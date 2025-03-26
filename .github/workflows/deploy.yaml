@@ -39,7 +39,7 @@ jobs:
 
       # 5️⃣ Authenticate Docker for Artifact Registry
       - name: 🐳 Configure Docker Authentication
-        run: gcloud auth configure-docker ${{ secrets.GCP_PROJECT_ID }}-docker.pkg.dev
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
       # 6️⃣ Build & Push Backend Docker Image
       - name: 🚀 Build & Push Backend Docker Image
