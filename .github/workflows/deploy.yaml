@@ -1,0 +1,49 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Configure Docker authentication
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build & Push Backend Docker Image
+        run: |
+          gcloud builds submit --tag us-central1-docker.pkg.dev/$GCP_PROJECT/billiard-pos-repo/billiard-pos-backend ./backend
+
+      - name: Deploy Backend to Cloud Run
+        run: |
+          gcloud run deploy billiard-pos-backend \
+            --image=us-central1-docker.pkg.dev/$GCP_PROJECT/billiard-pos-repo/billiard-pos-backend \
+            --region=us-central1 \
+            --platform=managed \
+            --allow-unauthenticated \
+            --add-cloudsql-instances=$CLOUD_SQL_INSTANCE \
+            --set-env-vars=DB_HOST=/cloudsql/$GCP_PROJECT:us-central1:$CLOUD_SQL_INSTANCE,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy Frontend to Firebase Hosting
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
