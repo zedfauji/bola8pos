@@ -1,49 +1,79 @@
-name: Deploy to Google Cloud
+name: Deploy Billiard POS to Google Cloud
 
 on:
   push:
     branches:
-      - main
+      - main  # Change this if using a different branch
 
 jobs:
   deploy:
+    name: Deploy Backend & Frontend
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      # 1️⃣ Checkout code
+      - name: 🔄 Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v1
+      # 2️⃣ Authenticate with Google Cloud
+      - name: 🔐 Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+      # 3️⃣ Set up Google Cloud SDK
+      - name: 📦 Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Configure Docker authentication
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
-
-      - name: Build & Push Backend Docker Image
+      # 4️⃣ Enable Required Services
+      - name: ⚡ Enable GCP Services
         run: |
-          gcloud builds submit --tag us-central1-docker.pkg.dev/$GCP_PROJECT/billiard-pos-repo/billiard-pos-backend ./backend
+          gcloud services enable compute.googleapis.com \
+              sqladmin.googleapis.com \
+              artifactregistry.googleapis.com \
+              run.googleapis.com \
+              cloudbuild.googleapis.com \
+              firebase.googleapis.com
 
-      - name: Deploy Backend to Cloud Run
+      # 5️⃣ Authenticate Docker for Artifact Registry
+      - name: 🐳 Configure Docker Authentication
+        run: gcloud auth configure-docker ${{ secrets.GCP_PROJECT_ID }}-docker.pkg.dev
+
+      # 6️⃣ Build & Push Backend Docker Image
+      - name: 🚀 Build & Push Backend Docker Image
+        run: |
+          gcloud builds submit --tag ${{ secrets.GCP_PROJECT_ID }}-docker.pkg.dev/billiard-pos-repo/billiard-pos-backend ./backend
+
+      # 7️⃣ Deploy Backend to Cloud Run
+      - name: 🔄 Deploy Backend to Cloud Run
         run: |
           gcloud run deploy billiard-pos-backend \
-            --image=us-central1-docker.pkg.dev/$GCP_PROJECT/billiard-pos-repo/billiard-pos-backend \
+            --image=${{ secrets.GCP_PROJECT_ID }}-docker.pkg.dev/billiard-pos-repo/billiard-pos-backend \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
-            --add-cloudsql-instances=$CLOUD_SQL_INSTANCE \
-            --set-env-vars=DB_HOST=/cloudsql/$GCP_PROJECT:us-central1:$CLOUD_SQL_INSTANCE,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            --add-cloudsql-instances=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db \
+            --set-env-vars=DB_HOST=/cloudsql/${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db,DB_USER=postgres,DB_PASSWORD=your-db-password,DB_NAME=billiard_pos
 
-      - name: Install Firebase CLI
+      # 8️⃣ Install Firebase CLI
+      - name: 🌎 Set up Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Deploy Frontend to Firebase Hosting
+      # 9️⃣ Authenticate Firebase using Service Account Key
+      - name: 🔑 Authenticate Firebase
+        run: |
+          echo "${{ secrets.FIREBASE_SA_KEY }}" > firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase-key.json"
+
+      # 🔟 Deploy Frontend to Firebase Hosting
+      - name: 🚀 Deploy Frontend to Firebase Hosting
         run: |
           cd frontend
           npm install
           npm run build
-          firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
+          firebase deploy --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: ✅ Deployment Completed
+        run: echo "🎉 Deployment successful! Backend is live on Cloud Run, Frontend is on Firebase Hosting."
