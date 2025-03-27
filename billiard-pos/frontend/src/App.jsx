@@ -1,55 +1,38 @@
-import { useState, useEffect } from 'react';
-import api from './api';
+// Sample complete structure (compare with yours)
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Login from './pages/Auth/Login';
+import Dashboard from './pages/Dashboard';
+import Tables from './pages/Tables';
+import Products from './pages/Products';
+import Layout from './components/Layout';
 
-export default function App() {
-  const [status, setStatus] = useState('loading');
-  const [error, setError] = useState(null);
+// Protected route wrapper
+const ProtectedRoute = ({ children }) => {
+  const { currentUser } = useAuth();
+  return currentUser ? children : <Navigate to="/login" />;
+};
 
-  useEffect(() => {
-    const testConnection = async () => {
-      try {
-        const response = await api.get('/health');
-        setStatus(response.data.status === 'OK' ? 'connected' : 'disconnected');
-      } catch (err) {
-        setStatus('disconnected');
-        setError({
-          message: err.message,
-          url: err.config.url,
-          status: err.response?.status
-        });
-        console.error('Connection error:', err);
-      }
-    };
-
-    testConnection();
-  }, []);
-
+function App() {
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Billiard POS System</h1>
-      <div style={{
-        margin: '2rem auto',
-        padding: '1rem',
-        backgroundColor: status === 'connected' ? '#d4edda' : '#f8d7da',
-        color: status === 'connected' ? '#155724' : '#721c24',
-        borderRadius: '4px',
-        maxWidth: '500px'
-      }}>
-        <p>Backend Status: <strong>{status}</strong></p>
-        {error && (
-          <div style={{ marginTop: '1rem' }}>
-            <p>Error Details:</p>
-            <ul>
-              <li>URL: {error.url}</li>
-              <li>Status: {error.status || 'No response'}</li>
-              <li>Message: {error.message}</li>
-            </ul>
-          </div>
-        )}
-      </div>
-      <div style={{ marginTop: '2rem' }}>
-        <p>Testing connection to: <code>{import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}</code></p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          
+          {/* Protected routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="tables" element={<Tables />} />
+            <Route path="products" element={<Products />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

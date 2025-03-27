@@ -1,0 +1,702 @@
+.
+|____.git
+| |____COMMIT_EDITMSG
+| |____config
+| |____description
+| |____FETCH_HEAD
+| |____fsmonitor--daemon
+| | |____cookies
+| |____HEAD
+| |____hooks
+| | |____applypatch-msg.sample
+| | |____commit-msg.sample
+| | |____fsmonitor-watchman.sample
+| | |____post-update.sample
+| | |____pre-applypatch.sample
+| | |____pre-commit.sample
+| | |____pre-merge-commit.sample
+| | |____pre-push.sample
+| | |____pre-rebase.sample
+| | |____pre-receive.sample
+| | |____prepare-commit-msg.sample
+| | |____push-to-checkout.sample
+| | |____sendemail-validate.sample
+| | |____update.sample
+| |____index
+| |____info
+| | |____exclude
+| | |____refs
+| |____logs
+| | |____HEAD
+| | |____refs
+| | | |____heads
+| | | | |____main
+| | | |____remotes
+| | | | |____origin
+| | | | | |____HEAD
+| | | | | |____main
+| |____objects
+| | |____00
+| | | |____0370fe4521ea9b841339b0c178dc9ed81ddabe
+| | | |____5a7457b695c2704d3cad6180d08e83c0fe2cd7
+| | | |____efc396a17b2a16d0a18a45995ab6f8bac7cd9e
+| | |____01
+| | | |____4463f962f9db08da642cdcc33a6bbfc3ccb9a2
+| | | |____bc1e04f357221c85452161d68c62d6072e60d0
+| | |____02
+| | | |____5a1ce08ee8d0ac397a049712c8cd22feed8e0d
+| | | |____62d9c83edf08facbab3854c4e434be63758103
+| | |____03
+| | | |____35c7bbaed161b073dd4b18aee234c54689ccf9
+| | |____04
+| | | |____0e138d2315d19df54d09fa052e0f168200cc70
+| | | |____595b6a525f320b4ad981ab61beae17e6fa1989
+| | |____05
+| | | |____91f82ea377edf9c10b48441132948d50f231db
+| | |____07
+| | | |____48e6ab60283babd6ab9983e0d8b792b9ef57f8
+| | |____08
+| | | |____6f65738c1a50aac8da4f69bfe4b318501691b0
+| | |____09
+| | | |____2f978f7bdd01c819e229189065e30176e7342a
+| | | |____a4bffb6f3c0ae0905d04be4ce011a413a924a2
+| | |____0a
+| | | |____c3c6caa97a24ccd442c274dc353300556329a1
+| | |____0c
+| | | |____dc72a2694ebb8198c7280faac63284c09e7eef
+| | |____0e
+| | | |____89cb37c45480a3667b09fffc5bb6275012fbbd
+| | |____0f
+| | | |____635bfa475e294f2f196db1e83a8b6c9f7821c2
+| | |____10
+| | | |____227e269c10a88f90e77783723dfdea2348b21e
+| | |____11
+| | | |____2e8dcfe220315f0ddb9908d570c76e535859d2
+| | |____12
+| | | |____c6e07d7854e239c80c489bfd8bcc5ea16d19a0
+| | |____13
+| | | |____e08dd7bb35e9fd90766e869c1523c6c1b752c9
+| | |____14
+| | | |____8e41025724806868985075430938b2489de118
+| | |____17
+| | | |____1ecdba2aaf0371a781f2c1bf41c7e602795865
+| | |____18
+| | | |____6f15e58fe8ee1df7aab3f8e9cc6fb02de7c4dd
+| | |____19
+| | | |____725e424b7ffafc674f5b044f35081978e4648a
+| | |____1a
+| | | |____24fb6833d2c22386352fd4cb1606f4fb30fef6
+| | | |____47f5ebbeedef3e27bd14c8dfb3319db8b32345
+| | |____1b
+| | | |____e104af07cc922477d99b7e16bc3ea42a845bd4
+| | |____1c
+| | | |____da9b9f3dfa0d8526263f72b9b0e384a91e2dfe
+| | |____1f
+| | | |____61c5aa17f49a77c64e107dbb4dfa9d6481aa19
+| | | |____84a2f30a8161d4d81302db550db948a282fd05
+| | |____20
+| | | |____27e8dcf3787f5aac9fcd835e2b80cb75a39211
+| | | |____b05fe8dd6449587d9cadd056081b4acb02444d
+| | |____21
+| | | |____215ca8888038288c2266b369b17eb6464e60b9
+| | | |____a763c7b24bf7f3b6e28e9a2988d6c4881c30a8
+| | |____23
+| | | |____3ffe5bb45f80127a31c43e6e1259bd1972a85d
+| | |____25
+| | | |____1083c2bdd1ba5aa199dcf88def64b79d4645cc
+| | | |____44d573c0609a684bd1190a159239f37ce1717e
+| | | |____77ea1d00d6a9dcdf77f7a4fe1fd848fb38bf76
+| | | |____b65963068a7c1f7771b4eece9672a92167d197
+| | |____26
+| | | |____218eee0c14a057c61ce1c108efad42ddca6396
+| | |____28
+| | | |____0d254313bac93d1a39af4154f2bcc42f61d743
+| | | |____fb80b9a2ae782419780766dd7cdd241033abb7
+| | |____2b
+| | | |____3e1f57ee2dae30c9a6628785d02bbe62f5028f
+| | |____2d
+| | | |____0c8cbe6f595605eeeb40f73004633ee0b15776
+| | | |____f37736bf514c4a513225528465de5ef3be8d44
+| | |____30
+| | | |____ee4febc3ac6ba49e8b803958ad38353637b982
+| | |____31
+| | | |____6be8ac3964b594891b92f1a59b222cd2c2f18b
+| | | |____e8ae9f32be7eda36d7c7ffa188368afb7ec723
+| | |____32
+| | | |____434c41ecf36cac547a11f8be20a681f4354b25
+| | |____33
+| | | |____96b24ffc5c8636167a65dbb78cf746973d1cc3
+| | | |____fbd08f5715fb610cced46e811fa1372e369266
+| | |____35
+| | | |____049efcc5c51aa57b7988f4be636202a74e693f
+| | | |____c6782bd02d5c91e84c2bf7a795b166cf741c5c
+| | | |____cb593ec7c572ed36f85348c69abb6423f4dc36
+| | |____37
+| | | |____7b2c0e0205c5e65f8dabadf8807fa610d4a07b
+| | | |____ebb3bc032e666c026d2fb9dfc7e31745c60d3f
+| | |____38
+| | | |____2008c7278163d316803f8aeb0a0f2f8e42bd26
+| | |____39
+| | | |____38f969e194466790661e25fe6fd6623d823d2c
+| | | |____80145c1d5a2d6cb32dc8ebd566804fab09e0e5
+| | |____3b
+| | | |____537094efa7b073230e07a463eb466261eecddd
+| | |____3c
+| | | |____6c2fa0028f5f8fdc816d451ec3c23b9c158919
+| | | |____bdb589deb5f716059d6a4d37143327ec0d7ed9
+| | | |____f11ce5e9e782528515a005ca79a25a462ef10a
+| | |____3d
+| | | |____64fdfefccdbb9c17ed15c6fd7fb7b61eb74817
+| | |____3e
+| | | |____69a1e71d970ee2a2bda46c4b8d3d3e82ee25c8
+| | | |____6c95deaa67a85efbe5d0ace18a34ceb2c87946
+| | |____3f
+| | | |____1dac362d49b64d406da433914550764fcc954f
+| | | |____f0a622350f7e205a4c05aa9cec1774030a9051
+| | |____43
+| | | |____06b09cce14fcf4a9c0b88420601e0f503d2fc7
+| | | |____67c0faab04b0f0b93be7a318abcac4ccb338df
+| | |____45
+| | | |____5b9691a509f083063b03a121d172671c8eb398
+| | |____47
+| | | |____141d5d93bf118355844d7efa3bf4581b22c324
+| | | |____281dfb4dbb868e31e5203cf7e67629d4b25c16
+| | |____4b
+| | | |____756b4670a559ac1704102d3cd48cf8870a3119
+| | |____4c
+| | | |____81120b076715c202970dffd7532f77d6710bfb
+| | |____4d
+| | | |____64dac5f86cbed6a73d115801f2ccde69bdc472
+| | | |____b269623c4ae1d8f838d1eb342eebc290938e40
+| | | |____fc3e7acd7a71cf848e5d9eb45c9cf3ac61b945
+| | |____4e
+| | | |____0d1464f69eba12aec93fb587622b867755fda9
+| | | |____352813b2768d55148a299a7e4534534a4d4a5c
+| | | |____4cfae9fd067e4de1bd2136d9e049cc6e532726
+| | |____4f
+| | | |____1dce828eae635941adcf7eb72afdf2dbc6b84d
+| | | |____a658cf079983235134bf9189bd5af9286b43a7
+| | |____50
+| | | |____0c5cb7186bef0f9e9d8a1ca5b4d08932354cb4
+| | | |____78c814e97aa26ac6e29c86006d152ca238b6f6
+| | | |____8528f4c13f5bec8f860c90a97e796488be7a28
+| | | |____89e21c2b43cf8eeea598b194f884425edf4c2c
+| | |____51
+| | | |____1a2ed7d9e05c21ac369fa7e57ba35071b98ae8
+| | | |____36c11fd16f250f5eca32357926b8152e1e7540
+| | |____52
+| | | |____08d31d409d1b0dc0f797612c2fbb0dcdf56b9f
+| | | |____20bae4d95ec11cd9ff7a47a912bf141311ef8f
+| | | |____bdb397951b12239b916ce751a1af6ac749f472
+| | |____54
+| | | |____447b7937a8135520b89fd17524a66acf89d2f9
+| | | |____4936a02ecbfd81b9e82f29ea8e8b800096ed53
+| | | |____59983b3f2148ca4bc05ad90718a3c0eb765b9a
+| | |____55
+| | | |____0d5d22529f91f7b140b2ffe2fe3ca84c156848
+| | | |____5613ca58fc10968e2c76066d562202211d7051
+| | | |____cfaf3ccc7e0fd2479b5efea91dd6c8cd66282b
+| | | |____cff43d29e4b7555e5197a79f2885659d27f93f
+| | | |____e62bc16c607b22ae6a76b9020d3bab007593ee
+| | |____56
+| | | |____ef4fedea45213bb056cf3c0fd54b0239f02413
+| | |____58
+| | | |____3743450b71fe7292f76429fbc664cc31badcef
+| | | |____881cca02ae2b3ba82bcc79f2d37ce35b6abab5
+| | |____5c
+| | | |____fbf95c0c8d5bf12e59645afc92e12ea01412e9
+| | |____5e
+| | | |____8d112308a19b354e14990ca8e66952f4ab912c
+| | | |____e369910c8253638d61a43e254252d7286d67f7
+| | |____60
+| | | |____35e35d8f1236507233ac46441c76e0951ac8cf
+| | | |____88f92f6ec78a5486d4a96f28349e4512c33227
+| | |____61
+| | | |____2b64ab96d199a70abcbbdcd4b2306d88419f12
+| | | |____c29294cc3514191c22f50b1d8501700f75f4b6
+| | |____62
+| | | |____cb7c110072fe06480b9d758cd30f9fcfcc0b28
+| | | |____ff6fd62cb6b8900eaab380a04382d361d6193e
+| | |____63
+| | | |____5846357205fe723511d3941cf190801f43c159
+| | | |____adc6b705aaf678803f4c4efb278147144fa859
+| | | |____bb6d40fb9459f03b3668c2035171c18642bce3
+| | |____64
+| | | |____df77b1a8fe83e826df98f804f2149fd5c0a8be
+| | |____65
+| | | |____9f94d48418f4cf65dd9a5594d0ccb1d6960e25
+| | |____66
+| | | |____6fe2cd2d5e0244bfe89e096b7cc4cf226f5240
+| | | |____85ebd0b9097b1a477e0daa7eda9e1f07c75412
+| | |____68
+| | | |____47519c247d6923568237e9067e95dc60e59ad8
+| | | |____526b44d819427632bbd545dd3b9a07ee1875c0
+| | |____6a
+| | | |____7457627424df0038ade508490254b36ccf16ad
+| | | |____b0d5b3d61d3a29641c51232aa9d7d640b8a173
+| | |____6c
+| | | |____8e8ccd928b3d96491e751bbc7ff4c67fb8dff9
+| | |____6e
+| | | |____40c08d5beb575672426376ace835e8a9577805
+| | | |____85d664a1b684137a17d8a492ad1e9d7a3bab05
+| | |____70
+| | | |____1e9f47e3bacee44da920740075e704a7f6cf49
+| | | |____4123740ac81b95369706b69093545bed4c560d
+| | | |____af4f845d063e1f38ed26b40645dd497290d1a6
+| | | |____cc99df1a4db97629257148453928a265c821ff
+| | |____71
+| | | |____1d9609dc6d05e777183865caa887293dc4aeca
+| | |____72
+| | | |____1b2957ca66b741c243658f6032a1fe472ac070
+| | |____73
+| | | |____748ad1b9ce8967849a549243835efa19727531
+| | | |____82dbc4f9247d26a8df8339bad027ee46f01a8d
+| | | |____b50b7e5d578ca1f1a263635a803a7f18d83dbf
+| | |____74
+| | | |____ba99ab631d16d90dba59115ab7f2b532fc8a3a
+| | |____76
+| | | |____57c9b1ff4f51f59934aee7a596e0810bb0d0c8
+| | | |____ddd33177829c87d807650ad5c66dc2e68b6ad6
+| | |____78
+| | | |____cb30bd4baba86fcc64eb4588ba761a96ee6da2
+| | |____79
+| | | |____30bb2f727596bab63c757a8a110b3d4809c00b
+| | | |____4fa44032d21fbec184c2ce0d420d00f4ada2f4
+| | | |____dc349d3c880cae3c133b17db5bec02f1ccfcfd
+| | |____7a
+| | | |____0a8c00c3b8b9a7d88814142af7744b2dd54ec6
+| | |____7b
+| | | |____65842bb1a879535e4c3f236baf4f0592869ec2
+| | |____7c
+| | | |____a5f237e5dcb8117fa8a29109f05869fbb47249
+| | | |____bf7799a174e7d1e035047bbf49762807326805
+| | | |____d2527b1a3c6a09b4dfc58568473d97c3e4b3fb
+| | |____7d
+| | | |____e0fa9bf39ce34f56f627af76bccd076bf97303
+| | |____81
+| | | |____42414bb902e651924f11083ab3b4eae2357c56
+| | | |____a351f9d67eee9141d26d48d9a62aeeb91d3dca
+| | | |____e0c475b3eb016a1fe8a80baa0bc132cd3da6b5
+| | | |____ffbf9c33b5226ae520f06a40faf48f3446f3ea
+| | |____82
+| | | |____57a35ca9122e43d5c8b9715a3edea93e9e47a1
+| | | |____96973fc81f227d15e2bacf9502ca8f71036df7
+| | |____83
+| | | |____c710359925a4a13afd25b56a03ec2a9c9d07d9
+| | |____84
+| | | |____87978062c6402059bfc9a895f476f0ae4115c8
+| | |____86
+| | | |____6a256c192d54a71751815261d73e4ab77b3a6a
+| | | |____9bd2e611ea14eb94e3efa2f89fc5c373770a8f
+| | |____8a
+| | | |____07311dec826b58e41d70e9880b019d536f02d0
+| | |____8b
+| | | |____c3c694efe31f98788452da25b01998965418e6
+| | |____8c
+| | | |____1f4a7d82b21ad8c3ba4c4190e930665f0ef036
+| | | |____4a6c27199466dd311129ed83be220fdb14af9f
+| | | |____4d488ba74791d56c3d886e1be2382c58852091
+| | | |____8fd9766e234604b828e7a18075971aad74e664
+| | |____8d
+| | | |____0bca42571352a2df40a5c1253f17d3be52f814
+| | | |____2b76dc7d60d17564e86f6558f5b7eb7868a280
+| | |____8e
+| | | |____1ed027303048571cf0edd6831b791c72390dea
+| | | |____f92cda54c129523aed37c4ea275bee8642526d
+| | |____90
+| | | |____10b02033e8ef02139e55c776c68abeaf69bc85
+| | | |____d3cc8aad7f13b765bb73de3b98aaa3979630d4
+| | |____91
+| | | |____d3e4c3acb8712f5d91bb1984a8f0ad160684cf
+| | |____92
+| | | |____02738f8227fbabca816c837547410129324e14
+| | | |____de8a1fafb61b88053d7de0df0a63e42ec7051d
+| | |____93
+| | | |____7084d875e9cacc8a13d2a73274a0bbbbcee7fd
+| | | |____863d198004eae1c7b17aef26d829dfca4a314f
+| | | |____9ecd01db53d53be1b890a7962932db658fb81b
+| | |____94
+| | | |____abf8c99361398a4d6091f280f9bbfa03448ddf
+| | |____95
+| | | |____83641cfc3248839410061c0bb7e0d6cb2d607e
+| | |____96
+| | | |____e365dee6530ee38106d13e21581f96b6ea51cc
+| | |____97
+| | | |____1ac096b0593fccb5e030b9e4ca1730fd46895c
+| | | |____8a2c5d37272edd55558f91f21cba2c5246d10f
+| | |____98
+| | | |____652118b6862120fb1a693020ad8654fe85851d
+| | |____9c
+| | | |____1b313d7b18166024d52473b2ed645f5b4e64dd
+| | | |____91fc3bad4348e0e4c77b634715ab7c00ff87cc
+| | | |____e2293231987ad28b0c23ece86147f0faad9676
+| | |____9f
+| | | |____2174c09b8266acf9cc2c6349dc99c6569a6dd8
+| | | |____db0c9b27d4cfdbc5e1db05864d520928ac3039
+| | |____a1
+| | | |____b6b9ea8edb9b407f614200f2ee7ed39b97fb9f
+| | |____a5
+| | | |____fb67b1169535549db8b5d68adb9273567b929c
+| | |____a6
+| | | |____8d51e0aa7d130dff055534775c353fa9d15264
+| | |____a7
+| | | |____759bcf2e3fcd381635df7c31198b2afe37bfac
+| | |____a8
+| | | |____6208151c5baf29f2168b8f4673ea5d813cf9bf
+| | | |____b8c4360e25969ea1a4e955416397fb4e2ece3b
+| | |____a9
+| | | |____35d5d1376221107d198b198a4353e07ee9b2e1
+| | | |____9ee7cf84e91677bc3c6100ac37a60fc8ec8fdb
+| | | |____bbb9c3a54716654ed2be91a4749b457dddd2f7
+| | |____aa
+| | | |____7b74439d5a9b8dac098bcd1804e8b7589b40af
+| | | |____e289afd8c8fa7adf9fe2699849e374af5a8677
+| | |____ab
+| | | |____d24b41dd8590957108c510d802b0b194177117
+| | |____ad
+| | | |____381bf78e402f282fe5349fe90049d8721018b2
+| | |____ae
+| | | |____f43508b3db5f6423cc31be7b219b8270c51800
+| | |____b0
+| | | |____3b61ada4a7635865f09a682a0ec0f1c4899383
+| | |____b1
+| | | |____85ec6a8086adea13207c94c460a7016ade5c52
+| | | |____8ee9200b278caaf7daff72378c6a629260b3cb
+| | | |____a3dd4395f8b6247160ffb9febfd527fc25cab3
+| | |____b2
+| | | |____9b5e0e27ae5b4deb0ef400699792d258660b1e
+| | | |____dd55965f384ea264518afe772c4ea230bc18e7
+| | |____b4
+| | | |____71e601ae4ec1aa4833eb07e3c8d04d0222f5ab
+| | | |____8fe229cd7a364f772d0d2d44ac5e49d460d794
+| | |____b5
+| | | |____8bfc1ec39d563e9f67b4dc435f137bbe7cbb66
+| | | |____d125d6f7821d8e2cf914d1d8b112cb4039b8b8
+| | |____b6
+| | | |____823e9d321d2794b3a2c9fd37a415309a5062be
+| | |____b7
+| | | |____7d0b12eb1dbd109c86676e536bd2521c164a82
+| | | |____f9a1c143a11352f335936a1157c03b588f9139
+| | |____b9
+| | | |____8701b719cd771cc21bf491576a00c7fda6fcc5
+| | |____bb
+| | | |____177918900fc056ae2a308347b3454433aec194
+| | | |____e5549fb924ac46e746afaaa13269682e7a022f
+| | |____bc
+| | | |____db4cab9678c6fbdb1435f7c9871f6c378c794a
+| | |____bd
+| | | |____4418379951b36d96cdaa98d7e2dd4973c56989
+| | |____bf
+| | | |____987b5bef2f51fd1d0725cdfb8c34f4cbd4264e
+| | | |____f4b2d1eecef8b4277f1b331c65993d06cf899b
+| | | |____fa994a04bf9e0388f4d0300d37977b1163059f
+| | |____c1
+| | | |____111e80a922298674cd3cee49fca4f40b6a227d
+| | |____c3
+| | | |____5d25787e7749816e87b29d4d35b58db37dcefc
+| | | |____f84d565d43f0dfe302fdbabe27ffb30a9564a2
+| | |____c4
+| | | |____ca22016b0c78a0fa753eadad491ea18d46ed59
+| | |____c5
+| | | |____14443076a6d95d0e19ad6ea30804605c732627
+| | | |____d5014c432a15d8c97b93718fd94f20f08be8bf
+| | |____c7
+| | | |____58c6264693b7f0085990dfc5e4e01e99b140fe
+| | |____c8
+| | | |____23276ccb40615688255b94a69a15ab469f0183
+| | | |____5f1d7eed4f420160e851d67801bfc3d4c526ce
+| | | |____78a487c0c50c63440f7dcc974f90708e69dc5a
+| | | |____8a2d0a3700d5c1c01bc2bab1ab73204662af77
+| | |____ca
+| | | |____6e9fe99d1b4c107aca08dabd15aa51cbd81acb
+| | |____cc
+| | | |____0fe32687222d1d2e88a4ba9d56a93e7690a0bc
+| | | |____75d624984f02837cf02d6e0bb4c5367c79de6c
+| | | |____920c59ff4f47447fc6a5b96c70e455d4b19558
+| | | |____d44f6322b09535e2433c4e365753a97c8a00fa
+| | | |____d4be0fe4492575ea18a162db807768faa156c8
+| | |____d2
+| | | |____754e8245584c029fa066c21684e2ea97119f46
+| | | |____b07af7031e651ba92e01e8ee655e9e38643243
+| | |____d3
+| | | |____2853116f91e961d3accf2039ea1cfa11060fa0
+| | | |____5053a573ab6c2180e1a1b9db78864701a53ae0
+| | | |____6b21d504d0d6770e345062f16274d424fee188
+| | |____d4
+| | | |____fb593c14aa933177f4304c7681b85c38bb4379
+| | |____d5
+| | | |____88a1605a3a91d3fbd880b0c3554d8e22587149
+| | | |____c20853161696543a39b6308aa37014441a6680
+| | | |____c6ac9efb83f48805cef6190e7023d963145221
+| | |____d6
+| | | |____925c5a6f2f9377badb1c3ba3721608127a198e
+| | | |____be441d9de7dcffe8296c178cbcf29ac32d04dc
+| | |____d7
+| | | |____5078f744bd7b6047b74b93c865aa8f85db0e0d
+| | | |____6b504ed25ca945fa3faa32aa4f4146749bd932
+| | | |____995a3aabd8750015dfff413e9193c2d93be5be
+| | | |____d04f556d4df28be659c0c36b74f591fefe2076
+| | | |____fa6574baa0c413444013b6de5686c80e40c805
+| | |____d9
+| | | |____7764edaa6e2ade24be5bcaa1c0e06064cb18b9
+| | | |____928fc5451db89ae21085f99d82585631fa251a
+| | |____db
+| | | |____0b34e21cfcd4ce58643d4c1d599e22d6dd7790
+| | | |____9669849cf4c5879895042b378009fa49cc3ffc
+| | | |____c4310e40f5dd8dd491d8d003bad1982b59086d
+| | |____de
+| | | |____5496b560103be9c1db1d1c9d7e8f972053f0fb
+| | | |____5ffde4161aa7f794b6eb54a402ea7a560c97ac
+| | | |____802148188eec84de16ac3737ee1b28beb4d80e
+| | |____e0
+| | | |____167531d6d9ad9e7a822e5b6f5acfa06a96ee72
+| | | |____23bccb463efa0da059ddffe814fbb4a0374a20
+| | |____e1
+| | | |____32f2c923bdefcbbb33b1ed00a2d36435e904ab
+| | | |____d26d86b02ff05639c248291053a733f836fc0d
+| | |____e2
+| | | |____54bc50218ea3b27aefb005b83561543173f5f1
+| | | |____71e556eb870d0406a0a4ba89d6a89ddcd67efc
+| | |____e3
+| | | |____b36c886f19be3842648da3587c944309e6f04d
+| | |____e5
+| | | |____00fb11f67aa73a895c3539dae37be6210ee8ff
+| | |____e6
+| | | |____3b960ae422261ff6a6b4d54dc936bf53af2ed9
+| | | |____e57c7be8c00674b757af38de536cd6c17c8d8d
+| | |____e7
+| | | |____8da8621d368fd98e2cf8fab7182d82d97c6ce5
+| | |____e8
+| | | |____31816e144014d2b946e65c1545b0eac9e24fc0
+| | | |____eac7119d7c860ee0996577c99f65ca491da10f
+| | |____e9
+| | | |____7e6f6d36f98d0356f09fecc5750ebdf3d22ec9
+| | | |____c63bcf87691573b3dcee6f5eed7d00320a9396
+| | | |____d5a13b265ea2a48b69fcf469a0ad701dbb6cb4
+| | |____ea
+| | | |____c45f09766e43def88c515ae65f2b9c411384a3
+| | |____eb
+| | | |____2653995611695eba1f73f2baf3780c452cfe33
+| | | |____2eae43826e391eb66daf309b85d734175bbbb5
+| | |____ec
+| | | |____a4607449fdd5bfb71c07fdc9f5bebcad98d454
+| | | |____bcc1df3a362e5556b85fc6e9fb598f535e35ee
+| | | |____ce0f4660b85c6e3e192a46746d0697efe2d947
+| | |____ee
+| | | |____00ff5d04818a8aa22b703b801e694492bd7ed5
+| | | |____2fff04139d3ad617b586a40e4e178a11223f5d
+| | | |____5654e24ed5ef6605fa37e12d86761768876c39
+| | |____f1
+| | | |____7313afe5ae26da50541623e09ac99049e2e689
+| | | |____7bb805024e04927736392e9086cd681612a66f
+| | | |____abdc20bba60396d52bbac7cf2d1ed66b324bc8
+| | |____f4
+| | | |____107619d8637523ff567c15a728a24f397b0ae5
+| | | |____3ed0d3069b153bd5217ca91eafb9908ce16020
+| | |____f5
+| | | |____24e4e469fa9950da4dd9889c97e2cfd3da27f5
+| | | |____456503f27c2bfac57a6df33af3dd4bfd2afdc6
+| | |____f6
+| | | |____2e966dca9b14ad5b8c0cbe4c8b469cc578f71d
+| | | |____44d6eb04b6b01d3c5a1806417485b90b236c3d
+| | | |____e0a2e6a6151ab1ab7e954989509e41cb7ddc15
+| | |____f7
+| | | |____46348be872fdbc8182ee9259b04ced9fe86b91
+| | |____f8
+| | | |____25db7b714f6c5f77092a0b9752ac96969a612a
+| | | |____70f15b66d9380be1b336c410c19e01fbe557a1
+| | |____fb
+| | | |____60727cd3c18a3933bbb0c98a447426aacc2f2f
+| | |____fc
+| | | |____7329edf14210491892a354fb85c228fe39d626
+| | | |____fcea8f5a15b31fddb478d12127785a559b00c7
+| | |____fd
+| | | |____70ea1cee5cfee729cd9742df11da85c6585590
+| | | |____981a66bc430d922a9db45962a136c4a14543c8
+| | | |____f5a2a86b90d58f9d6235d2ecae2240a818358c
+| | |____fe
+| | | |____253fb42a2136c6bd90fbbaa01df90d074d5479
+| | |____ff
+| | | |____5106408927bcfa4725386bef6c0ee3b33abed6
+| | |____info
+| | | |____commit-graph
+| | | |____packs
+| | |____pack
+| | | |____pack-4b4be724c272fe4e8619f7d671864e121dd72169.idx
+| | | |____pack-4b4be724c272fe4e8619f7d671864e121dd72169.pack
+| | | |____pack-4b4be724c272fe4e8619f7d671864e121dd72169.rev
+| | | |____pack-a7aba46e4a4c650c88b73b828158682ad2b1a19a.idx
+| | | |____pack-a7aba46e4a4c650c88b73b828158682ad2b1a19a.pack
+| | | |____pack-a7aba46e4a4c650c88b73b828158682ad2b1a19a.rev
+| | | |____pack-b8cf3f023d608611ddf491ffc524b7732e6acbb7.idx
+| | | |____pack-b8cf3f023d608611ddf491ffc524b7732e6acbb7.pack
+| | | |____pack-b8cf3f023d608611ddf491ffc524b7732e6acbb7.rev
+| |____ORIG_HEAD
+| |____packed-refs
+| |____refs
+| | |____heads
+| | | |____main
+| | |____remotes
+| | | |____origin
+| | | | |____HEAD
+| | | | |____main
+| | |____tags
+|____.github
+| |____workflows
+| | |____deploy.yaml
+|____add_content.sh
+|____add_controllers.sh
+|____add_routes.sh
+|____billiard-pos
+| |____.env
+| |____backend
+| | |____.env
+| | |____.gitignore
+| | |____.sequelizerc
+| | |____config
+| | | |____config.js
+| | |____Dockerfile
+| | |____node_modules
+| | |____package-lock.json
+| | |____package.json
+| | |____README.md
+| | |____scripts
+| | | |____add_all_content.sh
+| | | |____setupAdminEmployee.js
+| | | |____setup_db.sh
+| | |____src
+| | | |____app.js
+| | | |____app.js.bak
+| | | |____config
+| | | | |____database.js
+| | | | |____redis.js
+| | | |____controllers
+| | | | |____auth.controller.js
+| | | | |____employeeController.js
+| | | | |____inventoryController.js
+| | | | |____memberController.js
+| | | | |____orderController.js
+| | | | |____reportController.js
+| | | | |____tableController.js
+| | | |____middleware
+| | | | |____auth.js
+| | | | |____authenticate.js
+| | | | |____cors.js
+| | | | |____errorHandler.js
+| | | |____migrations
+| | | |____models
+| | | | |____employee.model.js
+| | | | |____employee.model.js.bak
+| | | | |____index.js
+| | | | |____inventoryItem.model.js
+| | | | |____inventoryMovement.model.js
+| | | | |____member.model.js
+| | | | |____order.model.js
+| | | | |____orderItem.model.js
+| | | | |____shift.model.js
+| | | | |____table.model.js
+| | | | |____tableSession.model.js
+| | | |____routes
+| | | | |____auth.route.js
+| | | | |____auth.routes.js
+| | | | |____authRoutes.js
+| | | | |____employeeRoutes.js
+| | | | |____health.js
+| | | | |____index.js
+| | | | |____inventoryRoutes.js
+| | | | |____memberRoutes.js
+| | | | |____orderRoutes.js
+| | | | |____tableRoutes.js
+| | | |____seeders
+| | | |____server.js
+| | | |____services
+| | | | |____auth.service.js
+| | | | |____billingService.js
+| | | | |____memberService.js
+| |____docker-compose.yml
+| |____execute.sh
+| |____execute1.sh
+| |____fix-docker.sh
+| |____frontend
+| | |____.env
+| | |____backup
+| | | |____index.html
+| | | |____package.json
+| | | |____vite.config.js
+| | |____Dockerfile
+| | |____index.html
+| | |____node_modules
+| | |____package-lock.json
+| | |____package.json
+| | |____postcss.config.js
+| | |____public
+| | | |____assets
+| | | | |____styles
+| | | |____favicon.ico
+| | | |____index.html
+| | |____src
+| | | |____api.js
+| | | |____App.js
+| | | |____App.jsx
+| | | |____AppRouter.js
+| | | |____assets
+| | | |____components
+| | | | |____auth
+| | | | | |____Login.js
+| | | | | |____Login.jsx
+| | | | |____dashboard
+| | | | | |____QuickStats.js
+| | | | |____inventory
+| | | | |____layout
+| | | | |____members
+| | | | |____orders
+| | | | | |____CreateOrder.js
+| | | | | |____QuickOrder.jsx
+| | | | | |____RecentOrders.js
+| | | | |____shared
+| | | | | |____ProtectedRoute.js
+| | | | |____tables
+| | | | | |____TableActions.js
+| | | | | |____TableCard.jsx
+| | | | | |____TableModal.js
+| | | | | |____TableStatus.js
+| | | | | |____TableStatus.jsx
+| | | | |____TestTailwind.jsx
+| | | |____context
+| | | | |____AuthContext.js
+| | | | |____AuthContext.jsx
+| | | | |____SocketContext.jsx
+| | | |____index.css
+| | | |____index.js
+| | | |____index.jsx
+| | | |____main.jsx
+| | | |____pages
+| | | | |____Dashboard.js
+| | | | |____Dashboard.jsx
+| | | | |____Login.js
+| | | | |____Tables.jsx
+| | | |____services
+| | | | |____api.js
+| | | | |____notify.js
+| | | |____utils
+| | |____tailwind.config.js
+| | |____vite.config.js
+| |____README.md
+| |____test1.sh
+|____components
+| |____auth
+| | |____Login.js
+|____create_directory.sh
+|____create_frontend.sh
+|____create_login.sh
+|____execute_bash.sh
+|____fix-blankpage.sh
+|____fix-config.sh
+|____fix_db_connection.sh
+|____fix_taillwind.sh
+|____README.md
+|____scripts
+| |____setupAdminEmployee.js
+|____setup-auth.sh
+|____structure.txt
+|____test_api.sh
