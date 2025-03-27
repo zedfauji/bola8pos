@@ -14,6 +14,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const inventoryRoutes = require("./routes/inventoryRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const tableController = require("../controllers/tableController");
 
 // Use Routes
 app.use("/api/auth", authRoutes);
