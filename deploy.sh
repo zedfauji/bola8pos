@@ -77,7 +77,7 @@ gcloud run deploy $BACKEND_SERVICE \
     --platform=managed \
     --allow-unauthenticated \
     --add-cloudsql-instances=$PROJECT_ID:$REGION:$SQL_INSTANCE \
-    --set-env-vars=DB_HOST=/cloudsql/$PROJECT_ID:$REGION:$SQL_INSTANCE,DB_USER=$DB_USER,DB_PASSWORD=$DB_PASS,DB_NAME=$DB_NAME
+    --set-env-vars=DB_HOST=/cloudsql/$PROJECT_ID:$REGION:$SQL_INSTANCE,DB_USER=$DB_USER,DB_PASSWORD=$DB_PASS,DB_NAME=$DB_NAME,REDIS_HOST="$REDIS_HOST",REDIS_PORT="$REDIS_PORT"
 
 log "✅ Backend successfully deployed to Cloud Run!"
 

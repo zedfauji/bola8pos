@@ -1,20 +1,26 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const mysql = require("mysql2/promise");
+const { Connector } = require("@google-cloud/cloud-sql-connector");
+require("dotenv").config();
 
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: '/cloudsql/' + process.env.CLOUD_SQL_CONNECTION_NAME,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: 5432, // Default PostgreSQL port
-});
+const connector = new Connector();
 
-pool.connect()
-  .then(() => {
-    console.log("Connected to PostgreSQL Database!");
-  })
-  .catch((err) => {
-    console.error("Error connecting to PostgreSQL:", err);
+async function createDBConnection() {
+  const clientOpts = await connector.getOptions({
+    instanceConnectionName: process.env.CLOUD_SQL_CONNECTION_NAME,
+    ipType: "PRIVATE", // or "PUBLIC" based on your setup
   });
 
-module.exports = pool;
+  return mysql.createPool({
+    ...clientOpts,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+  });
+}
+
+const db = createDBConnection();
+
+module.exports = db;
