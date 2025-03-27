@@ -1,32 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { createTable, updateTable, deleteTable } = require("../models/Table");
+const tableController = require("../controllers/tableController"); // Ensure this path is correct
 
-router.post("/", async (req, res) => {
-    try {
-        const table = await createTable(req.body.number, req.body.type);
-        res.json(table);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-router.put("/:id", async (req, res) => {
-    try {
-        const table = await updateTable(req.params.id, req.body.status);
-        res.json(table);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-router.delete("/:id", async (req, res) => {
-    try {
-        const response = await deleteTable(req.params.id);
-        res.json(response);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
+// Route handlers
+router.get("/", tableController.getAllTables);
+router.get("/:id", tableController.getTableById);
+router.post("/", tableController.createTable);
+router.put("/:id", tableController.updateTable);
+router.delete("/:id", tableController.deleteTable);
+console.log(tableController); // Check if the controller is properly loaded
 module.exports = router;
