@@ -56,8 +56,8 @@ jobs:
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
-            --add-cloudsql-instances=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db \
-            --set-env-vars=DB_HOST=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=billiard_pos,GCLOUD_PROJECT=bola8pos \
+            --add-cloudsql-instances ${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db \
+            --set-env-vars CLOUD_SQL_CONNECTION_NAME=${{ secrets.CLOUD_SQL_CONNECTION_NAME }},DB_HOST=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=billiard_pos,GCLOUD_PROJECT=bola8pos \
             --memory 512Mi \
             --cpu 1 \
             --max-instances 5 \
