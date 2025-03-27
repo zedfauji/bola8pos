@@ -1,27 +1,23 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-
-const routes = require('./routes');
-const errorHandler = require('./middleware/errorHandler');
+const healthRouter = require('./routes/health');
 
 const app = express();
-// Auth Routes
-const authRoutes = require("./routes/auth.routes");
-app.use("/api/auth", authRoutes);
 
 // Middleware
 app.use(cors());
-app.use(helmet());
-app.use(morgan('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api', routes);
+app.use('/api', healthRouter);
 
 // Error handling
-app.use(errorHandler);
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 
-module.exports = app;
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
