@@ -57,7 +57,12 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --add-cloudsql-instances=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db \
-            --set-env-vars=DB_HOST=/cloudsql/${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=billiard_pos
+            --set-env-vars=DB_HOST=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=billiard_pos,GCLOUD_PROJECT=bola8pos \
+            --memory 512Mi \
+            --cpu 1 \
+            --max-instances 5 \
+            --timeout 300
+
 
       # 8️⃣ Install Firebase CLI
       - name: 🌎 Set up Firebase CLI
