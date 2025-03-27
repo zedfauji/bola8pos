@@ -7,6 +7,9 @@ const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
+// Auth Routes
+const authRoutes = require("./routes/auth.routes");
+app.use("/api/auth", authRoutes);
 
 // Middleware
 app.use(cors());
