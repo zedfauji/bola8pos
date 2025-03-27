@@ -52,10 +52,11 @@ jobs:
       - name: 🔄 Deploy Backend to Cloud Run
         run: |
           gcloud run deploy billiard-pos-backend \
-            --image=${{ secrets.GCP_PROJECT_ID }}-docker.pkg.dev/billiard-pos-repo/billiard-pos-backend \
-            --region=us-central1 \
-            --platform=managed \
+            --image us-central1-docker.pkg.dev/bola8pos/billiard-pos-repo/billiard-pos-backend:latest \
+            --region us-central1 \
+            --platform managed \
             --allow-unauthenticated \
+            --port 5000 \
             --add-cloudsql-instances ${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db \
             --set-env-vars CLOUD_SQL_CONNECTION_NAME=${{ secrets.CLOUD_SQL_CONNECTION_NAME }},DB_HOST=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=billiard_pos,GCLOUD_PROJECT=bola8pos \
             --memory 512Mi \
