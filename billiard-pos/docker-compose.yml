@@ -23,21 +23,14 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   backend:
     build: 
       context: ./backend
-      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     environment:
       - NODE_ENV=development
-      - JWT_SECRET=your_strong_jwt_secret_here
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=posuser
@@ -45,40 +38,28 @@ services:
       - DB_NAME=billiardpos
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET:-changeme}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    command: >
-      sh -c "npm install && 
-      npx sequelize-cli db:migrate && 
-      npx sequelize-cli db:seed:all && 
-      npm start"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   frontend:
-    build:
+    build: 
       context: ./frontend
-      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:5000/api
-    depends_on:
-      - backend
+      - VITE_API_URL=http://localhost:5000/api
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    stdin_open: true
-    tty: true
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

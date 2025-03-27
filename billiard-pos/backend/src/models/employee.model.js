@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
     Employee.hasMany(models.InventoryMovement, { foreignKey: 'employee_id' });
   };
 
+  // Instance method for PIN verification
   Employee.prototype.verifyPin = async function(pin) {
     return await bcrypt.compare(pin, this.pin_code);
   };

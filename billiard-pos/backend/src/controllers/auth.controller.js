@@ -1,27 +1,15 @@
 const authService = require('../services/auth.service');
 
-const login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
-    const { email, pinCode } = req.body;
-    
-    if (!email || !pinCode) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Email and PIN code are required' 
-      });
+    const { email, pin } = req.body;
+    if (!email || !pin) {
+      return res.status(400).json({ error: 'Email and PIN are required' });
     }
-
-    const result = await authService.login(email, pinCode);
-    res.json({
-      success: true,
-      data: result
-    });
+    
+    const result = await authService.login(email, pin);
+    res.json(result);
   } catch (error) {
-    res.status(401).json({ 
-      success: false,
-      message: error.message || 'Login failed' 
-    });
+    next(error);
   }
 };
-
-module.exports = { login };
