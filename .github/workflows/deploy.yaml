@@ -44,7 +44,8 @@ jobs:
       # 6️⃣ Build & Push Backend Docker Image
       - name: 🚀 Build & Push Backend Docker Image
         run: |
-          gcloud builds submit --tag ${{ secrets.GCP_PROJECT_ID }}-docker.pkg.dev/billiard-pos-repo/billiard-pos-backend ./backend
+          gcloud builds submit --tag us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/billiard-pos-repo/billiard-pos-backend .
+
 
       # 7️⃣ Deploy Backend to Cloud Run
       - name: 🔄 Deploy Backend to Cloud Run
