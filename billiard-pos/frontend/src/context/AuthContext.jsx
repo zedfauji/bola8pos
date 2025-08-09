@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -11,7 +11,8 @@ export default function AuthProvider({ children }) {
   const login = async (credentials) => {
     try {
       const { data } = await api.post('/auth/login', credentials);
-      setUser(data.user);
+      // Backend returns { token, employee }
+      setUser(data.employee);
       localStorage.setItem('token', data.token);
       navigate('/');
     } catch (error) {
@@ -31,3 +32,5 @@ export default function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+export const useAuth = () => useContext(AuthContext);

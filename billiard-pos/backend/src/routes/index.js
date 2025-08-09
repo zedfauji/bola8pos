@@ -8,6 +8,10 @@ const inventoryRoutes = require('./inventoryRoutes');
 const employeeRoutes = require('./employeeRoutes');
 const authRoutes = require('./authRoutes');
 
+router.get('/', (req, res) => {
+  res.json({ service: 'Billiard POS API', status: 'OK' });
+});
+
 router.use('/tables', tableRoutes);
 router.use('/members', memberRoutes);
 router.use('/orders', orderRoutes);

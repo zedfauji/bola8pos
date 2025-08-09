@@ -1,0 +1,58 @@
+steps:
+  # Build images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-backend:$COMMIT_SHA', './billiard-pos/backend']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-frontend:$COMMIT_SHA', './billiard-pos/frontend']
+
+  # Push images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-backend:$COMMIT_SHA']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-frontend:$COMMIT_SHA']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - billiard-pos-backend
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-backend:$COMMIT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --set-env-vars=NODE_ENV=production,DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},DB_NAME=${_DB_NAME},REDIS_HOST=${_REDIS_HOST},REDIS_PORT=${_REDIS_PORT},JWT_SECRET=${_JWT_SECRET}
+      - --cpu=1
+      - --memory=512Mi
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - billiard-pos-frontend
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-frontend:$COMMIT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --set-env-vars=VITE_API_URL=${_BACKEND_URL}/api,VITE_WS_URL=${_WS_URL}
+      - --cpu=1
+      - --memory=256Mi
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-backend:$COMMIT_SHA'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/billiard-pos-frontend:$COMMIT_SHA'
+
+substitutions:
+  _REGION: us-central1
+  _REPO: pos-artifacts
+  _DB_HOST: 127.0.0.1
+  _DB_PORT: '5432'
+  _DB_USER: posuser
+  _DB_PASSWORD: pospassword
+  _DB_NAME: billiardpos
+  _REDIS_HOST: 127.0.0.1
+  _REDIS_PORT: '6379'
+  _JWT_SECRET: changeme
+  _BACKEND_URL: https://billiard-pos-backend-xxxxxxxx-uc.a.run.app
+  _WS_URL: https://billiard-pos-backend-xxxxxxxx-uc.a.run.app

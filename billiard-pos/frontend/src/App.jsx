@@ -1,16 +1,16 @@
 // Sample complete structure (compare with yours)
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import AuthProvider, { useAuth } from './context/AuthContext';
 import Login from './pages/Auth/Login';
 import Dashboard from './pages/Dashboard';
 import Tables from './pages/Tables';
 import Products from './pages/Products';
-import Layout from './components/Layout';
+import Layout from './components/layout';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
-  const { currentUser } = useAuth();
-  return currentUser ? children : <Navigate to="/login" />;
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" />;
 };
 
 function App() {
@@ -24,7 +24,9 @@ function App() {
           {/* Protected routes */}
           <Route path="/" element={
             <ProtectedRoute>
-              <Layout />
+              <Layout>
+                {/* Nested routes render here via children */}
+              </Layout>
             </ProtectedRoute>
           }>
             <Route index element={<Dashboard />} />
@@ -36,3 +38,5 @@ function App() {
     </BrowserRouter>
   );
 }
+
+export default App;
