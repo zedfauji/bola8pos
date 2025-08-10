@@ -8,6 +8,7 @@ interface StatCard {
   changeType: 'positive' | 'negative' | 'neutral'
   icon: string
   color: string
+  gradient: string
 }
 
 interface RecentOrder {
@@ -26,7 +27,8 @@ const statCards: StatCard[] = [
     change: '+12.5%',
     changeType: 'positive',
     icon: '💰',
-    color: 'from-green-500 to-green-600'
+    color: 'from-green-500 to-green-600',
+    gradient: 'from-green-500 via-emerald-600 to-teal-600'
   },
   {
     title: 'Mesas Ocupadas',
@@ -34,7 +36,8 @@ const statCards: StatCard[] = [
     change: '+2',
     changeType: 'positive',
     icon: '🎯',
-    color: 'from-blue-500 to-blue-600'
+    color: 'from-blue-500 to-blue-600',
+    gradient: 'from-blue-500 via-indigo-600 to-purple-600'
   },
   {
     title: 'Órdenes Pendientes',
@@ -42,7 +45,8 @@ const statCards: StatCard[] = [
     change: '-3',
     changeType: 'negative',
     icon: '📋',
-    color: 'from-orange-500 to-orange-600'
+    color: 'from-orange-500 to-orange-600',
+    gradient: 'from-orange-500 via-amber-600 to-yellow-600'
   },
   {
     title: 'Clientes Activos',
@@ -50,7 +54,8 @@ const statCards: StatCard[] = [
     change: '+5',
     changeType: 'positive',
     icon: '👥',
-    color: 'from-purple-500 to-purple-600'
+    color: 'from-purple-500 to-purple-600',
+    gradient: 'from-purple-500 via-violet-600 to-indigo-600'
   }
 ]
 
@@ -62,10 +67,10 @@ const recentOrders: RecentOrder[] = [
 ]
 
 const quickActions = [
-  { label: 'Nueva Orden', path: '/orders', icon: '➕', color: 'from-green-500 to-green-600' },
-  { label: 'Gestionar Mesas', path: '/tables', icon: '🎯', color: 'from-blue-500 to-blue-600' },
-  { label: 'Ver Cocina', path: '/kds', icon: '👨‍🍳', color: 'from-orange-500 to-orange-600' },
-  { label: 'Inventario', path: '/inventory', icon: '📦', color: 'from-indigo-500 to-indigo-600' },
+  { label: 'Nueva Orden', path: '/orders', icon: '➕', gradient: 'from-green-500 via-emerald-600 to-teal-600' },
+  { label: 'Gestionar Mesas', path: '/tables', icon: '🎯', gradient: 'from-blue-500 via-indigo-600 to-purple-600' },
+  { label: 'Ver Cocina', path: '/kds', icon: '👨‍🍳', gradient: 'from-orange-500 via-amber-600 to-yellow-600' },
+  { label: 'Inventario', path: '/inventory', icon: '📦', gradient: 'from-indigo-500 via-blue-600 to-cyan-600' },
 ]
 
 export default function Dashboard() {
@@ -98,62 +103,68 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="text-center">
-        <h1 className="text-display text-3xl mb-2">¡Bienvenido al Sistema!</h1>
-        <p className="text-subheading text-gray-400">
-          {currentTime.toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </p>
-        <p className="text-body text-gray-300 mt-2">
-          {currentTime.toLocaleTimeString('es-ES', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-          })}
-        </p>
+      {/* Enhanced Welcome Section */}
+      <div className="text-center relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-blue-500/10 to-purple-500/10 rounded-3xl blur-3xl"></div>
+        <div className="relative bg-gradient-to-br from-gray-800/50 to-gray-700/50 p-8 rounded-3xl border border-gray-600/30 backdrop-blur-xl">
+          <h1 className="text-display text-4xl mb-3">¡Bienvenido al Sistema!</h1>
+          <p className="text-subheading text-gray-300 mb-4">
+            {currentTime.toLocaleDateString('es-ES', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
+          <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-gray-700/50 to-gray-600/50 px-6 py-3 rounded-2xl border border-gray-600/30">
+            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <p className="text-body text-gray-200 font-mono">
+              {currentTime.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+              })}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Enhanced Stats Cards */}
       <div className="pos-grid-4">
         {statCards.map((card, index) => (
-          <div key={index} className="pos-card p-6 fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+          <div key={index} className="stat-card p-6 fade-in" style={{ animationDelay: `${index * 100}ms` }}>
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center`}>
+              <div className={`w-14 h-14 bg-gradient-to-br ${card.gradient} rounded-2xl flex items-center justify-center shadow-lg`}>
                 <span className="text-2xl">{card.icon}</span>
               </div>
-              <div className={`text-sm font-medium px-2 py-1 rounded-full ${
-                card.changeType === 'positive' ? 'bg-green-900 text-green-300' :
-                card.changeType === 'negative' ? 'bg-red-900 text-red-300' :
-                'bg-gray-700 text-gray-300'
+              <div className={`text-sm font-semibold px-3 py-1 rounded-full ${
+                card.changeType === 'positive' ? 'bg-green-900/50 text-green-300 border border-green-500/30' :
+                card.changeType === 'negative' ? 'bg-red-900/50 text-red-300 border border-red-500/30' :
+                'bg-gray-700/50 text-gray-300 border border-gray-500/30'
               }`}>
                 {card.change}
               </div>
             </div>
-            <h3 className="text-caption text-gray-400 mb-1">{card.title}</h3>
-            <p className="text-heading text-2xl">{card.value}</p>
+            <h3 className="text-caption text-gray-400 mb-2">{card.title}</h3>
+            <p className="text-heading text-3xl">{card.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="pos-card p-6">
-        <h2 className="text-heading mb-6">Acciones Rápidas</h2>
+      {/* Enhanced Quick Actions */}
+      <div className="pos-card p-8">
+        <h2 className="text-heading mb-8 text-center">Acciones Rápidas</h2>
         <div className="pos-grid-4">
           {quickActions.map((action, index) => (
             <Link
               key={index}
               to={action.path}
-              className="group block text-center p-6 rounded-xl bg-gray-700 hover:bg-gray-600 transition-all duration-200 transform hover:scale-105"
+              className="action-card group"
             >
-              <div className={`w-16 h-16 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                <span className="text-3xl">{action.icon}</span>
+              <div className={`w-20 h-20 bg-gradient-to-br ${action.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl`}>
+                <span className="text-4xl">{action.icon}</span>
               </div>
-              <span className="text-body font-medium text-white group-hover:text-green-400 transition-colors">
+              <span className="text-body font-semibold text-white group-hover:text-green-400 transition-colors">
                 {action.label}
               </span>
             </Link>
@@ -161,28 +172,28 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Orders & Quick Stats */}
+      {/* Enhanced Recent Orders & Quick Stats */}
       <div className="pos-grid-2">
-        {/* Recent Orders */}
+        {/* Enhanced Recent Orders */}
         <div className="pos-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-heading">Órdenes Recientes</h2>
-            <Link to="/orders" className="text-green-400 hover:text-green-300 text-sm font-medium">
+            <Link to="/orders" className="text-green-400 hover:text-green-300 text-sm font-medium hover:underline transition-all duration-200">
               Ver Todas →
             </Link>
           </div>
           <div className="space-y-4">
-            {recentOrders.map((order) => (
-              <div key={order.id} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+            {recentOrders.map((order, index) => (
+              <div key={order.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-xl border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 group hover:scale-[1.02]">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 ${getStatusColor(order.status)} rounded-full`}></div>
+                  <div className={`w-3 h-3 ${getStatusColor(order.status)} rounded-full shadow-lg`}></div>
                   <div>
-                    <p className="text-white font-medium">{order.table}</p>
+                    <p className="text-white font-semibold group-hover:text-green-400 transition-colors">{order.table}</p>
                     <p className="text-sm text-gray-400">{order.items} items • {order.time}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-white font-semibold">${order.total}</p>
+                  <p className="text-white font-bold text-lg">${order.total}</p>
                   <p className="text-xs text-gray-400">{getStatusText(order.status)}</p>
                 </div>
               </div>
@@ -190,76 +201,76 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Enhanced Quick Stats */}
         <div className="pos-card p-6">
           <h2 className="text-heading mb-6">Resumen del Día</h2>
           <div className="space-y-6">
-            <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-900/30 to-emerald-900/30 rounded-xl border border-green-500/20 hover:border-green-500/40 transition-all duration-200">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg">📊</span>
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xl">📊</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">Total Ventas</p>
+                  <p className="text-white font-semibold">Total Ventas</p>
                   <p className="text-sm text-gray-400">Hoy</p>
                 </div>
               </div>
-              <p className="text-2xl font-bold text-green-400">$2,450</p>
+              <p className="text-3xl font-bold text-green-400">$2,450</p>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-900/30 to-indigo-900/30 rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all duration-200">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg">🎯</span>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xl">🎯</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">Mesas Ocupadas</p>
+                  <p className="text-white font-semibold">Mesas Ocupadas</p>
                   <p className="text-sm text-gray-400">Actualmente</p>
                 </div>
               </div>
-              <p className="text-2xl font-bold text-blue-400">8/12</p>
+              <p className="text-3xl font-bold text-blue-400">8/12</p>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-900/30 to-amber-900/30 rounded-xl border border-orange-500/20 hover:border-orange-500/40 transition-all duration-200">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg">⏱️</span>
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xl">⏱️</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">Tiempo Promedio</p>
+                  <p className="text-white font-semibold">Tiempo Promedio</p>
                   <p className="text-sm text-gray-400">Por Orden</p>
                 </div>
               </div>
-              <p className="text-2xl font-bold text-orange-400">12m</p>
+              <p className="text-3xl font-bold text-orange-400">12m</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* System Status */}
-      <div className="pos-card p-6">
-        <h2 className="text-heading mb-6">Estado del Sistema</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center space-x-3 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+      {/* Enhanced System Status */}
+      <div className="pos-card p-8">
+        <h2 className="text-heading mb-8 text-center">Estado del Sistema</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex items-center space-x-4 p-6 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-2xl hover:border-green-500/50 transition-all duration-200 group hover:scale-105">
+            <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
             <div>
-              <p className="text-white font-medium">Backend</p>
+              <p className="text-white font-semibold group-hover:text-green-400 transition-colors">Backend</p>
               <p className="text-sm text-green-400">Operativo</p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-3 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+          <div className="flex items-center space-x-4 p-6 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-2xl hover:border-green-500/50 transition-all duration-200 group hover:scale-105">
+            <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
             <div>
-              <p className="text-white font-medium">Base de Datos</p>
+              <p className="text-white font-semibold group-hover:text-green-400 transition-colors">Base de Datos</p>
               <p className="text-sm text-green-400">Conectado</p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-3 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+          <div className="flex items-center space-x-4 p-6 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-2xl hover:border-green-500/50 transition-all duration-200 group hover:scale-105">
+            <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
             <div>
-              <p className="text-white font-medium">Red</p>
+              <p className="text-white font-semibold group-hover:text-green-400 transition-colors">Red</p>
               <p className="text-sm text-green-400">Estable</p>
             </div>
           </div>

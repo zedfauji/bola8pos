@@ -152,50 +152,51 @@ export default function Tables() {
 
   return (
     <div className="space-y-8">
-      {/* Header Stats */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-display text-3xl mb-2">Gestión de Mesas</h1>
-          <p className="text-subheading text-gray-400">Control y monitoreo de todas las mesas del establecimiento</p>
-        </div>
-        
-        <div className="flex items-center space-x-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-green-400">{freeCount}</div>
-            <div className="text-sm text-gray-400">Disponibles</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-red-400">{occupiedCount}</div>
-            <div className="text-sm text-gray-400">Ocupadas</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-400">{TABLE_COUNT}</div>
-            <div className="text-sm text-gray-400">Total</div>
+      {/* Enhanced Header Stats */}
+      <div className="text-center relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 rounded-3xl blur-3xl"></div>
+        <div className="relative bg-gradient-to-br from-gray-800/50 to-gray-700/50 p-8 rounded-3xl border border-gray-600/30 backdrop-blur-xl">
+          <h1 className="text-display text-4xl mb-3">Gestión de Mesas</h1>
+          <p className="text-subheading text-gray-300 mb-6">Control y monitoreo de todas las mesas del establecimiento</p>
+          
+          <div className="grid grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-400 mb-2">{freeCount}</div>
+              <div className="text-sm text-gray-400">Disponibles</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-red-400 mb-2">{occupiedCount}</div>
+              <div className="text-sm text-gray-400">Ocupadas</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-400 mb-2">{TABLE_COUNT}</div>
+              <div className="text-sm text-gray-400">Total</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Tables Grid */}
-      <div className="pos-card p-6">
-        <div className="flex items-center justify-between mb-6">
+      {/* Enhanced Tables Grid */}
+      <div className="pos-card p-8">
+        <div className="flex items-center justify-between mb-8">
           <h2 className="text-heading">Estado de Mesas</h2>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-400">Libre</span>
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-green-500 rounded-full shadow-lg shadow-green-500/50"></div>
+              <span className="text-sm text-gray-300 font-medium">Libre</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-400">Reservada</span>
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50"></div>
+              <span className="text-sm text-gray-300 font-medium">Reservada</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-sm text-gray-400">Ocupada</span>
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-red-500 rounded-full shadow-lg shadow-red-500/50"></div>
+              <span className="text-sm text-gray-300 font-medium">Ocupada</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {tables.map((table) => {
             const status = getTableStatus(table)
             const isSelected = selectedTable?.id === table.id
@@ -204,24 +205,24 @@ export default function Tables() {
               <div
                 key={table.id}
                 className={`
-                  relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer
-                  ${isSelected ? 'border-green-400 shadow-lg shadow-green-400/20' : 'border-gray-600'}
-                  ${status === 'free' ? 'bg-gray-700 hover:bg-gray-600' : 
-                    status === 'reserved' ? 'bg-blue-900/30 hover:bg-blue-900/50' : 
-                    'bg-red-900/30 hover:bg-red-900/50'}
+                  relative p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer group
+                  ${isSelected ? 'border-green-400 shadow-2xl shadow-green-400/30 scale-105' : 'border-gray-600/50 hover:border-gray-500'}
+                  ${status === 'free' ? 'bg-gradient-to-br from-gray-700/80 to-gray-600/80 hover:from-gray-600/80 hover:to-gray-500/80' : 
+                    status === 'reserved' ? 'bg-gradient-to-br from-blue-900/40 to-indigo-900/40 hover:from-blue-900/60 hover:to-indigo-900/60' : 
+                    'bg-gradient-to-br from-red-900/40 to-pink-900/40 hover:from-red-900/60 hover:to-pink-900/60'}
                 `}
                 onClick={() => setSelectedTable(isSelected ? null : table)}
               >
                 {/* Status Indicator */}
-                <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${
-                  status === 'free' ? 'bg-green-500' :
-                  status === 'reserved' ? 'bg-blue-500' : 'bg-red-500'
+                <div className={`absolute top-3 right-3 w-4 h-4 rounded-full shadow-lg ${
+                  status === 'free' ? 'bg-green-500 shadow-green-500/50' :
+                  status === 'reserved' ? 'bg-blue-500 shadow-blue-500/50' : 'bg-red-500 shadow-red-500/50'
                 }`}></div>
 
                 {/* Table Info */}
-                <div className="text-center mb-3">
-                  <h3 className="text-lg font-semibold text-white mb-1">{table.name}</h3>
-                  <p className={`text-sm ${
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-bold text-white mb-2">{table.name}</h3>
+                  <p className={`text-sm font-medium ${
                     status === 'free' ? 'text-green-400' :
                     status === 'reserved' ? 'text-blue-400' : 'text-red-400'
                   }`}>
@@ -231,56 +232,56 @@ export default function Tables() {
 
                 {/* Cue Indicator */}
                 {table.cueRented && (
-                  <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs px-2 py-1 rounded-full font-medium">
-                    Taco
+                  <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-black text-xs px-3 py-1 rounded-full font-bold shadow-lg">
+                    🎯 Taco
                   </div>
                 )}
 
                 {/* Action Buttons */}
                 {isSelected && (
-                  <div className="space-y-2 mt-3">
+                  <div className="space-y-3 mt-4">
                     {table.status === 'free' ? (
                       <button 
                         onClick={() => startTable(table.id)}
-                        className="pos-button w-full text-sm py-2"
+                        className="pos-button w-full text-sm py-3 rounded-xl"
                       >
                         Iniciar Mesa
                       </button>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <button 
                           onClick={() => toggleCue(table.id)}
-                          className="pos-button-warning w-full text-sm py-2"
+                          className="pos-button-warning w-full text-sm py-3 rounded-xl"
                         >
                           {table.cueRented ? 'Devolver Taco' : 'Rentar Taco'}
                         </button>
                         <button 
                           onClick={() => stopTable(table.id)}
-                          className="pos-button-danger w-full text-sm py-2"
+                          className="pos-button-danger w-full text-sm py-3 rounded-xl"
                         >
                           Detener Mesa
                         </button>
                         <button 
                           onClick={() => moveAll(table.id)}
-                          className="pos-button-secondary w-full text-sm py-2"
+                          className="pos-button-secondary w-full text-sm py-3 rounded-xl"
                         >
                           Mover Todo
                         </button>
                         <button 
                           onClick={() => moveItems(table.id)}
-                          className="pos-button-secondary w-full text-sm py-2"
+                          className="pos-button-secondary w-full text-sm py-3 rounded-xl"
                         >
                           Mover Items
                         </button>
                         <Link 
                           to={`/orders?table=${encodeURIComponent(table.name)}`}
-                          className="pos-button w-full text-sm py-2 block text-center"
+                          className="pos-button w-full text-sm py-3 rounded-xl block text-center"
                         >
                           Nueva Orden
                         </Link>
                         <button 
                           onClick={() => openCharge(table.name)}
-                          className="pos-button-secondary w-full text-sm py-2"
+                          className="pos-button-secondary w-full text-sm py-3 rounded-xl"
                         >
                           Cobrar
                         </button>
@@ -294,33 +295,34 @@ export default function Tables() {
         </div>
       </div>
 
-      {/* Waitlist */}
-      <div className="pos-card p-6">
-        <div className="flex items-center justify-between mb-6">
+      {/* Enhanced Waitlist */}
+      <div className="pos-card p-8">
+        <div className="flex items-center justify-between mb-8">
           <h2 className="text-heading">Lista de Espera</h2>
           <button 
             onClick={addToWaitlist}
-            className="pos-button-secondary px-4 py-2 text-sm"
+            className="pos-button-secondary px-6 py-3 text-sm rounded-xl hover:scale-105 transition-transform duration-200"
           >
             Agregar Cliente
           </button>
         </div>
         
         {waitlist.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            <div className="text-4xl mb-2">📝</div>
-            <p>No hay clientes en lista de espera</p>
+          <div className="text-center py-12 text-gray-400">
+            <div className="text-6xl mb-4">📝</div>
+            <p className="text-lg">No hay clientes en lista de espera</p>
+            <p className="text-sm text-gray-500">Los clientes aparecerán aquí cuando se agreguen</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {waitlist.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-lg">👤</span>
+              <div key={entry.id} className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-2xl border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 group hover:scale-105">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <span className="text-white text-xl">👤</span>
                   </div>
                   <div>
-                    <p className="text-white font-medium">{entry.name}</p>
+                    <p className="text-white font-semibold text-lg">{entry.name}</p>
                     <p className="text-sm text-gray-400">
                       {new Date(entry.createdAt).toLocaleTimeString('es-ES', { 
                         hour: '2-digit', 
@@ -331,9 +333,9 @@ export default function Tables() {
                 </div>
                 <button 
                   onClick={() => removeFromWaitlist(entry.id)}
-                  className="text-red-400 hover:text-red-300 transition-colors"
+                  className="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
@@ -382,36 +384,34 @@ function ItemsModal({ tableId, onClose }: { tableId: number; onClose: () => void
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-      <div className="bg-white rounded p-4 w-full max-w-lg">
-        <div className="flex items-center justify-between mb-3">
-          <div className="font-semibold">Items en Mesa {tableId}</div>
-          <button onClick={onClose}>✕</button>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-2xl p-6 w-full max-w-lg border border-gray-600/50 shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="font-semibold text-white text-lg">Items en Mesa {tableId}</div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-600/50 rounded-lg">✕</button>
         </div>
         {loading ? (
-          <div className="text-sm text-gray-500">Cargando…</div>
+          <div className="text-sm text-gray-400 text-center py-8">Cargando…</div>
         ) : items.length === 0 ? (
-          <div className="text-sm text-gray-500">Sin items</div>
+          <div className="text-sm text-gray-400 text-center py-8">Sin items</div>
         ) : (
-          <ul className="max-h-64 overflow-auto border rounded mb-3">
+          <ul className="max-h-64 overflow-auto border border-gray-600/50 rounded-xl mb-4 bg-gray-700/30">
             {items.map((it) => (
-              <li key={it.id} className="flex items-center gap-2 p-2 border-b">
-                <input type="checkbox" checked={!!selected[it.id]} onChange={(e)=>setSelected({ ...selected, [it.id]: e.target.checked })} />
-                <span className="text-sm">{it.name || it.sku || it.id}</span>
+              <li key={it.id} className="flex items-center gap-3 p-3 border-b border-gray-600/30 last:border-b-0">
+                <input type="checkbox" checked={!!selected[it.id]} onChange={(e)=>setSelected({ ...selected, [it.id]: e.target.checked })} className="w-4 h-4 text-green-500 bg-gray-600 border-gray-500 rounded focus:ring-green-500 focus:ring-2" />
+                <span className="text-sm text-white">{it.name || it.sku || it.id}</span>
               </li>
             ))}
           </ul>
         )}
-        <div className="flex items-center gap-2">
-          <input value={dest} onChange={(e)=>setDest(e.target.value)} className="border rounded px-2 py-1" placeholder="Mover a mesa #" />
-          <button onClick={submitMove} className="bg-yellow-200 rounded px-3 py-2">Mover Seleccionados</button>
+        <div className="flex items-center gap-3">
+          <input value={dest} onChange={(e)=>setDest(e.target.value)} className="pos-input flex-1" placeholder="Mover a mesa #" />
+          <button onClick={submitMove} className="pos-button-warning px-4 py-2 rounded-xl">Mover Seleccionados</button>
         </div>
       </div>
     </div>
   )
 }
-
-
 
 type ChargeItem = { id: string; name: string; price: number }
 const QUICK_MENU: ChargeItem[] = [
@@ -498,63 +498,63 @@ function ChargeModal({ tableName, onClose }: { tableName: string; onClose: () =>
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-      <div className="bg-white rounded p-4 w-full max-w-xl">
-        <div className="flex items-center justify-between mb-3">
-          <div className="font-semibold">Cobrar {tableName}</div>
-          <button onClick={onClose}>✕</button>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-2xl p-6 w-full max-w-2xl border border-gray-600/50 shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="font-semibold text-white text-xl">Cobrar {tableName}</div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-600/50 rounded-lg">✕</button>
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           {QUICK_MENU.map((mi) => (
-            <button key={mi.id} onClick={() => addItem(mi)} className="bg-gray-100 rounded p-3 text-left">
-              <div className="font-medium">{mi.name}</div>
-              <div className="text-sm">${mi.price}</div>
+            <button key={mi.id} onClick={() => addItem(mi)} className="bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-xl p-4 text-left border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 hover:scale-105">
+              <div className="font-semibold text-white">{mi.name}</div>
+              <div className="text-sm text-gray-300">${mi.price}</div>
             </button>
           ))}
         </div>
-        <div className="border rounded p-2 mb-3">
-          <div className="font-medium mb-1">Ticket</div>
+        <div className="border border-gray-600/50 rounded-xl p-4 mb-4 bg-gray-700/30">
+          <div className="font-semibold text-white mb-3">Ticket</div>
           {lines.length === 0 ? (
-            <div className="text-sm text-gray-500">Sin items</div>
+            <div className="text-sm text-gray-400 text-center py-4">Sin items</div>
           ) : (
-            <ul className="text-sm divide-y">
+            <ul className="text-sm divide-y divide-gray-600/30">
               {lines.map((l) => (
-                <li key={l.item.id} className="flex items-center justify-between py-1">
-                  <span>{l.item.name}</span>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => decItem(l.item.id)} className="px-2 py-1 bg-gray-200 rounded">-</button>
-                    <span className="w-6 text-center">{l.qty}</span>
-                    <button onClick={() => addItem(l.item)} className="px-2 py-1 bg-gray-200 rounded">+</button>
-                    <span className="w-16 text-right">${l.item.price * l.qty}</span>
+                <li key={l.item.id} className="flex items-center justify-between py-3">
+                  <span className="text-white">{l.item.name}</span>
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => decItem(l.item.id)} className="w-8 h-8 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors">-</button>
+                    <span className="w-8 text-center text-white font-semibold">{l.qty}</span>
+                    <button onClick={() => addItem(l.item)} className="w-8 h-8 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors">+</button>
+                    <span className="w-20 text-right text-white font-bold">${l.item.price * l.qty}</span>
                   </div>
                 </li>
               ))}
             </ul>
           )}
-          <div className="flex justify-between font-semibold mt-2">
-            <span>Total</span>
-            <span>${total}</span>
+          <div className="flex justify-between font-bold text-lg mt-4 pt-4 border-t border-gray-600/30">
+            <span className="text-white">Total</span>
+            <span className="text-green-400">${total}</span>
           </div>
         </div>
-        <div className="border rounded p-2 mb-3">
-          <div className="font-medium mb-1">Abiertos</div>
+        <div className="border border-gray-600/50 rounded-xl p-4 mb-6 bg-gray-700/30">
+          <div className="font-semibold text-white mb-3">Abiertos</div>
           {loadingOpen ? (
-            <div className="text-sm text-gray-500">Cargando…</div>
+            <div className="text-sm text-gray-400 text-center py-4">Cargando…</div>
           ) : openItems.length === 0 ? (
-            <div className="text-sm text-gray-500">Sin items abiertos</div>
+            <div className="text-sm text-gray-400 text-center py-4">Sin items abiertos</div>
           ) : (
-            <ul className="text-sm divide-y">
+            <ul className="text-sm divide-y divide-gray-600/30">
               {openItems.map((o) => (
-                <li key={o.id} className="flex items-center justify-between py-1">
-                  <span>{o.name || o.id}</span>
-                  <span className="w-16 text-right">{o.qty} × ${o.price ?? 0}</span>
+                <li key={o.id} className="flex items-center justify-between py-3">
+                  <span className="text-white">{o.name || o.id}</span>
+                  <span className="w-20 text-right text-gray-300">{o.qty} × ${o.price ?? 0}</span>
                 </li>
               ))}
             </ul>
           )}
           {openItems.length > 0 && (
             <button
-              className="mt-2 bg-gray-200 rounded px-3 py-2"
+              className="mt-4 w-full bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-xl px-4 py-3 hover:from-gray-500 hover:to-gray-400 transition-all duration-200"
               onClick={() => {
                 // Merge open items into the current ticket (one unit per qty)
                 openItems.forEach((oi) => {
@@ -565,9 +565,9 @@ function ChargeModal({ tableName, onClose }: { tableName: string; onClose: () =>
             >Agregar Abiertos al Ticket</button>
           )}
         </div>
-        <div className="flex gap-2">
-          <button onClick={sendToKitchen} className="flex-1 bg-[#32CD32] text-white rounded px-3 py-2">Enviar a Cocina</button>
-          <button onClick={payNow} className="flex-1 bg-purple-700 text-white rounded px-3 py-2">Cobrar</button>
+        <div className="flex gap-4">
+          <button onClick={sendToKitchen} className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl px-6 py-3 font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-200 hover:scale-105">Enviar a Cocina</button>
+          <button onClick={payNow} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl px-6 py-3 font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 hover:scale-105">Cobrar</button>
         </div>
       </div>
     </div>
