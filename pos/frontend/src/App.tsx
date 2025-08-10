@@ -1,18 +1,28 @@
-import { Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Layout from './components/Layout'
+import Dashboard from './routes/Dashboard'
+import Tables from './routes/Tables'
+import Orders from './routes/Orders'
+import KDS from './routes/KDS'
+import Loyalty from './routes/Loyalty'
+import Inventory from './routes/Inventory'
+import Employees from './routes/Employees'
 
 export default function App() {
   return (
-    <div className="min-h-full p-6">
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">POS Billiards & Bar</h1>
-      </header>
-      <nav className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Link to="/tables" className="rounded-lg bg-[#1E90FF] text-white p-6 text-center text-lg">Mesas</Link>
-        <Link to="/orders" className="rounded-lg bg-[#32CD32] text-white p-6 text-center text-lg">Ordenes</Link>
-        <Link to="/kds" className="rounded-lg bg-yellow-400 text-black p-6 text-center text-lg">Cocina</Link>
-        <Link to="/loyalty" className="rounded-lg bg-purple-700 text-white p-6 text-center text-lg">Lealtad</Link>
-        <Link to="/employees" className="rounded-lg bg-[#1E90FF] text-white p-6 text-center text-lg">Empleados</Link>
-      </nav>
-    </div>
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/tables" element={<Tables />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/kds" element={<KDS />} />
+          <Route path="/loyalty" element={<Loyalty />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/employees" element={<Employees />} />
+        </Routes>
+      </Layout>
+    </Router>
   )
 }

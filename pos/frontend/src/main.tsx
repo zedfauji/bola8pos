@@ -7,6 +7,7 @@ import Tables from './routes/Tables.tsx'
 import Orders from './routes/Orders.tsx'
 import KDS from './routes/KDS.tsx'
 import Loyalty from './routes/Loyalty.tsx'
+import Inventory from './routes/Inventory.tsx'
 import Employees from './routes/Employees.tsx'
 
 const router = createBrowserRouter([
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
   { path: '/orders', element: <Orders /> },
   { path: '/kds', element: <KDS /> },
   { path: '/loyalty', element: <Loyalty /> },
+  { path: '/inventory', element: <Inventory /> },
   { path: '/employees', element: <Employees /> },
 ])
 
