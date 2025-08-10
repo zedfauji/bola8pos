@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { api } from '../services/api'
 
 type Customer = {
   id: string
@@ -21,9 +22,16 @@ export default function Loyalty() {
   )
   const [selected, setSelected] = useState<Customer | null>(null)
 
-  function redeem() {
+  async function redeem() {
     if (!selected) return
-    alert(`Redimir puntos de ${selected.name}`)
+    const pts = Number(window.prompt('Puntos a redimir:', '10') || '0')
+    if (!pts || pts <= 0) return
+    try {
+      const res = await api.redeem(selected.id, pts)
+      alert(`Redimidos. Nuevo saldo: ${res.points}`)
+    } catch {
+      alert('No se pudo redimir puntos')
+    }
   }
 
   function sendPromo() {

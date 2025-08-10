@@ -1,24 +1,11 @@
-# Billiard POS (Frontend)
+## Project Overview
 
-Developer documentation is available in `docs/`.
+We will focus on the design-driven `pos/` implementation and deploy it to Google Cloud using free-tier-friendly settings.
 
-- Start here: `docs/README.md`
-- App and routing: `docs/app.md`
-- Services, contexts, components, and pages are documented under `docs/`
+- Backend: `pos/backend` (TypeScript/Express)
+- Frontend: `pos/frontend` (React + Vite)
+- Source of truth: `billiard_pos_design_document.markdown`
+- Dev log: `DEV_LOG.md`
 
-Quick Links
-- API client: `docs/services/api.md`
-- Auth: `docs/contexts/auth-context.md`
-- Realtime: `docs/contexts/socket-context.md`
-- Protected routes: `docs/components/ProtectedRoute.md`
-
-Environment Variables
-- `VITE_API_URL` – REST API base URL (Axios)
-- `REACT_APP_WS_URL` – WebSocket URL (Socket.IO)
-
-Structure
-- Frontend source: `billiard-pos/frontend/src`
-- Components: `billiard-pos/frontend/src/components`
-- Pages: `billiard-pos/frontend/src/pages`
-- Contexts: `billiard-pos/frontend/src/context`
-- Services: `billiard-pos/frontend/src/services`
+## Deployment
+Follow `pos/README_DEPLOY_GCP.md`.
