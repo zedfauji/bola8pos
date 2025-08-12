@@ -1,5 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
-import { API_URL } from '../services/api'
+import LowStockBadge from '../components/inventory/LowStockBadge'
+
+// Resolve API base URL similar to api.js (prefer Vite env, then window override, then localhost)
+let API_URL = 'http://localhost:3001'
+try {
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
+    // @ts-ignore
+    API_URL = import.meta.env.VITE_API_URL
+  }
+} catch {}
+// @ts-ignore
+if (typeof window !== 'undefined' && (window as any).__API_BASE_URL__) {
+  // @ts-ignore
+  API_URL = (window as any).__API_BASE_URL__
+}
 
 type Item = { sku: string; name: string; qty: number; lowStockThreshold: number }
 
@@ -7,6 +22,7 @@ export default function Inventory() {
   const [items, setItems] = useState<Item[]>([])
   const [csv, setCsv] = useState('')
   const [loading, setLoading] = useState(false)
+  const [lowOnly, setLowOnly] = useState<boolean>(() => new URLSearchParams(window.location.search).get('low') === '1')
 
   async function load() {
     setLoading(true)
@@ -23,7 +39,18 @@ export default function Inventory() {
     load()
   }, [])
 
-  const lowCount = useMemo(() => items.filter((i) => i.qty <= i.lowStockThreshold).length, [items])
+  // low stock badge is now computed server-side via LowStockBadge
+
+  // Watch URL changes (basic) to keep lowOnly in sync when navigating
+  useEffect(() => {
+    const onPop = () => setLowOnly(new URLSearchParams(window.location.search).get('low') === '1')
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  const viewItems = useMemo(() => {
+    return lowOnly ? items.filter((it) => it.qty <= it.lowStockThreshold) : items
+  }, [items, lowOnly])
 
   async function importCsv() {
     if (!csv.trim()) return
@@ -43,32 +70,47 @@ export default function Inventory() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 text-white">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Inventario</h2>
-        <span className={`text-sm ${lowCount ? 'text-red-600' : 'text-gray-500'}`}>Bajo stock: {lowCount}</span>
+        <div className="flex items-center gap-2">
+          {lowOnly && (
+            <button
+              className="text-xs px-2 py-1 rounded bg-white/10 hover:bg-white/20"
+              onClick={() => {
+                const url = new URL(window.location.href)
+                url.searchParams.delete('low')
+                window.history.pushState({}, '', url.toString())
+                setLowOnly(false)
+              }}
+            >
+              Limpiar filtro
+            </button>
+          )}
+          <LowStockBadge className="ml-2" clickable to="/inventory?low=1" pollMs={15000} notifyOnIncrease />
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4 mb-6">
-        <div className="border rounded p-3">
+        <div className="pos-card p-3">
           <div className="font-medium mb-2">Importar CSV</div>
-          <textarea value={csv} onChange={(e)=>setCsv(e.target.value)} className="w-full h-32 border rounded p-2 text-sm" placeholder="sku,name,qty,lowStockThreshold" />
+          <textarea value={csv} onChange={(e)=>setCsv(e.target.value)} className="w-full h-32 pos-input text-sm" placeholder="sku,name,qty,lowStockThreshold" />
           <div className="mt-2 flex gap-2">
-            <button onClick={importCsv} disabled={loading} className="bg-[#1E90FF] disabled:opacity-50 text-white rounded px-3 py-2">Importar</button>
-            <button onClick={load} disabled={loading} className="bg-gray-200 rounded px-3 py-2">Refrescar</button>
+            <button onClick={importCsv} disabled={loading} className="pos-button disabled:opacity-50">Importar</button>
+            <button onClick={load} disabled={loading} className="pos-button-secondary">Refrescar</button>
           </div>
         </div>
-        <div className="border rounded p-3">
+        <div className="pos-card p-3">
           <div className="font-medium mb-2">Ejemplo</div>
-          <pre className="text-xs bg-gray-50 p-2 rounded">{`sku,name,qty,lowStockThreshold
+          <pre className="text-xs bg-white/5 p-2 rounded">{`sku,name,qty,lowStockThreshold
 c1,Cerveza,24,6
 f1,Hamburguesa,10,3`}</pre>
         </div>
       </div>
 
-      <div className="overflow-x-auto border rounded">
+      <div className="overflow-x-auto pos-table">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
+          <thead>
             <tr>
               <th className="text-left p-2">SKU</th>
               <th className="text-left p-2">Nombre</th>
@@ -78,8 +120,8 @@ f1,Hamburguesa,10,3`}</pre>
             </tr>
           </thead>
           <tbody>
-            {items.map((it) => (
-              <tr key={it.sku} className={`border-t ${it.qty <= it.lowStockThreshold ? 'bg-red-50' : ''}`}>
+            {viewItems.map((it) => (
+              <tr key={it.sku} className={`border-t ${it.qty <= it.lowStockThreshold ? 'bg-red-900/20' : ''}`}>
                 <td className="p-2">{it.sku}</td>
                 <td className="p-2">{it.name}</td>
                 <td className="p-2 text-right">{it.qty}</td>
@@ -94,7 +136,7 @@ f1,Hamburguesa,10,3`}</pre>
                     onClick={async ()=>{ await fetch(`${API_URL}/api/inventory/movement`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sku: it.sku, type: 'sale', qty: 1 }) }); await load(); }}
                   >-1</button>
                   <button
-                    className="text-xs bg-gray-200 rounded px-2 py-1"
+                    className="text-xs bg-white/10 hover:bg-white/20 text-white rounded px-2 py-1"
                     onClick={async ()=>{
                       const p = Number(window.prompt('Nuevo precio', '') || 'NaN')
                       if (!Number.isFinite(p) || p < 0) return

@@ -33,9 +33,9 @@ export default function Employees() {
         <button onClick={exportPayroll} className="bg-[#32CD32] text-white rounded px-3 py-2">Exportar Nómina</button>
       </div>
 
-      <div className="overflow-x-auto border rounded">
+      <div className="overflow-x-auto border border-slate-700 rounded">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
+          <thead className="bg-slate-800 text-slate-200">
             <tr>
               <th className="text-left p-2">Nombre</th>
               <th className="text-left p-2">Rol</th>
@@ -45,7 +45,7 @@ export default function Employees() {
           </thead>
           <tbody>
             {employees.map((e) => (
-              <tr key={e.id} className="border-t">
+              <tr key={e.id} className="border-t border-slate-700">
                 <td className="p-2">{e.name}</td>
                 <td className="p-2 capitalize">{e.role}</td>
                 <td className="p-2 text-right">{e.hours}</td>

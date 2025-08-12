@@ -1,33 +1,23 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
-import App from './App.tsx'
-import Tables from './routes/Tables.tsx'
-import Orders from './routes/Orders.tsx'
-import KDS from './routes/KDS.tsx'
-import Loyalty from './routes/Loyalty.tsx'
-import Inventory from './routes/Inventory.tsx'
-import Employees from './routes/Employees.tsx'
+import App from './App.jsx'
 
-const router = createBrowserRouter([
-  { path: '/', element: <App /> },
-  { path: '/tables', element: <Tables /> },
-  { path: '/orders', element: <Orders /> },
-  { path: '/kds', element: <KDS /> },
-  { path: '/loyalty', element: <Loyalty /> },
-  { path: '/inventory', element: <Inventory /> },
-  { path: '/employees', element: <Employees /> },
-])
+// Register service worker for offline functionality (production only)
+if (import.meta && import.meta.env && import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('SW registered: ', registration);
+      })
+      .catch((registrationError) => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <App />
   </StrictMode>,
 )
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
-  })
-}
