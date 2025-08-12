@@ -1,0 +1,69 @@
+# Page snapshot
+
+```yaml
+- region "Notifications Alt+T"
+- text: B8 Bola8 POS
+- navigation:
+  - link "🏠 Dashboard":
+    - /url: /
+  - link "🎱 Tables":
+    - /url: /tables
+  - link "🍻 Bar Sales":
+    - /url: /bar-sales
+  - link "📦 Inventory":
+    - /url: /inventory
+  - link "🛒 Orders":
+    - /url: /orders
+  - link "💳 Payment":
+    - /url: /payment
+  - link "👨‍🍳 Kitchen":
+    - /url: /kitchen
+  - link "📊 Reports":
+    - /url: /reports
+  - link "⚙️ Settings":
+    - /url: /settings
+  - button "🔒 Admin ▼"
+- text: "👤 Manager Shift: 2:00 PM - 10:00 PM"
+- banner:
+  - text: "🕐 8/12/2025, 4:38:00 PM System Online Shift: S1"
+  - button "Drop"
+  - button "Payout"
+  - text: thr ≥ 75
+  - button "Adjust"
+  - button "Print"
+  - button "Close"
+  - heading "Add payout" [level=3]
+  - button "✕"
+  - text: Amount
+  - spinbutton: "20"
+  - text: Reason
+  - textbox
+  - button "Cancel"
+  - button "Add"
+- main:
+  - heading "Dashboard" [level=1]
+  - paragraph: Welcome to Bola8 Billiards POS System
+  - paragraph: Active Tables
+  - paragraph: "8"
+  - text: 📊
+  - paragraph: Pending Orders
+  - paragraph: "12"
+  - text: 🛒
+  - paragraph: Today's Revenue
+  - paragraph: $2,847
+  - text: 💳
+  - paragraph: Kitchen Queue
+  - paragraph: "5"
+  - text: 👨‍🍳
+  - heading "Quick Actions" [level=2]
+  - link "🎱 Manage Tables":
+    - /url: /tables
+  - link "🛒 New Order":
+    - /url: /tables
+  - link "💳 Process Payment":
+    - /url: /payment
+  - link "👨‍🍳 Kitchen Display":
+    - /url: /kitchen
+  - heading "Recent Activity" [level=2]
+  - text: "Table B1 started 2:45 PM Order #ORD001 completed 2:42 PM Payment processed - $85.50 2:38 PM Table T3 order sent to kitchen 2:35 PM Table B2 paused 2:30 PM"
+```
