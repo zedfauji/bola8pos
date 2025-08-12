@@ -25,6 +25,7 @@ const AdminSettings = React.lazy(() => import('./components/admin/AdminSettings'
 const BarSalesPage = React.lazy(() => import('./pages/inventory/sales/BarSalesPage'));
 const Inventory = React.lazy(() => import('./routes/Inventory'));
 import ShiftBar from './components/shifts/ShiftBar';
+const ShiftHistory = React.lazy(() => import('./components/shifts/ShiftHistory'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -141,6 +142,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Payment', href: '/payment', icon: '💳' },
     { name: 'Kitchen', href: '/kitchen', icon: '👨\u200d🍳' },
     { name: 'Reports', href: '/reports', icon: '📊' },
+    { name: 'Shift History', href: '/shifts/history', icon: '💵' },
     { name: 'Settings', href: '/settings', icon: '⚙️' },
     { 
       name: 'Admin', 
@@ -360,6 +362,7 @@ function App() {
                     <Route path="/admin/discounts" element={<DiscountsPage />} />
                     <Route path="/admin/settings" element={<AdminSettings />} />
                     <Route path="/bar-sales" element={<BarSalesPage />} />
+                    <Route path="/shifts/history" element={<ShiftHistory />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Suspense>
