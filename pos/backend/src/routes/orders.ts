@@ -82,7 +82,20 @@ const logAction = async (actionType: string, employeeId: string, details: any) =
   }
 }
 
-r.get('/', (_req, res) => res.json({ orders: ORDERS }))
+r.get('/', (req, res) => {
+  const status = String((req.query as any)?.status || '').toLowerCase()
+  let rows = ORDERS
+  if (status) {
+    if (status === 'delivered' || status === 'done') {
+      rows = ORDERS.filter(o => o.kitchenStatus === 'done')
+    } else if (status === 'pending') {
+      rows = ORDERS.filter(o => o.kitchenStatus === 'pending')
+    } else if (status === 'in_progress' || status === 'in-progress') {
+      rows = ORDERS.filter(o => o.kitchenStatus === 'in_progress')
+    }
+  }
+  res.json({ orders: rows })
+})
 
 // Get available combos
 r.get('/combos', (_req, res) => {

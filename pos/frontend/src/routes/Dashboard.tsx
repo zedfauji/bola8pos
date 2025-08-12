@@ -183,7 +183,7 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="space-y-4">
-            {recentOrders.map((order, index) => (
+            {recentOrders.map((order) => (
               <div key={order.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-xl border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 group hover:scale-[1.02]">
                 <div className="flex items-center space-x-3">
                   <div className={`w-3 h-3 ${getStatusColor(order.status)} rounded-full shadow-lg`}></div>
