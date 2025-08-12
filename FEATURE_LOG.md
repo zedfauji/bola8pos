@@ -1,4 +1,17 @@
 ## 2025-08-11 — Dev Infra: Fixed Ports & Startup Automation
+## 2025-08-12 — Cash Reconciliation UI
+
+- Shift Close — Denominations counter and Over/Short preview
+  - Added denominations inputs (100, 50, 20, 10, 5, 1, 0.25, 0.10, 0.05, 0.01) with auto-sum to counted cash.
+  - Toggle between denominations and manual counted input.
+  - Live preview of Expected vs Counted vs Over/Short with color hints.
+  - Files: `pos/frontend/src/components/shifts/ShiftBar.jsx`.
+
+- Shift History page
+  - New page to list past shifts and view a summary (start/expected/counted/over-short, movements).
+  - Simple print button for summary; guarded by PIN via `SettingsContext.isPinRequired('reports')`.
+  - Files: `pos/frontend/src/components/shifts/ShiftHistory.jsx`, route wired in `pos/frontend/src/App.jsx`.
+
 
 - Fixed ports for local dev with auto-terminate of conflicting processes.
   - Backend runs on `PORT=3001`; frontend on `5173`.

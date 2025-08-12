@@ -61,7 +61,7 @@ export default function ShiftBar() {
     setModal({ type: 'movement', payload: { kind, amount: kind==='adjustment'?5:20, reason: '' } });
   }
   function openCloseModal() {
-    setModal({ type: 'close', payload: { counted: 0, notes: '' } });
+    setModal({ type: 'close', payload: { counted: 0, notes: '', useDenoms: true, denoms: { 100:0, 50:0, 20:0, 10:0, 5:0, 1:0, 0.25:0, 0.1:0, 0.05:0, 0.01:0 } } });
   }
 
   async function submitOpen({ start, notes }) {
@@ -248,13 +248,68 @@ export default function ShiftBar() {
 
       {modal?.type === 'close' && (
         <Modal title="Close Shift" onClose={() => setModal(null)}>
-          <div className="space-y-3">
-            <label className="block text-sm text-gray-300">Counted Cash</label>
-            <input data-testid="close-counted" className="pos-input w-full" type="number" step="0.01" value={modal.payload.counted}
-              onChange={e=>setModal(m=>({...m,payload:{...m.payload,counted:e.target.value}}))} />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-gray-300">Use Denominations</label>
+              <input type="checkbox" className="w-4 h-4" checked={!!modal.payload.useDenoms}
+                onChange={e=>setModal(m=>({...m,payload:{...m.payload,useDenoms:e.target.checked}}))} />
+            </div>
+
+            {modal.payload.useDenoms ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {[
+                  100,50,20,10,5,1,0.25,0.1,0.05,0.01
+                ].map(v => (
+                  <div key={v} className="bg-white/5 rounded p-2">
+                    <div className="text-xs text-gray-400">${v.toFixed(2)}</div>
+                    <input className="pos-input w-full mt-1" type="number" min="0" step="1" value={modal.payload.denoms[String(v)] ?? 0}
+                      onChange={e=>setModal(m=>{
+                        const qty = Math.max(0, Number(e.target.value)||0);
+                        const denoms = { ...m.payload.denoms, [String(v)]: qty };
+                        const counted = Object.entries(denoms).reduce((sum,[k,q])=> sum + (Number(k)*Number(q||0)), 0);
+                        return { ...m, payload: { ...m.payload, denoms, counted } };
+                      })}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm text-gray-300">Counted Cash</label>
+                <input data-testid="close-counted" className="pos-input w-full" type="number" step="0.01" value={modal.payload.counted}
+                  onChange={e=>setModal(m=>({...m,payload:{...m.payload,counted:e.target.value}}))} />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-white/5 rounded p-3">
+                <div className="text-xs text-gray-400">Expected</div>
+                <div className="text-white font-semibold">${shift && shift.expected != null ? Number(shift.expected).toFixed(2) : '-'}</div>
+              </div>
+              <div className="bg-white/5 rounded p-3">
+                <div className="text-xs text-gray-400">Counted</div>
+                <div className="text-white font-semibold">${Number(modal.payload.counted || 0).toFixed(2)}</div>
+              </div>
+              <div className="bg-white/5 rounded p-3">
+                <div className="text-xs text-gray-400">Over / Short</div>
+                <div className={`font-semibold ${(() => {
+                  const exp = Number(shift?.expected ?? 0);
+                  const cnt = Number(modal.payload.counted || 0);
+                  const diff = (cnt - exp);
+                  return diff < 0 ? 'text-red-400' : diff > 0 ? 'text-green-400' : 'text-white';
+                })()}`}>{(() => {
+                  const exp = Number(shift?.expected ?? 0);
+                  const cnt = Number(modal.payload.counted || 0);
+                  const diff = (cnt - exp);
+                  return diff.toFixed(2);
+                })()}</div>
+              </div>
+            </div>
+
             <label className="block text-sm text-gray-300">Notes</label>
             <textarea className="pos-input w-full" rows={3} value={modal.payload.notes}
               onChange={e=>setModal(m=>({...m,payload:{...m.payload,notes:e.target.value}}))} />
+
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={()=>setModal(null)} className="pos-button-secondary">Cancel</button>
               <button onClick={()=>submitClose(modal.payload)} className="pos-button bg-red-600 hover:bg-red-700">Close</button>
