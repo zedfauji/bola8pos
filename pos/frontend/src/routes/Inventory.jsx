@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { Box, Breadcrumbs, Typography, Paper, Tabs, Tab, Alert } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { InventoryProvider } from '../contexts/InventoryContext';
+import { useAuth } from '../contexts/AuthContext';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 // Error Boundary component for catching lazy loading errors
 class ErrorBoundary extends Component {
@@ -36,7 +38,8 @@ class ErrorBoundary extends Component {
 }
 
 // Lazy load inventory components for better performance
-const InventoryDashboard = React.lazy(() => import('../pages/inventory/Dashboard'));
+const AdminDashboard = React.lazy(() => import('../pages/inventory/AdminDashboard'));
+const EmployeeDashboard = React.lazy(() => import('../pages/inventory/EmployeeDashboard'));
 const ProductsPage = React.lazy(() => import('../pages/inventory/products/ProductsPage'));
 const MovementsPage = React.lazy(() => import('../pages/inventory/movements/MovementsPage'));
 const SuppliersPage = React.lazy(() => import('../pages/inventory/suppliers/SuppliersPage'));
@@ -53,6 +56,7 @@ const LoadingFallback = () => (
 const Inventory = () => {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
+  const { user } = useAuth();
   
   // Determine active tab based on current path
   const getActiveTab = () => {
@@ -64,6 +68,9 @@ const Inventory = () => {
   const handleTabChange = (_, newValue) => {
     // No need to set state, we'll navigate to the new route
   };
+  
+  // Determine which dashboard to show based on user role
+  const isAdmin = user?.role === 'admin';
 
   return (
     <InventoryProvider>
@@ -146,7 +153,15 @@ const Inventory = () => {
             <Route path="/" element={
               <ErrorBoundary>
                 <Suspense fallback={<LoadingFallback />}>
-                  <InventoryDashboard />
+                  {isAdmin ? (
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  ) : (
+                    <ProtectedRoute allowedRoles={['employee', 'manager']}>
+                      <EmployeeDashboard />
+                    </ProtectedRoute>
+                  )}
                 </Suspense>
               </ErrorBoundary>
             } />

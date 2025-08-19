@@ -3,14 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-// Expose backend base URL globally for modules that can't import env directly
-// Always use http://localhost:3001 for consistency and to avoid SSL errors
-// Note: used by useWebSocket and api.js
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// API base URL is now managed by apiClient.ts
+// For backward compatibility with existing code
 // @ts-ignore
-const __resolvedBase = 'http://localhost:3001';
-// @ts-ignore
-window.__API_BASE_URL__ = __resolvedBase;
+window.__API_BASE_URL__ = import.meta.env.VITE_API_BASE_URL?.replace(/\/api$/, '') || 'http://localhost:3001';
 
 console.log('API Base URL:', window.__API_BASE_URL__);
 

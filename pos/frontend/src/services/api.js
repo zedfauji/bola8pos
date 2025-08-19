@@ -1,19 +1,6 @@
-// Prefer Vite env var, fallback to global/window override, then localhost
-let API_BASE_URL = 'http://localhost:3001';
-try {
-  // Vite exposes env via import.meta.env
-  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
-    API_BASE_URL = import.meta.env.VITE_API_URL;
-  }
-} catch {}
-if (typeof window !== 'undefined' && window.__API_BASE_URL__) {
-  API_BASE_URL = window.__API_BASE_URL__;
-}
+import apiClient from '../lib/apiClient';
 
-// Normalize: strip trailing '/api' if present, since endpoints already include '/api'
-API_BASE_URL = String(API_BASE_URL || '').replace(/\/?api\/?$/, '');
-
-// Ensure endpoint starts with '/api' unless already absolute or already includes '/api'
+// Access code helpers
 function normalizeEndpoint(endpoint = '') {
   let ep = String(endpoint || '');
   
@@ -24,8 +11,8 @@ function normalizeEndpoint(endpoint = '') {
   }
   
   if (/^https?:\/\//i.test(ep)) return ep; // absolute URL
-  if (ep.startsWith('/api')) return ep;
-  return `/api${ep.startsWith('/') ? ep : `/${ep}`}`;
+  if (ep.startsWith('/api')) return ep.substring(4); // Remove /api prefix since apiClient already has it
+  return ep.startsWith('/') ? ep : `/${ep}`;
 }
 
 // Access code helpers
@@ -46,131 +33,153 @@ export function setAccessCode(code) {
 class ApiService {
   async request(endpoint, options = {}) {
     const { responseType } = options || {};
-    const url = `${API_BASE_URL}${endpoint}`;
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
     
-    // Default headers
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    };
-
-    // Add Authorization header if token exists (support both 'accessToken' and legacy 'token')
-    try {
-      let token = localStorage.getItem('accessToken');
-      if (!token) token = localStorage.getItem('token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error('Error accessing localStorage:', error);
-    }
-
-    let config = {
-      method: options.method || 'GET',
-      headers,
-      body: options.body,
-      ...(responseType ? { responseType } : {}),
-      credentials: 'include', // Include cookies with all requests
-    };
+    // Convert fetch-style options to axios-style config
+    const method = options.method || 'GET';
+    const headers = options.headers || {};
     
-    if (config.credentials === undefined) {
-      config.credentials = 'include';
-    }
-
     // Automatically include accessCode in JSON body for mutating requests
-    try {
-      const method = (config.method || 'GET').toUpperCase();
-      const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
-      const isJson = String(config.headers['Content-Type'] || '').includes('application/json');
-      if (mutating && isJson) {
-        const code = getAccessCode();
-        if (config.body) {
-          const parsed = JSON.parse(config.body);
+    let data = null;
+    if (options.body) {
+      try {
+        const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
+        const isJson = String(headers['Content-Type'] || '').includes('application/json');
+        
+        if (mutating && isJson && typeof options.body === 'string') {
+          const parsed = JSON.parse(options.body);
           if (parsed && typeof parsed === 'object' && parsed.accessCode === undefined) {
+            const code = getAccessCode();
             parsed.accessCode = code;
-            config = { ...config, body: JSON.stringify(parsed) };
-          }
-        } else {
-          config = { ...config, body: JSON.stringify({ accessCode: code }) };
-        }
-      }
-    } catch (e) {
-      // fail-safe: do nothing if we can't parse
-      console.warn('Could not inject accessCode automatically:', e);
-    }
-
-    try {
-      const response = await fetch(url, config);
-      if (!response.ok) {
-        let detail = '';
-        try {
-          const ct = response.headers.get('content-type') || '';
-          if (ct.includes('application/json')) {
-            const j = await response.json();
-            detail = JSON.stringify(j);
+            data = parsed;
           } else {
-            detail = await response.text();
+            data = parsed;
           }
-        } catch {}
-        const err = new Error(`HTTP error ${response.status}: ${detail || response.statusText}`);
-        err.status = response.status;
-        err.detail = detail;
-        throw err;
+        } else if (options.body instanceof FormData) {
+          data = options.body;
+        } else {
+          data = options.body;
+        }
+      } catch (e) {
+        console.warn('Could not process request body:', e);
+        data = options.body;
       }
-      if (responseType === 'blob') {
-        return await response.blob();
-      }
-      if (responseType === 'text') {
-        return await response.text();
-      }
-      return await response.json();
+    } else if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+      // Empty body for mutating requests should include accessCode
+      data = { accessCode: getAccessCode() };
+    }
+    
+    // Create axios config
+    const config = {
+      method,
+      headers,
+      ...(responseType ? { responseType } : {}),
+      withCredentials: true, // Include cookies with all requests
+    };
+    
+    // Add data to request if present
+    if (data !== null) {
+      config.data = data;
+    }
+    
+    try {
+      const response = await apiClient(normalizedEndpoint, config);
+      return response.data;
     } catch (error) {
       console.error('API request failed:', error);
-      throw error;
+      
+      // Format error similar to the original implementation
+      const err = new Error(`HTTP error ${error.response?.status || 'unknown'}: ${error.message}`);
+      if (error.response) {
+        err.status = error.response.status;
+        err.detail = error.response.data ? JSON.stringify(error.response.data) : '';
+      }
+      throw err;
     }
   }
 
   // Generic helpers used by various modules (TableContext, tableService)
   async get(endpoint, { params, headers, responseType } = {}) {
-    let ep = normalizeEndpoint(endpoint);
-    if (params && typeof params === 'object') {
-      const usp = new URLSearchParams(params);
-      ep += (ep.includes('?') ? '&' : '?') + usp.toString();
-    }
-    return this.request(ep, { method: 'GET', headers, responseType });
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
+    return apiClient.get(normalizedEndpoint, { params, headers, responseType })
+      .then(response => response.data)
+      .catch(error => {
+        console.error('API GET request failed:', error);
+        throw error;
+      });
   }
 
   async delete(endpoint, { params, headers } = {}) {
-    let ep = normalizeEndpoint(endpoint);
-    if (params && typeof params === 'object') {
-      const usp = new URLSearchParams(params);
-      ep += (ep.includes('?') ? '&' : '?') + usp.toString();
-    }
-    return this.request(ep, { method: 'DELETE', headers });
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
+    return apiClient.delete(normalizedEndpoint, { params, headers })
+      .then(response => response.data)
+      .catch(error => {
+        console.error('API DELETE request failed:', error);
+        throw error;
+      });
   }
 
   async post(endpoint, data, { headers, responseType } = {}) {
-    const ep = normalizeEndpoint(endpoint);
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
     const isForm = typeof FormData !== 'undefined' && data instanceof FormData;
-    const body = isForm ? data : JSON.stringify(data ?? {});
     const hdrs = isForm ? { ...(headers || {}) } : { 'Content-Type': 'application/json', ...(headers || {}) };
-    return this.request(ep, { method: 'POST', headers: hdrs, body, responseType });
+    
+    // Add accessCode to data if it's not a FormData and doesn't already have it
+    let processedData = data;
+    if (!isForm && data && typeof data === 'object' && data.accessCode === undefined) {
+      processedData = { ...data, accessCode: getAccessCode() };
+    } else if (!data && !isForm) {
+      processedData = { accessCode: getAccessCode() };
+    }
+    
+    return apiClient.post(normalizedEndpoint, processedData, { headers: hdrs, responseType })
+      .then(response => response.data)
+      .catch(error => {
+        console.error('API POST request failed:', error);
+        throw error;
+      });
   }
 
   async put(endpoint, data, { headers } = {}) {
-    const ep = normalizeEndpoint(endpoint);
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
     const isForm = typeof FormData !== 'undefined' && data instanceof FormData;
-    const body = isForm ? data : JSON.stringify(data ?? {});
     const hdrs = isForm ? { ...(headers || {}) } : { 'Content-Type': 'application/json', ...(headers || {}) };
-    return this.request(ep, { method: 'PUT', headers: hdrs, body });
+    
+    // Add accessCode to data if it's not a FormData and doesn't already have it
+    let processedData = data;
+    if (!isForm && data && typeof data === 'object' && data.accessCode === undefined) {
+      processedData = { ...data, accessCode: getAccessCode() };
+    } else if (!data && !isForm) {
+      processedData = { accessCode: getAccessCode() };
+    }
+    
+    return apiClient.put(normalizedEndpoint, processedData, { headers: hdrs })
+      .then(response => response.data)
+      .catch(error => {
+        console.error('API PUT request failed:', error);
+        throw error;
+      });
   }
 
   async patch(endpoint, data, { headers } = {}) {
-    const ep = normalizeEndpoint(endpoint);
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
     const isForm = typeof FormData !== 'undefined' && data instanceof FormData;
-    const body = isForm ? data : JSON.stringify(data ?? {});
     const hdrs = isForm ? { ...(headers || {}) } : { 'Content-Type': 'application/json', ...(headers || {}) };
-    return this.request(ep, { method: 'PATCH', headers: hdrs, body });
+    
+    // Add accessCode to data if it's not a FormData and doesn't already have it
+    let processedData = data;
+    if (!isForm && data && typeof data === 'object' && data.accessCode === undefined) {
+      processedData = { ...data, accessCode: getAccessCode() };
+    } else if (!data && !isForm) {
+      processedData = { accessCode: getAccessCode() };
+    }
+    
+    return apiClient.patch(normalizedEndpoint, processedData, { headers: hdrs })
+      .then(response => response.data)
+      .catch(error => {
+        console.error('API PATCH request failed:', error);
+        throw error;
+      });
   }
 
   // Tables API

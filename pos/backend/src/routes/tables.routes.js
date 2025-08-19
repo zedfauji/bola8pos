@@ -3,6 +3,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate: authMiddleware, hasRole, checkPermission } = require('../middleware/auth.middleware');
+const { auditLog } = require('../services/audit.service');
 const tableController = require('../controllers/tables/table.controller');
 const layoutController = require('../controllers/tables/layout.controller');
 const sessionController = require('../controllers/tables/session.controller');
@@ -47,41 +49,67 @@ const upload = multer({
 });
 
 // Apply authentication middleware to all routes
-router.use(authenticate);
+router.use(authMiddleware);
 
-// Table Routes
-router.get('/tables', authorize(['admin', 'manager', 'staff']), tableController.getTables);
-router.get('/tables/:id', authorize(['admin', 'manager', 'staff']), tableController.getTable);
-router.post('/tables', authorize(['admin', 'manager']), tableController.createTable);
-router.put('/tables/:id', authorize(['admin', 'manager']), tableController.updateTable);
-// Allow PATCH as an alias for partial updates used by the frontend
-router.patch('/tables/:id', authorize(['admin', 'manager']), tableController.updateTable);
-router.delete('/tables/:id', authorize(['admin']), tableController.deleteTable);
-router.put('/tables/positions', authorize(['admin', 'manager']), tableController.updateTablePositions);
-router.put('/tables/:id/status', authorize(['admin', 'manager', 'staff']), tableController.updateTableStatus);
-// Allow PATCH for status updates as well
-router.patch('/tables/:id/status', authorize(['admin', 'manager', 'staff']), tableController.updateTableStatus);
+// Middleware to log configuration access attempts
+const logConfigAccess = (action) => {
+  return async (req, res, next) => {
+    await auditLog({
+      userId: req.user?.id || 'anonymous',
+      action: `TABLE_CONFIG_${action}`,
+      resourceType: 'TABLE_CONFIGURATION',
+      resourceId: req.params.id,
+      metadata: { 
+        path: req.path, 
+        method: req.method,
+        userRole: req.user?.role,
+        ip: req.ip 
+      }
+    });
+    next();
+  };
+};
 
-// Table Layout Routes
-router.get('/table-layouts', authorize(['admin', 'manager', 'staff']), layoutController.getLayouts);
-// Active layout endpoint expected by frontend
-router.get('/table-layouts/active', authorize(['admin', 'manager', 'staff']), layoutController.getActiveLayout);
-router.get('/table-layouts/:id', authorize(['admin', 'manager', 'staff']), layoutController.getLayout);
+// Table Routes - Operational (Available to all authenticated users)
+router.get('/tables', hasRole(['admin', 'manager', 'employee']), tableController.getTables);
+router.get('/tables/:id', hasRole(['admin', 'manager', 'employee']), tableController.getTable);
+router.get('/tables/stats', hasRole(['admin', 'manager', 'employee']), tableController.getTableStats);
+router.get('/tables/attention', hasRole(['admin', 'manager', 'employee']), tableController.getTablesNeedingAttention);
+
+// Table Status Updates - Operational (Available to employees and above)
+router.put('/tables/:id/status', hasRole(['admin', 'manager', 'employee']), tableController.updateTableStatus);
+router.patch('/tables/:id/status', hasRole(['admin', 'manager', 'employee']), tableController.updateTableStatus);
+
+// Table Configuration - ADMIN ONLY with audit logging
+router.post('/tables', logConfigAccess('CREATE'), hasRole(['admin']), tableController.createTable);
+router.put('/tables/:id', logConfigAccess('UPDATE'), hasRole(['admin']), tableController.updateTable);
+router.patch('/tables/:id', logConfigAccess('UPDATE'), hasRole(['admin']), tableController.updateTable);
+router.delete('/tables/:id', logConfigAccess('DELETE'), hasRole(['admin']), tableController.deleteTable);
+router.put('/tables/positions', logConfigAccess('POSITION_UPDATE'), hasRole(['admin']), tableController.updateTablePositions);
+
+// Table Layout Routes - Read access for all authenticated users
+router.get('/table-layouts', hasRole(['admin', 'manager', 'employee']), layoutController.getLayouts);
+router.get('/table-layouts/active', hasRole(['admin', 'manager', 'employee']), layoutController.getActiveLayout);
+router.get('/table-layouts/:id', hasRole(['admin', 'manager', 'employee']), layoutController.getLayout);
+
+// Table Layout Configuration - ADMIN ONLY with audit logging
 router.post(
   '/table-layouts', 
-  authorize(['admin', 'manager']), 
+  logConfigAccess('LAYOUT_CREATE'),
+  hasRole(['admin']), 
   upload.single('floorPlanImage'),
   layoutController.createLayout
 );
 router.put(
   '/table-layouts/:id', 
-  authorize(['admin', 'manager']), 
+  logConfigAccess('LAYOUT_UPDATE'),
+  hasRole(['admin']), 
   upload.single('floorPlanImage'),
   layoutController.updateLayout
 );
-router.delete('/table-layouts/:id', authorize(['admin']), layoutController.deleteLayout);
-router.post('/table-layouts/:id/duplicate', authorize(['admin', 'manager']), layoutController.duplicateLayout);
-router.put('/table-layouts/:id/activate', authorize(['admin', 'manager']), layoutController.activateLayout);
+router.delete('/table-layouts/:id', logConfigAccess('LAYOUT_DELETE'), hasRole(['admin']), layoutController.deleteLayout);
+router.post('/table-layouts/:id/duplicate', logConfigAccess('LAYOUT_DUPLICATE'), hasRole(['admin']), layoutController.duplicateLayout);
+router.put('/table-layouts/:id/activate', logConfigAccess('LAYOUT_ACTIVATE'), hasRole(['admin']), layoutController.activateLayout);
 
 // Table Session Routes
 router.get('/sessions', authorize(['admin', 'manager', 'staff']), sessionController.getSessions);
@@ -94,12 +122,14 @@ router.post('/sessions/:id/end', authorize(['admin', 'manager', 'staff']), sessi
 router.post('/sessions/:id/services', authorize(['admin', 'manager', 'staff']), sessionController.addServiceToSession);
 router.delete('/sessions/:id/services/:serviceId', authorize(['admin', 'manager', 'staff']), sessionController.removeServiceFromSession);
 
-// Tariff Routes
-router.get('/tariffs', authorize(['admin', 'manager', 'staff']), tariffController.getTariffs);
+// Tariff Routes - Read access for operational users
+router.get('/tariffs', hasRole(['admin', 'manager', 'employee']), tariffController.getTariffs);
 router.get('/tariffs/applicable', tariffController.getApplicableTariffs); // Public endpoint
-router.get('/tariffs/:id', authorize(['admin', 'manager', 'staff']), tariffController.getTariff);
-router.post('/tariffs', authorize(['admin', 'manager']), tariffController.createTariff);
-router.put('/tariffs/:id', authorize(['admin', 'manager']), tariffController.updateTariff);
-router.delete('/tariffs/:id', authorize(['admin']), tariffController.deleteTariff);
+router.get('/tariffs/:id', hasRole(['admin', 'manager', 'employee']), tariffController.getTariff);
+
+// Tariff Configuration - ADMIN ONLY with audit logging
+router.post('/tariffs', logConfigAccess('TARIFF_CREATE'), hasRole(['admin']), tariffController.createTariff);
+router.put('/tariffs/:id', logConfigAccess('TARIFF_UPDATE'), hasRole(['admin']), tariffController.updateTariff);
+router.delete('/tariffs/:id', logConfigAccess('TARIFF_DELETE'), hasRole(['admin']), tariffController.deleteTariff);
 
 module.exports = router;
