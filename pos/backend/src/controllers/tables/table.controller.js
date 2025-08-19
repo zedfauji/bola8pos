@@ -349,6 +349,83 @@ async function updateTableStatus(req, res, next) {
   }
 }
 
+/**
+ * Get table statistics
+ */
+async function getTableStats(req, res, next) {
+  try {
+    const { layoutId } = req.query;
+    
+    const where = {};
+    if (layoutId) where.layoutId = layoutId;
+    
+    // Get total tables count
+    const totalTables = await Table.count({ where });
+    
+    // Get active tables count
+    const activeTables = await Table.count({
+      where: {
+        ...where,
+        status: 'occupied'
+      }
+    });
+    
+    // Get available tables count
+    const availableTables = await Table.count({
+      where: {
+        ...where,
+        status: 'available'
+      }
+    });
+    
+    res.json({
+      success: true,
+      data: {
+        tables: totalTables,
+        active: activeTables,
+        available: availableTables,
+        maintenance: totalTables - activeTables - availableTables
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Get tables that need attention
+ */
+async function getTablesNeedingAttention(req, res, next) {
+  try {
+    const { layoutId } = req.query;
+    
+    const where = {
+      status: 'needs_attention'
+    };
+    
+    if (layoutId) where.layoutId = layoutId;
+    
+    const tables = await Table.findAll({
+      where,
+      include: [
+        {
+          model: TableLayout,
+          as: 'layout',
+          attributes: ['id', 'name'],
+        },
+      ],
+      order: [['updatedAt', 'DESC']],
+    });
+    
+    res.json({
+      success: true,
+      data: tables
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getTables,
   getTable,
@@ -357,4 +434,6 @@ module.exports = {
   deleteTable,
   updateTablePositions,
   updateTableStatus,
+  getTableStats,
+  getTablesNeedingAttention
 };

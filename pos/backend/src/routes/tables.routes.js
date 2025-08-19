@@ -72,9 +72,9 @@ const logConfigAccess = (action) => {
 
 // Table Routes - Operational (Available to all authenticated users)
 router.get('/tables', hasRole(['admin', 'manager', 'employee']), tableController.getTables);
-router.get('/tables/:id', hasRole(['admin', 'manager', 'employee']), tableController.getTable);
 router.get('/tables/stats', hasRole(['admin', 'manager', 'employee']), tableController.getTableStats);
 router.get('/tables/attention', hasRole(['admin', 'manager', 'employee']), tableController.getTablesNeedingAttention);
+router.get('/tables/:id', hasRole(['admin', 'manager', 'employee']), tableController.getTable);
 
 // Table Status Updates - Operational (Available to employees and above)
 router.put('/tables/:id/status', hasRole(['admin', 'manager', 'employee']), tableController.updateTableStatus);

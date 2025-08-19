@@ -64,11 +64,28 @@ const TableSession = sequelize.define('TableSession', {
   timestamps: true,
   indexes: [
     {
+      name: 'idx_table_sessions_active',
       fields: ['tableId', 'status'],
       where: {
         status: 'active',
       },
     },
+    {
+      name: 'idx_table_sessions_table_id',
+      fields: ['tableId']
+    },
+    {
+      name: 'idx_table_sessions_status',
+      fields: ['status']
+    },
+    {
+      name: 'idx_table_sessions_start_time',
+      fields: ['startTime']
+    },
+    {
+      name: 'idx_table_sessions_end_time',
+      fields: ['endTime']
+    }
   ],
 });
 

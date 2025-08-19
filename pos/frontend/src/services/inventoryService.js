@@ -231,6 +231,24 @@ export const purchaseOrdersApi = {
     api.get(`/api/inventory/purchase-orders/supplier/${supplierId}`, { params }),
 };
 
+// Backup API
+export const backupApi = {
+  /** @param {Record<string, any>} [params] */
+  listBackups: createSafeApiCall(
+    (params = {}) => api.get('/api/inventory/backup', { params }),
+    'backup.listBackups',
+    errorOptions
+  ),
+  /** @param {string} filename */
+  getBackupDetails: (filename) => api.get(`/api/inventory/backup/${encodeURIComponent(filename)}`),
+  /** @param {any} data Create a new backup */
+  createBackup: (data) => api.post('/api/inventory/backup', data),
+  /** @param {string} filename @param {any} data Restore from a backup */
+  restoreBackup: (filename, data) => api.post(`/api/inventory/backup/${encodeURIComponent(filename)}/restore`, data),
+  /** @param {string} filename Delete a backup */
+  deleteBackup: (filename) => api.delete(`/api/inventory/backup/${encodeURIComponent(filename)}`),
+};
+
 export default {
   products: productsApi,
   inventory: inventoryApi,
@@ -238,4 +256,5 @@ export default {
   locations: locationsApi,
   suppliers: suppliersApi,
   purchaseOrders: purchaseOrdersApi,
+  backup: backupApi,
 };

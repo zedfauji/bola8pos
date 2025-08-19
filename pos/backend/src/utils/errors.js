@@ -61,38 +61,44 @@ function errorHandler(err, req, res, next) {
     console.error('Error:', err);
   }
 
+  // Create standardized error response format
+  const formatErrorResponse = (status, message, details = null) => {
+    const response = {
+      status,
+      message,
+      timestamp: new Date().toISOString(),
+      path: req.originalUrl
+    };
+
+    if (details) {
+      response.details = details;
+    }
+
+    return response;
+  };
+
   // Handle JWT errors
   if (err.name === 'JsonWebTokenError') {
-    return res.status(401).json({
-      error: 'Invalid token',
-      message: 'The provided token is invalid or malformed'
-    });
+    return res.status(401).json(
+      formatErrorResponse(401, 'The provided token is invalid or malformed')
+    );
   }
 
   if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({
-      error: 'Token expired',
-      message: 'Your session has expired. Please log in again.'
-    });
+    return res.status(401).json(
+      formatErrorResponse(401, 'Your session has expired. Please log in again.')
+    );
   }
 
   // Handle validation errors
-  if (err.name === 'ValidationError' || err.name === 'ValidationError') {
-    return res.status(400).json({
-      error: 'Validation Error',
-      message: err.message,
-      details: err.details || err.errors
-    });
+  if (err.name === 'ValidationError') {
+    return res.status(400).json(
+      formatErrorResponse(400, err.message, err.details || err.errors)
+    );
   }
 
   // Handle custom errors
   if (err instanceof CustomError) {
-    const response = {
-      error: err.name.replace('Error', ''),
-      message: err.message,
-      ...(err.details && { details: err.details })
-    };
-
     // Add rate limit headers if this is a rate limit error
     if (err instanceof TooManyRequestsError) {
       res.setHeader('Retry-After', err.retryAfter || 60);
@@ -100,33 +106,33 @@ function errorHandler(err, req, res, next) {
       if (err.retryAfter) res.setHeader('X-RateLimit-Reset', new Date(Date.now() + (err.retryAfter * 1000)).toISOString());
     }
 
-    return res.status(err.statusCode).json(response);
+    return res.status(err.statusCode).json(
+      formatErrorResponse(err.statusCode, err.message, err.details)
+    );
   }
 
   // Handle database errors
   if (err.code === 'ER_DUP_ENTRY') {
-    return res.status(409).json({
-      error: 'Duplicate Entry',
-      message: 'A resource with this identifier already exists',
-      details: err.sqlMessage
-    });
+    return res.status(409).json(
+      formatErrorResponse(409, 'A resource with this identifier already exists', {
+        sqlError: err.sqlMessage
+      })
+    );
   }
 
   // Handle other database errors
   if (err.code && err.code.startsWith('ER_')) {
-    return res.status(400).json({
-      error: 'Database Error',
-      message: 'An error occurred while processing your request',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+    const details = process.env.NODE_ENV === 'development' ? { sqlError: err.message } : undefined;
+    return res.status(400).json(
+      formatErrorResponse(400, 'An error occurred while processing your request', details)
+    );
   }
 
   // Default error handler
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: 'An unexpected error occurred',
-    ...(process.env.NODE_ENV === 'development' && { details: err.message })
-  });
+  const details = process.env.NODE_ENV === 'development' ? { stack: err.stack } : undefined;
+  res.status(500).json(
+    formatErrorResponse(500, 'An unexpected error occurred', details)
+  );
 }
 
 module.exports = {

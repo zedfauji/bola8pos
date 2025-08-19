@@ -22,6 +22,8 @@ import api from '../lib/axios';
  * @property {'regular'|'billiard'|'bar'} [type] - Table type
  * @property {string} [group] - Logical grouping/zone of the table
  * @property {string} [notes] - Additional notes for the table
+ * @property {string} layoutId - ID of the layout this table belongs to
+ * @property {Object} [currentSession] - Current active session data if any
  */
 
 /**
@@ -37,18 +39,20 @@ import api from '../lib/axios';
 
 /**
  * @typedef {Object} TableContextType
- * @property {TableType[]} tables - Tables in the active layout
- * @property {LayoutType[]} layouts - All available layouts
+ * @property {TableType[]} tables - List of tables
+ * @property {LayoutType[]} layouts - List of layouts
  * @property {LayoutType|null} activeLayout - Currently active layout
  * @property {string|null} activeLayoutId - ID of the active layout
  * @property {boolean} loading - Loading state
- * @property {Function} saveLayout - Function to save layout changes
- * @property {Function} createLayout - Function to create a new layout
- * @property {Function} deleteLayout - Function to delete a layout
- * @property {Function} setActiveLayout - Function to set the active layout
- * @property {Function} addTable - Function to add a table
- * @property {Function} updateTable - Function to update a table
- * @property {Function} deleteTable - Function to delete a table
+ * @property {function(LayoutType): Promise<LayoutType>} saveLayout - Save layout function
+ * @property {function(LayoutType): Promise<LayoutType>} createLayout - Create layout function
+ * @property {function(string): Promise<void>} deleteLayout - Delete layout function
+ * @property {function(string): Promise<{id: string}>} setActiveLayout - Set active layout function
+ * @property {function(TableType): Promise<TableType>} addTable - Add table function
+ * @property {function(TableType): Promise<TableType>} updateTable - Update table function
+ * @property {function(string): Promise<void>} deleteTable - Delete table function
+ * @property {function(TableType): void} updateTableInList - Update a table in the current tables list
+ * @property {function(string): Promise<TableType[]>} fetchTables - Fetch tables for a specific layout
  */
 
 // Create context with default value
@@ -59,13 +63,15 @@ const defaultContextValue = {
   activeLayout: null,
   activeLayoutId: null,
   loading: false,
-  saveLayout: async () => {},
-  createLayout: async () => {},
+  saveLayout: async () => (/** @type {LayoutType} */ ({ id: '', name: '', width: 0, height: 0 })),
+  createLayout: async () => (/** @type {LayoutType} */ ({ id: '', name: '', width: 0, height: 0 })),
   deleteLayout: async () => {},
-  setActiveLayout: () => {},
-  addTable: () => {},
-  updateTable: () => {},
-  deleteTable: async () => {}
+  setActiveLayout: async () => ({ id: '' }),
+  addTable: async () => (/** @type {TableType} */ ({ id: '', name: '', x: 0, y: 0, width: 0, height: 0, rotation: 0, status: '', layoutId: '' })),
+  updateTable: async () => (/** @type {TableType} */ ({ id: '', name: '', x: 0, y: 0, width: 0, height: 0, rotation: 0, status: '', layoutId: '' })),
+  deleteTable: async () => {},
+  updateTableInList: () => {},
+  fetchTables: async () => (/** @type {TableType[]} */ ([]))
 };
 
 /** @type {import('react').Context<TableContextType>} */
@@ -142,8 +148,11 @@ export const TableProvider = ({ children }) => {
     }
   }, [activeLayoutData]);
 
+  // State for tables (for real-time updates)
+  const [tables, setTables] = useState(/** @type {TableType[]} */ ([]));
+  
   // Fetch tables for active layout
-  const { data: tables = /** @type {TableType[]} */ ([]), isLoading: tablesLoading } = useQuery({
+  const { data: fetchedTables = /** @type {TableType[]} */ ([]), isLoading: tablesLoading } = useQuery({
     queryKey: ['tables', activeLayoutId],
     queryFn: async () => {
       if (!activeLayoutId) return [];
@@ -153,6 +162,13 @@ export const TableProvider = ({ children }) => {
     staleTime: 1000 * 60 * 5, // 5 minutes
     enabled: !!activeLayoutId,
   });
+  
+  // Update tables state when fetched tables change
+  useEffect(() => {
+    if (fetchedTables && fetchedTables.length > 0) {
+      setTables(fetchedTables);
+    }
+  }, [fetchedTables]);
 
   // Loading states
   const isLoadingLayouts = layoutsLoading;
@@ -332,6 +348,44 @@ export const TableProvider = ({ children }) => {
   const loading = isLoadingLayouts || isLoadingActiveLayout || isLoadingTables;
 
   /**
+   * Update a single table in the list (for real-time updates)
+   * @param {TableType} updatedTable - The updated table data
+   */
+  const updateTableInList = useCallback((/** @type {TableType} */ updatedTable) => {
+    setTables(prevTables => {
+      // Check if the table already exists in the list
+      const tableExists = prevTables.some(table => table.id === updatedTable.id);
+      
+      if (tableExists) {
+        // Update the existing table
+        return prevTables.map(table => 
+          table.id === updatedTable.id ? updatedTable : table
+        );
+      } else if (updatedTable.layoutId === activeLayoutId) {
+        // Add the new table if it belongs to the current layout
+        return [...prevTables, updatedTable];
+      } else {
+        // No changes needed
+        return prevTables;
+      }
+    });
+  }, [activeLayoutId]);
+
+  // Function to fetch tables for a specific layout
+  const fetchTables = useCallback(async (/** @type {string} */ layoutId) => {
+    if (!layoutId) return [];
+    try {
+      const response = await api.get(`/tables?layoutId=${layoutId}`);
+      const fetchedTables = response.data;
+      setTables(fetchedTables);
+      return fetchedTables;
+    } catch (error) {
+      console.error('Error fetching tables:', error);
+      return [];
+    }
+  }, [api, setTables]);
+
+  /**
    * Create a new layout
    * @param {LayoutType} layoutData - Layout data
    * @returns {Promise<LayoutType>}
@@ -355,6 +409,8 @@ export const TableProvider = ({ children }) => {
     addTable,
     updateTable,
     deleteTable,
+    updateTableInList,
+    fetchTables
   };
 
   return (
@@ -364,7 +420,7 @@ export const TableProvider = ({ children }) => {
   );
 };
 
-// Custom hook for using the table context
+// ... (rest of the code remains the same)
 export const useTableContext = () => {
   const context = useContext(TableContext);
   if (!context) {

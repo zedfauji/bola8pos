@@ -10,8 +10,11 @@ const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
 const { errorHandler, UnauthorizedError, ForbiddenError } = require('./utils/errors');
-const { apiLimiter, authLimiter, publicApiLimiter } = require('./middleware/rateLimiter');
+const { apiLimiter, authLimiter, loginLimiter, publicApiLimiter, sensitiveOpLimiter, reportingLimiter } = require('./middleware/rateLimiter');
+const responseHandler = require('./middleware/responseHandler');
 const swaggerDocs = require('./config/swagger');
+const InventoryAlertService = require('./services/inventoryAlertService');
+const inventoryAlerts = require('./utils/inventoryAlerts');
 
 const app = express();
 
@@ -70,6 +73,15 @@ const io = new Server(server, {
   }
 });
 
+// Initialize inventory alert service with Socket.io
+const inventoryAlertService = new InventoryAlertService(io);
+
+// Initialize inventory alerts utility with the service
+inventoryAlerts.initializeAlerts(inventoryAlertService);
+
+// Schedule periodic low stock checks (every 30 minutes)
+inventoryAlertService.schedulePeriodicChecks(30);
+
 // Determine port: CLI flag (--port/-p or positional), then ENV, then default 3001
 function resolvePort() {
   const argv = process.argv.slice(2);
@@ -122,18 +134,31 @@ app.use(cors({
   exposedHeaders: ['set-cookie']
 }));
 
-// Apply rate limiting
+// Apply general rate limiting to all routes as a baseline protection
 app.use(apiLimiter);
 
 // More aggressive rate limiting for auth routes
 app.use('/api/access/auth', authLimiter);
 
+// Specific login endpoint rate limiting
+app.use('/api/access/auth/login', loginLimiter);
+
 // Public API rate limiting
 app.use('/api/public', publicApiLimiter);
+
+// Rate limiting for sensitive operations
+app.use('/api/admin', sensitiveOpLimiter);
+app.use('/api/settings', sensitiveOpLimiter);
+
+// Rate limiting for reporting endpoints
+app.use('/api/reports', reportingLimiter);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Apply response standardization middleware
+app.use(responseHandler);
 
 // Initialize Swagger documentation early so it's public (before auth middleware)
 if (process.env.NODE_ENV !== 'production') {
@@ -2137,11 +2162,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Socket.IO connection log
-io.on('connection', (socket) => {
-  // You can add auth/rooms later
-  socket.on('disconnect', () => {});
-});
+// Initialize Socket.io service
+const socketService = require('./services/socketService');
+socketService.initialize(server);
 
 // Start server
 server.listen(PORT, '0.0.0.0', () => {

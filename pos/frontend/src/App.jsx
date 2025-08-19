@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { InventoryProvider } from './contexts/InventoryContext';
+import { TableProvider } from './contexts/NewTableContext';
+import { SocketProvider } from './contexts/SocketContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import TablesPage from './pages/NewTablesPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
@@ -12,6 +14,8 @@ import UnauthorizedPage from './pages/UnauthorizedPage';
 // Lazy load components for better performance
 const NewTablesPage = React.lazy(() => import('./pages/NewTablesPage'));
 const Tables = React.lazy(() => import('./routes/Tables'));
+const AdminTableDashboard = React.lazy(() => import('./pages/AdminTableDashboard'));
+const StaffTableDashboard = React.lazy(() => import('./pages/StaffTableDashboard'));
 const OrderPage = React.lazy(() => import('./components/orders/OrderPage'));
 const KitchenDisplay = React.lazy(() => import('./components/kds/KitchenDisplay'));
 const SettingsPage = React.lazy(() => import('./components/settings/SettingsPage'));
@@ -370,6 +374,8 @@ function App() {
         <AuthProvider>
           <SettingsProvider>
             <InventoryProvider>
+              <TableProvider>
+                <SocketProvider>
             {ToastContainer ? <ToastContainer position="bottom-right" theme="dark" /> : null}
             <div className="flex h-screen pos-container text-white">
               <Routes>
@@ -388,7 +394,7 @@ function App() {
                               <Route path="/tables/*" element={
                                 <ProtectedRoute requiredPermission="tables:read">
                                   <Suspense fallback={<div>Loading...</div>}>
-                                    <Tables />
+                                    <RoleBasedTableDashboard />
                                   </Suspense>
                                 </ProtectedRoute>
                               } />
@@ -477,6 +483,8 @@ function App() {
                 } />
               </Routes>
             </div>
+                </SocketProvider>
+              </TableProvider>
             </InventoryProvider>
           </SettingsProvider>
         </AuthProvider>
@@ -484,5 +492,25 @@ function App() {
     </Router>
   );
 }
+
+// Role-based dashboard component that renders the appropriate dashboard based on user role
+const RoleBasedTableDashboard = () => {
+  const { user } = useAuth();
+  
+  if (!user) return <Navigate to="/login" replace />;
+  
+  // Render admin dashboard for admin and manager roles
+  if (user.role === 'admin' || user.role === 'manager') {
+    return <AdminTableDashboard />;
+  }
+  
+  // Render staff dashboard for staff role
+  if (user.role === 'staff') {
+    return <StaffTableDashboard />;
+  }
+  
+  // Fallback to the original Tables component for other roles or if role is undefined
+  return <Tables />;
+};
 
 export default App;

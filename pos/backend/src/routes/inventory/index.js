@@ -10,6 +10,7 @@ const purchaseOrderRoutes = require('./purchase-order.routes');
 const categoryRoutes = require('./category.routes');
 const locationRoutes = require('./location.routes');
 const supplierRoutes = require('./supplier.routes');
+const backupRoutes = require('./backupRoutes');
 
 // Mount routes with authentication and authorization
 router.use('/products', authenticate, authorize(['admin', 'manager', 'inventory']), productRoutes);
@@ -18,6 +19,7 @@ router.use('/purchase-orders', authenticate, authorize(['admin', 'manager', 'pur
 router.use('/categories', authenticate, authorize(['admin', 'manager']), categoryRoutes);
 router.use('/locations', authenticate, authorize(['admin', 'manager']), locationRoutes);
 router.use('/suppliers', authenticate, authorize(['admin', 'manager', 'purchasing']), supplierRoutes);
+router.use('/backup', backupRoutes); // Backup routes already have auth middleware
 
 // Expose menu_item_product_map at root: /api/inventory/map
 router.get('/map', authenticate, authorize(['admin', 'manager', 'inventory']), async (req, res, next) => {

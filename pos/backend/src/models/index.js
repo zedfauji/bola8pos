@@ -2,6 +2,14 @@ const Table = require('./Table');
 const TableLayout = require('./TableLayout');
 const TableSession = require('./TableSession');
 const Tariff = require('./Tariff');
+const Product = require('./Product');
+const Category = require('./Category');
+const Supplier = require('./Supplier');
+const Location = require('./Location');
+const Inventory = require('./Inventory');
+const StockMovement = require('./StockMovement');
+const PurchaseOrder = require('./PurchaseOrder');
+const Unit = require('./Unit');
 const sequelize = require('../config/database');
 
 // Table Relationships
@@ -57,4 +65,12 @@ module.exports = {
   TableLayout,
   TableSession,
   Tariff,
+  Product,
+  Category,
+  Supplier,
+  Location,
+  Inventory,
+  StockMovement,
+  PurchaseOrder,
+  Unit,
 };

@@ -69,6 +69,20 @@ const Tariff = sequelize.define('Tariff', {
   },
 }, {
   timestamps: true,
+  indexes: [
+    {
+      name: 'idx_tariffs_is_active',
+      fields: ['isActive']
+    },
+    {
+      name: 'idx_tariffs_rate_type',
+      fields: ['rateType']
+    },
+    {
+      name: 'idx_tariffs_rate',
+      fields: ['rate']
+    }
+  ]
 });
 
 module.exports = Tariff;

@@ -81,6 +81,24 @@ const Table = sequelize.define('Table', {
 }, {
   timestamps: true,
   paranoid: true, // Enable soft delete
+  indexes: [
+    {
+      name: 'idx_tables_layout_id',
+      fields: ['layoutId']
+    },
+    {
+      name: 'idx_tables_status',
+      fields: ['status']
+    },
+    {
+      name: 'idx_tables_is_active',
+      fields: ['isActive']
+    },
+    {
+      name: 'idx_tables_layout_status',
+      fields: ['layoutId', 'status']
+    }
+  ]
 });
 
 module.exports = Table;

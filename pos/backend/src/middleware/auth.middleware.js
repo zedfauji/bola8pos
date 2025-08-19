@@ -1,20 +1,27 @@
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 const { pool } = require('../db');
 const { auditLog } = require('../services/audit.service');
 const { UnauthorizedError, ForbiddenError } = require('../utils/errors');
+const RefreshToken = require('../models/RefreshToken');
 
 /**
- * Generate JWT tokens for authentication
+ * Generate access and refresh tokens for a user
+ * Implements token rotation security pattern
+ * @param {Object} user - User object
+ * @param {string} previousToken - Previous refresh token (for rotation)
+ * @param {string} familyId - Token family ID (for rotation)
+ * @returns {Object} Access and refresh tokens
  */
-function generateTokens(user) {
+async function generateTokens(user, previousToken = null, familyId = null) {
   // Create access token (15 minutes)
   const accessToken = jwt.sign(
     { 
       userId: user.id,
       email: user.email,
-      role: user.role 
+      role: user.role
     },
-    process.env.JWT_SECRET || 'your-secret-key',
+    process.env.JWT_SECRET,
     { expiresIn: '15m' }
   );
 
@@ -23,13 +30,20 @@ function generateTokens(user) {
     { 
       userId: user.id,
       email: user.email,
-      tokenVersion: user.tokenVersion || 0
+      role: user.role,
+      // Add jti (JWT ID) for uniqueness
+      jti: uuidv4()
     },
-    process.env.REFRESH_TOKEN_SECRET || 'your-refresh-secret-key',
+    process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: '7d' }
   );
 
-  return { accessToken, refreshToken };
+  // Generate a new family ID if not provided
+  if (!familyId) {
+    familyId = uuidv4();
+  }
+
+  return { accessToken, refreshToken, familyId };
 }
 
 /**
@@ -143,6 +157,84 @@ async function authenticate(req, res, next) {
 }
 
 /**
+ * Role hierarchy definition
+ * Higher index roles inherit permissions from lower index roles
+ */
+const ROLE_HIERARCHY = {
+  'admin': 3,    // Highest level - can do everything
+  'manager': 2,  // Can manage most things but not system settings
+  'staff': 1,    // Basic access
+  'guest': 0     // Minimal access
+};
+
+/**
+ * Check if role has sufficient privileges based on hierarchy
+ * @param {string} userRole - User's role
+ * @param {string} requiredRole - Required role
+ * @returns {boolean} True if user has sufficient privileges
+ */
+const hasRolePrivilege = (userRole, requiredRole) => {
+  // If roles aren't in hierarchy, do direct comparison
+  if (!(userRole in ROLE_HIERARCHY) || !(requiredRole in ROLE_HIERARCHY)) {
+    return userRole === requiredRole;
+  }
+  
+  // Check if user's role level is >= required role level
+  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[requiredRole];
+};
+
+/**
+ * Check if the user has the required role
+ * @param {string|string[]} roles - Required role(s)
+ * @param {boolean} [strict=false] - If true, requires exact role match without hierarchy
+ * @returns {Function} Express middleware
+ */
+const hasRole = (roles, strict = false) => {
+  return async (req, res, next) => {
+    try {
+      // Ensure user is authenticated first
+      if (!req.user) {
+        throw new UnauthorizedError('Authentication required');
+      }
+
+      const requiredRoles = Array.isArray(roles) ? roles : [roles];
+      const userRole = req.user.role;
+      let hasAccess = false;
+
+      if (strict) {
+        // Strict mode: require exact role match
+        hasAccess = requiredRoles.includes(userRole);
+      } else {
+        // Hierarchy mode: check if user's role has sufficient privileges
+        hasAccess = requiredRoles.some(role => hasRolePrivilege(userRole, role));
+      }
+
+      if (!hasAccess) {
+        // Log the role check failure
+        await auditLog({
+          userId: req.user.id,
+          action: 'ROLE_CHECK_FAILED',
+          resourceType: 'auth',
+          metadata: {
+            requiredRoles,
+            userRole,
+            strict,
+            path: req.originalUrl,
+            method: req.method
+          }
+        });
+
+        throw new ForbiddenError(`Requires role: ${requiredRoles.join(' or ')}`);
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+/**
  * Check if user has required permissions
  */
 function checkPermission(resource, action) {
@@ -174,25 +266,35 @@ function checkPermission(resource, action) {
 }
 
 /**
- * Check if user has any of the specified roles
+ * Middleware to require minimum role level
+ * @param {string} minRole - Minimum role required (e.g., 'staff', 'manager', 'admin')
+ * @returns {Function} Express middleware
  */
-function hasRole(roles = []) {
+function requireMinRole(minRole) {
   return async (req, res, next) => {
     try {
       if (!req.user) {
         throw new UnauthorizedError('Authentication required');
       }
-
-      if (!roles.includes(req.user.role)) {
+      
+      const userRole = req.user.role;
+      
+      // Check if user's role meets the minimum required level
+      if (!hasRolePrivilege(userRole, minRole)) {
         await auditLog({
           userId: req.user.id,
-          action: 'ROLE_CHECK_FAILED',
+          action: 'MIN_ROLE_CHECK_FAILED',
           resourceType: 'AUTH',
-          metadata: { requiredRoles: roles, userRole: req.user.role }
+          metadata: { 
+            requiredMinRole: minRole, 
+            userRole,
+            path: req.originalUrl,
+            method: req.method
+          }
         });
-        throw new ForbiddenError('Insufficient role privileges');
+        throw new ForbiddenError(`Requires minimum role level: ${minRole}`);
       }
-
+      
       next();
     } catch (error) {
       next(error);
@@ -267,5 +369,7 @@ module.exports = {
   hasRole,
   generateTokens,
   verifyToken,
-  requireManagerPin
+  requireManagerPin,
+  requireMinRole,
+  ROLE_HIERARCHY
 };

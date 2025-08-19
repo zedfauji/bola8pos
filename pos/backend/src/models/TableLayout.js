@@ -57,6 +57,16 @@ const TableLayout = sequelize.define('TableLayout', {
   },
 }, {
   timestamps: true,
+  indexes: [
+    {
+      name: 'idx_table_layouts_is_active',
+      fields: ['isActive']
+    },
+    {
+      name: 'idx_table_layouts_created_by',
+      fields: ['created_by']
+    }
+  ]
 });
 
 module.exports = TableLayout;

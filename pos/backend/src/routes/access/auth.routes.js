@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const { pool } = require('../../config/db');
 const { UnauthorizedError, BadRequestError } = require('../../utils/errors');
 const { authenticate, generateTokens } = require('../../middleware/auth.middleware');
+const RefreshToken = require('../../models/RefreshToken');
 
 /**
  * @swagger
@@ -179,18 +180,26 @@ router.post(
         throw new UnauthorizedError('Invalid credentials');
       }
 
-      // Generate tokens
-      const { accessToken, refreshToken } = generateTokens(user);
-
-      // Generate UUID for the refresh token ID
-      const { v4: uuidv4 } = require('uuid');
-      const tokenId = uuidv4();
+      // Generate tokens with rotation support
+      const { accessToken, refreshToken, familyId } = await generateTokens(user);
       
-      // Store refresh token in database with explicit ID
-      await pool.query(
-        'INSERT INTO refresh_tokens (id, user_id, token, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))',
-        [tokenId, user.id, refreshToken]
-      );
+      // Get user agent and IP for security tracking
+      const userAgent = req.get('User-Agent') || 'unknown';
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      
+      // Calculate expiration date (7 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      // Store refresh token using the RefreshToken model
+      await RefreshToken.createToken({
+        user_id: user.id,
+        token: refreshToken,
+        family_id: familyId,
+        user_agent: userAgent,
+        ip_address: ipAddress,
+        expires_at: expiresAt
+      });
 
       // Set refresh token in HTTP-only cookie
       const isProduction = process.env.NODE_ENV === 'production';
@@ -295,21 +304,58 @@ router.post('/refresh-token', async (req, res, next) => {
       return res.status(401).json({ message: 'Refresh token is required' });
     }
 
-    // Verify refresh token
-    const [tokens] = await pool.query(
-      `SELECT rt.*, u.email, u.name, r.name as role_name 
-       FROM refresh_tokens rt
-       JOIN users u ON rt.user_id = u.id
-       LEFT JOIN roles r ON u.role_id = r.id
-       WHERE rt.token = ? AND rt.revoked = FALSE AND rt.expires_at > NOW()`,
-      [refreshToken]
-    );
-
-    if (tokens.length === 0) {
-      return res.status(401).json({ message: 'Invalid or expired refresh token' });
+    // Find the token in the database
+    const tokenRecord = await RefreshToken.findByToken(refreshToken);
+    
+    if (!tokenRecord) {
+      // Check if this is a previously rotated token
+      const rotatedToken = await RefreshToken.findByPreviousToken(refreshToken);
+      
+      if (!rotatedToken) {
+        return res.status(401).json({ message: 'Invalid or expired refresh token' });
+      }
+      
+      // This is a reused token - possible theft attempt
+      // Revoke all tokens in this family
+      await RefreshToken.revokeFamily(rotatedToken.family_id, 'suspected_theft');
+      
+      // Log security event
+      await auditLog({
+        userId: rotatedToken.user_id,
+        action: 'TOKEN_REUSE_DETECTED',
+        resourceType: 'AUTH',
+        metadata: { 
+          ip: req.ip, 
+          userAgent: req.get('User-Agent'),
+          tokenFamily: rotatedToken.family_id
+        }
+      });
+      
+      return res.status(401).json({ 
+        message: 'Security alert: Token reuse detected. All sessions have been terminated.' 
+      });
+    }
+    
+    // Check if token is revoked or expired
+    if (tokenRecord.revoked || new Date(tokenRecord.expires_at) < new Date()) {
+      return res.status(401).json({ message: 'Token has been revoked or expired' });
     }
 
-    const tokenData = tokens[0];
+    // Get user data
+    const [users] = await pool.query(
+      `SELECT u.*, r.name as role_name 
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.id
+       WHERE u.id = ? AND u.is_active = 1`,
+      [tokenRecord.user_id]
+    );
+
+    if (!users.length) {
+      return res.status(401).json({ message: 'User not found or inactive' });
+    }
+
+    const userData = users[0];
+    
     // Fetch permissions for this user via role
     const [permRows] = await pool.query(
       `SELECT p.resource, p.action
@@ -317,8 +363,9 @@ router.post('/refresh-token', async (req, res, next) => {
        LEFT JOIN role_permissions rp ON u.role_id = rp.role_id
        LEFT JOIN permissions p ON rp.permission_id = p.id
        WHERE u.id = ?`,
-      [tokenData.user_id]
+      [tokenRecord.user_id]
     );
+    
     const permissions = permRows.reduce((acc, row) => {
       if (!row || !row.resource) return acc;
       if (!acc[row.resource]) acc[row.resource] = [];
@@ -327,15 +374,56 @@ router.post('/refresh-token', async (req, res, next) => {
     }, {});
 
     const user = {
-      id: tokenData.user_id,
-      email: tokenData.email,
-      name: tokenData.name,
-      role: tokenData.role_name,
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      role: userData.role_name,
       permissions,
     };
 
-    // Generate new access token
-    const { accessToken } = generateTokens(user);
+    // Generate new tokens with rotation
+    const { accessToken, refreshToken: newRefreshToken, familyId } = await generateTokens(
+      user, 
+      refreshToken, 
+      tokenRecord.family_id
+    );
+    
+    // Get user agent and IP for security tracking
+    const userAgent = req.get('User-Agent') || 'unknown';
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    
+    // Calculate expiration date (7 days from now)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    
+    // Mark the current token as rotated by setting previous_token in the new token
+    await RefreshToken.createToken({
+      user_id: user.id,
+      token: newRefreshToken,
+      previous_token: refreshToken,  // Link to the previous token
+      family_id: tokenRecord.family_id,  // Keep the same family ID
+      user_agent: userAgent,
+      ip_address: ipAddress,
+      expires_at: expiresAt
+    });
+    
+    // Revoke the old token
+    await pool.query(
+      'UPDATE refresh_tokens SET revoked = TRUE, revoked_reason = ? WHERE token = ?',
+      ['rotation', refreshToken]
+    );
+    
+    // Set the new refresh token in HTTP-only cookie
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isHttps = process.env.HTTPS === 'true';
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: isProduction || isHttps,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+      ...(isProduction && { domain: '.billiardpos.com' }),
+    });
 
     // Return new access token and user data
     res.json({
@@ -384,12 +472,41 @@ router.post('/logout', authenticate, async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
+    // Get refresh token from cookies
+    const refreshToken = req.cookies && req.cookies.refreshToken;
+
+    // Blacklist the access token
     if (token) {
-      // Add token to blacklist
       await pool.query(
         'INSERT INTO token_blacklist (token, expires_at) VALUES (?, DATE_ADD(NOW(), INTERVAL 24 HOUR))',
         [token]
       );
+    }
+
+    // Revoke the refresh token if present
+    if (refreshToken) {
+      // Find the token in the database
+      const tokenRecord = await RefreshToken.findByToken(refreshToken);
+      
+      if (tokenRecord) {
+        // Revoke this token
+        await pool.query(
+          'UPDATE refresh_tokens SET revoked = TRUE, revoked_reason = ? WHERE token = ?',
+          ['logout', refreshToken]
+        );
+        
+        // Log the logout action
+        await auditLog({
+          userId: req.user.id,
+          action: 'LOGOUT',
+          resourceType: 'AUTH',
+          metadata: { 
+            ip: req.ip, 
+            userAgent: req.get('User-Agent'),
+            tokenFamily: tokenRecord.family_id
+          }
+        });
+      }
     }
 
     // Clear refresh token cookie (must match attributes used when setting it)
