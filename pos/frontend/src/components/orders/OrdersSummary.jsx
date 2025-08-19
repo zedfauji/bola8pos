@@ -3,7 +3,8 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { getSocket } from '../../lib/socket';
 
 function getApiBase() {
-  return (import.meta?.env?.VITE_API_URL) || (window?.API_BASE_URL) || 'http://localhost:3001';
+  const raw = (import.meta?.env?.VITE_API_URL) || (window?.API_BASE_URL) || 'http://localhost:3001';
+  return String(raw || '').replace(/\/?api\/?$/, '');
 }
 
 async function api(path, opts = {}) {

@@ -1,12 +1,18 @@
-export const API_URL = import.meta.env.VITE_API_URL
+const RAW_API_URL = import.meta.env.VITE_API_URL
+export const API_URL = String(RAW_API_URL || '').replace(/\/api\/?$/, '')
 
-async function request(path: string, init?: RequestInit) {
+type ResponseType = 'json' | 'blob' | 'text'
+
+async function request(path: string, init?: RequestInit & { responseType?: ResponseType }) {
   if (!API_URL) throw new Error('VITE_API_URL is not set')
+  const { responseType } = init || {}
   const res = await fetch(`${API_URL}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...init,
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  if (responseType === 'blob') return res.blob()
+  if (responseType === 'text') return res.text()
   return res.json()
 }
 
@@ -39,4 +45,10 @@ export const api = {
     request('/api/inventory/movement', { method: 'POST', body: JSON.stringify(payload) }),
 }
 
+// Provide a default export compatible with default import usage elsewhere.
+// We purposely keep it as any to avoid forcing strict typing mismatches with the JS implementation.
+// Consumers that want typed helpers can import named exports from this module.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const http = api as any
+export default http
 

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { locationSchema } = require('../../validators/inventory.validator');
 const validate = require('../../middleware/validate');
+const { pool } = require('../../db');
 
 // Get all locations
 router.get('/', async (req, res, next) => {

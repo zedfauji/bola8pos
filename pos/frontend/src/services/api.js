@@ -10,6 +10,24 @@ if (typeof window !== 'undefined' && window.__API_BASE_URL__) {
   API_BASE_URL = window.__API_BASE_URL__;
 }
 
+// Normalize: strip trailing '/api' if present, since endpoints already include '/api'
+API_BASE_URL = String(API_BASE_URL || '').replace(/\/?api\/?$/, '');
+
+// Ensure endpoint starts with '/api' unless already absolute or already includes '/api'
+function normalizeEndpoint(endpoint = '') {
+  let ep = String(endpoint || '');
+  
+  // Replace HTTPS with HTTP for localhost URLs to avoid SSL errors
+  if (/^https:\/\/localhost/i.test(ep)) {
+    ep = ep.replace(/^https:/i, 'http:');
+    console.log('Converted HTTPS to HTTP for localhost URL:', ep);
+  }
+  
+  if (/^https?:\/\//i.test(ep)) return ep; // absolute URL
+  if (ep.startsWith('/api')) return ep;
+  return `/api${ep.startsWith('/') ? ep : `/${ep}`}`;
+}
+
 // Access code helpers
 function getAccessCode() {
   try {
@@ -27,14 +45,37 @@ export function setAccessCode(code) {
 
 class ApiService {
   async request(endpoint, options = {}) {
+    const { responseType } = options || {};
     const url = `${API_BASE_URL}${endpoint}`;
-    let config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
+    
+    // Default headers
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
     };
+
+    // Add Authorization header if token exists (support both 'accessToken' and legacy 'token')
+    try {
+      let token = localStorage.getItem('accessToken');
+      if (!token) token = localStorage.getItem('token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Error accessing localStorage:', error);
+    }
+
+    let config = {
+      method: options.method || 'GET',
+      headers,
+      body: options.body,
+      ...(responseType ? { responseType } : {}),
+      credentials: 'include', // Include cookies with all requests
+    };
+    
+    if (config.credentials === undefined) {
+      config.credentials = 'include';
+    }
 
     // Automatically include accessCode in JSON body for mutating requests
     try {
@@ -76,11 +117,60 @@ class ApiService {
         err.detail = detail;
         throw err;
       }
+      if (responseType === 'blob') {
+        return await response.blob();
+      }
+      if (responseType === 'text') {
+        return await response.text();
+      }
       return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
       throw error;
     }
+  }
+
+  // Generic helpers used by various modules (TableContext, tableService)
+  async get(endpoint, { params, headers, responseType } = {}) {
+    let ep = normalizeEndpoint(endpoint);
+    if (params && typeof params === 'object') {
+      const usp = new URLSearchParams(params);
+      ep += (ep.includes('?') ? '&' : '?') + usp.toString();
+    }
+    return this.request(ep, { method: 'GET', headers, responseType });
+  }
+
+  async delete(endpoint, { params, headers } = {}) {
+    let ep = normalizeEndpoint(endpoint);
+    if (params && typeof params === 'object') {
+      const usp = new URLSearchParams(params);
+      ep += (ep.includes('?') ? '&' : '?') + usp.toString();
+    }
+    return this.request(ep, { method: 'DELETE', headers });
+  }
+
+  async post(endpoint, data, { headers, responseType } = {}) {
+    const ep = normalizeEndpoint(endpoint);
+    const isForm = typeof FormData !== 'undefined' && data instanceof FormData;
+    const body = isForm ? data : JSON.stringify(data ?? {});
+    const hdrs = isForm ? { ...(headers || {}) } : { 'Content-Type': 'application/json', ...(headers || {}) };
+    return this.request(ep, { method: 'POST', headers: hdrs, body, responseType });
+  }
+
+  async put(endpoint, data, { headers } = {}) {
+    const ep = normalizeEndpoint(endpoint);
+    const isForm = typeof FormData !== 'undefined' && data instanceof FormData;
+    const body = isForm ? data : JSON.stringify(data ?? {});
+    const hdrs = isForm ? { ...(headers || {}) } : { 'Content-Type': 'application/json', ...(headers || {}) };
+    return this.request(ep, { method: 'PUT', headers: hdrs, body });
+  }
+
+  async patch(endpoint, data, { headers } = {}) {
+    const ep = normalizeEndpoint(endpoint);
+    const isForm = typeof FormData !== 'undefined' && data instanceof FormData;
+    const body = isForm ? data : JSON.stringify(data ?? {});
+    const hdrs = isForm ? { ...(headers || {}) } : { 'Content-Type': 'application/json', ...(headers || {}) };
+    return this.request(ep, { method: 'PATCH', headers: hdrs, body });
   }
 
   // Tables API

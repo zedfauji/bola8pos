@@ -211,6 +211,18 @@ const PaymentPage = () => {
   const tenderTotal = +(cashNum + cardNum).toFixed(2);
   const changeDue = Math.max(0, +(cashNum - Math.max(0, totals.grandTotal - cardNum)).toFixed(2));
 
+  // Auto-detect payment method from tender inputs
+  useEffect(() => {
+    if (cash === '' && card === '') return; // don't override initial selection
+    if (cashNum > 0 && cardNum > 0) {
+      setPaymentMethod('split');
+    } else if (cashNum > 0) {
+      setPaymentMethod('cash');
+    } else if (cardNum > 0) {
+      setPaymentMethod('card');
+    }
+  }, [cash, card]);
+
   const getStoreConfig = () => {
     try { const raw = localStorage.getItem('pos_store_config'); if (raw) return JSON.parse(raw); } catch {}
     return {
@@ -649,6 +661,99 @@ const PaymentPage = () => {
                       ))}
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Split Tender Modal */}
+      {splitOpen && (
+        <div className="fixed inset-0 z-[125]">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setSplitOpen(false)} />
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="w-full max-w-xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+                <div className="text-white font-bold text-xl">Split Payment</div>
+                <button className="text-slate-300 hover:text-white text-xl" onClick={() => setSplitOpen(false)}>✕</button>
+              </div>
+              <div className="p-6 space-y-6 text-slate-200">
+                <div className="text-sm">Allocate total between Cash and Card using the slider or quick buttons.</div>
+                <div className="bg-slate-900/60 border border-slate-700 rounded-xl p-4">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span>Total</span>
+                    <span className="font-semibold">${totals.grandTotal.toFixed(2)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={splitPct}
+                    onChange={(e)=>setSplitPct(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex items-center justify-between text-xs text-slate-400 mt-1">
+                    <span>0% Cash</span>
+                    <span>{splitPct}%</span>
+                    <span>100% Cash</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {[25,50,75].map(p => (
+                      <button key={p} onClick={()=>setSplitPct(p)} className="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">{p}%</button>
+                    ))}
+                  </div>
+                </div>
+                {(() => {
+                  const total = totals.grandTotal;
+                  const cashPart = +(total * (splitPct/100)).toFixed(2);
+                  const cardPart = +(total - cashPart).toFixed(2);
+                  return (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-900/60 border border-slate-700 rounded-xl p-4">
+                        <div className="text-sm mb-1">Cash</div>
+                        <div className="text-2xl font-bold text-emerald-300">${cashPart.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-700 rounded-xl p-4">
+                        <div className="text-sm mb-1">Card</div>
+                        <div className="text-2xl font-bold text-indigo-300">${cardPart.toFixed(2)}</div>
+                      </div>
+                    </div>
+                  );
+                })()}
+                <div className="flex justify-end gap-3">
+                  <button className="px-4 py-2 rounded bg-slate-700 text-white" onClick={()=>setSplitOpen(false)}>Cancel</button>
+                  <button
+                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                    onClick={() => {
+                      const total = totals.grandTotal;
+                      const cashPart = +(total * (splitPct/100)).toFixed(2);
+                      const cardPart = +(total - cashPart).toFixed(2);
+                      setCash(cashPart.toFixed(2));
+                      setCard(cardPart.toFixed(2));
+                      setSplitOpen(false);
+                    }}
+                  >Apply Split</button>
+                </div>
+                <div className="flex justify-between pt-2 text-xs text-slate-400">
+                  <button
+                    className="underline hover:text-slate-200"
+                    onClick={() => {
+                      // Exact cash, no card
+                      setCash(totals.grandTotal.toFixed(2));
+                      setCard('0.00');
+                      setSplitOpen(false);
+                    }}
+                  >Use Exact Cash</button>
+                  <button
+                    className="underline hover:text-slate-200"
+                    onClick={() => {
+                      // All card
+                      setCash('0.00');
+                      setCard(totals.grandTotal.toFixed(2));
+                      setSplitOpen(false);
+                    }}
+                  >All Card</button>
                 </div>
               </div>
             </div>

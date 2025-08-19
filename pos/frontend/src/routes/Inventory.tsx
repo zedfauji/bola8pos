@@ -15,6 +15,8 @@ if (typeof window !== 'undefined' && (window as any).__API_BASE_URL__) {
   // @ts-ignore
   API_URL = (window as any).__API_BASE_URL__
 }
+// Normalize: strip trailing '/api' if present. Endpoints below already include '/api'
+API_URL = String(API_URL || '').replace(/\/?api\/?$/, '')
 
 type Item = { sku: string; name: string; qty: number; lowStockThreshold: number }
 

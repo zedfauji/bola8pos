@@ -11,10 +11,8 @@ build/
 
 # Environment variables
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
 # IDE files
 .vscode/
@@ -33,7 +31,7 @@ ehthumbs.db
 Thumbs.db
 
 # Logs
-logs
+logs/
 *.log
 
 # Runtime data
@@ -82,11 +80,10 @@ jspm_packages/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
-#public
+public/
 
 # Storybook build outputs
 .out
@@ -100,6 +97,52 @@ temp/
 *.tfstate
 *.tfstate.*
 .terraform/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# SSL certificates
+*.pem
+*.crt
+*.key
+
+# Local development
+.vercel
+.netlify
+
+# Testing
+/test-results/
+/playwright-report/
+/playwright/.cache/
+playwright/.cache/
+
+# Frontend specific
+pos/frontend/.env
+pos/frontend/.env.*
+!pos/frontend/.env.example
+
+# Backend specific
+pos/backend/.env
+pos/backend/.env.*
+!pos/backend/.env.example
+
+# Script outputs
+pos/scripts/screenshots/
+pos/scripts/*.png
+pos/scripts/*.log
+
+# IDE specific
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# System Files
+.DS_Store
+Thumbs.db
+.terraform/
 .terraform.lock.hcl
 terraform.tfstate.backup
 
@@ -109,7 +152,7 @@ terraform.tfstate.backup
 *.rar
 
 # Service account keys (security)
-*.json
+#*.json
 !package.json
 !package-lock.json
 !tsconfig.json

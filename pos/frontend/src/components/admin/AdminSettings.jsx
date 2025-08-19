@@ -794,18 +794,18 @@ const AdminSettings = () => {
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Admin Settings</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">Admin Settings</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {/* Left: Groups */}
           <div className="md:col-span-1">
-            <div className="bg-white rounded-xl shadow border border-gray-200 p-2">
+            <div className="pos-card p-2">
               <div className="flex md:flex-col gap-2">
                 {groups.map(g => (
                   <button
                     key={g.key}
                     onClick={() => setActiveGroup(g.key)}
-                    className={`px-3 py-2 rounded text-left ${activeGroup===g.key ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                    className={`px-3 py-2 rounded text-left ${activeGroup===g.key ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
                   >{g.name}</button>
                 ))}
               </div>
@@ -814,13 +814,13 @@ const AdminSettings = () => {
 
           {/* Right: Subtabs + Panel */}
           <div className="md:col-span-4">
-            <div className="bg-white rounded-xl shadow border border-gray-200">
-              <div className="flex flex-wrap gap-2 p-2 border-b">
+            <div className="pos-card">
+              <div className="flex flex-wrap gap-2 p-2 border-b border-gray-700">
                 {currentGroup.subs.map(s => (
                   <button
                     key={s.key}
                     onClick={() => setActiveSub(s.key)}
-                    className={`px-4 py-2 rounded ${activeSub===s.key ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                    className={`px-4 py-2 rounded ${activeSub===s.key ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
                   >{s.name}</button>
                 ))}
               </div>
@@ -829,7 +829,7 @@ const AdminSettings = () => {
               </div>
             </div>
 
-            <div className="text-sm text-gray-500 mt-3">Tip: Configure groups (e.g., Kitchen, Barra), add printers under groups, then map menu categories to groups in Routing.</div>
+            <div className="text-sm text-gray-400 mt-3">Tip: Configure groups (e.g., Kitchen, Barra), add printers under groups, then map menu categories to groups in Routing.</div>
           </div>
         </div>
       </div>

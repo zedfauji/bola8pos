@@ -1,5 +1,12 @@
 const mysql = require('mysql2/promise');
 
+// Phase 8 Track A: Advanced POS Features
+const { initCustomerTables, seedCustomers } = require('./db_customers');
+const { initReservationTables, seedReservations } = require('./db_reservations');
+const { initStaffTables, seedStaff } = require('./db_staff');
+// Phase 8 Track B: Hardware Integration
+const { initHardwareTables, seedHardware } = require('./db_hardware');
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST || '127.0.0.1',
   port: Number(process.env.DB_PORT || 3306),
@@ -7,10 +14,20 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD || 'changeme',
   database: process.env.DB_NAME || 'bola8pos',
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 25,
   queueLimit: 0,
   dateStrings: true,
 });
+
+// Ensure session uses consistent utf8mb4 charset and collation
+(async () => {
+  try {
+    await pool.query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+    await pool.query("SET collation_connection = 'utf8mb4_unicode_ci'");
+  } catch (e) {
+    console.warn('Collation session setup failed:', e.message);
+  }
+})();
 
 // Lightweight shim to mimic sqlite3 callbacks used in server.js
 function normalizeArgs(params, cb) {
@@ -113,16 +130,18 @@ async function initSchema() {
   )`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    action VARCHAR(64) NOT NULL,
-    entity_type VARCHAR(64),
-    entity_id VARCHAR(64),
-    table_id VARCHAR(32),
-    details TEXT,
-    user_id VARCHAR(64),
-    role VARCHAR(64),
-    ip VARCHAR(64)
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(50) NOT NULL,
+    resource_id VARCHAR(36),
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    metadata JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_logs_user (user_id),
+    INDEX idx_audit_logs_resource (resource_type, resource_id),
+    INDEX idx_audit_logs_created (created_at)
   )`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS menu_items (
@@ -210,12 +229,8 @@ async function initSchema() {
     ['food10', 'Potato Skins', 'food', 11.99, '6 pieces with bacon and cheese', '🥔', 0, 15],
     ['cocktail1', 'Margarita', 'cocktails', 11.99, 'Tequila, lime, triple sec', '🍹', 1, 5],
     ['cocktail2', 'Mojito', 'cocktails', 10.99, 'Rum, mint, lime, soda', '🍹', 1, 4],
-    ['cocktail3', 'Old Fashioned', 'cocktails', 12.99, 'Whiskey, bitters, sugar', '🥃', 1, 6],
-    ['cocktail4', 'Cosmopolitan', 'cocktails', 11.99, 'Vodka, cranberry, lime', '🍸', 1, 5],
-    ['cocktail5', 'Long Island Iced Tea', 'cocktails', 13.99, 'Mixed spirits, cola', '🍹', 1, 7],
-    ['combo1', 'Billiard Special', 'combos', 50.00, '1 hour free billiard + 10 Corona beers + French fries', '🎱', 0, 15]
   ];
-  for (const [id, name, category, price, description, image, customizable, prepTime] of menuItems) {
+  for (const { id, name, category, price, description, image, customizable, prepTime } of menuItems) {
     await pool.query(
       `INSERT IGNORE INTO menu_items (id, name, category, price, description, image, customizable, prep_time) VALUES (?,?,?,?,?,?,?,?)`,
       [id, name, category, price, description, image, customizable, prepTime]
@@ -245,6 +260,22 @@ async function initSchema() {
       [id, name, description, active]
     );
   }
+
+  // Phase 8 Track A: Advanced POS Features
+  console.log('Initializing Phase 8 Track A: Advanced POS Features...');
+  await initCustomerTables(pool);
+  await seedCustomers(pool);
+  await initReservationTables(pool);
+  await seedReservations(pool);
+  await initStaffTables(pool);
+  await seedStaff(pool);
+
+  // Phase 8 Track B: Hardware Integration
+  console.log('Initializing Phase 8 Track B: Hardware Integration...');
+  await initHardwareTables(pool);
+  await seedHardware(pool);
+
+  console.log('Phase 8 database initialization complete!');
 }
 
 module.exports = { pool, db, initSchema };

@@ -42,7 +42,27 @@ export default function ShiftHistory() {
       setItems(list || []);
       if (list && list.length) {
         const first = list[0];
-        try { const detail = await api.getShiftSummary(first.id); setSelected(detail || first); } catch {}
+        try {
+          const detail = await api.getShiftSummary(first.id);
+          const normalized = {
+            id: first.id,
+            start_cash: detail?.shift?.start_cash ?? first.start_cash ?? 0,
+            expected: detail?.expected_cash ?? first.expected_cash ?? 0,
+            counted: detail?.shift?.end_cash_counted ?? first.end_cash_counted ?? null,
+            over_short: detail?.over_short ?? first.over_short ?? null,
+            movements: detail?.movements || [],
+          };
+          setSelected(normalized);
+        } catch {
+          setSelected({
+            id: first.id,
+            start_cash: first.start_cash ?? 0,
+            expected: first.expected_cash ?? 0,
+            counted: first.end_cash_counted ?? null,
+            over_short: first.over_short ?? null,
+            movements: [],
+          });
+        }
       }
     } catch (e) {
       setError(e.message || 'Failed to load history');
@@ -55,7 +75,15 @@ export default function ShiftHistory() {
     try {
       setSelected(null);
       const detail = await api.getShiftSummary(it.id);
-      setSelected(detail || it);
+      const normalized = {
+        id: it.id,
+        start_cash: detail?.shift?.start_cash ?? it.start_cash ?? 0,
+        expected: detail?.expected_cash ?? it.expected_cash ?? 0,
+        counted: detail?.shift?.end_cash_counted ?? it.end_cash_counted ?? null,
+        over_short: detail?.over_short ?? it.over_short ?? null,
+        movements: detail?.movements || [],
+      };
+      setSelected(normalized);
     } catch {
       setSelected(it);
     }
@@ -80,7 +108,7 @@ export default function ShiftHistory() {
                     <div className="text-white text-sm font-medium">Shift #{it.id}</div>
                     <div className="text-xs text-gray-400">{it.start_time} → {it.end_time || 'active'}</div>
                   </div>
-                  <div className="text-xs text-gray-300">${it.expected ?? it.total ?? '-'}</div>
+                  <div className="text-xs text-gray-300">${(it.expected_cash ?? it.expected ?? it.total ?? '-')}</div>
                 </button>
               ))}
             </div>

@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 // Mock css.escape before anything else loads
 vi.mock('css.escape', () => ({ default: (s: unknown) => String(s) }));
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 // Basic toast mock so components can call window.toast.success/error
 // without blowing up during tests.

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   productsApi, 
   inventoryApi, 
@@ -7,45 +7,140 @@ import {
   suppliersApi,
   purchaseOrdersApi 
 } from '../services/inventoryService';
+import { isApiEndpointAvailable } from '../utils/apiErrorHandler';
+
+// Debounce utility to prevent excessive API calls
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  
+  return debouncedValue;
+};
+
+// Utility for exponential backoff retry
+const retryWithBackoff = async (fn, maxRetries = 3, initialDelay = 300) => {
+  let retries = 0;
+  while (retries < maxRetries) {
+    try {
+      return await fn();
+    } catch (error) {
+      retries++;
+      if (retries >= maxRetries) throw error;
+      
+      // Calculate delay with exponential backoff
+      const delay = initialDelay * Math.pow(2, retries);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
 
 export const useProducts = (initialParams = {}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [apiAvailable, setApiAvailable] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
     total: 0,
     totalPages: 1,
   });
+  
+  // Track if component is mounted to prevent state updates after unmount
+  const isMounted = useRef(true);
+  // Track in-flight requests to prevent duplicate calls
+  const pendingRequest = useRef(false);
+
+  // Check if API endpoint is available
+  useEffect(() => {
+    const checkApiAvailability = async () => {
+      const isAvailable = await isApiEndpointAvailable(
+        productsApi.getAll,
+        initialParams
+      );
+      setApiAvailable(isAvailable);
+      if (!isAvailable) {
+        setLoading(false);
+      }
+    };
+    checkApiAvailability();
+  }, [initialParams]);
 
   const fetchProducts = useCallback(async (params = {}) => {
-    try {
-      setLoading(true);
-      const response = await productsApi.getAll({
-        page: pagination.page,
-        limit: pagination.limit,
-        ...params
-      });
-      
-      setProducts(response.data);
-      setPagination({
-        page: response.page,
-        limit: response.limit,
-        total: response.total,
-        totalPages: response.totalPages,
-      });
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch products');
-      console.error('Error fetching products:', err);
-    } finally {
-      setLoading(false);
+    if (!apiAvailable || pendingRequest.current) {
+      if (!apiAvailable) {
+        setProducts([]);
+        setLoading(false);
+      }
+      return;
     }
-  }, [pagination.page, pagination.limit]);
+    
+    try {
+      pendingRequest.current = true;
+      setLoading(true);
+      const paginationParams = {
+        page: pagination?.page || 1,
+        limit: pagination?.limit || 20,
+        ...params
+      };
+      
+      // Use retry with backoff for resilience
+      const response = await retryWithBackoff(
+        () => productsApi.getAll(paginationParams),
+        3,  // max retries
+        300 // initial delay in ms
+      );
+      
+      if (isMounted.current) {
+        setProducts(response?.data || []);
+        setPagination({
+          page: response?.page || 1,
+          limit: response?.limit || 20,
+          total: response?.total || 0,
+          totalPages: response?.totalPages || 1,
+        });
+        setError(null);
+      }
+    } catch (err) {
+      // Error is already handled by the createSafeApiCall wrapper
+      if (isMounted.current) {
+        setError(err);
+        setProducts([]);
+      }
+    } finally {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+      // Add a small delay before allowing new requests
+      setTimeout(() => {
+        pendingRequest.current = false;
+      }, 1000);
+    }
+  }, [apiAvailable, pagination?.page, pagination?.limit]);
 
+  // Debounce the initialParams to prevent excessive API calls when they change rapidly
+  const debouncedParams = useDebounce(initialParams, 300);
+  
   useEffect(() => {
-    fetchProducts(initialParams);
-  }, [fetchProducts, initialParams]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (!pendingRequest.current) {
+      fetchProducts(debouncedParams);
+    }
+  }, [fetchProducts, debouncedParams]);
 
   const createProduct = async (productData) => {
     try {
@@ -96,7 +191,7 @@ export const useProducts = (initialParams = {}) => {
     products,
     loading,
     error,
-    pagination,
+    pagination: pagination || { page: 1, limit: 20, total: 0, totalPages: 1 },
     fetchProducts,
     createProduct,
     updateProduct,
@@ -104,27 +199,51 @@ export const useProducts = (initialParams = {}) => {
   };
 };
 
-export const useInventory = (locationId) => {
+export const useInventoryByLocation = (locationId) => {
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [adjustmentDialog, setAdjustmentDialog] = useState(null);
   const [transferDialog, setTransferDialog] = useState(null);
+  const [apiAvailable, setApiAvailable] = useState(true);
+
+  // Check if API endpoint is available
+  useEffect(() => {
+    const checkApiAvailability = async () => {
+      const isAvailable = await isApiEndpointAvailable(
+        inventoryApi.getByLocation,
+        locationId
+      );
+      setApiAvailable(isAvailable);
+      if (!isAvailable) {
+        setLoading(false);
+      }
+    };
+    checkApiAvailability();
+  }, [locationId]);
 
   const fetchInventory = useCallback(async () => {
+    if (!apiAvailable) {
+      setInventory([]);
+      setLoading(false);
+      return;
+    }
+    
     if (!locationId) return;
     
     try {
       setLoading(true);
       const response = await inventoryApi.getByLocation(locationId);
-      setInventory(response.data);
+      setInventory(response.data || []);
+      setError(null);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch inventory');
-      console.error('Error fetching inventory:', err);
+      // Error is already handled by the createSafeApiCall wrapper
+      setError(err);
+      setInventory([]);
     } finally {
       setLoading(false);
     }
-  }, [locationId]);
+  }, [locationId, apiAvailable]);
 
   useEffect(() => {
     fetchInventory();
@@ -215,27 +334,80 @@ export const useCategories = () => {
   const [categoryTree, setCategoryTree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [apiAvailable, setApiAvailable] = useState(true);
+  
+  // Track if component is mounted to prevent state updates after unmount
+  const isMounted = useRef(true);
+  // Track in-flight requests to prevent duplicate calls
+  const pendingRequest = useRef(false);
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [flatResponse, treeResponse] = await Promise.all([
-        categoriesApi.getAll(),
-        categoriesApi.getTree()
-      ]);
-      
-      setCategories(flatResponse.data);
-      setCategoryTree(treeResponse.data);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch categories');
-      console.error('Error fetching categories:', err);
-    } finally {
-      setLoading(false);
-    }
+  // Check if API endpoint is available
+  useEffect(() => {
+    const checkApiAvailability = async () => {
+      const isAvailable = await isApiEndpointAvailable(
+        categoriesApi.getAll
+      );
+      setApiAvailable(isAvailable);
+      if (!isAvailable) {
+        setLoading(false);
+      }
+    };
+    checkApiAvailability();
   }, []);
 
+  const fetchCategories = useCallback(async () => {
+    if (!apiAvailable || pendingRequest.current) {
+      if (!apiAvailable) {
+        setCategories([]);
+        setCategoryTree([]);
+        setLoading(false);
+      }
+      return;
+    }
+    
+    try {
+      pendingRequest.current = true;
+      setLoading(true);
+      
+      // Use retry with backoff for resilience
+      const [flatResponse, treeResponse] = await Promise.all([
+        retryWithBackoff(() => categoriesApi.getAll(), 3, 300),
+        retryWithBackoff(() => categoriesApi.getTree(), 3, 300)
+      ]);
+      
+      if (isMounted.current) {
+        setCategories(flatResponse.data || []);
+        setCategoryTree(treeResponse.data || []);
+        setError(null);
+      }
+    } catch (err) {
+      // Error is already handled by the createSafeApiCall wrapper
+      if (isMounted.current) {
+        setError(err);
+        setCategories([]);
+        setCategoryTree([]);
+      }
+    } finally {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+      // Add a small delay before allowing new requests
+      setTimeout(() => {
+        pendingRequest.current = false;
+      }, 1000);
+    }
+  }, [apiAvailable]);
+
   useEffect(() => {
-    fetchCategories();
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (!pendingRequest.current) {
+      fetchCategories();
+    }
   }, [fetchCategories]);
 
   const createCategory = async (categoryData) => {
@@ -299,19 +471,42 @@ export const useLocations = () => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [apiAvailable, setApiAvailable] = useState(true);
+
+  // Check if API endpoint is available
+  useEffect(() => {
+    const checkApiAvailability = async () => {
+      const isAvailable = await isApiEndpointAvailable(
+        locationsApi.getAll
+      );
+      setApiAvailable(isAvailable);
+      if (!isAvailable) {
+        setLoading(false);
+      }
+    };
+    checkApiAvailability();
+  }, []);
 
   const fetchLocations = useCallback(async () => {
+    if (!apiAvailable) {
+      setLocations([]);
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await locationsApi.getAll();
-      setLocations(response.data);
+      setLocations(response.data || []);
+      setError(null);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch locations');
-      console.error('Error fetching locations:', err);
+      // Error is already handled by the createSafeApiCall wrapper
+      setError(err);
+      setLocations([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiAvailable]);
 
   useEffect(() => {
     fetchLocations();
@@ -377,19 +572,42 @@ export const useSuppliers = () => {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [apiAvailable, setApiAvailable] = useState(true);
+
+  // Check if API endpoint is available
+  useEffect(() => {
+    const checkApiAvailability = async () => {
+      const isAvailable = await isApiEndpointAvailable(
+        suppliersApi.getAll
+      );
+      setApiAvailable(isAvailable);
+      if (!isAvailable) {
+        setLoading(false);
+      }
+    };
+    checkApiAvailability();
+  }, []);
 
   const fetchSuppliers = useCallback(async () => {
+    if (!apiAvailable) {
+      setSuppliers([]);
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await suppliersApi.getAll();
-      setSuppliers(response.data);
+      setSuppliers(response.data || []);
+      setError(null);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch suppliers');
-      console.error('Error fetching suppliers:', err);
+      // Error is already handled by the createSafeApiCall wrapper
+      setError(err);
+      setSuppliers([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiAvailable]);
 
   useEffect(() => {
     fetchSuppliers();
@@ -475,34 +693,71 @@ export const usePurchaseOrders = (initialParams = {}) => {
     total: 0,
     totalPages: 1,
   });
+  
+  // Track if component is mounted to prevent state updates after unmount
+  const isMounted = useRef(true);
+  // Track in-flight requests to prevent duplicate calls
+  const pendingRequest = useRef(false);
 
   const fetchPurchaseOrders = useCallback(async (params = {}) => {
+    if (pendingRequest.current) {
+      return;
+    }
+    
     try {
+      pendingRequest.current = true;
       setLoading(true);
-      const response = await purchaseOrdersApi.getAll({
-        page: pagination.page,
-        limit: pagination.limit,
-        ...params
-      });
       
-      setPurchaseOrders(response.data);
-      setPagination({
-        page: response.page,
-        limit: response.limit,
-        total: response.total,
-        totalPages: response.totalPages,
-      });
+      // Use retry with backoff for resilience
+      const response = await retryWithBackoff(
+        () => purchaseOrdersApi.getAll({
+          page: pagination.page,
+          limit: pagination.limit,
+          ...params
+        }),
+        3,  // max retries
+        300 // initial delay in ms
+      );
+      
+      if (isMounted.current) {
+        setPurchaseOrders(response.data || []);
+        setPagination({
+          page: response.page || 1,
+          limit: response.limit || 20,
+          total: response.total || 0,
+          totalPages: response.totalPages || 1,
+        });
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch purchase orders');
-      console.error('Error fetching purchase orders:', err);
+      if (isMounted.current) {
+        setError(err.response?.data?.error || 'Failed to fetch purchase orders');
+        console.error('Error fetching purchase orders:', err);
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
+      // Add a small delay before allowing new requests
+      setTimeout(() => {
+        pendingRequest.current = false;
+      }, 1000);
     }
   }, [pagination.page, pagination.limit]);
 
+  // Debounce the initialParams to prevent excessive API calls when they change rapidly
+  const debouncedParams = useDebounce(initialParams, 300);
+  
   useEffect(() => {
-    fetchPurchaseOrders(initialParams);
-  }, [fetchPurchaseOrders, initialParams]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (!pendingRequest.current) {
+      fetchPurchaseOrders(debouncedParams);
+    }
+  }, [fetchPurchaseOrders, debouncedParams]);
 
   const createPurchaseOrder = async (poData) => {
     try {
@@ -564,3 +819,88 @@ export const usePurchaseOrders = (initialParams = {}) => {
     receivePurchaseOrderItems,
   };
 };
+
+/**
+ * Combined hook that provides all inventory functionality
+ * This is used by the InventoryContext
+ */
+export const useInventory = () => {
+  // Use all the individual hooks
+  const productsHook = useProducts();
+  const categoriesHook = useCategories();
+  const suppliersHook = useSuppliers();
+  const locationsHook = useLocations();
+  const purchaseOrdersHook = usePurchaseOrders();
+  
+  // Return a combined object with all the hooks' properties and methods
+  return {
+    // Products
+    products: productsHook.products,
+    loadProducts: productsHook.fetchProducts,
+    fetchProducts: productsHook.fetchProducts,
+    createProduct: productsHook.createProduct,
+    updateProduct: productsHook.updateProduct,
+    deleteProduct: productsHook.deleteProduct,
+    
+    // Categories
+    categories: categoriesHook.categories,
+    categoryTree: categoriesHook.categoryTree,
+    fetchCategories: categoriesHook.fetchCategories,
+    createCategory: categoriesHook.createCategory,
+    updateCategory: categoriesHook.updateCategory,
+    deleteCategory: categoriesHook.deleteCategory,
+    
+    // Suppliers
+    suppliers: suppliersHook.suppliers,
+    fetchSuppliers: suppliersHook.fetchSuppliers,
+    searchSuppliers: suppliersHook.searchSuppliers,
+    createSupplier: suppliersHook.createSupplier,
+    updateSupplier: suppliersHook.updateSupplier,
+    deleteSupplier: suppliersHook.deleteSupplier,
+    
+    // Locations
+    locations: locationsHook.locations,
+    fetchLocations: locationsHook.fetchLocations,
+    createLocation: locationsHook.createLocation,
+    updateLocation: locationsHook.updateLocation,
+    deleteLocation: locationsHook.deleteLocation,
+    
+    // Purchase Orders
+    purchaseOrders: purchaseOrdersHook.purchaseOrders,
+    fetchPurchaseOrders: purchaseOrdersHook.fetchPurchaseOrders,
+    createPurchaseOrder: purchaseOrdersHook.createPurchaseOrder,
+    updatePurchaseOrderStatus: purchaseOrdersHook.updatePurchaseOrderStatus,
+    receivePurchaseOrderItems: purchaseOrdersHook.receivePurchaseOrderItems,
+    
+    // Inventory - using default location for now
+    // In a real implementation, we would get the default location from user preferences or context
+    inventory: [],
+    fetchInventory: (locationId) => {
+      if (!locationId) return Promise.resolve([]);
+      return inventoryApi.getByLocation(locationId).then(res => res.data || []);
+    },
+    adjustInventory: (adjustmentData) => {
+      if (!adjustmentData) return Promise.resolve({ success: false });
+      return inventoryApi.adjust(adjustmentData).then(res => res.data || { success: true });
+    },
+    transferInventory: (transferData) => {
+      if (!transferData) return Promise.resolve({ success: false });
+      return inventoryApi.transfer(transferData).then(res => res.data || { success: true });
+    },
+    getLowStock: (threshold) => {
+      return inventoryApi.getLowStock(threshold).then(res => res.data || []);
+    },
+    getInventorySnapshot: () => {
+      return inventoryApi.getSnapshot().then(res => res.data || {});
+    },
+    
+    // Loading and error states
+    loading: productsHook.loading || categoriesHook.loading || suppliersHook.loading || 
+             locationsHook.loading || purchaseOrdersHook.loading,
+    error: productsHook.error || categoriesHook.error || suppliersHook.error || 
+           locationsHook.error || purchaseOrdersHook.error,
+  };
+};
+
+// Default export for backward compatibility
+export default useInventory;

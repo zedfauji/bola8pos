@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { categorySchema } = require('../../validators/inventory.validator');
 const validate = require('../../middleware/validate');
+const { pool } = require('../../db');
 
 // Get all categories
 router.get('/', async (req, res, next) => {

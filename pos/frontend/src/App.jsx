@@ -1,12 +1,16 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-
-// Context Providers
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginPage from './pages/LoginPage';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { InventoryProvider } from './contexts/InventoryContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import TablesPage from './pages/NewTablesPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
 
 // Lazy load components for better performance
-const TablesPage = React.lazy(() => import('./components/tables/TablesPage'));
+const NewTablesPage = React.lazy(() => import('./pages/NewTablesPage'));
 const OrderPage = React.lazy(() => import('./components/orders/OrderPage'));
 const KitchenDisplay = React.lazy(() => import('./components/kds/KitchenDisplay'));
 const SettingsPage = React.lazy(() => import('./components/settings/SettingsPage'));
@@ -24,6 +28,9 @@ const DiscountsPage = React.lazy(() => import('./components/admin/DiscountsPage'
 const AdminSettings = React.lazy(() => import('./components/admin/AdminSettings'));
 const BarSalesPage = React.lazy(() => import('./pages/inventory/sales/BarSalesPage'));
 const Inventory = React.lazy(() => import('./routes/Inventory'));
+const ReservationManagement = React.lazy(() => import('./components/reservations/ReservationManagement'));
+const HardwareManagement = React.lazy(() => import('./components/hardware/HardwareManagement'));
+const MembershipManager = React.lazy(() => import('./components/members/MembershipManager'));
 import ShiftBar from './components/shifts/ShiftBar';
 const ShiftHistory = React.lazy(() => import('./components/shifts/ShiftHistory'));
 
@@ -132,6 +139,8 @@ const Dashboard = () => {
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const [expanded, setExpanded] = useState({});
   
   const navigation = [
     { name: 'Dashboard', href: '/', icon: '🏠' },
@@ -142,6 +151,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Payment', href: '/payment', icon: '💳' },
     { name: 'Kitchen', href: '/kitchen', icon: '👨\u200d🍳' },
     { name: 'Reports', href: '/reports', icon: '📊' },
+    { name: 'Members', href: '/members', icon: '👥' },
+    { name: 'Reservations', href: '/reservations', icon: '📅' },
+    { name: 'Hardware', href: '/hardware', icon: '🖥️' },
     { name: 'Shift History', href: '/shifts/history', icon: '💵' },
     { name: 'Settings', href: '/settings', icon: '⚙️' },
     { 
@@ -166,7 +178,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       )}
       
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex items-center justify-between h-16 px-6 bg-gray-800">
@@ -184,18 +196,18 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           </button>
         </div>
         
-        <nav className="mt-8 px-4">
+        <nav className="mt-8 px-4 pb-20 overflow-y-auto flex-1">
           <div className="space-y-1">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href || 
                              (item.submenu && item.submenu.some(subItem => location.pathname === subItem.href));
-              const [isExpanded, setIsExpanded] = useState(false);
+              const isExpanded = !!expanded[item.name];
               
               if (item.submenu) {
                 return (
                   <div key={item.name} className="mb-2">
                     <button
-                      onClick={() => setIsExpanded(!isExpanded)}
+                      onClick={() => setExpanded(prev => ({ ...prev, [item.name]: !prev[item.name] }))}
                       className={`w-full flex items-center justify-between gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                         isActive
                           ? 'bg-blue-600 text-white'
@@ -260,14 +272,25 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         
         {/* User info */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gray-800">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-gray-300">
-              👤
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium">
+                {user?.name?.charAt(0) || 'U'}
+              </div>
+              <div>
+                <div className="text-sm font-medium text-white">{user?.name || 'User'}</div>
+                <div className="text-xs text-gray-400 capitalize">{user?.role || 'user'}</div>
+              </div>
             </div>
-            <div>
-              <div className="text-sm font-medium text-white">Manager</div>
-              <div className="text-xs text-gray-400">Shift: 2:00 PM - 10:00 PM</div>
-            </div>
+            <button
+              onClick={logout}
+              className="text-gray-300 hover:text-white"
+              title="Logout"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -329,6 +352,7 @@ const ComingSoon = ({ title }) => (
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [ToastContainer, setToastContainer] = useState(null);
+  
   useEffect(() => {
     let mounted = true;
     import('react-toastify').then(mod => {
@@ -337,40 +361,125 @@ function App() {
     return () => { mounted = false; };
   }, []);
 
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <Router>
-      <SettingsProvider>
-        <InventoryProvider>
-          {ToastContainer ? <ToastContainer position="bottom-right" theme="dark" /> : null}
-          <div className="flex h-screen pos-container text-white">
-            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <Header setSidebarOpen={setSidebarOpen} />
-              <main className="flex-1 overflow-x-hidden overflow-y-auto">
-                <Suspense fallback={<LoadingFallback />}>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/tables" element={<TablesPage />} />
-                    <Route path="/order/:tableId" element={<OrderPage />} />
-                    <Route path="/kitchen" element={<KitchenDisplay />} />
-                    <Route path="/payment/:tableId?" element={<PaymentPage />} />
-                    <Route path="/orders" element={<OrdersSummary />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/reports" element={<ReportsPage />} />
-                    <Route path="/inventory" element={<Inventory />} />
-                    <Route path="/admin/audit-log" element={<AuditLog />} />
-                    <Route path="/admin/discounts" element={<DiscountsPage />} />
-                    <Route path="/admin/settings" element={<AdminSettings />} />
-                    <Route path="/bar-sales" element={<BarSalesPage />} />
-                    <Route path="/shifts/history" element={<ShiftHistory />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </Suspense>
-              </main>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SettingsProvider>
+            <InventoryProvider>
+            {ToastContainer ? <ToastContainer position="bottom-right" theme="dark" /> : null}
+            <div className="flex h-screen pos-container text-white">
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                <Route path="*" element={
+                  <ProtectedRoute>
+                    <>
+                      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+                      <div className="flex-1 flex flex-col overflow-hidden">
+                        <Header setSidebarOpen={setSidebarOpen} />
+                        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+                          <Suspense fallback={<LoadingFallback />}>
+                            <Routes>
+                              <Route path="/" element={<Dashboard />} />
+                              <Route path="/tables" element={
+                                <ProtectedRoute requiredPermission="tables:read">
+                                  <Suspense fallback={<div>Loading...</div>}>
+                                    <NewTablesPage />
+                                  </Suspense>
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/order/:tableId" element={
+                                <ProtectedRoute requiredPermission="orders:create">
+                                  <OrderPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/kitchen" element={
+                                <ProtectedRoute requiredPermission="kds:view">
+                                  <KitchenDisplay />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/payment/:tableId?" element={
+                                <ProtectedRoute requiredPermission="payments:process">
+                                  <PaymentPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/orders" element={
+                                <ProtectedRoute requiredPermission="orders:view">
+                                  <OrdersSummary />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/settings" element={
+                                <ProtectedRoute requireAdmin>
+                                  <SettingsPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/reports" element={
+                                <ProtectedRoute requiredPermission="reports:view">
+                                  <ReportsPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/members" element={
+                                <ProtectedRoute requiredPermission="members:manage">
+                                  <MembershipManager />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/reservations" element={
+                                <ProtectedRoute requiredPermission="reservations:manage">
+                                  <ReservationManagement />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/hardware" element={
+                                <ProtectedRoute requireAdmin>
+                                  <HardwareManagement />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/inventory" element={
+                                <ProtectedRoute requiredPermission="inventory:view">
+                                  <Inventory />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/admin/audit-log" element={
+                                <ProtectedRoute requireAdmin>
+                                  <AuditLog />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/admin/discounts" element={
+                                <ProtectedRoute requiredPermission="discounts:manage">
+                                  <DiscountsPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/admin/settings" element={
+                                <ProtectedRoute requireAdmin>
+                                  <AdminSettings />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/bar-sales" element={
+                                <ProtectedRoute requiredPermission="sales:view">
+                                  <BarSalesPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/shifts/history" element={
+                                <ProtectedRoute requiredPermission="shifts:view">
+                                  <ShiftHistory />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                          </Suspense>
+                        </main>
+                      </div>
+                    </>
+                  </ProtectedRoute>
+                } />
+              </Routes>
             </div>
-          </div>
-        </InventoryProvider>
-      </SettingsProvider>
+            </InventoryProvider>
+          </SettingsProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </Router>
   );
 }

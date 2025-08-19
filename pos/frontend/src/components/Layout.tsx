@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, Outlet } from 'react-router-dom'
 import { useState } from 'react'
 
 interface NavItem {
@@ -13,48 +13,48 @@ const navItems: NavItem[] = [
   { 
     path: '/tables', 
     label: 'Mesas', 
-    icon: '🎯', 
+    icon: '', 
     color: 'from-blue-500 to-blue-600',
     gradient: 'from-blue-500 via-blue-600 to-indigo-600'
   },
   { 
     path: '/orders', 
     label: 'Órdenes', 
-    icon: '📋', 
+    icon: '', 
     color: 'from-green-500 to-green-600',
     gradient: 'from-green-500 via-emerald-600 to-teal-600'
   },
   { 
     path: '/kds', 
     label: 'Cocina', 
-    icon: '👨‍🍳', 
+    icon: '', 
     color: 'from-orange-500 to-orange-600',
     gradient: 'from-orange-500 via-amber-600 to-yellow-600'
   },
   { 
     path: '/loyalty', 
     label: 'Lealtad', 
-    icon: '💎', 
+    icon: '', 
     color: 'from-purple-500 to-purple-600',
     gradient: 'from-purple-500 via-violet-600 to-indigo-600'
   },
   { 
     path: '/inventory', 
     label: 'Inventario', 
-    icon: '📦', 
+    icon: '', 
     color: 'from-indigo-500 to-indigo-600',
     gradient: 'from-indigo-500 via-blue-600 to-cyan-600'
   },
   { 
     path: '/employees', 
     label: 'Empleados', 
-    icon: '👥', 
+    icon: '', 
     color: 'from-teal-500 to-teal-600',
     gradient: 'from-teal-500 via-cyan-600 to-blue-600'
   },
 ]
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children?: React.ReactNode }) {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -75,7 +75,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-2xl">🎱</span>
+                  <span className="text-2xl"></span>
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-gray-900 animate-pulse"></div>
               </div>
@@ -96,7 +96,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="text-white font-semibold">Admin</div>
             </div>
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white text-lg">👤</span>
+              <span className="text-white text-lg"></span>
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           )}
           
           <div className="fade-in">
-            {children}
+            {children ?? <Outlet />}
           </div>
         </main>
       </div>

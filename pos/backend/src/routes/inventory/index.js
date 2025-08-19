@@ -13,7 +13,7 @@ const supplierRoutes = require('./supplier.routes');
 
 // Mount routes with authentication and authorization
 router.use('/products', authenticate, authorize(['admin', 'manager', 'inventory']), productRoutes);
-router.use('/inventory', authenticate, authorize(['admin', 'manager', 'inventory']), inventoryRoutes);
+router.use('/', authenticate, authorize(['admin', 'manager', 'inventory']), inventoryRoutes);
 router.use('/purchase-orders', authenticate, authorize(['admin', 'manager', 'purchasing']), purchaseOrderRoutes);
 router.use('/categories', authenticate, authorize(['admin', 'manager']), categoryRoutes);
 router.use('/locations', authenticate, authorize(['admin', 'manager']), locationRoutes);

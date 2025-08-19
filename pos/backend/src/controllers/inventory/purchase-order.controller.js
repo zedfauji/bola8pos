@@ -265,34 +265,50 @@ class PurchaseOrderController extends BaseController {
 
   // Get purchase orders by status
   async getByStatus(status, page = 1, limit = 20) {
-    const offset = (page - 1) * limit;
-    
-    let whereClause = '';
-    const params = [];
-    
-    if (status) {
-      whereClause = 'WHERE status = ?';
-      params.push(status);
-    }
-    
-    const [orders] = await this.query(
-      `SELECT * FROM purchase_orders 
-       ${whereClause}
-       ORDER BY order_date DESC, id DESC
-       LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
-    );
-    
-    // Get item counts for each order
-    for (const order of orders) {
-      const [itemCount] = await this.query(
-        'SELECT COUNT(*) as count FROM purchase_order_items WHERE po_id = ?',
-        [order.id]
+    try {
+      const offset = (page - 1) * limit;
+      
+      let whereClause = '';
+      const params = [];
+      
+      if (status) {
+        whereClause = 'WHERE status = ?';
+        params.push(status);
+      }
+      
+      // Get purchase orders with pagination
+      let result = await this.query(
+        `SELECT * FROM purchase_orders 
+         ${whereClause}
+         ORDER BY order_date DESC, id DESC
+         LIMIT ? OFFSET ?`,
+        [...params, limit, offset]
       );
-      order.item_count = itemCount.count;
+      
+      // Ensure orders is always an array
+      let orders = Array.isArray(result) ? result : [];
+      
+      // Get item counts for each order
+      if (orders.length > 0) {
+        for (const order of orders) {
+          try {
+            const itemCount = await this.queryOne(
+              'SELECT COUNT(*) as count FROM purchase_order_items WHERE po_id = ?',
+              [order.id]
+            );
+            order.item_count = itemCount ? itemCount.count : 0;
+          } catch (error) {
+            console.error(`Error getting item count for order ${order.id}:`, error);
+            order.item_count = 0;
+          }
+        }
+      }
+      
+      return orders;
+    } catch (error) {
+      console.error('Error in getByStatus:', error);
+      return [];
     }
-    
-    return orders;
   }
 
   // Get purchase order history
@@ -305,23 +321,31 @@ class PurchaseOrderController extends BaseController {
 
   // Get purchase orders by supplier
   async getBySupplier(supplierId, status = null, page = 1, limit = 20) {
-    const offset = (page - 1) * limit;
-    
-    let whereClause = 'WHERE supplier_id = ?';
-    const params = [supplierId];
-    
-    if (status) {
-      whereClause += ' AND status = ?';
-      params.push(status);
+    try {
+      const offset = (page - 1) * limit;
+      
+      let whereClause = 'WHERE supplier_id = ?';
+      const params = [supplierId];
+      
+      if (status) {
+        whereClause += ' AND status = ?';
+        params.push(status);
+      }
+      
+      let result = await this.query(
+        `SELECT * FROM purchase_orders 
+         ${whereClause}
+         ORDER BY order_date DESC, id DESC
+         LIMIT ? OFFSET ?`,
+        [...params, limit, offset]
+      );
+      
+      // Ensure orders is always an array
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error in getBySupplier:', error);
+      return [];
     }
-    
-    return this.query(
-      `SELECT * FROM purchase_orders 
-       ${whereClause}
-       ORDER BY order_date DESC, id DESC
-       LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
-    );
   }
 }
 

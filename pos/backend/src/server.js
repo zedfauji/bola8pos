@@ -1,15 +1,65 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const https = require('https');
 const { Server } = require('socket.io');
 const { db, initSchema, pool } = require('./db');
 const { initBarInventorySchema } = require('./db_bar_inventory');
 const path = require('path');
 const fs = require('fs');
+const cookieParser = require('cookie-parser');
+const { errorHandler, UnauthorizedError, ForbiddenError } = require('./utils/errors');
+const { apiLimiter, authLimiter, publicApiLimiter } = require('./middleware/rateLimiter');
+const swaggerDocs = require('./config/swagger');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*', methods: ['GET','POST','PUT','DELETE'] } });
+
+// When behind a proxy/HTTPS terminator, enable trust proxy so req.secure is accurate
+app.set('trust proxy', 1);
+
+// Create HTTP or HTTPS server based on environment
+let server;
+let isHttps = false; // Force HTTP mode for consistency
+
+if (isHttps) {
+  try {
+    const certDir = path.join(__dirname, '..', 'certs');
+    const privateKey = fs.readFileSync(path.join(certDir, 'key.pem'), 'utf8');
+    const certificate = fs.readFileSync(path.join(certDir, 'cert.pem'), 'utf8');
+    const credentials = { key: privateKey, cert: certificate };
+    
+    server = https.createServer(credentials, app);
+    console.log('HTTPS server created with self-signed certificate');
+  } catch (error) {
+    console.warn('Failed to create HTTPS server, falling back to HTTP. Run "npm run generate-cert" first.');
+    console.warn(error.message);
+    isHttps = false;
+    server = http.createServer(app);
+  }
+} else {
+  server = http.createServer(app);
+}
+
+// Build allowed origins (env + common local hosts)
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const allowedOrigins = new Set([
+  FRONTEND_URL,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+]);
+
+const io = new Server(server, { 
+  cors: {
+    origin: true, // Allow all origins for now
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }
+});
+
 // Determine port: CLI flag (--port/-p or positional), then ENV, then default 3001
 function resolvePort() {
   const argv = process.argv.slice(2);
@@ -39,11 +89,65 @@ function resolvePort() {
 const PORT = resolvePort();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins for now
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
+}));
+
+// Apply rate limiting
+app.use(apiLimiter);
+
+// More aggressive rate limiting for auth routes
+app.use('/api/access/auth', authLimiter);
+
+// Public API rate limiting
+app.use('/api/public', publicApiLimiter);
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Initialize Swagger documentation early so it's public (before auth middleware)
+if (process.env.NODE_ENV !== 'production') {
+  swaggerDocs(app, PORT);
+}
 
 // Database setup (MySQL): initialize schema then run lightweight column migrations
 async function ensureTableMigrations() {
+  // Ensure consistent DB and table collations to avoid "Illegal mix of collations"
+  try {
+    const dbName = process.env.DB_NAME || 'bola8pos';
+    // Use a single connection and temporarily disable FK checks during conversion
+    const conn = await pool.getConnection();
+    try {
+      await conn.query('SET FOREIGN_KEY_CHECKS=0');
+      await conn.query(`ALTER DATABASE \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+      const tablesToConvert = [
+        'users','roles','role_permissions','permissions',
+        'orders','order_items','bills','tables','menu_items',
+        'audit_logs','reservations','inventory','inventory_transactions',
+        'menu_item_product_map','cash_movements','shifts'
+      ];
+      for (const t of tablesToConvert) {
+        try {
+          // Convert all columns + table default to utf8mb4/utf8mb4_unicode_ci
+          await conn.query(`ALTER TABLE \`${t}\` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+          await conn.query(`ALTER TABLE \`${t}\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+        } catch (e) {
+          if (!/doesn't exist|unknown table/i.test(e.message)) console.warn(`convert ${t}:`, e.message);
+        }
+      }
+    } finally {
+      try { await pool.query('SET FOREIGN_KEY_CHECKS=1'); } catch {}
+      try { /* ensure release even if FK enable fails */ } finally { conn.release(); }
+    }
+  } catch (e) {
+    if (!/denied|unknown database/i.test(e.message)) console.warn('alter database collation:', e.message);
+  }
+
   // Add lifecycle/tender columns if they don't exist (MySQL 8 supports IF NOT EXISTS)
   try {
     await pool.query(`ALTER TABLE tables ADD COLUMN IF NOT EXISTS cleaning_until DATETIME NULL`);
@@ -61,6 +165,13 @@ async function ensureTableMigrations() {
     await pool.query(`ALTER TABLE bills ADD COLUMN IF NOT EXISTS tender_card DECIMAL(10,2) DEFAULT 0`);
   } catch (e) { if (!/Duplicate column|exists/i.test(e.message)) console.warn('bills.tender_card:', e.message); }
 
+  // Reservations: add check-in audit columns if missing
+  try {
+    await pool.query(`ALTER TABLE reservations ADD COLUMN IF NOT EXISTS checked_in_at DATETIME NULL`);
+  } catch (e) { if (!/Duplicate column|exists/i.test(e.message)) console.warn('reservations.checked_in_at:', e.message); }
+  try {
+    await pool.query(`ALTER TABLE reservations ADD COLUMN IF NOT EXISTS checked_in_by VARCHAR(100) NULL`);
+  } catch (e) { if (!/Duplicate column|exists/i.test(e.message)) console.warn('reservations.checked_in_by:', e.message); }
   // Phase 7: shifts & cash_movements
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS shifts (
@@ -94,11 +205,59 @@ async function ensureTableMigrations() {
   } catch (e) { console.warn('cash_movements table:', e.message); }
 }
 
+// Run SQL file migrations from `src/migrations/` once (idempotent)
+async function runSqlMigrations() {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_migration (name)
+      )
+    `);
+    const [executed] = await conn.query('SELECT name FROM migrations');
+    const executedNames = new Set(executed.map(r => r.name));
+    const migrationsDir = path.join(__dirname, 'migrations');
+    let files = [];
+    try {
+      files = await fs.promises.readdir(migrationsDir);
+    } catch (e) {
+      console.warn('Migrations dir missing:', migrationsDir);
+      files = [];
+    }
+    const toRun = files.filter(f => f.endsWith('.sql') && !executedNames.has(f)).sort();
+    if (toRun.length === 0) {
+      await conn.commit();
+      return;
+    }
+    for (const file of toRun) {
+      const sql = await fs.promises.readFile(path.join(migrationsDir, file), 'utf8');
+      const statements = sql.split(';').map(s => s.trim()).filter(Boolean);
+      for (const stmt of statements) {
+        await conn.query(stmt);
+      }
+      await conn.query('INSERT INTO migrations (name) VALUES (?)', [file]);
+      console.log(`[migrate] ✓ ${file}`);
+    }
+    await conn.commit();
+    console.log('[migrate] All migrations applied');
+  } catch (e) {
+    await conn.rollback();
+    console.error('[migrate] Failed:', e.message);
+  } finally {
+    conn.release();
+  }
+}
+
 initSchema()
   .then(async () => {
     if (typeof initBarInventorySchema === 'function') {
       await initBarInventorySchema();
     }
+    await runSqlMigrations();
     await ensureTableMigrations();
   })
   .catch(err => {
@@ -107,15 +266,63 @@ initSchema()
 
 // Seeding is handled in db.initSchema()
 
-// API Routes
-const inventoryRoutes = require('./routes/inventory');
-app.use('/api/inventory', inventoryRoutes);
+// Import routes
+const accessRoutes = require('./routes/access');
+const tablesRouter = require('./routes/tables');
+const menuRouter = require('./routes/menu');
+const ordersRouter = require('./routes/orders');
+const inventoryRouter = require('./routes/inventory/index');
+const reportsRouter = require('./routes/reports');
+const settingsRouter = require('./routes/settings');
+const hardwareRoutes = require('./routes/hardware');
+const customersRouter = require('./routes/customers');
+const reservationsRouter = require('./routes/reservations');
 
-// Global error handler (JSON)
+// Authentication middleware
+const { authenticate } = require('./middleware/auth.middleware');
+const testRoutes = require('./routes/test.routes');
+
+// Public routes (no authentication required)
+app.use('/api/access', accessRoutes);
+app.use('/api/test', testRoutes);
+
+// Serve favicon.ico before authentication
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+// Protected routes (require authentication)
+app.use(authenticate);
+
+// API routes
+// Mount tablesRouter at '/api' so its internal paths like '/tables' and '/table-layouts'
+// resolve to '/api/tables' and '/api/table-layouts' respectively.
+app.use('/api', tablesRouter);
+app.use('/api/menu', menuRouter);
+app.use('/api/orders', ordersRouter);
+app.use('/api/inventory', inventoryRouter);
+app.use('/api/reports', reportsRouter);
+app.use('/api/settings', settingsRouter);
+app.use('/api/hardware', hardwareRoutes);
+app.use('/api/customers', customersRouter);
+app.use('/api/reservations', reservationsRouter);
+
+// Global error handler (must be after all other middleware/routes)
 app.use((err, req, res, next) => {
-  console.error('API Error:', err && err.stack ? err.stack : err);
-  const status = err && err.status ? err.status : 500;
-  res.status(status).json({ error: err && err.message ? err.message : 'Internal Server Error' });
+  const status = err.statusCode || err.status || 500;
+  const isAuthErr =
+    status === 401 ||
+    status === 403 ||
+    err instanceof UnauthorizedError ||
+    err instanceof ForbiddenError;
+
+  if (isAuthErr) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`AuthError ${status}: ${err.message} ${req.method} ${req.originalUrl}`);
+    }
+  } else {
+    console.error('API Error:', err && err.stack ? err.stack : err);
+  }
+
+  return errorHandler(err, req, res, next);
 });
 
 // Helper: write audit log
@@ -138,10 +345,7 @@ app.post('/api/admin/verify-pin', (req, res) => {
   return res.json({ ok, role: ok ? 'manager' : null });
 });
 
-// Minimal inventory endpoint to avoid 404s until full integration
-app.get('/api/inventory', (_req, res) => {
-  res.json({ items: [], products: [], message: 'Inventory API not yet wired' });
-});
+// Inventory API is now fully implemented in routes/inventory/index.js
 
 // ---------------------------
 // Phase 7: Shift Management
@@ -578,25 +782,6 @@ async function applyInventoryForTable(tableId, userId = null) {
     conn.release();
   }
 }
-
-// Reports: today summary (local server time)
-app.get('/api/reports/today', (_req, res) => {
-  try {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const start = `${y}-${m}-${d} 00:00:00`;
-    const end = `${y}-${m}-${d} 23:59:59`;
-    const sql = `SELECT COUNT(*) as count, COALESCE(SUM(total),0) as total, COALESCE(SUM(subtotal),0) as subtotal, COALESCE(SUM(tax),0) as tax, COALESCE(SUM(tip),0) as tip FROM bills WHERE created_at BETWEEN ? AND ?`;
-    db.all(sql, [start, end], (err, rows) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ range: { from: start, to: end }, bills: rows?.[0] || { count: 0, total: 0, subtotal: 0, tax: 0, tip: 0 } });
-    });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
 
 // Tables: list
 app.get('/api/tables', (_req, res) => {
@@ -1583,9 +1768,9 @@ app.get('/api/reports/shift', async (req, res) => {
 
 app.get('/api/reports/today', async (req, res) => {
   try {
-    const { from, to } = parseWindow({ query: {} });
-    const fromIso = from.toISOString().slice(0,19).replace('T',' ');
-    const toIso = to.toISOString().slice(0,19).replace('T',' ');
+    const { start, end } = parseWindow({ query: { window: 'today' } });
+    const fromIso = new Date(start).toISOString().slice(0,19).replace('T',' ');
+    const toIso = new Date(end).toISOString().slice(0,19).replace('T',' ');
     const [ordersRows, billsRows, voidRows, compRows] = await runAll(db, [
       { sql: `SELECT COUNT(*) as cnt, COALESCE(SUM(total),0) as sum FROM orders WHERE order_time BETWEEN ? AND ?`, params: [fromIso, toIso] },
       { sql: `SELECT COUNT(*) as cnt, COALESCE(SUM(total),0) as sum FROM bills WHERE created_at BETWEEN ? AND ?`, params: [fromIso, toIso] },
@@ -1595,12 +1780,20 @@ app.get('/api/reports/today', async (req, res) => {
 
     // Payment method breakdown
     const payRows = await new Promise((resolve, reject) => {
-      const sql = `SELECT COALESCE(LOWER(payment_method),'unknown') as method, COUNT(*) as cnt, COALESCE(SUM(total),0) as sum
-                   FROM bills
-                   WHERE created_at BETWEEN ? AND ?
-                   GROUP BY COALESCE(LOWER(payment_method),'unknown')
-                   ORDER BY sum DESC`;
-      db.all(sql, [fromIso, toIso], (err, rows) => err ? reject(err) : resolve(rows));
+      const sql = `
+        SELECT 'cash' as method,
+               SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN total ELSE COALESCE(tender_cash,0) END) as sum,
+               SUM(CASE WHEN (LOWER(payment_method) = 'cash' AND total > 0) OR (COALESCE(tender_cash,0) > 0) THEN 1 ELSE 0 END) as cnt
+        FROM bills
+        WHERE created_at BETWEEN ? AND ?
+        UNION ALL
+        SELECT 'card' as method,
+               SUM(CASE WHEN LOWER(payment_method) = 'card' THEN total ELSE COALESCE(tender_card,0) END) as sum,
+               SUM(CASE WHEN (LOWER(payment_method) = 'card' AND total > 0) OR (COALESCE(tender_card,0) > 0) THEN 1 ELSE 0 END) as cnt
+        FROM bills
+        WHERE created_at BETWEEN ? AND ?
+        ORDER BY method ASC`;
+      db.all(sql, [fromIso, toIso, fromIso, toIso], (err, rows) => err ? reject(err) : resolve(rows));
     });
 
     // Station throughput via category → station mapping
@@ -1915,13 +2108,11 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-server.listen(PORT, () => {
-  const host = process.env.DB_HOST || '127.0.0.1';
-  const port = process.env.DB_PORT || '3306';
-  const user = process.env.DB_USER || 'bola8pos';
-  const database = process.env.DB_NAME || 'bola8pos';
-  console.log(`Server running on port ${PORT}`);
-  console.log(`MySQL connected (pool): ${user}@${host}:${port}/${database}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on ${isHttps ? 'HTTPS' : 'HTTP'}://localhost:${PORT}`);
+  if (isHttps) {
+    console.log('Note: Using self-signed certificate. You may need to accept the security exception in your browser.');
+  }
 });
 
 module.exports = app;

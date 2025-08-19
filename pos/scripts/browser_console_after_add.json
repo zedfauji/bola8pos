@@ -1,0 +1,98 @@
+[
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/@vite/client 732:8 \"[vite] connecting...\"",
+    "timestamp": 1755331045885,
+    "type": ""
+  },
+  {
+    "level": "INFO",
+    "message": "http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+    "timestamp": 1755331045917,
+    "type": ""
+  },
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/@vite/client 826:11 \"[vite] connected.\"",
+    "timestamp": 1755331046187,
+    "type": ""
+  },
+  {
+    "level": "WARNING",
+    "message": "http://localhost:5173/login - <meta name=\"apple-mobile-web-app-capable\" content=\"yes\"> is deprecated. Please include <meta name=\"mobile-web-app-capable\" content=\"yes\">",
+    "timestamp": 1755331046481,
+    "type": ""
+  },
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/@vite/client 732:8 \"[vite] connecting...\"",
+    "timestamp": 1755331047137,
+    "type": ""
+  },
+  {
+    "level": "INFO",
+    "message": "http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+    "timestamp": 1755331047206,
+    "type": ""
+  },
+  {
+    "level": "WARNING",
+    "message": "http://localhost:5173/tables - <meta name=\"apple-mobile-web-app-capable\" content=\"yes\"> is deprecated. Please include <meta name=\"mobile-web-app-capable\" content=\"yes\">",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "WARNING",
+    "message": "http://localhost:5173/src/hooks/useWebSocket.js 63 WebSocket connection to 'wss://localhost:3001/ws/tables' failed: WebSocket is closed before the connection is established.",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/src/hooks/useWebSocket.js 59:16 \"WebSocket error:\" Event",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/src/hooks/useWebSocket.js 49:16 \"WebSocket disconnected\"",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/@vite/client 826:11 \"[vite] connected.\"",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "SEVERE",
+    "message": "http://localhost:5173/src/hooks/useWebSocket.js 31 WebSocket connection to 'wss://localhost:3001/ws/tables' failed: Connection closed before receiving a handshake response",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/src/hooks/useWebSocket.js 59:16 \"WebSocket error:\" Event",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "DEBUG",
+    "message": "http://localhost:5173/src/hooks/useWebSocket.js 49:16 \"WebSocket disconnected\"",
+    "timestamp": 1755331048738,
+    "type": ""
+  },
+  {
+    "level": "INFO",
+    "message": "http://localhost:5173/src/hooks/use-toast.js 4:14 \"Toast:\" Object",
+    "timestamp": 1755331048897,
+    "type": ""
+  },
+  {
+    "level": "SEVERE",
+    "message": "http://localhost:5173/src/components/tables/TableLayoutEditor.jsx 179:20 \"Failed to create table:\" Error: No active layout\n    at http://localhost:5173/src/contexts/TableContext.jsx:261:29\n    at onAddTable (http://localhost:5173/src/components/tables/TableLayoutEditor.jsx:178:19)\n    at HTMLUnknownElement.callCallback2 (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:3680:22)\n    at Object.invokeGuardedCallbackDev (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:3705:24)\n    at invokeGuardedCallback (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:3739:39)\n    at invokeGuardedCallbackAndCatchFirstError (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:3742:33)\n    at executeDispatch (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:7046:11)\n    at processDispatchQueueItemsInOrder (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:7066:15)\n    at processDispatchQueue (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:7075:13)\n    at dispatchEventsForPlugins (http://localhost:5173/node_modules/.vite/deps/chunk-YQ5BCTVV.js?v=5a938436:7083:11)",
+    "timestamp": 1755331048897,
+    "type": ""
+  }
+]

@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { createSafeApiCall } from '../utils/apiErrorHandler';
+
+/** @typedef {Window & { __API_BASE_URL__?: string }} WindowWithApiBase */
 
 // Resolve API base URL: prefer Vite env, then window override, then localhost:3001
 let API_BASE_URL = 'http://localhost:3001';
@@ -7,13 +10,14 @@ try {
     API_BASE_URL = import.meta.env.VITE_API_URL;
   }
 } catch {}
-if (typeof window !== 'undefined' && window.__API_BASE_URL__) {
-  API_BASE_URL = window.__API_BASE_URL__;
+if (typeof window !== 'undefined') {
+  const w = /** @type {WindowWithApiBase} */ (window);
+  if (w.__API_BASE_URL__) {
+    API_BASE_URL = w.__API_BASE_URL__;
+  }
 }
-// Ensure trailing /api for axios base if not provided
-if (!/\/api\/?$/.test(API_BASE_URL)) {
-  API_BASE_URL = API_BASE_URL.replace(/\/$/, '') + '/api';
-}
+// Normalize: strip trailing '/api' if present; endpoints already include '/api'
+API_BASE_URL = String(API_BASE_URL || '').replace(/\/?api\/?$/, '');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -24,101 +28,207 @@ const api = axios.create({
 
 // Add request interceptor to include auth token
 api.interceptors.request.use(
+  /** @param {import('axios').InternalAxiosRequestConfig} config */
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (config.headers) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        config.headers = /** @type {import('axios').AxiosRequestHeaders} */ ({
+          Authorization: `Bearer ${token}`,
+        });
+      }
     }
     return config;
   },
+  /** @param {unknown} error */
   (error) => {
     return Promise.reject(error);
   }
 );
 
+// Error handling options - only log once per minute
+const errorOptions = {
+  silent: false,
+  logInterval: 60000
+};
+
 // Products API
 export const productsApi = {
-  getAll: (params = {}) => api.get('/inventory/products', { params }),
-  getById: (id) => api.get(`/inventory/products/${id}`),
-  create: (data) => api.post('/inventory/products', data),
-  update: (id, data) => api.put(`/inventory/products/${id}`, data),
-  delete: (id) => api.delete(`/inventory/products/${id}`),
-  getInventory: (productId) => api.get(`/inventory/products/${productId}/inventory`),
+  /** @param {Record<string, any>} [params] */
+  getAll: createSafeApiCall(
+    (params = {}) => api.get('/api/inventory/products', { params }),
+    'products.getAll',
+    errorOptions
+  ),
+  /** @param {string|number} id */
+  getById: (id) => api.get(`/api/inventory/products/${id}`),
+  /** @param {any} data */
+  create: (data) => api.post('/api/inventory/products', data),
+  /** @param {string|number} id @param {any} data */
+  update: (id, data) => api.put(`/api/inventory/products/${id}`, data),
+  /** @param {string|number} id */
+  delete: (id) => api.delete(`/api/inventory/products/${id}`),
+  /** @param {string|number} productId */
+  getInventory: (productId) => api.get(`/api/inventory/products/${productId}/inventory`),
   
   // Variants
-  addVariant: (productId, data) => api.post(`/inventory/products/${productId}/variants`, data),
-  updateVariant: (variantId, data) => api.put(`/inventory/variants/${variantId}`, data),
-  deleteVariant: (variantId) => api.delete(`/inventory/variants/${variantId}`),
+  /** @param {string|number} productId @param {any} data */
+  addVariant: (productId, data) => api.post(`/api/inventory/products/${productId}/variants`, data),
+  /** @param {string|number} variantId @param {any} data */
+  updateVariant: (variantId, data) => api.put(`/api/inventory/variants/${variantId}`, data),
+  /** @param {string|number} variantId */
+  deleteVariant: (variantId) => api.delete(`/api/inventory/variants/${variantId}`),
 };
 
 // Inventory API
 export const inventoryApi = {
+  /** @param {string|number} locationId @param {Record<string, any>} [params] */
   getByLocation: (locationId, params = {}) => 
-    api.get(`/inventory/inventory/location/${locationId}`, { params }),
+    api.get(`/api/inventory/location/${locationId}`, { params }),
+  /** @param {string|number} productId @param {Record<string, any>} [params] */
   getByProduct: (productId, params = {}) => 
-    api.get(`/inventory/inventory/product/${productId}`, { params }),
-  adjust: (data) => api.post('/inventory/inventory/adjust', data),
-  transfer: (data) => api.post('/inventory/inventory/transfer', data),
+    api.get(`/api/inventory/product/${productId}`, { params }),
+  /** @param {any} data */
+  adjust: (data) => api.post('/api/inventory/adjust', data),
+  /** @param {any} data */
+  transfer: (data) => api.post('/api/inventory/transfer', data),
+  /** @param {string|number} productId @param {Record<string, any>} [params] */
   getHistory: (productId, params = {}) => 
-    api.get(`/inventory/inventory/history/product/${productId}`, { params }),
+    api.get(`/api/inventory/history/product/${productId}`, { params }),
+  /** @param {number} [threshold] */
   getLowStock: (threshold = 10) => 
-    api.get('/inventory/inventory/low-stock', { params: { threshold } }),
+    api.get('/api/inventory/low-stock', { params: { threshold } }),
+  /** @param {Record<string, any>} [params] */
   getSnapshot: (params = {}) => 
-    api.get('/inventory/inventory/snapshot', { params }),
+    api.get('/api/inventory/snapshot', { params }),
+  
+  // Stock Count API
+  /** @param {Record<string, any>} [params] Get all stock counts */
+  getStockCounts: (params = {}) => 
+    api.get('/api/inventory/stock-counts', { params }),
+  /** @param {string|number} id Get stock count by ID */
+  getStockCountById: (id) => 
+    api.get(`/api/inventory/stock-counts/${id}`),
+  /** @param {any} data Create a new stock count */
+  createStockCount: (data) => 
+    api.post('/api/inventory/stock-counts', data),
+  /** @param {string|number} id @param {any} data Update a stock count */
+  updateStockCount: (id, data) => 
+    api.put(`/api/inventory/stock-counts/${id}`, data),
+  /** @param {string|number} id @param {any} data Save stock count items */
+  saveStockCountItems: (id, data) => 
+    api.post(`/api/inventory/stock-counts/${id}/items`, data),
+  /** @param {string|number} id Complete a stock count */
+  completeStockCount: (id) => 
+    api.put(`/api/inventory/stock-counts/${id}/complete`),
+  /** @param {string|number} id Cancel a stock count */
+  cancelStockCount: (id) => 
+    api.put(`/api/inventory/stock-counts/${id}/cancel`),
+  /** @param {Record<string, any>} [params] Get stock count history */
+  getStockCountHistory: (params = {}) => 
+    api.get('/api/inventory/stock-counts/history', { params }),
 };
 
 // Categories API
 export const categoriesApi = {
-  getAll: () => api.get('/inventory/categories'),
-  getTree: () => api.get('/inventory/categories/tree'),
-  getById: (id) => api.get(`/inventory/categories/${id}`),
-  create: (data) => api.post('/inventory/categories', data),
-  update: (id, data) => api.put(`/inventory/categories/${id}`, data),
-  delete: (id) => api.delete(`/inventory/categories/${id}`),
+  getAll: createSafeApiCall(
+    () => api.get('/api/inventory/categories'),
+    'categories.getAll',
+    errorOptions
+  ),
+  getTree: createSafeApiCall(
+    () => api.get('/api/inventory/categories/tree'),
+    'categories.getTree',
+    errorOptions
+  ),
+  /** @param {string|number} id */
+  getById: (id) => api.get(`/api/inventory/categories/${id}`),
+  /** @param {any} data */
+  create: (data) => api.post('/api/inventory/categories', data),
+  /** @param {string|number} id @param {any} data */
+  update: (id, data) => api.put(`/api/inventory/categories/${id}`, data),
+  /** @param {string|number} id */
+  delete: (id) => api.delete(`/api/inventory/categories/${id}`),
+  /** @param {string|number} categoryId @param {Record<string, any>} [params] */
   getProducts: (categoryId, params = {}) => 
-    api.get(`/inventory/categories/${categoryId}/products`, { params }),
+    api.get(`/api/inventory/categories/${categoryId}/products`, { params }),
 };
 
 // Locations API
 export const locationsApi = {
-  getAll: (params = {}) => api.get('/inventory/locations', { params }),
-  getById: (id) => api.get(`/inventory/locations/${id}`),
-  create: (data) => api.post('/inventory/locations', data),
-  update: (id, data) => api.put(`/inventory/locations/${id}`, data),
-  delete: (id) => api.delete(`/inventory/locations/${id}`),
+  /** @param {Record<string, any>} [params] */
+  getAll: createSafeApiCall(
+    (params = {}) => api.get('/api/inventory/locations', { params }),
+    'locations.getAll',
+    errorOptions
+  ),
+  /** @param {string|number} id */
+  getById: (id) => api.get(`/api/inventory/locations/${id}`),
+  /** @param {any} data */
+  create: (data) => api.post('/api/inventory/locations', data),
+  /** @param {string|number} id @param {any} data */
+  update: (id, data) => api.put(`/api/inventory/locations/${id}`, data),
+  /** @param {string|number} id */
+  delete: (id) => api.delete(`/api/inventory/locations/${id}`),
+  /** @param {string|number} locationId @param {Record<string, any>} [params] */
   getInventory: (locationId, params = {}) => 
-    api.get(`/inventory/locations/${locationId}/inventory`, { params }),
-  getTypes: () => api.get('/inventory/locations/types'),
+    api.get(`/api/inventory/locations/${locationId}/inventory`, { params }),
+  getTypes: () => api.get('/api/inventory/locations/types'),
 };
 
 // Suppliers API
 export const suppliersApi = {
-  getAll: (params = {}) => api.get('/inventory/suppliers', { params }),
-  getById: (id) => api.get(`/inventory/suppliers/${id}`),
-  create: (data) => api.post('/inventory/suppliers', data),
-  update: (id, data) => api.put(`/inventory/suppliers/${id}`, data),
-  delete: (id) => api.delete(`/inventory/suppliers/${id}`),
+  /** @param {Record<string, any>} [params] */
+  getAll: createSafeApiCall(
+    (params = {}) => api.get('/api/inventory/suppliers', { params }),
+    'suppliers.getAll',
+    errorOptions
+  ),
+  /** @param {string|number} id */
+  getById: (id) => api.get(`/api/inventory/suppliers/${id}`),
+  /** @param {any} data */
+  create: (data) => api.post('/api/inventory/suppliers', data),
+  /** @param {string|number} id @param {any} data */
+  update: (id, data) => api.put(`/api/inventory/suppliers/${id}`, data),
+  /** @param {string|number} id */
+  delete: (id) => api.delete(`/api/inventory/suppliers/${id}`),
+  /** @param {string|number} supplierId @param {Record<string, any>} [params] */
   getPurchaseOrders: (supplierId, params = {}) => 
-    api.get(`/inventory/suppliers/${supplierId}/purchase-orders`, { params }),
+    api.get(`/api/inventory/suppliers/${supplierId}/purchase-orders`, { params }),
+  /** @param {string|number} supplierId */
   getStats: (supplierId) => 
-    api.get(`/inventory/suppliers/${supplierId}/stats`),
+    api.get(`/api/inventory/suppliers/${supplierId}/stats`),
+  /** @param {string} query */
   search: (query) => 
-    api.get(`/inventory/suppliers/search/${encodeURIComponent(query)}`),
+    api.get(`/api/inventory/suppliers/search/${encodeURIComponent(query)}`),
 };
 
 // Purchase Orders API
 export const purchaseOrdersApi = {
-  getAll: (params = {}) => api.get('/inventory/purchase-orders', { params }),
-  getById: (id) => api.get(`/inventory/purchase-orders/${id}`),
-  create: (data) => api.post('/inventory/purchase-orders', data),
+  /** @param {Record<string, any>} [params] */
+  getAll: createSafeApiCall(
+    (params = {}) => api.get('/api/inventory/purchase-orders', { params }),
+    'purchaseOrders.getAll',
+    errorOptions
+  ),
+  /** @param {string|number} id */
+  getById: (id) => api.get(`/api/inventory/purchase-orders/${id}`),
+  /** @param {any} data */
+  create: (data) => api.post('/api/inventory/purchase-orders', data),
+  /** @param {string|number} id @param {string} status */
   updateStatus: (id, status) => 
-    api.put(`/inventory/purchase-orders/${id}/status`, { status }),
+    api.put(`/api/inventory/purchase-orders/${id}/status`, { status }),
+  /** @param {string|number} id @param {any} data */
   receiveItems: (id, data) => 
-    api.post(`/inventory/purchase-orders/${id}/receive`, data),
+    api.post(`/api/inventory/purchase-orders/${id}/receive`, data),
+  /** @param {string|number} id */
   getHistory: (id) => 
-    api.get(`/inventory/purchase-orders/${id}/history`),
+    api.get(`/api/inventory/purchase-orders/${id}/history`),
+  /** @param {string|number} supplierId @param {Record<string, any>} [params] */
   getBySupplier: (supplierId, params = {}) => 
-    api.get(`/inventory/purchase-orders/supplier/${supplierId}`, { params }),
+    api.get(`/api/inventory/purchase-orders/supplier/${supplierId}`, { params }),
 };
 
 export default {

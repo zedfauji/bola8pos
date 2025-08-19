@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useState, useCallback, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
+import { handleApiError } from '../utils/errorHandler';
 import { useInventory } from '../hooks/useInventory';
 
 // Initial state
@@ -217,7 +218,8 @@ export const InventoryProvider = ({ children }) => {
         },
       });
     } catch (error) {
-      setError(error);
+      const handledError = handleApiError(error, 'Failed to load products');
+      setError(handledError);
     }
   }, [fetchProducts]);
 
@@ -229,8 +231,9 @@ export const InventoryProvider = ({ children }) => {
       await loadProducts();
       return newProduct;
     } catch (error) {
-      setError(error);
-      throw error;
+      const handledError = handleApiError(error, 'Failed to create product');
+      setError(handledError);
+      throw handledError;
     } finally {
       setLoading(false);
     }
@@ -244,8 +247,9 @@ export const InventoryProvider = ({ children }) => {
       await loadProducts();
       return updatedProduct;
     } catch (error) {
-      setError(error);
-      throw error;
+      const handledError = handleApiError(error, 'Failed to update product');
+      setError(handledError);
+      throw handledError;
     } finally {
       setLoading(false);
     }
@@ -258,8 +262,9 @@ export const InventoryProvider = ({ children }) => {
       enqueueSnackbar('Product deleted successfully', { variant: 'success' });
       await loadProducts();
     } catch (error) {
-      setError(error);
-      throw error;
+      const handledError = handleApiError(error, 'Failed to delete product');
+      setError(handledError);
+      throw handledError;
     } finally {
       setLoading(false);
     }
@@ -281,12 +286,13 @@ export const InventoryProvider = ({ children }) => {
     try {
       setLoading(true);
       const newCategory = await createCategory(categoryData);
-      enqueueSnackbar('Category created successfully', { variant: 'success' });
+      enqueueSnackbar('Category added successfully', { variant: 'success' });
       await loadCategories();
       return newCategory;
     } catch (error) {
-      setError(error);
-      throw error;
+      const handledError = handleApiError(error, 'Failed to add category');
+      setError(handledError);
+      throw handledError;
     } finally {
       setLoading(false);
     }
@@ -312,8 +318,9 @@ export const InventoryProvider = ({ children }) => {
       await loadSuppliers();
       return newSupplier;
     } catch (error) {
-      setError(error);
-      throw error;
+      const handledError = handleApiError(error, 'Failed to add supplier');
+      setError(handledError);
+      throw handledError;
     } finally {
       setLoading(false);
     }

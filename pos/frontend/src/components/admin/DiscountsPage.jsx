@@ -13,7 +13,8 @@ const scopes = [
 ];
 
 async function api(path, opts={}) {
-  const base = (import.meta?.env?.VITE_API_URL) || (window?.API_BASE_URL) || 'http://localhost:3001';
+  const rawBase = (import.meta?.env?.VITE_API_URL) || (window?.API_BASE_URL) || 'http://localhost:3001';
+  const base = String(rawBase || '').replace(/\/?api\/?$/, '');
   const res = await fetch(base + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
   if (!res.ok) throw new Error(await res.text());
   return res.json();

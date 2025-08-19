@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useAuth } from './AuthContext';
 import api from '../services/api';
 // Using dynamic import for better compatibility with Vite
 import('react-toastify').then(({ toast }) => {
@@ -80,14 +81,25 @@ export function SettingsProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   // Dev override can be toggled via localStorage.setItem('pos_dev_allow_all','1')
   const DEV_ALLOW_ALL = (() => { try { return localStorage.getItem('pos_dev_allow_all') === '1'; } catch { return false; } })();
+  // Auth state from context
+  const { user, loading: authLoading } = useAuth();
+  const loadedRef = useRef(false);
 
-  // Load all settings on mount
+  // Load settings only after authentication; avoid duplicate loads in StrictMode
   useEffect(() => {
-    async function loadSettings() {
+    let cancelled = false;
+    if (authLoading) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+    (async function loadSettings() {
       try {
         const [
-          authRes, accessRes, 
-          taxesRes, tipsRes, 
+          authRes, accessRes,
+          taxesRes, tipsRes,
           storeRes, printingRes
         ] = await Promise.all([
           api.getSetting('auth'),
@@ -97,7 +109,7 @@ export function SettingsProvider({ children }) {
           api.getSetting('store'),
           api.getSetting('printing'),
         ]);
-
+        if (cancelled) return;
         setSettings({
           auth: { ...DEFAULT_SETTINGS.auth, ...(authRes?.value || {}) },
           access: { ...DEFAULT_SETTINGS.access, ...(accessRes?.value || {}) },
@@ -110,16 +122,21 @@ export function SettingsProvider({ children }) {
         console.error('Failed to load settings:', error);
         if (window.toast) {
           window.toast.error('Failed to load settings. Using defaults.');
-        } else {
-          console.error('Toast not initialized yet');
         }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
-    }
+    })();
+    return () => { cancelled = true; };
+  }, [user, authLoading]);
 
-    loadSettings();
-  }, []);
+  // Reset settings on logout
+  useEffect(() => {
+    if (!authLoading && !user) {
+      setSettings(DEFAULT_SETTINGS);
+      loadedRef.current = false;
+    }
+  }, [user, authLoading]);
 
   // Update a specific setting section
   const updateSetting = async (section, value) => {
@@ -190,6 +207,17 @@ export function SettingsProvider({ children }) {
     return userRole === 'admin' || userPermissions.includes(requiredPermission);
   };
 
+  // Convenience wrapper used by feature modules
+  // Example: checkAccess('reservations', 'read') → hasPermission('reservations.read')
+  const checkAccess = (module, action) => {
+    try {
+      const key = `${module}.${action}`;
+      return hasPermission(key);
+    } catch {
+      return false;
+    }
+  };
+
   // Format currency based on store settings
   const formatCurrency = (amount) => {
     try {
@@ -223,6 +251,7 @@ export function SettingsProvider({ children }) {
         isPinRequired,
         verifyPin,
         hasPermission, // Add permission checking function
+        checkAccess,   // Module/action helper used by pages
         formatCurrency,
         calculateTax,
         formatTimeElapsed,

@@ -1,28 +1,76 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../../services/api';
 import { useSettings } from '../../contexts/SettingsContext';
-import { needsPinForPayout } from './pinLogic';
 
-function Modal({ title, children, onClose }) {
-  return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-md">
+function Modal({ title, children, onClose, testId }) {
+  // Prevent body scroll when modal is open
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  const modalContent = (
+    <div 
+      className="fixed inset-0 flex items-center justify-center p-4" 
+      style={{ 
+        zIndex: '2147483647',
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        right: '0', 
+        bottom: '0',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        backdropFilter: 'blur(2px)'
+      }}
+      onClick={(e) => {
+        // Close on backdrop click
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="bg-gray-900 rounded-lg shadow-xl w-full max-w-md relative"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        data-testid={testId || undefined}
+        style={{ 
+          zIndex: '2147483647',
+          position: 'relative'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="px-5 py-3 border-b border-gray-700 flex items-center justify-between">
           <h3 className="text-white font-semibold">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-white text-xl leading-none" 
+            data-testid="modal-close-x"
+            style={{ minWidth: '24px', minHeight: '24px' }}
+          >
+            ✕
+          </button>
         </div>
         <div className="p-5">{children}</div>
       </div>
     </div>
   );
+
+  // Render modal at document root using Portal
+  return createPortal(modalContent, document.body);
 }
 
 export default function ShiftBar() {
-  const { isPinRequired, verifyPin, access } = useSettings();
+  const { isPinRequired, verifyPin, access, isLoading, checkAccess } = useSettings();
   const [loading, setLoading] = useState(false);
   const [shift, setShift] = useState(null);
   const [error, setError] = useState('');
   const [modal, setModal] = useState(null); // { type: 'open'|'movement'|'close', payload }
+  const isLoadingRef = useRef(isLoading);
+  useEffect(() => { isLoadingRef.current = isLoading; }, [isLoading]);
+  const startCashRef = useRef(null);
 
   async function refresh() {
     try {
@@ -40,11 +88,35 @@ export default function ShiftBar() {
 
   useEffect(() => { refresh(); }, []);
 
-  async function ensurePinIfRequired(action, force = false) {
+  // Wait for settings to load to avoid enforcing default PIN flags before real settings arrive
+  async function waitForSettingsReady() {
+    if (!isLoadingRef.current) return;
+    // wait up to ~3s
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 50));
+      if (!isLoadingRef.current) break;
+    }
+  }
+
+  async function ensurePinIfRequired(action, force = false, context = {}) {
     if (!force && !isPinRequired(action)) return true;
+    const {
+      actionLabel,
+      amount,
+      threshold,
+    } = context || {};
+
+    // Improved copy for PIN prompt
+    const parts = [];
+    parts.push(`Manager approval required to ${actionLabel || 'perform this action'}.`);
+    if (typeof amount === 'number' && typeof threshold === 'number') {
+      parts.push(`Note: payouts at or above ${Number(threshold).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} require manager PIN. This amount: ${Number(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}.`);
+    }
+    const message = parts.join('\n');
+
     let pin = '';
-    // Simple inline prompt for PIN; could be upgraded to a dedicated modal
-    pin = window.prompt('Manager PIN required', '');
+    // Keep prompt for compatibility with tests; future enhancement could use a dedicated modal
+    pin = window.prompt(message, '');
     if (pin == null) return false;
     const res = await verifyPin(pin);
     if (!res.ok) {
@@ -55,7 +127,10 @@ export default function ShiftBar() {
   }
 
   function openOpenModal() {
-    setModal({ type: 'open', payload: { start: 200, notes: '' } });
+    // Prefill from last remembered start cash
+    let last = 200;
+    try { const v = localStorage.getItem('pos_last_start_cash'); if (v!=null) last = Number(v)||200; } catch {}
+    setModal({ type: 'open', payload: { start: last, notes: '' } });
   }
   function openMovementModal(kind) {
     setModal({ type: 'movement', payload: { kind, amount: kind==='adjustment'?5:20, reason: '' } });
@@ -65,27 +140,33 @@ export default function ShiftBar() {
   }
 
   async function submitOpen({ start, notes }) {
-    if (!(await ensurePinIfRequired('start'))) return;
+    await waitForSettingsReady();
+    if (!(await ensurePinIfRequired('start', false, { actionLabel: 'open this shift' }))) return;
     setLoading(true);
     try {
-      await api.openShift({ start_cash: Number(start)||0, notes: notes||'Opened via UI' });
-      await refresh();
+      // Clamp to 2 decimals and disallow negatives
+      const amount = Math.max(0, Math.round((Number(start)||0)*100)/100);
+      const opened = await api.openShift({ start_cash: amount, notes: notes||'Opened via UI' });
+      try { localStorage.setItem('pos_last_start_cash', String(amount)); } catch {}
+      // Immediately reflect the opened shift in UI to avoid timing issues
+      if (opened && opened.id) setShift(opened);
+      setError('');
       setModal(null);
+      // Background refresh to sync any server-calculated fields
+      refresh();
       if (window.toast) window.toast.success('Shift opened');
     } catch (e) { setError(e.message||'Open failed'); } finally { setLoading(false); }
   }
 
   async function submitMovement({ kind, amount, reason }) {
-    // Enforce PIN for payouts when required and above threshold
+    await waitForSettingsReady();
+    // Always enforce PIN for payouts; other movements follow lifecycle PIN flag
     let requireAction = 'finalize';
     if (kind === 'payout') {
       requireAction = 'refund';
-      const threshold = Number(access?.approvalThresholds?.cashPayoutAmount ?? 0);
-      const amt = Number(amount) || 0;
-      const mustPin = needsPinForPayout({ amount: amt, threshold, globallyRequired: isPinRequired(requireAction) });
-      if (mustPin && !(await ensurePinIfRequired(requireAction, true))) return;
+      if (!(await ensurePinIfRequired(requireAction, true, { actionLabel: 'authorize this payout' }))) return;
     } else {
-      if (!(await ensurePinIfRequired(requireAction))) return;
+      if (!(await ensurePinIfRequired(requireAction, false, { actionLabel: 'record this cash movement' }))) return;
     }
     setLoading(true);
     try {
@@ -101,7 +182,8 @@ export default function ShiftBar() {
   }
 
   async function submitClose({ counted, notes }) {
-    if (!(await ensurePinIfRequired('end'))) return;
+    await waitForSettingsReady();
+    if (!(await ensurePinIfRequired('end', false, { actionLabel: 'close this shift' }))) return;
     setLoading(true);
     try {
       await api.closeShift(shift.id, { end_cash_counted: Number(counted)||0, notes: notes||'Closed via UI' });
@@ -190,21 +272,21 @@ export default function ShiftBar() {
     <div className="flex items-center gap-2">
       {error ? <span className="text-red-400 text-sm">⚠ {error}</span> : null}
       {!shift ? (
-        <button disabled={loading} onClick={openOpenModal} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-2">
+        <button disabled={loading || (checkAccess && !checkAccess('shifts','open'))} onClick={openOpenModal} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-2">
           {loading ? <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"></span> : null}
           <span>Open Shift</span>
         </button>
       ) : (
         <>
           <span className="text-sm text-gray-300">Shift: {shift.id}</span>
-          <button disabled={loading} onClick={() => openMovementModal('drop')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Drop</button>
+          <button disabled={(checkAccess && !checkAccess('shifts.movement','drop'))} onClick={() => openMovementModal('drop')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed">Drop</button>
           <div className="flex items-center gap-2">
-            <button disabled={loading} onClick={() => openMovementModal('payout')} className="bg-yellow-600 hover:bg-yellow-700 text-black px-3 py-1 rounded">Payout</button>
-            <span className="text-[11px] text-gray-400">thr ≥ {Number(access?.approvalThresholds?.cashPayoutAmount ?? 0)}</span>
+            <button disabled={(checkAccess && !checkAccess('shifts.movement','payout'))} onClick={() => openMovementModal('payout')} className="bg-yellow-600 hover:bg-yellow-700 text-black px-3 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed">Payout</button>
+            <span className="text-[11px] text-gray-400">PIN Required</span>
           </div>
-          <button disabled={loading} onClick={() => openMovementModal('adjustment')} className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded">Adjust</button>
-          <button disabled={loading} onClick={printSummary} className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded">Print</button>
-          <button disabled={loading} onClick={openCloseModal} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded flex items-center gap-2">
+          <button disabled={(checkAccess && !checkAccess('shifts.movement','adjust'))} onClick={() => openMovementModal('adjustment')} className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed">Adjust</button>
+          <button disabled={(checkAccess && !checkAccess('shifts','print'))} onClick={printSummary} className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed">Print</button>
+          <button disabled={loading || (checkAccess && !checkAccess('shifts','close'))} onClick={openCloseModal} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             {loading ? <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"></span> : null}
             <span>Close</span>
           </button>
@@ -213,28 +295,47 @@ export default function ShiftBar() {
 
       {/* Modals */}
       {modal?.type === 'open' && (
-        <Modal title="Open Shift" onClose={() => setModal(null)}>
-          <div className="space-y-3">
-            <label className="block text-sm text-gray-300">Start Cash</label>
-            <input data-testid="open-start-cash" className="pos-input w-full" type="number" step="0.01" value={modal.payload.start}
-              onChange={e=>setModal(m=>({...m,payload:{...m.payload,start:e.target.value}}))} />
-            <label className="block text-sm text-gray-300">Notes</label>
-            <textarea className="pos-input w-full" rows={3} value={modal.payload.notes}
-              onChange={e=>setModal(m=>({...m,payload:{...m.payload,notes:e.target.value}}))} />
-            <div className="flex justify-end gap-2 pt-2">
-              <button onClick={()=>setModal(null)} className="pos-button-secondary">Cancel</button>
-              <button onClick={()=>submitOpen(modal.payload)} className="pos-button">Open</button>
+        <Modal title="Open Shift" onClose={() => setModal(null)} testId="modal-open-shift">
+          <form onSubmit={(e)=>{e.preventDefault(); const amt=Number(modal.payload.start); if (!isFinite(amt) || amt<0) return; submitOpen(modal.payload);}}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label htmlFor="start-cash" className="text-sm text-gray-300">Start Cash</label>
+                {isPinRequired('start') ? (<span className="text-[11px] text-gray-400">PIN Required</span>) : null}
+              </div>
+              <input id="start-cash" ref={startCashRef} autoFocus data-testid="open-start-cash" className="pos-input w-full" type="number" min="0" step="0.01" value={modal.payload.start}
+                onChange={e=>{
+                  const v=e.target.value; setModal(m=>({...m,payload:{...m.payload,start:v}}));
+                }} />
+              <div className="text-[12px] text-gray-400">Opening drawer cash. Use quick buttons or enter a custom amount.</div>
+              <div className="flex gap-2">
+                {[0,100,200].map(v=> (
+                  <button type="button" key={v} className="pos-button-secondary px-2 py-1" onClick={()=>setModal(m=>({...m,payload:{...m.payload,start:String(v)}}))}>{v.toLocaleString('en-US',{style:'currency',currency:'USD'})}</button>
+                ))}
+              </div>
+              {(() => { const n=Number(modal.payload.start); const invalid = !isFinite(n) || n<0; return invalid ? (<div className="text-red-400 text-xs">Enter a valid non-negative amount.</div>) : null; })()}
+              <label htmlFor="open-notes" className="block text-sm text-gray-300">Notes</label>
+              <textarea id="open-notes" placeholder="Optional notes (e.g., shift handover)" className="pos-input w-full" rows={3} value={modal.payload.notes}
+                onChange={e=>setModal(m=>({...m,payload:{...m.payload,notes:e.target.value}}))} />
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={()=>setModal(null)} className="pos-button-secondary">Cancel</button>
+                <button type="submit" disabled={!isFinite(Number(modal.payload.start)) || Number(modal.payload.start) < 0} className="pos-button disabled:opacity-50 disabled:cursor-not-allowed">Open</button>
+              </div>
             </div>
-          </div>
+          </form>
         </Modal>
       )}
 
       {modal?.type === 'movement' && (
-        <Modal title={`Add ${modal.payload.kind}`} onClose={() => setModal(null)}>
+        <Modal title={`Add ${modal.payload.kind}`} onClose={() => setModal(null)} testId="modal-movement">
           <div className="space-y-3">
             <label className="block text-sm text-gray-300">Amount</label>
             <input data-testid="movement-amount" className="pos-input w-full" type="number" step="0.01" value={modal.payload.amount}
               onChange={e=>setModal(m=>({...m,payload:{...m.payload,amount:e.target.value}}))} />
+            {modal.payload.kind === 'payout' ? (
+              <div className="text-[12px] text-gray-400">
+                Manager PIN is required for all payouts. Current amount: {Number(modal.payload.amount || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}.
+              </div>
+            ) : null}
             <label className="block text-sm text-gray-300">Reason</label>
             <input data-testid="movement-reason" className="pos-input w-full" value={modal.payload.reason}
               onChange={e=>setModal(m=>({...m,payload:{...m.payload,reason:e.target.value}}))} />
@@ -247,7 +348,7 @@ export default function ShiftBar() {
       )}
 
       {modal?.type === 'close' && (
-        <Modal title="Close Shift" onClose={() => setModal(null)}>
+        <Modal title="Close Shift" onClose={() => setModal(null)} testId="modal-close-shift">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm text-gray-300">Use Denominations</label>
@@ -260,9 +361,9 @@ export default function ShiftBar() {
                 {[
                   100,50,20,10,5,1,0.25,0.1,0.05,0.01
                 ].map(v => (
-                  <div key={v} className="bg-white/5 rounded p-2">
+                  <div key={v} className="bg-white/5 rounded p-2" data-testid={`denom-cell-${v}`}>
                     <div className="text-xs text-gray-400">${v.toFixed(2)}</div>
-                    <input className="pos-input w-full mt-1" type="number" min="0" step="1" value={modal.payload.denoms[String(v)] ?? 0}
+                    <input data-testid={`denom-input-${v}`} className="pos-input w-full mt-1" type="number" min="0" step="1" value={modal.payload.denoms[String(v)] ?? 0}
                       onChange={e=>setModal(m=>{
                         const qty = Math.max(0, Number(e.target.value)||0);
                         const denoms = { ...m.payload.denoms, [String(v)]: qty };

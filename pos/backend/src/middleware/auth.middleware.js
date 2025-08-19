@@ -1,0 +1,209 @@
+const jwt = require('jsonwebtoken');
+const { pool } = require('../db');
+const { auditLog } = require('../services/audit.service');
+const { UnauthorizedError, ForbiddenError } = require('../utils/errors');
+
+/**
+ * Generate JWT tokens for authentication
+ */
+function generateTokens(user) {
+  // Create access token (15 minutes)
+  const accessToken = jwt.sign(
+    { 
+      userId: user.id,
+      email: user.email,
+      role: user.role 
+    },
+    process.env.JWT_SECRET || 'your-secret-key',
+    { expiresIn: '15m' }
+  );
+
+  // Create refresh token (7 days)
+  const refreshToken = jwt.sign(
+    { 
+      userId: user.id,
+      email: user.email,
+      tokenVersion: user.tokenVersion || 0
+    },
+    process.env.REFRESH_TOKEN_SECRET || 'your-refresh-secret-key',
+    { expiresIn: '7d' }
+  );
+
+  return { accessToken, refreshToken };
+}
+
+/**
+ * Verify JWT token from request
+ */
+function verifyToken(token, isRefresh = false) {
+  return jwt.verify(
+    token, 
+    isRefresh 
+      ? process.env.REFRESH_TOKEN_SECRET || 'your-refresh-secret-key'
+      : process.env.JWT_SECRET || 'your-secret-key'
+  );
+}
+
+/**
+ * Verify JWT token from Authorization header
+ */
+async function authenticate(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    const allowDemo = process.env.ALLOW_DEMO_AUTH === 'true' || (process.env.NODE_ENV !== 'production');
+
+    // Debug auth header
+    console.log('Auth header received:', authHeader);
+
+    // Accept Bearer, or fall back to demo user in non-production if allowed
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('No valid auth header found. Auth header:', authHeader);
+      if (allowDemo) {
+        console.log('Using demo user due to missing/invalid auth header');
+        // Minimal admin-like user with broad permissions for local/dev E2E smoke tests
+        req.user = {
+          id: 'demo-admin',
+          email: 'admin@billiardpos.com',
+          name: 'Demo Admin',
+          role: 'admin',
+          permissions: {
+            '*': ['*']
+          }
+        };
+        return next();
+      }
+      throw new UnauthorizedError('No token provided');
+    }
+
+    const token = authHeader.split(' ')[1];
+    console.log('Token extracted from header:', {
+      tokenLength: token ? token.length : 0,
+      tokenParts: token ? token.split('.').length : 0,
+      firstChars: token ? token.substring(0, 10) + '...' : 'null',
+      lastChars: token ? '...' + token.substring(token.length - 10) : 'null'
+    });
+    
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      console.log('Token verified successfully. Decoded payload:', decoded);
+    } catch (tokenError) {
+      console.error('Token verification failed:', tokenError.message);
+      console.error('JWT_SECRET used:', process.env.JWT_SECRET ? '[SECRET PRESENT]' : 'default fallback');
+      throw tokenError;
+    }
+    
+    // Get user from database with role and permissions
+    const [users] = await pool.query(
+      `SELECT u.*, r.name as role_name, rp.permission_id, p.resource, p.action 
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.id
+       LEFT JOIN role_permissions rp ON r.id = rp.role_id
+       LEFT JOIN permissions p ON rp.permission_id = p.id
+       WHERE u.id = ? AND u.is_active = 1`,
+      [decoded.userId]
+    );
+
+    if (!users.length) {
+      throw new UnauthorizedError('User not found or inactive');
+    }
+
+    // Group permissions by resource
+    const permissions = users.reduce((acc, row) => {
+      if (row.permission_id) {
+        if (!acc[row.resource]) {
+          acc[row.resource] = [];
+        }
+        acc[row.resource].push(row.action);
+      }
+      return acc;
+    }, {});
+
+    // Attach user and permissions to request
+    req.user = {
+      id: users[0].id,
+      email: users[0].email,
+      name: users[0].name,
+      role: users[0].role_name,
+      permissions
+    };
+
+    // Log authentication
+    await auditLog({
+      userId: req.user.id,
+      action: 'AUTHENTICATE',
+      resourceType: 'AUTH',
+      metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
+    });
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Check if user has required permissions
+ */
+function checkPermission(resource, action) {
+  return async (req, res, next) => {
+    try {
+      if (!req.user) {
+        throw new UnauthorizedError('Authentication required');
+      }
+
+      const hasPermission = req.user.permissions[resource]?.includes(action) || 
+                          req.user.permissions[resource]?.includes('*');
+      
+      if (!hasPermission) {
+        await auditLog({
+          userId: req.user.id,
+          action: 'PERMISSION_DENIED',
+          resourceType: resource.toUpperCase(),
+          resourceId: req.params.id,
+          metadata: { action, path: req.path }
+        });
+        throw new ForbiddenError('Insufficient permissions');
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+/**
+ * Check if user has any of the specified roles
+ */
+function hasRole(roles = []) {
+  return async (req, res, next) => {
+    try {
+      if (!req.user) {
+        throw new UnauthorizedError('Authentication required');
+      }
+
+      if (!roles.includes(req.user.role)) {
+        await auditLog({
+          userId: req.user.id,
+          action: 'ROLE_CHECK_FAILED',
+          resourceType: 'AUTH',
+          metadata: { requiredRoles: roles, userRole: req.user.role }
+        });
+        throw new ForbiddenError('Insufficient role privileges');
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+module.exports = {
+  authenticate,
+  checkPermission,
+  hasRole,
+  generateTokens,
+  verifyToken
+};
