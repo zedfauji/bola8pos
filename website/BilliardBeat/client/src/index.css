@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 10.2%);
+  --foreground: hsl(0, 0%, 75.3%);
+  --card: hsl(0, 0%, 17.6%);
+  --card-foreground: hsl(0, 0%, 75.3%);
+  --popover: hsl(0, 0%, 10.2%);
+  --popover-foreground: hsl(0, 0%, 75.3%);
+  --primary: hsl(0, 76.6%, 54.3%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 75.3%);
+  --secondary-foreground: hsl(0, 0%, 10.2%);
+  --muted: hsl(0, 0%, 14.1%);
+  --muted-foreground: hsl(0, 0%, 63.9%);
+  --accent: hsl(51, 100%, 50%);
+  --accent-foreground: hsl(0, 0%, 10.2%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 18.8%);
+  --input: hsl(0, 0%, 18.8%);
+  --ring: hsl(0, 76.6%, 54.3%);
+  --chart-1: hsl(0, 76.6%, 54.3%);
+  --chart-2: hsl(160, 60%, 45%);
+  --chart-3: hsl(30, 80%, 55%);
+  --chart-4: hsl(280, 65%, 60%);
+  --chart-5: hsl(340, 75%, 55%);
+  --radius: 0.75rem;
+
+  /* Rock theme colors */
+  --rock-black: hsl(0, 0%, 10.2%);
+  --rock-red: hsl(0, 76.6%, 27.3%);
+  --neon-red: hsl(0, 76.6%, 54.3%);
+  --chrome: hsl(0, 0%, 75.3%);
+  --charcoal: hsl(0, 0%, 17.6%);
+  --rock-gold: hsl(51, 100%, 50%);
+
+  /* Fonts */
+  --font-rock: 'Bebas Neue', cursive;
+  --font-elegant: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+.dark {
+  --background: hsl(0, 0%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --card: hsl(0, 0%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --popover: hsl(0, 0%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(0, 76.6%, 54.3%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 14.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 14.9%);
+  --muted-foreground: hsl(0, 0%, 63.9%);
+  --accent: hsl(0, 0%, 14.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 14.9%);
+  --input: hsl(0, 0%, 14.9%);
+  --ring: hsl(0, 76.6%, 54.3%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-rock-black text-chrome font-body antialiased;
+    background-color: var(--rock-black);
+    color: var(--chrome);
+    font-family: var(--font-body);
+  }
+}
+
+@layer utilities {
+  .font-rock {
+    font-family: var(--font-rock);
+    letter-spacing: 0.05em;
+  }
+  
+  .font-elegant {
+    font-family: var(--font-elegant);
+  }
+  
+  .text-rock-black {
+    color: var(--rock-black);
+  }
+  
+  .text-rock-red {
+    color: var(--rock-red);
+  }
+  
+  .text-neon-red {
+    color: var(--neon-red);
+  }
+  
+  .text-chrome {
+    color: var(--chrome);
+  }
+  
+  .text-charcoal {
+    color: var(--charcoal);
+  }
+  
+  .text-rock-gold {
+    color: var(--rock-gold);
+  }
+  
+  .bg-rock-black {
+    background-color: var(--rock-black);
+  }
+  
+  .bg-rock-red {
+    background-color: var(--rock-red);
+  }
+  
+  .bg-neon-red {
+    background-color: var(--neon-red);
+  }
+  
+  .bg-chrome {
+    background-color: var(--chrome);
+  }
+  
+  .bg-charcoal {
+    background-color: var(--charcoal);
+  }
+  
+  .bg-rock-gold {
+    background-color: var(--rock-gold);
+  }
+  
+  .border-chrome {
+    border-color: var(--chrome);
+  }
+  
+  .border-neon-red {
+    border-color: var(--neon-red);
+  }
+  
+  .border-rock-gold {
+    border-color: var(--rock-gold);
+  }
+  
+  .glow-red {
+    box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+  }
+  
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+}

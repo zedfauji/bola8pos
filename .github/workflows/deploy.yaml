@@ -1,0 +1,87 @@
+name: Deploy Billiard POS to Google Cloud
+
+on:
+  push:
+    branches:
+      - main  # Change this if using a different branch
+
+jobs:
+  deploy:
+    name: Deploy Backend & Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: 🔄 Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Authenticate with Google Cloud
+      - name: 🔐 Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # 3️⃣ Set up Google Cloud SDK
+      - name: 📦 Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # 4️⃣ Enable Required Services
+      - name: ⚡ Enable GCP Services
+        run: |
+          gcloud services enable compute.googleapis.com \
+              sqladmin.googleapis.com \
+              artifactregistry.googleapis.com \
+              run.googleapis.com \
+              cloudbuild.googleapis.com \
+              firebase.googleapis.com
+
+      # 5️⃣ Authenticate Docker for Artifact Registry
+      - name: 🐳 Configure Docker Authentication
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      # 6️⃣ Build & Push Backend Docker Image
+      - name: 🚀 Build & Push Backend Docker Image
+        run: |
+          cd backend
+          gcloud builds submit --tag us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/billiard-pos-repo/billiard-pos-backend .
+
+
+      # 7️⃣ Deploy Backend to Cloud Run
+      - name: 🔄 Deploy Backend to Cloud Run
+        run: |
+          gcloud run deploy billiard-pos-backend \
+            --image us-central1-docker.pkg.dev/bola8pos/billiard-pos-repo/billiard-pos-backend:latest \
+            --region us-central1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 5000 \
+            --add-cloudsql-instances ${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db \
+            --set-env-vars CLOUD_SQL_CONNECTION_NAME=${{ secrets.CLOUD_SQL_CONNECTION_NAME }},DB_HOST=${{ secrets.GCP_PROJECT_ID }}:us-central1:billiard-pos-db,DB_USER=postgres,DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=billiard_pos,GCLOUD_PROJECT=bola8pos \
+            --memory 512Mi \
+            --cpu 1 \
+            --max-instances 5 \
+            --timeout 300
+
+
+      # 8️⃣ Install Firebase CLI
+      - name: 🌎 Set up Firebase CLI
+        run: npm install -g firebase-tools
+
+      # 9️⃣ Authenticate Firebase using Service Account Key
+      - name: 🔑 Authenticate Firebase
+        run: |
+          echo "${{ secrets.FIREBASE_SA_KEY }}" > firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase-key.json"
+
+      # 🔟 Deploy Frontend to Firebase Hosting
+      - name: 🚀 Deploy Frontend to Firebase Hosting
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          firebase deploy --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: ✅ Deployment Completed
+        run: echo "🎉 Deployment successful! Backend is live on Cloud Run, Frontend is on Firebase Hosting."

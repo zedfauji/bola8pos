@@ -1,0 +1,237 @@
+import { createContext, useContext, useState, useCallback } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import api from '@/lib/axios';
+
+// Create context
+/**
+ * @typedef {Object} TableContextType
+ * @property {Array<Object>} layouts - Table layouts
+ * @property {boolean} loading - Loading state
+ * @property {Function} saveLayout - Function to save a layout
+ * @property {Function} setActiveLayoutId - Function to set active layout ID
+ * @property {string|null} activeLayoutId - ID of the active layout
+ * @property {Function} deleteLayout - Function to delete a layout
+ * @property {Function} setActiveLayout - Function to set a layout as active
+ * @property {Array<Object>} tables - Tables in the active layout
+ * @property {Object|null} activeLayout - Currently active layout
+ */
+
+/**
+ * @type {import('react').Context<TableContextType>}
+ */
+const TableContext = createContext(null);
+
+// Provider component
+/**
+ * @param {Object} props
+ * @param {React.ReactNode} props.children
+ */
+export const TableProvider = ({ children }) => {
+  const queryClient = useQueryClient();
+  
+  /**
+   * Simple toast helper
+   * @param {string} message - Toast message
+   * @param {string} type - Toast type
+   */
+  const showToast = useCallback((message, type = 'success') => {
+    // @ts-ignore - window.toast is added by a toast library
+    if (window.toast) {
+      // @ts-ignore - window.toast is added by a toast library
+      window.toast(message, { type });
+    } else {
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+  }, []);
+  
+  // State
+  const [selectedTableId, setSelectedTableId] = useState(null);
+  const [activeLayoutId, setActiveLayoutId] = useState(() => {
+    // Try to get active layout ID from localStorage on initial load
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('activeLayoutId');
+    }
+    return null;
+  });
+
+  /**
+   * Update active layout ID in localStorage
+   * @param {string} id - Layout ID
+   */
+  const updateActiveLayoutId = useCallback((id) => {
+    setActiveLayoutId(id);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('activeLayoutId', id);
+    }
+  }, []);
+
+  // Fetch all layouts
+  const { data: layouts = [], isLoading: isLoadingLayouts } = useQuery({
+    queryKey: ['tableLayouts'],
+    queryFn: async () => {
+      const { data } = await api.get('/table-layouts');
+      return data;
+    },
+  });
+
+  // Fetch active layout details
+  const { data: activeLayout, isLoading: isLoadingActiveLayout } = useQuery({
+    queryKey: ['tableLayout', 'active'],
+    queryFn: async () => {
+      if (!activeLayoutId) return null;
+      const { data } = await api.get(`/table-layouts/${activeLayoutId}`);
+      return data;
+    },
+    enabled: !!activeLayoutId,
+  });
+
+  // Fetch tables for active layout
+  const { data: tables = [], isLoading: isLoadingTables } = useQuery({
+    queryKey: ['tables', activeLayoutId],
+    queryFn: async () => {
+      if (!activeLayoutId) return [];
+      const { data } = await api.get(`/tables?layoutId=${activeLayoutId}`);
+      return data;
+    },
+    enabled: !!activeLayoutId,
+  });
+
+  // Save layout mutation
+  const saveLayoutMutation = useMutation({
+    /**
+     * @param {Object} layoutData - Layout data to save
+     */
+    mutationFn: async (layoutData) => {
+      if (layoutData.id) {
+        const { data } = await api.put(`/table-layouts/${layoutData.id}`, layoutData);
+        return data;
+      } else {
+        const { data } = await api.post('/table-layouts', layoutData);
+        return data;
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tableLayouts'] });
+      queryClient.invalidateQueries({ queryKey: ['tableLayout', 'active'] });
+      
+      // If this is a new layout, set it as active
+      if (data && !activeLayoutId) {
+        updateActiveLayoutId(data.id);
+      }
+      
+      showToast(data.id ? 'Layout updated successfully' : 'Layout created successfully', 'success');
+      
+      return data;
+    },
+    onError: (error) => {
+      console.error('Error saving layout:', error);
+      // @ts-ignore - Error might be an AxiosError with response property
+      showToast(error.response?.data?.message || 'Failed to save layout', 'error');
+    },
+  });
+
+  // Delete layout mutation
+  const deleteLayoutMutation = useMutation({
+    /**
+     * @param {string} id - Layout ID to delete
+     */
+    mutationFn: async (id) => {
+      await api.delete(`/table-layouts/${id}`);
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['tableLayouts'] });
+      
+      // If the deleted layout was active, clear the active layout
+      if (activeLayoutId === id) {
+        updateActiveLayoutId(null);
+      } else if (activeLayoutId === null && layouts.length > 0) {
+        updateActiveLayoutId(layouts[0].id);
+      }
+      
+      showToast('Layout deleted successfully', 'success');
+    },
+    onError: (error) => {
+      console.error('Error deleting layout:', error);
+      // @ts-ignore - Error might be an AxiosError with response property
+      showToast(error.response?.data?.message || 'Failed to delete layout', 'error');
+    },
+  });
+
+  // Set active layout mutation
+  const setActiveLayoutMutation = useMutation({
+    /**
+     * @param {string} id - Layout ID
+     */
+    mutationFn: async (id) => {
+      const { data } = await api.put(`/table-layouts/${id}/activate`);
+      return data;
+    },
+    onSuccess: (data) => {
+      updateActiveLayoutId(data.id);
+      queryClient.invalidateQueries({ queryKey: ['tableLayouts'] });
+      queryClient.invalidateQueries({ queryKey: ['tableLayout', 'active'] });
+      
+      showToast('Layout activated successfully', 'success');
+    },
+    onError: (error) => {
+      console.error('Error activating layout:', error);
+      // @ts-ignore - Error might be an AxiosError with response property
+      showToast(error.response?.data?.message || 'Failed to activate layout', 'error');
+    },
+  });
+
+  // Wrapper functions
+  const saveLayout = useCallback((layoutData) => {
+    return saveLayoutMutation.mutateAsync(layoutData);
+  }, []);
+
+  const deleteLayout = useCallback((id) => {
+    return deleteLayoutMutation.mutateAsync(id);
+  }, []);
+
+  /**
+   * Set active layout
+   * @param {string} id - Layout ID to set as active
+   */
+  const setActiveLayout = useCallback(async (id) => {
+    return setActiveLayoutMutation.mutateAsync(id);
+  }, []);
+
+  // Loading state
+  const isLoading = isLoadingLayouts || isLoadingActiveLayout || isLoadingTables;
+
+  // Exposed values and actions
+  const value = {
+    // State
+    layouts,
+    activeLayout,
+    tables,
+    selectedTableId,
+    activeLayoutId,
+    loading: isLoading,
+    
+    // Actions
+    setSelectedTableId,
+    setActiveLayoutId: updateActiveLayoutId, // Use the wrapped version
+    saveLayout,
+    deleteLayout,
+    setActiveLayout,
+  };
+
+  return (
+    <TableContext.Provider value={value}>
+      {children}
+    </TableContext.Provider>
+  );
+};
+
+// Custom hook for using the table context
+export const useTableContext = () => {
+  const context = useContext(TableContext);
+  if (!context) {
+    throw new Error('useTableContext must be used within a TableProvider');
+  }
+  return context;
+};
+
+export default TableContext;

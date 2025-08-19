@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "bola8pos",
+    "password": "changeme",
+    "database": "pos_db",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  },
+  "test": {
+    "username": "bola8pos",
+    "password": "changeme",
+    "database": "pos_db_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  },
+  "production": {
+    "username": "bola8pos",
+    "password": "changeme",
+    "database": "pos_db_prod",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  }
+}

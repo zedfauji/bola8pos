@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bola 8 Pool Club La Calma - Rock n Roll Billiard Parlour</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'rock-black': '#1a1a1a',
+                        'rock-red': '#8b0000',
+                        'neon-red': '#ff4444',
+                        'chrome': '#c0c0c0',
+                        'charcoal': '#2d2d2d',
+                        'rock-gold': '#ffd700'
+                    },
+                    fontFamily: {
+                        'rock': ['Bebas Neue', 'cursive'],
+                        'elegant': ['Playfair Display', 'serif'],
+                        'body': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-rock-black text-white font-body">
+
+<!-- Navigation -->
+<nav class="fixed top-0 w-full bg-rock-black/95 backdrop-blur-sm border-b border-chrome/20 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+                <h1 class="font-rock text-2xl text-rock-gold">BOLA 8</h1>
+                <span class="font-elegant text-chrome ml-2">Pool Club La Calma</span>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-baseline space-x-8">
+                    <a href="#home" class="text-chrome hover:text-neon-red transition-colors">Inicio</a>
+                    <a href="#reservations" class="text-chrome hover:text-neon-red transition-colors">Reservaciones</a>
+                    <a href="#menu" class="text-chrome hover:text-neon-red transition-colors">Menú</a>
+                    <a href="#sports" class="text-chrome hover:text-neon-red transition-colors">Deportes</a>
+                    <a href="#reviews" class="text-chrome hover:text-neon-red transition-colors">Reseñas</a>
+                    <a href="#membership" class="text-chrome hover:text-neon-red transition-colors">Membresía</a>
+                    <a href="#promotions" class="text-chrome hover:text-neon-red transition-colors">Promociones</a>
+                </div>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button class="text-chrome hover:text-neon-red">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Dark atmospheric background of a rock music billiard hall with neon lighting -->
+    <div class="absolute inset-0 bg-gradient-to-r from-rock-black via-charcoal to-rock-black opacity-80"></div>
+    <div class="absolute inset-0" style="background-image: url('https://pixabay.com/get/g8078c04fff4888cf9c53dc40bd4e1aa84ff6c970b7f12f39ce3d9c038cbb6c7625840d1f2d72beccb267573f203ff16cc870f620ce6e97d373c318e32628b179_1280.jpg'); background-size: cover; background-position: center;"></div>
+    
+    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <h1 class="font-rock text-6xl md:text-8xl text-rock-gold mb-4 tracking-wider">
+            BOLA 8
+        </h1>
+        <h2 class="font-elegant text-3xl md:text-5xl text-chrome mb-6">
+            Pool Club La Calma
+        </h2>
+        <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            Cervezas Artesanales, Alitas, Rock Music, 5 Pool Tables y Great Food.
+            <br>Un grupo de entusiastas del billar (ingenieros) trayendo ideas frescas para mejorar tu experiencia.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button class="bg-neon-red hover:bg-red-600 text-white font-semibold py-4 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 glow-red">
+                <i class="fas fa-calendar-alt mr-2"></i>
+                Reservar Mesa
+            </button>
+            <button class="border-2 border-chrome text-chrome hover:bg-chrome hover:text-rock-black font-semibold py-4 px-8 rounded-lg transition-all duration-200">
+                <i class="fas fa-utensils mr-2"></i>
+                Ver Menú
+            </button>
+        </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-chrome animate-bounce">
+        <i class="fas fa-chevron-down text-2xl"></i>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="py-20 bg-charcoal">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-6">
+                    ¡ÚNETE A NOSOTROS!
+                </h2>
+                <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                    Todos los días de 3-11 PM
+                </p>
+                
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="text-center p-4 bg-rock-black/50 rounded-lg border border-chrome/20">
+                        <div class="text-2xl font-bold text-neon-red">$35</div>
+                        <div class="text-chrome text-sm">Cervezas</div>
+                    </div>
+                    <div class="text-center p-4 bg-rock-black/50 rounded-lg border border-chrome/20">
+                        <div class="text-2xl font-bold text-neon-red">$75</div>
+                        <div class="text-chrome text-sm">Artesanales</div>
+                    </div>
+                    <div class="text-center p-4 bg-rock-black/50 rounded-lg border border-chrome/20">
+                        <div class="text-2xl font-bold text-neon-red">$75</div>
+                        <div class="text-chrome text-sm">Papas</div>
+                    </div>
+                </div>
+
+                <button class="bg-rock-gold hover:bg-yellow-500 text-rock-black font-semibold py-3 px-8 rounded-lg transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-percent mr-2"></i>
+                    Pregunta por Promos
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Elegant pool table in upscale billiard hall with warm lighting -->
+                <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400" alt="Mesa de billar elegante" class="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <!-- Rock music venue with stage and atmospheric lighting -->
+                <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400" alt="Ambiente de rock" class="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <!-- Mexican craft beer and food spread on wooden table -->
+                <img src="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400" alt="Comida mexicana y cerveza" class="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <!-- Modern billiard parlour interior with multiple tables -->
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400" alt="Interior del billar" class="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- @COMPONENT: TableReservation -->
+<section id="reservations" class="py-20 bg-rock-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-4">
+                RESERVAR MESA
+            </h2>
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+                Asegura tu mesa para una experiencia perfecta. 5 mesas de pool disponibles.
+            </p>
+        </div>
+
+        <div class="max-w-4xl mx-auto bg-charcoal p-8 rounded-xl border border-chrome/20">
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-6" data-implementation="Connect to /createReservationWebsite route">
+                <div>
+                    <label class="block text-chrome font-semibold mb-2">Fecha</label>
+                    <input type="date" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                </div>
+                <div>
+                    <label class="block text-chrome font-semibold mb-2">Hora</label>
+                    <select class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                        <option>15:00</option>
+                        <option>16:00</option>
+                        <option>17:00</option>
+                        <option>18:00</option>
+                        <option>19:00</option>
+                        <option>20:00</option>
+                        <option>21:00</option>
+                        <option>22:00</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-chrome font-semibold mb-2">Número de Personas</label>
+                    <select class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                        <option>2 personas</option>
+                        <option>4 personas</option>
+                        <option>6 personas</option>
+                        <option>8 personas</option>
+                        <option>10+ personas</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-chrome font-semibold mb-2">Mesa Preferida</label>
+                    <select class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                        <option>Cualquier mesa</option>
+                        <option>Mesa 1</option>
+                        <option>Mesa 2</option>
+                        <option>Mesa 3</option>
+                        <option>Mesa 4</option>
+                        <option>Mesa 5</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-chrome font-semibold mb-2">Nombre Completo</label>
+                    <input type="text" placeholder="Tu nombre completo" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                </div>
+                <div>
+                    <label class="block text-chrome font-semibold mb-2">Teléfono</label>
+                    <input type="tel" placeholder="Tu número de teléfono" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                </div>
+                <div>
+                    <label class="block text-chrome font-semibold mb-2">Email</label>
+                    <input type="email" placeholder="tu@email.com" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-chrome font-semibold mb-2">Notas Especiales</label>
+                    <textarea placeholder="Ocasión especial, preferencias..." rows="3" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors resize-none" data-mock="true"></textarea>
+                </div>
+                <div class="md:col-span-2 text-center">
+                    <button type="submit" class="bg-neon-red hover:bg-red-600 text-white font-semibold py-4 px-12 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 glow-red" data-event="click:handleReservationSubmit">
+                        <i class="fas fa-calendar-check mr-2"></i>
+                        Confirmar Reservación
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Available Tables Display -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-5 gap-4">
+            <!-- @MAP: availableTables.map(table => ( -->
+            <div class="bg-charcoal p-4 rounded-lg border border-chrome/20 text-center" data-mock="true">
+                <div class="text-rock-gold font-semibold mb-2">Mesa 1</div>
+                <div class="text-green-400 text-sm">Disponible</div>
+                <div class="text-gray-400 text-xs mt-1">Próxima: 19:00</div>
+            </div>
+            <!-- @END_MAP -->
+        </div>
+    </div>
+</section>
+<!-- @END_COMPONENT: TableReservation -->
+
+<!-- Menu Section -->
+<section id="menu" class="py-20 bg-charcoal">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-4">
+                NUESTRO MENÚ
+            </h2>
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+                Comida deliciosa y las mejores cervezas para acompañar tu juego
+            </p>
+        </div>
+
+        <!-- Menu Categories Tabs -->
+        <div class="flex flex-wrap justify-center mb-8 gap-2">
+            <button class="menu-tab active bg-neon-red text-white px-6 py-3 rounded-lg font-semibold" data-category="entradas">Entradas</button>
+            <button class="menu-tab bg-rock-black text-chrome px-6 py-3 rounded-lg font-semibold hover:bg-charcoal transition-colors" data-category="botanas">Botanas</button>
+            <button class="menu-tab bg-rock-black text-chrome px-6 py-3 rounded-lg font-semibold hover:bg-charcoal transition-colors" data-category="cervezas">Cervezas</button>
+            <button class="menu-tab bg-rock-black text-chrome px-6 py-3 rounded-lg font-semibold hover:bg-charcoal transition-colors" data-category="artesanales">Artesanales</button>
+            <button class="menu-tab bg-rock-black text-chrome px-6 py-3 rounded-lg font-semibold hover:bg-charcoal transition-colors" data-category="bebidas">Bebidas</button>
+            <button class="menu-tab bg-rock-black text-chrome px-6 py-3 rounded-lg font-semibold hover:bg-charcoal transition-colors" data-category="cubetas">Cubetas</button>
+        </div>
+
+        <!-- Entradas Section -->
+        <div id="entradas" class="menu-section">
+            <h3 class="font-elegant text-3xl text-chrome mb-6">Entradas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Alitas (700G)</h4>
+                        <span class="text-neon-red font-bold text-xl">$179</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">Alitas con salsa a eligir</p>
+                    <div class="text-sm text-gray-500">
+                        <p><strong>Salsas disponibles:</strong></p>
+                        <p>Buffalo, BBQ, Hot BBQ, Smokey BBQ, Mango Habanero, Tamarindo Habanero, Lemon Pepper, Parmesano</p>
+                    </div>
+                </div>
+                
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Alitas (350G)</h4>
+                        <span class="text-neon-red font-bold text-xl">$90</span>
+                    </div>
+                    <p class="text-gray-400">Porción media con tu salsa favorita</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Boneless (300G)</h4>
+                        <span class="text-neon-red font-bold text-xl">$169</span>
+                    </div>
+                    <p class="text-gray-400">Trozos de pollo sin hueso bañados en salsa</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Tenders (300G)</h4>
+                        <span class="text-neon-red font-bold text-xl">$169</span>
+                    </div>
+                    <p class="text-gray-400">Dedos de pollo empanizados crujientes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botanas Section -->
+        <div id="botanas" class="menu-section hidden">
+            <h3 class="font-elegant text-3xl text-chrome mb-6">Botanas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Papas Doradas Preparadas</h4>
+                        <span class="text-neon-red font-bold text-xl">$55</span>
+                    </div>
+                    <p class="text-gray-400">300gr de papas con preparado especial</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Papas a la Francesa</h4>
+                        <div class="text-right">
+                            <div class="text-neon-red font-bold">Sin Queso $75</div>
+                            <div class="text-neon-red font-bold">Con Queso $100</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400">300gr de papas clásicas</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Papas Gajo</h4>
+                        <div class="text-right">
+                            <div class="text-neon-red font-bold">Sin Queso $75</div>
+                            <div class="text-neon-red font-bold">Con Queso $100</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400">Papas en gajos crujientes</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Salchipulpos (250gm)</h4>
+                        <span class="text-neon-red font-bold text-xl">$80</span>
+                    </div>
+                    <p class="text-gray-400">Salchichas en forma de pulpo</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Dedos de Queso (6 pzs)</h4>
+                        <span class="text-neon-red font-bold text-xl">$109</span>
+                    </div>
+                    <p class="text-gray-400">Queso mozzarella empanizado</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Carne Seca (50gm)</h4>
+                        <span class="text-neon-red font-bold text-xl">$80</span>
+                    </div>
+                    <p class="text-gray-400">Carne deshidratada tradicional</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cervezas Section -->
+        <div id="cervezas" class="menu-section hidden">
+            <h3 class="font-elegant text-3xl text-chrome mb-6">Cervezas</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div class="bg-rock-black p-4 rounded-lg border border-chrome/20 text-center hover:border-neon-red transition-colors">
+                    <h4 class="font-semibold text-chrome mb-2">Indio</h4>
+                    <span class="text-neon-red font-bold text-lg">$35</span>
+                </div>
+                <div class="bg-rock-black p-4 rounded-lg border border-chrome/20 text-center hover:border-neon-red transition-colors">
+                    <h4 class="font-semibold text-chrome mb-2">Tecate</h4>
+                    <span class="text-neon-red font-bold text-lg">$35</span>
+                </div>
+                <div class="bg-rock-black p-4 rounded-lg border border-chrome/20 text-center hover:border-neon-red transition-colors">
+                    <h4 class="font-semibold text-chrome mb-2">Corona</h4>
+                    <span class="text-neon-red font-bold text-lg">$40</span>
+                </div>
+                <div class="bg-rock-black p-4 rounded-lg border border-chrome/20 text-center hover:border-neon-red transition-colors">
+                    <h4 class="font-semibold text-chrome mb-2">Victoria</h4>
+                    <span class="text-neon-red font-bold text-lg">$40</span>
+                </div>
+                <div class="bg-rock-black p-4 rounded-lg border border-chrome/20 text-center hover:border-neon-red transition-colors">
+                    <h4 class="font-semibold text-chrome mb-2">Heineken</h4>
+                    <span class="text-neon-red font-bold text-lg">$40</span>
+                </div>
+                <div class="bg-rock-black p-4 rounded-lg border border-chrome/20 text-center hover:border-neon-red transition-colors">
+                    <h4 class="font-semibold text-chrome mb-2">Bohemia</h4>
+                    <span class="text-neon-red font-bold text-lg">$40</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Artesanales Section -->
+        <div id="artesanales" class="menu-section hidden">
+            <h3 class="font-elegant text-3xl text-chrome mb-6">Cervezas Artesanales</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Jabalí Helles</h4>
+                        <span class="text-neon-red font-bold text-xl">$60</span>
+                    </div>
+                    <p class="text-gray-400">Cerveza artesanal estilo alemán</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Tempus Malta</h4>
+                        <span class="text-neon-red font-bold text-xl">$90</span>
+                    </div>
+                    <p class="text-gray-400">Cerveza de malta premium</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Fortuna IPA</h4>
+                        <span class="text-neon-red font-bold text-xl">$75</span>
+                    </div>
+                    <p class="text-gray-400">India Pale Ale con sabor intenso</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Kumo Stout</h4>
+                        <span class="text-neon-red font-bold text-xl">$90</span>
+                    </div>
+                    <p class="text-gray-400">Cerveza negra de sabor robusto</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bebidas Section -->
+        <div id="bebidas" class="menu-section hidden">
+            <h3 class="font-elegant text-3xl text-chrome mb-6">Bebidas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <h4 class="font-semibold text-chrome text-lg mb-4">Micheladas</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Rusa (Cerveza, Sal y Limón)</span>
+                            <span class="text-neon-red font-bold">$75</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Con Clamato y Tajín</span>
+                            <span class="text-neon-red font-bold">$75</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">Refrescos</h4>
+                        <span class="text-neon-red font-bold text-xl">$29</span>
+                    </div>
+                    <p class="text-gray-400">Coca Cola y varios sabores</p>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-lg">New Mix</h4>
+                        <span class="text-neon-red font-bold text-xl">$40</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cubetas Section -->
+        <div id="cubetas" class="menu-section hidden">
+            <h3 class="font-elegant text-3xl text-chrome mb-6">Cubetas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-rock-black p-8 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-2xl">Cubeta Regular</h4>
+                        <span class="text-neon-red font-bold text-3xl">$300</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">10 Cervezas</p>
+                    <p class="text-sm text-gray-500">Indio, Tecate, Tecate Light, Dos Equis Lager, Dos Equis Ámbar</p>
+                </div>
+
+                <div class="bg-rock-black p-8 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-semibold text-chrome text-2xl">Cubeta Premium</h4>
+                        <span class="text-neon-red font-bold text-3xl">$380</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">10 Cervezas</p>
+                    <p class="text-sm text-gray-500">Corona, Victoria, Pacífico, Heineken, Bohemia</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sports Section -->
+<section id="sports" class="py-20 bg-rock-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-4">
+                DEPORTES EN VIVO
+            </h2>
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+                Sigue los juegos de México y NFL mientras juegas billar
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Mexico Football -->
+            <div class="bg-charcoal p-6 rounded-xl border border-chrome/20">
+                <h3 class="font-elegant text-2xl text-chrome mb-4 flex items-center">
+                    <i class="fas fa-futbol mr-3 text-green-400"></i>
+                    Liga MX
+                </h3>
+                
+                <!-- @STATE: mexicanGames:array = [] -->
+                <!-- @MAP: mexicanGames.map(game => ( -->
+                <div class="space-y-4" data-implementation="Connect to Mexican Football API">
+                    <div class="bg-rock-black p-4 rounded-lg border border-chrome/20" data-mock="true">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-chrome font-semibold">América</span>
+                                <span class="text-gray-400">vs</span>
+                                <span class="text-chrome font-semibold">Guadalajara</span>
+                            </div>
+                            <div class="text-neon-red font-bold">2-1</div>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            <span class="bg-green-600 text-white px-2 py-1 rounded text-xs mr-2">LIVE</span>
+                            Estadio Azteca - 75'
+                        </div>
+                    </div>
+
+                    <div class="bg-rock-black p-4 rounded-lg border border-chrome/20" data-mock="true">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-chrome font-semibold">Tigres</span>
+                                <span class="text-gray-400">vs</span>
+                                <span class="text-chrome font-semibold">Monterrey</span>
+                            </div>
+                            <div class="text-gray-400">20:00</div>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs mr-2">PRÓXIMO</span>
+                            Estadio Universitario - Hoy
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP -->
+            </div>
+
+            <!-- NFL -->
+            <div class="bg-charcoal p-6 rounded-xl border border-chrome/20">
+                <h3 class="font-elegant text-2xl text-chrome mb-4 flex items-center">
+                    <i class="fas fa-football-ball mr-3 text-orange-400"></i>
+                    NFL
+                </h3>
+                
+                <!-- @STATE: nflGames:array = [] -->
+                <!-- @MAP: nflGames.map(game => ( -->
+                <div class="space-y-4" data-implementation="Connect to NFL API">
+                    <div class="bg-rock-black p-4 rounded-lg border border-chrome/20" data-mock="true">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-chrome font-semibold">Cowboys</span>
+                                <span class="text-gray-400">vs</span>
+                                <span class="text-chrome font-semibold">Giants</span>
+                            </div>
+                            <div class="text-neon-red font-bold">21-14</div>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            <span class="bg-green-600 text-white px-2 py-1 rounded text-xs mr-2">LIVE</span>
+                            Q3 - 8:45
+                        </div>
+                    </div>
+
+                    <div class="bg-rock-black p-4 rounded-lg border border-chrome/20" data-mock="true">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-chrome font-semibold">Chiefs</span>
+                                <span class="text-gray-400">vs</span>
+                                <span class="text-chrome font-semibold">Bills</span>
+                            </div>
+                            <div class="text-gray-400">22:00</div>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs mr-2">PRÓXIMO</span>
+                            Arrowhead Stadium - Hoy
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews Section -->
+<section id="reviews" class="py-20 bg-charcoal">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-4">
+                RESEÑAS
+            </h2>
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+                Lo que dicen nuestros clientes sobre la experiencia
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Reviews Display -->
+            <div class="space-y-6">
+                <!-- @MAP: reviews.map(review => ( -->
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20" data-mock="true">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-chrome rounded-full flex items-center justify-center text-rock-black font-bold mr-4">
+                            JD
+                        </div>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Juan Pérez</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300">
+                        "Excelente ambiente, las mesas están en perfecto estado y la comida deliciosa. El rock en vivo los viernes es increíble!"
+                    </p>
+                    <div class="text-sm text-gray-500 mt-2">Hace 2 días</div>
+                </div>
+
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20" data-mock="true">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-chrome rounded-full flex items-center justify-center text-rock-black font-bold mr-4">
+                            MR
+                        </div>
+                        <div>
+                            <h4 class="text-chrome font-semibold">María Rodríguez</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300">
+                        "Las cervezas artesanales son fantásticas y el servicio muy profesional. Perfecto para una noche con amigos."
+                    </p>
+                    <div class="text-sm text-gray-500 mt-2">Hace 1 semana</div>
+                </div>
+                <!-- @END_MAP -->
+
+                <!-- Overall Rating -->
+                <div class="bg-rock-black p-6 rounded-lg border border-chrome/20 text-center">
+                    <div class="text-4xl text-rock-gold font-bold mb-2">4.8</div>
+                    <div class="flex justify-center text-yellow-400 mb-2">
+                        <i class="fas fa-star text-xl"></i>
+                        <i class="fas fa-star text-xl"></i>
+                        <i class="fas fa-star text-xl"></i>
+                        <i class="fas fa-star text-xl"></i>
+                        <i class="fas fa-star text-xl"></i>
+                    </div>
+                    <p class="text-chrome">Basado en 47 reseñas</p>
+                </div>
+            </div>
+
+            <!-- Leave Review Form -->
+            <div class="bg-rock-black p-6 rounded-lg border border-chrome/20">
+                <h3 class="font-elegant text-2xl text-chrome mb-6">Deja tu Reseña</h3>
+                
+                <form class="space-y-4" data-implementation="Connect to review submission system">
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Nombre</label>
+                        <input type="text" placeholder="Tu nombre" class="w-full p-3 bg-charcoal border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Calificación</label>
+                        <div class="flex space-x-1">
+                            <button type="button" class="star-rating text-2xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                            <button type="button" class="star-rating text-2xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                            <button type="button" class="star-rating text-2xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                            <button type="button" class="star-rating text-2xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                            <button type="button" class="star-rating text-2xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Tu Reseña</label>
+                        <textarea placeholder="Comparte tu experiencia..." rows="4" class="w-full p-3 bg-charcoal border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors resize-none" data-mock="true"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-neon-red hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Enviar Reseña
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Membership Section -->
+<section id="membership" class="py-20 bg-rock-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-4">
+                MEMBRESÍA BOLA 8
+            </h2>
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+                Únete al club y obtén beneficios exclusivos
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Benefits -->
+            <div class="bg-charcoal p-8 rounded-xl border border-chrome/20">
+                <h3 class="font-elegant text-2xl text-chrome mb-6">Beneficios de Membresía</h3>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-check-circle text-neon-red text-xl mt-1"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Descuentos Especiales</h4>
+                            <p class="text-gray-400">15% de descuento en todas las consumiciones</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-check-circle text-neon-red text-xl mt-1"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Reservaciones Prioritarias</h4>
+                            <p class="text-gray-400">Garantiza tu mesa favorita</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-check-circle text-neon-red text-xl mt-1"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Eventos Exclusivos</h4>
+                            <p class="text-gray-400">Acceso a torneos privados y noches especiales</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-check-circle text-neon-red text-xl mt-1"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Happy Hour Extendido</h4>
+                            <p class="text-gray-400">Precios especiales todo el día para miembros</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-check-circle text-neon-red text-xl mt-1"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Cumpleaños Gratis</h4>
+                            <p class="text-gray-400">Mesa gratis el día de tu cumpleaños</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 bg-rock-black rounded-lg border border-chrome/20">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-rock-gold mb-2">$500</div>
+                        <div class="text-chrome">Membresía Anual</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Membership Form -->
+            <div class="bg-charcoal p-8 rounded-xl border border-chrome/20">
+                <h3 class="font-elegant text-2xl text-chrome mb-6">Regístrate Ahora</h3>
+                
+                <form class="space-y-4" data-implementation="Connect to /createMemberwebsite route">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-chrome font-semibold mb-2">Nombre</label>
+                            <input type="text" placeholder="Tu nombre" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                        </div>
+                        <div>
+                            <label class="block text-chrome font-semibold mb-2">Apellido</label>
+                            <input type="text" placeholder="Tu apellido" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Email</label>
+                        <input type="email" placeholder="tu@email.com" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Teléfono</label>
+                        <input type="tel" placeholder="Tu número de teléfono" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Fecha de Nacimiento</label>
+                        <input type="date" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="terms" class="w-4 h-4 text-neon-red bg-rock-black border-chrome rounded focus:ring-neon-red focus:ring-2" data-mock="true">
+                        <label for="terms" class="text-sm text-gray-300">
+                            Acepto los términos y condiciones de la membresía
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-rock-gold hover:bg-yellow-500 text-rock-black font-semibold py-4 px-6 rounded-lg transform hover:scale-105 transition-all duration-200" data-event="click:handleMembershipSubmit">
+                        <i class="fas fa-crown mr-2"></i>
+                        Unirse al Club
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Promotions Section -->
+<section id="promotions" class="py-20 bg-charcoal">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-4">
+                PROMOCIONES
+            </h2>
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+                Ofertas especiales y eventos únicos
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div class="bg-rock-black p-6 rounded-xl border border-neon-red">
+                <div class="text-center mb-4">
+                    <i class="fas fa-beer text-4xl text-rock-gold mb-2"></i>
+                    <h3 class="font-rock text-2xl text-chrome">LUNES LOCOS</h3>
+                </div>
+                <p class="text-gray-300 text-center mb-4">
+                    2x1 en cervezas nacionales después de las 7 PM
+                </p>
+                <div class="text-center">
+                    <span class="bg-neon-red text-white px-4 py-2 rounded-full text-sm font-semibold">
+                        Todos los Lunes
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-rock-black p-6 rounded-xl border border-neon-red">
+                <div class="text-center mb-4">
+                    <i class="fas fa-drum text-4xl text-rock-gold mb-2"></i>
+                    <h3 class="font-rock text-2xl text-chrome">VIERNES ROCK</h3>
+                </div>
+                <p class="text-gray-300 text-center mb-4">
+                    Bandas en vivo + 20% descuento en toda la carta
+                </p>
+                <div class="text-center">
+                    <span class="bg-neon-red text-white px-4 py-2 rounded-full text-sm font-semibold">
+                        Viernes 9-11 PM
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-rock-black p-6 rounded-xl border border-neon-red">
+                <div class="text-center mb-4">
+                    <i class="fas fa-trophy text-4xl text-rock-gold mb-2"></i>
+                    <h3 class="font-rock text-2xl text-chrome">TORNEO MENSUAL</h3>
+                </div>
+                <p class="text-gray-300 text-center mb-4">
+                    Primer lugar: $2000 + trofeo personalizado
+                </p>
+                <div class="text-center">
+                    <span class="bg-neon-red text-white px-4 py-2 rounded-full text-sm font-semibold">
+                        Último Sábado
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Gallery Placeholder -->
+        <div class="mb-12">
+            <h3 class="font-elegant text-3xl text-chrome text-center mb-8">Videos Promocionales</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-implementation="Add video player component">
+                <div class="bg-rock-black rounded-xl border border-chrome/20 overflow-hidden hover:border-neon-red transition-colors">
+                    <!-- Atmospheric billiard hall with players enjoying games -->
+                    <div class="aspect-video bg-gradient-to-br from-charcoal to-rock-black flex items-center justify-center relative" style="background-image: url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400'); background-size: cover; background-position: center;">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <button class="bg-neon-red hover:bg-red-600 rounded-full p-4 text-white text-2xl transform hover:scale-110 transition-all" data-implementation="Play video">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-chrome font-semibold mb-2">Ambiente del Club</h4>
+                        <p class="text-gray-400 text-sm">Conoce nuestras instalaciones</p>
+                    </div>
+                </div>
+
+                <div class="bg-rock-black rounded-xl border border-chrome/20 overflow-hidden hover:border-neon-red transition-colors">
+                    <!-- Rock band performing on stage with energetic crowd -->
+                    <div class="aspect-video bg-gradient-to-br from-charcoal to-rock-black flex items-center justify-center relative" style="background-image: url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400'); background-size: cover; background-position: center;">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <button class="bg-neon-red hover:bg-red-600 rounded-full p-4 text-white text-2xl transform hover:scale-110 transition-all" data-implementation="Play video">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-chrome font-semibold mb-2">Viernes de Rock</h4>
+                        <p class="text-gray-400 text-sm">Bandas en vivo cada viernes</p>
+                    </div>
+                </div>
+
+                <div class="bg-rock-black rounded-xl border border-chrome/20 overflow-hidden hover:border-neon-red transition-colors">
+                    <!-- Mexican food and craft beer beautifully arranged -->
+                    <div class="aspect-video bg-gradient-to-br from-charcoal to-rock-black flex items-center justify-center relative" style="background-image: url('https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400'); background-size: cover; background-position: center;">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <button class="bg-neon-red hover:bg-red-600 rounded-full p-4 text-white text-2xl transform hover:scale-110 transition-all" data-implementation="Play video">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-chrome font-semibold mb-2">Nuestra Cocina</h4>
+                        <p class="text-gray-400 text-sm">Los mejores sabores</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact & Location Section -->
+<section class="py-20 bg-rock-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-rock text-4xl md:text-5xl text-rock-gold mb-4">
+                VISÍTANOS
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-charcoal p-8 rounded-xl border border-chrome/20">
+                <h3 class="font-elegant text-2xl text-chrome mb-6">Información de Contacto</h3>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <i class="fas fa-map-marker-alt text-neon-red text-xl"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Dirección</h4>
+                            <p class="text-gray-300">5061, Av López Mateos Sur, Plaza Orion</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <i class="fas fa-clock text-neon-red text-xl"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Horarios</h4>
+                            <p class="text-gray-300">Lunes a Domingo: 3:00 PM - 11:00 PM</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <i class="fas fa-phone text-neon-red text-xl"></i>
+                        <div>
+                            <h4 class="text-chrome font-semibold">Teléfono</h4>
+                            <p class="text-gray-300">+52 33 1234 5678</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h4 class="text-chrome font-semibold mb-4">Síguenos</h4>
+                    <div class="flex space-x-4">
+                        <a href="https://www.facebook.com/bola.8gdl" target="_blank" class="bg-rock-black p-3 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                            <i class="fab fa-facebook-f text-chrome hover:text-neon-red transition-colors"></i>
+                        </a>
+                        <a href="https://www.instagram.com/bola8billarclub/" target="_blank" class="bg-rock-black p-3 rounded-lg border border-chrome/20 hover:border-neon-red transition-colors">
+                            <i class="fab fa-instagram text-chrome hover:text-neon-red transition-colors"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-charcoal p-8 rounded-xl border border-chrome/20">
+                <h3 class="font-elegant text-2xl text-chrome mb-6">¿Tienes Preguntas?</h3>
+                
+                <form class="space-y-4" data-implementation="Connect to contact form handler">
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Nombre</label>
+                        <input type="text" placeholder="Tu nombre" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Email</label>
+                        <input type="email" placeholder="tu@email.com" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors" data-mock="true">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-chrome font-semibold mb-2">Mensaje</label>
+                        <textarea placeholder="¿En qué podemos ayudarte?" rows="4" class="w-full p-3 bg-rock-black border border-chrome/30 rounded-lg text-white placeholder-gray-500 focus:border-neon-red focus:outline-none transition-colors resize-none" data-mock="true"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-neon-red hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Enviar Mensaje
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-charcoal border-t border-chrome/20 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <div class="flex items-center justify-center mb-6">
+                <h1 class="font-rock text-3xl text-rock-gold">BOLA 8</h1>
+                <span class="font-elegant text-chrome ml-2">Pool Club La Calma</span>
+            </div>
+            
+            <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+                Un grupo de entusiastas del billar trayendo ideas frescas para mejorar tu experiencia. 
+                Rock, billar y las mejores cervezas artesanales.
+            </p>
+            
+            <div class="flex justify-center space-x-6 mb-6">
+                <a href="#home" class="text-chrome hover:text-neon-red transition-colors">Inicio</a>
+                <a href="#reservations" class="text-chrome hover:text-neon-red transition-colors">Reservaciones</a>
+                <a href="#menu" class="text-chrome hover:text-neon-red transition-colors">Menú</a>
+                <a href="#membership" class="text-chrome hover:text-neon-red transition-colors">Membresía</a>
+                <a href="#promotions" class="text-chrome hover:text-neon-red transition-colors">Promociones</a>
+            </div>
+            
+            <div class="border-t border-chrome/20 pt-6">
+                <p class="text-gray-500">© 2024 Bola 8 Pool Club La Calma. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .glow-red {
+        box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+    }
+    
+    .menu-tab.active {
+        background-color: #ff4444;
+        color: white;
+    }
+    
+    .menu-section.hidden {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .font-rock {
+            font-size: clamp(2rem, 8vw, 4rem);
+        }
+    }
+</style>
+
+<script>
+    // TODO: Implement business logic, API calls, and state management
+    (function() {
+        // Menu tab functionality
+        const menuTabs = document.querySelectorAll('.menu-tab');
+        const menuSections = document.querySelectorAll('.menu-section');
+        
+        menuTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const category = tab.getAttribute('data-category');
+                
+                // Update active tab
+                menuTabs.forEach(t => t.classList.remove('active', 'bg-neon-red', 'text-white'));
+                menuTabs.forEach(t => t.classList.add('bg-rock-black', 'text-chrome'));
+                tab.classList.add('active', 'bg-neon-red', 'text-white');
+                tab.classList.remove('bg-rock-black', 'text-chrome');
+                
+                // Show corresponding section
+                menuSections.forEach(section => {
+                    section.classList.add('hidden');
+                    if (section.id === category) {
+                        section.classList.remove('hidden');
+                    }
+                });
+            });
+        });
+
+        // Star rating functionality
+        const starRatings = document.querySelectorAll('.star-rating');
+        let selectedRating = 0;
+        
+        starRatings.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                selectedRating = index + 1;
+                updateStarDisplay();
+            });
+            
+            star.addEventListener('mouseover', () => {
+                highlightStars(index + 1);
+            });
+        });
+
+        function updateStarDisplay() {
+            starRatings.forEach((star, index) => {
+                if (index < selectedRating) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-400');
+                }
+            });
+        }
+
+        function highlightStars(rating) {
+            starRatings.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-400');
+                }
+            });
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Form submission handlers (placeholders)
+        document.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // TODO: Implement actual form submission logic
+            alert('Formulario enviado! (Placeholder - implementar lógica real)');
+        });
+
+        // Live sports data update simulation
+        function updateSportsData() {
+            // TODO: Connect to actual sports APIs
+            console.log('Updating sports data...');
+        }
+
+        // Update sports data every 30 seconds
+        setInterval(updateSportsData, 30000);
+
+        // Mobile menu functionality
+        const mobileMenuButton = document.querySelector('[class*="md:hidden"] button');
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function() {
+                // TODO: Implement mobile menu toggle
+                console.log('Mobile menu toggle clicked');
+            });
+        }
+    })();
+</script>
+
+</body>
+</html>

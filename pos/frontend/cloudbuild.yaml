@@ -1,0 +1,36 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/pos-frontend:$_TAG'
+      - '--build-arg'
+      - 'VITE_API_URL=${_API_URL}'
+      - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/pos-frontend:$_TAG']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - pos-frontend
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/pos-frontend:$_TAG
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --cpu=1
+      - --memory=128Mi
+      - --port=8080
+      - --concurrency=200
+      - --min-instances=0
+      - --max-instances=1
+substitutions:
+  _REGION: us-central1
+  _REPO: pos-artifacts
+  _TAG: latest
+  _API_URL: https://pos-backend-CHANGE-ME-uc.a.run.app
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/pos-frontend:$_TAG'
+
+

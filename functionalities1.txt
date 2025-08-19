@@ -1,0 +1,296 @@
+BilliardPOS UI Mockups and Functionalities
+Overview
+BilliardPOS is a specialized POS system for billiard clubs, managing game time, table controls, lighting (via control boards for 2-32 channels), bar sales, inventory, loyalty, and reporting. It supports two user roles: Operator (table/sales management) and Administrator (settings/reports). The interface is intuitive, requiring 10-20 minutes to train staff. Accounts have no default passwords but can be secured. Hardware includes receipt printers (58mm/80mm) and optional RFID readers. All operations are local (no internet required). A demo version (5-minute table limit) is available.
+Below are the functionalities, workflows, and UI mockups for key screens to guide integration into your POS system.
+Operator Functionalities
+Operators manage tables, sales, and basic reports via an intuitive interface.
+
+Table Overview and Status Monitoring: Real-time view of tables, showing status (open/closed), game time, price, and remaining time for limited sessions.
+Table Controls: Start, stop, pause, move games, or enable cleaning mode (free lights for 5 minutes, configurable).
+Game Session Options: Start unlimited or time-limited sessions, select tariffs (hourly pricing).
+Additional Services: Add items like cue rentals during game start or via a "Services" button.
+Bar Sales (Optional): Add bar items to bills, with auto-updated totals and inventory.
+Customer Discounts (Optional RFID): Apply manual or RFID-based discounts when closing games, supporting fixed/variable discounts, cashback, or deposits.
+Booking Log: Manage reservations as reminders (no light control), with calendar-based entries.
+Receipt Management: View, print (58mm/80mm), or reprint receipts.
+Basic Reporting: View/export current/previous shift reports to Excel, Word, OpenOffice, or email.
+
+Administrator Functionalities
+Admins configure settings and access advanced reports.
+
+Tariff Settings: Create/edit tariffs (per hour, with time/day restrictions) for table groups (e.g., VIP, Hall).
+Additional Services: Configure services (e.g., "Premium Cue") with unit and pricing.
+Regular Customers: Add/edit customers, set discounts, link RFID for loyalty (discounts, cashback, deposits).
+Bar Inventory (Optional): Manage products, stock (income/expense), and composite items.
+Table Settings: Configure 2-32 tables, hide unused ones, enable/disable pause/cleaning, assign tariff groups.
+Staff Accounts: Create/edit accounts, set passwords, link RFID.
+Reports: Full access to reports, exportable to Excel, Word, OpenOffice, or email.
+
+Key Workflows
+These step-by-step flows describe common operations, primarily for operators unless specified.
+
+Starting a Game Session:
+Navigate to table detail page from overview.
+Click "Start".
+Select tariff, set unlimited/limited time, add services.
+Confirm: Lights on, timing starts, overview updates.
+
+
+Pausing a Game:
+On table detail page, click "Pause": Timing stops, lights off.
+Resume: Click "Start".
+
+
+Moving a Game:
+On table detail page, click "Move".
+Select closed table in same tariff group, confirm: Session transfers.
+
+
+Cleaning Mode:
+On closed table, click "Cleaning": Lights on (free), auto-off after 5 minutes or manual stop.
+
+
+Adding Services/Bar Items:
+During game start or via "Services": Add items (e.g., cues).
+For bar: Open "Bar", double-click products, totals update.
+
+
+Closing a Game:
+Click "Stop", select customer for discount (manual/RFID), review bill.
+Click "Bill": Receipt opens (print/close), lights off, table closes.
+
+
+Managing Reservations:
+Open booking log, select date.
+Highlight table/time, add/edit/delete record with comment.
+
+
+Viewing Reports (Operator):
+Click graph button, select "Main Report", filter by shift.
+Open/print receipts.
+
+
+Admin: Creating Tariff:
+In "Tariffs", select group, add tariff (type, price, restrictions), save.
+
+
+Admin: Adding Bar Product:
+In "Bar", add product (name, unit, price), save.
+Record stock via "Income" (price, quantity), save.
+
+
+Admin: Adding Customer:
+In "Regular Customers", add name, discounts, RFID, save.
+
+
+Admin: Adding Staff:
+In "Staff", add name, role, password, RFID, save.
+
+
+
+UI Mockups
+These mockups describe key screens in markdown format, using text-based layouts to represent components and structure. Each includes a title, description, and layout with placeholders for dynamic data.
+1. Table Overview Screen (Operator)
+Description: Displays all tables with real-time status, game time, price, and remaining time (if limited). Allows quick navigation to table details or other functions.
+Layout:
+-------------------------------------------------------
+| [BilliardPOS Logo]                     [Logout Button] |
+-------------------------------------------------------
+| Tables Overview                                     |
+|-----------------------------------------------------|
+| Table 1 | Status: [Open/Closed] | Time: [HH:MM:SS]  |
+|         | Price: [$XX.XX]       | Remaining: [MM:SS] |
+| [Go to Detail Button]                                |
+|-----------------------------------------------------|
+| Table 2 | Status: [Open/Closed] | Time: [HH:MM:SS]  |
+|         | Price: [$XX.XX]       | Remaining: [MM:SS] |
+| [Go to Detail Button]                                |
+|-----------------------------------------------------|
+| ... (Repeat for all tables)                         |
+|-----------------------------------------------------|
+| [Booking Log Button] [Reports Button] [Bar Button]   |
+-------------------------------------------------------
+
+Components:
+
+Logo/Logout: Top-left logo, top-right logout button.
+Table Cards: Grid or list of tables, each showing status, time, price, remaining time (if applicable), and a "Go to Detail" button.
+Navigation Bar: Bottom buttons for booking log, reports, and bar (if enabled).
+
+2. Table Detail Screen (Operator)
+Description: Manages a single table’s session (start, pause, move, stop, cleaning, services). Displays session details and totals.
+Layout:
+-------------------------------------------------------
+| [Back to Overview]                [Table 1] [Logout] |
+-------------------------------------------------------
+| Table Status: [Open/Closed]                         |
+| Game Time: [HH:MM:SS]                               |
+| Remaining Time: [MM:SS] (if limited)                |
+| Tariff: [Selected Tariff Name]                      |
+| Game Price: [$XX.XX]                                |
+| Services Total: [$XX.XX]                            |
+| Bar Total: [$XX.XX] (if enabled)                    |
+| Total Price: [$XX.XX]                               |
+|-----------------------------------------------------|
+| [Start Button] [Pause Button] [Move Button]         |
+| [Stop Button]  [Cleaning Button] [Services Button]  |
+-------------------------------------------------------
+
+Components:
+
+Header: Back button, table number, logout.
+Status Panel: Displays real-time session info (status, time, tariff, prices).
+Control Buttons: Start, pause, move, stop, cleaning, services (large, intuitive buttons).
+
+3. Game Start Popup (Operator)
+Description: Configures a new game session (tariff, time limit, services).
+Layout:
+-------------------------------------------------------
+| Start Game - Table 1                                |
+|-----------------------------------------------------|
+| Tariff: [Dropdown: VIP, Hall, Promotion...]         |
+| Time: [ ] Unlimited  [ ] Limited [Input: MM:SS]     |
+| Services: [Add Button]                              |
+|           - [Cue Rental: $X.XX] [Remove Button]     |
+|           - [Other Service] [Remove Button]         |
+|-----------------------------------------------------|
+| [Cancel Button]               [Start Button]        |
+-------------------------------------------------------
+
+Components:
+
+Title: Indicates table number.
+Inputs: Tariff dropdown, time radio buttons (unlimited/limited with input), services list with add/remove.
+Buttons: Cancel or confirm start.
+
+4. Bar Sales Screen (Operator, Optional)
+Description: Adds bar items to a table’s bill, with product groups and inventory tracking.
+Layout:
+-------------------------------------------------------
+| Bar Sales - Table 1                     [Close]     |
+|-----------------------------------------------------|
+| Groups         | Products                           |
+| [Beverages]    | [Coca-Cola 500ml: $2.10] [Add]    |
+| [Snacks]       | [Chips: $1.50] [Add]              |
+| [Alcohol]      | ...                               |
+|-----------------------------------------------------|
+| Total: [$XX.XX]                                     |
+|-----------------------------------------------------|
+| [Cancel Button]               [Confirm Button]      |
+-------------------------------------------------------
+
+Components:
+
+Header: Table number, close button.
+Split Panel: Left: Product group list. Right: Products with prices and "Add" buttons (double-click to add).
+Total: Updates dynamically.
+Buttons: Cancel or confirm additions.
+
+5. Booking Log Screen (Operator)
+Description: Manages reservations with a calendar and table/time grid.
+Layout:
+-------------------------------------------------------
+| [Calendar: Select Date]                   [Logout]  |
+|-----------------------------------------------------|
+|       | 08:00 | 09:00 | 10:00 | ...                 |
+| Table 1 | [ ] | [ ] | [ ] | ...                   |
+| Table 2 | [ ] | [ ] | [ ] | ...                   |
+| ...     |     |     |     |                       |
+|-----------------------------------------------------|
+| [Add Record Button] [Edit Button] [Delete Button]   |
+-------------------------------------------------------
+
+Components:
+
+Calendar: Top-left date selector.
+Grid: Tables (rows), time slots (columns), clickable cells for reservations.
+Buttons: Add, edit, or delete reservation entries.
+
+6. Tariff Settings Screen (Admin)
+Description: Configures tariffs for table groups, with restrictions.
+Layout:
+-------------------------------------------------------
+| Settings - Tariffs                      [Logout]    |
+|-----------------------------------------------------|
+| Groups         | Tariffs                            |
+| [VIP]          | [Promotion: $1/hr] [Edit/Delete]  |
+| [Hall]         | [Working Days: $X/hr] [Edit/Delete]|
+|-----------------------------------------------------|
+| Add Tariff:                                         |
+| Name: [Input]                                       |
+| Type: [Dropdown: Per Hour]                          |
+| Price: [Input: $X.XX]                               |
+| Restrictions: [Time: HH:MM-HH:MM] [Days: Checkbox]  |
+|-----------------------------------------------------|
+| [Cancel Button]               [Save Button]         |
+-------------------------------------------------------
+
+Components:
+
+Header: Settings title, logout.
+Split Panel: Left: Tariff groups. Right: Tariffs with edit/delete.
+Form: Add/edit tariff with name, type, price, restrictions (time/days).
+Buttons: Cancel or save.
+
+7. Regular Customers Screen (Admin)
+Description: Manages customer profiles and loyalty settings.
+Layout:
+-------------------------------------------------------
+| Settings - Regular Customers             [Logout]    |
+|-----------------------------------------------------|
+| Customers:                                          |
+| [Client Test: 20% Game, 10% Bar] [Edit/Delete]      |
+| ...                                                |
+|-----------------------------------------------------|
+| Add Customer:                                       |
+| Name: [Input]                                       |
+| Game Discount: [Input: XX%]                         |
+| Bar Discount: [Input: XX%]                          |
+| RFID Card: [Input: Card ID]                         |
+|-----------------------------------------------------|
+| [Cancel Button]               [Save Button]         |
+-------------------------------------------------------
+
+Components:
+
+Header: Settings title, logout.
+Customer List: Shows name, discounts, edit/delete buttons.
+Form: Add/edit customer with name, discounts, RFID.
+Buttons: Cancel or save.
+
+8. Bar Inventory Screen (Admin, Optional)
+Description: Manages bar products and stock.
+Layout:
+-------------------------------------------------------
+| Settings - Bar Inventory                [Logout]    |
+|-----------------------------------------------------|
+| Groups         | Products                           |
+| [Beverages]    | [Coca-Cola 500ml: $2.10] [Edit]   |
+| [Snacks]       | [Chips: $1.50] [Edit]             |
+|-----------------------------------------------------|
+| Add Product:                                        |
+| Name: [Input]                                       |
+| Unit: [Input: e.g., Can]                           |
+| Price: [Input: $X.XX]                              |
+| Stock: [Income Button]                             |
+|-----------------------------------------------------|
+| [Cancel Button]               [Save Button]        |
+-------------------------------------------------------
+
+Components:
+
+Header: Settings title, logout.
+Split Panel: Left: Product groups. Right: Products with edit buttons.
+Form: Add/edit product with name, unit, price, stock (links to income form).
+Buttons: Cancel or save.
+
+Notes for Implementation
+
+Styling: Use a clean, minimal design with large buttons for touch-friendly operation (e.g., Tailwind CSS for web apps).
+Responsiveness: Ensure layouts adapt to desktop and tablet screens (common in POS setups).
+Real-Time Updates: Use WebSockets or polling for live table status updates.
+Hardware Integration: Mockups assume API endpoints for lighting control and RFID readers.
+Accessibility: High-contrast colors, clear labels for operator ease (10-20 min training).
+Tech Stack: For a web-based POS, consider React with Tailwind CSS, or a desktop app with Electron for local hardware integration.
+
+These mockups and functionalities should help you replicate BilliardPOS features in your system. For code snippets or specific integrations, provide your POS’s tech stack or requirements.

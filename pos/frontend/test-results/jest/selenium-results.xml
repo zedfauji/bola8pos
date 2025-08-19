@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="3" failures="0" errors="0" time="62.304">
+  <testsuite name="Selenium Smoke" errors="0" failures="0" skipped="0" timestamp="2025-08-17T04:54:37" time="62.166" tests="3">
+    <testcase classname="Selenium Smoke opens the browser" name="Selenium Smoke opens the browser" time="0.001">
+    </testcase>
+    <testcase classname="Selenium Smoke loads login page" name="Selenium Smoke loads login page" time="0.257">
+    </testcase>
+    <testcase classname="Selenium Smoke can login with valid credentials" name="Selenium Smoke can login with valid credentials" time="0.986">
+    </testcase>
+  </testsuite>
+</testsuites>

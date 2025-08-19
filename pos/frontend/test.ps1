@@ -1,0 +1,1 @@
+﻿$ports = $args; $ports | % { netstat -ano | findstr ":$_ " | % { ($_.split())[-1] } | sort -u | % { taskkill /F /PID $_ } }
