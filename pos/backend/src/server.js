@@ -53,7 +53,17 @@ const allowedOrigins = new Set([
 
 const io = new Server(server, { 
   cors: {
-    origin: true, // Allow all origins for now
+    origin: (origin, callback) => {
+      // Allow requests with no origin
+      if (!origin) return callback(null, true);
+      
+      // Check if origin is in allowed list
+      if (allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+      
+      callback(new Error('Not allowed by CORS'));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -90,7 +100,22 @@ const PORT = resolvePort();
 
 // Middleware
 app.use(cors({
-  origin: true, // Allow all origins for now
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+    
+    // For development, log rejected origins
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`CORS blocked request from origin: ${origin}`);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -285,6 +310,17 @@ const testRoutes = require('./routes/test.routes');
 // Public routes (no authentication required)
 app.use('/api/access', accessRoutes);
 app.use('/api/test', testRoutes);
+
+// Health endpoint - no authentication required
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // Serve favicon.ico before authentication
 app.get('/favicon.ico', (req, res) => res.status(204).end());

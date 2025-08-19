@@ -5,12 +5,13 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { InventoryProvider } from './contexts/InventoryContext';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import TablesPage from './pages/NewTablesPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 
 // Lazy load components for better performance
 const NewTablesPage = React.lazy(() => import('./pages/NewTablesPage'));
+const Tables = React.lazy(() => import('./routes/Tables'));
 const OrderPage = React.lazy(() => import('./components/orders/OrderPage'));
 const KitchenDisplay = React.lazy(() => import('./components/kds/KitchenDisplay'));
 const SettingsPage = React.lazy(() => import('./components/settings/SettingsPage'));
@@ -384,10 +385,10 @@ function App() {
                           <Suspense fallback={<LoadingFallback />}>
                             <Routes>
                               <Route path="/" element={<Dashboard />} />
-                              <Route path="/tables" element={
+                              <Route path="/tables/*" element={
                                 <ProtectedRoute requiredPermission="tables:read">
                                   <Suspense fallback={<div>Loading...</div>}>
-                                    <NewTablesPage />
+                                    <Tables />
                                   </Suspense>
                                 </ProtectedRoute>
                               } />

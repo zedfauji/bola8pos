@@ -200,10 +200,72 @@ function hasRole(roles = []) {
   };
 }
 
+/**
+ * Middleware to enforce manager PIN verification for sensitive operations
+ */
+function requireManagerPin() {
+  return async (req, res, next) => {
+    try {
+      // Skip PIN check for admin users
+      if (req.user && req.user.role === 'admin') {
+        return next();
+      }
+      
+      // Check if user is a manager
+      if (req.user && req.user.role === 'manager') {
+        const { managerPin } = req.body;
+        
+        if (!managerPin) {
+          throw new ForbiddenError('Manager PIN required for this operation');
+        }
+        
+        // Get manager from database with stored PIN
+        const [managers] = await pool.query(
+          `SELECT pin FROM users WHERE id = ? AND role_id = (SELECT id FROM roles WHERE name = 'manager')`,
+          [req.user.id]
+        );
+        
+        if (!managers.length) {
+          throw new ForbiddenError('User is not a manager');
+        }
+        
+        const storedPin = managers[0].pin;
+        
+        // If no PIN is set or PIN doesn't match
+        if (!storedPin || storedPin !== managerPin) {
+          await auditLog({
+            userId: req.user.id,
+            action: 'MANAGER_PIN_FAILED',
+            resourceType: 'AUTH',
+            metadata: { path: req.path }
+          });
+          throw new ForbiddenError('Invalid manager PIN');
+        }
+        
+        // PIN verified successfully
+        await auditLog({
+          userId: req.user.id,
+          action: 'MANAGER_PIN_VERIFIED',
+          resourceType: 'AUTH',
+          metadata: { path: req.path }
+        });
+      } else {
+        // Not a manager or admin
+        throw new ForbiddenError('This operation requires manager privileges');
+      }
+      
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
 module.exports = {
   authenticate,
   checkPermission,
   hasRole,
   generateTokens,
-  verifyToken
+  verifyToken,
+  requireManagerPin
 };
