@@ -1,0 +1,184 @@
+import { Meta } from '@storybook/blocks'
+
+<Meta title="Introduction/Bar POS Design System" />
+
+# Bar POS Design System
+
+Welcome to the Bar POS Design System catalog. This Storybook contains all shared UI components, design tokens, and usage guidelines for the Bar POS application.
+
+---
+
+## Design Principles
+
+### 1. Touch-Optimized
+All interactive components have large touch targets for bartender use in a fast-paced bar environment:
+- **Minimum 44px** for standard mobile
+- **56px** for comfortable bartender use (POSButton large)
+- **64px+** for primary actions (POSButton xl, PINKeypad)
+
+### 2. Dark Theme by Default
+The bar environment is typically dimly lit, so the entire application uses a dark theme to reduce eye strain.
+
+### 3. Accessibility First
+Every component follows WCAG 2.1 Level AA guidelines:
+- Keyboard navigation (Tab, Shift+Tab, Enter, Escape)
+- Screen reader support (ARIA labels, roles, descriptions)
+- Focus management (trap focus in modals/sheets)
+- Color contrast (4.5:1 minimum for text)
+
+### 4. Composition Over Configuration
+Components are designed to be composed together rather than configured with dozens of props.
+
+---
+
+## Design Tokens
+
+### Color Palette
+See the **Design Tokens/Color Palette** story for a visual reference of all colors used in the POS.
+
+**Primary Colors:**
+- Primary: Brand color for primary actions
+- Secondary: Secondary actions and accents
+- Destructive: Dangerous actions (void, delete)
+- Muted: Subtle backgrounds and borders
+
+**Status Colors:**
+- Success (Green): Open tabs, available tables, completed actions
+- Warning (Yellow): Occupied tables, approaching limits
+- Error (Red): Voided orders, maintenance, errors
+- Info (Blue): Paid tabs, informational messages
+
+### Typography
+See the **Design Tokens/Typography** story for all text size/weight combinations.
+
+**Font Family:** System font stack (optimized for performance)
+
+**Scale:**
+- Display: 3xl, 2xl, xl (page titles, large numbers)
+- Heading: lg, base (section headers, card titles)
+- Body: base, sm (paragraph text, labels)
+- Caption: xs (hints, metadata)
+
+### Spacing
+See the **Design Tokens/Spacing** story for the spacing scale.
+
+**Base Unit:** 4px (0.25rem)
+
+**Scale:** 0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64
+
+---
+
+## Component Categories
+
+### Display Components
+Components for displaying data and information:
+- **MoneyDisplay** - Currency formatting
+- **TimerDisplay** - Elapsed time display
+- **StatusBadge** - Color-coded status indicators
+- **EmptyState** - Empty state with icon and action
+- **SectionHeader** - Page/section headers
+- **LoadingSkeletons** - Loading state placeholders
+- **POSButton** - Touch-optimized buttons
+- **DataTable** - Generic data tables
+
+### Input Components
+Components for user input and interaction:
+- **QuantityControl** - Quantity selector
+- **MoneyInput** - Currency input
+- **PINKeypad** - Numeric keypad for PIN entry
+- **FormField** - Form field wrapper
+- **SearchInput** - Debounced search input
+- **ConfirmDialog** - Confirmation dialogs
+
+### Layout Components
+Components for page and application layout:
+- **AppShell** - Main application layout
+- **PageContainer** - Page wrapper
+- **SplitLayout** - Split layout for POS screen
+- **ScrollArea** - Scrollable container
+
+---
+
+## Usage Guidelines
+
+### Always Use These Components
+**Never create inline equivalents.** All UI must use these shared components to ensure consistency, accessibility, and maintainability.
+
+❌ **Don't:**
+```tsx
+<button className="bg-blue-500 text-white px-4 py-2 rounded">
+  Click Me
+</button>
+```
+
+✅ **Do:**
+```tsx
+import { POSButton } from '@shared/ui'
+
+<POSButton touchSize="large">
+  Click Me
+</POSButton>
+```
+
+### Import from Single Location
+All shared UI components are exported from `@shared/ui`:
+
+```tsx
+import {
+  MoneyDisplay,
+  TimerDisplay,
+  StatusBadge,
+  POSButton,
+  DataTable,
+} from '@shared/ui'
+```
+
+### Compose Components
+Build complex UI by composing simple components:
+
+```tsx
+<PageContainer
+  title="Open Tabs"
+  actions={<POSButton>New Tab</POSButton>}
+>
+  <ScrollArea maxHeight="600px">
+    <DataTable
+      columns={columns}
+      data={tabs}
+      searchable
+    />
+  </ScrollArea>
+</PageContainer>
+```
+
+---
+
+## Responsive Breakpoints
+
+All layout components use consistent Tailwind breakpoints:
+
+- **Mobile:** < 768px (sm)
+- **Tablet:** 768px - 1024px (md - lg)
+- **Desktop:** ≥ 1024px (lg+)
+
+---
+
+## Getting Started
+
+1. Browse the component categories in the sidebar
+2. View component examples and props
+3. Check accessibility with the A11y addon
+4. Copy code examples for your use case
+5. Always import from `@shared/ui`
+
+---
+
+## Resources
+
+- **GitHub:** [Bar POS Repository](#)
+- **Documentation:** See `SHARED-UI-COMPONENTS.md` in the repository
+- **Support:** Contact the development team
+
+---
+
+**Built with:** React 18, TypeScript, Tailwind CSS, shadcn/ui, Radix UI
