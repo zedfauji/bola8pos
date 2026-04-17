@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "bar-pos",
-  "version": "0.1.0",
-  "identifier": "com.giris.bar-pos",
+  "productName": "Bar &amp; Pool Parlor POS",
+  "version": "1.0.0",
+  "identifier": "com.yourcompany.barpos",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "bar-pos",
-        "width": 800,
-        "height": 600
+        "title": "Bar POS",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 1024,
+        "minHeight": 700,
+        "fullscreen": false,
+        "decorations": true
       }
     ],
     "security": {

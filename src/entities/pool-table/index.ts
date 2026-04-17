@@ -16,6 +16,8 @@ export {
   useMutationLinkPoolSessionToTab,
   useMutationReleasePoolTable,
   useMutationAddPoolTable,
+  useMutationUpdatePoolTable,
+  useMutationDeletePoolTable,
   usePoolTimer,
 } from './model';
 

@@ -44,6 +44,7 @@ function stubUseTabs(tabs: Tab[]) {
     isEmpty: tabs.length === 0,
     resultError: undefined,
     refetch: vi.fn(),
+    isDisabled: false,
   } as never;
 }
 

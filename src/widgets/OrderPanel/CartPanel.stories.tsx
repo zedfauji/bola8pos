@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useCartStore } from '@features/add-item-to-tab/model/cartStore';
+import { useCartStore } from '@entities/tab/model/cartStore';
 import { useTabStore } from '@entities/tab/model/store';
 import { mockTab } from '@entities/tab/model/types';
 import type { CartItem as CartLine, Modifier, Product } from '@shared/lib/domain';

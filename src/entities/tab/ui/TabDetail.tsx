@@ -366,9 +366,11 @@ export function TabDetail({
         <Button size="lg" variant="default" onClick={onAddItems} className="w-full">
           Add Items
         </Button>
-        <Button size="lg" variant="default" onClick={onCloseTab} className="w-full">
-          Close Tab
-        </Button>
+        <ProtectedAction action="close_tab" currentRole={currentStaff?.role}>
+          <Button size="lg" variant="default" onClick={onCloseTab} className="w-full">
+            Close Tab
+          </Button>
+        </ProtectedAction>
         {canTransferTab && onTransferTab && (
           <Button size="lg" variant="outline" onClick={onTransferTab} className="w-full">
             Transfer Tab

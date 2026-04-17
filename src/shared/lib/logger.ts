@@ -26,7 +26,10 @@ type BannedKeys =
   | 'cardData'
   | 'paymentToken'
   | 'securityCode'
-  | 'fullName'; // when combined with amount, this is PII
+  | 'fullName' // when combined with amount, this is PII
+  | 'referenceNumber'
+  | 'terminalReference'
+  | 'rappiOrderId';
 
 /**
  * Safe log payload type that prevents PII from being logged.
@@ -351,6 +354,9 @@ export function sanitizePayload(payload: Record<string, unknown>): SafeLogPayloa
     'paymentToken',
     'securityCode',
     'fullName',
+    'referenceNumber',
+    'terminalReference',
+    'rappiOrderId',
   ];
 
   const sanitized: Record<string, unknown> = {};

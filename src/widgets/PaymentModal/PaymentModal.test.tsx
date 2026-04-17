@@ -1,11 +1,25 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@entities/tab/model/types';
 import type { OrderItem, Product } from '@shared/lib/domain';
+import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { printReceipt, openCashDrawer } from '@shared/lib/pos-printer';
 import { err, ok } from '@shared/lib/result';
 import { renderWithProviders } from '@shared/lib/test-utils';
-import { PaymentModal, type PaymentModalProps } from './index';
+import { PaymentModal, type PaymentProcessors } from './index';
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock('@shared/lib/pos-printer', () => ({
+  printReceipt: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+  openCashDrawer: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+  testPrint: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+}));
 
 const categoryId = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
@@ -127,25 +141,102 @@ const tabWithPool: Tab = {
   ],
 };
 
+const tabRappi: Tab = {
+  ...tabNoPool,
+  id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa03',
+  rappiOrderId: 'RAPPI-999',
+};
+
+function makeReceipt(overrides: Partial<ReceiptData> = {}): ReceiptData {
+  const base: ReceiptData = {
+    receiptNumber: 'RECEIPT1',
+    tabId: tabNoPool.id,
+    customerName: 'Sarah J.',
+    cashierName: 'Staff',
+    barName: 'Test Bar',
+    barAddress: '1 Main St',
+    items: [
+      { name: 'Beer', quantity: 2, unitPrice: 6.5, lineTotal: 13 },
+      { name: 'Whiskey', quantity: 1, unitPrice: 9, lineTotal: 9 },
+    ],
+    subtotal: 22,
+    tipAmount: 3.3,
+    total: 25.3,
+    paymentMethod: 'cash',
+    processedAt: new Date('2026-04-17T12:00:00.000Z'),
+    squareReceiptUrl: null,
+    tenderedAmount: 40,
+    changeAmount: 14.7,
+  };
+  return { ...base, ...overrides };
+}
+
+function defaultProcessorMocks(receipt: ReceiptData): PaymentProcessors {
+  return {
+    processCashPayment: vi
+      .fn()
+      .mockResolvedValue(
+        ok({ paymentId: 'pay-1', changeAmount: receipt.changeAmount ?? 0, receiptData: receipt })
+      ),
+    processCardPayment: vi.fn().mockResolvedValue(ok({ paymentId: 'pay-2', receiptData: receipt })),
+    processRappiPayment: vi
+      .fn()
+      .mockResolvedValue(ok({ paymentId: 'pay-3', receiptData: receipt })),
+  };
+}
+
 function renderModal(
   tab: Tab,
   overrides: Partial<{
     open: boolean;
-    onPayment: PaymentModalProps['onPayment'];
+    processors: PaymentProcessors;
     onClose: () => void;
+    onPaymentSuccess: () => void;
+    staffId: string;
   }> = {}
 ) {
-  const onPayment = (overrides.onPayment ??
-    vi.fn().mockResolvedValue(ok(undefined))) as PaymentModalProps['onPayment'];
   const onClose = overrides.onClose ?? vi.fn();
+  const receipt = makeReceipt({ tabId: tab.id, customerName: tab.customerName });
+  const processors = overrides.processors ?? defaultProcessorMocks(receipt);
+  const sid = overrides.staffId ?? staffId;
   renderWithProviders(
-    <PaymentModal open={overrides.open ?? true} tab={tab} onPayment={onPayment} onClose={onClose} />
+    <PaymentModal
+      open={overrides.open ?? true}
+      tab={tab}
+      staffId={sid}
+      onClose={onClose}
+      {...(overrides.onPaymentSuccess != null
+        ? { onPaymentSuccess: overrides.onPaymentSuccess }
+        : {})}
+      processors={processors}
+    />
   );
-  return { onPayment, onClose };
+  return { onClose, processors };
 }
 
 describe('PaymentModal', () => {
-  it('shows customer, item lines, subtotals, and running total without pool section', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useStaffStore.setState({
+      currentStaff: {
+        id: staffId,
+        name: 'Cashier',
+        email: 'cashier@test.dev',
+        role: 'manager',
+        pin: '123456',
+        isActive: true,
+      },
+      currentShift: null,
+      staffList: [],
+      isAuthenticated: true,
+    });
+  });
+
+  afterEach(() => {
+    useStaffStore.getState().logout();
+  });
+
+  it('shows customer, item lines, subtotals, and total without pool section', () => {
     renderModal(tabNoPool);
     const dialog = screen.getByRole('dialog');
 
@@ -160,7 +251,7 @@ describe('PaymentModal', () => {
       .getByText('Items subtotal')
       .closest('div') as HTMLElement;
     expect(within(itemsSubtotalRow).getByLabelText('$22.00 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByText('Running total')).toBeInTheDocument();
+    expect(within(dialog).getByText('Total')).toBeInTheDocument();
     expect(within(dialog).getByLabelText('$25.30 dollars')).toBeInTheDocument();
     expect(within(dialog).queryByText('Pool charges')).not.toBeInTheDocument();
   });
@@ -233,44 +324,89 @@ describe('PaymentModal', () => {
     expect(card.className).toContain('border-border');
   });
 
-  it('calls onPayment with cash and 15% tip, closes on success, and shows processing state', async () => {
-    const user = userEvent.setup();
-    let resolvePayment: (value: ReturnType<typeof ok<void>>) => void = () => {};
-    const paymentPromise = new Promise<ReturnType<typeof ok<void>>>(resolve => {
-      resolvePayment = resolve;
-    });
-    const onPayment = vi.fn().mockReturnValue(paymentPromise);
-    const onClose = vi.fn();
-    renderModal(tabNoPool, { onPayment, onClose });
-
-    await user.click(screen.getByRole('button', { name: 'Process Payment' }));
-    expect(onPayment).toHaveBeenCalledWith('cash', 3.3);
-
-    await waitFor(() => {
-      expect(screen.getByText('Processing Payment...')).toBeInTheDocument();
-    });
+  it('shows Rappi method when tab has rappiOrderId', () => {
+    renderModal(tabRappi);
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByRole('button', { name: /Processing Payment/ })).toBeDisabled();
-    expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeDisabled();
-
-    resolvePayment(ok(undefined));
-    await waitFor(() => {
-      expect(onClose).toHaveBeenCalled();
-    });
+    expect(within(dialog).getByRole('button', { name: 'Rappi' })).toBeInTheDocument();
   });
 
-  it('shows payment error alert and does not call onClose on failure', async () => {
+  it('disables process payment until tendered covers total, then shows receipt', async () => {
     const user = userEvent.setup();
-    const onPayment = vi
-      .fn()
-      .mockResolvedValue(err({ code: 'PAYMENT_DECLINED', message: 'Card declined' }));
-    const onClose = vi.fn();
-    renderModal(tabNoPool, { onPayment, onClose });
+    const onPaymentSuccess = vi.fn();
+    const receipt = makeReceipt();
+    const processors: PaymentProcessors = {
+      processCashPayment: vi
+        .fn()
+        .mockResolvedValue(ok({ paymentId: 'p1', changeAmount: 4.7, receiptData: receipt })),
+      processCardPayment: vi.fn(),
+      processRappiPayment: vi.fn(),
+    };
+    renderModal(tabNoPool, { processors, onPaymentSuccess });
 
-    await user.click(screen.getByRole('button', { name: 'Process Payment' }));
+    const payBtn = screen.getByRole('button', { name: 'Process payment' });
+    expect(payBtn).toBeDisabled();
+
+    const tendered = screen.getByLabelText('Amount tendered');
+    await user.clear(tendered);
+    await user.type(tendered, '30.00');
+
+    expect(payBtn).not.toBeDisabled();
+    await user.click(payBtn);
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Card declined');
+      expect(screen.getByRole('heading', { name: 'Receipt' })).toBeInTheDocument();
+    });
+    expect(onPaymentSuccess).toHaveBeenCalled();
+    expect(processors.processCashPayment).toHaveBeenCalledWith(tabNoPool.id, 22, 3.3, 30);
+    expect(openCashDrawer).toHaveBeenCalled();
+    expect(printReceipt).toHaveBeenCalledWith(receipt);
+    expect(vi.mocked(openCashDrawer).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(printReceipt).mock.invocationCallOrder[0]!
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+  });
+
+  it('prints without opening drawer after card payment', async () => {
+    const user = userEvent.setup();
+    const receipt = makeReceipt();
+    const processors: PaymentProcessors = {
+      processCashPayment: vi.fn(),
+      processCardPayment: vi.fn().mockResolvedValue(ok({ paymentId: 'p2', receiptData: receipt })),
+      processRappiPayment: vi.fn(),
+    };
+    renderModal(tabNoPool, { processors });
+
+    await user.click(screen.getByRole('button', { name: 'Card' }));
+    await user.click(screen.getByRole('button', { name: 'Confirm card payment' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Receipt' })).toBeInTheDocument();
+    });
+    expect(printReceipt).toHaveBeenCalledWith(receipt);
+    expect(openCashDrawer).not.toHaveBeenCalled();
+  });
+
+  it('shows payment error alert and stays open on failure', async () => {
+    const user = userEvent.setup();
+    const processors: PaymentProcessors = {
+      processCashPayment: vi
+        .fn()
+        .mockResolvedValue(err({ code: 'VALIDATION_ERROR', message: 'Insufficient tender' })),
+      processCardPayment: vi.fn(),
+      processRappiPayment: vi.fn(),
+    };
+    const onClose = vi.fn();
+    renderModal(tabNoPool, { processors, onClose });
+
+    const tendered = screen.getByLabelText('Amount tendered');
+    await user.clear(tendered);
+    await user.type(tendered, '50.00');
+
+    await user.click(screen.getByRole('button', { name: 'Process payment' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Insufficient tender');
     });
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -282,5 +418,123 @@ describe('PaymentModal', () => {
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('disables close_tab for bartender and shows manager tooltip', async () => {
+    const user = userEvent.setup();
+    useStaffStore.setState({
+      currentStaff: {
+        id: staffId,
+        name: 'B',
+        email: 'b@b.dev',
+        role: 'bartender',
+        pin: '123456',
+        isActive: true,
+      },
+      currentShift: null,
+      staffList: [],
+      isAuthenticated: true,
+    });
+    renderModal(tabNoPool);
+
+    const payBtn = screen.getByRole('button', { name: 'Process payment' });
+    expect(payBtn).toBeDisabled();
+    await user.hover(payBtn);
+    const tips = await screen.findAllByText('Manager access required');
+    expect(tips.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows change due for cash tendered above total', async () => {
+    const user = userEvent.setup();
+    renderModal(tabNoPool);
+    const dialog = screen.getByRole('dialog');
+
+    const tendered = within(dialog).getByLabelText('Amount tendered');
+    await user.clear(tendered);
+    await user.type(tendered, '40.00');
+
+    expect(within(dialog).getByText('Change due')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$14.70 dollars')).toBeInTheDocument();
+  });
+
+  it('completes Rappi payment without cash drawer', async () => {
+    const user = userEvent.setup();
+    const receipt = makeReceipt({
+      tabId: tabRappi.id,
+      paymentMethod: 'rappi',
+      tipAmount: 0,
+      total: 22,
+    });
+    const processors: PaymentProcessors = {
+      processCashPayment: vi.fn(),
+      processCardPayment: vi.fn(),
+      processRappiPayment: vi
+        .fn()
+        .mockResolvedValue(ok({ paymentId: 'pay-r', receiptData: receipt })),
+    };
+    renderModal(tabRappi, { processors });
+
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByRole('button', { name: 'Rappi' })).toHaveClass(/bg-primary/);
+
+    await user.click(screen.getByRole('button', { name: 'Confirm & close tab' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Receipt' })).toBeInTheDocument();
+    });
+    expect(processors.processRappiPayment).toHaveBeenCalledWith(tabRappi.id, 22, 'RAPPI-999');
+    expect(openCashDrawer).not.toHaveBeenCalled();
+    expect(printReceipt).toHaveBeenCalled();
+  });
+
+  it('passes BBVA terminal reference to card processor', async () => {
+    const user = userEvent.setup();
+    const receipt = makeReceipt({ paymentMethod: 'card' });
+    const processors: PaymentProcessors = {
+      processCashPayment: vi.fn(),
+      processCardPayment: vi.fn().mockResolvedValue(ok({ paymentId: 'p2', receiptData: receipt })),
+      processRappiPayment: vi.fn(),
+    };
+    renderModal(tabNoPool, { processors });
+
+    await user.click(screen.getByRole('button', { name: 'Card' }));
+    await user.type(screen.getByLabelText(/Reference/i), 'AUTH-777');
+    await user.click(screen.getByRole('button', { name: 'Confirm card payment' }));
+
+    await waitFor(() => {
+      expect(processors.processCardPayment).toHaveBeenCalled();
+    });
+    expect(processors.processCardPayment).toHaveBeenCalledWith(tabNoPool.id, 22, 3.3, 'AUTH-777');
+  });
+
+  it('keeps primary disabled when staffId empty', () => {
+    renderModal(tabNoPool, { staffId: '' });
+    expect(screen.getByRole('button', { name: 'Process payment' })).toBeDisabled();
+  });
+
+  it('toasts hardware error when cash drawer fails after cash payment', async () => {
+    const user = userEvent.setup();
+    const receipt = makeReceipt();
+    const processors: PaymentProcessors = {
+      processCashPayment: vi
+        .fn()
+        .mockResolvedValue(ok({ paymentId: 'p1', changeAmount: 4.7, receiptData: receipt })),
+      processCardPayment: vi.fn(),
+      processRappiPayment: vi.fn(),
+    };
+    vi.mocked(openCashDrawer).mockResolvedValue(
+      err({ code: 'TAURI_ERROR', message: 'Drawer failed' })
+    );
+
+    renderModal(tabNoPool, { processors });
+
+    const tendered = screen.getByLabelText('Amount tendered');
+    await user.clear(tendered);
+    await user.type(tendered, '30.00');
+    await user.click(screen.getByRole('button', { name: 'Process payment' }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Drawer failed');
+    });
   });
 });

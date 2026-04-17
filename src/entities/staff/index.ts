@@ -5,13 +5,23 @@ export {
   ShiftSchema,
   ShiftCreateSchema,
   ShiftUpdateSchema,
-  AuthProvider,
-  useAuth,
   staffKeys,
   useStaffStore,
+  useLoginUiStore,
   useStaffList,
   useMutationClockIn,
   useMutationClockOut,
+  useOpenShifts,
+  usePermissions,
+  useShiftClosePreview,
 } from './model';
 
-export type { Staff, StaffCreate, StaffUpdate, Shift, ShiftCreate, ShiftUpdate } from './model';
+export type {
+  Staff,
+  StaffCreate,
+  StaffUpdate,
+  Shift,
+  ShiftCreate,
+  ShiftUpdate,
+  ShiftClosePreview,
+} from './model';

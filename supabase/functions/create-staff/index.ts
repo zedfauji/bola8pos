@@ -9,12 +9,11 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
-  // Generate a stable UUID from name (or use crypto)
   const staffId = crypto.randomUUID()
   const email = `${staffId}@barpos.local`
 
-  // Create auth user
   const { error: authError } = await supabaseAdmin.auth.admin.createUser({
+    id: staffId,
     email,
     password: pin,
     email_confirm: true,
@@ -28,13 +27,11 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Create profile (auth user creation does not auto-create it)
   const { error: profileError } = await supabaseAdmin
     .from('profiles')
-    .insert({ id: staffId, name, role, pin, is_active: true })
+    .insert({ id: staffId, name, role, pin, email, is_active: true })
 
   if (profileError) {
-    // Rollback: delete the auth user we just created
     await supabaseAdmin.auth.admin.deleteUser(staffId)
     return new Response(JSON.stringify({ error: profileError.message }), {
       status: 400,
@@ -42,7 +39,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  return new Response(JSON.stringify({ id: staffId, name, role }), {
+  return new Response(JSON.stringify({ id: staffId, email, name, role }), {
     headers: { 'Content-Type': 'application/json' },
   })
 })

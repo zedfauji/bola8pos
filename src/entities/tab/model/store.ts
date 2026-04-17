@@ -4,6 +4,24 @@ import type { Tab } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { ok, err, type Result } from '@shared/lib/result';
 
+// ============================================================================
+// OFFLINE ACTION QUEUE
+// ============================================================================
+
+export type OfflineActionType = 'place-order' | 'open-tab' | 'start-pool-timer' | 'stop-pool-timer';
+
+export interface OfflineAction {
+  id: string;
+  type: OfflineActionType;
+  payload: unknown;
+  timestamp: number;
+  retryCount: number;
+}
+
+// ============================================================================
+// STATE & ACTIONS
+// ============================================================================
+
 interface TabsState {
   /** All open tabs loaded from the server. */
   tabs: Tab[];
@@ -13,6 +31,10 @@ interface TabsState {
   selectedTabId: string | null;
   /** Controls the tab drawer visibility. */
   isTabDrawerOpen: boolean;
+  /** Actions queued while offline; replayed in order when connectivity returns. */
+  offlineQueue: OfflineAction[];
+  /** True while the queue is being replayed after reconnection. Not persisted. */
+  isSyncing: boolean;
 }
 
 interface TabsActions {
@@ -46,6 +68,18 @@ interface TabsActions {
 
   /** Closes the tab drawer. */
   closeDrawer: () => void;
+
+  /** Appends an action to the offline queue. */
+  enqueueOfflineAction: (action: Omit<OfflineAction, 'id' | 'timestamp' | 'retryCount'>) => void;
+
+  /** Removes a single action from the offline queue by its id. */
+  dequeueOfflineAction: (id: string) => void;
+
+  /** Clears all queued offline actions. */
+  clearOfflineQueue: () => void;
+
+  /** Sets the syncing flag shown in the OfflineBanner. */
+  setSyncing: (flag: boolean) => void;
 }
 
 type TabsStore = TabsState & TabsActions;
@@ -57,6 +91,8 @@ export const useTabStore = create<TabsStore>()(
       activeTabId: null,
       selectedTabId: null,
       isTabDrawerOpen: false,
+      offlineQueue: [],
+      isSyncing: false,
 
       loadTabs: tabs => {
         logger.info('tabs.loaded', { count: tabs.length });
@@ -128,13 +164,42 @@ export const useTabStore = create<TabsStore>()(
       closeDrawer: () => {
         set({ isTabDrawerOpen: false });
       },
+
+      enqueueOfflineAction: action => {
+        const entry: OfflineAction = {
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          retryCount: 0,
+          ...action,
+        };
+        logger.warn('offline.action.queued', { type: entry.type, id: entry.id });
+        set(state => ({ offlineQueue: [...state.offlineQueue, entry] }));
+      },
+
+      dequeueOfflineAction: id => {
+        logger.debug('offline.action.dequeued', { id });
+        set(state => ({ offlineQueue: state.offlineQueue.filter(a => a.id !== id) }));
+      },
+
+      clearOfflineQueue: () => {
+        logger.info('offline.queue.cleared');
+        set({ offlineQueue: [] });
+      },
+
+      setSyncing: flag => {
+        set({ isSyncing: flag });
+      },
     }),
     {
       name: 'tabs',
+      // Only persist UI selection and the offline queue.
+      // The tabs array is server state owned by TanStack Query — persisting it
+      // causes Date deserialisation bugs and stale data.
+      // isSyncing is volatile and must never be persisted.
       partialize: state => ({
-        tabs: state.tabs,
         activeTabId: state.activeTabId,
         selectedTabId: state.selectedTabId,
+        offlineQueue: state.offlineQueue,
       }),
     }
   )

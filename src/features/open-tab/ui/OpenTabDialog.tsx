@@ -1,7 +1,7 @@
 import { useState, type SyntheticEvent } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { useAuthStore } from '@entities/staff/model/authStore';
+import { useStaffStore } from '@entities/staff/model/store';
 import { useMutationOpenTab } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import type { CreateTab } from '@entities/tab/model/types';
@@ -38,11 +38,11 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [shiftError, setShiftError] = useState('');
 
-  const selectedStaff = useAuthStore(s => s.selectedStaff);
-  const currentShiftId = useAuthStore(s => s.currentShiftId);
+  const currentStaff = useStaffStore(s => s.currentStaff);
+  const currentShift = useStaffStore(s => s.currentShift);
   const mutation = useMutationOpenTab();
 
-  const canOpen = Boolean(selectedStaff?.id && currentShiftId);
+  const canOpen = Boolean(currentStaff?.id && currentShift?.id);
   const isSubmitting = mutation.isPending;
 
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
@@ -77,7 +77,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
       return;
     }
 
-    if (!selectedStaff?.id || !currentShiftId) {
+    if (!currentStaff?.id || !currentShift?.id) {
       setShiftError('No active shift. Clock in before opening tabs.');
       return;
     }
@@ -86,8 +86,8 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
     const payload: CreateTab = {
       customerName: v.customerName,
       tableNumber: v.tableNumber ?? null,
-      staffId: selectedStaff.id,
-      shiftId: currentShiftId,
+      staffId: currentStaff.id,
+      shiftId: currentShift.id,
       status: 'open',
       notes: null,
       items: [],

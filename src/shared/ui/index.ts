@@ -14,9 +14,14 @@ export type { TimerDisplayProps } from './TimerDisplay';
 export { LiveTimeDisplay } from './LiveTimeDisplay';
 export type { LiveTimeDisplayProps } from './LiveTimeDisplay';
 export { StatusBadge } from './StatusBadge';
-export type { StatusBadgeProps, TabOpenDurationBadgeStatus } from './StatusBadge';
+export type {
+  StatusBadgeProps,
+  TabOpenDurationBadgeStatus,
+  InventoryStockBadgeStatus,
+} from './StatusBadge';
 export { ProtectedAction } from './ProtectedAction';
 export type { ProtectedActionProps } from './ProtectedAction';
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
 export { SectionHeader } from './SectionHeader';
@@ -103,4 +108,5 @@ export {
   SheetTitle,
   SheetDescription,
 } from './sheet';
+export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 export { ScrollAreaRoot, ScrollBar } from './scroll-area';

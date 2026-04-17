@@ -1,4 +1,4 @@
-import { useAuthStore } from '@entities/staff/model/authStore';
+import { useLoginUiStore } from '@entities/staff/model/loginUiStore';
 import { useStaffList } from '@entities/staff/model/queries';
 import type { Staff } from '@entities/staff/model/types';
 import { LoadingSpinner } from '@shared/ui/LoadingSpinner';
@@ -7,7 +7,7 @@ export function EmployeeSelector() {
   const { data: staff, isLoading, error, resultError } = useStaffList();
   const hasError = Boolean(error || resultError);
   const errorMessage = resultError?.message ?? error?.message ?? 'Unknown error';
-  const setSelectedStaff = useAuthStore(s => s.setSelectedStaff);
+  const setSelectedStaff = useLoginUiStore(s => s.setSelectedStaff);
 
   if (isLoading) {
     return (
@@ -30,6 +30,7 @@ export function EmployeeSelector() {
         {(staff ?? []).map((member: Staff) => (
           <button
             key={member.id}
+            type="button"
             onClick={() => {
               setSelectedStaff(member);
             }}

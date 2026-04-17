@@ -17,6 +17,11 @@ export interface PoolTableCardProps {
   onReleaseReserved?: () => void;
   /** Disable start (e.g. while mutation pending). */
   startDisabled?: boolean;
+  startDisabledTitle?: string;
+  /** Disable stop session (e.g. RBAC). */
+  stopDisabled?: boolean;
+  /** Native tooltip when stop is RBAC-disabled. */
+  stopDisabledTitle?: string;
 }
 
 export function PoolTableCard({
@@ -28,6 +33,9 @@ export function PoolTableCard({
   onAssignToTab,
   onReleaseReserved,
   startDisabled = false,
+  startDisabledTitle,
+  stopDisabled = false,
+  stopDisabledTitle,
 }: PoolTableCardProps) {
   const isOccupied = table.status === 'occupied';
   const timer = usePoolTimer(isOccupied && session ? session.startedAt : null, table.ratePerHour);
@@ -81,6 +89,7 @@ export function PoolTableCard({
             touchSize="large"
             className="w-full"
             disabled={startDisabled}
+            title={startDisabled ? startDisabledTitle : undefined}
             onClick={e => {
               e.stopPropagation();
               onStartSession();
@@ -98,6 +107,8 @@ export function PoolTableCard({
                 variant="destructive"
                 touchSize="large"
                 className="w-full"
+                disabled={stopDisabled}
+                title={stopDisabled ? stopDisabledTitle : undefined}
                 onClick={e => {
                   e.stopPropagation();
                   onStopSession();

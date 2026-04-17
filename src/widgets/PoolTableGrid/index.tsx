@@ -10,13 +10,16 @@ import {
   usePoolTables,
   PoolTableCard,
 } from '@entities/pool-table';
-import { useAuth } from '@entities/staff/model/AuthContext';
+import { useStaffStore } from '@entities/staff/model/store';
+import { usePermissions } from '@entities/staff/model/usePermissions';
 import { useTabs } from '@entities/tab';
 import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import { rbacDenialMessage } from '@shared/lib/rbac';
 import { EmptyState, POSButton, PoolTableGridSkeleton, ProtectedAction } from '@shared/ui';
 
 export function PoolTableGrid() {
-  const { profile } = useAuth();
+  const currentStaff = useStaffStore(s => s.currentStaff);
+  const { can } = usePermissions();
   const { data: tables, isIdleOrLoading, isError, refetch, resultError, error } = usePoolTables();
   const { data: tabs } = useTabs();
   const addTable = useMutationAddPoolTable();
@@ -78,7 +81,7 @@ export function PoolTableGrid() {
             | Available: {availableCount} | Occupied: {occupiedCount}
           </span>
         </h2>
-        <ProtectedAction action="manage_pool_tables" currentRole={profile?.role ?? null}>
+        <ProtectedAction action="manage_settings" currentRole={currentStaff?.role ?? null}>
           <POSButton
             type="button"
             variant="outline"
@@ -119,7 +122,14 @@ export function PoolTableGrid() {
                 table={table}
                 session={session}
                 linkedCustomerName={resolveCustomerName(session)}
-                startDisabled={false}
+                startDisabled={!can('start_pool_timer')}
+                {...(!can('start_pool_timer')
+                  ? { startDisabledTitle: rbacDenialMessage('start_pool_timer') }
+                  : {})}
+                stopDisabled={!can('stop_pool_timer')}
+                {...(!can('stop_pool_timer')
+                  ? { stopDisabledTitle: rbacDenialMessage('stop_pool_timer') }
+                  : {})}
                 {...(table.status === 'available'
                   ? {
                       onStartSession: () => {

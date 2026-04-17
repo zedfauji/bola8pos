@@ -1,30 +1,10 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: '14.5';
   };
   public: {
     Tables: {
@@ -272,12 +252,15 @@ export type Database = {
           amount: number;
           created_at: string;
           id: string;
+          idempotency_key: string;
           method: Database['public']['Enums']['payment_method'];
           processed_at: string;
           processed_by: string;
+          reference_number: string | null;
           square_payment_id: string | null;
           square_receipt_url: string | null;
           tab_id: string;
+          tendered_amount: number | null;
           tip_amount: number;
           updated_at: string;
         };
@@ -285,12 +268,15 @@ export type Database = {
           amount: number;
           created_at?: string;
           id?: string;
+          idempotency_key: string;
           method: Database['public']['Enums']['payment_method'];
           processed_at?: string;
           processed_by: string;
+          reference_number?: string | null;
           square_payment_id?: string | null;
           square_receipt_url?: string | null;
           tab_id: string;
+          tendered_amount?: number | null;
           tip_amount?: number;
           updated_at?: string;
         };
@@ -298,12 +284,15 @@ export type Database = {
           amount?: number;
           created_at?: string;
           id?: string;
+          idempotency_key?: string;
           method?: Database['public']['Enums']['payment_method'];
           processed_at?: string;
           processed_by?: string;
+          reference_number?: string | null;
           square_payment_id?: string | null;
           square_receipt_url?: string | null;
           tab_id?: string;
+          tendered_amount?: number | null;
           tip_amount?: number;
           updated_at?: string;
         };
@@ -529,6 +518,145 @@ export type Database = {
         };
         Relationships: [];
       };
+      rappi_orders: {
+        Row: {
+          accepted_at: string | null;
+          completed_at: string | null;
+          customer_name: string;
+          delivery_address: string;
+          id: string;
+          items: Json;
+          rappi_order_id: string;
+          rappi_total: number;
+          received_at: string;
+          rejection_reason: string | null;
+          status: Database['public']['Enums']['rappi_order_status'];
+          subtotal: number;
+          tab_id: string | null;
+          tenant_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          accepted_at?: string | null;
+          completed_at?: string | null;
+          customer_name?: string;
+          delivery_address?: string;
+          id?: string;
+          items?: Json;
+          rappi_order_id: string;
+          rappi_total: number;
+          received_at?: string;
+          rejection_reason?: string | null;
+          status?: Database['public']['Enums']['rappi_order_status'];
+          subtotal: number;
+          tab_id?: string | null;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Update: {
+          accepted_at?: string | null;
+          completed_at?: string | null;
+          customer_name?: string;
+          delivery_address?: string;
+          id?: string;
+          items?: Json;
+          rappi_order_id?: string;
+          rappi_total?: number;
+          received_at?: string;
+          rejection_reason?: string | null;
+          status?: Database['public']['Enums']['rappi_order_status'];
+          subtotal?: number;
+          tab_id?: string | null;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'rappi_orders_tab_id_fkey';
+            columns: ['tab_id'];
+            isOneToOne: false;
+            referencedRelation: 'tabs';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      settings: {
+        Row: {
+          id: string;
+          key: string;
+          updated_at: string;
+          updated_by: string | null;
+          value: Json;
+        };
+        Insert: {
+          id?: string;
+          key: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          value: Json;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          value?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'settings_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      settings_backups: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          label: string;
+          restored_at: string | null;
+          restored_by: string | null;
+          snapshot: Json;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          label: string;
+          restored_at?: string | null;
+          restored_by?: string | null;
+          snapshot: Json;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          label?: string;
+          restored_at?: string | null;
+          restored_by?: string | null;
+          snapshot?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'settings_backups_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'settings_backups_restored_by_fkey';
+            columns: ['restored_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       shifts: {
         Row: {
           clock_in: string;
@@ -578,6 +706,7 @@ export type Database = {
           id: string;
           notes: string | null;
           opened_at: string;
+          rappi_order_id: string | null;
           shift_id: string;
           staff_id: string;
           status: Database['public']['Enums']['tab_status'];
@@ -591,6 +720,7 @@ export type Database = {
           id?: string;
           notes?: string | null;
           opened_at?: string;
+          rappi_order_id?: string | null;
           shift_id: string;
           staff_id: string;
           status?: Database['public']['Enums']['tab_status'];
@@ -604,6 +734,7 @@ export type Database = {
           id?: string;
           notes?: string | null;
           opened_at?: string;
+          rappi_order_id?: string | null;
           shift_id?: string;
           staff_id?: string;
           status?: Database['public']['Enums']['tab_status'];
@@ -635,7 +766,7 @@ export type Database = {
       create_order_with_items: {
         Args: {
           p_items: Json;
-          p_notes: string | null;
+          p_notes: string;
           p_staff_id: string;
           p_status: Database['public']['Enums']['order_status'];
           p_tab_id: string;
@@ -646,11 +777,32 @@ export type Database = {
         Args: never;
         Returns: Database['public']['Enums']['user_role'];
       };
+      process_payment_atomic: {
+        Args: {
+          p_amount: number;
+          p_idempotency_key: string;
+          p_method: string;
+          p_rappi_order_id?: string;
+          p_reference_number?: string;
+          p_staff_id: string;
+          p_tab_id: string;
+          p_tendered_amount?: number;
+          p_tip_amount: number;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       order_status: 'pending' | 'served' | 'voided';
-      payment_method: 'cash' | 'card' | 'tab_transfer';
+      payment_method: 'cash' | 'card' | 'tab_transfer' | 'rappi';
       pool_table_status: 'available' | 'occupied' | 'reserved' | 'maintenance';
+      rappi_order_status:
+        | 'pending_acceptance'
+        | 'accepted'
+        | 'preparing'
+        | 'ready_for_pickup'
+        | 'completed'
+        | 'rejected';
       tab_status: 'open' | 'closed' | 'paid' | 'voided';
       user_role: 'bartender' | 'manager' | 'admin';
     };
@@ -758,11 +910,8 @@ export type Enums<
     ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
     : never;
 
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema['CompositeTypes']
-    | { schema: keyof DatabaseWithoutInternals },
+  PublicCompositeTypeNameOrOptions extends string | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
@@ -775,17 +924,21 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
     ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
     : never;
-/* eslint-enable @typescript-eslint/no-redundant-type-constituents */
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       order_status: ['pending', 'served', 'voided'],
-      payment_method: ['cash', 'card', 'tab_transfer'],
+      payment_method: ['cash', 'card', 'tab_transfer', 'rappi'],
       pool_table_status: ['available', 'occupied', 'reserved', 'maintenance'],
+      rappi_order_status: [
+        'pending_acceptance',
+        'accepted',
+        'preparing',
+        'ready_for_pickup',
+        'completed',
+        'rejected',
+      ],
       tab_status: ['open', 'closed', 'paid', 'voided'],
       user_role: ['bartender', 'manager', 'admin'],
     },

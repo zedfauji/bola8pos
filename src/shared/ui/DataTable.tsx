@@ -2,16 +2,18 @@
  * DATA TABLE COMPONENT
  *
  * Generic table wrapper using TanStack Table.
- * Supports loading states, empty states, search, and row clicks.
+ * Supports loading states, empty states, search, sorting, optional toolbar, and row clicks.
  */
 
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
   type ColumnFiltersState,
+  type SortingState,
 } from '@tanstack/react-table';
 import { FileQuestion } from 'lucide-react';
 import * as React from 'react';
@@ -38,36 +40,20 @@ export interface DataTableProps<T> {
   searchable?: boolean;
   /** Search input placeholder */
   searchPlaceholder?: string;
+  /** Enable column sorting (TanStack sorting state) */
+  enableSorting?: boolean;
+  /** Initial sorting state */
+  initialSorting?: SortingState;
+  /** Extra controls rendered above search/table (e.g. filters) */
+  toolbar?: React.ReactNode;
+  /** Per-data-row class names (e.g. highlight low stock) */
+  getRowClassName?: (row: T) => string | undefined;
   /** Additional CSS classes */
   className?: string;
 }
 
 /**
  * DataTable - Generic table component with TanStack Table
- *
- * Features:
- * - Loading state with skeleton rows
- * - Empty state with custom component
- * - Optional search with local filtering
- * - Row click handler with hover highlight
- * - Fully typed with TypeScript generics
- *
- * @example
- * ```tsx
- * const columns: ColumnDef<Product>[] = [
- *   { accessorKey: 'name', header: 'Name' },
- *   { accessorKey: 'price', header: 'Price' },
- * ]
- *
- * <DataTable
- *   columns={columns}
- *   data={products}
- *   isLoading={isLoading}
- *   searchable
- *   searchPlaceholder="Search products..."
- *   onRowClick={(product) => console.log(product)}
- * />
- * ```
  */
 export function DataTable<T>({
   columns,
@@ -77,10 +63,15 @@ export function DataTable<T>({
   onRowClick,
   searchable = false,
   searchPlaceholder = 'Search...',
+  enableSorting = false,
+  initialSorting,
+  toolbar,
+  getRowClassName,
   className,
 }: DataTableProps<T>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
+  const [sorting, setSorting] = React.useState<SortingState>(() => initialSorting ?? []);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -88,18 +79,31 @@ export function DataTable<T>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    ...(enableSorting
+      ? {
+          getSortedRowModel: getSortedRowModel(),
+          onSortingChange: setSorting,
+        }
+      : {}),
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     state: {
       columnFilters,
       globalFilter,
+      ...(enableSorting ? { sorting } : {}),
     },
+    enableSorting,
   });
+
+  const toolbarBlock = toolbar ? (
+    <div className="flex flex-wrap items-center gap-2">{toolbar}</div>
+  ) : null;
 
   // Show loading state
   if (isLoading) {
     return (
       <div className={cn('space-y-4', className)}>
+        {toolbarBlock}
         {searchable && <SearchInput value="" onChange={() => {}} placeholder={searchPlaceholder} />}
         <div className="rounded-md border">
           <Table>
@@ -131,6 +135,7 @@ export function DataTable<T>({
   if (data.length === 0) {
     return (
       <div className={cn('space-y-4', className)}>
+        {toolbarBlock}
         {searchable && (
           <SearchInput
             value={globalFilter}
@@ -147,7 +152,7 @@ export function DataTable<T>({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Search Input */}
+      {toolbarBlock}
       {searchable && (
         <SearchInput
           value={globalFilter}
@@ -156,7 +161,6 @@ export function DataTable<T>({
         />
       )}
 
-      {/* Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -190,7 +194,7 @@ export function DataTable<T>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={cn(onRowClick && 'cursor-pointer')}
+                  className={cn(onRowClick && 'cursor-pointer', getRowClassName?.(row.original))}
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map(cell => (

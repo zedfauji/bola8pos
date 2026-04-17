@@ -89,16 +89,19 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 New Tab +
               </Button>
             </div>
-            <ProtectedAction action="void_order" currentRole={currentStaff?.role}>
-              {(currentTab?.orders.length ?? 0) > 0 && (
-                <div className="space-y-2 border-t pt-2">
-                  <p className="text-xs text-muted-foreground">Order history</p>
-                  <div className="space-y-1">
-                    {[...(currentTab?.orders ?? [])]
-                      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-                      .map(order => (
+            {(currentTab?.orders.length ?? 0) > 0 && (
+              <div className="space-y-2 border-t pt-2">
+                <p className="text-xs text-muted-foreground">Order history</p>
+                <div className="space-y-1">
+                  {[...(currentTab?.orders ?? [])]
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                    .map(order => (
+                      <ProtectedAction
+                        key={order.id}
+                        action="void_order"
+                        currentRole={currentStaff?.role}
+                      >
                         <Button
-                          key={order.id}
                           type="button"
                           variant="destructive"
                           size="sm"
@@ -113,11 +116,11 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                             minute: '2-digit',
                           })}
                         </Button>
-                      ))}
-                  </div>
+                      </ProtectedAction>
+                    ))}
                 </div>
-              )}
-            </ProtectedAction>
+              </div>
+            )}
           </div>
         ) : (
           <div

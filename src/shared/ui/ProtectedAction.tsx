@@ -1,41 +1,55 @@
-import type { ReactNode } from 'react';
-import type { UserRole } from '@shared/lib/domain';
-
-const ACTION_ROLE_MAP = {
-  void_order: ['manager', 'admin'],
-  manage_pool_tables: ['admin'],
-} as const satisfies Record<string, readonly UserRole[]>;
-
-type ProtectedActionName = keyof typeof ACTION_ROLE_MAP;
+import { cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
+import { canAccess, rbacDenialMessage, type StaffAction, type StaffRole } from '@shared/lib/rbac';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 
 export type ProtectedActionProps = {
-  /** Roles that may see and use the wrapped action */
-  allowedRoles?: readonly UserRole[];
-  /** Action mapped to allowed roles */
-  action?: ProtectedActionName;
-  currentRole: UserRole | null | undefined;
+  action: StaffAction;
+  currentRole: StaffRole | null | undefined;
+  /** Extra disable (e.g. no orders) combined with RBAC via OR. */
+  disabled?: boolean;
   children: ReactNode;
-  /** Shown when the current role is not allowed (defaults to nothing) */
-  fallback?: ReactNode;
 };
 
+function isReactElement(node: ReactNode): node is ReactElement<{ disabled?: boolean }> {
+  return isValidElement(node);
+}
+
 /**
- * Renders children only when currentRole is permitted.
- * Caller supplies role from staff/auth state — this component stays free of entity imports.
+ * If the role lacks permission: disables the child control and shows a tooltip.
+ * Otherwise renders the child with optional `disabled` merged in.
  */
 export function ProtectedAction({
-  allowedRoles,
   action,
   currentRole,
+  disabled = false,
   children,
-  fallback = null,
 }: ProtectedActionProps) {
-  const resolvedAllowedRoles = action ? ACTION_ROLE_MAP[action] : allowedRoles;
-  const hasRoleConstraint = Array.isArray(resolvedAllowedRoles) && resolvedAllowedRoles.length > 0;
-  if (!hasRoleConstraint) return <>{fallback}</>;
+  const allowed = canAccess(currentRole, action);
+  const denialMessage = rbacDenialMessage(action);
 
-  const allowedRoleSet = resolvedAllowedRoles as readonly UserRole[];
-  const isAllowed = currentRole != null && allowedRoleSet.includes(currentRole);
-  if (!isAllowed) return <>{fallback}</>;
-  return <>{children}</>;
+  if (!isReactElement(children)) {
+    return <>{children}</>;
+  }
+
+  const mergedDisabled = Boolean(disabled || children.props.disabled);
+
+  if (allowed) {
+    if (mergedDisabled === Boolean(children.props.disabled)) {
+      return children;
+    }
+    return cloneElement(children, { disabled: mergedDisabled });
+  }
+
+  const deniedChild = cloneElement(children, { disabled: true });
+
+  return (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex max-w-full cursor-not-allowed">{deniedChild}</span>
+        </TooltipTrigger>
+        <TooltipContent side="top">{denialMessage}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }

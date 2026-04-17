@@ -8,7 +8,13 @@ export { InventorySchema, InventoryLogSchema } from './types';
 export type { Inventory, InventoryLog } from './types';
 
 // State Management
-export { useInventoryStore, selectInventoryByProductId, selectIsLowStock } from './store';
+export {
+  useInventoryStore,
+  inventoryStore,
+  selectInventoryByProductId,
+  selectIsLowStock,
+} from './store';
+export type { LowStockAlertItem } from './store';
 
 // Data Fetching
 export {

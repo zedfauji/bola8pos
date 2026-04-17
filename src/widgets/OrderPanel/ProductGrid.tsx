@@ -1,11 +1,11 @@
 import { AlertCircle, Package } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
-import { useCartStore } from '@features/add-item-to-tab/model/cartStore';
 import { ModifierSheet } from '@features/add-item-to-tab/ui/ModifierSheet';
 import { useProducts, useCategories } from '@entities/product/model/queries';
 import type { Product, Modifier } from '@entities/product/model/types';
 import { CategoryTabs } from '@entities/product/ui/CategoryTabs';
 import { ProductCard } from '@entities/product/ui/ProductCard';
+import { useCartStore } from '@entities/tab/model/cartStore';
 import { getCurrentTime } from '@shared/lib/domain-helpers';
 import { EmptyState } from '@shared/ui/EmptyState';
 import { CardSkeleton } from '@shared/ui/LoadingSkeletons';

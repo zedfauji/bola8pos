@@ -1,7 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
-import { useCartStore } from '@features/add-item-to-tab/model/cartStore';
-import { useAuthStore } from '@entities/staff/model/authStore';
+import { inventoryKeys, inventoryStore } from '@entities/inventory';
+import { useStaffStore } from '@entities/staff/model/store';
+import { useCartStore } from '@entities/tab/model/cartStore';
 import { useMutationAddOrder } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import type { CreateOrderItem } from '@entities/tab/model/types';
@@ -11,9 +13,10 @@ import { POSButton } from '@shared/ui/POSButton';
 import { ScrollArea } from '@shared/ui/ScrollArea';
 
 export function CartPanel() {
+  const queryClient = useQueryClient();
   const activeTabId = useTabStore(s => s.activeTabId);
   const { items, setLineQuantity, removeItem, clearCart, totalAmount, itemCount } = useCartStore();
-  const selectedStaff = useAuthStore(s => s.selectedStaff);
+  const currentStaff = useStaffStore(s => s.currentStaff);
   const addOrderMutation = useMutationAddOrder();
 
   const total = totalAmount();
@@ -25,8 +28,8 @@ export function CartPanel() {
     if (!activeTabId || items.length === 0) {
       return;
     }
-    if (!selectedStaff?.id) {
-      toast.error('Select staff and clock in before placing orders.');
+    if (!currentStaff?.id) {
+      toast.error('Sign in and start a shift before placing orders.');
       return;
     }
 
@@ -39,10 +42,15 @@ export function CartPanel() {
       notes: item.notes.trim() === '' ? null : item.notes,
     }));
 
+    const inventoryDecrementLines = items.map(item => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+    }));
+
     const result = await addOrderMutation.mutateAsync({
       tabId: activeTabId,
       order: {
-        staffId: selectedStaff.id,
+        staffId: currentStaff.id,
         status: 'pending',
         notes: null,
       },
@@ -53,6 +61,9 @@ export function CartPanel() {
       toast.error(result.error.message);
       return;
     }
+
+    inventoryStore.getState().decrementQuantities(inventoryDecrementLines);
+    void queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
 
     toast.success('Order placed successfully');
     clearCart();

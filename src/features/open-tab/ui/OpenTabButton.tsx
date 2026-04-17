@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useAuthStore } from '@entities/staff/model/authStore';
+import { useStaffStore } from '@entities/staff/model/store';
 import { POSButton } from '@shared/ui/POSButton';
 import {
   Dialog,
@@ -23,17 +23,17 @@ import { useOpenTab } from '../model/useOpenTab';
 
 export function OpenTabButton() {
   const { openTab, isPending } = useOpenTab();
-  const selectedStaff = useAuthStore(s => s.selectedStaff);
-  const currentShiftId = useAuthStore(s => s.currentShiftId);
+  const currentStaff = useStaffStore(s => s.currentStaff);
+  const currentShift = useStaffStore(s => s.currentShift);
   const [isOpen, setIsOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [submitError, setSubmitError] = useState('');
 
-  const canOpen = !!selectedStaff && !!currentShiftId;
+  const canOpen = Boolean(currentStaff?.id && currentShift?.id);
 
   const handleOpenTab = async () => {
-    if (!selectedStaff?.id || !currentShiftId) {
+    if (!currentStaff?.id || !currentShift?.id) {
       setSubmitError('No active shift. Please clock in before opening tabs.');
       return;
     }
@@ -42,8 +42,8 @@ export function OpenTabButton() {
     const result = await openTab({
       customerName: customerName.trim() || 'Guest',
       tableNumber: tableNumber ? parseInt(tableNumber, 10) : null,
-      staffId: selectedStaff.id,
-      shiftId: currentShiftId,
+      staffId: currentStaff.id,
+      shiftId: currentShift.id,
       status: 'open',
       notes: null,
       items: [],
@@ -69,7 +69,7 @@ export function OpenTabButton() {
       }}
     >
       <DialogTrigger asChild>
-        <POSButton touchSize="large" variant="default" disabled={!selectedStaff}>
+        <POSButton touchSize="large" variant="default" disabled={!currentStaff}>
           Open Tab
         </POSButton>
       </DialogTrigger>

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
+import { ReportsRoute } from './reports-route';
 
 const LoginPage = lazy(() => import('../pages/login'));
 const PosPage = lazy(() => import('../pages/pos'));
@@ -8,6 +9,8 @@ const PoolTablesPage = lazy(() => import('../pages/pool-tables'));
 const InventoryPage = lazy(() => import('../pages/inventory'));
 const StaffPage = lazy(() => import('../pages/staff'));
 const ReportsPage = lazy(() => import('../pages/reports'));
+const SettingsPage = lazy(() => import('../pages/settings'));
+const RappiOrdersPage = lazy(() => import('../pages/rappi'));
 
 function LoadingFallback() {
   return (
@@ -60,7 +63,25 @@ export function Router() {
             path="/reports"
             element={
               <ProtectedRoute>
-                <ReportsPage />
+                <ReportsRoute>
+                  <ReportsPage />
+                </ReportsRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rappi"
+            element={
+              <ProtectedRoute>
+                <RappiOrdersPage />
               </ProtectedRoute>
             }
           />

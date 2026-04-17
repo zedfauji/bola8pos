@@ -4,6 +4,9 @@
  * Centralized exports for shared utilities, mocks, and test helpers.
  */
 
+// Connectivity utilities
+export { isOnline, useOnlineStatus } from './connectivity';
+
 // Supabase client and types
 export { supabase } from './supabase';
 export type { Database, Tables, TablesInsert, TablesUpdate, Enums } from './supabase.types';

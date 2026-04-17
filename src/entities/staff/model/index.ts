@@ -16,12 +16,19 @@ export {
 } from './types';
 
 export type { Staff, StaffCreate, StaffUpdate, Shift, ShiftCreate, ShiftUpdate } from './types';
+export type { ShiftClosePreview } from './queries';
 
 // State Management
 export { useStaffStore } from './store';
-
-// Context
-export { AuthProvider, useAuth } from './AuthContext';
+export { useLoginUiStore } from './loginUiStore';
 
 // Data Fetching
-export { staffKeys, useStaffList, useMutationClockIn, useMutationClockOut } from './queries';
+export {
+  staffKeys,
+  useStaffList,
+  useOpenShifts,
+  useShiftClosePreview,
+  useMutationClockIn,
+  useMutationClockOut,
+} from './queries';
+export { usePermissions } from './usePermissions';

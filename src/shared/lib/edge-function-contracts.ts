@@ -9,6 +9,7 @@
 import { z } from 'zod';
 import { MoneySchema, UuidSchema, TimestampSchema, PaymentMethodSchema } from './domain';
 import { ok, err, type Result } from './result';
+import { supabase } from './supabase';
 import type { AppError } from './supabase-contracts';
 
 // ============================================================================
@@ -22,6 +23,9 @@ export const ReceiptDataSchema = z.object({
   receiptNumber: z.string(),
   tabId: UuidSchema,
   customerName: z.string(),
+  cashierName: z.string(),
+  barName: z.string(),
+  barAddress: z.string(),
   items: z.array(
     z.object({
       name: z.string(),
@@ -36,6 +40,10 @@ export const ReceiptDataSchema = z.object({
   paymentMethod: PaymentMethodSchema,
   processedAt: TimestampSchema,
   squareReceiptUrl: z.string().nullable(),
+  tenderedAmount: MoneySchema.nullable().optional(),
+  changeAmount: MoneySchema.nullable().optional(),
+  /** Terminal / BBVA receipt reference — never log raw value */
+  terminalReference: z.string().max(64).nullable().optional(),
 });
 
 export type ReceiptData = z.infer<typeof ReceiptDataSchema>;
@@ -112,89 +120,155 @@ export type ReportData = z.infer<typeof ReportDataSchema>;
 
 /**
  * Request schema for process-payment edge function.
- *
- * Processes a payment for a tab, integrating with Square if card payment.
  */
-export const ProcessPaymentRequestSchema = z.object({
-  tabId: UuidSchema,
-  amount: MoneySchema,
-  tipAmount: MoneySchema,
-  method: PaymentMethodSchema,
-  squarePaymentId: z.string().nullable(),
-  idempotencyKey: z.string().min(1),
-});
+export const ProcessPaymentRequestSchema = z
+  .object({
+    tabId: UuidSchema,
+    amount: MoneySchema,
+    tipAmount: MoneySchema,
+    method: PaymentMethodSchema,
+    idempotencyKey: z.string().min(1).max(255),
+    tenderedAmount: MoneySchema.nullable().optional(),
+    referenceNumber: z.string().max(64).nullable().optional(),
+    rappiOrderId: z.string().max(128).nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.method === 'cash' && data.tenderedAmount == null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'tenderedAmount is required for cash',
+        path: ['tenderedAmount'],
+      });
+    }
+    if (data.method !== 'cash' && data.tenderedAmount != null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'tenderedAmount is only valid for cash',
+        path: ['tenderedAmount'],
+      });
+    }
+    if (data.method === 'rappi' && (data.rappiOrderId == null || data.rappiOrderId.trim() === '')) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'rappiOrderId is required for rappi',
+        path: ['rappiOrderId'],
+      });
+    }
+  });
 
 export type ProcessPaymentRequest = z.infer<typeof ProcessPaymentRequestSchema>;
 
-/**
- * Response schema for process-payment edge function.
- */
-export const ProcessPaymentResponseSchema = z.object({
+const ProcessPaymentErrorBodySchema = z.object({
+  code: z.string(),
+  message: z.string(),
+});
+
+/** Successful payload after {@link callProcessPayment} unwraps the edge envelope. */
+export const ProcessPaymentSuccessSchema = z.object({
+  paymentId: UuidSchema,
+  receiptData: ReceiptDataSchema,
+  idempotent: z.boolean().optional(),
+});
+
+export type ProcessPaymentSuccess = z.infer<typeof ProcessPaymentSuccessSchema>;
+
+export const ProcessPaymentEnvelopeSchema = z.object({
   success: z.boolean(),
   paymentId: UuidSchema.optional(),
   receiptData: ReceiptDataSchema.optional(),
-  error: z.string().optional(),
+  idempotent: z.boolean().optional(),
+  error: ProcessPaymentErrorBodySchema.optional(),
 });
 
-export type ProcessPaymentResponse = z.infer<typeof ProcessPaymentResponseSchema>;
+export type ProcessPaymentEnvelope = z.infer<typeof ProcessPaymentEnvelopeSchema>;
+
+function mapProcessPaymentEdgeError(code: string | undefined, message: string): AppError {
+  switch (code) {
+    case 'POOL_SESSION_ACTIVE':
+      return { code: 'SESSION_STILL_RUNNING', message };
+    case 'TAB_NOT_OPEN':
+    case 'TAB_NOT_FOUND':
+      return { code: 'TAB_ALREADY_CLOSED', message };
+    case 'AMOUNT_MISMATCH':
+    case 'TENDERED_REQUIRED':
+    case 'INSUFFICIENT_TENDER':
+    case 'TENDERED_NOT_ALLOWED':
+    case 'RAPPI_ORDER_MISMATCH':
+    case 'INVALID_METHOD':
+    case 'VALIDATION_ERROR':
+    case 'IDEMPOTENCY_MISMATCH':
+      return { code: 'VALIDATION_ERROR', message };
+    case 'FORBIDDEN':
+      return { code: 'AUTH_FORBIDDEN', message };
+    case 'UNAUTHORIZED':
+      return { code: 'AUTH_REQUIRED', message };
+    default:
+      return { code: 'SUPABASE_ERROR', message, details: code ?? '' };
+  }
+}
 
 /**
  * Calls the process-payment edge function.
  *
- * @param request - Payment request data
- * @returns Result with payment response or error
- *
- * @example
- * ```typescript
- * const result = await callProcessPayment({
- *   tabId: '123',
- *   amount: 50.00,
- *   tipAmount: 10.00,
- *   method: 'card',
- *   squarePaymentId: 'sq_123',
- *   idempotencyKey: 'payment_123_abc'
- * })
- *
- * if (result.ok) {
- *   console.log('Payment processed:', result.data.paymentId)
- * } else {
- *   console.error('Payment failed:', result.error.message)
- * }
- * ```
+ * @returns Unwrapped success payload or structured {@link AppError}.
  */
 export async function callProcessPayment(
   request: ProcessPaymentRequest
-): Promise<Result<ProcessPaymentResponse, AppError>> {
+): Promise<Result<ProcessPaymentSuccess, AppError>> {
   try {
-    // Validate request
     const validatedRequest = ProcessPaymentRequestSchema.parse(request);
 
-    // Call edge function (placeholder - will be implemented with actual Supabase client)
-    const response = await fetch('/functions/v1/process-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validatedRequest),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('process-payment', {
+      body: validatedRequest,
     });
 
-    if (!response.ok) {
+    if (error) {
+      const msg =
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message: unknown }).message === 'string'
+          ? (error as { message: string }).message
+          : 'Could not reach payment service';
       return err({
-        code: 'EDGE_FUNCTION_ERROR',
-        message: 'Failed to process payment',
-        details: await response.text(),
+        code: 'SUPABASE_ERROR',
+        message: msg,
+        details: JSON.stringify(error),
       });
     }
 
-    const data: unknown = await response.json();
-    const validatedResponse = ProcessPaymentResponseSchema.parse(data);
-
-    if (!validatedResponse.success) {
+    const envelope = ProcessPaymentEnvelopeSchema.safeParse(data);
+    if (!envelope.success) {
       return err({
-        code: 'PAYMENT_FAILED',
-        message: validatedResponse.error || 'Payment processing failed',
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected response from payment service',
+        details: envelope.error.message,
       });
     }
 
-    return ok(validatedResponse);
+    const body = envelope.data;
+    if (!body.success || body.paymentId == null || body.receiptData == null) {
+      const e = body.error;
+      return err(
+        mapProcessPaymentEdgeError(e?.code, e?.message ?? 'Payment could not be completed.')
+      );
+    }
+
+    const success = ProcessPaymentSuccessSchema.safeParse({
+      paymentId: body.paymentId,
+      receiptData: body.receiptData,
+      idempotent: body.idempotent,
+    });
+    if (!success.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid receipt payload',
+        details: success.error.message,
+      });
+    }
+
+    return ok(success.data);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return err({
@@ -508,6 +582,405 @@ export async function callVoidOrder(
 }
 
 // ============================================================================
+// SEND RECEIPT EMAIL
+// ============================================================================
+
+export const SendReceiptEmailRequestSchema = z.object({
+  email: z.string().trim().pipe(z.email('Enter a valid email address')),
+  receiptPlainText: z.string().min(1).max(50_000),
+});
+
+export type SendReceiptEmailRequest = z.infer<typeof SendReceiptEmailRequestSchema>;
+
+const SendReceiptEmailErrorBodySchema = z.object({
+  code: z.string(),
+  message: z.string(),
+});
+
+export const SendReceiptEmailEnvelopeSchema = z.object({
+  success: z.boolean(),
+  error: SendReceiptEmailErrorBodySchema.optional(),
+});
+
+export type SendReceiptEmailEnvelope = z.infer<typeof SendReceiptEmailEnvelopeSchema>;
+
+/**
+ * Calls the send-receipt-email edge function (Resend).
+ */
+export async function callSendReceiptEmail(
+  request: SendReceiptEmailRequest
+): Promise<Result<void, AppError>> {
+  try {
+    const validatedRequest = SendReceiptEmailRequestSchema.parse(request);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('send-receipt-email', {
+      body: validatedRequest,
+    });
+
+    if (error) {
+      const msg =
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message: unknown }).message === 'string'
+          ? (error as { message: string }).message
+          : 'Could not send receipt email';
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: msg,
+        details: JSON.stringify(error),
+      });
+    }
+
+    const envelope = SendReceiptEmailEnvelopeSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected response from email service',
+        details: envelope.error.message,
+      });
+    }
+
+    const body = envelope.data;
+    if (!body.success) {
+      const e = body.error;
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: e?.message ?? 'Failed to send receipt email',
+        ...(e?.code != null && e.code.length > 0 ? { details: e.code } : {}),
+      });
+    }
+
+    return ok(undefined);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid request data',
+        details: error.message,
+      });
+    }
+
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+// ============================================================================
+// SETTINGS: RAPPI MENU SYNC
+// ============================================================================
+
+export const RappiMenuSyncResponseSchema = z.object({
+  ok: z.boolean(),
+  syncedAt: z.iso.datetime().optional(),
+  error: z
+    .object({
+      code: z.string(),
+      message: z.string(),
+    })
+    .optional(),
+});
+
+export type RappiMenuSyncResponse = z.infer<typeof RappiMenuSyncResponseSchema>;
+
+function getInvokeErrorMessage(error: unknown, fallback: string): string {
+  return typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+    ? (error as { message: string }).message
+    : fallback;
+}
+
+export async function callRappiMenuSync(): Promise<Result<{ syncedAt: string }, AppError>> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('rappi-sync-menu', {
+      body: {},
+    });
+
+    if (error) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: getInvokeErrorMessage(error, 'Could not sync Rappi menu'),
+      });
+    }
+
+    const envelope = RappiMenuSyncResponseSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected response from Rappi sync function',
+        details: envelope.error.message,
+      });
+    }
+
+    if (!envelope.data.ok || !envelope.data.syncedAt) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: envelope.data.error?.message ?? 'Rappi menu sync failed',
+      });
+    }
+
+    return ok({ syncedAt: envelope.data.syncedAt });
+  } catch (error) {
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+// ============================================================================
+// SETTINGS: BACKUP + RESTORE
+// ============================================================================
+
+export const CreateSettingsBackupRequestSchema = z.object({
+  label: z.string().trim().min(1).max(120),
+});
+
+export type CreateSettingsBackupRequest = z.infer<typeof CreateSettingsBackupRequestSchema>;
+
+export const CreateSettingsBackupResponseSchema = z.object({
+  ok: z.boolean(),
+  backupId: UuidSchema.optional(),
+  error: z
+    .object({
+      code: z.string(),
+      message: z.string(),
+    })
+    .optional(),
+});
+
+export async function callCreateSettingsBackup(
+  request: CreateSettingsBackupRequest
+): Promise<Result<{ backupId: string }, AppError>> {
+  try {
+    const validated = CreateSettingsBackupRequestSchema.parse(request);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('settings-backup', {
+      body: validated,
+    });
+
+    if (error) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: getInvokeErrorMessage(error, 'Could not create backup'),
+      });
+    }
+
+    const envelope = CreateSettingsBackupResponseSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected backup response',
+        details: envelope.error.message,
+      });
+    }
+    if (!envelope.data.ok || !envelope.data.backupId) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: envelope.data.error?.message ?? 'Backup failed',
+      });
+    }
+    return ok({ backupId: envelope.data.backupId });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid backup request',
+        details: error.message,
+      });
+    }
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+export const RestoreSettingsBackupRequestSchema = z.object({
+  backupId: UuidSchema,
+});
+
+export type RestoreSettingsBackupRequest = z.infer<typeof RestoreSettingsBackupRequestSchema>;
+
+export const RestoreSettingsBackupResponseSchema = z.object({
+  ok: z.boolean(),
+  error: z
+    .object({
+      code: z.string(),
+      message: z.string(),
+    })
+    .optional(),
+});
+
+export async function callRestoreSettingsBackup(
+  request: RestoreSettingsBackupRequest
+): Promise<Result<void, AppError>> {
+  try {
+    const validated = RestoreSettingsBackupRequestSchema.parse(request);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('settings-restore', {
+      body: validated,
+    });
+
+    if (error) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: getInvokeErrorMessage(error, 'Could not restore backup'),
+      });
+    }
+
+    const envelope = RestoreSettingsBackupResponseSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected restore response',
+        details: envelope.error.message,
+      });
+    }
+    if (!envelope.data.ok) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: envelope.data.error?.message ?? 'Restore failed',
+      });
+    }
+    return ok(undefined);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid restore request',
+        details: error.message,
+      });
+    }
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+// ============================================================================
+// SETTINGS: EMAIL STATUS + TEST
+// ============================================================================
+
+export const SettingsEmailStatusResponseSchema = z.object({
+  ok: z.boolean(),
+  resendConfigured: z.boolean().optional(),
+  error: z
+    .object({
+      code: z.string(),
+      message: z.string(),
+    })
+    .optional(),
+});
+
+export async function callSettingsEmailStatus(): Promise<
+  Result<{ resendConfigured: boolean }, AppError>
+> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('settings-email-status', {
+      body: {},
+    });
+    if (error) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: getInvokeErrorMessage(error, 'Could not check email status'),
+      });
+    }
+    const envelope = SettingsEmailStatusResponseSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected response from email status function',
+        details: envelope.error.message,
+      });
+    }
+    if (!envelope.data.ok || envelope.data.resendConfigured == null) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: envelope.data.error?.message ?? 'Could not check email status',
+      });
+    }
+    return ok({ resendConfigured: envelope.data.resendConfigured });
+  } catch (error) {
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+export const SettingsTestEmailRequestSchema = z.object({
+  email: z.string().trim().pipe(z.email('Enter a valid email address')),
+});
+
+export type SettingsTestEmailRequest = z.infer<typeof SettingsTestEmailRequestSchema>;
+
+export const SettingsTestEmailResponseSchema = z.object({
+  ok: z.boolean(),
+  error: z
+    .object({
+      code: z.string(),
+      message: z.string(),
+    })
+    .optional(),
+});
+
+export async function callSendSettingsTestEmail(
+  request: SettingsTestEmailRequest
+): Promise<Result<void, AppError>> {
+  try {
+    const validated = SettingsTestEmailRequestSchema.parse(request);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('settings-test-email', {
+      body: validated,
+    });
+
+    if (error) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: getInvokeErrorMessage(error, 'Could not send test email'),
+      });
+    }
+
+    const envelope = SettingsTestEmailResponseSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected test email response',
+        details: envelope.error.message,
+      });
+    }
+    if (!envelope.data.ok) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: envelope.data.error?.message ?? 'Could not send test email',
+      });
+    }
+    return ok(undefined);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid test email request',
+        details: error.message,
+      });
+    }
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+// ============================================================================
 // EDGE FUNCTION REGISTRY
 // ============================================================================
 
@@ -518,8 +991,13 @@ export async function callVoidOrder(
 export const EDGE_FUNCTIONS = {
   'process-payment': {
     requestSchema: ProcessPaymentRequestSchema,
-    responseSchema: ProcessPaymentResponseSchema,
+    responseSchema: ProcessPaymentEnvelopeSchema,
     caller: callProcessPayment,
+  },
+  'send-receipt-email': {
+    requestSchema: SendReceiptEmailRequestSchema,
+    responseSchema: SendReceiptEmailEnvelopeSchema,
+    caller: callSendReceiptEmail,
   },
   'close-shift': {
     requestSchema: CloseShiftRequestSchema,
@@ -535,6 +1013,31 @@ export const EDGE_FUNCTIONS = {
     requestSchema: VoidOrderRequestSchema,
     responseSchema: VoidOrderResponseSchema,
     caller: callVoidOrder,
+  },
+  'rappi-sync-menu': {
+    requestSchema: z.object({}),
+    responseSchema: RappiMenuSyncResponseSchema,
+    caller: callRappiMenuSync,
+  },
+  'settings-backup': {
+    requestSchema: CreateSettingsBackupRequestSchema,
+    responseSchema: CreateSettingsBackupResponseSchema,
+    caller: callCreateSettingsBackup,
+  },
+  'settings-restore': {
+    requestSchema: RestoreSettingsBackupRequestSchema,
+    responseSchema: RestoreSettingsBackupResponseSchema,
+    caller: callRestoreSettingsBackup,
+  },
+  'settings-email-status': {
+    requestSchema: z.object({}),
+    responseSchema: SettingsEmailStatusResponseSchema,
+    caller: callSettingsEmailStatus,
+  },
+  'settings-test-email': {
+    requestSchema: SettingsTestEmailRequestSchema,
+    responseSchema: SettingsTestEmailResponseSchema,
+    caller: callSendSettingsTestEmail,
   },
 } as const;
 

@@ -2,6 +2,7 @@ export {
   InventorySchema,
   InventoryLogSchema,
   useInventoryStore,
+  inventoryStore,
   selectInventoryByProductId,
   selectIsLowStock,
   inventoryKeys,
@@ -12,4 +13,7 @@ export {
   useInventoryLog,
 } from './model';
 
-export type { Inventory, InventoryLog } from './model';
+export type { Inventory, InventoryLog, LowStockAlertItem } from './model';
+
+export { InventoryRow, inventoryRowColumns } from './ui/InventoryRow';
+export type { InventoryRowProps } from './ui/InventoryRow';

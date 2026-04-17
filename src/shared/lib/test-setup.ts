@@ -20,9 +20,16 @@ vi.mock('@shared/lib/supabase', () => ({
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data: null, error: null }),
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
+      signInWithPassword: vi
+        .fn()
+        .mockResolvedValue({ data: { user: {}, session: {} }, error: null }),
     },
   },
 }));

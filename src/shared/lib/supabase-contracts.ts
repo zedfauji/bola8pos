@@ -150,7 +150,7 @@ export type Database = {
           tab_id: string;
           amount: number;
           tip_amount: number;
-          method: 'cash' | 'card' | 'tab_transfer';
+          method: 'cash' | 'card' | 'rappi';
           square_payment_id: string | null;
           square_receipt_url: string | null;
           processed_at: string;

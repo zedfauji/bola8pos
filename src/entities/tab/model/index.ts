@@ -27,6 +27,7 @@ export type {
 
 // State Management
 export { useTabStore, selectTabById, selectOpenTabs } from './store';
+export { useCartStore } from './cartStore';
 
 // Data Fetching
 export {

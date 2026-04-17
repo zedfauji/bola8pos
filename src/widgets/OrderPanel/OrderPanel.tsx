@@ -5,17 +5,16 @@
  * Displays tab contents, allows voiding, and opens payment modal.
  */
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, RefreshCw, Receipt } from 'lucide-react';
 import { useState } from 'react';
 import { PaymentModal } from '@widgets/PaymentModal';
 import { OpenTabButton } from '@features/open-tab/ui/OpenTabButton';
 import { VoidOrderDialog } from '@features/void-order';
 import { useStaffStore } from '@entities/staff/model/store';
-import { useTab } from '@entities/tab/model/queries';
+import { tabKeys, useTab } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import type { Order, OrderItem } from '@entities/tab/model/types';
-import { logger } from '@shared/lib/logger';
-import { ok } from '@shared/lib/result';
 import { EmptyState } from '@shared/ui/EmptyState';
 import { LoadingSpinner } from '@shared/ui/LoadingSpinner';
 import { POSButton } from '@shared/ui/POSButton';
@@ -34,6 +33,7 @@ function calculateSubtotal(items: OrderItem[]): number {
 }
 
 export function OrderPanel() {
+  const queryClient = useQueryClient();
   const { activeTabId, openDrawer } = useTabStore();
   const currentStaff = useStaffStore(state => state.currentStaff);
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -153,28 +153,29 @@ export function OrderPanel() {
             Void
           </POSButton>
         </ProtectedAction>
-        <POSButton
-          touchSize="large"
-          variant="default"
-          className="flex-1"
-          onClick={() => {
-            setPaymentOpen(true);
-          }}
-          disabled={items.length === 0}
-          aria-label={`Close tab and process payment for ${tab?.customerName ?? 'customer'}`}
-        >
-          Close Tab / Pay
-        </POSButton>
+        <ProtectedAction action="close_tab" currentRole={currentStaff?.role}>
+          <POSButton
+            touchSize="large"
+            variant="default"
+            className="flex-1"
+            onClick={() => {
+              setPaymentOpen(true);
+            }}
+            disabled={items.length === 0}
+            aria-label={`Close tab and process payment for ${tab?.customerName ?? 'customer'}`}
+          >
+            Close Tab / Pay
+          </POSButton>
+        </ProtectedAction>
       </div>
 
-      <ProtectedAction action="void_order" currentRole={currentStaff?.role}>
-        {sortedOrders.length > 0 && (
-          <div className="space-y-2 border-t px-4 py-3">
-            <p className="text-xs font-medium text-muted-foreground">Order history</p>
-            <div className="space-y-2">
-              {sortedOrders.map(order => (
+      {sortedOrders.length > 0 && (
+        <div className="space-y-2 border-t px-4 py-3">
+          <p className="text-xs font-medium text-muted-foreground">Order history</p>
+          <div className="space-y-2">
+            {sortedOrders.map(order => (
+              <ProtectedAction key={order.id} action="void_order" currentRole={currentStaff?.role}>
                 <POSButton
-                  key={order.id}
                   type="button"
                   variant="outline"
                   size="sm"
@@ -188,30 +189,23 @@ export function OrderPanel() {
                     {order.createdAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                   </span>
                 </POSButton>
-              ))}
-            </div>
+              </ProtectedAction>
+            ))}
           </div>
-        )}
-      </ProtectedAction>
+        </div>
+      )}
 
       {tab && (
         <PaymentModal
           open={paymentOpen}
           tab={tab}
+          staffId={currentStaff?.id ?? ''}
           onClose={() => {
             setPaymentOpen(false);
           }}
-          onPayment={async (method, tipAmount) => {
-            logger.info('payment.mock.processed', {
-              tabId: tab.id,
-              method,
-              tipAmount,
-              subtotal: total,
-            });
-            await new Promise(resolve => {
-              setTimeout(resolve, 1000);
-            });
-            return ok(undefined);
+          onPaymentSuccess={() => {
+            void queryClient.invalidateQueries({ queryKey: tabKeys.detail(tab.id) });
+            void queryClient.invalidateQueries({ queryKey: tabKeys.lists() });
           }}
         />
       )}

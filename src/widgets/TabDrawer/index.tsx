@@ -16,7 +16,7 @@ import { TabListSkeleton } from '@shared/ui/LoadingSkeletons';
 
 export function TabDrawer() {
   const { isTabDrawerOpen, closeDrawer, selectTab, activeTabId } = useTabStore();
-  const { data: tabs, isLoading, isError, error, resultError } = useTabs();
+  const { data: tabs, isLoading, isError, error, resultError, isDisabled } = useTabs();
   const hasError = isError || Boolean(resultError);
   const errorMessage = resultError?.message ?? error?.message ?? 'An unknown error occurred';
 
@@ -34,19 +34,29 @@ export function TabDrawer() {
           </SheetDescription>
         </SheetHeader>
 
-        {isLoading && (
+        {isDisabled && (
+          <div className="py-8">
+            <EmptyState
+              icon={Receipt}
+              title="No active shift"
+              description="Your session has no shift linked. Sign out and sign in again with opening cash to start a shift."
+            />
+          </div>
+        )}
+
+        {!isDisabled && isLoading && (
           <div className="flex-1 overflow-y-auto py-4">
             <TabListSkeleton count={4} />
           </div>
         )}
 
-        {hasError && (
+        {!isDisabled && hasError && (
           <div className="py-4" role="alert">
             <EmptyState icon={Receipt} title="Error loading tabs" description={errorMessage} />
           </div>
         )}
 
-        {!isLoading && !hasError && tabCount === 0 && (
+        {!isDisabled && !isLoading && !hasError && tabCount === 0 && (
           <div className="py-8">
             <EmptyState
               icon={Receipt}
@@ -56,7 +66,7 @@ export function TabDrawer() {
           </div>
         )}
 
-        {!isLoading && !hasError && tabCount > 0 && (
+        {!isDisabled && !isLoading && !hasError && tabCount > 0 && (
           <div className="flex-1 space-y-2 overflow-y-auto py-4">
             {tabs?.map(tab => (
               <TabCard

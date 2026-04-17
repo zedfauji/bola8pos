@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { tabKeys } from '@entities/tab/model/queries';
+import { useTabStore } from '@entities/tab/model/store';
 import type { PoolSession, PoolTable } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { computePoolSessionBilling } from '@shared/lib/pool-billing';
@@ -243,6 +244,14 @@ export function useMutationStartSession() {
 
     onSuccess: (result, variables, ctx) => {
       if (!result.ok) {
+        if (result.error.code === 'NETWORK_OFFLINE') {
+          useTabStore.getState().enqueueOfflineAction({
+            type: 'start-pool-timer',
+            payload: variables,
+          });
+          // Keep the optimistic 'occupied' status; sync will confirm it.
+          return;
+        }
         const prev = (ctx as { previous?: PoolTablesSnapshot } | undefined)?.previous;
         if (prev !== undefined) {
           queryClient.setQueryData(poolTableKeys.all, prev);
@@ -367,6 +376,14 @@ export function useMutationStopSession() {
 
     onSuccess: (result, variables, ctx) => {
       if (!result.ok) {
+        if (result.error.code === 'NETWORK_OFFLINE') {
+          useTabStore.getState().enqueueOfflineAction({
+            type: 'stop-pool-timer',
+            payload: variables,
+          });
+          // Keep the optimistic 'available' status; sync will confirm it.
+          return;
+        }
         const prev = (ctx as { previous?: PoolTablesSnapshot } | undefined)?.previous;
         if (prev !== undefined) {
           queryClient.setQueryData(poolTableKeys.all, prev);
@@ -513,6 +530,67 @@ export function useMutationAddPoolTable() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+    },
+  });
+}
+
+export function useMutationUpdatePoolTable() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      tableId,
+      label,
+      ratePerHour,
+    }: {
+      tableId: string;
+      label: string;
+      ratePerHour: number;
+    }): Promise<Result<void>> => {
+      const res = await supabaseMutation(() =>
+        supabase
+          .from('pool_tables')
+          .update({
+            label,
+            rate_per_hour: ratePerHour,
+          })
+          .eq('id', tableId)
+      );
+      if (!res.ok) {
+        logger.error('pool_tables.update_failed', { tableId, message: res.error.message });
+        return res;
+      }
+      return ok(undefined);
+    },
+    onSuccess: result => {
+      if (result.ok) {
+        void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      }
+    },
+  });
+}
+
+export function useMutationDeletePoolTable() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ tableId }: { tableId: string }): Promise<Result<void>> => {
+      const res = await supabaseMutation(() =>
+        supabase
+          .from('pool_tables')
+          .delete()
+          .eq('id', tableId)
+          .eq('status', 'available')
+          .is('current_session_id', null)
+      );
+      if (!res.ok) {
+        logger.error('pool_tables.delete_failed', { tableId, message: res.error.message });
+        return res;
+      }
+      return ok(undefined);
+    },
+    onSuccess: result => {
+      if (result.ok) {
+        void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      }
     },
   });
 }

@@ -1,0 +1,299 @@
+// Supabase Edge Function — process-payment (Deno)
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import { z } from 'https://deno.land/x/zod@v3.23.8/mod.ts';
+
+const BodySchema = z
+  .object({
+    tabId: z.string().uuid(),
+    amount: z.number().nonnegative().multipleOf(0.01),
+    tipAmount: z.number().nonnegative().multipleOf(0.01),
+    method: z.enum(['cash', 'card', 'rappi']),
+    idempotencyKey: z.string().min(1).max(255),
+    tenderedAmount: z.number().nonnegative().multipleOf(0.01).nullable().optional(),
+    referenceNumber: z.string().max(64).nullable().optional(),
+    rappiOrderId: z.string().max(128).nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.method === 'cash' && data.tenderedAmount == null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'tenderedAmount is required for cash',
+        path: ['tenderedAmount'],
+      });
+    }
+    if (data.method !== 'cash' && data.tenderedAmount != null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'tenderedAmount is only valid for cash',
+        path: ['tenderedAmount'],
+      });
+    }
+    if (data.method === 'rappi' && (data.rappiOrderId == null || data.rappiOrderId.trim() === '')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'rappiOrderId is required for rappi',
+        path: ['rappiOrderId'],
+      });
+    }
+  });
+
+type RpcResult = {
+  ok: boolean;
+  idempotent?: boolean;
+  paymentId?: string;
+  code?: string;
+  message?: string;
+};
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function statusForCode(code: string | undefined): number {
+  switch (code) {
+    case 'FORBIDDEN':
+    case 'IDEMPOTENCY_MISMATCH':
+      return 403;
+    case 'TAB_NOT_FOUND':
+      return 404;
+    case 'POOL_SESSION_ACTIVE':
+    case 'TAB_NOT_OPEN':
+    case 'AMOUNT_MISMATCH':
+    case 'TENDERED_REQUIRED':
+    case 'INSUFFICIENT_TENDER':
+    case 'TENDERED_NOT_ALLOWED':
+    case 'RAPPI_ORDER_MISMATCH':
+    case 'INVALID_METHOD':
+      return 409;
+    default:
+      return 400;
+  }
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method !== 'POST') {
+    return jsonResponse({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'POST only' } }, 405);
+  }
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return jsonResponse({ success: false, error: { code: 'UNAUTHORIZED', message: 'Missing bearer token' } }, 401);
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+  if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey) {
+    return jsonResponse({ success: false, error: { code: 'CONFIG', message: 'Server misconfigured' } }, 500);
+  }
+
+  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const {
+    data: { user },
+    error: userError,
+  } = await userClient.auth.getUser();
+
+  if (userError || !user) {
+    return jsonResponse({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid session' } }, 401);
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await req.json();
+  } catch {
+    return jsonResponse({ success: false, error: { code: 'INVALID_JSON', message: 'Body must be JSON' } }, 400);
+  }
+
+  const parsed = BodySchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: parsed.error.flatten().fieldErrors
+            ? JSON.stringify(parsed.error.flatten().fieldErrors)
+            : 'Invalid request',
+        },
+      },
+      400
+    );
+  }
+
+  const body = parsed.data;
+  const admin = createClient(supabaseUrl, serviceRoleKey);
+
+  const { data: rpcData, error: rpcError } = await admin.rpc('process_payment_atomic', {
+    p_tab_id: body.tabId,
+    p_staff_id: user.id,
+    p_amount: body.amount,
+    p_tip_amount: body.tipAmount,
+    p_method: body.method,
+    p_idempotency_key: body.idempotencyKey,
+    p_tendered_amount: body.tenderedAmount ?? null,
+    p_reference_number: body.referenceNumber?.trim() ? body.referenceNumber.trim() : null,
+    p_rappi_order_id: body.rappiOrderId?.trim() ? body.rappiOrderId.trim() : null,
+  });
+
+  if (rpcError) {
+    return jsonResponse(
+      {
+        success: false,
+        error: { code: 'RPC_ERROR', message: rpcError.message },
+      },
+      500
+    );
+  }
+
+  const rpc = rpcData as RpcResult;
+  if (!rpc || typeof rpc !== 'object' || rpc.ok !== true || !rpc.paymentId) {
+    const code = rpc?.code ?? 'PAYMENT_FAILED';
+    const message = rpc?.message ?? 'Payment failed';
+    return jsonResponse({ success: false, error: { code, message } }, statusForCode(code));
+  }
+
+  const paymentId = rpc.paymentId;
+
+  const barName = Deno.env.get('BAR_NAME') ?? 'Bar';
+  const barAddress = Deno.env.get('BAR_ADDRESS') ?? '';
+
+  const { data: paymentRow, error: payErr } = await admin
+    .from('payments')
+    .select('id, amount, tip_amount, method, processed_at, tendered_amount, reference_number')
+    .eq('id', paymentId)
+    .single();
+
+  if (payErr || !paymentRow) {
+    return jsonResponse({ success: false, error: { code: 'PAYMENT_FETCH', message: 'Could not load payment' } }, 500);
+  }
+
+  const { data: tabRow, error: tabErr } = await admin
+    .from('tabs')
+    .select('customer_name')
+    .eq('id', body.tabId)
+    .single();
+
+  if (tabErr || !tabRow) {
+    return jsonResponse({ success: false, error: { code: 'TAB_FETCH', message: 'Could not load tab' } }, 500);
+  }
+
+  const { data: cashierRow } = await admin.from('profiles').select('name').eq('id', user.id).maybeSingle();
+
+  const { data: orderRows, error: ordErr } = await admin
+    .from('orders')
+    .select(
+      `
+      id,
+      status,
+      order_items (
+        quantity,
+        unit_price,
+        modifier_price_delta,
+        products ( name )
+      )
+    `
+    )
+    .eq('tab_id', body.tabId);
+
+  if (ordErr) {
+    return jsonResponse({ success: false, error: { code: 'ORDERS_FETCH', message: ordErr.message } }, 500);
+  }
+
+  type Oi = {
+    quantity: number;
+    unit_price: number;
+    modifier_price_delta: number;
+    products: { name: string } | null;
+  };
+  type Or = {
+    id: string;
+    status: string;
+    order_items: Oi[] | null;
+  };
+
+  const items: {
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    lineTotal: number;
+  }[] = [];
+
+  for (const order of (orderRows ?? []) as Or[]) {
+    if (order.status === 'voided') continue;
+    for (const oi of order.order_items ?? []) {
+      const name = oi.products?.name ?? 'Item';
+      const lineTotal = (Number(oi.unit_price) + Number(oi.modifier_price_delta)) * Number(oi.quantity);
+      items.push({
+        name,
+        quantity: oi.quantity,
+        unitPrice: Number(oi.unit_price) + Number(oi.modifier_price_delta),
+        lineTotal: Math.round(lineTotal * 100) / 100,
+      });
+    }
+  }
+
+  const { data: poolRows } = await admin
+    .from('pool_sessions')
+    .select('billed_minutes, total_charge, pool_tables ( number, label )')
+    .eq('tab_id', body.tabId)
+    .not('stopped_at', 'is', null);
+
+  type PoolR = {
+    billed_minutes: number | null;
+    total_charge: number | null;
+    pool_tables: { number: number; label: string } | null;
+  };
+
+  for (const ps of (poolRows ?? []) as PoolR[]) {
+    if (ps.total_charge == null || ps.billed_minutes == null) continue;
+    const label = ps.pool_tables ? `Pool T${ps.pool_tables.number}` : 'Pool';
+    items.push({
+      name: `${label} (${ps.billed_minutes} min)`,
+      quantity: 1,
+      unitPrice: ps.total_charge,
+      lineTotal: ps.total_charge,
+    });
+  }
+
+  const subtotal = body.amount;
+  const tipAmount = body.tipAmount;
+  const total = Math.round((subtotal + tipAmount) * 100) / 100;
+  const tendered = paymentRow.tendered_amount != null ? Number(paymentRow.tendered_amount) : null;
+  const changeAmount =
+    tendered != null ? Math.round((tendered - total) * 100) / 100 : null;
+
+  const ref = paymentRow.reference_number as string | null;
+
+  const receiptData = {
+    receiptNumber: paymentId.slice(0, 8).toUpperCase(),
+    tabId: body.tabId,
+    customerName: tabRow.customer_name ?? 'Guest',
+    items,
+    subtotal,
+    tipAmount,
+    total,
+    paymentMethod: paymentRow.method,
+    processedAt: paymentRow.processed_at,
+    squareReceiptUrl: null as string | null,
+    cashierName: cashierRow?.name ?? 'Staff',
+    barName,
+    barAddress,
+    tenderedAmount: tendered,
+    changeAmount,
+    terminalReference: ref && ref.length > 0 ? ref : undefined,
+  };
+
+  return jsonResponse({
+    success: true,
+    paymentId,
+    receiptData,
+    idempotent: rpc.idempotent === true,
+  });
+});

@@ -13,6 +13,7 @@ import {
   type Product,
   type Tab,
 } from '@shared/lib/domain';
+import { generateIdempotencyKey } from '@shared/lib/domain-helpers';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
@@ -37,7 +38,7 @@ import {
 export const tabKeys = {
   all: ['tabs'] as const,
   lists: () => [...tabKeys.all, 'list'] as const,
-  list: (filters?: { shiftId?: string; status?: string }) =>
+  list: (filters?: { shiftId?: string; status?: string; bartenderScope?: string }) =>
     [...tabKeys.lists(), filters ?? {}] as const,
   details: () => [...tabKeys.all, 'detail'] as const,
   detail: (id: string) => [...tabKeys.details(), id] as const,
@@ -188,6 +189,9 @@ function mapTabRow(row: TabRow): Result<Tab> {
         orders,
         items: flatItems,
         poolCharges,
+        ...(row.rappi_order_id != null && row.rappi_order_id !== ''
+          ? { rappiOrderId: row.rappi_order_id }
+          : {}),
         ...(hasActivePoolSession ? { hasActivePoolSession: true, activePoolTableNumber } : {}),
       })
     );
@@ -220,9 +224,19 @@ const tabListSelect = `
 /** Open tabs for the current shift; syncs {@link useTabStore} on success. */
 export function useTabs() {
   const shiftId = useStaffStore(s => s.currentShift?.id);
+  const viewerRole = useStaffStore(s => s.currentStaff?.role);
+  const viewerStaffId = useStaffStore(s => s.currentStaff?.id);
+  const isDisabled = !shiftId;
+
+  const listFilters =
+    shiftId != null
+      ? viewerRole === 'bartender' && viewerStaffId != null
+        ? { shiftId, status: 'open' as const, bartenderScope: viewerStaffId }
+        : { shiftId, status: 'open' as const }
+      : { status: 'open' as const };
 
   const query = useQuery({
-    queryKey: tabKeys.list(shiftId ? { shiftId, status: 'open' } : { status: 'open' }),
+    queryKey: tabKeys.list(listFilters),
     enabled: Boolean(shiftId),
     queryFn: async (): Promise<Result<Tab[]>> => {
       if (!shiftId) {
@@ -255,6 +269,12 @@ export function useTabs() {
         }
         tabs.push(m.data);
       }
+
+      const role = useStaffStore.getState().currentStaff?.role;
+      const ownId = useStaffStore.getState().currentStaff?.id;
+      if (role === 'bartender' && ownId) {
+        return ok(tabs.filter(t => t.staffId === ownId));
+      }
       return ok(tabs);
     },
   });
@@ -272,6 +292,7 @@ export function useTabs() {
     resultError: r && !r.ok ? r.error : undefined,
     isEmpty: query.isSuccess && !!r?.ok && r.data.length === 0,
     isIdleOrLoading: query.isPending || query.isLoading,
+    isDisabled,
   };
 }
 
@@ -330,6 +351,9 @@ export function useMutationOpenTab() {
         shift_id: input.shiftId,
         status: input.status,
         notes: input.notes,
+        ...(input.rappiOrderId != null && input.rappiOrderId !== ''
+          ? { rappi_order_id: input.rappiOrderId }
+          : {}),
       };
 
       const res = await supabaseMutation(() =>
@@ -371,6 +395,9 @@ export function useMutationOpenTab() {
         items: [],
         poolCharges: [],
         hasActivePoolSession: false,
+        ...(input.rappiOrderId != null && input.rappiOrderId !== ''
+          ? { rappiOrderId: input.rappiOrderId }
+          : {}),
       });
 
       useTabStore.getState().openTab(optimistic);
@@ -385,10 +412,15 @@ export function useMutationOpenTab() {
       return { previousLists, tempId };
     },
 
-    onSuccess: (result, _input, ctx) => {
+    onSuccess: (result, input, ctx) => {
       const c = ctx as OpenTabMutationContext | undefined;
       if (!result.ok) {
         logger.error('tabs.open.mutation_failed', { message: result.error.message });
+        if (result.error.code === 'NETWORK_OFFLINE') {
+          useTabStore.getState().enqueueOfflineAction({ type: 'open-tab', payload: input });
+          // Keep the optimistic tab in place so the UI stays usable offline.
+          return;
+        }
         if (c?.tempId) {
           useTabStore.setState(s => ({ tabs: s.tabs.filter(t => t.id !== c.tempId) }));
         }
@@ -420,9 +452,7 @@ export function useMutationOpenTab() {
   });
 }
 
-function buildRpcItemsJson(
-  items: Omit<CreateOrderItem, 'orderId'>[]
-): {
+function buildRpcItemsJson(items: Omit<CreateOrderItem, 'orderId'>[]): {
   product_id: string;
   quantity: number;
   unit_price: number;
@@ -479,7 +509,7 @@ export function useMutationAddOrder() {
         p_tab_id: tabId,
         p_staff_id: order.staffId,
         p_status: order.status,
-        p_notes: order.notes,
+        p_notes: order.notes ?? '',
         p_items: buildRpcItemsJson(items) as unknown as Json,
       };
 
@@ -561,6 +591,14 @@ export function useMutationAddOrder() {
     onSuccess: (result, variables, ctx) => {
       const c = ctx as AddOrderContext | undefined;
       if (!result.ok) {
+        if (result.error.code === 'NETWORK_OFFLINE') {
+          useTabStore.getState().enqueueOfflineAction({
+            type: 'place-order',
+            payload: variables,
+          });
+          // Leave the optimistic order visible — the cache already has it.
+          return;
+        }
         if (c?.previousDetail !== undefined) {
           queryClient.setQueryData(tabKeys.detail(variables.tabId), c.previousDetail);
         }
@@ -669,14 +707,20 @@ export function useMutationRecordTabPayment() {
       processedBy,
       squarePaymentId,
       squareReceiptUrl,
+      idempotencyKey,
+      tenderedAmount,
+      referenceNumber,
     }: {
       tabId: string;
       amount: number;
       tipAmount: number;
-      method: 'cash' | 'card' | 'tab_transfer';
+      method: 'cash' | 'card' | 'rappi';
       processedBy: string;
       squarePaymentId?: string;
       squareReceiptUrl?: string;
+      idempotencyKey?: string;
+      tenderedAmount?: number | null;
+      referenceNumber?: string | null;
     }): Promise<Result<Tables<'payments'>>> => {
       const tabRes = await supabaseMutation(() =>
         supabase
@@ -706,6 +750,9 @@ export function useMutationRecordTabPayment() {
         processed_by: processedBy,
         square_payment_id: squarePaymentId || null,
         square_receipt_url: squareReceiptUrl || null,
+        idempotency_key: idempotencyKey ?? generateIdempotencyKey('payment'),
+        tendered_amount: tenderedAmount ?? null,
+        reference_number: referenceNumber ?? null,
       };
 
       const payRes = await supabaseMutation(() =>

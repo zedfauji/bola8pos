@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type { Shift, Staff } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
@@ -18,6 +18,9 @@ import { ShiftSchema, StaffSchema } from './types';
 export const staffKeys = {
   all: ['staff'] as const,
   list: () => [...staffKeys.all, 'list'] as const,
+  openShifts: () => [...staffKeys.all, 'openShifts'] as const,
+  shiftClosePreview: (shiftId: string, staffId: string) =>
+    [...staffKeys.all, 'shiftClosePreview', shiftId, staffId] as const,
 };
 
 function mapStaffRow(row: Tables<'profiles'>): Result<Staff> {
@@ -103,10 +106,155 @@ export function useStaffList() {
   };
 }
 
-type ClockContext = { previousShift: Shift | null | undefined };
+/** Open shifts (no clock-out); used on staff dashboard. */
+export function useOpenShifts() {
+  const query = useQuery({
+    queryKey: staffKeys.openShifts(),
+    queryFn: async (): Promise<Result<Shift[]>> => {
+      const res = await supabaseQuery(() =>
+        supabase
+          .from('shifts')
+          .select('*')
+          .is('clock_out', null)
+          .order('clock_in', { ascending: false })
+      );
+
+      if (!res.ok) {
+        logger.error('staff.open_shifts.fetch_failed', { message: res.error.message });
+        return res;
+      }
+
+      const shifts: Shift[] = [];
+      for (const row of res.data) {
+        const m = mapShiftRow(row);
+        if (!m.ok) {
+          logger.error('staff.open_shifts.map_failed', { message: m.error.message });
+          return m;
+        }
+        shifts.push(m.data);
+      }
+      return ok(shifts);
+    },
+  });
+
+  const r = query.data;
+  return {
+    ...query,
+    data: r?.ok ? r.data : undefined,
+    resultError: r && !r.ok ? r.error : undefined,
+    isIdleOrLoading: query.isPending || query.isLoading,
+  };
+}
+
+export type ShiftClosePreview = {
+  /** Non-voided orders this staff placed on tabs in this shift. */
+  orderCount: number;
+  /** Sum of payment amounts this staff processed for tabs in this shift. */
+  totalSales: number;
+  shiftStartedAt: Date;
+};
+
+/**
+ * Aggregates shift-close summary for the clock-out dialog.
+ * Orders: `orders` joined to `tabs` with this `shift_id`, `staff_id` = staff, status ≠ voided.
+ * Sales: `payments` for tabs in the shift where `processed_by` = staff (tab-closure payments).
+ */
+export function useShiftClosePreview(shiftId: string | null, staffId: string | null) {
+  const query = useQuery({
+    queryKey:
+      shiftId && staffId
+        ? staffKeys.shiftClosePreview(shiftId, staffId)
+        : ['staff', 'shiftClosePreview', 'idle'],
+    enabled: Boolean(shiftId && staffId),
+    queryFn: async (): Promise<Result<ShiftClosePreview>> => {
+      if (!shiftId || !staffId) {
+        return err(unknownError('missing_shift_or_staff'));
+      }
+
+      const tabsRes = await supabaseQuery(() =>
+        supabase.from('tabs').select('id').eq('shift_id', shiftId)
+      );
+      if (!tabsRes.ok) {
+        logger.error('staff.shift_preview.tabs_failed', { message: tabsRes.error.message });
+        return tabsRes;
+      }
+      const tabIds = tabsRes.data.map(t => t.id);
+      if (tabIds.length === 0) {
+        const shiftRes = await supabaseQuery<{ clock_in: string }>(() =>
+          supabase.from('shifts').select('clock_in').eq('id', shiftId).single()
+        );
+        if (!shiftRes.ok) return shiftRes as Result<ShiftClosePreview>;
+        const started = new Date(shiftRes.data.clock_in);
+        return ok({ orderCount: 0, totalSales: 0, shiftStartedAt: started });
+      }
+
+      const [ordersRes, paymentsRes, shiftRes] = await Promise.all([
+        supabaseQuery(() =>
+          supabase
+            .from('orders')
+            .select('id')
+            .in('tab_id', tabIds)
+            .eq('staff_id', staffId)
+            .neq('status', 'voided')
+        ),
+        supabaseQuery(() =>
+          supabase
+            .from('payments')
+            .select('amount')
+            .in('tab_id', tabIds)
+            .eq('processed_by', staffId)
+        ),
+        supabaseQuery<{ clock_in: string }>(() =>
+          supabase.from('shifts').select('clock_in').eq('id', shiftId).single()
+        ),
+      ]);
+
+      if (!ordersRes.ok) {
+        return ordersRes as Result<ShiftClosePreview>;
+      }
+      if (!paymentsRes.ok) {
+        return paymentsRes as Result<ShiftClosePreview>;
+      }
+      if (!shiftRes.ok) {
+        return shiftRes as Result<ShiftClosePreview>;
+      }
+
+      const orderCount = ordersRes.data.length;
+      const totalSales = paymentsRes.data.reduce((sum, row) => sum + row.amount, 0);
+      const shiftStartedAt = new Date(shiftRes.data.clock_in);
+
+      return ok({ orderCount, totalSales, shiftStartedAt });
+    },
+  });
+
+  const r = query.data;
+  return {
+    ...query,
+    data: r?.ok ? r.data : undefined,
+    resultError: r && !r.ok ? r.error : undefined,
+    isIdleOrLoading: query.isPending || query.isLoading,
+  };
+}
+
+function shouldApplyShiftToStore(staffId: string): boolean {
+  const selfId = useStaffStore.getState().currentStaff?.id;
+  return selfId != null && selfId === staffId;
+}
+
+type ClockInContext = {
+  previousShift: Shift | null | undefined;
+  appliedOptimistic: boolean;
+};
 
 export function useMutationClockIn() {
-  return useMutation({
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    Result<Shift>,
+    Error,
+    { staffId: string; openingCash: number },
+    ClockInContext
+  >({
     mutationFn: async ({
       staffId,
       openingCash,
@@ -137,8 +285,11 @@ export function useMutationClockIn() {
       return mapShiftRow(res.data);
     },
 
-    onMutate: ({ staffId, openingCash }): ClockContext => {
+    onMutate: ({ staffId, openingCash }): ClockInContext => {
       const previousShift = useStaffStore.getState().currentShift;
+      if (!shouldApplyShiftToStore(staffId)) {
+        return { previousShift, appliedOptimistic: false };
+      }
       const tempId = crypto.randomUUID();
       const optimistic = ShiftSchema.parse({
         id: tempId,
@@ -149,41 +300,66 @@ export function useMutationClockIn() {
         closingCash: null,
       });
       useStaffStore.getState().updateShift(optimistic);
-      return { previousShift };
+      return { previousShift, appliedOptimistic: true };
     },
 
     onSuccess: (result, _vars, ctx) => {
-      const c = ctx as ClockContext | undefined;
+      void queryClient.invalidateQueries({ queryKey: staffKeys.openShifts() });
+      void queryClient.invalidateQueries({ queryKey: staffKeys.all });
+
       if (!result.ok) {
         logger.error('staff.clock_in.failed', { message: result.error.message });
-        if (c?.previousShift) {
-          useStaffStore.getState().updateShift(c.previousShift);
-        } else {
-          useStaffStore.setState({ currentShift: null });
+        // TanStack may omit context on edge failures; keep guard for runtime safety.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (ctx != null && ctx.appliedOptimistic) {
+          if (ctx.previousShift) {
+            useStaffStore.getState().updateShift(ctx.previousShift);
+          } else {
+            useStaffStore.setState({ currentShift: null });
+          }
         }
         return;
       }
-      useStaffStore.getState().updateShift(result.data);
+      if (shouldApplyShiftToStore(result.data.staffId)) {
+        useStaffStore.getState().updateShift(result.data);
+      }
     },
 
     onError: (_e, _v, ctx) => {
-      const c = ctx;
-      if (c?.previousShift) {
-        useStaffStore.getState().updateShift(c.previousShift);
-      } else {
-        useStaffStore.setState({ currentShift: null });
+      if (ctx == null) return;
+      if (ctx.appliedOptimistic) {
+        if (ctx.previousShift) {
+          useStaffStore.getState().updateShift(ctx.previousShift);
+        } else {
+          useStaffStore.setState({ currentShift: null });
+        }
       }
     },
   });
 }
 
+type ClockOutContext = {
+  previousShift: Shift | null | undefined;
+  appliedOptimistic: boolean;
+};
+
 export function useMutationClockOut() {
-  return useMutation({
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    Result<Shift>,
+    Error,
+    { shiftId: string; staffId: string; closingCash: number },
+    ClockOutContext
+  >({
     mutationFn: async ({
       shiftId,
+      staffId,
       closingCash,
     }: {
       shiftId: string;
+      /** Shift owner — used so we do not overwrite another user’s `currentShift` in the store. */
+      staffId: string;
       closingCash: number;
     }): Promise<Result<Shift>> => {
       const res = await supabaseMutation(() =>
@@ -194,6 +370,7 @@ export function useMutationClockOut() {
             closing_cash: closingCash,
           })
           .eq('id', shiftId)
+          .eq('staff_id', staffId)
           .select()
           .single()
       );
@@ -210,35 +387,47 @@ export function useMutationClockOut() {
       return mapShiftRow(res.data);
     },
 
-    onMutate: ({ shiftId, closingCash }): ClockContext => {
+    onMutate: ({ shiftId, staffId, closingCash }): ClockOutContext => {
       const previousShift = useStaffStore.getState().currentShift;
       const cur = previousShift;
-      if (cur && cur.id === shiftId) {
+      const apply = Boolean(
+        cur && cur.id === shiftId && shouldApplyShiftToStore(staffId) && cur.staffId === staffId
+      );
+      if (apply && cur) {
         useStaffStore.getState().updateShift({
           ...cur,
           clockOut: new Date(),
           closingCash,
         });
+        return { previousShift, appliedOptimistic: true };
       }
-      return { previousShift };
+      return { previousShift, appliedOptimistic: false };
     },
 
-    onSuccess: (result, _vars, ctx) => {
-      const c = ctx as ClockContext | undefined;
+    onSuccess: (result, vars, ctx) => {
+      void queryClient.invalidateQueries({ queryKey: staffKeys.openShifts() });
+      void queryClient.invalidateQueries({
+        queryKey: staffKeys.shiftClosePreview(vars.shiftId, vars.staffId),
+      });
+      void queryClient.invalidateQueries({ queryKey: staffKeys.all });
+
       if (!result.ok) {
         logger.error('staff.clock_out.failed', { message: result.error.message });
-        if (c?.previousShift) {
-          useStaffStore.getState().updateShift(c.previousShift);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (ctx != null && ctx.appliedOptimistic && ctx.previousShift) {
+          useStaffStore.getState().updateShift(ctx.previousShift);
         }
         return;
       }
-      useStaffStore.getState().updateShift(result.data);
+      if (shouldApplyShiftToStore(result.data.staffId)) {
+        useStaffStore.getState().updateShift(result.data);
+      }
     },
 
     onError: (_e, _v, ctx) => {
-      const prev = ctx?.previousShift;
-      if (prev) {
-        useStaffStore.getState().updateShift(prev);
+      if (ctx == null) return;
+      if (ctx.appliedOptimistic && ctx.previousShift) {
+        useStaffStore.getState().updateShift(ctx.previousShift);
       }
     },
   });

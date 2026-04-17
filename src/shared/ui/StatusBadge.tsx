@@ -13,13 +13,17 @@ import { Badge } from '@shared/ui/badge';
 /** Visual-only tiers for open-tab duration (not persisted domain status). */
 export type TabOpenDurationBadgeStatus = 'tab_open_ok' | 'tab_open_warn' | 'tab_open_critical';
 
+/** Inventory row stock tier (UI-only; not a persisted domain enum). */
+export type InventoryStockBadgeStatus = 'inv_in_stock' | 'inv_low_stock' | 'inv_out_of_stock';
+
 export type StatusBadgeProps = {
   /** Status value from domain types, or tab duration tier for open tabs */
   status:
     | z.infer<typeof TabStatusSchema>
     | z.infer<typeof PoolTableStatusSchema>
     | z.infer<typeof OrderStatusSchema>
-    | TabOpenDurationBadgeStatus;
+    | TabOpenDurationBadgeStatus
+    | InventoryStockBadgeStatus;
   /** Additional CSS classes */
   className?: string;
 };
@@ -99,6 +103,23 @@ const statusConfig: Record<string, StatusConfig> = {
     label: '4h+',
     variant: 'destructive',
     className: 'bg-red-600 hover:bg-red-700 text-white',
+  },
+
+  // Inventory (quantity vs threshold)
+  inv_in_stock: {
+    label: 'In stock',
+    variant: 'secondary',
+    className: 'bg-muted text-muted-foreground hover:bg-muted',
+  },
+  inv_low_stock: {
+    label: 'Low stock',
+    variant: 'destructive',
+    className: 'bg-red-600 hover:bg-red-700 text-white',
+  },
+  inv_out_of_stock: {
+    label: 'Out of stock',
+    variant: 'destructive',
+    className: 'bg-red-700 hover:bg-red-800 text-white',
   },
 };
 

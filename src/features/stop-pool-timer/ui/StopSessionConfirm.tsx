@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useMutationStopSession } from '@entities/pool-table/model/queries';
+import { usePermissions } from '@entities/staff/model/usePermissions';
 import type { Tab } from '@entities/tab';
 import { useTabStore } from '@entities/tab/model/store';
 import type { PoolSession, PoolTable } from '@shared/lib/domain';
@@ -28,6 +29,7 @@ export function StopSessionConfirm({
 }: StopSessionConfirmProps) {
   const navigate = useNavigate();
   const stopSession = useMutationStopSession();
+  const { can } = usePermissions();
   const selectTab = useTabStore(s => s.selectTab);
   const openDrawer = useTabStore(s => s.openDrawer);
   const tabsFromStore = useTabStore(s => s.tabs);
@@ -103,7 +105,7 @@ export function StopSessionConfirm({
       }}
       onCancel={handleCancel}
       isLoading={stopSession.isPending}
-      confirmDisabled={!table || !session || paidTabBlock}
+      confirmDisabled={!table || !session || paidTabBlock || !can('stop_pool_timer')}
     >
       {table && session && preview ? (
         <div className="space-y-4 py-2">

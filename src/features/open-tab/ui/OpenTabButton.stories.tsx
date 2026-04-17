@@ -4,7 +4,10 @@
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@entities/staff/model/AuthContext';
+import { useEffect, type ReactNode } from 'react';
+import { useStaffStore } from '@entities/staff/model/store';
+import { mockStaff } from '@entities/staff/model/types';
+import type { Shift } from '@shared/lib/domain';
 import { OpenTabButton } from './OpenTabButton';
 
 const queryClient = new QueryClient({
@@ -14,15 +17,35 @@ const queryClient = new QueryClient({
   },
 });
 
+const storyShift: Shift = {
+  id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+  staffId: mockStaff[0]!.id,
+  clockIn: new Date(),
+  clockOut: null,
+  openingCash: 100,
+  closingCash: null,
+};
+
+function SeedStaffSession({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    useStaffStore.getState().login(mockStaff[0]!, storyShift);
+    return () => {
+      useStaffStore.getState().logout();
+    };
+  }, []);
+
+  return <>{children}</>;
+}
+
 const meta = {
   title: 'Features/OpenTab/OpenTabButton',
   component: OpenTabButton,
   decorators: [
     Story => (
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
+        <SeedStaffSession>
           <Story />
-        </AuthProvider>
+        </SeedStaffSession>
       </QueryClientProvider>
     ),
   ],

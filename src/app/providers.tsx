@@ -1,16 +1,29 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
+import { OfflineQueueProcessor } from '@app/OfflineQueueProcessor';
 import { PoolRealtimeListener } from '@app/PoolRealtimeListener';
-import { AuthProvider } from '@entities/staff/model/AuthContext';
+import { useRappiOrdersRealtimeBridge } from '@entities/rappi-order';
+import { useStaffStore } from '@entities/staff/model/store';
+import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
+
+function RappiRealtimeBridge() {
+  useRappiOrdersRealtimeBridge();
+  return null;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30 * 1000,
+      networkMode: 'offlineFirst',
+      staleTime: 5 * 60 * 1000,
+      gcTime: 24 * 60 * 60 * 1000,
       retry: 1,
       refetchOnWindowFocus: false,
+    },
+    mutations: {
+      networkMode: 'offlineFirst',
     },
   },
 });
@@ -21,17 +34,52 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   useEffect(() => {
-    // Subscriptions are set up in individual entity stores.
-    // Global cleanup for all Supabase channels on unmount.
+    // Sync Zustand staffStore with the real Supabase auth session.
+    // If the session disappears or the user in the JWT no longer matches
+    // the persisted store, force a logout so stale credentials can't
+    // bypass RLS.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      const store = useStaffStore.getState();
+
+      if (event === 'SIGNED_OUT' || session === null) {
+        if (store.isAuthenticated) {
+          logger.warn('auth.session_lost', { event });
+          store.logout();
+          queryClient.clear();
+        }
+        return;
+      }
+
+      // If the JWT user doesn't match the persisted staff record, the
+      // persisted session is stale (e.g. after deleting a dev user).
+      if (
+        store.isAuthenticated &&
+        store.currentStaff !== null &&
+        store.currentStaff.id !== session.user.id
+      ) {
+        logger.warn('auth.session_mismatch', {
+          storeId: store.currentStaff.id,
+          sessionId: session.user.id,
+        });
+        store.logout();
+        queryClient.clear();
+      }
+    });
+
     return () => {
+      subscription.unsubscribe();
       void supabase.removeAllChannels();
     };
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
+      <OfflineQueueProcessor />
       <PoolRealtimeListener />
-      <AuthProvider>{children}</AuthProvider>
+      <RappiRealtimeBridge />
+      {children}
     </QueryClientProvider>
   );
 }

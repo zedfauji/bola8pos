@@ -19,4 +19,19 @@ export {
 } from './store';
 
 // Data Fetching
-export { useProducts, useCategories, useModifiers } from './queries';
+export {
+  useProducts,
+  useProductsForManagement,
+  useCategories,
+  useModifiers,
+  useMutationCreateProduct,
+  useMutationUpdateProduct,
+  useMutationDeactivateProduct,
+  useMutationCreateCategory,
+  useMutationUpdateCategory,
+  useMutationCreateModifier,
+  useMutationUpdateModifier,
+  useMutationDeleteModifier,
+} from './queries';
+
+export type { CreateProductInput, UpdateProductInput } from './queries';

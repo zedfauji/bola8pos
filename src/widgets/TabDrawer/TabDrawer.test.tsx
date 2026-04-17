@@ -89,6 +89,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -98,6 +99,23 @@ describe('TabDrawer', () => {
 
     // Should display loading skeletons
     expect(screen.getByLabelText('Loading tabs...')).toBeInTheDocument();
+  });
+
+  it('shows no-shift message when tab list query is disabled', () => {
+    vi.mocked(queries.useTabs).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      isDisabled: true,
+    } as any);
+
+    useTabStore.setState({ isTabDrawerOpen: true });
+
+    renderWithProviders(<TabDrawer />);
+
+    expect(screen.getByText('No active shift')).toBeInTheDocument();
   });
 
   /**
@@ -113,6 +131,7 @@ describe('TabDrawer', () => {
       isError: true,
       error: mockError,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -137,6 +156,7 @@ describe('TabDrawer', () => {
       isError: true,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -161,6 +181,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -184,6 +205,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -213,6 +235,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -258,6 +281,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     renderWithProviders(<TabDrawer />);
@@ -288,6 +312,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -317,6 +342,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -339,6 +365,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Open the drawer via store
@@ -360,6 +387,7 @@ describe('TabDrawer', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isDisabled: false,
     } as any);
 
     // Keep drawer closed

@@ -1,1 +1,1 @@
-export { useCartStore } from './cartStore';
+export { useCartStore } from '@entities/tab/model/cartStore';

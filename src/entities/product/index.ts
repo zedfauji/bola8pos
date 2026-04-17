@@ -11,8 +11,24 @@ export {
   selectModifierById,
   selectModifiersByIds,
   useProducts,
+  useProductsForManagement,
   useCategories,
   useModifiers,
+  useMutationCreateProduct,
+  useMutationUpdateProduct,
+  useMutationDeactivateProduct,
+  useMutationCreateCategory,
+  useMutationUpdateCategory,
+  useMutationCreateModifier,
+  useMutationUpdateModifier,
+  useMutationDeleteModifier,
 } from './model';
 
-export type { Product, Category, Modifier, ProductCreate } from './model';
+export type {
+  Product,
+  Category,
+  Modifier,
+  ProductCreate,
+  CreateProductInput,
+  UpdateProductInput,
+} from './model';

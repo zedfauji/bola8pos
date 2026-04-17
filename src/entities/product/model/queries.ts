@@ -1,10 +1,27 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import type { Category, Modifier, Product } from '@shared/lib/domain';
+import type {
+  Category,
+  CategoryCreate,
+  CategoryUpdate,
+  Modifier,
+  ModifierCreate,
+  ModifierUpdate,
+  Product,
+  ProductCreate,
+  ProductUpdate,
+} from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
-import { err, ok, supabaseQuery, unknownError, type Result } from '@shared/lib/result';
+import {
+  err,
+  ok,
+  supabaseMutation,
+  supabaseQuery,
+  unknownError,
+  type Result,
+} from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
-import type { Tables } from '@shared/lib/supabase.types';
+import type { Tables, TablesInsert, TablesUpdate } from '@shared/lib/supabase.types';
 import { useProductStore } from './store';
 import { ProductSchema, CategorySchema, ModifierSchema } from './types';
 
@@ -256,4 +273,361 @@ export function useModifiers() {
     isEmpty: query.isSuccess && !!r?.ok && r.data.length === 0,
     isIdleOrLoading: query.isPending || query.isLoading,
   };
+}
+
+const PRODUCT_MANAGEMENT_QUERY_KEY = ['products', 'management'] as const;
+
+/**
+ * Fetches all products (active and inactive) for catalog management UI.
+ * Does not update {@link useProductStore} — POS continues to use {@link useProducts} only.
+ */
+export function useProductsForManagement() {
+  const query = useQuery({
+    queryKey: PRODUCT_MANAGEMENT_QUERY_KEY,
+    queryFn: async (): Promise<Result<Product[]>> => {
+      const res = await supabaseQuery(() =>
+        supabase
+          .from('products')
+          .select(
+            `
+            *,
+            category:categories(*),
+            product_modifiers(
+              modifier:modifiers(*)
+            )
+          `
+          )
+          .order('name')
+      );
+
+      if (!res.ok) {
+        logger.error('products.management.fetch_failed', {
+          code: res.error.code,
+          message: res.error.message,
+        });
+        return res;
+      }
+
+      const products: Product[] = [];
+      for (const row of res.data as ProductRow[]) {
+        const mapped = mapProductRow(row);
+        if (!mapped.ok) {
+          logger.error('products.management.map_failed', { message: mapped.error.message });
+          return mapped;
+        }
+        products.push(mapped.data);
+      }
+      return ok(products);
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const rm = query.data;
+  return {
+    ...query,
+    data: rm?.ok ? rm.data : undefined,
+    resultError: rm && !rm.ok ? rm.error : undefined,
+    isEmpty: query.isSuccess && !!rm?.ok && rm.data.length === 0,
+    isIdleOrLoading: query.isPending || query.isLoading,
+  };
+}
+
+function invalidateCatalogQueries(queryClient: ReturnType<typeof useQueryClient>): void {
+  void queryClient.invalidateQueries({ queryKey: ['products'] });
+  void queryClient.invalidateQueries({ queryKey: PRODUCT_MANAGEMENT_QUERY_KEY });
+  void queryClient.invalidateQueries({ queryKey: ['categories'] });
+  void queryClient.invalidateQueries({ queryKey: ['modifiers'] });
+}
+
+/** Postgres TIME strings accept HH:MM or HH:MM:SS — normalize short forms. */
+function categoryTimeForDb(value: string | null): string | null {
+  if (value == null || value === '') return null;
+  const parts = value.split(':');
+  if (parts.length === 2) {
+    const h = parts[0] ?? '';
+    const m = parts[1] ?? '';
+    if (h !== '' && m !== '') {
+      return `${h.padStart(2, '0')}:${m}:00`;
+    }
+  }
+  return value;
+}
+
+async function syncProductModifiers(
+  productId: string,
+  modifierIds: readonly string[]
+): Promise<Result<null>> {
+  const delRes = await supabaseMutation(() =>
+    supabase.from('product_modifiers').delete().eq('product_id', productId)
+  );
+  if (!delRes.ok) return delRes;
+
+  if (modifierIds.length === 0) return ok(null);
+
+  const rows: TablesInsert<'product_modifiers'>[] = modifierIds.map(modifierId => ({
+    product_id: productId,
+    modifier_id: modifierId,
+  }));
+
+  const insRes = await supabaseMutation(() => supabase.from('product_modifiers').insert(rows));
+  if (!insRes.ok) {
+    logger.error('product_modifiers.insert_failed', { message: insRes.error.message });
+    return insRes;
+  }
+  return ok(null);
+}
+
+function productUpdateToRow(patch: Partial<Omit<ProductUpdate, 'id'>>): TablesUpdate<'products'> {
+  const row: TablesUpdate<'products'> = {};
+  if (patch.name !== undefined) row.name = patch.name;
+  if (patch.categoryId !== undefined) row.category_id = patch.categoryId;
+  if (patch.basePrice !== undefined) row.base_price = patch.basePrice;
+  if (patch.happyHourPrice !== undefined) row.happy_hour_price = patch.happyHourPrice;
+  if (patch.sku !== undefined) row.sku = patch.sku;
+  if (patch.isActive !== undefined) row.is_active = patch.isActive;
+  if (patch.imageUrl !== undefined) row.image_url = patch.imageUrl;
+  return row;
+}
+
+export type CreateProductInput = ProductCreate & { modifierIds: readonly string[] };
+
+export type UpdateProductInput = ProductUpdate & { modifierIds?: readonly string[] };
+
+export function useMutationCreateProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CreateProductInput): Promise<Result<Product>> => {
+      const { modifierIds, ...product } = input;
+      const insertRow: TablesInsert<'products'> = {
+        name: product.name,
+        category_id: product.categoryId,
+        base_price: product.basePrice,
+        happy_hour_price: product.happyHourPrice,
+        sku: product.sku,
+        is_active: product.isActive,
+        image_url: product.imageUrl,
+      };
+
+      const res = await supabaseMutation<Tables<'products'>>(() =>
+        supabase.from('products').insert(insertRow).select('*').single()
+      );
+
+      if (!res.ok) {
+        logger.error('products.create_failed', { message: res.error.message });
+        return res;
+      }
+      const inserted = res.data;
+      if (inserted == null) {
+        return err(unknownError('no_row'));
+      }
+
+      const productId = inserted.id;
+      const linkRes = await syncProductModifiers(productId, modifierIds);
+      if (!linkRes.ok) return linkRes;
+
+      const full = await supabaseQuery(() =>
+        supabase
+          .from('products')
+          .select(
+            `
+            *,
+            category:categories(*),
+            product_modifiers(
+              modifier:modifiers(*)
+            )
+          `
+          )
+          .eq('id', productId)
+          .single()
+      );
+
+      if (!full.ok) return full;
+      return mapProductRow(full.data as unknown as ProductRow);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
+}
+
+export function useMutationUpdateProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: UpdateProductInput): Promise<Result<null>> => {
+      const { id, modifierIds, ...patch } = input;
+      const row = productUpdateToRow(patch);
+      if (Object.keys(row).length > 0) {
+        const upd = await supabaseMutation(() =>
+          supabase.from('products').update(row).eq('id', id).select('id').single()
+        );
+        if (!upd.ok) {
+          logger.error('products.update_failed', { message: upd.error.message });
+          return upd;
+        }
+      }
+
+      if (modifierIds !== undefined) {
+        const linkRes = await syncProductModifiers(id, modifierIds);
+        if (!linkRes.ok) return linkRes;
+      }
+
+      return ok(null);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
+}
+
+export function useMutationDeactivateProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (productId: string): Promise<Result<null>> => {
+      const res = await supabaseMutation(() =>
+        supabase.from('products').update({ is_active: false }).eq('id', productId)
+      );
+      if (!res.ok) {
+        logger.error('products.deactivate_failed', { message: res.error.message });
+        return res;
+      }
+      return ok(null);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
+}
+
+export function useMutationCreateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CategoryCreate): Promise<Result<Category>> => {
+      const insertRow: TablesInsert<'categories'> = {
+        name: input.name,
+        color: input.color,
+        sort_order: input.sortOrder,
+        happy_hour_start: categoryTimeForDb(input.happyHourStart),
+        happy_hour_end: categoryTimeForDb(input.happyHourEnd),
+      };
+
+      const res = await supabaseMutation(() =>
+        supabase.from('categories').insert(insertRow).select('*').single()
+      );
+
+      if (!res.ok) {
+        logger.error('categories.create_failed', { message: res.error.message });
+        return res;
+      }
+      return mapCategoryRow(res.data as unknown as Tables<'categories'>);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
+}
+
+export function useMutationUpdateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CategoryUpdate): Promise<Result<null>> => {
+      const { id, ...rest } = input;
+      const row: TablesUpdate<'categories'> = {};
+      if (rest.name !== undefined) row.name = rest.name;
+      if (rest.color !== undefined) row.color = rest.color;
+      if (rest.sortOrder !== undefined) row.sort_order = rest.sortOrder;
+      if (rest.happyHourStart !== undefined)
+        row.happy_hour_start = categoryTimeForDb(rest.happyHourStart);
+      if (rest.happyHourEnd !== undefined)
+        row.happy_hour_end = categoryTimeForDb(rest.happyHourEnd);
+
+      if (Object.keys(row).length === 0) return ok(null);
+
+      const res = await supabaseMutation(() =>
+        supabase.from('categories').update(row).eq('id', id)
+      );
+      if (!res.ok) {
+        logger.error('categories.update_failed', { message: res.error.message });
+        return res;
+      }
+      return ok(null);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
+}
+
+export function useMutationCreateModifier() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: ModifierCreate): Promise<Result<Modifier>> => {
+      const insertRow: TablesInsert<'modifiers'> = {
+        name: input.name,
+        price_delta: input.priceDelta,
+        sort_order: input.sortOrder,
+      };
+      const res = await supabaseMutation(() =>
+        supabase.from('modifiers').insert(insertRow).select('*').single()
+      );
+      if (!res.ok) {
+        logger.error('modifiers.create_failed', { message: res.error.message });
+        return res;
+      }
+      return mapModifierRow(res.data as unknown as Tables<'modifiers'>);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
+}
+
+export function useMutationUpdateModifier() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: ModifierUpdate): Promise<Result<null>> => {
+      const { id, ...rest } = input;
+      const row: TablesUpdate<'modifiers'> = {};
+      if (rest.name !== undefined) row.name = rest.name;
+      if (rest.priceDelta !== undefined) row.price_delta = rest.priceDelta;
+      if (rest.sortOrder !== undefined) row.sort_order = rest.sortOrder;
+      if (Object.keys(row).length === 0) return ok(null);
+
+      const res = await supabaseMutation(() => supabase.from('modifiers').update(row).eq('id', id));
+      if (!res.ok) {
+        logger.error('modifiers.update_failed', { message: res.error.message });
+        return res;
+      }
+      return ok(null);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
+}
+
+export function useMutationDeleteModifier() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (modifierId: string): Promise<Result<null>> => {
+      const res = await supabaseMutation(() =>
+        supabase.from('modifiers').delete().eq('id', modifierId)
+      );
+      if (!res.ok) {
+        logger.error('modifiers.delete_failed', { message: res.error.message });
+        return res;
+      }
+      return ok(null);
+    },
+    onSuccess: result => {
+      if (result.ok) invalidateCatalogQueries(queryClient);
+    },
+  });
 }

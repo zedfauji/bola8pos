@@ -2,9 +2,18 @@ import { create } from 'zustand';
 import type { Inventory } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 
+export type LowStockAlertItem = {
+  productId: string;
+  name: string;
+  quantityOnHand: number;
+};
+
 interface InventoryState {
   inventory: Inventory[];
+  /** Product IDs at or below threshold (derived from `lowStockAlerts`). */
   lowStockProductIds: string[];
+  /** Rich list for POS alert bar and tooling. */
+  lowStockAlerts: LowStockAlertItem[];
 }
 
 interface InventoryActions {
@@ -17,15 +26,31 @@ interface InventoryActions {
    */
   decrementQuantity: (productId: string, amount: number) => void;
 
-  /** Recomputes lowStockProductIds from the current inventory list. */
+  /**
+   * Merges line quantities by productId, then decrements each in one state update.
+   * Used after a successful order (optimistic UI; DB trigger is authoritative).
+   */
+  decrementQuantities: (lines: { productId: string; quantity: number }[]) => void;
+
+  /** Recomputes low-stock lists from the current inventory list. */
   refreshAlerts: () => void;
 }
 
 type InventoryStore = InventoryState & InventoryActions;
 
+function mergeQuantities(lines: { productId: string; quantity: number }[]): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const { productId, quantity } of lines) {
+    if (quantity <= 0) continue;
+    map.set(productId, (map.get(productId) ?? 0) + quantity);
+  }
+  return map;
+}
+
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
   inventory: [],
   lowStockProductIds: [],
+  lowStockAlerts: [],
 
   setInventory: items => {
     logger.info('inventory.loaded', { count: items.length });
@@ -34,6 +59,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   },
 
   decrementQuantity: (productId, amount) => {
+    if (amount <= 0) return;
     logger.debug('inventory.decrement', { productId, amount });
     set(state => ({
       inventory: state.inventory.map(item =>
@@ -45,15 +71,38 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     get().refreshAlerts();
   },
 
+  decrementQuantities: lines => {
+    const merged = mergeQuantities(lines);
+    if (merged.size === 0) return;
+    logger.debug('inventory.decrement_batch', { productCount: merged.size });
+    set(state => ({
+      inventory: state.inventory.map(item => {
+        const take = merged.get(item.productId);
+        if (take === undefined) return item;
+        return { ...item, quantityOnHand: Math.max(0, item.quantityOnHand - take) };
+      }),
+    }));
+    get().refreshAlerts();
+  },
+
   refreshAlerts: () => {
-    const lowStockProductIds = get()
+    const lowStockAlerts: LowStockAlertItem[] = get()
       .inventory.filter(item => item.quantityOnHand <= item.lowStockThreshold)
-      .map(item => item.productId);
+      .map(item => ({
+        productId: item.productId,
+        name: item.product?.name ?? 'Unknown',
+        quantityOnHand: item.quantityOnHand,
+      }));
+
+    const lowStockProductIds = lowStockAlerts.map(a => a.productId);
 
     logger.debug('inventory.alerts.refreshed', { lowStockCount: lowStockProductIds.length });
-    set({ lowStockProductIds });
+    set({ lowStockProductIds, lowStockAlerts });
   },
 }));
+
+/** Same store reference; use for `getState` / `subscribe` outside React. */
+export const inventoryStore = useInventoryStore;
 
 /** Returns the inventory record for a given product, or undefined. */
 export const selectInventoryByProductId = (productId: string): Inventory | undefined =>

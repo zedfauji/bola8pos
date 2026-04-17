@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useMutationStartSession } from '@entities/pool-table/model/queries';
+import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@entities/tab';
 import type { PoolTable } from '@shared/lib/domain';
 import {
   MoneyDisplay,
   POSButton,
+  ProtectedAction,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -26,6 +28,7 @@ export interface StartSessionSheetProps {
 
 export function StartSessionSheet({ open, onOpenChange, table, openTabs }: StartSessionSheetProps) {
   const startSession = useMutationStartSession();
+  const currentRole = useStaffStore(s => s.currentStaff?.role);
   const [tabChoice, setTabChoice] = useState<string>(UNLINKED);
 
   const handleOpenChange = (next: boolean) => {
@@ -92,17 +95,23 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
         )}
 
         <SheetFooter className="flex-col gap-2 sm:flex-col">
-          <POSButton
-            type="button"
-            touchSize="large"
-            className="w-full"
+          <ProtectedAction
+            action="start_pool_timer"
+            currentRole={currentRole}
             disabled={!table || startSession.isPending}
-            onClick={() => {
-              void handleConfirm();
-            }}
           >
-            {startSession.isPending ? 'Starting…' : 'Start Session'}
-          </POSButton>
+            <POSButton
+              type="button"
+              touchSize="large"
+              className="w-full"
+              disabled={!table || startSession.isPending}
+              onClick={() => {
+                void handleConfirm();
+              }}
+            >
+              {startSession.isPending ? 'Starting…' : 'Start Session'}
+            </POSButton>
+          </ProtectedAction>
         </SheetFooter>
       </SheetContent>
     </Sheet>

@@ -1,0 +1,1 @@
+export { RappiOrderBadge } from './RappiOrderBadge';

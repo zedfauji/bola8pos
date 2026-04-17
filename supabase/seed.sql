@@ -3,11 +3,11 @@
 -- NOTE: Auth users are created in migration 20260415000001_seed_auth_users.sql
 
 -- Insert test staff profiles (auth users created in migration)
-INSERT INTO public.profiles (id, name, role, pin, is_active) VALUES
-  ('11111111-1111-1111-1111-111111111111', 'Alex Martinez', 'bartender', '123456', true),
-  ('22222222-2222-2222-2222-222222222222', 'Jamie Chen', 'manager', '567890', true),
-  ('33333333-3333-3333-3333-333333333333', 'Taylor Brooks', 'admin', '901234', true),
-  ('44444444-4444-4444-4444-444444444444', 'Sam Rivera', 'bartender', '345678', true)
+INSERT INTO public.profiles (id, name, role, pin, email, is_active) VALUES
+  ('11111111-1111-1111-1111-111111111111', 'Alex Martinez', 'bartender', '123456', '11111111-1111-1111-1111-111111111111@barpos.local', true),
+  ('22222222-2222-2222-2222-222222222222', 'Jamie Chen', 'manager', '567890', '22222222-2222-2222-2222-222222222222@barpos.local', true),
+  ('33333333-3333-3333-3333-333333333333', 'Taylor Brooks', 'admin', '901234', '33333333-3333-3333-3333-333333333333@barpos.local', true),
+  ('44444444-4444-4444-4444-444444444444', 'Sam Rivera', 'bartender', '345678', '44444444-4444-4444-4444-444444444444@barpos.local', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert test categories

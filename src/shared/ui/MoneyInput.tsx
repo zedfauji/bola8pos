@@ -7,7 +7,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { cn } from '@shared/lib/utils';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -17,6 +17,8 @@ export type MoneyInputProps = {
   value: number;
   /** Callback when value changes */
   onChange: (value: number) => void;
+  /** Called after blur once the value is normalized (optional) */
+  onBlurCommit?: () => void;
   /** Placeholder text */
   placeholder?: string;
   /** Input label */
@@ -60,11 +62,13 @@ function parseToCents(value: string): number {
 export function MoneyInput({
   value,
   onChange,
+  onBlurCommit,
   placeholder = '0.00',
   label,
   disabled = false,
   className,
 }: MoneyInputProps) {
+  const inputId = useId();
   const [displayValue, setDisplayValue] = useState(() => {
     const cents = Math.round(value * 100);
     return formatCents(cents);
@@ -101,19 +105,20 @@ export function MoneyInput({
     const cents = parseToCents(displayValue);
     setDisplayValue(formatCents(cents));
     onChange(cents / 100);
+    onBlurCommit?.();
   };
 
   return (
     <div className={cn('space-y-2', className)}>
       {label && (
-        <Label htmlFor="money-input" className="text-sm font-medium">
+        <Label htmlFor={inputId} className="text-sm font-medium">
           {label}
         </Label>
       )}
       <div className="relative">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
         <Input
-          id="money-input"
+          id={inputId}
           type="text"
           inputMode="decimal"
           value={displayValue}
@@ -123,7 +128,7 @@ export function MoneyInput({
           placeholder={placeholder}
           disabled={disabled}
           className="pl-7 font-mono tabular-nums"
-          aria-label={label || 'Money amount'}
+          {...(!label ? { 'aria-label': 'Money amount' as const } : {})}
         />
       </div>
     </div>

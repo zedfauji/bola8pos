@@ -71,11 +71,11 @@ export const PoolTableStatus = {
   MAINTENANCE: 'maintenance',
 } as const;
 
-export const PaymentMethodSchema = z.enum(['cash', 'card', 'tab_transfer']);
+export const PaymentMethodSchema = z.enum(['cash', 'card', 'rappi']);
 export const PaymentMethod = {
   CASH: 'cash',
   CARD: 'card',
-  TAB_TRANSFER: 'tab_transfer',
+  RAPPI: 'rappi',
 } as const;
 
 export const InventoryAdjustReasonSchema = z.enum([
@@ -325,6 +325,8 @@ export const TabSchema = z.object({
   activePoolTableNumber: z.number().int().nullable().optional(),
   subtotal: MoneySchema.optional(),
   staff: StaffSchema.optional(),
+  /** External Rappi order id when tab originated from delivery */
+  rappiOrderId: z.string().min(1).max(128).nullable().optional(),
 });
 
 export const TabCreateSchema = TabSchema.omit({
@@ -353,6 +355,60 @@ export const TabUpdateSchema = TabSchema.omit({
 export type Tab = z.infer<typeof TabSchema>;
 export type TabCreate = z.infer<typeof TabCreateSchema>;
 export type TabUpdate = z.infer<typeof TabUpdateSchema>;
+
+// ============================================================================
+// RAPPI DELIVERY ORDER
+// ============================================================================
+
+export const RappiOrderStatusSchema = z.enum([
+  'pending_acceptance',
+  'accepted',
+  'preparing',
+  'ready_for_pickup',
+  'completed',
+  'rejected',
+]);
+
+export const RappiOrderStatus = {
+  PENDING_ACCEPTANCE: 'pending_acceptance',
+  ACCEPTED: 'accepted',
+  PREPARING: 'preparing',
+  READY_FOR_PICKUP: 'ready_for_pickup',
+  COMPLETED: 'completed',
+  REJECTED: 'rejected',
+} as const;
+
+export type RappiOrderStatus = z.infer<typeof RappiOrderStatusSchema>;
+
+/** One line item stored in rappi_orders.items (JSON) and mapped to POS order_items.notes */
+export const RappiOrderItemSchema = z
+  .object({
+    name: z.string().min(1),
+    quantity: z.number().int().min(1).max(999).default(1),
+    unitPrice: MoneySchema,
+  })
+  .loose();
+
+export type RappiOrderItem = z.infer<typeof RappiOrderItemSchema>;
+
+export const RappiOrderSchema = z.object({
+  id: UuidSchema,
+  rappiOrderId: z.string().min(1).max(128),
+  tabId: UuidSchema.nullable(),
+  status: RappiOrderStatusSchema,
+  customerName: z.string(),
+  deliveryAddress: z.string(),
+  items: z.array(RappiOrderItemSchema),
+  subtotal: MoneySchema,
+  rappiTotal: MoneySchema,
+  receivedAt: TimestampSchema,
+  acceptedAt: TimestampSchema.nullable(),
+  completedAt: TimestampSchema.nullable(),
+  tenantId: UuidSchema,
+  rejectionReason: z.string().max(2000).nullable().optional(),
+});
+
+export type RappiOrder = z.infer<typeof RappiOrderSchema>;
 
 // ============================================================================
 // POOL SESSION (base fields; `table` added below after PoolTableSchema)
@@ -427,6 +483,9 @@ export const PaymentSchema = z.object({
   method: PaymentMethodSchema,
   squarePaymentId: z.string().nullable(),
   squareReceiptUrl: UrlSchema.nullable(),
+  tenderedAmount: MoneySchema.nullable().optional(),
+  referenceNumber: z.string().max(64).nullable().optional(),
+  idempotencyKey: z.string().min(1).max(255).nullable().optional(),
   processedAt: TimestampSchema,
   processedBy: UuidSchema,
 });
@@ -491,6 +550,75 @@ export const InventoryLogUpdateSchema = InventoryLogSchema.partial().required({ 
 export type InventoryLog = z.infer<typeof InventoryLogSchema>;
 export type InventoryLogCreate = z.infer<typeof InventoryLogCreateSchema>;
 export type InventoryLogUpdate = z.infer<typeof InventoryLogUpdateSchema>;
+
+// ============================================================================
+// SETTINGS
+// ============================================================================
+
+export const SettingsKeySchema = z.enum([
+  'general',
+  'billing',
+  'rappi',
+  'email_receipts',
+  'pool_tables',
+]);
+export type SettingsKey = z.infer<typeof SettingsKeySchema>;
+
+export const GeneralSettingsSchema = z.object({
+  barName: z.string().min(1).max(120),
+  address: z.string().min(1).max(300),
+  timezone: z.string().min(1).max(100),
+  currency: z.string().length(3).default('MXN'),
+  receiptFooterText: z.string().max(240).default(''),
+});
+
+export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
+
+export const BillingPaymentMethodsSchema = z.object({
+  cash: z.boolean().default(true),
+  bbvaCard: z.boolean().default(true),
+  rappi: z.boolean().default(true),
+});
+
+export const BillingSettingsSchema = z.object({
+  taxRatePercent: z.number().min(0).max(100).default(16),
+  defaultTipPercentages: z
+    .array(z.number().int().min(0).max(100))
+    .min(1)
+    .max(4)
+    .default([10, 15, 18, 20]),
+  paymentMethods: BillingPaymentMethodsSchema.default({
+    cash: true,
+    bbvaCard: true,
+    rappi: true,
+  }),
+});
+
+export type BillingSettings = z.infer<typeof BillingSettingsSchema>;
+
+export const RappiSettingsSchema = z.object({
+  storeId: z.string().max(120).default(''),
+  lastSyncAt: z.iso.datetime().nullable().default(null),
+});
+
+export type RappiSettings = z.infer<typeof RappiSettingsSchema>;
+
+export const EmailReceiptSettingsSchema = z.object({
+  fromEmail: z.email().trim().default(''),
+});
+
+export type EmailReceiptSettings = z.infer<typeof EmailReceiptSettingsSchema>;
+
+export const SettingsBackupSummarySchema = z.object({
+  id: UuidSchema,
+  label: z.string().min(1).max(120),
+  createdAt: TimestampSchema,
+  createdBy: UuidSchema.nullable(),
+  restoredAt: TimestampSchema.nullable(),
+  restoredBy: UuidSchema.nullable(),
+});
+
+export type SettingsBackupSummary = z.infer<typeof SettingsBackupSummarySchema>;
 
 // ============================================================================
 // CART ITEM (client-only â€” not in DB)
@@ -575,6 +703,10 @@ export const domain = {
     TabCreate: TabCreateSchema,
     TabUpdate: TabUpdateSchema,
 
+    RappiOrderStatus: RappiOrderStatusSchema,
+    RappiOrderItem: RappiOrderItemSchema,
+    RappiOrder: RappiOrderSchema,
+
     PoolTable: PoolTableSchema,
     PoolTableCreate: PoolTableCreateSchema,
     PoolTableUpdate: PoolTableUpdateSchema,
@@ -596,6 +728,14 @@ export const domain = {
     InventoryLog: InventoryLogSchema,
     InventoryLogCreate: InventoryLogCreateSchema,
     InventoryLogUpdate: InventoryLogUpdateSchema,
+
+    SettingsKey: SettingsKeySchema,
+    GeneralSettings: GeneralSettingsSchema,
+    BillingPaymentMethods: BillingPaymentMethodsSchema,
+    BillingSettings: BillingSettingsSchema,
+    RappiSettings: RappiSettingsSchema,
+    EmailReceiptSettings: EmailReceiptSettingsSchema,
+    SettingsBackupSummary: SettingsBackupSummarySchema,
 
     CartItem: CartItemSchema,
     CartItemCreate: CartItemCreateSchema,
@@ -643,6 +783,10 @@ export const domain = {
     TabCreate: TabCreate;
     TabUpdate: TabUpdate;
 
+    RappiOrderStatus: RappiOrderStatus;
+    RappiOrderItem: RappiOrderItem;
+    RappiOrder: RappiOrder;
+
     PoolTable: PoolTable;
     PoolTableCreate: PoolTableCreate;
     PoolTableUpdate: PoolTableUpdate;
@@ -664,6 +808,13 @@ export const domain = {
     InventoryLog: InventoryLog;
     InventoryLogCreate: InventoryLogCreate;
     InventoryLogUpdate: InventoryLogUpdate;
+
+    SettingsKey: SettingsKey;
+    GeneralSettings: GeneralSettings;
+    BillingSettings: BillingSettings;
+    RappiSettings: RappiSettings;
+    EmailReceiptSettings: EmailReceiptSettings;
+    SettingsBackupSummary: SettingsBackupSummary;
 
     CartItem: CartItem;
     CartItemCreate: CartItemCreate;

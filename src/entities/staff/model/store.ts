@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Staff, Shift } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
+import { supabase } from '@shared/lib/supabase';
 
 interface StaffState {
   currentStaff: Staff | null;
@@ -46,6 +47,7 @@ export const useStaffStore = create<StaffStore>()(
 
       logout: () => {
         logger.info('staff.loggedOut');
+        void supabase.auth.signOut();
         set({ currentStaff: null, currentShift: null, staffList: [], isAuthenticated: false });
       },
 
