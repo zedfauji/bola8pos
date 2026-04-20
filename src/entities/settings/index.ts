@@ -15,7 +15,9 @@ export type {
   BillingSettings,
   EmailReceiptSettings,
   GeneralSettings,
+  PaymentMethodLabels,
   RappiSettings,
+  ReceiptSettings,
   SettingsBackupSummary,
   SettingsKey,
 } from './model';

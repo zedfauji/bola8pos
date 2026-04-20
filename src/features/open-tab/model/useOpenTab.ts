@@ -12,7 +12,7 @@ import { logger } from '@shared/lib/logger';
 
 export function useOpenTab() {
   const mutation = useMutationOpenTab();
-  const { selectTab, openDrawer } = useTabStore();
+  const { selectTab, closeDrawer } = useTabStore();
 
   const openTab = async (input: CreateTab) => {
     const result = await mutation.mutateAsync(input);
@@ -40,7 +40,7 @@ export function useOpenTab() {
     });
 
     selectTab(tab.id);
-    openDrawer();
+    closeDrawer();
 
     return { ok: true as const, data: tab };
   };

@@ -63,7 +63,7 @@ export function PINLoginForm() {
         closingCash: existingShift.closing_cash,
       });
       clearSelection();
-      navigate('/pos');
+      navigate('/home');
       return;
     }
 
@@ -94,7 +94,7 @@ export function PINLoginForm() {
 
       useStaffStore.getState().login(selectedStaff, result.data);
       clearSelection();
-      navigate('/pos');
+      navigate('/home');
     } finally {
       setIsClockingIn(false);
     }

@@ -327,6 +327,8 @@ export const TabSchema = z.object({
   staff: StaffSchema.optional(),
   /** External Rappi order id when tab originated from delivery */
   rappiOrderId: z.string().min(1).max(128).nullable().optional(),
+  /** Caja session under which this tab was opened */
+  cajaSessionId: UuidSchema.nullable().optional(),
 });
 
 export const TabCreateSchema = TabSchema.omit({
@@ -422,6 +424,8 @@ const PoolSessionBaseSchema = z.object({
   stoppedAt: TimestampSchema.nullable(),
   billedMinutes: z.number().int().nonnegative().nullable(),
   totalCharge: MoneySchema.nullable(),
+  previousTableId: UuidSchema.nullable().optional(),
+  previousTableNumber: z.number().int().nullable().optional(),
 });
 
 // ============================================================================
@@ -561,6 +565,8 @@ export const SettingsKeySchema = z.enum([
   'rappi',
   'email_receipts',
   'pool_tables',
+  'receipt',
+  'payment_labels',
 ]);
 export type SettingsKey = z.infer<typeof SettingsKeySchema>;
 
@@ -579,6 +585,14 @@ export const BillingPaymentMethodsSchema = z.object({
   bbvaCard: z.boolean().default(true),
   rappi: z.boolean().default(true),
 });
+
+export const PaymentMethodLabelsSchema = z.object({
+  cash: z.string().min(1).max(40).default('Efectivo'),
+  card: z.string().min(1).max(40).default('Terminal BBVA'),
+  rappi: z.string().min(1).max(40).default('Rappi'),
+});
+
+export type PaymentMethodLabels = z.infer<typeof PaymentMethodLabelsSchema>;
 
 export const BillingSettingsSchema = z.object({
   taxRatePercent: z.number().min(0).max(100).default(16),
@@ -608,6 +622,158 @@ export const EmailReceiptSettingsSchema = z.object({
 });
 
 export type EmailReceiptSettings = z.infer<typeof EmailReceiptSettingsSchema>;
+
+// ============================================================================
+// RECEIPT SETTINGS
+// ============================================================================
+
+export const ReceiptPaperWidthSchema = z.union([z.literal(32), z.literal(40), z.literal(48)]);
+
+export const ReceiptSettingsSchema = z.object({
+  paperWidthChars: ReceiptPaperWidthSchema.default(32),
+  showCashierName: z.boolean().default(true),
+  showCustomerName: z.boolean().default(true),
+  showReceiptNumber: z.boolean().default(true),
+  headerLine2: z.string().max(48).default(''),
+  footerText: z.string().max(480).default(''),
+  boldTotals: z.boolean().default(true),
+});
+
+export type ReceiptSettings = z.infer<typeof ReceiptSettingsSchema>;
+
+// ============================================================================
+// CAJA SESSION
+// ============================================================================
+
+export const CajaStatusSchema = z.enum(['open', 'closed']);
+export type CajaStatus = z.infer<typeof CajaStatusSchema>;
+
+export const CajaSessionSchema = z.object({
+  id: UuidSchema,
+  openedAt: TimestampSchema,
+  closedAt: TimestampSchema.nullable(),
+  openedBy: UuidSchema,
+  closedBy: UuidSchema.nullable(),
+  openingCash: MoneySchema,
+  closingCash: MoneySchema.nullable(),
+  notes: z.string().max(500).nullable(),
+  status: CajaStatusSchema,
+  openedByName: z.string().optional(),
+  closedByName: z.string().nullable().optional(),
+});
+
+export const CajaSessionCreateSchema = CajaSessionSchema.omit({
+  id: true,
+  closedAt: true,
+  closedBy: true,
+  closingCash: true,
+  status: true,
+  openedByName: true,
+  closedByName: true,
+});
+
+export type CajaSession = z.infer<typeof CajaSessionSchema>;
+export type CajaSessionCreate = z.infer<typeof CajaSessionCreateSchema>;
+
+// ============================================================================
+// CAJA REPORT (returned by get_caja_report RPC)
+// ============================================================================
+
+export const CajaReportSummarySchema = z.object({
+  totalRevenue: MoneySchema,
+  cashSales: MoneySchema,
+  cardSales: MoneySchema,
+  rappiSales: MoneySchema,
+  orderCount: z.number().int().nonnegative(),
+  tabCount: z.number().int().nonnegative(),
+});
+
+export const CashReconciliationSchema = z.object({
+  openingCash: MoneySchema,
+  cashSales: MoneySchema,
+  expectedCash: MoneySchema,
+  closingCash: MoneySchema.nullable(),
+  variance: z.number().nullable(),
+});
+
+export const CajaReportTopProductSchema = z.object({
+  productName: z.string(),
+  quantity: z.number().int(),
+  revenue: MoneySchema,
+});
+
+export const CajaReportStaffSchema = z.object({
+  staffId: UuidSchema,
+  staffName: z.string(),
+  orderCount: z.number().int(),
+  salesTotal: MoneySchema,
+});
+
+export const CajaReportSchema = z.object({
+  cajaSession: CajaSessionSchema,
+  summary: CajaReportSummarySchema,
+  cashReconciliation: CashReconciliationSchema,
+  topProducts: z.array(CajaReportTopProductSchema),
+  staffSummary: z.array(CajaReportStaffSchema),
+});
+
+export type CajaReport = z.infer<typeof CajaReportSchema>;
+export type CajaReportSummary = z.infer<typeof CajaReportSummarySchema>;
+export type CashReconciliation = z.infer<typeof CashReconciliationSchema>;
+export type CajaReportTopProduct = z.infer<typeof CajaReportTopProductSchema>;
+export type CajaReportStaff = z.infer<typeof CajaReportStaffSchema>;
+
+// ============================================================================
+// TAB TRANSFER
+// ============================================================================
+
+export const TabTransferTypeSchema = z.enum([
+  'staff',
+  'table',
+  'pool_to_dining',
+  'dining_to_pool',
+  'pool_to_pool',
+  'manual',
+]);
+
+export type TabTransferType = z.infer<typeof TabTransferTypeSchema>;
+
+export const TabTransferSchema = z.object({
+  id: UuidSchema,
+  tabId: UuidSchema,
+  transferredAt: TimestampSchema,
+  transferredBy: UuidSchema,
+  fromStaffId: UuidSchema.nullable(),
+  toStaffId: UuidSchema.nullable(),
+  fromTable: z.number().int().nullable(),
+  toTable: z.number().int().nullable(),
+  reason: z.string().max(500).nullable(),
+  transferType: TabTransferTypeSchema,
+});
+
+export const TabTransferCreateSchema = TabTransferSchema.omit({
+  id: true,
+  transferredAt: true,
+});
+
+export type TabTransfer = z.infer<typeof TabTransferSchema>;
+export type TabTransferCreate = z.infer<typeof TabTransferCreateSchema>;
+
+// ============================================================================
+// POOL TABLE TRANSFER
+// ============================================================================
+
+export const PoolTableTransferSchema = z.object({
+  id: UuidSchema,
+  poolSessionId: UuidSchema,
+  transferredAt: TimestampSchema,
+  transferredBy: UuidSchema,
+  fromPoolTableId: UuidSchema,
+  toPoolTableId: UuidSchema,
+  reason: z.string().max(500).nullable(),
+});
+
+export type PoolTableTransfer = z.infer<typeof PoolTableTransferSchema>;
 
 export const SettingsBackupSummarySchema = z.object({
   id: UuidSchema,
@@ -732,10 +898,26 @@ export const domain = {
     SettingsKey: SettingsKeySchema,
     GeneralSettings: GeneralSettingsSchema,
     BillingPaymentMethods: BillingPaymentMethodsSchema,
+    PaymentMethodLabels: PaymentMethodLabelsSchema,
     BillingSettings: BillingSettingsSchema,
     RappiSettings: RappiSettingsSchema,
     EmailReceiptSettings: EmailReceiptSettingsSchema,
+    ReceiptSettings: ReceiptSettingsSchema,
     SettingsBackupSummary: SettingsBackupSummarySchema,
+
+    CajaStatus: CajaStatusSchema,
+    CajaSession: CajaSessionSchema,
+    CajaSessionCreate: CajaSessionCreateSchema,
+    CajaReport: CajaReportSchema,
+    CajaReportSummary: CajaReportSummarySchema,
+    CashReconciliation: CashReconciliationSchema,
+    CajaReportTopProduct: CajaReportTopProductSchema,
+    CajaReportStaff: CajaReportStaffSchema,
+
+    TabTransferType: TabTransferTypeSchema,
+    TabTransfer: TabTransferSchema,
+    TabTransferCreate: TabTransferCreateSchema,
+    PoolTableTransfer: PoolTableTransferSchema,
 
     CartItem: CartItemSchema,
     CartItemCreate: CartItemCreateSchema,
@@ -812,9 +994,21 @@ export const domain = {
     SettingsKey: SettingsKey;
     GeneralSettings: GeneralSettings;
     BillingSettings: BillingSettings;
+    PaymentMethodLabels: PaymentMethodLabels;
     RappiSettings: RappiSettings;
     EmailReceiptSettings: EmailReceiptSettings;
+    ReceiptSettings: ReceiptSettings;
     SettingsBackupSummary: SettingsBackupSummary;
+
+    CajaStatus: CajaStatus;
+    CajaSession: CajaSession;
+    CajaSessionCreate: CajaSessionCreate;
+    CajaReport: CajaReport;
+
+    TabTransferType: TabTransferType;
+    TabTransfer: TabTransfer;
+    TabTransferCreate: TabTransferCreate;
+    PoolTableTransfer: PoolTableTransfer;
 
     CartItem: CartItem;
     CartItemCreate: CartItemCreate;

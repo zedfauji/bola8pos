@@ -47,17 +47,28 @@ export function CartPanel() {
       quantity: item.quantity,
     }));
 
-    const result = await addOrderMutation.mutateAsync({
-      tabId: activeTabId,
-      order: {
-        staffId: currentStaff.id,
-        status: 'pending',
-        notes: null,
-      },
-      items: orderItems,
-    });
+    let result: Awaited<ReturnType<typeof addOrderMutation.mutateAsync>>;
+    try {
+      result = await addOrderMutation.mutateAsync({
+        tabId: activeTabId,
+        order: {
+          staffId: currentStaff.id,
+          status: 'pending',
+          notes: null,
+        },
+        items: orderItems,
+      });
+    } catch {
+      toast.error('Failed to place order. Please try again.');
+      return;
+    }
 
     if (!result.ok) {
+      if (result.error.code === 'NETWORK_OFFLINE') {
+        // Queued for replay when connectivity returns — clear the cart optimistically.
+        clearCart();
+        return;
+      }
       toast.error(result.error.message);
       return;
     }

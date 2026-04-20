@@ -1,11 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { BillingSettingsTab } from './BillingSettingsTab';
 
-const mutateAsyncMock = vi.fn();
-const toastErrorMock = vi.fn();
-const toastSuccessMock = vi.fn();
+const { mutateAsyncMock, toastErrorMock, toastSuccessMock, mockSettingsData } = vi.hoisted(() => ({
+  mutateAsyncMock: vi.fn(),
+  toastErrorMock: vi.fn(),
+  toastSuccessMock: vi.fn(),
+  // Stable object reference — useEffect([data, ...]) fires on every render if data is recreated
+  mockSettingsData: {
+    billing: {
+      taxRatePercent: 16,
+      defaultTipPercentages: [10, 15, 18, 20],
+      paymentMethods: { cash: true, bbvaCard: true, rappi: true },
+    },
+    paymentLabels: { cash: 'Efectivo', card: 'Terminal BBVA', rappi: 'Rappi' },
+  },
+}));
 
 vi.mock('sonner', () => ({
   toast: {
@@ -15,20 +25,15 @@ vi.mock('sonner', () => ({
 }));
 
 vi.mock('@entities/settings', () => ({
-  useSettings: () => ({
-    data: {
-      billing: {
-        taxRatePercent: 16,
-        defaultTipPercentages: [10, 15, 18, 20],
-        paymentMethods: { cash: true, bbvaCard: true, rappi: true },
-      },
-    },
-  }),
+  useSettings: () => ({ data: mockSettingsData }),
   useMutationUpdateSetting: () => ({
     mutateAsync: mutateAsyncMock,
+    mutate: mutateAsyncMock,
     isPending: false,
   }),
 }));
+
+import { BillingSettingsTab } from './BillingSettingsTab';
 
 describe('BillingSettingsTab', () => {
   beforeEach(() => {

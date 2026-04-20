@@ -6,11 +6,13 @@
  */
 
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, RefreshCw, Receipt } from 'lucide-react';
+import { Plus, RefreshCw, Receipt, ArrowLeftRight } from 'lucide-react';
 import { useState } from 'react';
 import { PaymentModal } from '@widgets/PaymentModal';
 import { OpenTabButton } from '@features/open-tab/ui/OpenTabButton';
+import { TransferTabDialog } from '@features/transfer-tab';
 import { VoidOrderDialog } from '@features/void-order';
+import { usePermissions } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
 import { tabKeys, useTab } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
@@ -38,6 +40,8 @@ export function OrderPanel() {
   const currentStaff = useStaffStore(state => state.currentStaff);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [orderToVoid, setOrderToVoid] = useState<Order | null>(null);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const { can } = usePermissions();
   const { data: tab, isLoading } = useTab(activeTabId ?? '');
 
   // No tab selected — show prompt to open or select
@@ -109,6 +113,18 @@ export function OrderPanel() {
             <RefreshCw className="h-4 w-4 mr-1" />
             Switch Tab
           </POSButton>
+          {can('transfer_tab') && (
+            <POSButton
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTransferOpen(true);
+              }}
+              aria-label="Transfer tab"
+            >
+              <ArrowLeftRight className="h-4 w-4" />
+            </POSButton>
+          )}
           <POSButton variant="outline" size="sm" onClick={openDrawer} aria-label="Open new tab">
             <Plus className="h-4 w-4" />
           </POSButton>
@@ -220,6 +236,8 @@ export function OrderPanel() {
           }
         }}
       />
+
+      <TransferTabDialog open={transferOpen} onOpenChange={setTransferOpen} tab={tab ?? null} />
     </div>
   );
 }

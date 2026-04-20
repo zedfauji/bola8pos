@@ -1,6 +1,7 @@
 import {
   Home,
   Clock,
+  CreditCard,
   Package,
   Users,
   BarChart,
@@ -21,7 +22,7 @@ import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@shared/ui/sheet';
 
-type NavPermission = 'adjust_inventory' | 'view_reports' | 'manage_settings';
+type NavPermission = 'adjust_inventory' | 'view_reports' | 'manage_settings' | 'close_tab';
 
 type NavItem = {
   path: string;
@@ -32,6 +33,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { path: '/pos', label: 'POS Register', icon: Home },
+  { path: '/payments', label: 'Payments', icon: CreditCard, permission: 'close_tab' },
   { path: '/rappi', label: 'Rappi', icon: Bike },
   { path: '/pool-tables', label: 'Pool Tables', icon: Clock },
   { path: '/inventory', label: 'Inventory', icon: Package, permission: 'adjust_inventory' },

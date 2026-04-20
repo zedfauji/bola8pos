@@ -1,7 +1,7 @@
 import { AlertCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { AssignPoolSessionSheet } from '@features/assign-pool-session-to-tab';
 import { StartSessionSheet } from '@features/start-pool-timer';
 import { StopSessionConfirm } from '@features/stop-pool-timer';
 import {
@@ -18,6 +18,7 @@ import { rbacDenialMessage } from '@shared/lib/rbac';
 import { EmptyState, POSButton, PoolTableGridSkeleton, ProtectedAction } from '@shared/ui';
 
 export function PoolTableGrid() {
+  const navigate = useNavigate();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const { can } = usePermissions();
   const { data: tables, isIdleOrLoading, isError, refetch, resultError, error } = usePoolTables();
@@ -27,9 +28,6 @@ export function PoolTableGrid() {
 
   const [startTable, setStartTable] = useState<PoolTable | null>(null);
   const [stopTarget, setStopTarget] = useState<{ table: PoolTable; session: PoolSession } | null>(
-    null
-  );
-  const [assignTarget, setAssignTarget] = useState<{ sessionId: string; label: string } | null>(
     null
   );
 
@@ -144,13 +142,6 @@ export function PoolTableGrid() {
                       },
                     }
                   : {})}
-                {...(table.status === 'occupied' && session && !session.tabId
-                  ? {
-                      onAssignToTab: () => {
-                        setAssignTarget({ sessionId: session.id, label: table.label });
-                      },
-                    }
-                  : {})}
                 {...(table.status === 'reserved'
                   ? {
                       onReleaseReserved: () => {
@@ -162,6 +153,13 @@ export function PoolTableGrid() {
                           }
                           toast.success('Table released.');
                         })();
+                      },
+                    }
+                  : {})}
+                {...(table.status === 'occupied'
+                  ? {
+                      onViewStatus: () => {
+                        navigate(`/pool-tables/${table.id}`);
                       },
                     }
                   : {})}
@@ -187,16 +185,6 @@ export function PoolTableGrid() {
         }}
         table={stopTarget?.table ?? null}
         session={stopTarget?.session ?? null}
-        openTabs={openTabs}
-      />
-
-      <AssignPoolSessionSheet
-        open={Boolean(assignTarget)}
-        onOpenChange={open => {
-          if (!open) setAssignTarget(null);
-        }}
-        sessionId={assignTarget?.sessionId ?? null}
-        tableLabel={assignTarget?.label ?? ''}
         openTabs={openTabs}
       />
     </div>

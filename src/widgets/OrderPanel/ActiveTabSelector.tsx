@@ -1,8 +1,9 @@
-import { Loader2, Plus, RefreshCw, User } from 'lucide-react';
+import { ArrowLeftRight, Loader2, Plus, RefreshCw, User } from 'lucide-react';
 import { useState } from 'react';
 import { OpenTabDialog } from '@features/open-tab/ui/OpenTabDialog';
+import { TransferTabDialog } from '@features/transfer-tab';
 import { VoidOrderDialog } from '@features/void-order';
-import { useStaffStore } from '@entities/staff/model/store';
+import { usePermissions, useStaffStore } from '@entities/staff';
 import { useTabs, useTab } from '@entities/tab/model/queries';
 import { selectTabById, useTabStore } from '@entities/tab/model/store';
 import type { Order } from '@entities/tab/model/types';
@@ -20,7 +21,9 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
   const openDrawer = useTabStore(s => s.openDrawer);
   const currentStaff = useStaffStore(state => state.currentStaff);
   const [openTabDialogOpen, setOpenTabDialogOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [orderToVoid, setOrderToVoid] = useState<Order | null>(null);
+  const { can } = usePermissions();
 
   const { data: tabList } = useTabs();
   const openTabCount = tabList?.length ?? 0;
@@ -76,6 +79,19 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                   </Badge>
                 )}
               </Button>
+              {can('transfer_tab') && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setTransferOpen(true);
+                  }}
+                  aria-label="Transfer tab"
+                >
+                  <ArrowLeftRight className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"
@@ -166,6 +182,11 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
         onClose={() => {
           setOpenTabDialogOpen(false);
         }}
+      />
+      <TransferTabDialog
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
+        tab={currentTab ?? null}
       />
       {activeTabId && (
         <VoidOrderDialog

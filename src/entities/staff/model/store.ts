@@ -10,6 +10,11 @@ interface StaffState {
   /** Active staff profiles from server; refreshed by `useStaffList`. */
   staffList: Staff[];
   isAuthenticated: boolean;
+  /**
+   * Actions temporarily unlocked via Manager PIN dialog for the current session.
+   * Cleared on logout. Not persisted — intentionally session-scoped.
+   */
+  managerGrantedActions: ReadonlySet<string>;
 }
 
 interface StaffActions {
@@ -27,6 +32,9 @@ interface StaffActions {
 
   /** Replaces cached staff directory from TanStack Query. */
   setStaffList: (staff: Staff[]) => void;
+
+  /** Grants a set of actions via Manager PIN approval for this session. */
+  grantManagerActions: (actions: string[]) => void;
 }
 
 type StaffStore = StaffState & StaffActions;
@@ -39,16 +47,28 @@ export const useStaffStore = create<StaffStore>()(
       currentShift: null,
       staffList: [],
       isAuthenticated: false,
+      managerGrantedActions: new Set<string>(),
 
       login: (staff, shift) => {
         logger.info('staff.loggedIn', { staffId: staff.id, shiftId: shift.id, role: staff.role });
-        set({ currentStaff: staff, currentShift: shift, isAuthenticated: true });
+        set({
+          currentStaff: staff,
+          currentShift: shift,
+          isAuthenticated: true,
+          managerGrantedActions: new Set<string>(),
+        });
       },
 
       logout: () => {
         logger.info('staff.loggedOut');
         void supabase.auth.signOut();
-        set({ currentStaff: null, currentShift: null, staffList: [], isAuthenticated: false });
+        set({
+          currentStaff: null,
+          currentShift: null,
+          staffList: [],
+          isAuthenticated: false,
+          managerGrantedActions: new Set<string>(),
+        });
       },
 
       updateShift: shift => {
@@ -60,6 +80,13 @@ export const useStaffStore = create<StaffStore>()(
         logger.info('staff.list.loaded', { count: staff.length });
         set({ staffList: staff });
       },
+
+      grantManagerActions: (actions: string[]) => {
+        logger.info('staff.managerActions.granted', { actions });
+        set(state => ({
+          managerGrantedActions: new Set([...state.managerGrantedActions, ...actions]),
+        }));
+      },
     }),
     {
       name: 'staff-store',
@@ -67,6 +94,7 @@ export const useStaffStore = create<StaffStore>()(
         currentStaff: state.currentStaff,
         currentShift: state.currentShift,
         isAuthenticated: state.isAuthenticated,
+        // managerGrantedActions intentionally NOT persisted — session-only
       }),
     }
   )

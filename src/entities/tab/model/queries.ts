@@ -4,7 +4,9 @@
 
 import { useQuery, useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useCajaStore } from '@entities/caja/model/store';
 import { useStaffStore } from '@entities/staff/model/store';
+import { isOnline } from '@shared/lib/connectivity';
 import {
   ProductSchema,
   type Order,
@@ -17,10 +19,12 @@ import { generateIdempotencyKey } from '@shared/lib/domain-helpers';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
+  networkOfflineError,
   ok,
   supabaseMutation,
   supabaseQuery,
   unknownError,
+  type AppError,
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -44,8 +48,22 @@ export const tabKeys = {
   detail: (id: string) => [...tabKeys.details(), id] as const,
 };
 
+interface CategoryEmbed {
+  id: string;
+  name: string;
+  color: string;
+  sort_order: number;
+  happy_hour_start: string | null;
+  happy_hour_end: string | null;
+  created_at: string;
+}
+
+interface ProductRowWithCategory extends Tables<'products'> {
+  category?: CategoryEmbed | null;
+}
+
 interface OrderItemRow extends Tables<'order_items'> {
-  product?: Tables<'products'> | null;
+  product?: ProductRowWithCategory | null;
 }
 
 interface OrderRow extends Tables<'orders'> {
@@ -67,9 +85,12 @@ interface TabRow extends Tables<'tabs'> {
   pool_sessions?: PoolSessionRow[] | null;
 }
 
-function mapProductRow(p: Tables<'products'> | null | undefined): Product | undefined {
+function mapProductRow(
+  p: ProductRowWithCategory | Tables<'products'> | null | undefined
+): Product | undefined {
   if (p == null) return undefined;
   try {
+    const catEmbed = 'category' in p ? p.category : null;
     return ProductSchema.parse({
       id: p.id,
       name: p.name,
@@ -80,6 +101,19 @@ function mapProductRow(p: Tables<'products'> | null | undefined): Product | unde
       isActive: p.is_active,
       imageUrl: p.image_url,
       modifiers: [],
+      ...(catEmbed
+        ? {
+            category: {
+              id: catEmbed.id,
+              name: catEmbed.name,
+              color: catEmbed.color,
+              sortOrder: catEmbed.sort_order,
+              happyHourStart: catEmbed.happy_hour_start,
+              happyHourEnd: catEmbed.happy_hour_end,
+              createdAt: new Date(catEmbed.created_at),
+            },
+          }
+        : {}),
     });
   } catch {
     return undefined;
@@ -206,7 +240,10 @@ const tabListSelect = `
     *,
     order_items(
       *,
-      product:products(*)
+      product:products(
+        *,
+        category:categories(id, name, color, sort_order, happy_hour_start, happy_hour_end, created_at)
+      )
     )
   ),
   pool_sessions(
@@ -344,13 +381,28 @@ export function useMutationOpenTab() {
 
   return useMutation({
     mutationFn: async (input: CreateTab): Promise<Result<Tab>> => {
-      const insertData: TablesInsert<'tabs'> = {
+      if (!isOnline()) {
+        return err(networkOfflineError());
+      }
+      const cajaState = useCajaStore.getState();
+      if (!cajaState.isCajaOpen || !cajaState.currentCaja) {
+        const cajaErr: AppError = {
+          code: 'CAJA_CLOSED',
+          message: 'No caja is open. Ask a manager to open the caja first.',
+        };
+        return err(cajaErr);
+      }
+      const cajaSessionId = cajaState.currentCaja.id;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const insertData: any = {
         customer_name: input.customerName,
         table_number: input.tableNumber,
         staff_id: input.staffId,
         shift_id: input.shiftId,
         status: input.status,
         notes: input.notes,
+        caja_session_id: cajaSessionId,
         ...(input.rappiOrderId != null && input.rappiOrderId !== ''
           ? { rappi_order_id: input.rappiOrderId }
           : {}),
@@ -395,6 +447,7 @@ export function useMutationOpenTab() {
         items: [],
         poolCharges: [],
         hasActivePoolSession: false,
+        cajaSessionId: useCajaStore.getState().currentCaja?.id ?? null,
         ...(input.rappiOrderId != null && input.rappiOrderId !== ''
           ? { rappiOrderId: input.rappiOrderId }
           : {}),
@@ -505,6 +558,9 @@ export function useMutationAddOrder() {
       order: Omit<CreateOrder, 'tabId'>;
       items: Omit<CreateOrderItem, 'orderId'>[];
     }): Promise<Result<{ order: Order; items: OrderItem[] }>> => {
+      if (!isOnline()) {
+        return err(networkOfflineError());
+      }
       const payload = {
         p_tab_id: tabId,
         p_staff_id: order.staffId,

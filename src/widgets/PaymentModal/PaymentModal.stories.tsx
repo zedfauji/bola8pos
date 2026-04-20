@@ -135,7 +135,7 @@ export const CardPayment: Story = {
   },
   play: async () => {
     const root = within(document.body);
-    const cardButton = await root.findByRole('button', { name: 'Card' });
+    const cardButton = await root.findByRole('button', { name: 'Terminal BBVA' });
     await userEvent.setup().click(cardButton);
   },
 };

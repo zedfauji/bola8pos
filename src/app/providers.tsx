@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
+import { CajaListener } from '@app/CajaListener';
 import { OfflineQueueProcessor } from '@app/OfflineQueueProcessor';
 import { PoolRealtimeListener } from '@app/PoolRealtimeListener';
 import { useRappiOrdersRealtimeBridge } from '@entities/rappi-order';
@@ -43,6 +44,11 @@ export function Providers({ children }: ProvidersProps) {
     } = supabase.auth.onAuthStateChange((event, session) => {
       const store = useStaffStore.getState();
 
+      if (event === 'SIGNED_IN' && session) {
+        void queryClient.invalidateQueries({ queryKey: ['caja'] });
+        return;
+      }
+
       if (event === 'SIGNED_OUT' || session === null) {
         if (store.isAuthenticated) {
           logger.warn('auth.session_lost', { event });
@@ -76,6 +82,7 @@ export function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CajaListener />
       <OfflineQueueProcessor />
       <PoolRealtimeListener />
       <RappiRealtimeBridge />

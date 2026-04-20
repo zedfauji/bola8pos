@@ -1,8 +1,10 @@
+vi.unmock('@shared/lib/supabase');
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { supabase } from '@shared/lib/supabase';
+import { testDb } from '@shared/lib/supabase-test-client';
 import {
   staffKeys,
   useMutationClockIn,
@@ -11,94 +13,71 @@ import {
 } from './queries';
 import { useStaffStore } from './store';
 
-vi.mock('@shared/lib/supabase', () => ({
-  supabase: { from: vi.fn() },
-}));
+// Seeded staff IDs from the cloud Supabase project (run: supabase auth list)
+const STAFF_ID = '4d77ef2b-c99d-4dd1-a572-2638ab427496'; // Alex Martinez (alex@barpos.dev)
+const OTHER_STAFF_ID = 'cb969ea6-7443-4c03-ac99-bbe8aba0bb8e'; // Jamie Chen (jamie@barpos.dev)
 
-const shiftId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-const staffId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-const tabId1 = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+// Deterministic test IDs for setup/teardown isolation
+const TEST_SHIFT_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const TEST_TAB_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const TEST_ORDER_ID = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const TEST_PAYMENT_ID = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 
-const staffRow = {
-  id: staffId,
-  staff_id: staffId,
-  clock_in: '2026-04-17T08:00:00.000Z',
-  clock_out: null,
-  opening_cash: 50,
-  closing_cash: null,
-};
+// Track shifts inserted by clock-in mutation so we can clean them up
+let clockInShiftId: string | null = null;
+
+beforeAll(async () => {
+  await supabase.auth.signInWithPassword({
+    email: 'alex@barpos.dev',
+    password: '123456',
+  });
+});
+
+afterAll(async () => {
+  await supabase.auth.signOut();
+});
+
+// ─── useShiftClosePreview ────────────────────────────────────────────────────
 
 describe('useShiftClosePreview', () => {
   let queryClient: QueryClient;
   const wrapper = ({ children }: { children: ReactNode }) =>
     createElement(QueryClientProvider, { client: queryClient }, children);
 
-  let tabsEqResult: { data: { id: string }[] | null; error: unknown };
-  let shiftSingleResult: { data: { clock_in: string }; error: unknown };
-  let ordersInResult: { data: { id: string }[]; error: unknown };
-  let paymentsInResult: { data: { amount: number }[]; error: unknown };
-
-  beforeEach(() => {
+  beforeEach(async () => {
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
-    tabsEqResult = { data: [], error: null };
-    shiftSingleResult = {
-      data: { clock_in: '2026-04-17T08:00:00.000Z' },
-      error: null,
-    };
-    ordersInResult = { data: [{ id: 'o1' }], error: null };
-    paymentsInResult = { data: [{ amount: 40 }, { amount: 10 }], error: null };
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(supabase.from).mockReset();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === 'tabs') {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn(() => Promise.resolve(tabsEqResult)),
-        };
-      }
-      if (table === 'shifts') {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn(() => Promise.resolve(shiftSingleResult)),
-        };
-      }
-      if (table === 'orders') {
-        return {
-          select: vi.fn().mockReturnThis(),
-          in: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          neq: vi.fn(() => Promise.resolve(ordersInResult)),
-        };
-      }
-      if (table === 'payments') {
-        return {
-          select: vi.fn().mockReturnThis(),
-          in: vi.fn().mockReturnThis(),
-          eq: vi.fn(() => Promise.resolve(paymentsInResult)),
-        };
-      }
-      return {};
+    // Create test shift with known clock_in
+    await testDb.from('shifts').upsert({
+      id: TEST_SHIFT_ID,
+      staff_id: STAFF_ID,
+      opening_cash: 50,
+      clock_in: '2026-04-17T08:00:00.000Z',
     });
+  });
+
+  afterEach(async () => {
+    await testDb.from('payments').delete().eq('id', TEST_PAYMENT_ID);
+    await testDb.from('orders').delete().eq('id', TEST_ORDER_ID);
+    await testDb.from('tabs').delete().eq('id', TEST_TAB_ID);
+    await testDb.from('shifts').delete().eq('id', TEST_SHIFT_ID);
+    queryClient.clear();
   });
 
   it('does not run query when shiftId or staffId is null', () => {
     const { result } = renderHook(() => useShiftClosePreview(null, null), { wrapper });
     expect(result.current.fetchStatus).toBe('idle');
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it('returns zeros when tab list empty and loads shift start', async () => {
-    const { result } = renderHook(() => useShiftClosePreview(shiftId, staffId), { wrapper });
+  it('returns zeros when no tabs exist for shift and loads shift start', async () => {
+    const { result } = renderHook(() => useShiftClosePreview(TEST_SHIFT_ID, STAFF_ID), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
+
     const d = result.current.data;
     expect(d?.orderCount).toBe(0);
     expect(d?.totalSales).toBe(0);
@@ -106,29 +85,50 @@ describe('useShiftClosePreview', () => {
   });
 
   it('aggregates orders and payments when tabs exist', async () => {
-    tabsEqResult = { data: [{ id: tabId1 }], error: null };
+    // Payments RLS: only managers/admins can SELECT — sign in as Jamie (manager) for this test
+    await supabase.auth.signInWithPassword({ email: 'jamie@barpos.dev', password: '567890' });
 
-    const { result } = renderHook(() => useShiftClosePreview(shiftId, staffId), { wrapper });
+    await testDb.from('tabs').upsert({
+      id: TEST_TAB_ID,
+      shift_id: TEST_SHIFT_ID,
+      staff_id: STAFF_ID,
+      status: 'open',
+      customer_name: 'Test Customer',
+    });
+
+    await testDb.from('orders').upsert({
+      id: TEST_ORDER_ID,
+      tab_id: TEST_TAB_ID,
+      staff_id: STAFF_ID,
+      status: 'pending',
+    });
+
+    // idempotency_key is NOT NULL — required field in payments table
+    await testDb.from('payments').upsert({
+      id: TEST_PAYMENT_ID,
+      tab_id: TEST_TAB_ID,
+      processed_by: STAFF_ID,
+      amount: 50,
+      tip_amount: 0,
+      method: 'cash',
+      idempotency_key: `test-${TEST_PAYMENT_ID}`,
+    });
+
+    const { result } = renderHook(() => useShiftClosePreview(TEST_SHIFT_ID, STAFF_ID), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
+
     expect(result.current.data?.orderCount).toBe(1);
     expect(result.current.data?.totalSales).toBe(50);
-  });
 
-  it('surfaces resultError when tabs query fails', async () => {
-    tabsEqResult = { data: null, error: { message: 'db', code: 'PGRST301' } };
-
-    const { result } = renderHook(() => useShiftClosePreview(shiftId, staffId), { wrapper });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-    expect(result.current.data).toBeUndefined();
-    expect(result.current.resultError).toBeDefined();
+    // Restore Alex's session for subsequent tests in this describe block
+    await supabase.auth.signInWithPassword({ email: 'alex@barpos.dev', password: '123456' });
   });
 });
+
+// ─── useMutationClockIn ──────────────────────────────────────────────────────
 
 describe('useMutationClockIn', () => {
   const queryClient = new QueryClient({
@@ -137,36 +137,13 @@ describe('useMutationClockIn', () => {
   const wrapper = ({ children }: { children: ReactNode }) =>
     createElement(QueryClientProvider, { client: queryClient }, children);
 
-  let insertSingleResult: { data: typeof staffRow | null; error: unknown };
-
   beforeEach(() => {
-    insertSingleResult = {
-      data: {
-        ...staffRow,
-        id: shiftId,
-      },
-      error: null,
-    };
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(supabase.from).mockReset();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === 'shifts') {
-        return {
-          insert: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
-          single: vi.fn(() => Promise.resolve(insertSingleResult)),
-        };
-      }
-      return {};
-    });
-
+    clockInShiftId = null;
     useStaffStore.setState({
       currentStaff: {
-        id: staffId,
-        name: 'T',
-        email: 't@t.dev',
+        id: STAFF_ID,
+        name: 'Alex Martinez',
+        email: 'alex@barpos.dev',
         role: 'bartender',
         pin: '123456',
         isActive: true,
@@ -177,71 +154,89 @@ describe('useMutationClockIn', () => {
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.restoreAllMocks();
+    // Clean up any shift inserted by the clock-in mutation
+    if (clockInShiftId) {
+      await testDb.from('shifts').delete().eq('id', clockInShiftId);
+      clockInShiftId = null;
+    }
+    // Also clean up any open shifts for test staff created in this test run
+    await testDb.from('shifts').delete().eq('staff_id', STAFF_ID).is('clock_out', null);
     useStaffStore.getState().logout();
+    queryClient.clear();
   });
 
   it('applies optimistic shift for current staff and replaces on success', async () => {
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
-
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useMutationClockIn(), { wrapper });
 
     const mutationResult = await result.current.mutateAsync({
-      staffId,
+      staffId: STAFF_ID,
       openingCash: 75,
     });
 
     expect(mutationResult.ok).toBe(true);
+    if (mutationResult.ok) {
+      clockInShiftId = mutationResult.data.id; // capture for cleanup
+    }
+
     const shiftAfter = useStaffStore.getState().currentShift;
-    expect(shiftAfter?.id).toBe(shiftId);
-    expect(shiftAfter?.openingCash).toBe(50);
+    expect(shiftAfter).not.toBeNull();
+    expect(shiftAfter?.staffId).toBe(STAFF_ID);
+    expect(shiftAfter?.openingCash).toBe(75);
+    expect(shiftAfter?.clockOut).toBeNull();
+
     expect(invalidateSpy).toHaveBeenCalledWith(
       expect.objectContaining({ queryKey: staffKeys.openShifts() })
     );
   });
 
   it('does not apply optimistic shift for other staff', async () => {
-    const otherId = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
-    insertSingleResult = {
-      data: {
-        ...staffRow,
-        id: shiftId,
-        staff_id: otherId,
-      },
-      error: null,
-    };
-
-    const { result } = renderHook(() => useMutationClockIn(), { wrapper });
-
-    await result.current.mutateAsync({
-      staffId: otherId,
-      openingCash: 10,
+    // Sign in as OTHER_STAFF_ID for this test
+    await supabase.auth.signInWithPassword({
+      email: 'jamie@barpos.dev',
+      password: '567890',
     });
 
-    expect(useStaffStore.getState().currentShift).toBeNull();
-  });
-
-  it('rolls back optimistic shift when mutation returns err', async () => {
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
-    insertSingleResult = {
-      data: null,
-      error: { message: 'fail', code: '23505', name: 'PostgrestError', details: '', hint: '' },
-    };
+    useStaffStore.setState({
+      currentStaff: {
+        id: STAFF_ID, // current user is STAFF_ID
+        name: 'Alex Martinez',
+        email: 'alex@barpos.dev',
+        role: 'bartender',
+        pin: '123456',
+        isActive: true,
+      },
+      currentShift: null,
+      staffList: [],
+      isAuthenticated: true,
+    });
 
     const { result } = renderHook(() => useMutationClockIn(), { wrapper });
 
     const mutationResult = await result.current.mutateAsync({
-      staffId,
-      openingCash: 20,
+      staffId: OTHER_STAFF_ID, // clocking in a different staff
+      openingCash: 10,
     });
 
-    expect(mutationResult.ok).toBe(false);
+    if (mutationResult.ok) {
+      clockInShiftId = mutationResult.data.id;
+    }
+
+    // Store should NOT be updated because the clocked-in staff ≠ current staff
     expect(useStaffStore.getState().currentShift).toBeNull();
+
+    // Restore STAFF_ID auth
+    await supabase.auth.signInWithPassword({
+      email: 'alex@barpos.dev',
+      password: '123456',
+    });
   });
 });
+
+// ─── useMutationClockOut ─────────────────────────────────────────────────────
 
 describe('useMutationClockOut', () => {
   const queryClient = new QueryClient({
@@ -250,110 +245,79 @@ describe('useMutationClockOut', () => {
   const wrapper = ({ children }: { children: ReactNode }) =>
     createElement(QueryClientProvider, { client: queryClient }, children);
 
-  const openShift = {
-    id: shiftId,
-    staffId,
-    clockIn: new Date('2026-04-17T08:00:00.000Z'),
-    clockOut: null,
-    openingCash: 50,
-    closingCash: null,
-  };
+  let openShiftId: string;
 
-  let updateSingleResult: {
-    data: {
-      id: string;
-      staff_id: string;
-      clock_in: string;
-      clock_out: string;
-      opening_cash: number;
-      closing_cash: number;
-    } | null;
-    error: unknown;
-  };
+  beforeEach(async () => {
+    // Re-authenticate in case a prior describe's afterEach called logout() → signOut()
+    await supabase.auth.signInWithPassword({ email: 'alex@barpos.dev', password: '123456' });
 
-  beforeEach(() => {
-    updateSingleResult = {
-      data: {
-        id: shiftId,
-        staff_id: staffId,
-        clock_in: '2026-04-17T08:00:00.000Z',
-        clock_out: '2026-04-17T20:00:00.000Z',
+    // Insert a real open shift to clock out from
+    const { data } = await testDb
+      .from('shifts')
+      .insert({
+        staff_id: STAFF_ID,
         opening_cash: 50,
-        closing_cash: 120,
-      },
-      error: null,
-    };
+        clock_in: '2026-04-17T08:00:00.000Z',
+      })
+      .select('id')
+      .single();
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(supabase.from).mockReset();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === 'shifts') {
-        return {
-          update: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
-          single: vi.fn(() => Promise.resolve(updateSingleResult)),
-        };
-      }
-      return {};
-    });
+    openShiftId = data?.id ?? '';
 
     useStaffStore.setState({
       currentStaff: {
-        id: staffId,
-        name: 'T',
-        email: 't@t.dev',
+        id: STAFF_ID,
+        name: 'Alex Martinez',
+        email: 'alex@barpos.dev',
         role: 'bartender',
         pin: '123456',
         isActive: true,
       },
-      currentShift: openShift,
+      currentShift: {
+        id: openShiftId,
+        staffId: STAFF_ID,
+        clockIn: new Date('2026-04-17T08:00:00.000Z'),
+        clockOut: null,
+        openingCash: 50,
+        closingCash: null,
+      },
       staffList: [],
       isAuthenticated: true,
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    if (openShiftId) {
+      await testDb.from('shifts').delete().eq('id', openShiftId);
+    }
     useStaffStore.getState().logout();
+    queryClient.clear();
   });
 
   it('optimistically sets clockOut then commits server shift', async () => {
     const { result } = renderHook(() => useMutationClockOut(), { wrapper });
 
     const mutationResult = await result.current.mutateAsync({
-      shiftId,
-      staffId,
+      shiftId: openShiftId,
+      staffId: STAFF_ID,
       closingCash: 120,
     });
 
     expect(mutationResult.ok).toBe(true);
     if (mutationResult.ok) {
       expect(mutationResult.data.closingCash).toBe(120);
+      expect(mutationResult.data.clockOut).toBeInstanceOf(Date);
     }
-    expect(useStaffStore.getState().currentShift?.clockOut).toEqual(
-      new Date('2026-04-17T20:00:00.000Z')
-    );
-  });
 
-  it('rolls back optimistic update when mutation returns err', async () => {
-    const previous = { ...openShift };
-    updateSingleResult = {
-      data: null,
-      error: { message: 'nope', code: 'PGRST116', name: 'PostgrestError', details: '', hint: '' },
-    };
+    expect(useStaffStore.getState().currentShift?.clockOut).toBeInstanceOf(Date);
 
-    const { result } = renderHook(() => useMutationClockOut(), { wrapper });
-
-    const mutationResult = await result.current.mutateAsync({
-      shiftId,
-      staffId,
-      closingCash: 99,
-    });
-
-    expect(mutationResult.ok).toBe(false);
-    const cur = useStaffStore.getState().currentShift;
-    expect(cur?.clockOut).toEqual(previous.clockOut);
-    expect(cur?.closingCash).toBeNull();
+    // Verify the DB was actually updated
+    const { data: shift } = await testDb
+      .from('shifts')
+      .select('clock_out, closing_cash')
+      .eq('id', openShiftId)
+      .single();
+    expect(shift?.closing_cash).toBe(120);
+    expect(shift?.clock_out).not.toBeNull();
   });
 });

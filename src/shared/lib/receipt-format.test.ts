@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ReceiptData } from './edge-function-contracts';
-import { buildThermalReceiptText } from './receipt-format';
+import type { PreChequeData } from './receipt-format';
+import { buildPreChequeText, buildThermalReceiptText } from './receipt-format';
 
 function baseReceipt(overrides: Partial<ReceiptData> = {}): ReceiptData {
   return {
@@ -109,5 +110,121 @@ describe('buildThermalReceiptText', () => {
   it('includes receipt number footer', () => {
     const text = buildThermalReceiptText(baseReceipt({ receiptNumber: 'ABCD12' }));
     expect(text).toContain('#ABCD12');
+  });
+});
+
+// ============================================================================
+// buildPreChequeText
+// ============================================================================
+
+function basePreCheque(overrides: Partial<PreChequeData> = {}): PreChequeData {
+  return {
+    barName: 'Bola 8',
+    tableLabel: 'Mesa 5',
+    customerName: 'Juan',
+    cashierName: 'Maria',
+    happyHourActive: false,
+    items: [
+      { name: 'Cerveza', quantity: 2, lineTotal: 90, orderedAt: new Date('2026-04-17T18:00:00Z') },
+    ],
+    poolCharge: null,
+    subtotal: 90,
+    generatedAt: new Date('2026-04-17T20:00:00Z'),
+    ...overrides,
+  };
+}
+
+describe('buildPreChequeText', () => {
+  it('header contains PRE-CHEQUE', () => {
+    const text = buildPreChequeText(basePreCheque());
+    expect(text).toContain('PRE-CHEQUE');
+  });
+
+  it('footer contains PENDIENTE DE PAGO', () => {
+    const text = buildPreChequeText(basePreCheque());
+    expect(text).toContain('PENDIENTE DE PAGO');
+  });
+
+  it('does not include Billar line when poolCharge is null', () => {
+    const text = buildPreChequeText(basePreCheque({ poolCharge: null }));
+    expect(text).not.toContain('Billar');
+  });
+
+  it('includes Billar line when poolCharge is set', () => {
+    const text = buildPreChequeText(
+      basePreCheque({
+        poolCharge: {
+          tableLabel: 'Mesa 5',
+          billedMinutes: 30,
+          ratePerHour: 60,
+          amount: 30,
+        },
+        subtotal: 120,
+      })
+    );
+    expect(text).toContain('Billar');
+    expect(text).toContain('30m');
+  });
+
+  it('subtotal includes pool amount when poolCharge present', () => {
+    const text = buildPreChequeText(
+      basePreCheque({
+        poolCharge: {
+          tableLabel: 'Mesa 5',
+          billedMinutes: 30,
+          ratePerHour: 60,
+          amount: 30,
+        },
+        subtotal: 120,
+      })
+    );
+    // subtotal line should show 120.00
+    expect(text).toContain('$120.00');
+  });
+
+  it('handles empty items array without crashing and still renders header/footer', () => {
+    const text = buildPreChequeText(basePreCheque({ items: [], subtotal: 0 }));
+    expect(text).toContain('PRE-CHEQUE');
+    expect(text).toContain('PENDIENTE DE PAGO');
+  });
+
+  it('all output lines are at most 32 characters', () => {
+    const text = buildPreChequeText(
+      basePreCheque({
+        barName: 'A very long bar name that might overflow the line',
+        cashierName: 'A very long cashier name',
+        customerName: 'A very long customer name',
+        items: [{ name: 'X'.repeat(40), quantity: 10, lineTotal: 999.99, orderedAt: new Date() }],
+      })
+    );
+    const lines = text.split('\n');
+    for (const line of lines) {
+      expect(line.length).toBeLessThanOrEqual(32);
+    }
+  });
+
+  it('happyHourActive true → output contains HORA FELIZ', () => {
+    const text = buildPreChequeText(basePreCheque({ happyHourActive: true }));
+    expect(text).toContain('HORA FELIZ');
+  });
+
+  it('happyHourActive false → output does NOT contain HORA FELIZ', () => {
+    const text = buildPreChequeText(basePreCheque({ happyHourActive: false }));
+    expect(text).not.toContain('HORA FELIZ');
+  });
+
+  it('uses Bar fallback when barName is empty', () => {
+    const text = buildPreChequeText(basePreCheque({ barName: '' }));
+    expect(text).toContain('Bar');
+  });
+
+  it('renders item name and quantity in output', () => {
+    const text = buildPreChequeText(
+      basePreCheque({
+        items: [{ name: 'Tequila', quantity: 3, lineTotal: 150, orderedAt: new Date() }],
+      })
+    );
+    expect(text).toContain('Tequila');
+    expect(text).toContain('3');
   });
 });

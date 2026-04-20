@@ -54,7 +54,6 @@ export const OccupiedNoTab: Story = {
     },
     session: occupiedSession,
     onStopSession: () => {},
-    onAssignToTab: () => {},
   },
 };
 

@@ -1,0 +1,642 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\playwright.config.ts",
+    "rootDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e-results/04-pool-timer",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "blob",
+        {
+          "outputDir": "e2e-blob-reports"
+        }
+      ],
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:1420",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "04-pool-timer.spec.ts",
+      "file": "04-pool-timer.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Pool Timer",
+          "file": "04-pool-timer.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Start session on available table",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2005,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:03:45.312Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1833,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:03:50.115Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Start-session-on-available-table-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f6372b3808836272c546-93d778c57277dd0e6fe6",
+              "file": "04-pool-timer.spec.ts",
+              "line": 14,
+              "column": 3
+            },
+            {
+              "title": "Timer ticks",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1881,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:03:53.531Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1854,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:03:57.049Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-Timer-ticks-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f6372b3808836272c546-7f8ee3232bf236f69229",
+              "file": "04-pool-timer.spec.ts",
+              "line": 36,
+              "column": 3
+            },
+            {
+              "title": "15-minute minimum charge on stop",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1953,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:04:00.496Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2018,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:04:04.064Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-15-minute-minimum-charge-on-stop-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f6372b3808836272c546-ccb2293d36e7606c371a",
+              "file": "04-pool-timer.spec.ts",
+              "line": 56,
+              "column": 3
+            },
+            {
+              "title": "Charge recorded for linked tab after stop",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1938,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:04:07.847Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2014,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\04-pool-timer.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:04:11.488Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\04-pool-timer\\04-pool-timer-Pool-Timer-C-91db0-d-for-linked-tab-after-stop-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f6372b3808836272c546-f2063bb175922ffc6d83",
+              "file": "04-pool-timer.spec.ts",
+              "line": 78,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-19T00:03:43.778Z",
+    "duration": 30370.019,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

@@ -12,7 +12,7 @@
     "lint": "eslint src --max-warnings 0",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write src",
-    "test": "vitest run --project unit",
+    "test": "vitest run --project unit --reporter=dot",
     "test:watch": "vitest --project unit",
     "test:storybook": "vitest run --project storybook",
     "test:ui": "vitest --ui --project unit",
@@ -23,7 +23,9 @@
     "build:storybook": "storybook build",
     "setup:dev-users": "npx tsx scripts/setup-dev-users.ts",
     "seed:dev": "npx tsx scripts/seed-dev-data.ts",
-    "setup:dev": "npm run setup:dev-users && npm run seed:dev"
+    "setup:dev": "npm run setup:dev-users && npm run seed:dev",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
@@ -63,6 +65,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.1.2",
+    "@playwright/test": "^1.59.1",
     "@eslint/js": "^9.39.4",
     "@storybook/addon-a11y": "^10.3.5",
     "@storybook/addon-docs": "^10.3.5",
@@ -80,6 +83,7 @@
     "@vitest/browser-playwright": "^4.1.4",
     "@vitest/coverage-v8": "^4.1.4",
     "@vitest/ui": "^4.1.4",
+    "dotenv": "^16.6.1",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",

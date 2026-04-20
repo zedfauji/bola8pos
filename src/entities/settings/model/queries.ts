@@ -21,12 +21,16 @@ import {
   BillingSettingsSchema,
   EmailReceiptSettingsSchema,
   GeneralSettingsSchema,
+  PaymentMethodLabelsSchema,
   RappiSettingsSchema,
+  ReceiptSettingsSchema,
   SettingsBackupSummarySchema,
   type BillingSettings,
   type EmailReceiptSettings,
   type GeneralSettings,
+  type PaymentMethodLabels,
   type RappiSettings,
+  type ReceiptSettings,
   type SettingsBackupSummary,
   type SettingsKey,
 } from './types';
@@ -54,11 +58,29 @@ const DEFAULT_EMAIL_RECEIPTS: EmailReceiptSettings = {
   fromEmail: '',
 };
 
+const DEFAULT_PAYMENT_LABELS: PaymentMethodLabels = {
+  cash: 'Efectivo',
+  card: 'Terminal BBVA',
+  rappi: 'Rappi',
+};
+
+const DEFAULT_RECEIPT: ReceiptSettings = {
+  paperWidthChars: 32,
+  showCashierName: true,
+  showCustomerName: true,
+  showReceiptNumber: true,
+  headerLine2: '',
+  footerText: '',
+  boldTotals: true,
+};
+
 export type SettingsSnapshot = {
   general: GeneralSettings;
   billing: BillingSettings;
   rappi: RappiSettings;
   emailReceipts: EmailReceiptSettings;
+  paymentLabels: PaymentMethodLabels;
+  receipt: ReceiptSettings;
 };
 
 export const settingsKeys = {
@@ -76,6 +98,8 @@ const SETTINGS_KEYS: SettingsKey[] = [
   'rappi',
   'email_receipts',
   'pool_tables',
+  'payment_labels',
+  'receipt',
 ];
 
 function parseGeneral(value: unknown): GeneralSettings {
@@ -96,6 +120,16 @@ function parseRappi(value: unknown): RappiSettings {
 function parseEmailReceipts(value: unknown): EmailReceiptSettings {
   const parsed = EmailReceiptSettingsSchema.safeParse(value);
   return parsed.success ? parsed.data : DEFAULT_EMAIL_RECEIPTS;
+}
+
+function parsePaymentLabels(value: unknown): PaymentMethodLabels {
+  const parsed = PaymentMethodLabelsSchema.safeParse(value);
+  return parsed.success ? parsed.data : DEFAULT_PAYMENT_LABELS;
+}
+
+function parseReceipt(value: unknown): ReceiptSettings {
+  const parsed = ReceiptSettingsSchema.safeParse(value);
+  return parsed.success ? parsed.data : DEFAULT_RECEIPT;
 }
 
 function parseBackup(row: Tables<'settings_backups'>): Result<SettingsBackupSummary> {
@@ -122,6 +156,8 @@ function toSnapshot(rows: SettingsRow[]): SettingsSnapshot {
     billing: parseBilling(byKey.get('billing')),
     rappi: parseRappi(byKey.get('rappi')),
     emailReceipts: parseEmailReceipts(byKey.get('email_receipts')),
+    paymentLabels: parsePaymentLabels(byKey.get('payment_labels')),
+    receipt: parseReceipt(byKey.get('receipt')),
   };
   return snapshot;
 }
@@ -170,6 +206,8 @@ export function useMutationUpdateSetting() {
         | BillingSettings
         | RappiSettings
         | EmailReceiptSettings
+        | PaymentMethodLabels
+        | ReceiptSettings
         | Record<string, unknown>;
     }): Promise<Result<void>> => {
       const {

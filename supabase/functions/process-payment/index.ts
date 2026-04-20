@@ -45,10 +45,15 @@ type RpcResult = {
   message?: string;
 };
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
 }
 
@@ -74,6 +79,10 @@ function statusForCode(code: string | undefined): number {
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
     return jsonResponse({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'POST only' } }, 405);
   }
@@ -91,18 +100,24 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ success: false, error: { code: 'CONFIG', message: 'Server misconfigured' } }, 500);
   }
 
-  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: authHeader } },
+  // Verify the JWT via a direct HTTP call to /auth/v1/user.
+  // admin.auth.getUser() in supabase-js@2.49.1 fails with ES256-signed tokens
+  // ("Unsupported JWT algorithm ES256") because the bundled JWT library predates
+  // Supabase's switch from RS256 → ES256. The Auth REST API handles ES256 correctly.
+  const token = authHeader.slice(7); // strip "Bearer "
+  const authVerifyResp = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'apikey': supabaseAnonKey,
+    },
   });
 
-  const {
-    data: { user },
-    error: userError,
-  } = await userClient.auth.getUser();
-
-  if (userError || !user) {
+  if (!authVerifyResp.ok) {
     return jsonResponse({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid session' } }, 401);
   }
+
+  const authUser = await authVerifyResp.json() as { id: string };
+  const admin = createClient(supabaseUrl, serviceRoleKey);
 
   let bodyJson: unknown;
   try {
@@ -128,11 +143,10 @@ Deno.serve(async (req: Request) => {
   }
 
   const body = parsed.data;
-  const admin = createClient(supabaseUrl, serviceRoleKey);
 
   const { data: rpcData, error: rpcError } = await admin.rpc('process_payment_atomic', {
     p_tab_id: body.tabId,
-    p_staff_id: user.id,
+    p_staff_id: authUser.id,
     p_amount: body.amount,
     p_tip_amount: body.tipAmount,
     p_method: body.method,
@@ -184,7 +198,7 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ success: false, error: { code: 'TAB_FETCH', message: 'Could not load tab' } }, 500);
   }
 
-  const { data: cashierRow } = await admin.from('profiles').select('name').eq('id', user.id).maybeSingle();
+  const { data: cashierRow } = await admin.from('profiles').select('name').eq('id', authUser.id).maybeSingle();
 
   const { data: orderRows, error: ordErr } = await admin
     .from('orders')

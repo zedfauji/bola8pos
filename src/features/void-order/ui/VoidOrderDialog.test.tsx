@@ -104,10 +104,12 @@ describe('VoidOrderDialog', () => {
         currentShift: null,
         staffList: [],
         isAuthenticated: true,
+        managerGrantedActions: new Set<string>(),
         login: vi.fn(),
         logout: vi.fn(),
         updateShift: vi.fn(),
         setStaffList: vi.fn(),
+        grantManagerActions: vi.fn(),
       })
     );
   });
@@ -178,10 +180,12 @@ describe('VoidOrderDialog', () => {
         currentShift: null,
         staffList: [],
         isAuthenticated: false,
+        managerGrantedActions: new Set<string>(),
         login: vi.fn(),
         logout: vi.fn(),
         updateShift: vi.fn(),
         setStaffList: vi.fn(),
+        grantManagerActions: vi.fn(),
       })
     );
     renderDialog();

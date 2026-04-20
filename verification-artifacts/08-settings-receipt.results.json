@@ -1,0 +1,642 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\playwright.config.ts",
+    "rootDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e-results/08-settings-receipt",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "blob",
+        {
+          "outputDir": "e2e-blob-reports"
+        }
+      ],
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:1420",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "08-settings-receipt.spec.ts",
+      "file": "08-settings-receipt.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Receipt / Hardware Settings",
+          "file": "08-settings-receipt.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Save paper width setting (80mm / 40 chars)",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3545,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:06:36.776Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2077,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:06:44.714Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-d18f0-idth-setting-80mm-40-chars--chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ae134a3abd04a29a9930-891cdde4773138dc6d79",
+              "file": "08-settings-receipt.spec.ts",
+              "line": 14,
+              "column": 3
+            },
+            {
+              "title": "Cashier name toggle off persists in UI state",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2022,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:06:49.251Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1882,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:06:53.616Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-35704-le-off-persists-in-UI-state-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ae134a3abd04a29a9930-51ef1e43ac3bab2112de",
+              "file": "08-settings-receipt.spec.ts",
+              "line": 24,
+              "column": 3
+            },
+            {
+              "title": "Settings persist after reload",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1937,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:06:57.917Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1910,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:07:01.456Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-f27cb-ttings-persist-after-reload-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ae134a3abd04a29a9930-fe40f0791b7e235ffa8d",
+              "file": "08-settings-receipt.spec.ts",
+              "line": 33,
+              "column": 3
+            },
+            {
+              "title": "Reset to defaults (58mm + cashier name)",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1963,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:07:04.996Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1853,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\08-settings-receipt.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:07:08.706Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\08-settings-receipt\\08-settings-receipt-Receip-53bf5-defaults-58mm-cashier-name--chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ae134a3abd04a29a9930-7fc0c7a17be7844993f9",
+              "file": "08-settings-receipt.spec.ts",
+              "line": 47,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-19T00:06:34.701Z",
+    "duration": 36491.742000000006,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

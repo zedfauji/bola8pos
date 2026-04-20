@@ -21,6 +21,20 @@ vi.mock('@shared/lib/pos-printer', () => ({
   testPrint: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
 }));
 
+// Stable settings object — same reference every render so tipPresets dependency
+// in PaymentModal's useEffect does not trigger spurious resets of tenderedAmount.
+// taxRatePercent=0 keeps test money amounts simple (no tax arithmetic in assertions).
+vi.mock('@entities/settings', () => {
+  const stableSettings = {
+    billing: {
+      taxRatePercent: 0,
+      defaultTipPercentages: [10, 15, 18, 20],
+      paymentMethods: { cash: true, bbvaCard: true, rappi: true },
+    },
+  };
+  return { useSettings: () => ({ data: stableSettings }) };
+});
+
 const categoryId = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
 function miniProduct(partial: { id: string; name: string; basePrice: number }): Product {
@@ -310,8 +324,8 @@ describe('PaymentModal', () => {
     renderModal(tabNoPool);
     const dialog = screen.getByRole('dialog');
 
-    const cash = within(dialog).getByRole('button', { name: 'Cash' });
-    const card = within(dialog).getByRole('button', { name: 'Card' });
+    const cash = within(dialog).getByTestId('payment-btn-cash');
+    const card = within(dialog).getByTestId('payment-btn-card');
     expect(cash.className).toContain('bg-primary');
     expect(card.className).toContain('border-border');
 
@@ -377,7 +391,7 @@ describe('PaymentModal', () => {
     };
     renderModal(tabNoPool, { processors });
 
-    await user.click(screen.getByRole('button', { name: 'Card' }));
+    await user.click(screen.getByTestId('payment-btn-card'));
     await user.click(screen.getByRole('button', { name: 'Confirm card payment' }));
 
     await waitFor(() => {
@@ -497,7 +511,7 @@ describe('PaymentModal', () => {
     };
     renderModal(tabNoPool, { processors });
 
-    await user.click(screen.getByRole('button', { name: 'Card' }));
+    await user.click(screen.getByTestId('payment-btn-card'));
     await user.type(screen.getByLabelText(/Reference/i), 'AUTH-777');
     await user.click(screen.getByRole('button', { name: 'Confirm card payment' }));
 

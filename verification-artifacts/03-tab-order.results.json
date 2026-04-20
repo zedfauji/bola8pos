@@ -1,0 +1,642 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\playwright.config.ts",
+    "rootDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e-results/03-tab-order",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "blob",
+        {
+          "outputDir": "e2e-blob-reports"
+        }
+      ],
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:1420",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "03-tab-order.spec.ts",
+      "file": "03-tab-order.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Tab + Order Flow",
+          "file": "03-tab-order.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Bartender creates a tab",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3082,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:02:45.805Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2016,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:02:54.660Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Bartender-creates-a-tab-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e80e5b918efef727488-62f556d8ba43a68cded8",
+              "file": "03-tab-order.spec.ts",
+              "line": 14,
+              "column": 3
+            },
+            {
+              "title": "Add items to cart",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2024,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:02:59.306Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2988,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:03:05.538Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Add-items-to-cart-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e80e5b918efef727488-785c9d447990fff53599",
+              "file": "03-tab-order.spec.ts",
+              "line": 25,
+              "column": 3
+            },
+            {
+              "title": "Place order",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3364,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:03:13.081Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2090,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:03:29.413Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Place-order-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e80e5b918efef727488-7c37f46764f6956a2839",
+              "file": "03-tab-order.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "Cart clears after order",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2036,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:03:33.481Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1877,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\03-tab-order.spec.ts:10:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:03:37.271Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\03-tab-order\\03-tab-order-Tab-Order-Flow-Cart-clears-after-order-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e80e5b918efef727488-384164ef20d695de20a6",
+              "file": "03-tab-order.spec.ts",
+              "line": 56,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-19T00:02:44.583Z",
+    "duration": 55317.708,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

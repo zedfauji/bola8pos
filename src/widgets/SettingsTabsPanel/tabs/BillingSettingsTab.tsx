@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useMutationUpdateSetting, useSettings } from '@entities/settings';
+import type { PaymentMethodLabels } from '@entities/settings';
 import type { UserRole } from '@shared/lib/domain';
 import { Input, Label, POSButton, ProtectedAction } from '@shared/ui';
 
@@ -36,26 +37,39 @@ function parseTipPercentages(raw: string): number[] | null {
   return parsed.map(value => Math.round(value));
 }
 
+const DEFAULT_LABELS: PaymentMethodLabels = {
+  cash: 'Efectivo',
+  card: 'Terminal BBVA',
+  rappi: 'Rappi',
+};
+
 export function BillingSettingsTab({ currentRole }: Props) {
   const { data } = useSettings();
   const updateSetting = useMutationUpdateSetting();
   const [form, setForm] = useState<BillingForm>(DEFAULT_FORM);
   const [dirty, setDirty] = useState(false);
+  const [labels, setLabels] = useState<PaymentMethodLabels>(DEFAULT_LABELS);
+  const [labelsDirty, setLabelsDirty] = useState(false);
 
   useEffect(() => {
-    if (!data || dirty) return;
+    if (!data) return;
     /* eslint-disable react-hooks/set-state-in-effect */
-    setForm({
-      taxRatePercent: String(data.billing.taxRatePercent),
-      tipPercentagesCsv: data.billing.defaultTipPercentages.join(', '),
-      paymentMethods: {
-        cash: data.billing.paymentMethods.cash,
-        bbvaCard: data.billing.paymentMethods.bbvaCard,
-        rappi: data.billing.paymentMethods.rappi,
-      },
-    });
+    if (!dirty) {
+      setForm({
+        taxRatePercent: String(data.billing.taxRatePercent),
+        tipPercentagesCsv: data.billing.defaultTipPercentages.join(', '),
+        paymentMethods: {
+          cash: data.billing.paymentMethods.cash,
+          bbvaCard: data.billing.paymentMethods.bbvaCard,
+          rappi: data.billing.paymentMethods.rappi,
+        },
+      });
+    }
+    if (!labelsDirty) {
+      setLabels(data.paymentLabels);
+    }
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [data, dirty]);
+  }, [data, dirty, labelsDirty]);
 
   const paymentMethodButtons = useMemo(
     () =>
@@ -165,6 +179,58 @@ export function BillingSettingsTab({ currentRole }: Props) {
         >
           {updateSetting.isPending ? 'Saving...' : 'Save Billing'}
         </POSButton>
+
+        <div className="space-y-3 rounded-lg border p-4">
+          <h3 className="font-medium">Payment button labels</h3>
+          <p className="text-xs text-muted-foreground">
+            Customize the label shown on payment buttons in the POS and on receipts.
+          </p>
+          {(
+            [
+              { key: 'cash', placeholder: 'Efectivo' },
+              { key: 'card', placeholder: 'Terminal BBVA' },
+              { key: 'rappi', placeholder: 'Rappi' },
+            ] as const
+          ).map(({ key, placeholder }) => (
+            <div key={key} className="flex items-center gap-3">
+              <Label htmlFor={`label-${key}`} className="w-12 shrink-0 capitalize">
+                {key}
+              </Label>
+              <Input
+                id={`label-${key}`}
+                value={labels[key]}
+                placeholder={placeholder}
+                maxLength={40}
+                onChange={e => {
+                  setLabelsDirty(true);
+                  setLabels(prev => ({ ...prev, [key]: e.target.value }));
+                }}
+              />
+            </div>
+          ))}
+          <POSButton
+            type="button"
+            touchSize="large"
+            disabled={!labelsDirty || updateSetting.isPending}
+            onClick={() => {
+              updateSetting.mutate(
+                { key: 'payment_labels', value: labels },
+                {
+                  onSuccess: result => {
+                    if (!result.ok) {
+                      toast.error(result.error.message);
+                      return;
+                    }
+                    setLabelsDirty(false);
+                    toast.success('Payment labels saved.');
+                  },
+                }
+              );
+            }}
+          >
+            {updateSetting.isPending ? 'Saving...' : 'Save Labels'}
+          </POSButton>
+        </div>
       </div>
     </ProtectedAction>
   );

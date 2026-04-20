@@ -23,12 +23,19 @@ export const poolTableKeys = {
   detail: (id: string) => [...poolTableKeys.all, 'detail', id] as const,
 };
 
-type PoolTableRow = Tables<'pool_tables'> & {
-  current_session: Tables<'pool_sessions'> | null;
+type PoolSessionRowWithPrevious = Tables<'pool_sessions'> & {
+  previous_table: { number: number } | null;
 };
 
-function mapPoolSessionRow(row: Tables<'pool_sessions'>): Result<PoolSession> {
+type PoolTableRow = Tables<'pool_tables'> & {
+  current_session: PoolSessionRowWithPrevious | null;
+};
+
+function mapPoolSessionRow(
+  row: Tables<'pool_sessions'> | PoolSessionRowWithPrevious
+): Result<PoolSession> {
   try {
+    const previousTable = 'previous_table' in row ? row.previous_table : null;
     return ok(
       PoolSessionSchema.omit({ table: true }).parse({
         id: row.id,
@@ -38,6 +45,8 @@ function mapPoolSessionRow(row: Tables<'pool_sessions'>): Result<PoolSession> {
         stoppedAt: row.stopped_at ? new Date(row.stopped_at) : null,
         billedMinutes: row.billed_minutes,
         totalCharge: row.total_charge,
+        previousTableId: row.previous_table_id,
+        previousTableNumber: previousTable?.number ?? null,
       })
     );
   } catch (e) {
@@ -77,7 +86,10 @@ export function usePoolTables() {
           .select(
             `
           *,
-          current_session:pool_sessions!fk_pool_tables_current_session(*)
+          current_session:pool_sessions!fk_pool_tables_current_session(
+            *,
+            previous_table:pool_tables!pool_sessions_previous_table_id_fkey(number)
+          )
         `
           )
           .order('number')
@@ -137,7 +149,10 @@ export function usePoolTable(id: string) {
           .select(
             `
           *,
-          current_session:pool_sessions!fk_pool_tables_current_session(*)
+          current_session:pool_sessions!fk_pool_tables_current_session(
+            *,
+            previous_table:pool_tables!pool_sessions_previous_table_id_fkey(number)
+          )
         `
           )
           .eq('id', id)

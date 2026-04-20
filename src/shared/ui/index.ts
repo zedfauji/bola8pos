@@ -54,6 +54,9 @@ export type { ConfirmDialogProps } from './ConfirmDialog';
 export { DataTable } from './DataTable';
 export type { DataTableProps } from './DataTable';
 
+// Navigation
+export { BackToHomeButton } from './BackToHomeButton';
+
 // Layout
 export { AppShell } from './AppShell';
 export type { AppShellProps } from './AppShell';

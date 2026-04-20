@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { MemoryRouter } from 'react-router-dom';
 import POSPage from './index';
 
 const meta = {
@@ -8,6 +9,13 @@ const meta = {
     layout: 'fullscreen',
   },
   tags: ['autodocs'],
+  decorators: [
+    (Story: React.ComponentType) => (
+      <MemoryRouter>
+        <Story />
+      </MemoryRouter>
+    ),
+  ],
 } satisfies Meta<typeof POSPage>;
 
 export default meta;
@@ -15,11 +23,4 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const WithActiveTab: Story = {
-  decorators: [
-    Story => {
-      // Set up initial state with an active tab
-      return <Story />;
-    },
-  ],
-};
+export const WithActiveTab: Story = {};

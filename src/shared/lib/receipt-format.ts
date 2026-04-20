@@ -31,6 +31,69 @@ function paymentMethodLabel(method: ReceiptData['paymentMethod']): string {
   return 'Rappi';
 }
 
+// ============================================================================
+// PRE-CHEQUE
+// ============================================================================
+
+export type PreChequeData = {
+  barName: string;
+  tableLabel: string;
+  customerName: string;
+  cashierName: string;
+  happyHourActive: boolean;
+  items: Array<{
+    name: string;
+    quantity: number;
+    lineTotal: number;
+    orderedAt: Date;
+  }>;
+  poolCharge: {
+    tableLabel: string;
+    billedMinutes: number;
+    ratePerHour: number;
+    amount: number;
+  } | null;
+  subtotal: number;
+  generatedAt: Date;
+};
+
+/** Pre-cheque for 58mm thermal printer (32 columns). Shows balance due before final payment. */
+export function buildPreChequeText(data: PreChequeData): string {
+  const lines: string[] = [];
+
+  lines.push(centerLine(data.barName || 'Bar'));
+  lines.push(centerLine('CUENTA PREVIA'));
+  lines.push(centerLine('PRE-CHEQUE'));
+  lines.push(divider());
+  lines.push(lineLeftRight('Fecha', data.generatedAt.toLocaleString()));
+  lines.push(lineLeftRight('Cajero', data.cashierName));
+  lines.push(lineLeftRight('Cliente', data.customerName));
+  lines.push(lineLeftRight('Mesa', data.tableLabel));
+  if (data.happyHourActive) {
+    lines.push(centerLine('\u2605 HORA FELIZ ACTIVA \u2605'));
+  }
+  lines.push(divider());
+
+  for (const item of data.items) {
+    const left = `${String(item.quantity)}\u00d7 ${item.name}`;
+    lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
+  }
+
+  if (data.poolCharge !== null) {
+    lines.push(divider());
+    const label = `Billar ${String(data.poolCharge.billedMinutes)}m @ $${String(data.poolCharge.ratePerHour)}/h`;
+    lines.push(lineLeftRight(label, formatMoney(data.poolCharge.amount)));
+  }
+
+  lines.push(divider());
+  lines.push(lineLeftRight('SUBTOTAL', formatMoney(data.subtotal)));
+  lines.push('');
+  lines.push(centerLine('** PENDIENTE DE PAGO **'));
+  lines.push('');
+
+  return lines.join('\n');
+}
+
 /** Plain text for 58mm thermal printer (32 columns). Keep aligned with Rust `commands/printer.rs`. */
 export function buildThermalReceiptText(receipt: ReceiptData): string {
   const lines: string[] = [];

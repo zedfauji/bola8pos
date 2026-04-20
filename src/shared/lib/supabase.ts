@@ -15,6 +15,19 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Module-level token cache — populated by onAuthStateChange so callProcessPayment
+// doesn't rely on getSession() storage reads, which fail in some environments.
+let _cachedAccessToken: string | null = null;
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  _cachedAccessToken = session?.access_token ?? null;
+});
+
+/** Returns the current user's JWT access token, or null if not authenticated. */
+export function getCachedAccessToken(): string | null {
+  return _cachedAccessToken;
+}
+
 // Row type aliases for use across the app
 export type TabRow = Database['public']['Tables']['tabs']['Row'];
 export type OrderRow = Database['public']['Tables']['orders']['Row'];

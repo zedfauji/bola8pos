@@ -141,6 +141,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
 
   return (
     <Badge
+      role="status"
       variant={config.variant}
       className={cn(config.className, className)}
       aria-label={`Status: ${config.label}`}

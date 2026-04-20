@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { ReportsRoute } from './reports-route';
 
 const LoginPage = lazy(() => import('../pages/login'));
+const HomePage = lazy(() => import('../pages/home'));
 const PosPage = lazy(() => import('../pages/pos'));
 const PoolTablesPage = lazy(() => import('../pages/pool-tables'));
 const InventoryPage = lazy(() => import('../pages/inventory'));
@@ -11,6 +12,8 @@ const StaffPage = lazy(() => import('../pages/staff'));
 const ReportsPage = lazy(() => import('../pages/reports'));
 const SettingsPage = lazy(() => import('../pages/settings'));
 const RappiOrdersPage = lazy(() => import('../pages/rappi'));
+const TableStatusPage = lazy(() => import('../pages/pool-table-status'));
+const PaymentsPage = lazy(() => import('../pages/payments'));
 
 function LoadingFallback() {
   return (
@@ -26,7 +29,15 @@ export function Router() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Navigate to="/pos" replace />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/pos"
             element={
@@ -82,6 +93,22 @@ export function Router() {
             element={
               <ProtectedRoute>
                 <RappiOrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pool-tables/:tableId"
+            element={
+              <ProtectedRoute>
+                <TableStatusPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payments"
+            element={
+              <ProtectedRoute>
+                <PaymentsPage />
               </ProtectedRoute>
             }
           />

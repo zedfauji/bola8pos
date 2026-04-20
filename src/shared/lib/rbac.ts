@@ -26,6 +26,8 @@ export const STAFF_ACTIONS = [
   'manage_settings',
   'delete_tab',
   'view_all_shifts',
+  'manage_caja',
+  'transfer_tab',
 ] as const;
 
 export type StaffAction = (typeof STAFF_ACTIONS)[number];
@@ -33,19 +35,22 @@ export type StaffAction = (typeof STAFF_ACTIONS)[number];
 const BARTENDER_ACTIONS: ReadonlySet<StaffAction> = new Set([
   'create_order',
   'view_own_tabs',
+  'view_all_tabs', // any bartender can see and operate any open tab
   'start_pool_timer',
   'stop_pool_timer',
   'clock_in',
   'clock_out',
+  'transfer_tab', // bartenders can transfer tabs between tables
+  'close_tab', // bartenders can process payments via PIN verification
 ]);
 
 const MANAGER_EXTRA: ReadonlySet<StaffAction> = new Set([
   'close_tab',
   'void_order',
-  'view_all_tabs',
   'view_reports',
   'adjust_inventory',
   'manage_products',
+  'manage_caja', // open and close the daily caja session
 ]);
 
 const ADMIN_EXTRA: ReadonlySet<StaffAction> = new Set([

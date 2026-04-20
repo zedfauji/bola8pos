@@ -32,7 +32,7 @@ vi.mock('@shared/lib/logger-instance', () => ({
 describe('useOpenTab', () => {
   let queryClient: QueryClient;
   const mockSelectTab = vi.fn();
-  const mockOpenDrawer = vi.fn();
+  const mockCloseDrawer = vi.fn();
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -50,8 +50,8 @@ describe('useOpenTab', () => {
       isTabDrawerOpen: false,
       selectTab: mockSelectTab,
       clearSelection: vi.fn(),
-      openDrawer: mockOpenDrawer,
-      closeDrawer: vi.fn(),
+      openDrawer: vi.fn(),
+      closeDrawer: mockCloseDrawer,
     });
   });
 
@@ -100,7 +100,7 @@ describe('useOpenTab', () => {
     if (openResult.ok) {
       expect(openResult.data).toEqual(mockTab);
       expect(mockSelectTab).toHaveBeenCalledWith('tab-123');
-      expect(mockOpenDrawer).toHaveBeenCalled();
+      expect(mockCloseDrawer).toHaveBeenCalled();
     }
   });
 
@@ -133,7 +133,7 @@ describe('useOpenTab', () => {
     }
 
     expect(mockSelectTab).not.toHaveBeenCalled();
-    expect(mockOpenDrawer).not.toHaveBeenCalled();
+    expect(mockCloseDrawer).not.toHaveBeenCalled();
   });
 
   it('should expose isPending state from mutation', () => {

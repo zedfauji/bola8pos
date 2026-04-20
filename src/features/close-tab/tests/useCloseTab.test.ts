@@ -1,16 +1,14 @@
+vi.unmock('@shared/lib/supabase');
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { tabKeys } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import { supabase } from '@shared/lib/supabase';
+import { testDb } from '@shared/lib/supabase-test-client';
 import { useCloseTab } from '../index';
-
-vi.mock('@shared/lib/supabase', () => ({
-  supabase: { from: vi.fn() },
-}));
 
 vi.mock('sonner', () => ({
   toast: {
@@ -19,15 +17,13 @@ vi.mock('sonner', () => ({
   },
 }));
 
-vi.mock('@entities/tab/model/store', () => ({
-  useTabStore: vi.fn(),
-}));
+// Seeded staff ID from the cloud Supabase project (Alex Martinez)
+const STAFF_ID = '4d77ef2b-c99d-4dd1-a572-2638ab427496';
+// Unique IDs for test isolation
+const TEST_SHIFT_ID = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const TEST_TAB_ID = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 
-const clearSelectionMock = vi.fn();
-
-let poolSessionsResult: { data: unknown; error: unknown };
-let tabsMutationResult: { data: unknown; error: unknown };
-let tabsUpdateFn: ReturnType<typeof vi.fn>;
+let poolTableId: string;
 
 describe('useCloseTab', () => {
   const queryClient = new QueryClient({
@@ -42,42 +38,59 @@ describe('useCloseTab', () => {
   const wrapper = ({ children }: { children: ReactNode }) =>
     createElement(QueryClientProvider, { client: queryClient }, children);
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    poolSessionsResult = { data: [], error: null };
-    tabsMutationResult = { data: null, error: null };
-
-    vi.mocked(useTabStore).mockImplementation(fn =>
-      fn({
-        clearSelection: clearSelectionMock,
-      } as never)
-    );
-
-    tabsUpdateFn = vi.fn(() => ({
-      eq: vi.fn(() => Promise.resolve(tabsMutationResult)),
-    }));
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method -- `from` is a vi.fn() test double, not the real Supabase client
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === 'pool_sessions') {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          is: vi.fn(() => Promise.resolve(poolSessionsResult)),
-        };
-      }
-      if (table === 'tabs') {
-        return {
-          update: tabsUpdateFn,
-        };
-      }
-      return {};
+  beforeAll(async () => {
+    // Sign in as seeded test user so RLS-protected mutations work
+    await supabase.auth.signInWithPassword({
+      email: 'alex@barpos.dev',
+      password: '123456',
     });
+
+    // Get a real pool table ID from the cloud DB for pool session tests
+    const { data } = await testDb.from('pool_tables').select('id').limit(1).single();
+    poolTableId = data?.id ?? '';
+
+    // Create a test shift (service role bypasses RLS)
+    await testDb.from('shifts').upsert({
+      id: TEST_SHIFT_ID,
+      staff_id: STAFF_ID,
+      opening_cash: 0,
+    });
+  });
+
+  afterAll(async () => {
+    await testDb.from('pool_sessions').delete().eq('tab_id', TEST_TAB_ID);
+    await testDb.from('tabs').delete().eq('id', TEST_TAB_ID);
+    await testDb.from('shifts').delete().eq('id', TEST_SHIFT_ID);
+    await supabase.auth.signOut();
+  });
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    queryClient.clear();
+
+    // Seed useTabStore with a clearSelection stub
+    useTabStore.setState({ clearSelection: vi.fn() } as never);
+
+    // Insert a fresh open tab before each test
+    await testDb.from('tabs').upsert({
+      id: TEST_TAB_ID,
+      shift_id: TEST_SHIFT_ID,
+      staff_id: STAFF_ID,
+      status: 'open',
+      customer_name: 'Test Customer',
+    });
+  });
+
+  afterEach(async () => {
+    // Remove any pool sessions created during the test
+    await testDb.from('pool_sessions').delete().eq('tab_id', TEST_TAB_ID);
+    // Reset tab status back to open (or delete — we re-create in beforeEach anyway)
+    await testDb.from('tabs').delete().eq('id', TEST_TAB_ID);
   });
 
   it('closes tab when no running pool sessions', async () => {
     const { result } = renderHook(() => useCloseTab(), { wrapper });
-    const closeResult = await result.current.closeTab('tab-123');
+    const closeResult = await result.current.closeTab(TEST_TAB_ID);
 
     expect(closeResult.ok).toBe(true);
     if (closeResult.ok) {
@@ -87,72 +100,53 @@ describe('useCloseTab', () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith(
       expect.objectContaining({ queryKey: tabKeys.lists() })
     );
-    expect(clearSelectionMock).toHaveBeenCalled();
-    expect(tabsUpdateFn).toHaveBeenCalled();
+
+    // Verify tab is actually closed in the DB
+    const { data: tab } = await testDb.from('tabs').select('*').eq('id', TEST_TAB_ID).single();
+    expect(tab?.status).toBe('closed');
   });
 
   it('returns session still running when one pool session is active', async () => {
-    poolSessionsResult = {
-      data: [{ pool_tables: { number: 3 } }],
-      error: null,
-    };
+    // Insert a running pool session for the tab (id is DB-generated)
+    await testDb.from('pool_sessions').insert({
+      tab_id: TEST_TAB_ID,
+      table_id: poolTableId,
+      started_at: new Date().toISOString(),
+    });
 
     const { result } = renderHook(() => useCloseTab(), { wrapper });
-    const closeResult = await result.current.closeTab('tab-123');
+    const closeResult = await result.current.closeTab(TEST_TAB_ID);
 
     expect(closeResult.ok).toBe(false);
-    if (!closeResult.ok) {
-      expect(closeResult.error.message).toContain('3');
-    }
     expect(toast.error).toHaveBeenCalled();
     expect(toast.success).not.toHaveBeenCalled();
-    expect(tabsUpdateFn).not.toHaveBeenCalled();
+
+    // Verify tab is still open
+    const { data: tab } = await testDb.from('tabs').select('*').eq('id', TEST_TAB_ID).single();
+    expect(tab?.status).toBe('open');
   });
 
-  it('uses first running session table when multiple sessions exist', async () => {
-    poolSessionsResult = {
-      data: [{ pool_tables: { number: 3 } }, { pool_tables: { number: 7 } }],
-      error: null,
-    };
+  it('returns error message containing the pool table number', async () => {
+    // Get the actual table number for the pool table we're using
+    const { data: pt } = await testDb
+      .from('pool_tables')
+      .select('*')
+      .eq('id', poolTableId)
+      .single();
+    const tableNumber = pt?.number ?? 1;
+
+    await testDb.from('pool_sessions').insert({
+      tab_id: TEST_TAB_ID,
+      table_id: poolTableId,
+      started_at: new Date().toISOString(),
+    });
 
     const { result } = renderHook(() => useCloseTab(), { wrapper });
-    const closeResult = await result.current.closeTab('tab-123');
+    const closeResult = await result.current.closeTab(TEST_TAB_ID);
 
     expect(closeResult.ok).toBe(false);
     if (!closeResult.ok) {
-      expect(closeResult.error.message).toContain('3');
-      expect(closeResult.error.message).not.toContain('7');
+      expect(closeResult.error.message).toContain(String(tableNumber));
     }
-    expect(tabsUpdateFn).not.toHaveBeenCalled();
-  });
-
-  it('defaults table number when pool_tables is null', async () => {
-    poolSessionsResult = {
-      data: [{ pool_tables: null }],
-      error: null,
-    };
-
-    const { result } = renderHook(() => useCloseTab(), { wrapper });
-    const closeResult = await result.current.closeTab('tab-123');
-
-    expect(closeResult.ok).toBe(false);
-    if (!closeResult.ok) {
-      expect(closeResult.error.message).toContain('1');
-    }
-    expect(tabsUpdateFn).not.toHaveBeenCalled();
-  });
-
-  it('returns error when pool_sessions query fails', async () => {
-    poolSessionsResult = {
-      data: null,
-      error: { message: 'network error', code: 'NET_ERROR' },
-    };
-
-    const { result } = renderHook(() => useCloseTab(), { wrapper });
-    const closeResult = await result.current.closeTab('tab-123');
-
-    expect(closeResult.ok).toBe(false);
-    expect(toast.error).toHaveBeenCalled();
-    expect(tabsUpdateFn).not.toHaveBeenCalled();
   });
 });

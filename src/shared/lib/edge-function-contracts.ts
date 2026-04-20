@@ -9,7 +9,7 @@
 import { z } from 'zod';
 import { MoneySchema, UuidSchema, TimestampSchema, PaymentMethodSchema } from './domain';
 import { ok, err, type Result } from './result';
-import { supabase } from './supabase';
+import { supabase, getCachedAccessToken } from './supabase';
 import type { AppError } from './supabase-contracts';
 
 // ============================================================================
@@ -218,24 +218,42 @@ export async function callProcessPayment(
   try {
     const validatedRequest = ProcessPaymentRequestSchema.parse(request);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
-    const { data, error } = await supabase.functions.invoke<unknown>('process-payment', {
-      body: validatedRequest,
+    // supabase.functions getter creates a new FunctionsClient with static anon-key headers on
+    // every access — the user JWT is never injected. Use fetch() directly with the cached token.
+    // getCachedAccessToken() is populated by onAuthStateChange (set at signIn, cleared at signOut)
+    // and is reliable in all environments including Playwright where getSession() can return null.
+    const accessToken = getCachedAccessToken();
+    if (!accessToken) {
+      return err({ code: 'AUTH_REQUIRED', message: 'Not authenticated' });
+    }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/process-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify(validatedRequest),
     });
 
-    if (error) {
-      const msg =
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message: unknown }).message === 'string'
-          ? (error as { message: string }).message
-          : 'Could not reach payment service';
-      return err({
-        code: 'SUPABASE_ERROR',
-        message: msg,
-        details: JSON.stringify(error),
-      });
+    const data: unknown = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      // Edge function envelope: { success: false, error: { code, message } }
+      const edgeErr =
+        data !== null && typeof data === 'object' && 'error' in data
+          ? (data as { error: { code?: unknown; message?: unknown } }).error
+          : null;
+      const edgeCode = typeof edgeErr?.code === 'string' ? edgeErr.code : undefined;
+      const edgeMsg =
+        typeof edgeErr?.message === 'string'
+          ? edgeErr.message
+          : `Payment service error (${String(response.status)})`;
+      return err(mapProcessPaymentEdgeError(edgeCode, edgeMsg));
     }
 
     const envelope = ProcessPaymentEnvelopeSchema.safeParse(data);

@@ -18,6 +18,13 @@ export interface StopSessionConfirmProps {
   session: PoolSession | null;
   /** Open tabs list (same source as grid) to resolve tab status / name. */
   openTabs: Tab[];
+  /**
+   * Optional override for post-stop navigation. When provided, called instead
+   * of the default behaviour (navigate to /pos with the tab open).
+   * Use this when StopSessionConfirm is rendered from the status page so it
+   * can return to /pool-tables after stopping.
+   */
+  onSuccess?: () => void;
 }
 
 export function StopSessionConfirm({
@@ -26,6 +33,7 @@ export function StopSessionConfirm({
   table,
   session,
   openTabs,
+  onSuccess,
 }: StopSessionConfirmProps) {
   const navigate = useNavigate();
   const stopSession = useMutationStopSession();
@@ -80,7 +88,9 @@ export function StopSessionConfirm({
     }
     toast.success('Pool session stopped.');
     onOpenChange(false);
-    if (session.tabId) {
+    if (onSuccess) {
+      onSuccess();
+    } else if (session.tabId) {
       selectTab(session.tabId);
       openDrawer();
       navigate('/pos');

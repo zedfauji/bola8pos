@@ -1,11 +1,10 @@
-import { AppNav } from '@widgets/AppNav/ui/AppNav';
 import { RappiOrdersPanel } from '@widgets/RappiOrdersPanel';
-import { LiveTimeDisplay, PageContainer } from '@shared/ui';
+import { BackToHomeButton, LiveTimeDisplay, PageContainer } from '@shared/ui';
 
 export default function RappiOrdersPage() {
   return (
-    <div className="flex h-screen">
-      <AppNav />
+    <div className="flex h-screen flex-col">
+      <BackToHomeButton />
       <main className="flex-1 overflow-auto">
         <PageContainer title="Rappi delivery" actions={<LiveTimeDisplay />}>
           <RappiOrdersPanel />

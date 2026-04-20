@@ -58,6 +58,7 @@ export function LowStockAlert() {
         'mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-50'
       )}
       role="status"
+      aria-label="Low stock alert"
       aria-live="polite"
     >
       <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />

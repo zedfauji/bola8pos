@@ -97,6 +97,39 @@ export async function openCashDrawer(): Promise<Result<void>> {
   return ok(undefined);
 }
 
+/**
+ * Prints arbitrary pre-formatted plain text on the thermal printer.
+ * Used for pre-cheques, shift summaries, etc. where no ReceiptData is built.
+ * In Tauri: invokes `print_raw_text` Rust command.
+ * Browser fallback: opens a popup with the text for window.print().
+ */
+export async function printRawText(text: string): Promise<Result<void>> {
+  if (isTauri()) {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('print_raw_text', { text });
+      return ok(undefined);
+    } catch (e) {
+      logger.warn('printer.raw_text.failed', { raw: String(e) });
+      return err(tauriError(e instanceof Error ? e.message : 'Print failed', e));
+    }
+  }
+  // Browser fallback: open popup with pre-formatted text
+  const w = window.open('', '_blank', 'noopener,noreferrer,width=400,height=600');
+  if (!w) {
+    logger.warn('printer.raw_text.popup_blocked');
+    return ok(undefined);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- minimal print fallback when not in Tauri
+  w.document.write(
+    `<!DOCTYPE html><html><head><title>Pre-cheque</title></head><body><pre style="font-family:monospace;font-size:11px;">${escapeHtml(
+      text
+    )}</pre><script>window.onload=function(){window.print();}</` + `script></body></html>`
+  );
+  w.document.close();
+  return ok(undefined);
+}
+
 export async function testPrint(): Promise<Result<void>> {
   if (isTauri()) {
     try {

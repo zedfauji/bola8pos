@@ -9,7 +9,7 @@ type ReportsRouteProps = {
 export function ReportsRoute({ children }: ReportsRouteProps) {
   const { can } = usePermissions();
   if (!can('view_reports')) {
-    return <Navigate to="/pos" replace />;
+    return <Navigate to="/home" replace />;
   }
   return <>{children}</>;
 }
