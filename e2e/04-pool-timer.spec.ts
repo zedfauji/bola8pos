@@ -75,6 +75,22 @@ test.describe('Pool Timer', () => {
     await logout(page);
   });
 
+  test('Start session auto-creates a New Tab', async ({ page }) => {
+    // beforeEach already calls resetTestState + openCaja + goto('/')
+    await loginAs(page, 'manager');
+    await page.goto('/pool-tables');
+    // click Start Session on first available table
+    await page.getByRole('button', { name: 'Start Session' }).first().click();
+    const sheet = page.getByRole('dialog');
+    await expect(sheet).toBeVisible({ timeout: 15_000 });
+    // default dropdown value should be __new_tab__
+    await expect(sheet.locator('#pool-start-tab')).toHaveValue('__new_tab__');
+    // start session with auto-create
+    await sheet.getByRole('button', { name: /start session/i }).click();
+    await expect(page.getByText(/pool session started/i)).toBeVisible({ timeout: 20_000 });
+    await logout(page);
+  });
+
   test('Charge recorded for linked tab after stop', async ({ page }) => {
     await loginAs(page, 'manager');
     await openTabForCustomer(page, 'Pool Charge Tab');

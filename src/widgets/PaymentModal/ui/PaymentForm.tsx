@@ -90,6 +90,7 @@ export function PaymentForm({
   const [customTip, setCustomTip] = useState(0);
   const [tenderedAmount, setTenderedAmount] = useState(0);
   const [cardReference, setCardReference] = useState('');
+  const [cardChargeOverride, setCardChargeOverride] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
@@ -116,6 +117,7 @@ export function PaymentForm({
     setSelectedTipPercent(defaultTipPercent);
     setTenderedAmount(0);
     setCardReference('');
+    setCardChargeOverride(null);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     tab.id,
@@ -163,9 +165,14 @@ export function PaymentForm({
   }, [customTip, method, selectedTipPercent, subtotalWithTax, tipMode]);
   const runningTotal = Math.round((subtotalWithTax + tipAmount) * 100) / 100;
   const changeDue = Math.max(0, Math.round((tenderedAmount - runningTotal) * 100) / 100);
+  const effectiveCardAmount = cardChargeOverride ?? runningTotal;
 
   const canSubmitCash = tenderedAmount >= runningTotal && runningTotal > 0;
-  const canSubmit = staffId.length > 0 && (method !== 'cash' || canSubmitCash);
+  const canSubmitCard = effectiveCardAmount > 0;
+  const canSubmit =
+    staffId.length > 0 &&
+    (method !== 'cash' || canSubmitCash) &&
+    (method !== 'card' || canSubmitCard);
 
   const groupedItems = useMemo(() => groupOrderItems(tab.items), [tab.items]);
 
@@ -189,10 +196,12 @@ export function PaymentForm({
 
     if (method === 'card') {
       const ref = cardReference.trim();
+      const chargeAmount = cardChargeOverride ?? baseSubtotal;
+      const chargeTip = cardChargeOverride !== null ? 0 : tipAmount;
       const r = await processors.processCardPayment(
         tab.id,
-        baseSubtotal,
-        tipAmount,
+        chargeAmount,
+        chargeTip,
         ref.length > 0 ? ref : undefined
       );
       if (!r.ok) return { ok: false, error: { message: r.error.message } };
@@ -444,13 +453,24 @@ export function PaymentForm({
           {method === 'card' && (
             <section className="space-y-3 rounded-lg border p-4">
               <p className="text-sm font-medium">Process payment on BBVA Terminal</p>
-              <p className="text-xs text-muted-foreground">
-                Enter this total on the terminal, then confirm below when the charge is approved.
-              </p>
-              <div className="flex items-center justify-between rounded-md bg-muted px-3 py-4">
-                <span className="text-sm font-medium">Charge amount</span>
-                <MoneyDisplay amount={runningTotal} size="lg" />
-              </div>
+              <MoneyInput
+                label="Charge amount"
+                value={effectiveCardAmount}
+                onChange={setCardChargeOverride}
+                disabled={isProcessing}
+              />
+              {cardChargeOverride !== null && (
+                <button
+                  type="button"
+                  data-testid="card-override-reset"
+                  className="text-xs text-muted-foreground underline"
+                  onClick={() => {
+                    setCardChargeOverride(null);
+                  }}
+                >
+                  Reset to computed (${runningTotal.toFixed(2)})
+                </button>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="card-ref">Reference # (optional)</Label>
                 <Input

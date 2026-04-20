@@ -30,7 +30,7 @@ export function PaymentPane() {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-full w-full overflow-hidden">
       {/* Left panel — tab list */}
       <div className="flex w-80 shrink-0 flex-col border-r bg-background">
         <div className="border-b px-4 py-3">

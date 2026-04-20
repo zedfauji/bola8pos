@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useMutationStartSession } from '@entities/pool-table/model/queries';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@entities/tab';
+import { useMutationOpenTab } from '@entities/tab/model/queries';
 import type { PoolTable } from '@shared/lib/domain';
 import {
   MoneyDisplay,
@@ -17,7 +18,7 @@ import {
 } from '@shared/ui';
 import { Label } from '@shared/ui/label';
 
-const UNLINKED = '__unlinked__';
+const NEW_TAB = '__new_tab__';
 
 export interface StartSessionSheetProps {
   open: boolean;
@@ -29,11 +30,14 @@ export interface StartSessionSheetProps {
 export function StartSessionSheet({ open, onOpenChange, table, openTabs }: StartSessionSheetProps) {
   const startSession = useMutationStartSession();
   const currentRole = useStaffStore(s => s.currentStaff?.role);
-  const [tabChoice, setTabChoice] = useState<string>(UNLINKED);
+  const openTab = useMutationOpenTab();
+  const currentStaff = useStaffStore(s => s.currentStaff);
+  const currentShift = useStaffStore(s => s.currentShift);
+  const [tabChoice, setTabChoice] = useState<string>(NEW_TAB);
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
-      setTabChoice(UNLINKED);
+      setTabChoice(NEW_TAB);
     }
     onOpenChange(next);
   };
@@ -44,8 +48,34 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
       toast.error('This table is not available to start a session.');
       return;
     }
-    const tabId = tabChoice === UNLINKED ? null : tabChoice;
-    const result = await startSession.mutateAsync({ tableId: table.id, tabId });
+
+    let resolvedTabId: string | null;
+
+    if (tabChoice === NEW_TAB) {
+      if (!currentStaff || !currentShift) {
+        toast.error('No active staff or shift.');
+        return;
+      }
+      const tabName = `Pool ${table.label.trim() || 'Table ' + String(table.number)}`;
+      const createResult = await openTab.mutateAsync({
+        customerName: tabName,
+        tableNumber: null,
+        staffId: currentStaff.id,
+        shiftId: currentShift.id,
+        status: 'open',
+        notes: null,
+        items: [],
+      });
+      if (!createResult.ok) {
+        toast.error(createResult.error.message);
+        return;
+      }
+      resolvedTabId = createResult.data.id;
+    } else {
+      resolvedTabId = tabChoice;
+    }
+
+    const result = await startSession.mutateAsync({ tableId: table.id, tabId: resolvedTabId });
     if (!result.ok) {
       toast.error(result.error.message);
       return;
@@ -53,6 +83,8 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
     toast.success('Pool session started.');
     handleOpenChange(false);
   };
+
+  const isBusy = openTab.isPending || startSession.isPending;
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
@@ -83,7 +115,7 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
                   setTabChoice(e.target.value);
                 }}
               >
-                <option value={UNLINKED}>Unlinked — pay separately at end</option>
+                <option value={NEW_TAB}>New Tab (auto-create)</option>
                 {openTabs.map(tab => (
                   <option key={tab.id} value={tab.id}>
                     {tab.customerName}
@@ -98,18 +130,18 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
           <ProtectedAction
             action="start_pool_timer"
             currentRole={currentRole}
-            disabled={!table || startSession.isPending}
+            disabled={!table || isBusy}
           >
             <POSButton
               type="button"
               touchSize="large"
               className="w-full"
-              disabled={!table || startSession.isPending}
+              disabled={!table || isBusy}
               onClick={() => {
                 void handleConfirm();
               }}
             >
-              {startSession.isPending ? 'Starting…' : 'Start Session'}
+              {isBusy ? 'Starting…' : 'Start Session'}
             </POSButton>
           </ProtectedAction>
         </SheetFooter>

@@ -428,6 +428,16 @@ test.describe('Payment Pane', () => {
     await logout(page);
   });
 
+  // ── Back-to-home navigation ───────────────────────────────────────────────
+
+  test('T12: back button navigates from /payments to /home', async ({ page }) => {
+    await loginAs(page, 'manager');
+    await page.goto('/payments');
+    await page.getByRole('link', { name: /home/i }).click();
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
+    await logout(page);
+  });
+
   // ── Item grouping ─────────────────────────────────────────────────────────
 
   test('T11: items with same product appear grouped (e.g. "2×" prefix) in order review', async ({ page }) => {
