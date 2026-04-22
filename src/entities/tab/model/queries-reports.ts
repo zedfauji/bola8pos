@@ -36,6 +36,46 @@ export function computePctTotals(rows: Array<{ revenue: number }>): number[] {
   return rows.map(r => Math.round((r.revenue / total) * 10000) / 100);
 }
 
+type HourlyItem = {
+  orders: { created_at: string } | null;
+  quantity: unknown;
+  unit_price: unknown;
+  modifier_price_delta: unknown;
+};
+
+/**
+ * Aggregates raw order_item rows into per-hour totals.
+ * Exported as a pure function so hourly bucketing can be unit-tested independently.
+ */
+export function aggregateHourlyRevenue(items: HourlyItem[]): HourlyRow[] {
+  const map = new Map<number, { orderCount: number; revenue: number }>();
+
+  for (const item of items) {
+    const orderCreatedAt: string = item.orders?.created_at ?? '';
+    if (!orderCreatedAt) continue;
+    const hour = new Date(orderCreatedAt).getHours();
+    const quantity: number = typeof item.quantity === 'number' ? item.quantity : 0;
+    const unitPrice: number = typeof item.unit_price === 'number' ? item.unit_price : 0;
+    const modDelta: number =
+      typeof item.modifier_price_delta === 'number' ? item.modifier_price_delta : 0;
+    const lineRev = quantity * (unitPrice + modDelta);
+
+    const existing = map.get(hour);
+    if (existing) {
+      existing.orderCount += 1;
+      existing.revenue += lineRev;
+    } else {
+      map.set(hour, { orderCount: 1, revenue: lineRev });
+    }
+  }
+
+  return Array.from(map.entries()).map(([hour, v]) => ({
+    hour,
+    orderCount: v.orderCount,
+    revenue: Math.round(v.revenue * 100) / 100,
+  }));
+}
+
 /**
  * Fills in missing hours (0–23) with zero-revenue rows.
  * Returns a sorted 24-entry array.
@@ -252,34 +292,7 @@ export function useHourlyBreakdown(from: Date, to: Date) {
 
       if (!data || !Array.isArray(data)) return ok(fillMissingHours([]));
 
-      // Aggregate by hour
-      const map = new Map<number, { orderCount: number; revenue: number }>();
-
-      for (const item of data) {
-        const orderCreatedAt: string = item.orders?.created_at ?? '';
-        if (!orderCreatedAt) continue;
-        const hour = new Date(orderCreatedAt).getHours();
-        const quantity: number = typeof item.quantity === 'number' ? item.quantity : 0;
-        const unitPrice: number = typeof item.unit_price === 'number' ? item.unit_price : 0;
-        const modDelta: number =
-          typeof item.modifier_price_delta === 'number' ? item.modifier_price_delta : 0;
-        const lineRev = quantity * (unitPrice + modDelta);
-
-        const existing = map.get(hour);
-        if (existing) {
-          existing.orderCount += 1;
-          existing.revenue += lineRev;
-        } else {
-          map.set(hour, { orderCount: 1, revenue: lineRev });
-        }
-      }
-
-      const sparse: HourlyRow[] = Array.from(map.entries()).map(([hour, v]) => ({
-        hour,
-        orderCount: v.orderCount,
-        revenue: Math.round(v.revenue * 100) / 100,
-      }));
-
+      const sparse = aggregateHourlyRevenue(data as HourlyItem[]);
       return ok(fillMissingHours(sparse));
     },
     staleTime: 60_000,

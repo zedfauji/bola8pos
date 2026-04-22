@@ -56,6 +56,8 @@ export type { DataTableProps } from './DataTable';
 
 // Navigation
 export { BackToHomeButton } from './BackToHomeButton';
+export { DateRangePicker } from './DateRangePicker';
+export type { DateRangePickerProps } from './DateRangePicker';
 
 // Layout
 export { AppShell } from './AppShell';

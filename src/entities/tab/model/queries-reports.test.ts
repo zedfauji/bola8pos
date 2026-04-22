@@ -10,6 +10,7 @@ import {
   fillMissingHours,
   fillMissingCategories,
   aggregateCategoryRevenue,
+  aggregateHourlyRevenue,
   findPeakHour,
   findSlowestHour,
   filterVoidRefundRows,
@@ -449,5 +450,62 @@ describe('aggregateCategoryRevenue', () => {
 
   it('returns empty array for empty input', () => {
     expect(aggregateCategoryRevenue([])).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// aggregateHourlyRevenue — AC: day-boundary bucketing
+// ---------------------------------------------------------------------------
+
+function makeHourlyItem(createdAt: Date, unitPrice: number) {
+  return {
+    orders: { created_at: createdAt.toISOString() },
+    quantity: 1,
+    unit_price: unitPrice,
+    modifier_price_delta: 0,
+  };
+}
+
+describe('aggregateHourlyRevenue', () => {
+  it('buckets items at 23:59 and 00:01 into separate hours across a day boundary', () => {
+    // Use Date constructor (local time) so getHours() is consistent with new Date(iso).getHours()
+    const lateNight = new Date(2026, 3, 21, 23, 59, 0); // local 23:59
+    const earlyMorning = new Date(2026, 3, 22, 0, 1, 0); // local 00:01 next day
+
+    const items = [makeHourlyItem(lateNight, 10), makeHourlyItem(earlyMorning, 20)];
+
+    const sparse = aggregateHourlyRevenue(items);
+
+    // Both timestamps are constructed and parsed with the same local timezone,
+    // so hour extraction is consistent regardless of the test environment's TZ.
+    const h23 = sparse.find(r => r.hour === lateNight.getHours());
+    const h0 = sparse.find(r => r.hour === earlyMorning.getHours());
+
+    expect(h23?.revenue).toBe(10);
+    expect(h0?.revenue).toBe(20);
+    // The two items must land in different buckets (23 ≠ 0)
+    expect(lateNight.getHours()).not.toBe(earlyMorning.getHours());
+  });
+
+  it('accumulates revenue and order count for multiple items in the same hour', () => {
+    const noon = new Date(2026, 3, 21, 12, 0, 0);
+    const noonLate = new Date(2026, 3, 21, 12, 45, 0);
+
+    const items = [makeHourlyItem(noon, 15), makeHourlyItem(noonLate, 25)];
+    const sparse = aggregateHourlyRevenue(items);
+    const h12 = sparse.find(r => r.hour === 12);
+
+    expect(h12?.revenue).toBe(40);
+    expect(h12?.orderCount).toBe(2);
+  });
+
+  it('skips items with no orders.created_at', () => {
+    const items = [{ orders: null, quantity: 1, unit_price: 50, modifier_price_delta: 0 }];
+    const sparse = aggregateHourlyRevenue(items);
+    expect(sparse).toHaveLength(0);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(aggregateHourlyRevenue([])).toHaveLength(0);
   });
 });
