@@ -177,6 +177,10 @@ export type AppErrorCode =
   | 'CAJA_CLOSED'
   | 'OPEN_TABS_EXIST'
   | 'POOL_TABLE_OCCUPIED'
+  | 'COMBO_UNAVAILABLE' // Combo not available at this day/time
+  | 'SLOT_MIN_MAX_VIOLATION' // Slot selection qty outside min..max
+  | 'INVALID_CHILD' // Child product not combo_eligible or not in slot options
+  | 'NESTED_COMBO_FORBIDDEN' // Attempting to nest a combo inside another combo
   | 'SUPABASE_ERROR'
   | 'TAURI_ERROR'
   | 'EXPORT_CANCELLED'
