@@ -28,7 +28,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 
 Plans:
 - [x] 02-migrations-PLAN.md — 6 SQL migrations (Wave 1, serial) + atomic inventory_log rename flip + Wave-0 scaffolds (S1-01, S1-02, S1-03, S1-04, S1-05, S1-11) ✓ 2026-04-23
-- [ ] 03-types-zod-PLAN.md — supabase.types.ts regen + Zod schema extensions in domain.ts (Wave 2, fan-in) (S1-06)
+- [x] 03-types-zod-PLAN.md — supabase.types.ts regen + Zod schema extensions in domain.ts (Wave 2, fan-in) (S1-06) ✓ 2026-04-23
 - [ ] 04-entity-category-PLAN.md — move category hooks to new @entities/category folder + tree-aware queries (Wave 3, parallel) (S1-10)
 - [ ] 05-ui-features-PLAN.md — CategoryTreePicker shared/ui + manage-categories + manage-modifier-groups features + Settings wiring + P1 property test (Wave 3, parallel) (S1-07, S1-08, S1-09, S1-12)
 - [ ] 06-e2e-categories-PLAN.md — e2e/31-categories.spec.ts full flow (Wave 4) (S1-13)
