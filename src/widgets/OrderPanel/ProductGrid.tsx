@@ -1,5 +1,6 @@
 import { AlertCircle, Package } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
+import { ComboBuilderSheet } from '@features/add-combo-to-tab';
 import { ModifierSheet } from '@features/add-item-to-tab/ui/ModifierSheet';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
 import { useComboAvailability } from '@entities/combo';
@@ -8,6 +9,7 @@ import type { Product, Modifier } from '@entities/product/model/types';
 import { CategoryTabs } from '@entities/product/ui/CategoryTabs';
 import { ProductCard } from '@entities/product/ui/ProductCard';
 import { useCartStore } from '@entities/tab/model/cartStore';
+import { useTabStore } from '@entities/tab/model/store';
 import { resolveProductPrice, getCurrentTime } from '@shared/lib/domain-helpers';
 import { ComboBadge } from '@shared/ui/ComboBadge';
 import { ComboUnavailableBadge } from '@shared/ui/ComboUnavailableBadge';
@@ -96,11 +98,7 @@ export function ProductGrid({ className }: ProductGridProps) {
   const [overrideActive, setOverrideActive] = useState(false);
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
 
-  // Suppress unused-variable warnings for state that Plan 05 will consume
-  void selectedCombo;
-  void comboBuilderOpen;
-  void overrideActive;
-
+  const activeTabId = useTabStore(s => s.activeTabId);
   const { addItem } = useCartStore();
 
   const {
@@ -301,9 +299,17 @@ export function ProductGrid({ className }: ProductGridProps) {
         }}
       />
 
-      {/* ComboBuilderSheet will be mounted here in Plan 05 */}
-      {/* selectedCombo and comboBuilderOpen state are already wired */}
-      {/* overrideActive flag will be passed to ComboBuilderSheet */}
+      <ComboBuilderSheet
+        combo={selectedCombo}
+        tabId={activeTabId ?? ''}
+        open={comboBuilderOpen}
+        overrideActive={overrideActive}
+        onClose={() => {
+          setComboBuilderOpen(false);
+          setSelectedCombo(null);
+          setOverrideActive(false);
+        }}
+      />
     </div>
   );
 }
