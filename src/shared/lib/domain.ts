@@ -217,6 +217,8 @@ export const ProductSchema = z.object({
   comboEligible: z.boolean().optional().default(true),
   /** True when this product IS a combo (composed of other products) */
   isCombo: z.boolean().optional().default(false),
+  /** Null means price = sum of child list prices; absent = null (optional for backward compat) */
+  comboPriceOverride: MoneySchema.nullable().optional(),
   category: CategorySchema.optional(),
   modifiers: z.array(ModifierSchema).default([]),
 });
@@ -1383,3 +1385,85 @@ export const domain = {
     } as CartItem,
   },
 };
+
+// ============================================================================
+// COMBO
+// ============================================================================
+
+export const ComboSlotTypeSchema = z.enum(['product', 'pool_time']);
+export type ComboSlotType = z.infer<typeof ComboSlotTypeSchema>;
+
+export const ComboSlotSchema = z.object({
+  id: UuidSchema,
+  comboProductId: UuidSchema,
+  label: z.string().min(1).max(100),
+  slotType: ComboSlotTypeSchema,
+  minQty: z.number().int().min(1),
+  maxQty: z.number().int().min(1),
+  isRequired: z.boolean().default(true),
+  sortOrder: z.number().int().nonnegative(),
+  createdAt: TimestampSchema,
+});
+
+export const ComboSlotCreateSchema = ComboSlotSchema.omit({ id: true, createdAt: true });
+export const ComboSlotUpdateSchema = ComboSlotSchema.partial().required({ id: true });
+
+export type ComboSlot = z.infer<typeof ComboSlotSchema>;
+export type ComboSlotCreate = z.infer<typeof ComboSlotCreateSchema>;
+export type ComboSlotUpdate = z.infer<typeof ComboSlotUpdateSchema>;
+
+export const ComboSlotOptionSchema = z.object({
+  id: UuidSchema,
+  comboSlotId: UuidSchema,
+  childProductId: UuidSchema.nullable(), // null for pool_time slots
+  prepaidMinutes: z.number().int().nonnegative().nullable(), // populated for pool_time
+  sortOrder: z.number().int().nonnegative(),
+  createdAt: TimestampSchema,
+});
+
+export const ComboSlotOptionCreateSchema = ComboSlotOptionSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ComboSlotOption = z.infer<typeof ComboSlotOptionSchema>;
+export type ComboSlotOptionCreate = z.infer<typeof ComboSlotOptionCreateSchema>;
+
+export const ComboAvailabilitySchema = z.object({
+  id: UuidSchema,
+  comboProductId: UuidSchema,
+  daysOfWeek: z.array(z.number().int().min(1).max(7)).min(1),
+  startTime: TimeStringSchema.nullable(), // null = all day
+  endTime: TimeStringSchema.nullable(), // null = all day
+  startDate: z.string().nullable(), // ISO date string or null
+  endDate: z.string().nullable(), // ISO date string or null
+  createdAt: TimestampSchema,
+});
+
+export const ComboAvailabilityCreateSchema = ComboAvailabilitySchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ComboAvailability = z.infer<typeof ComboAvailabilitySchema>;
+export type ComboAvailabilityCreate = z.infer<typeof ComboAvailabilityCreateSchema>;
+
+// SlotSelection — the shape passed to add_combo_to_tab RPC
+export const SlotSelectionSchema = z.object({
+  slotId: UuidSchema,
+  childProductId: UuidSchema.nullable(),
+  qty: z.number().int().min(1),
+});
+
+export type SlotSelection = z.infer<typeof SlotSelectionSchema>;
+
+// AddComboToTabInput — full RPC input shape (used in useAddComboToTab mutation)
+export const AddComboToTabInputSchema = z.object({
+  comboProductId: UuidSchema,
+  tabId: UuidSchema,
+  slotSelections: z.array(SlotSelectionSchema).min(1),
+  overrideAvailability: z.boolean().default(false),
+  overrideReason: z.string().nullable().default(null),
+});
+
+export type AddComboToTabInput = z.infer<typeof AddComboToTabInputSchema>;

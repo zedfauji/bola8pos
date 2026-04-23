@@ -200,4 +200,90 @@ describe('computePoolSessionBilling', () => {
       )
     );
   });
+
+  // --- prepaidMinutes tests ---
+  it('prepaidMinutes=0 is backward compatible with no-prepaid behavior', () => {
+    const start = new Date(0);
+    const end = new Date(90 * 60 * 1000); // 90 minutes
+    const withZero = computePoolSessionBilling({
+      startedAt: start,
+      endTime: end,
+      ratePerHour: 100,
+      prepaidMinutes: 0,
+    });
+    const withoutPrepaid = computePoolSessionBilling({
+      startedAt: start,
+      endTime: end,
+      ratePerHour: 100,
+    });
+    expect(withZero.totalCharge).toBe(withoutPrepaid.totalCharge);
+    expect(withZero.billedMinutes).toBe(withoutPrepaid.billedMinutes);
+    expect(withZero.elapsedMinutes).toBe(withoutPrepaid.elapsedMinutes);
+  });
+
+  it('prepaidMinutes=60 with 90 elapsed at rate 100/hr: billedMinutes=30, totalCharge=50', () => {
+    const start = new Date(0);
+    const end = new Date(90 * 60 * 1000); // 90 minutes elapsed
+    const result = computePoolSessionBilling({
+      startedAt: start,
+      endTime: end,
+      ratePerHour: 100,
+      prepaidMinutes: 60,
+    });
+    expect(result.elapsedMinutes).toBe(90);
+    expect(result.billedMinutes).toBe(30);
+    expect(result.totalCharge).toBeCloseTo(50, 5);
+  });
+
+  it('prepaidMinutes >= elapsed: totalCharge is 0 (no negative charges)', () => {
+    const start = new Date(0);
+    const end = new Date(90 * 60 * 1000); // 90 minutes elapsed
+    const result = computePoolSessionBilling({
+      startedAt: start,
+      endTime: end,
+      ratePerHour: 100,
+      prepaidMinutes: 120, // more than elapsed
+    });
+    expect(result.totalCharge).toBe(0);
+    expect(result.billedMinutes).toBe(0);
+    expect(result.elapsedMinutes).toBe(90); // actual elapsed still reported
+  });
+
+  it('prepaidMinutes=60 with firstHourMode=full and 45 elapsed: full hour applies, chargeable=0', () => {
+    const start = new Date(0);
+    const end = new Date(45 * 60 * 1000); // 45 minutes elapsed
+    const result = computePoolSessionBilling({
+      startedAt: start,
+      endTime: end,
+      ratePerHour: 100,
+      firstHourMode: 'full',
+      prepaidMinutes: 60,
+    });
+    // full mode bills 60 for <60min sessions, then subtract 60 prepaid → 0
+    expect(result.totalCharge).toBe(0);
+    expect(result.billedMinutes).toBe(0);
+  });
+
+  it('prepaidMinutes: property test — totalCharge never negative (fast-check)', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 480 }),
+        fc.integer({ min: 0, max: 600 }),
+        fc.float({ min: 1, max: 500, noNaN: true }),
+        (elapsedMin, prepaid, rate) => {
+          const start = new Date(0);
+          const end = new Date(elapsedMin * 60 * 1000);
+          const result = computePoolSessionBilling({
+            startedAt: start,
+            endTime: end,
+            ratePerHour: rate,
+            prepaidMinutes: prepaid,
+          });
+          expect(result.totalCharge).toBeGreaterThanOrEqual(0);
+          expect(result.billedMinutes).toBeGreaterThanOrEqual(0);
+          expect(result.elapsedMinutes).toBe(elapsedMin);
+        }
+      )
+    );
+  });
 });
