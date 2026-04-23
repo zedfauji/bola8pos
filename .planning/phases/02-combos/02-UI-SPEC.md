@@ -1,7 +1,7 @@
 ---
 phase: 2
 slug: combos
-status: draft
+status: approved
 shadcn_initialized: true
 preset: "style=radix-nova, baseColor=neutral, cssVariables=true"
 created: 2026-04-23
@@ -59,14 +59,16 @@ Source: `bar-pos/src/shared/ui/Spacing.stories.tsx` (established project convent
 
 All sizes use Geist Variable. Tailwind classes map to browser default 16px root.
 
+Exactly 4 sizes, exactly 2 weights (400 regular, 600 semibold).
+
 | Role | Tailwind Class | Computed Size | Weight | Line Height | Usage |
 |------|---------------|--------------|--------|-------------|-------|
-| Display | `text-2xl font-bold` | 24px | 700 | 1.2 | Running total in ComboBuilderSheet header (`MoneyDisplay`) |
+| Display | `text-2xl font-semibold` | 24px | 600 | 1.2 | Running total in ComboBuilderSheet header (`MoneyDisplay`) |
 | Heading | `text-lg font-semibold` | 18px | 600 | 1.2 | Sheet title, section headers, combo name in admin list |
-| Body | `text-base` (400) or `text-base font-medium` (500) | 16px | 400 / 500 | 1.5 | Slot labels, option names, availability window text |
-| Label / Caption | `text-sm` / `text-xs` | 14px / 12px | 400 / 500 | 1.4 | Min/max hints below slot card, badge text, muted metadata |
+| Body | `text-base` | 16px | 400 | 1.5 | Slot labels, option names, availability window text, item totals |
+| Label | `text-sm` | 14px | 400 | 1.4 | Min/max hints below slot card, badge text, muted metadata, caption text |
 
-**Weights in use: regular (400) and semibold (600).** Font-medium (500) is used only for `text-base font-medium` item totals (existing ModifierSheet pattern) and is not a third weight — Geist Variable renders it from the same file.
+**Weights in use: regular (400) and semibold (600) only.** `text-2xl font-semibold` provides sufficient visual hierarchy for the display role without requiring a third weight. All item totals use `text-base` at 400; emphasis is conveyed by size and position, not weight variation. `text-sm` (14px) is the single small-text size used for both labels and captions — `text-xs` (12px) is not used in this phase.
 
 Source: `bar-pos/src/shared/ui/Typography.stories.tsx`
 
@@ -98,6 +100,14 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 
 ---
 
+## Visual Hierarchy
+
+**Primary focal point on ProductGrid:** The combo product card with `ComboBadge` in the top-right corner is the visual entry-point for the combos feature. The badge's `--pos-accent` green color draws the eye on the dark card grid background.
+
+**Primary focal point within ComboBuilderSheet:** The "Add to Order" `POSButton` in the Sheet footer is the primary focal point. It is the only `--primary`-colored element in the sheet, full-width at 56px touch height, and remains the final destination of the user's eye after filling out slot selections above it.
+
+---
+
 ## Component Inventory
 
 ### New shared/ui components (require Storybook story)
@@ -105,9 +115,9 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 #### `ComboSlotCard` (`src/shared/ui/ComboSlotCard/ComboSlotCard.tsx`)
 
 - Surface: `bg-card rounded-lg border p-4`
-- Header row: slot label (`text-base font-medium`) + min/max hint (`text-xs text-muted-foreground`)
+- Header row: slot label (`text-base`) + min/max hint (`text-sm text-muted-foreground`)
 - Option list: scrollable `max-h-48 overflow-y-auto divide-y` — each row is `flex items-center gap-3 px-3 py-2`
-- Each option row: shadcn `Checkbox` + `Label` + price delta (right-aligned, `text-sm font-medium`)
+- Each option row: shadcn `Checkbox` + `Label` + price delta (right-aligned, `text-sm`)
 - Selected state: option row gets `bg-accent/50` background
 - Qty selector: when `min_qty === max_qty`, show read-only qty display. When range, show `QuantityControl` (reuse existing `shared/ui/QuantityControl`)
 - Footer: running sub-total for this slot — `text-sm text-muted-foreground` + `MoneyDisplay`
@@ -119,14 +129,14 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 
 - `Badge` variant `secondary` + `bg-pos-accent/20 text-pos-accent border-pos-accent/30` override
 - Text: "Combo" (fixed string, non-translatable in v1)
-- Size: `text-xs px-1.5 py-0.5`
+- Size: `text-sm px-1.5 py-0.5`
 - Used on product cards in ProductGrid when `product.is_combo === true`
 - No Storybook story required (it's a trivial one-liner wrapping Badge) — EXCEPTION: the spec calls for Storybook on new shared/ui components; add a minimal story.
 
 #### `ComboUnavailableBadge` (`src/shared/ui/ComboUnavailableBadge.tsx`)
 
 - `Badge` variant `secondary` + `bg-muted text-muted-foreground` (greyed)
-- Contains: lock icon (`Lock` from lucide, 12px) + availability text
+- Contains: lock icon (`Lock` from lucide, 14px) + availability text
 - Availability text format: "Available Mon–Fri" or "Available Mon 18:00–22:00"
 - Screen-reader: `aria-label="Combo unavailable. {full reason}"` on the outer element
 - Color contrast requirement: muted-foreground on muted background must pass ≥ 4.5:1 in dark mode. Existing `--muted-foreground: oklch(0.708 0 0)` on `--muted: oklch(0.269 0 0)` passes in dark mode.
@@ -142,7 +152,7 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 - Body: `max-h-[calc(80vh-240px)] overflow-y-auto space-y-4 py-6` — one `ComboSlotCard` per slot, ordered by `sort_order`
 - Pool-time slots: rendered as a non-interactive info card — "1 hour pool time included" — no picker needed
 - Footer: two buttons full-width via `SheetFooter gap-2`
-  - Cancel: `Button variant="outline" flex-1`
+  - Discard selection: `Button variant="outline" flex-1`
   - "Add to Order": `POSButton touchSize="large" flex-1` — **disabled** until all required slots filled
 - Disabled confirm state: button has `disabled` attr; no tooltip needed (slot cards already show red border on unfilled required slots)
 - Availability override path: if manager PIN override was granted before sheet opened, show yellow `Alert` banner at top of sheet: "Manager override active — availability check bypassed"
@@ -163,7 +173,7 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 - Multiple availability windows: "Add window" button adds a new row; each row has a trash icon to remove
   - Each row is self-contained: days + time window + date range
   - "Add window" = `POSButton touchSize="default" variant="outline"` with `Plus` icon
-- Note below editor: `text-xs text-muted-foreground` — "No windows = always available"
+- Note below editor: `text-sm text-muted-foreground` — "No windows = always available"
 
 ### Modified existing components
 
@@ -187,7 +197,7 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 #### Tab order view (existing widget)
 
 - Parent combo order_item: renders as collapsible row — `ChevronDown` icon right side
-- Collapsed: "Cubeta Regular x1 — $450.00" in `text-base font-medium`
+- Collapsed: "Cubeta Regular x1 — $450.00" in `text-base font-semibold`
 - Expanded: children listed with `pl-6 text-sm text-muted-foreground`, each showing child name + qty
 - Children are read-only (cannot be individually voided in S2 — that's S4)
 
@@ -198,6 +208,7 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 | Element | Copy |
 |---------|------|
 | Primary CTA — ComboBuilderSheet | "Add to Order" |
+| Secondary CTA — ComboBuilderSheet | "Discard selection" (dismisses sheet and abandons all slot selections made in the builder) |
 | Primary CTA — manage-combos admin | "Save combo" (on create/edit form) |
 | Primary CTA — admin: new combo | "Add combo" |
 | Primary CTA — availability override | "Request override" |
@@ -215,7 +226,7 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 | Error: RPC NESTED_COMBO_FORBIDDEN | Toast: "Nested combos are not allowed." |
 | Error: RPC AUTH_FORBIDDEN (override without PIN) | Toast: "Manager PIN required to override availability." |
 | Error: generic load failure | "Could not load combo details. Try again." (inline in Sheet, not toast) |
-| Destructive: delete combo | Dialog title: "Delete '{combo name}'?" / Body: "This will remove the combo and all its slots. Orders already placed are not affected." / Confirm button: "Delete" (destructive variant) |
+| Destructive: delete combo | Dialog title: "Delete '{combo name}'?" / Body: "This will remove the combo and all its slots. Orders already placed are not affected." / Confirm button: "Delete Combo" (destructive variant) |
 | Destructive: remove slot | Dialog title: "Remove slot '{slot label}'?" / Body: "Existing orders with this slot are not affected." / Confirm button: "Remove slot" |
 | Destructive confirmation approach | shadcn `ConfirmDialog` (existing `shared/ui/ConfirmDialog`) — matches pattern in ModifierGroupEditor |
 | KDS parent line label | "{combo name} x{qty}" with `ComboBadge` |
@@ -230,7 +241,7 @@ Source: `bar-pos/src/app/globals.css` + `bar-pos/tailwind.config.ts` — all exi
 | Interaction | Behaviour |
 |-------------|-----------|
 | Open trigger | Tap product card with `is_combo=true` and available — replaces straight `add-item-to-tab` call |
-| Close | Swipe down OR tap Cancel — resets all slot selections |
+| Close | Swipe down OR tap "Discard selection" — resets all slot selections |
 | Slot selection | Tap option row toggles checkbox; `QuantityControl` only shown when `min_qty !== max_qty` |
 | Required slot unfilled | Red border on `ComboSlotCard`, confirm button disabled |
 | All slots filled | Confirm button enabled; running total updates in real-time |
@@ -285,6 +296,8 @@ Source: `04-navigation-ui-flows.md § Accessibility & UX guardrails`
 | No single-tap-without-confirm on destructive | Delete combo and Remove slot both go through `ConfirmDialog` |
 | Confirm button disabled state | Native HTML `disabled` attribute — screen reader announces as "dimmed" / "greyed out"; no ARIA needed beyond native |
 | QuantityControl | Existing `aria-live="polite"` on qty display; `aria-label` on +/– buttons — reused as-is |
+| KDS ChevronDown expand/collapse trigger | `aria-label` must toggle: `aria-label="Expand combo items"` when collapsed, `aria-label="Collapse combo items"` when expanded |
+| Tab order view collapsible parent row ChevronDown trigger | `aria-label` must toggle: `aria-label="Show combo items"` when collapsed, `aria-label="Hide combo items"` when expanded |
 
 ---
 
