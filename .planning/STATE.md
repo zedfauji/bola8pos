@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 02-combos
-current_plan: 02-02 (wave 1)
+current_plan: 02-03 (wave 2) — next to execute
 status: in_progress
-stopped_at: Completed 02-combos plan 01 (02-01-PLAN.md) — combo DB schema foundations
-last_updated: "2026-04-23T23:15:00.000Z"
+stopped_at: Completed 02-combos plan 02 (02-02-PLAN.md) — combo Zod schemas + pool-billing prepaid
+last_updated: "2026-04-23T23:35:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 14
-  completed_plans: 7
-  percent: 50
+  completed_plans: 9
+  percent: 64
 ---
 
 # Session State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2
 **Current phase:** 02-combos
-**Current plan:** 02-02 (wave 1) — next to execute
+**Current plan:** 02-03 (wave 2) — next to execute
 **Status:** In Progress
-**Progress:** [█████░░░░░] 50%
+**Progress:** [██████░░░░] 64%
 
 ## Session Log
 
@@ -38,6 +38,7 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 05 (ui-features) completed — S1-07/08/09/12, CategoryTreePicker, CategoryTreeEditor, ModifierGroupEditor, category-tree property tests (29 tests, fast-check)
 - 2026-04-23: Plan 07 (regression-gate) completed — typecheck/lint/unit PASS; E2E 31-categories blocked by staging migration gap; manual operator steps documented
 - 2026-04-23: Plan 02-01 (combo schema foundations) completed — 2 tasks, 4 SQL migrations, AppErrorCode +4 combo codes, shadcn Collapsible installed
+- 2026-04-23: Plan 02-02 (schema push + Zod types + pool-billing) completed — supabase db push applied, 6 combo Zod schemas added to domain.ts, prepaidMinutes in pool-billing, 19 tests pass
 
 ## Decisions
 
@@ -63,6 +64,9 @@ See: .planning/PROJECT.md
 - [Phase 01-foundation]: inventory_log grep: 2 hits in src/ are comments only documenting rename history — gate passes
 - [Phase 02-combos 02-01]: shadcn CLI installs collapsible to src/app/components/ui/ — always move to src/shared/ui/ to match FSD layer boundaries
 - [Phase 02-combos 02-01]: Added FK indexes on combo tables and partial indexes on order_items combo columns for query performance
+- [Phase 02-combos 02-02]: comboPriceOverride uses .nullable().optional() (no .default) to avoid exactOptionalPropertyTypes violation in existing mock objects
+- [Phase 02-combos 02-02]: prepaid deduction applies after firstHourMode block sizing — full-hour sessions with 60min prepaid yield 0 charge
+- [Phase 02-combos 02-02]: supabase gen types --local overwrites file with error text when Docker unavailable; must restore from git
 
 ## Performance Metrics
 
@@ -75,8 +79,9 @@ See: .planning/PROJECT.md
 | Phase 01-foundation P06 | 50min | 1 tasks | 1 files |
 | Phase 01-foundation P07 | 25min | 1 tasks | 0 files |
 | 02-combos | 01 | 4min | 2 | 6 |
+| 02-combos | 02 | 12min | 2 | 3 |
 
 ## Last Session
 
-- **Stopped at:** Completed 02-combos plan 01 (02-01-PLAN.md) — combo DB schema foundations
-- **Timestamp:** 2026-04-23T23:15:00Z
+- **Stopped at:** Completed 02-combos plan 02 (02-02-PLAN.md) — combo Zod schemas + pool-billing prepaid
+- **Timestamp:** 2026-04-23T23:35:00Z
