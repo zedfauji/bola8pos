@@ -49,6 +49,7 @@ const baseTable: PoolTable = {
   label: 'Billar 3',
   status: 'occupied',
   ratePerHour: 60,
+  tableType: 'pool',
   currentSessionId: baseSession.id,
   currentSession: undefined,
 };

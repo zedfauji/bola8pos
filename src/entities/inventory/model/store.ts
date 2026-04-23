@@ -1,6 +1,10 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { create } from 'zustand';
 import type { Inventory } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
+import { supabase } from '@shared/lib/supabase';
+import { inventoryKeys } from './queries';
 
 export type LowStockAlertItem = {
   productId: string;
@@ -111,3 +115,35 @@ export const selectInventoryByProductId = (productId: string): Inventory | undef
 /** Returns true if the product ID is in the low-stock alert list. */
 export const selectIsLowStock = (productId: string): boolean =>
   useInventoryStore.getState().lowStockProductIds.includes(productId);
+
+/**
+ * Subscribes to Supabase Realtime postgres_changes on the inventory table.
+ * When any inventory row is inserted, updated, or deleted, invalidates the
+ * alerts query so useInventoryAlerts() refetches automatically.
+ *
+ * Mount this hook once in a top-level widget or provider — never in a list component.
+ */
+export function useInventoryRealtimeBridge() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const invalidateAlerts = () => {
+      void queryClient.invalidateQueries({ queryKey: inventoryKeys.alerts() });
+      void queryClient.invalidateQueries({ queryKey: inventoryKeys.lowStock() });
+    };
+
+    const ch = supabase
+      .channel('inventory:changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => {
+        logger.debug('inventory.realtime.change');
+        invalidateAlerts();
+        // Also refresh Zustand alert list on the next tick after TanStack refetch
+        useInventoryStore.getState().refreshAlerts();
+      })
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(ch);
+    };
+  }, [queryClient]);
+}

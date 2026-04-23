@@ -47,6 +47,7 @@ function miniProduct(partial: { id: string; name: string; basePrice: number }): 
     sku: null,
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
   };
 }
@@ -69,6 +70,7 @@ function orderItem(partial: {
     modifierIds: [],
     modifierPriceDelta: partial.modifierPriceDelta ?? 0,
     notes: null,
+    kdsStatus: 'pending',
     modifiers: [],
     product: partial.product,
   };
@@ -255,7 +257,7 @@ describe('PaymentModal', () => {
     const dialog = screen.getByRole('dialog');
 
     expect(within(dialog).getByRole('heading', { name: 'Sarah J.' })).toBeInTheDocument();
-    expect(within(dialog).getByText(/\d\s*item\(s\)/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/item type/)).toBeInTheDocument();
     expect(within(dialog).getByText(/Beer/)).toBeInTheDocument();
     expect(within(dialog).getByText(/Whiskey/)).toBeInTheDocument();
     expect(within(dialog).getByLabelText('$13.00 dollars')).toBeInTheDocument();
@@ -371,7 +373,13 @@ describe('PaymentModal', () => {
       expect(screen.getByRole('heading', { name: 'Receipt' })).toBeInTheDocument();
     });
     expect(onPaymentSuccess).toHaveBeenCalled();
-    expect(processors.processCashPayment).toHaveBeenCalledWith(tabNoPool.id, 22, 3.3, 30);
+    expect(processors.processCashPayment).toHaveBeenCalledWith(
+      tabNoPool.id,
+      22,
+      3.3,
+      30,
+      undefined
+    );
     expect(openCashDrawer).toHaveBeenCalled();
     expect(printReceipt).toHaveBeenCalledWith(receipt);
     expect(vi.mocked(openCashDrawer).mock.invocationCallOrder[0]).toBeLessThan(
@@ -434,7 +442,7 @@ describe('PaymentModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('disables close_tab for bartender and shows manager tooltip', async () => {
+  it('allows bartender to process payment (close_tab is in bartender permissions)', async () => {
     const user = userEvent.setup();
     useStaffStore.setState({
       currentStaff: {
@@ -451,11 +459,15 @@ describe('PaymentModal', () => {
     });
     renderModal(tabNoPool);
 
+    // Button is initially disabled because tendered amount is zero, not due to RBAC
     const payBtn = screen.getByRole('button', { name: 'Process payment' });
     expect(payBtn).toBeDisabled();
-    await user.hover(payBtn);
-    const tips = await screen.findAllByText('Manager access required');
-    expect(tips.length).toBeGreaterThanOrEqual(1);
+
+    // Once sufficient tender is entered, bartender can submit
+    const tendered = screen.getByLabelText('Amount tendered');
+    await user.clear(tendered);
+    await user.type(tendered, '30.00');
+    expect(payBtn).not.toBeDisabled();
   });
 
   it('shows change due for cash tendered above total', async () => {
@@ -496,7 +508,12 @@ describe('PaymentModal', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Receipt' })).toBeInTheDocument();
     });
-    expect(processors.processRappiPayment).toHaveBeenCalledWith(tabRappi.id, 22, 'RAPPI-999');
+    expect(processors.processRappiPayment).toHaveBeenCalledWith(
+      tabRappi.id,
+      22,
+      'RAPPI-999',
+      undefined
+    );
     expect(openCashDrawer).not.toHaveBeenCalled();
     expect(printReceipt).toHaveBeenCalled();
   });
@@ -518,7 +535,13 @@ describe('PaymentModal', () => {
     await waitFor(() => {
       expect(processors.processCardPayment).toHaveBeenCalled();
     });
-    expect(processors.processCardPayment).toHaveBeenCalledWith(tabNoPool.id, 22, 3.3, 'AUTH-777');
+    expect(processors.processCardPayment).toHaveBeenCalledWith(
+      tabNoPool.id,
+      22,
+      3.3,
+      'AUTH-777',
+      undefined
+    );
   });
 
   it('keeps primary disabled when staffId empty', () => {
@@ -549,6 +572,93 @@ describe('PaymentModal', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Drawer failed');
+    });
+  });
+
+  // ── Discount section (Sprint 2) ────────────────────────────────────────────
+
+  describe('discount section', () => {
+    it('discount section is visible when method is cash', () => {
+      renderModal(tabNoPool);
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByTestId('discount-section')).toBeInTheDocument();
+    });
+
+    it('discount section is NOT visible when method is rappi', async () => {
+      const user = userEvent.setup();
+      renderModal(tabRappi);
+      // Rappi tabs default to rappi method — discount section should not be rendered
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).queryByTestId('discount-section')).not.toBeInTheDocument();
+      await user.click(within(dialog).getByTestId('payment-btn-cash'));
+      expect(within(dialog).getByTestId('discount-section')).toBeInTheDocument();
+    });
+
+    it('selecting Pool Only scope button is reflected in the UI', async () => {
+      const user = userEvent.setup();
+      renderModal(tabNoPool);
+      const dialog = screen.getByRole('dialog');
+      const poolOnlyBtn = within(dialog).getByTestId('discount-scope-pool_only');
+      await user.click(poolOnlyBtn);
+      expect(poolOnlyBtn.className).toContain('bg-primary');
+      const allBtn = within(dialog).getByTestId('discount-scope-all');
+      expect(allBtn.className).not.toContain('bg-primary');
+    });
+
+    it('selecting Fixed type button changes the discount label to "Discount amount"', async () => {
+      const user = userEvent.setup();
+      renderModal(tabNoPool);
+      const dialog = screen.getByRole('dialog');
+      await user.click(within(dialog).getByTestId('discount-type-fixed'));
+      expect(within(dialog).getByLabelText('Discount amount')).toBeInTheDocument();
+    });
+
+    it('10% discount on $22 tab shows discount-applied-label with correct amount', async () => {
+      const user = userEvent.setup();
+      renderModal(tabNoPool);
+      const dialog = screen.getByRole('dialog');
+
+      // Default is percent type — label is "Discount %"
+      const discountInput = within(dialog).getByLabelText('Discount %');
+      await user.clear(discountInput);
+      await user.type(discountInput, '10');
+
+      // tabNoPool itemsSubtotal = $22, 10% of $22 = $2.20
+      await waitFor(() => {
+        expect(within(dialog).getByTestId('discount-applied-label')).toBeInTheDocument();
+      });
+      expect(within(dialog).getByTestId('discount-applied-label')).toHaveTextContent('2.20');
+    });
+
+    it('fixed $5 discount on $22 tab shows discount-applied-label and discount-row', async () => {
+      const user = userEvent.setup();
+      renderModal(tabNoPool);
+      const dialog = screen.getByRole('dialog');
+
+      await user.click(within(dialog).getByTestId('discount-type-fixed'));
+      const discountInput = within(dialog).getByLabelText('Discount amount');
+      await user.clear(discountInput);
+      await user.type(discountInput, '5');
+
+      await waitFor(() => {
+        expect(within(dialog).getByTestId('discount-applied-label')).toBeInTheDocument();
+      });
+      expect(within(dialog).getByTestId('discount-applied-label')).toHaveTextContent('5.00');
+      expect(within(dialog).getByTestId('discount-row')).toBeInTheDocument();
+    });
+
+    it('discount-row appears in totals section when discount is active', async () => {
+      const user = userEvent.setup();
+      renderModal(tabNoPool);
+      const dialog = screen.getByRole('dialog');
+
+      const discountInput = within(dialog).getByLabelText('Discount %');
+      await user.clear(discountInput);
+      await user.type(discountInput, '10');
+
+      await waitFor(() => {
+        expect(within(dialog).getByTestId('discount-row')).toBeInTheDocument();
+      });
     });
   });
 });

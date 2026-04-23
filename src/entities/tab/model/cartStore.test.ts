@@ -12,6 +12,7 @@ describe('cartStore', () => {
     imageUrl: null,
     isActive: true,
     sku: 'COCKTAIL-MARG',
+    stock_threshold: null,
     modifiers: [],
   };
 
@@ -178,6 +179,33 @@ describe('cartStore', () => {
     it('should return false when cart has items', () => {
       useCartStore.getState().addItem(mockProduct, []);
       expect(useCartStore.getState().isCartEmpty()).toBe(false);
+    });
+  });
+
+  describe('addItem — unitPrice override (Sprint 2)', () => {
+    it('addItem with explicit unitPrice stores that price, not product.basePrice', () => {
+      useCartStore.getState().addItem(mockProduct, [], 4.5);
+
+      const item = useCartStore.getState().items[0]!;
+      expect(item.unitPrice).toBe(4.5);
+      expect(item.lineTotal).toBe(4.5);
+    });
+
+    it('addItem without unitPrice falls back to product.basePrice', () => {
+      useCartStore.getState().addItem(mockProduct, []);
+
+      const item = useCartStore.getState().items[0]!;
+      expect(item.unitPrice).toBe(mockProduct.basePrice);
+    });
+
+    it('addItem increments existing item preserving original unitPrice', () => {
+      const { addItem } = useCartStore.getState();
+      addItem(mockProduct, [], 4.5);
+      addItem(mockProduct, [], 4.5);
+
+      const item = useCartStore.getState().items[0]!;
+      expect(item.quantity).toBe(2);
+      expect(item.lineTotal).toBe(4.5 * 2);
     });
   });
 

@@ -18,6 +18,7 @@ const inv = (productId: string, qty: number, threshold: number, name = 'Test') =
       sku: 'SKU',
       isActive: true,
       imageUrl: null,
+      stock_threshold: null,
       modifiers: [],
       category: {
         id: crypto.randomUUID(),

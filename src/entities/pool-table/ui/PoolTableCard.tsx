@@ -1,4 +1,4 @@
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
 import { POSButton, StatusBadge } from '@shared/ui';
 import { Badge } from '@shared/ui/badge';
@@ -24,7 +24,20 @@ export interface PoolTableCardProps {
   stopDisabled?: boolean;
   /** Native tooltip when stop is RBAC-disabled. */
   stopDisabledTitle?: string;
+  firstHourMode: 'full' | 'prorated';
 }
+
+const TABLE_TYPE_LABEL: Record<PoolTableType, string> = {
+  pool: 'Pool',
+  carom: 'Carom',
+  consumption: 'Consumption',
+};
+
+const TABLE_TYPE_VARIANT: Record<PoolTableType, 'default' | 'secondary' | 'outline'> = {
+  pool: 'default',
+  carom: 'secondary',
+  consumption: 'outline',
+};
 
 const statusMessage: Record<string, string> = {
   available: 'Ready for the next game.',
@@ -44,11 +57,16 @@ export function PoolTableCard({
   startDisabledTitle,
   stopDisabled,
   stopDisabledTitle,
+  firstHourMode,
 }: PoolTableCardProps) {
   const isOccupied = table.status === 'occupied';
   const startDisabledVal = startDisabled ?? false;
   const stopDisabledVal = stopDisabled ?? false;
-  const timer = usePoolTimer(isOccupied && session ? session.startedAt : null, table.ratePerHour);
+  const timer = usePoolTimer(
+    isOccupied && session ? session.startedAt : null,
+    table.ratePerHour,
+    firstHourMode
+  );
 
   const handleCardClick = () => {
     if (isOccupied && onViewStatus) {
@@ -58,6 +76,7 @@ export function PoolTableCard({
 
   return (
     <Card
+      data-testid="pool-table-card"
       className={cn(
         'flex flex-col overflow-hidden',
         isOccupied && 'ring-2 ring-inset ring-primary'
@@ -69,6 +88,13 @@ export function PoolTableCard({
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground">Table {table.number}</p>
           <CardTitle className="truncate text-lg font-bold">{table.label}</CardTitle>
+          <Badge
+            data-testid="table-type-badge"
+            variant={TABLE_TYPE_VARIANT[table.tableType]}
+            className="mt-1 text-xs"
+          >
+            {TABLE_TYPE_LABEL[table.tableType]}
+          </Badge>
         </div>
         <StatusBadge status={table.status} />
       </CardHeader>

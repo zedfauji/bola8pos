@@ -1,14 +1,17 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { PaymentForm } from '@widgets/PaymentModal';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
 import { useStaffStore } from '@entities/staff/model/store';
+import { tabKeys } from '@entities/tab/model/queries';
 import type { Tab } from '@entities/tab/model/types';
 import { POSButton } from '@shared/ui';
 import { TabPaymentList } from './TabPaymentList';
 
 export function PaymentPane() {
   const currentStaff = useStaffStore(s => s.currentStaff);
+  const queryClient = useQueryClient();
 
   const [selectedTab, setSelectedTab] = useState<Tab | null>(null);
   const [pinVerified, setPinVerified] = useState(false);
@@ -24,7 +27,17 @@ export function PaymentPane() {
     setPinVerified(false);
   }
 
+  /**
+   * Called immediately when payment succeeds — invalidates the tabs query so the
+   * left-panel list refreshes, but does NOT clear the selected tab yet (receipt is
+   * still visible). Selection is cleared by handlePaymentClose after receipt is dismissed.
+   */
   function handlePaymentSuccess() {
+    void queryClient.invalidateQueries({ queryKey: tabKeys.all });
+  }
+
+  /** Called when the user clicks Done on the receipt — clears the selected tab. */
+  function handlePaymentClose() {
     setSelectedTab(null);
     setPinVerified(false);
   }
@@ -105,6 +118,7 @@ export function PaymentPane() {
                   tab={selectedTab}
                   staffId={currentStaff?.id ?? ''}
                   onPaymentSuccess={handlePaymentSuccess}
+                  onClose={handlePaymentClose}
                 />
               </div>
             )}

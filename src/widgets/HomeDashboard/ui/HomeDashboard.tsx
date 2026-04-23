@@ -9,6 +9,7 @@ import {
   Package,
   Settings,
   Users,
+  UtensilsCrossed,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -26,6 +27,8 @@ type DashboardItem = {
   icon: LucideIcon;
   requiredAction?: StaffAction;
   managerLabel?: string;
+  /** If set, only these roles can see this item. All roles see it when undefined. */
+  visibleToRoles?: string[];
 };
 
 const ITEMS: DashboardItem[] = [
@@ -54,6 +57,12 @@ const ITEMS: DashboardItem[] = [
     icon: Settings,
     requiredAction: 'manage_settings',
     managerLabel: 'Admin',
+  },
+  {
+    path: '/kds',
+    label: 'Kitchen Display',
+    icon: UtensilsCrossed,
+    visibleToRoles: ['admin', 'kitchen'],
   },
 ];
 
@@ -94,7 +103,11 @@ export function HomeDashboard() {
 
       {/* Navigation grid */}
       <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-        {ITEMS.map(item => {
+        {ITEMS.filter(
+          item =>
+            !item.visibleToRoles ||
+            (currentStaff?.role != null && item.visibleToRoles.includes(currentStaff.role))
+        ).map(item => {
           const isGated = !!item.requiredAction && !can(item.requiredAction);
           const Icon = item.icon;
           return (

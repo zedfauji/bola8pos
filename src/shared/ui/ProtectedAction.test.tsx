@@ -18,7 +18,7 @@ describe('ProtectedAction', () => {
   it('disables child and shows manager denial tooltip when bartender lacks action', async () => {
     const user = userEvent.setup();
     renderWithProviders(
-      <ProtectedAction action="close_tab" currentRole="bartender">
+      <ProtectedAction action="void_order" currentRole="bartender">
         <POSButton type="button">Close</POSButton>
       </ProtectedAction>
     );

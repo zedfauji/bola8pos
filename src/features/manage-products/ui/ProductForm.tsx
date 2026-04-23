@@ -46,6 +46,7 @@ export function ProductForm({
     initialProduct?.happyHourPrice ?? null
   );
   const [sku, setSku] = useState(initialProduct?.sku ?? '');
+  const [barcode, setBarcode] = useState(initialProduct?.barcode ?? '');
   const [isActive, setIsActive] = useState(initialProduct?.isActive ?? true);
   const [imageUrl, setImageUrl] = useState(initialProduct?.imageUrl ?? '');
   const [modifierIds, setModifierIds] = useState<string[]>(
@@ -75,6 +76,7 @@ export function ProductForm({
 
     const skuVal = sku.trim() === '' ? null : sku.trim();
     const imageVal = imageUrl.trim() === '' ? null : imageUrl.trim();
+    const barcodeVal = barcode.trim() === '' ? null : barcode.trim();
 
     const happyHourNormalized =
       happyHourPrice === null || happyHourPrice === 0 ? null : happyHourPrice;
@@ -89,6 +91,7 @@ export function ProductForm({
         sku: skuVal,
         isActive,
         imageUrl: imageVal,
+        barcode: barcodeVal,
       });
       if (!parsed.success) {
         const flat = z.flattenError(parsed.error);
@@ -115,6 +118,7 @@ export function ProductForm({
       sku: skuVal,
       isActive,
       imageUrl: imageVal,
+      barcode: barcodeVal,
     });
     if (!parsed.success) {
       const flat = z.flattenError(parsed.error);
@@ -188,6 +192,21 @@ export function ProductForm({
           value={sku}
           onChange={e => {
             setSku(e.target.value);
+          }}
+          disabled={submitting}
+        />
+      </FormField>
+
+      <FormField
+        label="Barcode"
+        hint="Optional — scan or type product barcode."
+        error={fieldErrors.barcode ?? ''}
+      >
+        <Input
+          data-testid="product-form-barcode"
+          value={barcode}
+          onChange={e => {
+            setBarcode(e.target.value);
           }}
           disabled={submitting}
         />

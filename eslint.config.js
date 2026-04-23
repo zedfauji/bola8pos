@@ -21,6 +21,7 @@ export default tseslint.config({
     '*.config.ts',
     '*.config.js',
     'vite-env.d.ts',
+    'src/shared/lib/supabase.types.ts',
   ],
 }, js.configs.recommended, ...tseslint.configs.strictTypeChecked, {
   languageOptions: {

@@ -17,6 +17,7 @@ export function ReceiptPreview({ receipt, onDone }: ReceiptPreviewProps) {
 
   return (
     <div className="space-y-4">
+      <h2 className="text-lg font-semibold">Receipt</h2>
       <pre className="max-h-[50vh] overflow-auto rounded-md border bg-muted/40 p-3 font-mono text-[11px] leading-tight whitespace-pre">
         {text}
       </pre>

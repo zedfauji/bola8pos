@@ -100,4 +100,61 @@ test.describe('Home Dashboard Navigation', () => {
     await expect(page.getByText(/Manager Access Required/i)).toBeVisible();
     await logout(page);
   });
+
+  test('T11: bartender navigates to /settings directly — redirected or access dialog shown', async ({
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    await loginAs(page, 'bartender');
+    await page.goto('/settings');
+
+    const redirected = await page
+      .waitForURL(/\/home/, { timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (!redirected) {
+      // May show an alertdialog blocking the page
+      const dialog = page.getByRole('alertdialog');
+      await expect(dialog).toBeVisible({ timeout: 8_000 });
+      await expect(dialog.getByText(/manager access required|admin access required/i)).toBeVisible();
+    } else {
+      expect(redirected).toBe(true);
+    }
+    await logout(page);
+  });
+
+  test('T12: bartender navigates to /reports directly — redirected or PIN dialog shown', async ({
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    await loginAs(page, 'bartender');
+    await page.goto('/reports');
+
+    const onHome = await page
+      .waitForURL(/\/home/, { timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (!onHome) {
+      // PIN dialog or alertdialog shown on the reports page
+      const dialog = page.getByRole('alertdialog');
+      await expect(dialog).toBeVisible({ timeout: 8_000 });
+    } else {
+      expect(onHome).toBe(true);
+    }
+    await logout(page);
+  });
+
+  test('T13: admin logs out — /pos redirects to /login', async ({ page }) => {
+    test.setTimeout(60_000);
+    await loginAs(page, 'admin');
+    await page.goto('/pos');
+    await expect(page).toHaveURL(/\/pos/, { timeout: 10_000 });
+    await logout(page);
+
+    // After logout, navigating to /pos should redirect to /login
+    await page.goto('/pos');
+    await expect(page).toHaveURL(/\/login/, { timeout: 15_000 });
+  });
 });

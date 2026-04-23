@@ -1,7 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReceiptData } from './edge-function-contracts';
-import { openCashDrawer, printReceipt, receiptDataToPrinterJson, testPrint } from './pos-printer';
+import {
+  openCashDrawer,
+  printRawText,
+  printReceipt,
+  receiptDataToPrinterJson,
+  testPrint,
+} from './pos-printer';
 
 function sampleReceipt(overrides: Partial<ReceiptData> = {}): ReceiptData {
   return {
@@ -199,5 +205,68 @@ describe('testPrint', () => {
     const result = await testPrint();
     expect(result.ok).toBe(true);
     expect(invoke).toHaveBeenCalledWith('test_print');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// printRawText — autoCut AC coverage (AC 1, 2)
+// ---------------------------------------------------------------------------
+
+describe('printRawText', () => {
+  const originalOpen = window.open;
+
+  beforeEach(() => {
+    delete (window as unknown as { __TAURI__?: unknown }).__TAURI__;
+    vi.mocked(invoke).mockReset();
+    vi.mocked(invoke).mockResolvedValue(undefined);
+    // Silence browser fallback popup in non-Tauri path
+    window.open = vi.fn().mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    window.open = originalOpen;
+    delete (window as unknown as { __TAURI__?: unknown }).__TAURI__;
+  });
+
+  it('appends ESC/POS cut bytes when autoCut is true (AC-1)', async () => {
+    (window as unknown as { __TAURI__: unknown }).__TAURI__ = {};
+
+    const result = await printRawText('hello', { autoCut: true });
+
+    expect(result.ok).toBe(true);
+    expect(invoke).toHaveBeenCalledWith('print_raw_text', {
+      text: 'hello\x1d\x56\x41\x00',
+    });
+  });
+
+  it('does NOT append cut bytes when autoCut is false (AC-2)', async () => {
+    (window as unknown as { __TAURI__: unknown }).__TAURI__ = {};
+
+    const result = await printRawText('hello', { autoCut: false });
+
+    expect(result.ok).toBe(true);
+    expect(invoke).toHaveBeenCalledWith('print_raw_text', { text: 'hello' });
+  });
+
+  it('does NOT append cut bytes when options are omitted (AC-2)', async () => {
+    (window as unknown as { __TAURI__: unknown }).__TAURI__ = {};
+
+    const result = await printRawText('hello');
+
+    expect(result.ok).toBe(true);
+    expect(invoke).toHaveBeenCalledWith('print_raw_text', { text: 'hello' });
+  });
+
+  it('returns tauriError when invoke throws', async () => {
+    (window as unknown as { __TAURI__: unknown }).__TAURI__ = {};
+    vi.mocked(invoke).mockRejectedValue(new Error('Paper jam'));
+
+    const result = await printRawText('hello', { autoCut: true });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe('TAURI_ERROR');
+      expect(result.error.message).toContain('Paper jam');
+    }
   });
 });

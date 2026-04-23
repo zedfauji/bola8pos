@@ -11,6 +11,7 @@ import {
   useCajaEntries,
   useMutationDeleteCajaEntry,
 } from '@entities/caja';
+import { useSettings } from '@entities/settings';
 import { usePermissions } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
 import { useOpenTabsPendingTotal } from '@entities/tab';
@@ -59,6 +60,7 @@ function SummaryCard({ label, amount, isLoading, highlight }: SummaryCardProps) 
 export function CajaDashboard() {
   const { can } = usePermissions();
   const currentStaff = useStaffStore(s => s.currentStaff);
+  const settings = useSettings();
   const isCajaOpen = useCajaStore(s => s.isCajaOpen);
   const currentCaja = useCajaStore(s => s.currentCaja);
 
@@ -179,7 +181,7 @@ export function CajaDashboard() {
       .filter(l => l !== '')
       .join('\n');
 
-    const result = await printRawText(lines);
+    const result = await printRawText(lines, { autoCut: settings.data?.receipt.autoCut });
     setIsPrinting(false);
 
     if (result.ok) {

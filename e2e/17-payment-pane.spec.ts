@@ -46,18 +46,33 @@ async function goToPaymentsViaHome(page: Page): Promise<void> {
  * Create a tab with one item via the service client (bypasses UI, much faster).
  * Returns the tab id.
  */
-async function seedOpenTab(customerName: string): Promise<string> {
-  const admin = getServiceClient();
-
-  // Resolve shift id for the manager
-  const { data: shift } = await admin
+async function ensureOpenShift(admin: ReturnType<typeof getServiceClient>): Promise<{ id: string; staff_id: string }> {
+  const { data: existing } = await admin
     .from('shifts')
-    .select('id, profile_id')
+    .select('id, staff_id')
     .is('clock_out', null)
     .limit(1)
     .maybeSingle();
+  if (existing) return existing as { id: string; staff_id: string };
 
-  if (!shift) throw new Error('seedOpenTab: no open shift found — run openCaja first');
+  // No open shift — clock in the manager profile
+  const { data: mgr } = await admin.from('profiles').select('id').eq('role', 'manager').limit(1).maybeSingle();
+  if (!mgr) throw new Error('ensureOpenShift: no manager profile found');
+
+  const { data: shift, error } = await admin
+    .from('shifts')
+    .insert({ staff_id: mgr.id, clock_in: new Date().toISOString() })
+    .select('id, staff_id')
+    .single();
+  if (error || !shift) throw new Error(`ensureOpenShift: failed to create shift — ${error?.message ?? 'no row'}`);
+  return shift as { id: string; staff_id: string };
+}
+
+async function seedOpenTab(customerName: string): Promise<string> {
+  const admin = getServiceClient();
+
+  // Resolve shift id for the manager (create one if none is open)
+  const shift = await ensureOpenShift(admin);
 
   // Resolve caja session
   const { data: caja } = await admin
@@ -73,7 +88,7 @@ async function seedOpenTab(customerName: string): Promise<string> {
     .from('tabs')
     .insert({
       customer_name: customerName,
-      staff_id: shift.profile_id,
+      staff_id: shift.staff_id,
       shift_id: shift.id,
       caja_session_id: caja.id,
       status: 'open',
@@ -95,8 +110,8 @@ async function seedOpenTab(customerName: string): Promise<string> {
       .from('orders')
       .insert({
         tab_id: tab.id,
-        staff_id: shift.profile_id,
-        status: 'delivered',
+        staff_id: shift.staff_id,
+        status: 'served',
       })
       .select('id')
       .single();
@@ -119,14 +134,7 @@ async function seedOpenTab(customerName: string): Promise<string> {
 async function seedTabWithDuplicateItems(customerName: string): Promise<string> {
   const admin = getServiceClient();
 
-  const { data: shift } = await admin
-    .from('shifts')
-    .select('id, profile_id')
-    .is('clock_out', null)
-    .limit(1)
-    .maybeSingle();
-
-  if (!shift) throw new Error('seedTabWithDuplicateItems: no open shift');
+  const shift = await ensureOpenShift(admin);
 
   const { data: caja } = await admin
     .from('caja_sessions')
@@ -140,7 +148,7 @@ async function seedTabWithDuplicateItems(customerName: string): Promise<string> 
     .from('tabs')
     .insert({
       customer_name: customerName,
-      staff_id: shift.profile_id,
+      staff_id: shift.staff_id,
       shift_id: shift.id,
       caja_session_id: caja.id,
       status: 'open',
@@ -161,8 +169,8 @@ async function seedTabWithDuplicateItems(customerName: string): Promise<string> 
       .from('orders')
       .insert({
         tab_id: tab.id,
-        staff_id: shift.profile_id,
-        status: 'delivered',
+        staff_id: shift.staff_id,
+        status: 'served',
       })
       .select('id')
       .single();
@@ -224,11 +232,11 @@ test.describe('Payment Pane', () => {
   // ── Left panel — tab listing ───────────────────────────────────────────────
 
   test('T3: left panel lists open tabs', async ({ page }) => {
-    await seedOpenTab('Pane List Test');
     await loginAs(page, 'manager');
+    await seedOpenTab('Pane List Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list).toBeVisible({ timeout: 20_000 });
     await expect(list.getByText('Pane List Test')).toBeVisible({ timeout: 15_000 });
     await logout(page);
@@ -236,6 +244,7 @@ test.describe('Payment Pane', () => {
 
   test('T4: pool table tab shows Pool badge in the card', async ({ page }) => {
     const admin = getServiceClient();
+    await loginAs(page, 'manager');
     const tabId = await seedOpenTab('Pool Badge Test');
 
     // Attach the tab to an available pool table (via direct DB update to simulate active session)
@@ -266,10 +275,9 @@ test.describe('Payment Pane', () => {
       }
     }
 
-    await loginAs(page, 'manager');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list).toBeVisible({ timeout: 20_000 });
     const card = list.getByRole('button', { name: /tab Pool Badge Test/i });
     await expect(card).toBeVisible({ timeout: 15_000 });
@@ -287,11 +295,11 @@ test.describe('Payment Pane', () => {
   // ── Right panel — PIN gate ─────────────────────────────────────────────────
 
   test('T5: selecting a tab shows PIN prompt on right panel', async ({ page }) => {
-    await seedOpenTab('PIN Prompt Test');
     await loginAs(page, 'manager');
+    await seedOpenTab('PIN Prompt Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list.getByText('PIN Prompt Test')).toBeVisible({ timeout: 20_000 });
     await list.getByRole('button', { name: /tab PIN Prompt Test/i }).click();
 
@@ -302,11 +310,11 @@ test.describe('Payment Pane', () => {
   });
 
   test('T6: entering wrong PIN shows error inside the dialog', async ({ page }) => {
-    await seedOpenTab('Wrong PIN Test');
     await loginAs(page, 'manager');
+    await seedOpenTab('Wrong PIN Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list.getByText('Wrong PIN Test')).toBeVisible({ timeout: 20_000 });
     await list.getByRole('button', { name: /tab Wrong PIN Test/i }).click();
     await page.getByRole('button', { name: /verify pin to process payment/i }).click();
@@ -321,11 +329,11 @@ test.describe('Payment Pane', () => {
   });
 
   test('T7: correct manager PIN unlocks PaymentForm', async ({ page }) => {
-    await seedOpenTab('Manager PIN Test');
     await loginAs(page, 'manager');
+    await seedOpenTab('Manager PIN Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list.getByText('Manager PIN Test')).toBeVisible({ timeout: 20_000 });
     await list.getByRole('button', { name: /tab Manager PIN Test/i }).click();
     await page.getByRole('button', { name: /verify pin to process payment/i }).click();
@@ -338,8 +346,8 @@ test.describe('Payment Pane', () => {
 
     // Dialog closes, PaymentForm appears
     await expect(pinDialog).not.toBeVisible({ timeout: 10_000 });
-    // PaymentForm shows the customer name in its header
-    await expect(page.getByRole('heading', { name: 'Manager PIN Test' })).toBeVisible({
+    // PaymentForm shows the customer name in its header (h2 level in PaymentForm)
+    await expect(page.getByRole('heading', { name: 'Manager PIN Test', level: 2 })).toBeVisible({
       timeout: 15_000,
     });
     await expect(page.getByTestId('payment-btn-cash')).toBeVisible({ timeout: 10_000 });
@@ -347,11 +355,11 @@ test.describe('Payment Pane', () => {
   });
 
   test('T8: correct bartender PIN also unlocks PaymentForm (RBAC: bartender has close_tab)', async ({ page }) => {
-    await seedOpenTab('Bartender PIN Test');
     await loginAs(page, 'bartender');
+    await seedOpenTab('Bartender PIN Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list.getByText('Bartender PIN Test')).toBeVisible({ timeout: 20_000 });
     await list.getByRole('button', { name: /tab Bartender PIN Test/i }).click();
     await page.getByRole('button', { name: /verify pin to process payment/i }).click();
@@ -371,11 +379,11 @@ test.describe('Payment Pane', () => {
   // ── Cash payment completes ─────────────────────────────────────────────────
 
   test('T9: cash payment completes — tab removed from list, receipt shown', async ({ page }) => {
-    await seedOpenTab('Cash Pay Pane Test');
     await loginAs(page, 'manager');
+    await seedOpenTab('Cash Pay Pane Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list.getByText('Cash Pay Pane Test')).toBeVisible({ timeout: 20_000 });
     await list.getByRole('button', { name: /tab Cash Pay Pane Test/i }).click();
     await page.getByRole('button', { name: /verify pin to process payment/i }).click();
@@ -409,11 +417,11 @@ test.describe('Payment Pane', () => {
   // ── Back button ───────────────────────────────────────────────────────────
 
   test('T10: back button in right panel header clears selected tab', async ({ page }) => {
-    await seedOpenTab('Back Button Test');
     await loginAs(page, 'manager');
+    await seedOpenTab('Back Button Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list.getByText('Back Button Test')).toBeVisible({ timeout: 20_000 });
     await list.getByRole('button', { name: /tab Back Button Test/i }).click();
     await expect(
@@ -441,11 +449,11 @@ test.describe('Payment Pane', () => {
   // ── Item grouping ─────────────────────────────────────────────────────────
 
   test('T11: items with same product appear grouped (e.g. "2×" prefix) in order review', async ({ page }) => {
-    await seedTabWithDuplicateItems('Group Items Test');
     await loginAs(page, 'manager');
+    await seedTabWithDuplicateItems('Group Items Test');
     await goToPaymentsViaHome(page);
 
-    const list = page.getByLabel('tabs waiting for payment');
+    const list = page.getByTestId('tabs-waiting-for-payment');
     await expect(list.getByText('Group Items Test')).toBeVisible({ timeout: 20_000 });
     await list.getByRole('button', { name: /tab Group Items Test/i }).click();
     await page.getByRole('button', { name: /verify pin to process payment/i }).click();

@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useMutationStartSession } from '@entities/pool-table/model/queries';
+import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@entities/tab';
 import { useMutationOpenTab } from '@entities/tab/model/queries';
+import { buildStartTicketText } from '@shared/lib/buildStartTicketText';
 import type { PoolTable } from '@shared/lib/domain';
+import { logger } from '@shared/lib/logger-instance';
+import { printRawText } from '@shared/lib/pos-printer';
 import {
   MoneyDisplay,
   POSButton,
@@ -33,6 +37,7 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
   const openTab = useMutationOpenTab();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const currentShift = useStaffStore(s => s.currentShift);
+  const settings = useSettings();
   const [tabChoice, setTabChoice] = useState<string>(NEW_TAB);
 
   const handleOpenChange = (next: boolean) => {
@@ -81,6 +86,20 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
       return;
     }
     toast.success('Pool session started.');
+
+    if (settings.data?.receipt.printOnStart) {
+      const text = buildStartTicketText({
+        barName: settings.data.general.barName,
+        tableLabel: table.label,
+        startedAt: result.data.startedAt,
+        ratePerHour: table.ratePerHour,
+        paperWidthChars: settings.data.receipt.paperWidthChars,
+      });
+      void printRawText(text, { autoCut: settings.data.receipt.autoCut }).catch((e: unknown) => {
+        logger.warn('start_ticket.print.failed', { error: String(e) });
+      });
+    }
+
     handleOpenChange(false);
   };
 

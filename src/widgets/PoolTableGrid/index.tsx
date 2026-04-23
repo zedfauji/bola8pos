@@ -1,4 +1,4 @@
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -10,12 +10,23 @@ import {
   usePoolTables,
   PoolTableCard,
 } from '@entities/pool-table';
+import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import { usePermissions } from '@entities/staff/model/usePermissions';
 import { useTabs } from '@entities/tab';
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
 import { rbacDenialMessage } from '@shared/lib/rbac';
+import { usePersistedBool } from '@shared/lib/usePersistedBool';
 import { EmptyState, POSButton, PoolTableGridSkeleton, ProtectedAction } from '@shared/ui';
+
+type TypeFilter = 'all' | PoolTableType;
+
+const TYPE_FILTER_LABELS: { value: TypeFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'pool', label: 'Pool' },
+  { value: 'carom', label: 'Carom' },
+  { value: 'consumption', label: 'Consumption' },
+];
 
 export function PoolTableGrid() {
   const navigate = useNavigate();
@@ -23,6 +34,8 @@ export function PoolTableGrid() {
   const { can } = usePermissions();
   const { data: tables, isIdleOrLoading, isError, refetch, resultError, error } = usePoolTables();
   const { data: tabs } = useTabs();
+  const { data: settings } = useSettings();
+  const firstHourMode = settings?.billing.firstHourMode ?? 'prorated';
   const addTable = useMutationAddPoolTable();
   const releaseTable = useMutationReleasePoolTable();
 
@@ -30,8 +43,16 @@ export function PoolTableGrid() {
   const [stopTarget, setStopTarget] = useState<{ table: PoolTable; session: PoolSession } | null>(
     null
   );
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [filtersCollapsed, setFiltersCollapsed] = usePersistedBool('pool_filters_collapsed', false);
 
   const openTabs = useMemo(() => (tabs ?? []).filter(t => t.status === 'open'), [tabs]);
+
+  const filteredTables = useMemo(() => {
+    if (!tables) return [];
+    if (typeFilter === 'all') return tables;
+    return tables.filter(t => t.tableType === typeFilter);
+  }, [tables, typeFilter]);
 
   const availableCount = useMemo(
     () => (tables ?? []).filter(t => t.status === 'available').length,
@@ -94,6 +115,43 @@ export function PoolTableGrid() {
         </ProtectedAction>
       </div>
 
+      {/* Type filter buttons */}
+      <div className="space-y-2">
+        <button
+          type="button"
+          data-testid="pool-filters-toggle"
+          aria-expanded={!filtersCollapsed}
+          onClick={() => {
+            setFiltersCollapsed(prev => !prev);
+          }}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          {filtersCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+          Filters
+        </button>
+        {!filtersCollapsed && (
+          <div data-testid="pool-filters" className="flex flex-wrap gap-2">
+            {TYPE_FILTER_LABELS.map(({ value, label }) => (
+              <POSButton
+                key={value}
+                type="button"
+                touchSize="default"
+                variant={typeFilter === value ? 'default' : 'outline'}
+                onClick={() => {
+                  setTypeFilter(value);
+                }}
+              >
+                {label}
+              </POSButton>
+            ))}
+          </div>
+        )}
+      </div>
+
       {isIdleOrLoading && (
         <PoolTableGridSkeleton
           count={9}
@@ -112,7 +170,7 @@ export function PoolTableGrid() {
 
       {!isIdleOrLoading && !isError && tables && (
         <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {tables.map(table => {
+          {filteredTables.map(table => {
             const session = table.currentSession ?? null;
             return (
               <PoolTableCard
@@ -120,6 +178,7 @@ export function PoolTableGrid() {
                 table={table}
                 session={session}
                 linkedCustomerName={resolveCustomerName(session)}
+                firstHourMode={firstHourMode}
                 startDisabled={!can('start_pool_timer')}
                 {...(!can('start_pool_timer')
                   ? { startDisabledTitle: rbacDenialMessage('start_pool_timer') }

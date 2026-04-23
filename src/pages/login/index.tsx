@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { EmployeeSelector } from '@widgets/EmployeeSelector/EmployeeSelector';
+import { LogoImage } from '@widgets/LogoImage';
 import { PINLoginForm } from '@widgets/PINLoginForm/PINLoginForm';
 import { useLoginUiStore } from '@entities/staff/model/loginUiStore';
 import { useStaffStore } from '@entities/staff/model/store';
@@ -14,7 +15,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+      <div className="flex h-16 items-center">
+        <LogoImage alt="Bar logo" className="h-16" />
+      </div>
       <ErrorBoundary>{!selectedStaff ? <EmployeeSelector /> : <PINLoginForm />}</ErrorBoundary>
     </div>
   );

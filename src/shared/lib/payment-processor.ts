@@ -3,6 +3,7 @@
  * with idempotency keys (secrets stay server-side).
  */
 
+import type { DiscountScope, DiscountType } from '@shared/lib/domain';
 import { generateIdempotencyKey } from '@shared/lib/domain-helpers';
 import {
   callProcessPayment,
@@ -10,6 +11,13 @@ import {
 } from '@shared/lib/edge-function-contracts';
 import { ok, type Result } from '@shared/lib/result';
 import type { AppError } from '@shared/lib/supabase-contracts';
+
+export interface DiscountInfo {
+  scope: DiscountScope;
+  type: DiscountType;
+  value: number;
+  amount: number;
+}
 
 export type CashPaymentResult = {
   paymentId: string;
@@ -31,7 +39,8 @@ export async function processCashPayment(
   tabId: string,
   amount: number,
   tipAmount: number,
-  tenderedAmount: number
+  tenderedAmount: number,
+  discountInfo?: DiscountInfo
 ): Promise<Result<CashPaymentResult, AppError>> {
   const idempotencyKey = generateIdempotencyKey('payment_cash');
   const result = await callProcessPayment({
@@ -41,6 +50,10 @@ export async function processCashPayment(
     method: 'cash',
     idempotencyKey,
     tenderedAmount,
+    discountScope: discountInfo?.scope,
+    discountType: discountInfo?.type,
+    discountValue: discountInfo?.value,
+    discountAmount: discountInfo?.amount,
   });
 
   if (!result.ok) {
@@ -60,7 +73,8 @@ export async function processCardPayment(
   tabId: string,
   amount: number,
   tipAmount: number,
-  referenceNumber?: string
+  referenceNumber?: string,
+  discountInfo?: DiscountInfo
 ): Promise<Result<CardPaymentResult, AppError>> {
   const idempotencyKey = generateIdempotencyKey('payment_card');
   const trimmed = referenceNumber?.trim();
@@ -71,6 +85,10 @@ export async function processCardPayment(
     method: 'card',
     idempotencyKey,
     referenceNumber: trimmed && trimmed.length > 0 ? trimmed : undefined,
+    discountScope: discountInfo?.scope,
+    discountType: discountInfo?.type,
+    discountValue: discountInfo?.value,
+    discountAmount: discountInfo?.amount,
   });
 
   if (!result.ok) {
@@ -86,7 +104,8 @@ export async function processCardPayment(
 export async function processRappiPayment(
   tabId: string,
   amount: number,
-  rappiOrderId: string
+  rappiOrderId: string,
+  discountInfo?: DiscountInfo
 ): Promise<Result<RappiPaymentResult, AppError>> {
   const idempotencyKey = generateIdempotencyKey('payment_rappi');
   const result = await callProcessPayment({
@@ -96,6 +115,10 @@ export async function processRappiPayment(
     method: 'rappi',
     idempotencyKey,
     rappiOrderId: rappiOrderId.trim(),
+    discountScope: discountInfo?.scope,
+    discountType: discountInfo?.type,
+    discountValue: discountInfo?.value,
+    discountAmount: discountInfo?.amount,
   });
 
   if (!result.ok) {

@@ -100,6 +100,7 @@ function mapProductRow(
       sku: p.sku,
       isActive: p.is_active,
       imageUrl: p.image_url,
+      stock_threshold: p.stock_threshold ?? null,
       modifiers: [],
       ...(catEmbed
         ? {
@@ -887,6 +888,57 @@ export function useVoidOrder() {
       if (!result.ok) return;
       void queryClient.invalidateQueries({ queryKey: tabKeys.detail(tabId) });
       void queryClient.invalidateQueries({ queryKey: tabKeys.lists() });
+    },
+  });
+}
+
+// ============================================================================
+// OPEN TABS PENDING TOTAL
+// ============================================================================
+
+/**
+ * Sums the revenue of all open tabs that belong to the given caja session.
+ * Uses order_items joined through orders → tabs to compute the total.
+ */
+export function useOpenTabsPendingTotal(cajaId: string | null) {
+  return useQuery({
+    queryKey: ['tabs', 'pending-total', cajaId] as const,
+    enabled: cajaId !== null,
+    refetchInterval: 30_000,
+    queryFn: async (): Promise<Result<number>> => {
+      if (!cajaId) return ok(0);
+
+      // Fetch open tabs for the caja session with their order_items
+      const { data, error } = await supabase
+        .from('tabs')
+        .select('id, orders(order_items(quantity, unit_price, modifier_price_delta))')
+        .eq('caja_session_id', cajaId)
+        .eq('status', 'open');
+
+      if (error) {
+        logger.error('tabs.pending_total.fetch_failed', { message: error.message });
+        return err(unknownError(error));
+      }
+
+      type PendingOrderItem = {
+        quantity: number;
+        unit_price: number;
+        modifier_price_delta: number;
+      };
+      type PendingOrder = { order_items: PendingOrderItem[] | null };
+      type PendingTabRow = { id: string; orders: PendingOrder[] | null };
+
+      const rows = data as unknown as PendingTabRow[];
+      let total = 0;
+      for (const tab of rows) {
+        for (const order of tab.orders ?? []) {
+          for (const item of order.order_items ?? []) {
+            total += item.quantity * (item.unit_price + item.modifier_price_delta);
+          }
+        }
+      }
+
+      return ok(Math.round(total * 100) / 100);
     },
   });
 }

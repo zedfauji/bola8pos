@@ -17,12 +17,14 @@ type BillingForm = {
     bbvaCard: boolean;
     rappi: boolean;
   };
+  firstHourMode: 'full' | 'prorated';
 };
 
 const DEFAULT_FORM: BillingForm = {
   taxRatePercent: '16',
   tipPercentagesCsv: '10, 15, 18, 20',
   paymentMethods: { cash: true, bbvaCard: true, rappi: true },
+  firstHourMode: 'prorated',
 };
 
 function parseTipPercentages(raw: string): number[] | null {
@@ -63,6 +65,7 @@ export function BillingSettingsTab({ currentRole }: Props) {
           bbvaCard: data.billing.paymentMethods.bbvaCard,
           rappi: data.billing.paymentMethods.rappi,
         },
+        firstHourMode: data.billing.firstHourMode,
       });
     }
     if (!labelsDirty) {
@@ -99,6 +102,7 @@ export function BillingSettingsTab({ currentRole }: Props) {
         taxRatePercent,
         defaultTipPercentages: tips,
         paymentMethods: form.paymentMethods,
+        firstHourMode: form.firstHourMode,
       },
     });
     if (!result.ok) {
@@ -164,6 +168,43 @@ export function BillingSettingsTab({ currentRole }: Props) {
                 }}
               >
                 {button.label}
+              </POSButton>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>First hour billing mode</Label>
+          <p className="text-xs text-muted-foreground">
+            Controls how sessions under 60 minutes are billed.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[
+              {
+                value: 'prorated' as const,
+                label: 'Prorated',
+                description: 'Bill in 15-minute blocks (default)',
+              },
+              {
+                value: 'full' as const,
+                label: 'Full Hour',
+                description: 'Charge minimum 1 full hour for short sessions',
+              },
+            ].map(option => (
+              <POSButton
+                key={option.value}
+                type="button"
+                touchSize="large"
+                variant={form.firstHourMode === option.value ? 'default' : 'outline'}
+                onClick={() => {
+                  setDirty(true);
+                  setForm(current => ({ ...current, firstHourMode: option.value }));
+                }}
+              >
+                <span className="flex flex-col items-start gap-0.5 text-left">
+                  <span className="font-semibold">{option.label}</span>
+                  <span className="text-xs font-normal opacity-80">{option.description}</span>
+                </span>
               </POSButton>
             ))}
           </div>

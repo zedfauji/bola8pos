@@ -13,6 +13,7 @@ export {
   inventoryStore,
   selectInventoryByProductId,
   selectIsLowStock,
+  useInventoryRealtimeBridge,
 } from './store';
 export type { LowStockAlertItem } from './store';
 
@@ -22,6 +23,7 @@ export {
   useInventory,
   useInventoryByProduct,
   useLowStockInventory,
+  useInventoryAlerts,
   useMutationAdjustInventory,
   useInventoryLog,
 } from './queries';

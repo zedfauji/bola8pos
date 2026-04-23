@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { AssignPoolSessionSheet } from '@features/assign-pool-session-to-tab';
+import { EditStartTimeDialog } from '@features/edit-session-start-time';
 import { ManagerPinDialog } from '@features/manager-pin-gate/ui/ManagerPinDialog';
 import { usePrintPreCheque } from '@features/print-precheque/usePrintPreCheque';
 import { RemoveTabItemDialog } from '@features/remove-tab-item/ui/RemoveTabItemDialog';
@@ -11,6 +12,7 @@ import { StopSessionConfirm } from '@features/stop-pool-timer/ui/StopSessionConf
 import { TransferPoolDialog } from '@features/transfer-tab/ui/TransferPoolDialog';
 import { usePoolTable } from '@entities/pool-table/model/queries';
 import { usePoolTimer } from '@entities/pool-table/model/usePoolTimer';
+import { useSettings } from '@entities/settings';
 import { useTab, useTabs } from '@entities/tab';
 import { useTabStore } from '@entities/tab/model/store';
 import type { OrderItem } from '@shared/lib/domain';
@@ -63,8 +65,11 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
   // openTabs needed by StopSessionConfirm
   const { data: openTabs } = useTabs();
 
+  const { data: settings } = useSettings();
+  const firstHourMode = settings?.billing.firstHourMode ?? 'prorated';
+
   // ── Live timer ────────────────────────────────────────────────────────────
-  const timer = usePoolTimer(session?.startedAt ?? null, table?.ratePerHour);
+  const timer = usePoolTimer(session?.startedAt ?? null, table?.ratePerHour, firstHourMode);
 
   // ── Mutations ─────────────────────────────────────────────────────────────
   const printPreCheque = usePrintPreCheque();
@@ -78,6 +83,8 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
   const [showPinForRemoval, setShowPinForRemoval] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [showPinForEditStart, setShowPinForEditStart] = useState(false);
+  const [editStartOpen, setEditStartOpen] = useState(false);
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const activeOrders = useMemo(() => (tab?.orders ?? []).filter(o => o.status !== 'voided'), [tab]);
@@ -184,7 +191,10 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <Clock className="size-5 text-primary" />
-            <span className="font-mono text-3xl font-bold text-primary">
+            <span
+              data-testid="elapsed-minutes"
+              className="font-mono text-3xl font-bold text-primary"
+            >
               {formatElapsed(timer.totalSeconds)}
             </span>
           </div>
@@ -352,6 +362,20 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
           >
             Stop &amp; Move to Table
           </POSButton>
+
+          {!session.stoppedAt && (
+            <POSButton
+              type="button"
+              variant="outline"
+              touchSize="large"
+              className="col-span-2 min-h-[56px]"
+              onClick={() => {
+                setShowPinForEditStart(true);
+              }}
+            >
+              Edit Start Time
+            </POSButton>
+          )}
         </div>
       </div>
 
@@ -451,6 +475,24 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
           setShowCloseConfirm(false);
         }}
       />
+
+      {/* PIN gate for edit start time — Step 1 */}
+      <ManagerPinDialog
+        open={showPinForEditStart}
+        onOpenChange={open => {
+          if (!open) {
+            setShowPinForEditStart(false);
+          }
+        }}
+        requiredAction="void_order"
+        onSuccess={() => {
+          setShowPinForEditStart(false);
+          setEditStartOpen(true);
+        }}
+      />
+
+      {/* Edit start time dialog — Step 2 */}
+      <EditStartTimeDialog open={editStartOpen} onOpenChange={setEditStartOpen} session={session} />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useMutationStopSession } from '@entities/pool-table/model/queries';
+import { useSettings } from '@entities/settings';
 import { usePermissions } from '@entities/staff/model/usePermissions';
 import type { Tab } from '@entities/tab';
 import { useTabStore } from '@entities/tab/model/store';
@@ -41,6 +42,8 @@ export function StopSessionConfirm({
   const selectTab = useTabStore(s => s.selectTab);
   const openDrawer = useTabStore(s => s.openDrawer);
   const tabsFromStore = useTabStore(s => s.tabs);
+  const { data: settings } = useSettings();
+  const firstHourMode = settings?.billing.firstHourMode ?? 'prorated';
 
   const linkedTab = useMemo(() => {
     if (!session?.tabId) return undefined;
@@ -56,8 +59,9 @@ export function StopSessionConfirm({
       startedAt: session.startedAt,
       endTime: end,
       ratePerHour: table.ratePerHour,
+      firstHourMode,
     });
-  }, [session, table]);
+  }, [session, table, firstHourMode]);
 
   const paidTabBlock =
     Boolean(session?.tabId) && linkedTab !== undefined && linkedTab.status === 'paid';

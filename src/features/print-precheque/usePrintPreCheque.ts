@@ -30,16 +30,21 @@ export function usePrintPreCheque() {
       const barName = settings?.general.barName ?? 'Bar';
       const cashierName = currentStaff?.name ?? tab.staff?.name ?? 'Staff';
 
+      // When kdsEnabled, food items are handled by the kitchen display and excluded from the pre-cheque.
+      const kdsEnabled = settings?.receipt.kdsEnabled ?? false;
+
       // Flatten non-voided order items into pre-cheque line items
       const items = tab.orders
         .filter(o => o.status !== 'voided')
         .flatMap(o =>
-          o.items.map(item => ({
-            name: item.product?.name ?? 'Item',
-            quantity: item.quantity,
-            lineTotal: item.lineTotal ?? item.quantity * item.unitPrice,
-            orderedAt: o.createdAt,
-          }))
+          o.items
+            .filter(item => !kdsEnabled || item.product?.category?.isFood !== true)
+            .map(item => ({
+              name: item.product?.name ?? 'Item',
+              quantity: item.quantity,
+              lineTotal: item.lineTotal ?? item.quantity * item.unitPrice,
+              orderedAt: o.createdAt,
+            }))
         );
 
       // Compute pool charge: use stored billedMinutes if session is stopped,
@@ -94,7 +99,7 @@ export function usePrintPreCheque() {
 
       logger.info('precheque.print.start', { tabId: tab.id, tableId: table.id });
 
-      const result = await printRawText(text);
+      const result = await printRawText(text, { autoCut: settings?.receipt.autoCut });
 
       if (!result.ok) {
         logger.warn('precheque.print.failed', { tabId: tab.id, error: result.error.message });

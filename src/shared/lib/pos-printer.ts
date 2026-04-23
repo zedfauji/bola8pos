@@ -97,17 +97,33 @@ export async function openCashDrawer(): Promise<Result<void>> {
   return ok(undefined);
 }
 
+/** Options for {@link printRawText}. */
+export type PrintRawTextOptions = {
+  /** When true, appends ESC/POS full-cut sequence (GS V A NUL) after the text. */
+  autoCut: boolean | undefined;
+};
+
+/** ESC/POS full-cut command bytes: GS V A NUL */
+const ESC_POS_FULL_CUT = '\x1d\x56\x41\x00';
+
 /**
  * Prints arbitrary pre-formatted plain text on the thermal printer.
  * Used for pre-cheques, shift summaries, etc. where no ReceiptData is built.
  * In Tauri: invokes `print_raw_text` Rust command.
  * Browser fallback: opens a popup with the text for window.print().
+ *
+ * @param options.autoCut - When true, appends ESC/POS full-cut bytes after the text.
  */
-export async function printRawText(text: string): Promise<Result<void>> {
+export async function printRawText(
+  text: string,
+  options?: PrintRawTextOptions
+): Promise<Result<void>> {
+  const payload = options?.autoCut === true ? text + ESC_POS_FULL_CUT : text;
+
   if (isTauri()) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('print_raw_text', { text });
+      await invoke('print_raw_text', { text: payload });
       return ok(undefined);
     } catch (e) {
       logger.warn('printer.raw_text.failed', { raw: String(e) });

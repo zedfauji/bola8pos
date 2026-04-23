@@ -39,11 +39,12 @@ export const UrlSchema = z
 // ENUMS
 // ============================================================================
 
-export const UserRoleSchema = z.enum(['bartender', 'manager', 'admin']);
+export const UserRoleSchema = z.enum(['bartender', 'manager', 'admin', 'kitchen']);
 export const UserRole = {
   BARTENDER: 'bartender',
   MANAGER: 'manager',
   ADMIN: 'admin',
+  KITCHEN: 'kitchen',
 } as const;
 
 export type UserRole = z.infer<typeof UserRoleSchema>;
@@ -63,7 +64,18 @@ export const OrderStatus = {
   VOIDED: 'voided',
 } as const;
 
+export const KdsStatusSchema = z.enum(['pending', 'in_progress', 'done']);
+export const KdsStatus = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  DONE: 'done',
+} as const;
+export type KdsStatus = z.infer<typeof KdsStatusSchema>;
+
 export const PoolTableStatusSchema = z.enum(['available', 'occupied', 'reserved', 'maintenance']);
+
+export const PoolTableTypeSchema = z.enum(['pool', 'carom', 'consumption']);
+export type PoolTableType = z.infer<typeof PoolTableTypeSchema>;
 export const PoolTableStatus = {
   AVAILABLE: 'available',
   OCCUPIED: 'occupied',
@@ -84,6 +96,7 @@ export const InventoryAdjustReasonSchema = z.enum([
   'waste',
   'delivery',
   'correction',
+  'physical_count',
 ]);
 export const InventoryAdjustReason = {
   SALE: 'sale',
@@ -91,7 +104,23 @@ export const InventoryAdjustReason = {
   WASTE: 'waste',
   DELIVERY: 'delivery',
   CORRECTION: 'correction',
+  PHYSICAL_COUNT: 'physical_count',
 } as const;
+
+export const DiscountScopeSchema = z.enum(['all', 'pool_only', 'consumptions_only']);
+export const DiscountScope = {
+  ALL: 'all',
+  POOL_ONLY: 'pool_only',
+  CONSUMPTIONS_ONLY: 'consumptions_only',
+} as const;
+export type DiscountScope = z.infer<typeof DiscountScopeSchema>;
+
+export const DiscountTypeSchema = z.enum(['percent', 'fixed']);
+export const DiscountType = {
+  PERCENT: 'percent',
+  FIXED: 'fixed',
+} as const;
+export type DiscountType = z.infer<typeof DiscountTypeSchema>;
 
 // ============================================================================
 // CATEGORY
@@ -104,6 +133,7 @@ export const CategorySchema = z.object({
   sortOrder: z.number().int().nonnegative(),
   happyHourStart: TimeStringSchema.nullable(),
   happyHourEnd: TimeStringSchema.nullable(),
+  isFood: z.boolean().default(false),
   createdAt: TimestampSchema,
 });
 
@@ -150,6 +180,8 @@ export const ProductSchema = z.object({
   sku: z.string().nullable(),
   isActive: z.boolean(),
   imageUrl: UrlSchema.nullable(),
+  stock_threshold: z.number().nullable(),
+  barcode: z.string().nullable().optional(),
   category: CategorySchema.optional(),
   modifiers: z.array(ModifierSchema).default([]),
 });
@@ -230,6 +262,7 @@ export const OrderItemSchema = z.object({
   modifierIds: z.array(UuidSchema).default([]),
   modifierPriceDelta: MoneySchema.default(0),
   notes: z.string().max(200).nullable(),
+  kdsStatus: KdsStatusSchema.default('pending'),
   product: ProductSchema.optional(),
   modifiers: z.array(ModifierSchema).default([]),
   lineTotal: MoneySchema.optional(),
@@ -237,6 +270,7 @@ export const OrderItemSchema = z.object({
 
 export const OrderItemCreateSchema = OrderItemSchema.omit({
   id: true,
+  kdsStatus: true,
   product: true,
   modifiers: true,
   lineTotal: true,
@@ -438,6 +472,7 @@ export const PoolTableSchema = z.object({
   label: z.string().min(1).max(50),
   ratePerHour: MoneySchema,
   status: PoolTableStatusSchema,
+  tableType: PoolTableTypeSchema.default('pool'),
   currentSessionId: UuidSchema.nullable(),
   currentSession: PoolSessionBaseSchema.optional(),
 });
@@ -492,6 +527,10 @@ export const PaymentSchema = z.object({
   idempotencyKey: z.string().min(1).max(255).nullable().optional(),
   processedAt: TimestampSchema,
   processedBy: UuidSchema,
+  discountScope: DiscountScopeSchema.optional(),
+  discountType: DiscountTypeSchema.optional(),
+  discountValue: z.number().nonnegative().optional(),
+  discountAmount: MoneySchema.optional(),
 });
 
 export const PaymentCreateSchema = PaymentSchema.omit({
@@ -556,6 +595,23 @@ export type InventoryLogCreate = z.infer<typeof InventoryLogCreateSchema>;
 export type InventoryLogUpdate = z.infer<typeof InventoryLogUpdateSchema>;
 
 // ============================================================================
+// INVENTORY ALERT
+// ============================================================================
+
+/**
+ * Represents a product that is at or below its stock threshold.
+ * Derived by joining inventory.quantity_on_hand with products.stock_threshold.
+ */
+export const InventoryAlertSchema = z.object({
+  productId: UuidSchema,
+  productName: z.string().min(1),
+  currentStock: z.number().int().nonnegative(),
+  threshold: z.number().int().nonnegative(),
+});
+
+export type InventoryAlert = z.infer<typeof InventoryAlertSchema>;
+
+// ============================================================================
 // SETTINGS
 // ============================================================================
 
@@ -606,6 +662,7 @@ export const BillingSettingsSchema = z.object({
     bbvaCard: true,
     rappi: true,
   }),
+  firstHourMode: z.enum(['full', 'prorated']).default('prorated'),
 });
 
 export type BillingSettings = z.infer<typeof BillingSettingsSchema>;
@@ -637,6 +694,10 @@ export const ReceiptSettingsSchema = z.object({
   headerLine2: z.string().max(48).default(''),
   footerText: z.string().max(480).default(''),
   boldTotals: z.boolean().default(true),
+  printOnStart: z.boolean().default(false),
+  autoCut: z.boolean().default(false),
+  kdsEnabled: z.boolean().default(false),
+  logoDataUrl: z.string().nullable().default(null),
 });
 
 export type ReceiptSettings = z.infer<typeof ReceiptSettingsSchema>;
@@ -676,6 +737,34 @@ export type CajaSession = z.infer<typeof CajaSessionSchema>;
 export type CajaSessionCreate = z.infer<typeof CajaSessionCreateSchema>;
 
 // ============================================================================
+// CAJA ENTRY (expense / income against an open caja session)
+// ============================================================================
+
+export const CajaEntryTypeSchema = z.enum(['expense', 'income']);
+export type CajaEntryType = z.infer<typeof CajaEntryTypeSchema>;
+
+export const CajaEntrySchema = z.object({
+  id: UuidSchema,
+  cajaSessionId: UuidSchema,
+  type: CajaEntryTypeSchema,
+  amount: MoneySchema,
+  concept: z.string().min(1).max(200),
+  createdAt: TimestampSchema,
+  staffId: UuidSchema,
+  staffName: z.string().optional(),
+});
+export type CajaEntry = z.infer<typeof CajaEntrySchema>;
+
+export const CajaEntryCreateSchema = z.object({
+  cajaSessionId: UuidSchema,
+  type: CajaEntryTypeSchema,
+  amount: MoneySchema,
+  concept: z.string().min(1).max(200),
+  staffId: UuidSchema,
+});
+export type CajaEntryCreate = z.infer<typeof CajaEntryCreateSchema>;
+
+// ============================================================================
 // CAJA REPORT (returned by get_caja_report RPC)
 // ============================================================================
 
@@ -686,6 +775,10 @@ export const CajaReportSummarySchema = z.object({
   rappiSales: MoneySchema,
   orderCount: z.number().int().nonnegative(),
   tabCount: z.number().int().nonnegative(),
+  totalExpenses: MoneySchema,
+  totalIncome: MoneySchema,
+  // netBalance can be negative when expenses exceed revenue, so use a signed money schema
+  netBalance: z.number().multipleOf(0.01),
 });
 
 export const CashReconciliationSchema = z.object({
@@ -715,6 +808,7 @@ export const CajaReportSchema = z.object({
   cashReconciliation: CashReconciliationSchema,
   topProducts: z.array(CajaReportTopProductSchema),
   staffSummary: z.array(CajaReportStaffSchema),
+  cajaEntries: z.array(CajaEntrySchema),
 });
 
 export type CajaReport = z.infer<typeof CajaReportSchema>;
@@ -722,6 +816,28 @@ export type CajaReportSummary = z.infer<typeof CajaReportSummarySchema>;
 export type CashReconciliation = z.infer<typeof CashReconciliationSchema>;
 export type CajaReportTopProduct = z.infer<typeof CajaReportTopProductSchema>;
 export type CajaReportStaff = z.infer<typeof CajaReportStaffSchema>;
+
+// ============================================================================
+// STAFF METRICS (for Staff Reports)
+// ============================================================================
+
+export const StaffMetricSchema = z.object({
+  staffId: UuidSchema,
+  staffName: z.string().min(1),
+  revenue: MoneySchema,
+  transactionCount: z.number().int().nonnegative(),
+  avgCheckSize: MoneySchema,
+  voidCount: z.number().int().nonnegative(),
+});
+
+export const StaffTipsSchema = z.object({
+  staffId: UuidSchema,
+  staffName: z.string().min(1),
+  totalTips: MoneySchema,
+});
+
+export type StaffMetric = z.infer<typeof StaffMetricSchema>;
+export type StaffTips = z.infer<typeof StaffTipsSchema>;
 
 // ============================================================================
 // TAB TRANSFER
@@ -787,6 +903,44 @@ export const SettingsBackupSummarySchema = z.object({
 export type SettingsBackupSummary = z.infer<typeof SettingsBackupSummarySchema>;
 
 // ============================================================================
+// REPORT ROW TYPES (used by report queries and exporters)
+// ============================================================================
+
+export type ProductSalesRow = {
+  productId: string;
+  productName: string;
+  categoryName: string;
+  units: number;
+  revenue: number;
+  pctTotal: number;
+};
+
+export type HourlyRow = {
+  hour: number;
+  orderCount: number;
+  revenue: number;
+};
+
+export const VoidRefundRowSchema = z.object({
+  orderId: UuidSchema,
+  voidedAt: TimestampSchema,
+  staffName: z.string(),
+  amount: MoneySchema,
+  reason: z.string(),
+});
+
+export type VoidRefundRow = z.infer<typeof VoidRefundRowSchema>;
+
+export type CategoryRevenueRow = {
+  categoryId: string;
+  categoryName: string;
+  unitsSold: number;
+  orderCount: number;
+  revenue: number;
+  pctTotal: number;
+};
+
+// ============================================================================
 // CART ITEM (client-only â€” not in DB)
 // ============================================================================
 
@@ -832,7 +986,9 @@ export const domain = {
     UserRole: UserRoleSchema,
     TabStatus: TabStatusSchema,
     OrderStatus: OrderStatusSchema,
+    KdsStatus: KdsStatusSchema,
     PoolTableStatus: PoolTableStatusSchema,
+    PoolTableType: PoolTableTypeSchema,
     PaymentMethod: PaymentMethodSchema,
     InventoryAdjustReason: InventoryAdjustReasonSchema,
 
@@ -908,11 +1064,17 @@ export const domain = {
     CajaStatus: CajaStatusSchema,
     CajaSession: CajaSessionSchema,
     CajaSessionCreate: CajaSessionCreateSchema,
+    CajaEntryType: CajaEntryTypeSchema,
+    CajaEntry: CajaEntrySchema,
+    CajaEntryCreate: CajaEntryCreateSchema,
     CajaReport: CajaReportSchema,
     CajaReportSummary: CajaReportSummarySchema,
     CashReconciliation: CashReconciliationSchema,
     CajaReportTopProduct: CajaReportTopProductSchema,
     CajaReportStaff: CajaReportStaffSchema,
+
+    StaffMetric: StaffMetricSchema,
+    StaffTips: StaffTipsSchema,
 
     TabTransferType: TabTransferTypeSchema,
     TabTransfer: TabTransferSchema,
@@ -928,7 +1090,9 @@ export const domain = {
     UserRole: z.infer<typeof UserRoleSchema>;
     TabStatus: z.infer<typeof TabStatusSchema>;
     OrderStatus: z.infer<typeof OrderStatusSchema>;
+    KdsStatus: KdsStatus;
     PoolTableStatus: z.infer<typeof PoolTableStatusSchema>;
+    PoolTableType: PoolTableType;
     PaymentMethod: z.infer<typeof PaymentMethodSchema>;
     InventoryAdjustReason: z.infer<typeof InventoryAdjustReasonSchema>;
 
@@ -1003,7 +1167,13 @@ export const domain = {
     CajaStatus: CajaStatus;
     CajaSession: CajaSession;
     CajaSessionCreate: CajaSessionCreate;
+    CajaEntryType: CajaEntryType;
+    CajaEntry: CajaEntry;
+    CajaEntryCreate: CajaEntryCreate;
     CajaReport: CajaReport;
+
+    StaffMetric: StaffMetric;
+    StaffTips: StaffTips;
 
     TabTransferType: TabTransferType;
     TabTransfer: TabTransfer;
@@ -1039,6 +1209,7 @@ export const domain = {
       sku: 'BEER-01',
       isActive: true,
       imageUrl: null,
+      stock_threshold: null,
       modifiers: [],
     } as Product,
     cartItem: {
@@ -1052,6 +1223,7 @@ export const domain = {
         sku: 'BEER-01',
         isActive: true,
         imageUrl: null,
+        stock_threshold: null,
         modifiers: [],
       },
       quantity: 1,

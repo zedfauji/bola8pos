@@ -16,7 +16,7 @@ describe('usePoolTimer', () => {
     const now = new Date('2026-04-17T12:00:00.000Z');
     vi.setSystemTime(now);
 
-    const { result } = renderHook(() => usePoolTimer(null, 10));
+    const { result } = renderHook(() => usePoolTimer(null, 10, 'prorated'));
 
     expect(result.current.totalSeconds).toBe(0);
     expect(result.current.isRunning).toBe(false);
@@ -34,7 +34,7 @@ describe('usePoolTimer', () => {
     vi.setSystemTime(now);
     const startedAt = new Date(now.getTime() - 120_000);
 
-    const { result } = renderHook(() => usePoolTimer(startedAt, 10));
+    const { result } = renderHook(() => usePoolTimer(startedAt, 10, 'prorated'));
 
     expect(result.current.totalSeconds).toBe(120);
     expect(result.current.isRunning).toBe(true);
@@ -51,7 +51,7 @@ describe('usePoolTimer', () => {
     vi.setSystemTime(now);
     const startedAt = new Date(now.getTime() - 60_000);
 
-    const { result } = renderHook(() => usePoolTimer(startedAt, 10));
+    const { result } = renderHook(() => usePoolTimer(startedAt, 10, 'prorated'));
 
     expect(result.current.currentCharge).toBe(2.5);
   });
@@ -61,7 +61,7 @@ describe('usePoolTimer', () => {
     vi.setSystemTime(now);
     const startedAt = new Date(now.getTime() - 16 * 60_000);
 
-    const { result } = renderHook(() => usePoolTimer(startedAt, 10));
+    const { result } = renderHook(() => usePoolTimer(startedAt, 10, 'prorated'));
 
     expect(result.current.currentCharge).toBe(5.0);
   });
@@ -71,7 +71,7 @@ describe('usePoolTimer', () => {
     vi.setSystemTime(now);
     const startedAt = new Date(now.getTime() - 60 * 60_000);
 
-    const { result } = renderHook(() => usePoolTimer(startedAt, 10));
+    const { result } = renderHook(() => usePoolTimer(startedAt, 10, 'prorated'));
 
     expect(result.current.currentCharge).toBe(10.0);
   });
@@ -83,12 +83,34 @@ describe('usePoolTimer', () => {
 
     const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
 
-    const { unmount } = renderHook(() => usePoolTimer(startedAt, 10));
+    const { unmount } = renderHook(() => usePoolTimer(startedAt, 10, 'prorated'));
 
     expect(clearIntervalSpy).not.toHaveBeenCalled();
 
     unmount();
 
     expect(clearIntervalSpy).toHaveBeenCalled();
+  });
+
+  it('full mode: charges 60 min minimum for a 30-min session', () => {
+    const baseTime = new Date('2026-04-17T12:00:00.000Z');
+    vi.setSystemTime(new Date(baseTime.getTime() + 30 * 60 * 1000));
+    const startedAt = baseTime;
+
+    const { result } = renderHook(() => usePoolTimer(startedAt, 60, 'full'));
+
+    expect(result.current.billedMinutes).toBe(60);
+    expect(result.current.currentCharge).toBe(60);
+  });
+
+  it('prorated mode: charges 15-min blocks for a 7-min session', () => {
+    const baseTime = new Date('2026-04-17T12:00:00.000Z');
+    vi.setSystemTime(new Date(baseTime.getTime() + 7 * 60 * 1000));
+    const startedAt = baseTime;
+
+    const { result } = renderHook(() => usePoolTimer(startedAt, 60, 'prorated'));
+
+    expect(result.current.billedMinutes).toBe(15);
+    expect(result.current.currentCharge).toBeCloseTo(15, 1);
   });
 });

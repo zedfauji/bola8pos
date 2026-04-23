@@ -47,6 +47,7 @@ const DEFAULT_BILLING: BillingSettings = {
   taxRatePercent: 16,
   defaultTipPercentages: [10, 15, 18, 20],
   paymentMethods: { cash: true, bbvaCard: true, rappi: true },
+  firstHourMode: 'prorated',
 };
 
 const DEFAULT_RAPPI: RappiSettings = {
@@ -72,6 +73,10 @@ const DEFAULT_RECEIPT: ReceiptSettings = {
   headerLine2: '',
   footerText: '',
   boldTotals: true,
+  printOnStart: false,
+  autoCut: false,
+  kdsEnabled: false,
+  logoDataUrl: null,
 };
 
 export type SettingsSnapshot = {

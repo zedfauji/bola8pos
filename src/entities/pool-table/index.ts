@@ -2,6 +2,7 @@ export {
   PoolTableSchema,
   PoolSessionSchema,
   PoolSessionSummarySchema,
+  PoolTableTypeSchema,
   usePoolTableStore,
   selectTableById,
   selectActiveSessionForTable,
@@ -25,6 +26,7 @@ export type {
   PoolTable,
   PoolSession,
   PoolTableStatus,
+  PoolTableType,
   PoolSessionSummary,
   UsePoolTimerOptions,
 } from './model';

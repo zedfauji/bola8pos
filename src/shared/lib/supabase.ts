@@ -1,26 +1,48 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './supabase.types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+type SupabaseClientType = ReturnType<typeof createClient<Database>>;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
-
-// Module-level token cache — populated by onAuthStateChange so callProcessPayment
-// doesn't rely on getSession() storage reads, which fail in some environments.
+let _client: SupabaseClientType | null = null;
 let _cachedAccessToken: string | null = null;
 
-supabase.auth.onAuthStateChange((_event, session) => {
-  _cachedAccessToken = session?.access_token ?? null;
+export function initSupabaseClient(url: string, anonKey: string): void {
+  if (_client) return; // idempotent — only init once
+  _client = createClient<Database>(url, anonKey, {
+    auth: { persistSession: true, autoRefreshToken: true },
+  });
+  _client.auth.onAuthStateChange((_event, session) => {
+    _cachedAccessToken = session?.access_token ?? null;
+  });
+}
+
+function getClient(): SupabaseClientType {
+  if (!_client) {
+    // Dev fallback: use build-time VITE_ env vars
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+    if (url && key) {
+      initSupabaseClient(url, key);
+    } else {
+      throw new Error(
+        'Supabase not initialized. Ensure AppConfigProvider ran before any DB access.'
+      );
+    }
+  }
+  // _client is guaranteed non-null here: either it was set before entry,
+  // or initSupabaseClient just set it above (throws if url/key missing).
+  const client = _client;
+  if (!client) {
+    throw new Error('Supabase client failed to initialize.');
+  }
+  return client;
+}
+
+// Backward-compatible proxy — all existing `supabase.from(...)` calls keep working
+export const supabase = new Proxy({} as SupabaseClientType, {
+  get(_t, prop) {
+    return (getClient() as unknown as Record<string | symbol, unknown>)[prop as string];
+  },
 });
 
 /** Returns the current user's JWT access token, or null if not authenticated. */

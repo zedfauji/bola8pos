@@ -56,6 +56,7 @@ describe('useVoidOrder', () => {
         modifierIds: [],
         modifierPriceDelta: 1,
         notes: null,
+        kdsStatus: 'pending',
         modifiers: [],
       },
       {
@@ -67,6 +68,7 @@ describe('useVoidOrder', () => {
         modifierIds: [],
         modifierPriceDelta: 0,
         notes: null,
+        kdsStatus: 'pending',
         modifiers: [],
       },
     ],

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import type { Shift, Staff } from '@shared/lib/domain';
+import type { Shift, Staff, StaffMetric, StaffTips } from '@shared/lib/domain';
+import { StaffMetricSchema, StaffTipsSchema } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
@@ -8,6 +10,7 @@ import {
   supabaseMutation,
   supabaseQuery,
   unknownError,
+  type AppErrorCode,
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -21,6 +24,8 @@ export const staffKeys = {
   openShifts: () => [...staffKeys.all, 'openShifts'] as const,
   shiftClosePreview: (shiftId: string, staffId: string) =>
     [...staffKeys.all, 'shiftClosePreview', shiftId, staffId] as const,
+  staffMetrics: (from: string, to: string) => [...staffKeys.all, 'staffMetrics', from, to] as const,
+  staffTips: (from: string, to: string) => [...staffKeys.all, 'staffTips', from, to] as const,
 };
 
 function mapStaffRow(row: Tables<'profiles'>): Result<Staff> {
@@ -430,5 +435,169 @@ export function useMutationClockOut() {
         useStaffStore.getState().updateShift(ctx.previousShift);
       }
     },
+  });
+}
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+// db is typed as any because order_items/payments columns may not be in supabase.types.ts yet.
+// Regenerate types and remove this cast when the generated types are up to date.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
+type ProfileRow = { id: string; name: string };
+type OrderItemRow = {
+  created_by: string | null;
+  quantity: number;
+  price: number;
+  tab_id: string;
+  is_voided: boolean;
+};
+type PaymentRow = { staff_id: string; tip: number | null };
+
+async function fetchActiveProfiles(): Promise<{
+  data: ProfileRow[] | null;
+  error: { message: string } | null;
+}> {
+  return db.from('profiles').select('id, name').eq('is_active', true) as Promise<{
+    data: ProfileRow[] | null;
+    error: { message: string } | null;
+  }>;
+}
+
+async function fetchOrderItemsInRange(
+  from: Date,
+  to: Date
+): Promise<{ data: OrderItemRow[] | null; error: { message: string } | null }> {
+  return db
+    .from('order_items')
+    .select('created_by, quantity, price, tab_id, is_voided')
+    .gte('created_at', from.toISOString())
+    .lte('created_at', to.toISOString()) as Promise<{
+    data: OrderItemRow[] | null;
+    error: { message: string } | null;
+  }>;
+}
+
+async function fetchPaymentsWithTipsInRange(
+  from: Date,
+  to: Date
+): Promise<{ data: PaymentRow[] | null; error: { message: string } | null }> {
+  return db
+    .from('payments')
+    .select('staff_id, tip')
+    .gte('created_at', from.toISOString())
+    .lte('created_at', to.toISOString())
+    .not('staff_id', 'is', null) as Promise<{
+    data: PaymentRow[] | null;
+    error: { message: string } | null;
+  }>;
+}
+/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+
+export function useStaffMetrics(from: Date, to: Date): UseQueryResult<Result<StaffMetric[]>> {
+  return useQuery({
+    queryKey: staffKeys.staffMetrics(from.toISOString(), to.toISOString()),
+    queryFn: async (): Promise<Result<StaffMetric[]>> => {
+      const { data: profiles, error: profilesError } = await fetchActiveProfiles();
+
+      if (profilesError) {
+        return err({ code: 'SUPABASE_ERROR' as AppErrorCode, message: profilesError.message });
+      }
+
+      const { data: items, error: itemsError } = await fetchOrderItemsInRange(from, to);
+
+      if (itemsError) {
+        return err({ code: 'SUPABASE_ERROR' as AppErrorCode, message: itemsError.message });
+      }
+
+      const metricsMap = new Map<
+        string,
+        { name: string; revenue: number; tabIds: Set<string>; voidCount: number }
+      >();
+
+      for (const profile of profiles ?? []) {
+        metricsMap.set(profile.id, {
+          name: profile.name,
+          revenue: 0,
+          tabIds: new Set(),
+          voidCount: 0,
+        });
+      }
+
+      for (const item of items ?? []) {
+        const createdBy = item.created_by;
+        if (!createdBy) continue;
+        const entry = metricsMap.get(createdBy);
+        if (!entry) continue;
+        if (item.is_voided) {
+          entry.voidCount += 1;
+        } else {
+          entry.revenue += item.price * item.quantity;
+          entry.tabIds.add(item.tab_id);
+        }
+      }
+
+      const metrics: StaffMetric[] = [];
+      for (const [staffId, entry] of metricsMap.entries()) {
+        const transactionCount = entry.tabIds.size;
+        const avgCheckSize = transactionCount > 0 ? entry.revenue / transactionCount : 0;
+        metrics.push(
+          StaffMetricSchema.parse({
+            staffId,
+            staffName: entry.name,
+            revenue: entry.revenue,
+            transactionCount,
+            avgCheckSize,
+            voidCount: entry.voidCount,
+          })
+        );
+      }
+
+      metrics.sort((a, b) => b.revenue - a.revenue);
+      return ok(metrics);
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useStaffTips(from: Date, to: Date): UseQueryResult<Result<StaffTips[]>> {
+  return useQuery({
+    queryKey: staffKeys.staffTips(from.toISOString(), to.toISOString()),
+    queryFn: async (): Promise<Result<StaffTips[]>> => {
+      const { data: profiles, error: profilesError } = await fetchActiveProfiles();
+
+      if (profilesError) {
+        return err({ code: 'SUPABASE_ERROR' as AppErrorCode, message: profilesError.message });
+      }
+
+      const { data: payments, error: paymentsError } = await fetchPaymentsWithTipsInRange(from, to);
+
+      if (paymentsError) {
+        return err({ code: 'SUPABASE_ERROR' as AppErrorCode, message: paymentsError.message });
+      }
+
+      const nameMap = new Map<string, string>();
+      for (const p of profiles ?? []) {
+        nameMap.set(p.id, p.name);
+      }
+
+      const tipsMap = new Map<string, number>();
+      for (const payment of payments ?? []) {
+        const staffId = payment.staff_id;
+        const tip = payment.tip ?? 0;
+        tipsMap.set(staffId, (tipsMap.get(staffId) ?? 0) + tip);
+      }
+
+      const tips: StaffTips[] = [];
+      for (const [staffId, totalTips] of tipsMap.entries()) {
+        const staffName = nameMap.get(staffId);
+        if (!staffName) continue;
+        tips.push(StaffTipsSchema.parse({ staffId, staffName, totalTips }));
+      }
+
+      tips.sort((a, b) => b.totalTips - a.totalTips);
+      return ok(tips);
+    },
+    staleTime: 30_000,
   });
 }

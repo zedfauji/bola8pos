@@ -8,6 +8,7 @@ const baseTable: PoolTable = {
   label: 'Table 3',
   ratePerHour: 12,
   status: 'available',
+  tableType: 'pool',
   currentSessionId: null,
 };
 
@@ -42,6 +43,7 @@ export const Available: Story = {
   args: {
     table: baseTable,
     session: null,
+    firstHourMode: 'prorated',
   },
 };
 
@@ -54,6 +56,7 @@ export const OccupiedNoTab: Story = {
     },
     session: occupiedSession,
     onStopSession: () => {},
+    firstHourMode: 'prorated',
   },
 };
 
@@ -67,6 +70,7 @@ export const OccupiedWithTab: Story = {
     session: { ...occupiedSession, tabId: 'tab-1' },
     linkedCustomerName: 'Jordan',
     onStopSession: () => {},
+    firstHourMode: 'prorated',
   },
 };
 
@@ -77,5 +81,6 @@ export const Maintenance: Story = {
       status: 'maintenance',
     },
     session: null,
+    firstHourMode: 'prorated',
   },
 };

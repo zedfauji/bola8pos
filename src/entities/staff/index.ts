@@ -14,6 +14,8 @@ export {
   useOpenShifts,
   usePermissions,
   useShiftClosePreview,
+  useStaffMetrics,
+  useStaffTips,
 } from './model';
 
 export type {

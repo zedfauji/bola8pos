@@ -44,6 +44,7 @@ describe('TabDrawer', () => {
           modifierIds: [],
           modifierPriceDelta: 0,
           notes: null,
+          kdsStatus: 'pending',
           modifiers: [],
         },
       ],

@@ -15,6 +15,13 @@ import { PaymentPane } from './PaymentPane';
 
 vi.mock('@entities/tab/model/queries', () => ({
   useTabs: vi.fn(),
+  tabKeys: {
+    all: ['tabs'] as const,
+    lists: () => ['tabs', 'list'] as const,
+    list: () => ['tabs', 'list', {}] as const,
+    details: () => ['tabs', 'detail'] as const,
+    detail: (id: string) => ['tabs', 'detail', id] as const,
+  },
 }));
 
 vi.mock('@entities/staff/model/store', () => ({
@@ -64,16 +71,20 @@ vi.mock('@features/manager-pin-gate', () => ({
 // PaymentForm: a lightweight stub so PaymentPane logic can be tested without
 // the full payment form tree (which requires settings, processors, etc.)
 const mockOnPaymentSuccess = vi.fn();
+const mockOnClose = vi.fn();
 vi.mock('@widgets/PaymentModal', () => ({
   PaymentForm: ({
     tab,
     onPaymentSuccess,
+    onClose,
   }: {
     tab: Tab;
     staffId: string;
     onPaymentSuccess: () => void;
+    onClose: () => void;
   }) => {
     mockOnPaymentSuccess.mockImplementation(onPaymentSuccess);
+    mockOnClose.mockImplementation(onClose);
     return <div data-testid="payment-form">PaymentForm for {tab.customerName}</div>;
   },
 }));
@@ -258,8 +269,9 @@ describe('PaymentPane', () => {
       expect(screen.getByTestId('payment-form')).toBeInTheDocument();
     });
 
-    // Fire payment success
+    // Fire payment success (invalidates query) then close (clears selection)
     mockOnPaymentSuccess();
+    mockOnClose();
 
     await waitFor(() => {
       expect(

@@ -57,4 +57,34 @@ test.describe('Receipt / Hardware Settings', () => {
     await expect(page.locator('#receipt-showCashierName')).toBeChecked();
     await logout(page);
   });
+
+  test('Auto-cut toggle persists after reload', async ({ page }) => {
+    await loginAs(page, 'admin');
+    await page.goto('/settings');
+    await page.getByRole('tab', { name: 'Hardware' }).click();
+    await expect(page.locator('#receipt-autoCut')).toBeVisible({ timeout: 20_000 });
+
+    // Toggle ON — wait for the server round-trip before reloading
+    await page.locator('#receipt-autoCut').setChecked(true);
+    await expect(page.locator('#receipt-autoCut')).toBeChecked({ timeout: 10_000 });
+
+    // Reload and re-navigate to Settings → Hardware
+    await page.reload();
+    await page.goto('/settings');
+    await page.getByRole('tab', { name: 'Hardware' }).click();
+    await expect(page.locator('#receipt-autoCut')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('#receipt-autoCut')).toBeChecked();
+
+    // Toggle OFF — persist that too
+    await page.locator('#receipt-autoCut').setChecked(false);
+    await expect(page.locator('#receipt-autoCut')).not.toBeChecked({ timeout: 10_000 });
+
+    await page.reload();
+    await page.goto('/settings');
+    await page.getByRole('tab', { name: 'Hardware' }).click();
+    await expect(page.locator('#receipt-autoCut')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('#receipt-autoCut')).not.toBeChecked();
+
+    await logout(page);
+  });
 });

@@ -12,6 +12,7 @@ const { mutateAsyncMock, toastErrorMock, toastSuccessMock, mockSettingsData } = 
       taxRatePercent: 16,
       defaultTipPercentages: [10, 15, 18, 20],
       paymentMethods: { cash: true, bbvaCard: true, rappi: true },
+      firstHourMode: 'prorated' as const,
     },
     paymentLabels: { cash: 'Efectivo', card: 'Terminal BBVA', rappi: 'Rappi' },
   },
@@ -58,5 +59,59 @@ describe('BillingSettingsTab', () => {
 
     expect(toastErrorMock).toHaveBeenCalledWith('Save failed');
     expect(screen.getByLabelText('Tax rate (IVA %)').getAttribute('value')).toBe('20');
+  });
+
+  it('renders Prorated and Full Hour option buttons', () => {
+    render(<BillingSettingsTab currentRole="manager" />);
+
+    expect(screen.getByRole('button', { name: /Prorated/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Full Hour/i })).toBeInTheDocument();
+  });
+
+  it('clicking Full Hour button then Save Billing calls mutation with firstHourMode: full', async () => {
+    mutateAsyncMock.mockResolvedValueOnce({ ok: true });
+    const user = userEvent.setup();
+
+    render(<BillingSettingsTab currentRole="manager" />);
+
+    await user.click(screen.getByRole('button', { name: /Full Hour/i }));
+    await user.click(screen.getByRole('button', { name: 'Save Billing' }));
+
+    expect(mutateAsyncMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: 'billing',
+        value: expect.objectContaining({ firstHourMode: 'full' }),
+      })
+    );
+  });
+
+  it('clicking Full Hour then Prorated then Save calls mutation with firstHourMode: prorated', async () => {
+    mutateAsyncMock.mockResolvedValueOnce({ ok: true });
+    const user = userEvent.setup();
+
+    render(<BillingSettingsTab currentRole="manager" />);
+
+    await user.click(screen.getByRole('button', { name: /Full Hour/i }));
+    await user.click(screen.getByRole('button', { name: /Prorated/i }));
+    await user.click(screen.getByRole('button', { name: 'Save Billing' }));
+
+    expect(mutateAsyncMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: 'billing',
+        value: expect.objectContaining({ firstHourMode: 'prorated' }),
+      })
+    );
+  });
+
+  it('saves successfully with toast on successful mutation', async () => {
+    mutateAsyncMock.mockResolvedValueOnce({ ok: true });
+    const user = userEvent.setup();
+
+    render(<BillingSettingsTab currentRole="manager" />);
+
+    await user.click(screen.getByRole('button', { name: /Full Hour/i }));
+    await user.click(screen.getByRole('button', { name: 'Save Billing' }));
+
+    expect(toastSuccessMock).toHaveBeenCalledWith('Billing settings saved.');
   });
 });

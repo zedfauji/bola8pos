@@ -65,19 +65,25 @@ export function TabPaymentList({ selectedTabId, onSelect }: TabPaymentListProps)
   }
 
   return (
-    <ScrollArea className="flex-1" aria-label="tabs waiting for payment">
-      <div className="space-y-2 p-3">
-        {openTabs.map(tab => (
-          <TabPaymentCard
-            key={tab.id}
-            tab={tab}
-            selected={tab.id === selectedTabId}
-            onClick={() => {
-              onSelect(tab);
-            }}
-          />
-        ))}
-      </div>
-    </ScrollArea>
+    <div
+      className="flex-1 overflow-hidden"
+      aria-label="tabs waiting for payment"
+      data-testid="tabs-waiting-for-payment"
+    >
+      <ScrollArea className="h-full">
+        <div className="space-y-2 p-3">
+          {openTabs.map(tab => (
+            <TabPaymentCard
+              key={tab.id}
+              tab={tab}
+              selected={tab.id === selectedTabId}
+              onClick={() => {
+                onSelect(tab);
+              }}
+            />
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }

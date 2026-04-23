@@ -6,7 +6,7 @@ import {
   useMutationUpdatePoolTable,
   usePoolTables,
 } from '@entities/pool-table';
-import type { PoolTable, UserRole } from '@shared/lib/domain';
+import type { PoolTable, PoolTableType, UserRole } from '@shared/lib/domain';
 import { ConfirmDialog, Input, Label, POSButton, ProtectedAction } from '@shared/ui';
 
 type Props = {
@@ -16,6 +16,7 @@ type Props = {
 type EditDraft = {
   label: string;
   ratePerHour: string;
+  tableType: PoolTableType;
 };
 
 export function PoolTablesSettingsTab({ currentRole }: Props) {
@@ -36,6 +37,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
       drafts[table.id] ?? {
         label: table.label,
         ratePerHour: String(table.ratePerHour),
+        tableType: table.tableType,
       }
     );
   };
@@ -46,6 +48,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
       [tableId]: {
         label: current[tableId]?.label ?? '',
         ratePerHour: current[tableId]?.ratePerHour ?? '',
+        tableType: current[tableId]?.tableType ?? 'pool',
         ...partial,
       },
     }));
@@ -77,7 +80,12 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
       toast.error('Table label is required.');
       return;
     }
-    const result = await updateTable.mutateAsync({ tableId: table.id, label, ratePerHour });
+    const result = await updateTable.mutateAsync({
+      tableId: table.id,
+      label,
+      ratePerHour,
+      tableType: draft.tableType,
+    });
     if (!result.ok) {
       toast.error(result.error.message);
       return;
@@ -125,7 +133,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                 <div className="mb-3 text-sm font-medium text-muted-foreground">
                   Table {table.number} · Current status: {table.status}
                 </div>
-                <div className="grid gap-3 md:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-4">
                   <div className="space-y-1">
                     <Label htmlFor={`table-label-${table.id}`}>Label</Label>
                     <Input
@@ -145,6 +153,23 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                         setDraft(table.id, { ratePerHour: event.target.value });
                       }}
                     />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor={`table-type-${table.id}`}>Type</Label>
+                    <select
+                      id={`table-type-${table.id}`}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={draft.tableType}
+                      onChange={event => {
+                        setDraft(table.id, {
+                          tableType: event.target.value as 'pool' | 'carom' | 'consumption',
+                        });
+                      }}
+                    >
+                      <option value="pool">Pool</option>
+                      <option value="carom">Carom</option>
+                      <option value="consumption">Consumption</option>
+                    </select>
                   </div>
                   <div className="flex items-end gap-2">
                     <POSButton

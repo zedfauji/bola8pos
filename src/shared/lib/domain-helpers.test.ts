@@ -1,3 +1,4 @@
+import fc from 'fast-check';
 import { describe, it, expect } from 'vitest';
 import type { Category, CartItem, Order, PoolSessionSummary, Product } from './domain';
 import {
@@ -10,6 +11,8 @@ import {
   formatElapsed,
   isHappyHourActive,
   generateIdempotencyKey,
+  getDiscountBase,
+  calculateDiscountAmount,
 } from './domain-helpers';
 
 describe('calculatePoolCharge', () => {
@@ -73,6 +76,7 @@ describe('resolveProductPrice', () => {
     sku: null,
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
   };
 
@@ -83,6 +87,7 @@ describe('resolveProductPrice', () => {
     sortOrder: 0,
     happyHourStart: '16:00',
     happyHourEnd: '18:00',
+    isFood: false,
     createdAt: new Date(),
   };
 
@@ -151,6 +156,7 @@ describe('calculateOrderItemLineTotal', () => {
       sku: null,
       isActive: true,
       imageUrl: null,
+      stock_threshold: null,
       modifiers: [],
     },
     quantity: 1,
@@ -281,6 +287,7 @@ describe('calculateTabSubtotal', () => {
             modifierIds: [],
             modifierPriceDelta: 0,
             notes: null,
+            kdsStatus: 'pending',
             modifiers: [],
             lineTotal: 10.0,
           },
@@ -293,6 +300,7 @@ describe('calculateTabSubtotal', () => {
             modifierIds: [],
             modifierPriceDelta: 0,
             notes: null,
+            kdsStatus: 'pending',
             modifiers: [],
             lineTotal: 5.5,
           },
@@ -345,6 +353,7 @@ describe('calculateTabSubtotal', () => {
             modifierIds: [],
             modifierPriceDelta: 0,
             notes: null,
+            kdsStatus: 'pending',
             modifiers: [],
             lineTotal: 10.0,
           },
@@ -384,6 +393,7 @@ describe('calculateTabSubtotal', () => {
             modifierIds: [],
             modifierPriceDelta: 0,
             notes: null,
+            kdsStatus: 'pending',
             modifiers: [],
             lineTotal: 10.0,
           },
@@ -406,6 +416,7 @@ describe('calculateTabSubtotal', () => {
             modifierIds: [],
             modifierPriceDelta: 0,
             notes: null,
+            kdsStatus: 'pending',
             modifiers: [],
             lineTotal: 8.0,
           },
@@ -435,6 +446,7 @@ describe('calculateTabSubtotal', () => {
             modifierIds: [],
             modifierPriceDelta: 0,
             notes: null,
+            kdsStatus: 'pending',
             modifiers: [],
             lineTotal: 10.555,
           },
@@ -555,6 +567,7 @@ describe('isHappyHourActive', () => {
     sortOrder: 0,
     happyHourStart: '16:00',
     happyHourEnd: '18:00',
+    isFood: false,
     createdAt: new Date(),
   };
 
@@ -663,5 +676,121 @@ describe('generateIdempotencyKey', () => {
     const key = generateIdempotencyKey('test');
     const parts = key.split('_');
     expect(parts[2]).toHaveLength(8);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sprint 2 — Discount helpers
+// ---------------------------------------------------------------------------
+
+describe('getDiscountBase', () => {
+  it("scope 'all' returns itemsSubtotal + poolTotal", () => {
+    expect(getDiscountBase(80, 20, 'all')).toBe(100);
+  });
+
+  it("scope 'pool_only' returns only poolTotal", () => {
+    expect(getDiscountBase(80, 20, 'pool_only')).toBe(20);
+  });
+
+  it("scope 'consumptions_only' returns only itemsSubtotal", () => {
+    expect(getDiscountBase(80, 20, 'consumptions_only')).toBe(80);
+  });
+});
+
+describe('calculateDiscountAmount', () => {
+  it('percent 10% on $100 base → $10.00', () => {
+    expect(calculateDiscountAmount(100, 'percent', 10)).toBe(10);
+  });
+
+  it('percent 0% → $0', () => {
+    expect(calculateDiscountAmount(100, 'percent', 0)).toBe(0);
+  });
+
+  it('fixed $20 on $100 base → $20.00', () => {
+    expect(calculateDiscountAmount(100, 'fixed', 20)).toBe(20);
+  });
+
+  it('fixed $200 on $100 base → clamped to $100.00', () => {
+    expect(calculateDiscountAmount(100, 'fixed', 200)).toBe(100);
+  });
+
+  it('percent 100% → equals base', () => {
+    expect(calculateDiscountAmount(100, 'percent', 100)).toBe(100);
+  });
+
+  it('base $0 → always $0', () => {
+    expect(calculateDiscountAmount(0, 'percent', 50)).toBe(0);
+    expect(calculateDiscountAmount(0, 'fixed', 50)).toBe(0);
+  });
+
+  it('calculateDiscountAmount never exceeds base (fast-check)', () => {
+    fc.assert(
+      fc.property(
+        fc.float({ min: Math.fround(0), max: Math.fround(10000), noNaN: true }),
+        fc.float({ min: Math.fround(0), max: Math.fround(100), noNaN: true }),
+        fc.oneof(fc.constant('percent' as const), fc.constant('fixed' as const)),
+        (base, value, type) => {
+          const result = calculateDiscountAmount(base, type, value);
+          // The function rounds to 2 decimal places; allow up to 0.005 rounding tolerance.
+          // The result must never exceed the 2dp-rounded base by more than the rounding epsilon.
+          const roundedBase = Math.round(base * 100) / 100;
+          return result <= roundedBase + 0.005 && result >= 0;
+        }
+      )
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sprint 2 — isHappyHourActive boundary tests
+// ---------------------------------------------------------------------------
+
+describe('isHappyHourActive — boundary tests (Sprint 2)', () => {
+  const category: Category = {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    name: 'Drinks',
+    color: '#FF0000',
+    sortOrder: 0,
+    happyHourStart: '16:00',
+    happyHourEnd: '18:00',
+    isFood: false,
+    createdAt: new Date(),
+  };
+
+  it('time at exactly startMinutes → true', () => {
+    const time = new Date('2024-01-01T16:00:00'); // exactly 16:00
+    expect(isHappyHourActive(category, time)).toBe(true);
+  });
+
+  it('time at exactly endMinutes → false (exclusive end)', () => {
+    const time = new Date('2024-01-01T18:00:00'); // exactly 18:00
+    expect(isHappyHourActive(category, time)).toBe(false);
+  });
+
+  it('midnight crossing: 10pm-2am, time at 11pm → true', () => {
+    const midnightCategory: Category = {
+      ...category,
+      happyHourStart: '22:00',
+      happyHourEnd: '02:00',
+    };
+    expect(isHappyHourActive(midnightCategory, new Date('2024-01-01T23:00:00'))).toBe(true);
+  });
+
+  it('midnight crossing: 10pm-2am, time at 1:59am → true', () => {
+    const midnightCategory: Category = {
+      ...category,
+      happyHourStart: '22:00',
+      happyHourEnd: '02:00',
+    };
+    expect(isHappyHourActive(midnightCategory, new Date('2024-01-01T01:59:00'))).toBe(true);
+  });
+
+  it('midnight crossing: 10pm-2am, time at 2:00am → false', () => {
+    const midnightCategory: Category = {
+      ...category,
+      happyHourStart: '22:00',
+      happyHourEnd: '02:00',
+    };
+    expect(isHappyHourActive(midnightCategory, new Date('2024-01-01T02:00:00'))).toBe(false);
   });
 });

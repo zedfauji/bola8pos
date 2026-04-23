@@ -15,6 +15,7 @@ export {
   useMutationUpdateTabStatus,
   useMutationRecordTabPayment,
   useVoidOrder,
+  useOpenTabsPendingTotal,
   useCartStore,
 } from './model';
 

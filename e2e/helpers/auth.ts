@@ -1,6 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 
-export type StaffRole = 'bartender' | 'manager' | 'admin';
+const fastE2e = process.env.FAST_E2E === '1' || process.env.FAST_E2E === 'true';
+
+export type StaffRole = 'bartender' | 'manager' | 'admin' | 'kitchen';
 
 function envOrThrow(key: string): string {
   const v = process.env[key];
@@ -17,6 +19,9 @@ function staffForRole(role: StaffRole): { name: string; pin: string } {
   if (role === 'manager') {
     return { name: envOrThrow('E2E_MANAGER_NAME'), pin: envOrThrow('E2E_MANAGER_PIN') };
   }
+  if (role === 'kitchen') {
+    return { name: envOrThrow('E2E_KITCHEN_NAME'), pin: envOrThrow('E2E_KITCHEN_PIN') };
+  }
   return { name: envOrThrow('E2E_ADMIN_NAME'), pin: envOrThrow('E2E_ADMIN_PIN') };
 }
 
@@ -30,7 +35,9 @@ async function enterPin(page: Page, pin: string): Promise<void> {
 /** PIN login for an explicit staff name/PIN (e.g. second bartender). */
 export async function loginAsNamed(page: Page, name: string, pin: string): Promise<void> {
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: /who are you/i })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole('heading', { name: /who are you/i })).toBeVisible({
+    timeout: fastE2e ? 15_000 : 60_000,
+  });
   await page.getByRole('button', { name: new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i') }).click();
 
   await expect(page.getByRole('heading', { name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') })).toBeVisible({
@@ -51,7 +58,7 @@ export async function loginAsNamed(page: Page, name: string, pin: string): Promi
     await page.getByRole('button', { name: 'Start shift' }).click();
   }
 
-  await expect(page).toHaveURL(/\/home(?:\/)?$/, { timeout: 45_000 });
+  await expect(page).toHaveURL(/\/home(?:\/)?$/, { timeout: fastE2e ? 12_000 : 45_000 });
 }
 
 /**

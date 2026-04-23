@@ -78,6 +78,7 @@ describe('TabDetail', () => {
         modifierIds: [],
         modifierPriceDelta: 0,
         notes: null,
+        kdsStatus: 'pending',
         modifiers: [],
       },
       {
@@ -89,6 +90,7 @@ describe('TabDetail', () => {
         modifierIds: ['modifier-1'],
         modifierPriceDelta: 3.0,
         notes: 'Extra salt',
+        kdsStatus: 'pending',
         modifiers: [],
       },
     ],

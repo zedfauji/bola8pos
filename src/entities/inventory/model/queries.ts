@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import type { Inventory, InventoryLog, Product } from '@shared/lib/domain';
-import { CategorySchema, ProductSchema } from '@shared/lib/domain';
+import type { Inventory, InventoryAlert, InventoryLog, Product } from '@shared/lib/domain';
+import { CategorySchema, InventoryAlertSchema, ProductSchema } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
@@ -20,6 +20,7 @@ export const inventoryKeys = {
   all: ['inventory'] as const,
   product: (id: string) => [...inventoryKeys.all, 'product', id] as const,
   lowStock: () => [...inventoryKeys.all, 'low-stock'] as const,
+  alerts: () => [...inventoryKeys.all, 'alerts'] as const,
   log: (productId?: string) => [...inventoryKeys.all, 'log', productId ?? 'all'] as const,
 };
 
@@ -56,6 +57,7 @@ function mapInventoryRow(row: InventoryRow): Result<Inventory> {
         sku: row.product.sku,
         isActive: row.product.is_active,
         imageUrl: row.product.image_url,
+        stock_threshold: row.product.stock_threshold ?? null,
         modifiers: [],
         category: cat,
       });
@@ -200,6 +202,83 @@ export function useLowStockInventory() {
       return ok(list);
     },
     staleTime: 60 * 1000,
+  });
+
+  const r = query.data;
+  return {
+    ...query,
+    data: r?.ok ? r.data : undefined,
+    resultError: r && !r.ok ? r.error : undefined,
+    isEmpty: query.isSuccess && !!r?.ok && r.data.length === 0,
+    isIdleOrLoading: query.isPending || query.isLoading,
+  };
+}
+
+/**
+ * Returns all products where stock_threshold is set and
+ * current quantity_on_hand <= stock_threshold.
+ *
+ * Queries the inventory table joined with products, filtering server-side
+ * to only rows where products.stock_threshold is not null, then applies
+ * the <= threshold comparison client-side.
+ *
+ * Invalidated by the Realtime subscription in useInventoryStore.
+ */
+export function useInventoryAlerts() {
+  const query = useQuery({
+    queryKey: inventoryKeys.alerts(),
+    queryFn: async (): Promise<Result<InventoryAlert[]>> => {
+      // Select inventory joined with products; only include products that have
+      // a stock_threshold configured (not null).
+      const res = await supabaseQuery(() =>
+        supabase
+          .from('inventory')
+          .select(
+            `
+            quantity_on_hand,
+            product:products!inner(
+              id,
+              name,
+              stock_threshold
+            )
+          `
+          )
+          .not('product.stock_threshold', 'is', null)
+      );
+
+      if (!res.ok) {
+        logger.error('inventory.alerts.fetch_failed', { message: res.error.message });
+        return res;
+      }
+
+      const alerts: InventoryAlert[] = [];
+
+      for (const row of res.data as Array<{
+        quantity_on_hand: number;
+        product: { id: string; name: string; stock_threshold: number | null } | null;
+      }>) {
+        if (!row.product || row.product.stock_threshold === null) continue;
+
+        const threshold = row.product.stock_threshold;
+        if (row.quantity_on_hand > threshold) continue;
+
+        try {
+          alerts.push(
+            InventoryAlertSchema.parse({
+              productId: row.product.id,
+              productName: row.product.name,
+              currentStock: row.quantity_on_hand,
+              threshold,
+            })
+          );
+        } catch (e) {
+          return err(unknownError(e));
+        }
+      }
+
+      return ok(alerts);
+    },
+    staleTime: 30 * 1000,
   });
 
   const r = query.data;

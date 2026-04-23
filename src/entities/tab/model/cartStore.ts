@@ -10,8 +10,9 @@ interface CartActions {
   /**
    * Adds a product to the cart with the chosen modifiers.
    * If an identical product+modifier combination already exists, increments quantity instead.
+   * Pass unitPrice to override the base price (e.g. happy hour resolved price).
    */
-  addItem: (product: Product, modifiers: Modifier[]) => void;
+  addItem: (product: Product, modifiers: Modifier[], unitPrice?: number) => void;
 
   /** Removes a cart line by its tempId. */
   removeItem: (tempId: string) => void;
@@ -49,7 +50,7 @@ const calcLineTotal = (unitPrice: number, modifiers: Modifier[], quantity: numbe
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
 
-  addItem: (product, modifiers) => {
+  addItem: (product, modifiers, unitPrice?) => {
     const state = get();
     const modifierKey = modifiers
       .map(m => m.id)
@@ -80,15 +81,15 @@ export const useCartStore = create<CartStore>((set, get) => ({
       logger.debug('cart.item.incremented', { tempId: existing.tempId, quantity });
       set({ items: updated });
     } else {
-      const unitPrice = product.basePrice;
+      const resolvedUnitPrice = unitPrice ?? product.basePrice;
       const newItem: CartItem = {
         tempId: crypto.randomUUID(),
         product,
         quantity: 1,
         selectedModifiers: modifiers,
-        unitPrice,
+        unitPrice: resolvedUnitPrice,
         notes: '',
-        lineTotal: calcLineTotal(unitPrice, modifiers, 1),
+        lineTotal: calcLineTotal(resolvedUnitPrice, modifiers, 1),
       };
       logger.debug('cart.item.added', { tempId: newItem.tempId, productId: product.id });
       set({ items: [...state.items, newItem] });

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { tabKeys } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { computePoolSessionBilling } from '@shared/lib/pool-billing';
 import {
@@ -14,7 +14,8 @@ import {
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
-import type { Tables, TablesInsert } from '@shared/lib/supabase.types';
+import type { Json } from '@shared/lib/supabase.types';
+import type { Tables, TablesInsert, TablesUpdate } from '@shared/lib/supabase.types';
 import { usePoolTableStore } from './store';
 import { PoolTableSchema, PoolSessionSchema } from './types';
 
@@ -67,6 +68,7 @@ function mapPoolTableRow(row: PoolTableRow): Result<PoolTable> {
         label: row.label,
         ratePerHour: row.rate_per_hour,
         status: row.status,
+        tableType: row.table_type,
         currentSessionId: row.current_session_id,
         currentSession: currentSession?.ok ? currentSession.data : undefined,
       })
@@ -316,10 +318,22 @@ export function useMutationStopSession() {
       const session = fetchRes.data;
       const startedAt = new Date(session.started_at);
       const stoppedAt = new Date();
+
+      // Fetch billing settings to get firstHourMode
+      const billingRes = await supabaseQuery<{ value: Json }>(() =>
+        supabase.from('settings').select('value').eq('key', 'billing').maybeSingle()
+      );
+      const billingValue = billingRes.ok
+        ? (billingRes.data.value as Record<string, unknown> | null)
+        : null;
+      const firstHourMode: 'full' | 'prorated' =
+        billingValue?.['firstHourMode'] === 'full' ? 'full' : 'prorated';
+
       const { billedMinutes, totalCharge } = computePoolSessionBilling({
         startedAt,
         endTime: stoppedAt,
         ratePerHour,
+        firstHourMode,
       });
 
       const sessionRes = await supabaseMutation<Tables<'pool_sessions'>>(() =>
@@ -523,12 +537,14 @@ export function useMutationAddPoolTable() {
       number: number;
       label: string;
       ratePerHour: number;
+      tableType?: PoolTableType;
     }): Promise<Result<PoolTable>> => {
       const insert: TablesInsert<'pool_tables'> = {
         number: input.number,
         label: input.label,
         rate_per_hour: input.ratePerHour,
         status: 'available',
+        table_type: input.tableType ?? 'pool',
       };
       const res = await supabaseMutation<Tables<'pool_tables'>>(() =>
         supabase.from('pool_tables').insert(insert).select().single()
@@ -556,19 +572,20 @@ export function useMutationUpdatePoolTable() {
       tableId,
       label,
       ratePerHour,
+      tableType,
     }: {
       tableId: string;
       label: string;
       ratePerHour: number;
+      tableType?: PoolTableType;
     }): Promise<Result<void>> => {
+      const updatePayload: TablesUpdate<'pool_tables'> = {
+        label,
+        rate_per_hour: ratePerHour,
+        ...(tableType !== undefined ? { table_type: tableType } : {}),
+      };
       const res = await supabaseMutation(() =>
-        supabase
-          .from('pool_tables')
-          .update({
-            label,
-            rate_per_hour: ratePerHour,
-          })
-          .eq('id', tableId)
+        supabase.from('pool_tables').update(updatePayload).eq('id', tableId)
       );
       if (!res.ok) {
         logger.error('pool_tables.update_failed', { tableId, message: res.error.message });
@@ -605,6 +622,31 @@ export function useMutationDeletePoolTable() {
     onSuccess: result => {
       if (result.ok) {
         void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      }
+    },
+  });
+}
+
+export function useMutationUpdateSessionStartTime() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      sessionId,
+      startedAt,
+    }: {
+      sessionId: string;
+      startedAt: Date;
+    }): Promise<Result<null>> => {
+      return supabaseMutation<null>(async () =>
+        supabase
+          .from('pool_sessions')
+          .update({ started_at: startedAt.toISOString() })
+          .eq('id', sessionId)
+      );
+    },
+    onSuccess: result => {
+      if (result.ok) {
+        void qc.invalidateQueries({ queryKey: poolTableKeys.all });
       }
     },
   });

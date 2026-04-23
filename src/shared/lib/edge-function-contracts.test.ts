@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   type ReceiptData,
   ProcessPaymentRequestSchema,
+  ReceiptDataSchema,
   SendReceiptEmailRequestSchema,
 } from './edge-function-contracts';
 
@@ -41,6 +42,21 @@ function validReceiptData(overrides: Partial<ReceiptData> = {}): ReceiptData {
 
 // Keep the reference so TypeScript doesn't complain about unused import
 void validReceiptData;
+
+describe('ReceiptDataSchema — Sprint 2 discount fields', () => {
+  it('accepts receipt with discountAmount: null', () => {
+    const r = ReceiptDataSchema.safeParse({
+      ...validReceiptData(),
+      discountAmount: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('accepts receipt without discount fields', () => {
+    const r = ReceiptDataSchema.safeParse(validReceiptData());
+    expect(r.success).toBe(true);
+  });
+});
 
 describe('ProcessPaymentRequestSchema', () => {
   it('accepts valid cash with tenderedAmount', () => {
@@ -159,6 +175,23 @@ describe('ProcessPaymentRequestSchema', () => {
       referenceNumber: 'r'.repeat(65),
     });
     expect(r.success).toBe(false);
+  });
+
+  // Sprint 2 — discount fields
+  it('accepts valid request with discount fields', () => {
+    const r = ProcessPaymentRequestSchema.safeParse({
+      ...baseValidRequest(),
+      discountScope: 'all',
+      discountType: 'percent',
+      discountValue: 10,
+      discountAmount: 1.0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('accepts valid request without discount fields (all optional)', () => {
+    const r = ProcessPaymentRequestSchema.safeParse(baseValidRequest());
+    expect(r.success).toBe(true);
   });
 });
 

@@ -39,4 +39,5 @@ export {
   useMutationUpdateTabStatus,
   useMutationRecordTabPayment,
   useVoidOrder,
+  useOpenTabsPendingTotal,
 } from './queries';

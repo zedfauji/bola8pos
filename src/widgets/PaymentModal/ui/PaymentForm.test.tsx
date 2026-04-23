@@ -37,7 +37,7 @@ vi.mock('@entities/settings', () => {
     billing: {
       taxRatePercent: 0,
       defaultTipPercentages: [10, 15, 18, 20],
-      paymentMethods: { cash: true, bbvaCard: true, rappi: false },
+      paymentMethods: { cash: true, bbvaCard: true, rappi: true },
     },
     paymentLabels: { cash: 'Efectivo', card: 'Terminal BBVA', rappi: 'Rappi' },
   };
@@ -76,6 +76,7 @@ const testTab: Tab = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
     },
   ],
@@ -158,6 +159,70 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Sprint 2 — Discount section
+// ---------------------------------------------------------------------------
+
+describe('PaymentForm — discount section', () => {
+  it('renders discount section for cash payment', () => {
+    renderForm();
+    // Default method is cash (non-rappi tab); discount section should be present
+    expect(screen.getByTestId('discount-section')).toBeInTheDocument();
+  });
+
+  it('discount section not shown for Rappi payment', () => {
+    const rappiTab: Tab = {
+      ...testTab,
+      id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+      rappiOrderId: 'RAPPI-ORDER-123',
+    };
+    renderWithProviders(
+      <PaymentForm
+        tab={rappiTab}
+        staffId={staffId}
+        onPaymentSuccess={vi.fn()}
+        processors={makeProcessors()}
+      />
+    );
+    // rappi tab auto-selects rappi method → discount hidden
+    expect(screen.queryByTestId('discount-section')).not.toBeInTheDocument();
+  });
+
+  it('10% all-items discount shows discount row in totals', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    // scope defaults to 'all'; change discount value to 10
+    const discountInput = screen.getByLabelText('Discount %');
+    await user.clear(discountInput);
+    await user.type(discountInput, '10');
+    await user.tab(); // blur to commit
+
+    // Discount base = $20 (itemsSubtotal), 10% = $2
+    expect(screen.getByTestId('discount-row')).toBeInTheDocument();
+  });
+
+  it('fixed $5 discount shows correct discount-applied-label', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByTestId('discount-type-fixed'));
+
+    const discountInput = screen.getByLabelText('Discount amount');
+    await user.clear(discountInput);
+    await user.type(discountInput, '5');
+    await user.tab();
+
+    expect(screen.getByTestId('discount-applied-label')).toHaveTextContent('5.00');
+  });
+
+  it('no discount row when discountValue is 0', () => {
+    renderForm();
+    // Default discountValue = 0
+    expect(screen.queryByTestId('discount-row')).not.toBeInTheDocument();
+  });
+});
 
 describe('PaymentForm — card charge override', () => {
   it('renders MoneyInput for charge amount when method is card', async () => {
@@ -258,8 +323,14 @@ describe('PaymentForm — card charge override', () => {
     await waitFor(() => {
       expect(processors.processCardPayment).toHaveBeenCalled();
     });
-    // override amount=45, tipAmount=0 (because override is set)
-    expect(processors.processCardPayment).toHaveBeenCalledWith(testTab.id, 45, 0, undefined);
+    // override amount=45, tipAmount=0 (because override is set), no ref, no discount
+    expect(processors.processCardPayment).toHaveBeenCalledWith(
+      testTab.id,
+      45,
+      0,
+      undefined,
+      undefined
+    );
   });
 
   it('processCardPayment called with baseSubtotal and tipAmount when no override', async () => {
@@ -274,7 +345,13 @@ describe('PaymentForm — card charge override', () => {
     await waitFor(() => {
       expect(processors.processCardPayment).toHaveBeenCalled();
     });
-    // No override: chargeAmount=baseSubtotal=20, tipAmount=3 (15% of 20, taxRate=0)
-    expect(processors.processCardPayment).toHaveBeenCalledWith(testTab.id, 20, 3, undefined);
+    // No override: chargeAmount=baseSubtotal=20, tipAmount=3 (15% of 20, taxRate=0), no ref, no discount
+    expect(processors.processCardPayment).toHaveBeenCalledWith(
+      testTab.id,
+      20,
+      3,
+      undefined,
+      undefined
+    );
   });
 });

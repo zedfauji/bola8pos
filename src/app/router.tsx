@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HelpSheet } from '@widgets/HelpSheet';
 import { ProtectedRoute } from './ProtectedRoute';
+import { KdsRoute } from './kds-route';
 import { ReportsRoute } from './reports-route';
 
 const LoginPage = lazy(() => import('../pages/login'));
@@ -14,6 +16,7 @@ const SettingsPage = lazy(() => import('../pages/settings'));
 const RappiOrdersPage = lazy(() => import('../pages/rappi'));
 const TableStatusPage = lazy(() => import('../pages/pool-table-status'));
 const PaymentsPage = lazy(() => import('../pages/payments'));
+const KdsPage = lazy(() => import('../pages/kds'));
 
 function LoadingFallback() {
   return (
@@ -26,6 +29,7 @@ function LoadingFallback() {
 export function Router() {
   return (
     <BrowserRouter>
+      <HelpSheet />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -109,6 +113,16 @@ export function Router() {
             element={
               <ProtectedRoute>
                 <PaymentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/kds"
+            element={
+              <ProtectedRoute>
+                <KdsRoute>
+                  <KdsPage />
+                </KdsRoute>
               </ProtectedRoute>
             }
           />

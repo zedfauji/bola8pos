@@ -197,12 +197,14 @@ test.describe('Table Status Page', () => {
     await openTabViaUI(page, 'Status Nav Test');
     await startSessionViaUI(page, 'Status Nav Test');
 
-    // Pool grid should show the occupied table
+    // Pool grid should show the occupied table — click the card itself to navigate to status page
     await page.goto('/pool-tables');
-    await expect(page.getByRole('button', { name: /view status/i }).first()).toBeVisible({
-      timeout: 20_000,
+    // Occupied cards are clickable (the whole card acts as a nav link to the status page)
+    const occupiedCard = page.locator('[data-testid="pool-table-card"]').filter({
+      has: page.getByText('Status Nav Test'),
     });
-    await page.getByRole('button', { name: /view status/i }).first().click();
+    await expect(occupiedCard).toBeVisible({ timeout: 20_000 });
+    await occupiedCard.click();
 
     // URL includes the table ID segment
     await expect(page).toHaveURL(/\/pool-tables\/[0-9a-f-]{36}/, { timeout: 15_000 });
@@ -740,6 +742,71 @@ test.describe('Table Status Page', () => {
     // returning a NETWORK_OFFLINE error. See feedback-offline-mutation-guard.md for full
     // root-cause analysis. Fix requires an isOnline() early-exit guard in the mutationFn
     // before this test can be enabled.
+  });
+
+  // ── Test 16 ───────────────────────────────────────────────────────────────
+  test('T16: Edit Start Time requires manager PIN and rebills on save', async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAs(page, 'manager');
+
+    // Seed a table with a session started 5 minutes ago
+    const { tableId } = await seedOccupiedTableDirect('T16 Edit Start Time', {
+      startedAtOffset: 5 * 60 * 1000,
+    });
+
+    await page.goto(`/pool-tables/${tableId}`);
+
+    // "Edit Start Time" button is visible for active sessions
+    const editBtn = page.getByRole('button', { name: /edit start time/i });
+    await expect(editBtn).toBeVisible({ timeout: 15_000 });
+
+    await editBtn.click();
+
+    // ManagerPinDialog opens first
+    const pinDialog = page.getByRole('alertdialog', { name: /manager access required/i });
+    await expect(pinDialog).toBeVisible({ timeout: 15_000 });
+
+    // Enter wrong PIN (000000 is unlikely to be a valid manager PIN)
+    await enterManagerPin(page, '000000');
+    await expect(pinDialog.getByText(/incorrect pin/i)).toBeVisible({ timeout: 10_000 });
+
+    // Enter correct manager PIN
+    const managerPin = process.env['E2E_MANAGER_PIN'] ?? '';
+    await enterManagerPin(page, managerPin);
+
+    // EditStartTimeDialog should now open
+    const editForm = page.getByTestId('edit-start-time-form');
+    await expect(editForm).toBeVisible({ timeout: 15_000 });
+
+    // Change the start time to 65 minutes ago so elapsed > 1 hour
+    const startTime65MinAgo = new Date(Date.now() - 65 * 60 * 1000);
+    // Format as datetime-local string (YYYY-MM-DDTHH:MM)
+    const year = startTime65MinAgo.getFullYear();
+    const month = String(startTime65MinAgo.getMonth() + 1).padStart(2, '0');
+    const day = String(startTime65MinAgo.getDate()).padStart(2, '0');
+    const hours = String(startTime65MinAgo.getHours()).padStart(2, '0');
+    const minutes = String(startTime65MinAgo.getMinutes()).padStart(2, '0');
+    const datetimeLocalStr = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+    const startInput = page.locator('#start-time-input');
+    await expect(startInput).toBeVisible({ timeout: 10_000 });
+    await startInput.fill(datetimeLocalStr);
+
+    await page.getByRole('button', { name: /save/i }).click();
+
+    // Success toast
+    await expect(page.getByText(/session start time updated/i)).toBeVisible({ timeout: 15_000 });
+
+    // Elapsed timer should now show ≥ 1 hour (01:00:xx or more)
+    // Use span.font-mono fallback in case data-testid is not immediately rendered
+    const timer = page.locator('[data-testid="elapsed-minutes"], span.font-mono').first();
+    await expect(timer).toBeVisible({ timeout: 20_000 });
+    // The timer format is HH:MM:SS — assert it starts with "01:" or higher
+    await expect
+      .poll(async () => (await timer.innerText()).trim(), { timeout: 20_000 })
+      .toMatch(/^(?:0[1-9]|[1-9]\d):/);
+
+    await logout(page);
   });
 
   // ── Test 15 ───────────────────────────────────────────────────────────────

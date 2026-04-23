@@ -182,6 +182,7 @@ export function generateMockProduct(overrides?: Partial<Product>): Product {
     sku: 'HEIN-12OZ',
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
     ...overrides,
     categoryId,
@@ -405,6 +406,7 @@ function productCorona(): Product {
     sku: 'CORONA-12',
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
     category: beerCategory(),
   });
@@ -420,6 +422,7 @@ function productTitos(): Product {
     sku: 'TITOS-1OZ',
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
     category: spiritsCategory(),
   });
@@ -435,6 +438,7 @@ function productLime(): Product {
     sku: 'MIX-LIME-PT',
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
     category: mixersCategory(),
   });
@@ -450,6 +454,7 @@ function productGuinness(): Product {
     sku: 'GUIN-DRAFT',
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
     category: beerCategory(),
   });

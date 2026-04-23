@@ -6,10 +6,11 @@ import type { Product, Modifier } from '@entities/product/model/types';
 import { CategoryTabs } from '@entities/product/ui/CategoryTabs';
 import { ProductCard } from '@entities/product/ui/ProductCard';
 import { useCartStore } from '@entities/tab/model/cartStore';
-import { getCurrentTime } from '@shared/lib/domain-helpers';
+import { resolveProductPrice, getCurrentTime } from '@shared/lib/domain-helpers';
 import { EmptyState } from '@shared/ui/EmptyState';
 import { CardSkeleton } from '@shared/ui/LoadingSkeletons';
 import { ScrollAreaRoot } from '@shared/ui/scroll-area';
+import { HappyHourBanner } from './HappyHourBanner';
 
 function gridClockFromWallTime(): Date {
   const d = new Date();
@@ -62,13 +63,21 @@ export function ProductGrid({ className }: ProductGridProps) {
       setSelectedProduct(product);
       setModifierSheetOpen(true);
     } else {
-      addItem(product, []);
+      const category = categories?.find(c => c.id === product.categoryId);
+      const resolvedPrice = category
+        ? resolveProductPrice(product, category, catalogNow)
+        : product.basePrice;
+      addItem(product, [], resolvedPrice);
     }
   };
 
   const handleModifierConfirm = (selectedModifiers: Modifier[]) => {
     if (selectedProduct) {
-      addItem(selectedProduct, selectedModifiers);
+      const category = categories?.find(c => c.id === selectedProduct.categoryId);
+      const resolvedPrice = category
+        ? resolveProductPrice(selectedProduct, category, catalogNow)
+        : selectedProduct.basePrice;
+      addItem(selectedProduct, selectedModifiers, resolvedPrice);
       setSelectedProduct(null);
     }
   };
@@ -83,6 +92,7 @@ export function ProductGrid({ className }: ProductGridProps) {
 
   return (
     <div className={className}>
+      <HappyHourBanner categories={categories ?? []} now={catalogNow} />
       {categories && Array.isArray(categories) && categories.length > 0 && (
         <CategoryTabs
           categories={categories}

@@ -179,6 +179,8 @@ export type AppErrorCode =
   | 'POOL_TABLE_OCCUPIED'
   | 'SUPABASE_ERROR'
   | 'TAURI_ERROR'
+  | 'EXPORT_CANCELLED'
+  | 'EXPORT_FAILED'
   | 'UNKNOWN_ERROR';
 
 /**
@@ -327,6 +329,27 @@ export const supabaseError = (message: string, detail?: string, raw?: unknown): 
 export const tauriError = (message: string, raw?: unknown): AppError => ({
   code: 'TAURI_ERROR',
   message,
+  ...(raw !== undefined && { raw }),
+});
+
+/**
+ * Creates an export cancelled error (user dismissed the save dialog).
+ */
+export const exportCancelledError = (): AppError => ({
+  code: 'EXPORT_CANCELLED',
+  message: 'Export cancelled.',
+});
+
+/**
+ * Creates an export failed error.
+ *
+ * @param detail - Technical detail about what failed
+ * @param raw - Underlying error
+ */
+export const exportFailedError = (detail?: string, raw?: unknown): AppError => ({
+  code: 'EXPORT_FAILED',
+  message: 'Export failed. Please try again.',
+  ...(detail !== undefined && { detail }),
   ...(raw !== undefined && { raw }),
 });
 

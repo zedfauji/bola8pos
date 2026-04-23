@@ -26,6 +26,7 @@ const sampleProduct: Product = {
   imageUrl: null,
   isActive: true,
   sku: 'COCKTAIL-MARG',
+  stock_threshold: null,
   modifiers: [],
 };
 

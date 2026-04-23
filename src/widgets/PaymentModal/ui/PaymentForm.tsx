@@ -10,6 +10,8 @@ import { ReceiptPreview } from '@features/process-payment/ui/ReceiptPreview';
 import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@entities/tab/model/types';
+import type { DiscountScope, DiscountType } from '@shared/lib/domain';
+import { getDiscountBase, calculateDiscountAmount } from '@shared/lib/domain-helpers';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
 import { groupOrderItems } from '@shared/lib/groupOrderItems';
 import { logger } from '@shared/lib/logger-instance';
@@ -91,6 +93,9 @@ export function PaymentForm({
   const [tenderedAmount, setTenderedAmount] = useState(0);
   const [cardReference, setCardReference] = useState('');
   const [cardChargeOverride, setCardChargeOverride] = useState<number | null>(null);
+  const [discountScope, setDiscountScope] = useState<DiscountScope>('all');
+  const [discountType, setDiscountType] = useState<DiscountType>('percent');
+  const [discountValue, setDiscountValue] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
@@ -118,6 +123,9 @@ export function PaymentForm({
     setTenderedAmount(0);
     setCardReference('');
     setCardChargeOverride(null);
+    setDiscountScope('all');
+    setDiscountType('percent');
+    setDiscountValue(0);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     tab.id,
@@ -153,11 +161,20 @@ export function PaymentForm({
     [tab.poolCharges]
   );
   const baseSubtotal = itemsSubtotal + poolChargesTotal;
+  const discountBase = useMemo(
+    () => getDiscountBase(itemsSubtotal, poolChargesTotal, discountScope),
+    [itemsSubtotal, poolChargesTotal, discountScope]
+  );
+  const discountAmount = useMemo(
+    () => calculateDiscountAmount(discountBase, discountType, discountValue),
+    [discountBase, discountType, discountValue]
+  );
+  const afterDiscount = Math.round((baseSubtotal - discountAmount) * 100) / 100;
   const taxAmount = useMemo(() => {
     if (method === 'rappi') return 0;
-    return Math.round(baseSubtotal * (taxRatePercent / 100) * 100) / 100;
-  }, [baseSubtotal, method, taxRatePercent]);
-  const subtotalWithTax = Math.round((baseSubtotal + taxAmount) * 100) / 100;
+    return Math.round(afterDiscount * (taxRatePercent / 100) * 100) / 100;
+  }, [afterDiscount, method, taxRatePercent]);
+  const subtotalWithTax = Math.round((afterDiscount + taxAmount) * 100) / 100;
   const tipAmount = useMemo(() => {
     if (method === 'rappi') return 0;
     if (tipMode === 'custom') return Math.max(0, customTip);
@@ -183,12 +200,18 @@ export function PaymentForm({
       return { ok: false, error: { message: 'Not signed in.' } };
     }
 
+    const discountInfoArg =
+      discountAmount > 0
+        ? { scope: discountScope, type: discountType, value: discountValue, amount: discountAmount }
+        : undefined;
+
     if (method === 'cash') {
       const r = await processors.processCashPayment(
         tab.id,
-        baseSubtotal,
+        afterDiscount,
         tipAmount,
-        tenderedAmount
+        tenderedAmount,
+        discountInfoArg
       );
       if (!r.ok) return { ok: false, error: { message: r.error.message } };
       return { ok: true, data: { receiptData: r.data.receiptData } };
@@ -196,13 +219,14 @@ export function PaymentForm({
 
     if (method === 'card') {
       const ref = cardReference.trim();
-      const chargeAmount = cardChargeOverride ?? baseSubtotal;
+      const chargeAmount = cardChargeOverride ?? afterDiscount;
       const chargeTip = cardChargeOverride !== null ? 0 : tipAmount;
       const r = await processors.processCardPayment(
         tab.id,
         chargeAmount,
         chargeTip,
-        ref.length > 0 ? ref : undefined
+        ref.length > 0 ? ref : undefined,
+        discountInfoArg
       );
       if (!r.ok) return { ok: false, error: { message: r.error.message } };
       return { ok: true, data: { receiptData: r.data.receiptData } };
@@ -211,7 +235,12 @@ export function PaymentForm({
     if (!tab.rappiOrderId) {
       return { ok: false, error: { message: 'Missing Rappi order id.' } };
     }
-    const r = await processors.processRappiPayment(tab.id, baseSubtotal, tab.rappiOrderId);
+    const r = await processors.processRappiPayment(
+      tab.id,
+      afterDiscount,
+      tab.rappiOrderId,
+      discountInfoArg
+    );
     if (!r.ok) return { ok: false, error: { message: r.error.message } };
     return { ok: true, data: { receiptData: r.data.receiptData } };
   };
@@ -358,6 +387,66 @@ export function PaymentForm({
             </section>
           )}
 
+          {method !== 'rappi' && (
+            <section className="space-y-3" data-testid="discount-section">
+              <h4 className="font-medium">Discount</h4>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  {(['all', 'pool_only', 'consumptions_only'] as const).map(scope => (
+                    <POSButton
+                      key={scope}
+                      type="button"
+                      touchSize="large"
+                      variant={discountScope === scope ? 'default' : 'outline'}
+                      disabled={isProcessing}
+                      data-testid={`discount-scope-${scope}`}
+                      onClick={() => {
+                        setDiscountScope(scope);
+                      }}
+                      className="flex-1 text-xs"
+                    >
+                      {scope === 'all'
+                        ? 'All Items'
+                        : scope === 'pool_only'
+                          ? 'Pool Only'
+                          : 'Consumptions'}
+                    </POSButton>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  {(['percent', 'fixed'] as const).map(type => (
+                    <POSButton
+                      key={type}
+                      type="button"
+                      touchSize="large"
+                      variant={discountType === type ? 'default' : 'outline'}
+                      disabled={isProcessing}
+                      data-testid={`discount-type-${type}`}
+                      onClick={() => {
+                        setDiscountType(type);
+                      }}
+                      className="flex-1"
+                    >
+                      {type === 'percent' ? '% Percent' : '$ Fixed'}
+                    </POSButton>
+                  ))}
+                </div>
+                <MoneyInput
+                  label={discountType === 'percent' ? 'Discount %' : 'Discount amount'}
+                  value={discountValue}
+                  onChange={setDiscountValue}
+                  disabled={isProcessing}
+                  data-testid="discount-value-input"
+                />
+                {discountAmount > 0 && (
+                  <p className="text-sm text-green-400" data-testid="discount-applied-label">
+                    ✓ Discount applied: -{discountAmount.toFixed(2)}
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
+
           {method === 'rappi' && (
             <section className="rounded-lg border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
               Payment collected by Rappi. Confirm here to close this tab in the POS.
@@ -369,6 +458,25 @@ export function PaymentForm({
               <span>Subtotal</span>
               <MoneyDisplay amount={baseSubtotal} size="sm" />
             </div>
+            {discountAmount > 0 && (
+              <>
+                <div
+                  className="flex items-center justify-between text-sm text-green-400"
+                  data-testid="discount-row"
+                >
+                  <span>
+                    Discount ({discountType === 'percent' ? `${String(discountValue)}%` : 'fixed'})
+                  </span>
+                  <span>
+                    -<MoneyDisplay amount={discountAmount} size="sm" />
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span>After discount</span>
+                  <MoneyDisplay amount={afterDiscount} size="sm" />
+                </div>
+              </>
+            )}
             {method !== 'rappi' && (
               <div className="flex items-center justify-between text-sm">
                 <span>Tax ({taxRatePercent}%)</span>

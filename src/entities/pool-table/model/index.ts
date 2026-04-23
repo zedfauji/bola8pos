@@ -3,9 +3,20 @@
  */
 
 // Types & Schemas
-export { PoolTableSchema, PoolSessionSchema, PoolSessionSummarySchema } from './types';
+export {
+  PoolTableSchema,
+  PoolSessionSchema,
+  PoolSessionSummarySchema,
+  PoolTableTypeSchema,
+} from './types';
 
-export type { PoolTable, PoolSession, PoolTableStatus, PoolSessionSummary } from './types';
+export type {
+  PoolTable,
+  PoolSession,
+  PoolTableStatus,
+  PoolTableType,
+  PoolSessionSummary,
+} from './types';
 
 // State Management
 export {

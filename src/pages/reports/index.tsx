@@ -3,6 +3,8 @@ import { CajaReportPanel } from '@widgets/CajaReportPanel';
 import { CategoryRevenuePanel } from '@widgets/CategoryRevenuePanel';
 import { HourlyBreakdownPanel } from '@widgets/HourlyBreakdownPanel';
 import { ProductSalesPanel } from '@widgets/ProductSalesPanel';
+import { StaffSalesPanel } from '@widgets/StaffSalesPanel';
+import { TipDistributionPanel } from '@widgets/TipDistributionPanel';
 import { VoidRefundPanel } from '@widgets/VoidRefundPanel';
 import { BackToHomeButton, DateRangePicker } from '@shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
@@ -47,6 +49,8 @@ export default function ReportsPage() {
             <TabsTrigger value="hourly">Hourly Breakdown</TabsTrigger>
             <TabsTrigger value="voids">Voids &amp; Refunds</TabsTrigger>
             <TabsTrigger value="categories">Revenue by Category</TabsTrigger>
+            <TabsTrigger value="staff">Staff Performance</TabsTrigger>
+            <TabsTrigger value="tips">Tip Distribution</TabsTrigger>
           </TabsList>
 
           <TabsContent value="session">
@@ -78,6 +82,20 @@ export default function ReportsPage() {
             <div className="space-y-4">
               <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
               <CategoryRevenuePanel dateRange={dateRange} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="staff">
+            <div className="space-y-4">
+              <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+              <StaffSalesPanel dateRange={dateRange} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tips">
+            <div className="space-y-4">
+              <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+              <TipDistributionPanel dateRange={dateRange} />
             </div>
           </TabsContent>
         </Tabs>

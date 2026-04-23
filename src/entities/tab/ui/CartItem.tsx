@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { X, Zap } from 'lucide-react';
 import type { CartItem as CartItemType } from '@shared/lib/domain';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { QuantityControl } from '@shared/ui/QuantityControl';
@@ -42,7 +42,12 @@ export function CartItem({ item, onQuantitySet, onRemove }: CartItemProps) {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <QuantityControl value={item.quantity} min={1} max={99} onChange={onQuantitySet} />
-          <MoneyDisplay amount={item.lineTotal} size="lg" className="shrink-0" />
+          <div className="flex shrink-0 items-center gap-1">
+            {item.unitPrice !== item.product.basePrice && (
+              <Zap className="h-3.5 w-3.5 text-amber-400" aria-label="Happy hour price" />
+            )}
+            <MoneyDisplay amount={item.lineTotal} size="lg" />
+          </div>
         </div>
       </div>
     </div>

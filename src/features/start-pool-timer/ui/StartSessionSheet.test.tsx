@@ -11,10 +11,12 @@ import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as poolTableQueries from '@entities/pool-table/model/queries';
+import * as settingsEntity from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import * as tabQueries from '@entities/tab/model/queries';
 import type { Tab } from '@entities/tab/model/types';
 import type { PoolTable, Shift } from '@shared/lib/domain';
+import * as posPrinter from '@shared/lib/pos-printer';
 import { err, ok } from '@shared/lib/result';
 import { renderWithProviders } from '@shared/lib/test-utils';
 
@@ -36,6 +38,22 @@ vi.mock('@entities/tab/model/queries', () => ({
   useMutationOpenTab: vi.fn(),
 }));
 
+vi.mock('@entities/settings', async importOriginal => {
+  const actual = await importOriginal<typeof settingsEntity>();
+  return {
+    ...actual,
+    useSettings: vi.fn(),
+  };
+});
+
+vi.mock('@shared/lib/pos-printer', async importOriginal => {
+  const actual = await importOriginal<typeof posPrinter>();
+  return {
+    ...actual,
+    printRawText: vi.fn(),
+  };
+});
+
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
@@ -49,6 +67,7 @@ const testTable: PoolTable = {
   label: 'Main',
   ratePerHour: 15,
   status: 'available',
+  tableType: 'pool',
   currentSessionId: null,
 };
 
@@ -121,6 +140,62 @@ function renderSheet(openTabs: Tab[] = []) {
 // Setup
 // ---------------------------------------------------------------------------
 
+function mockSettings(printOnStart: boolean) {
+  vi.mocked(settingsEntity.useSettings).mockReturnValue({
+    data: {
+      general: {
+        barName: 'Bola 8',
+        address: '',
+        timezone: 'America/Mexico_City',
+        currency: 'MXN',
+        receiptFooterText: '',
+      },
+      billing: {
+        taxRatePercent: 16,
+        defaultTipPercentages: [10, 15, 18, 20],
+        paymentMethods: { cash: true, bbvaCard: true, rappi: true },
+        firstHourMode: 'prorated',
+      },
+      rappi: { storeId: '', lastSyncAt: null },
+      emailReceipts: { fromEmail: '' },
+      paymentLabels: { cash: 'Efectivo', card: 'Terminal BBVA', rappi: 'Rappi' },
+      receipt: {
+        paperWidthChars: 32,
+        showCashierName: true,
+        showCustomerName: true,
+        showReceiptNumber: true,
+        headerLine2: '',
+        footerText: '',
+        boldTotals: true,
+        printOnStart,
+      },
+    },
+    resultError: undefined,
+    isIdleOrLoading: false,
+    isPending: false,
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
+    status: 'success' as const,
+    fetchStatus: 'idle' as const,
+    isFetching: false,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isRefetching: false,
+    isStale: false,
+    isPlaceholderData: false,
+    error: null,
+    dataUpdatedAt: 0,
+    errorUpdatedAt: 0,
+    failureCount: 0,
+    failureReason: null,
+    errorUpdateCount: 0,
+    refetch: vi.fn(),
+    isRefetchError: false,
+    isLoadingError: false,
+  } as unknown as ReturnType<typeof settingsEntity.useSettings>);
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   useStaffStore.setState({
@@ -144,6 +219,7 @@ beforeEach(() => {
     isAuthenticated: true,
   });
   mockMutations();
+  mockSettings(false);
 });
 
 // ---------------------------------------------------------------------------
@@ -250,5 +326,64 @@ describe('StartSessionSheet — auto-create tab', () => {
     mockMutations({ openTabIsPending: true });
     renderSheet();
     expect(screen.getByRole('button', { name: /starting/i })).toBeDisabled();
+  });
+});
+
+const sessionWithStartedAt = ok({
+  id: 'session-id',
+  tableId: testTable.id,
+  tabId: 'new-tab-id',
+  startedAt: new Date('2026-04-21T10:00:00.000Z'),
+  stoppedAt: null,
+  billedMinutes: null,
+  totalCharge: null,
+});
+
+describe('StartSessionSheet — print on start', () => {
+  it('calls printRawText once after session starts when printOnStart=true', async () => {
+    const user = userEvent.setup();
+    mockSettings(true);
+    mockMutations({ startSessionResult: sessionWithStartedAt });
+    vi.mocked(posPrinter.printRawText).mockResolvedValue(ok(undefined));
+
+    renderSheet();
+    await user.click(screen.getByRole('button', { name: /start session/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Pool session started.');
+    });
+    await waitFor(() => {
+      expect(vi.mocked(posPrinter.printRawText)).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does NOT call printRawText when printOnStart=false', async () => {
+    const user = userEvent.setup();
+    mockSettings(false);
+    mockMutations({ startSessionResult: sessionWithStartedAt });
+
+    renderSheet();
+    await user.click(screen.getByRole('button', { name: /start session/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Pool session started.');
+    });
+    expect(vi.mocked(posPrinter.printRawText)).not.toHaveBeenCalled();
+  });
+
+  it('print failure does NOT prevent session success toast', async () => {
+    const user = userEvent.setup();
+    mockSettings(true);
+    mockMutations({ startSessionResult: sessionWithStartedAt });
+    vi.mocked(posPrinter.printRawText).mockRejectedValue(new Error('printer offline'));
+
+    renderSheet();
+    await user.click(screen.getByRole('button', { name: /start session/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Pool session started.');
+    });
+    // Error should NOT have been toasted
+    expect(toast.error).not.toHaveBeenCalled();
   });
 });

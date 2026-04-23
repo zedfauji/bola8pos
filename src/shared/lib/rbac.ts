@@ -7,6 +7,7 @@ export const STAFF_ROLES = [
   'bartender',
   'manager',
   'admin',
+  'kitchen',
 ] as const satisfies readonly StaffRole[];
 
 export const STAFF_ACTIONS = [
@@ -28,6 +29,7 @@ export const STAFF_ACTIONS = [
   'view_all_shifts',
   'manage_caja',
   'transfer_tab',
+  'view_kds',
 ] as const;
 
 export type StaffAction = (typeof STAFF_ACTIONS)[number];
@@ -53,11 +55,14 @@ const MANAGER_EXTRA: ReadonlySet<StaffAction> = new Set([
   'manage_caja', // open and close the daily caja session
 ]);
 
+const KITCHEN_ACTIONS: ReadonlySet<StaffAction> = new Set(['view_kds', 'clock_in', 'clock_out']);
+
 const ADMIN_EXTRA: ReadonlySet<StaffAction> = new Set([
   'manage_staff',
   'manage_settings',
   'delete_tab',
   'view_all_shifts',
+  'view_kds',
 ]);
 
 const MANAGER_ACTIONS: ReadonlySet<StaffAction> = new Set([...BARTENDER_ACTIONS, ...MANAGER_EXTRA]);
@@ -68,6 +73,7 @@ const ROLE_SET: Record<StaffRole, ReadonlySet<StaffAction>> = {
   bartender: BARTENDER_ACTIONS,
   manager: MANAGER_ACTIONS,
   admin: ADMIN_ACTIONS,
+  kitchen: KITCHEN_ACTIONS,
 };
 
 /** Actions that require admin (tooltip copy). */

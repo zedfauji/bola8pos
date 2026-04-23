@@ -103,6 +103,7 @@ const singleOrderTab: Tab = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
     },
     {
@@ -114,6 +115,7 @@ const singleOrderTab: Tab = {
       modifierIds: ['modifier-1'],
       modifierPriceDelta: 3.0,
       notes: 'Extra salt',
+      kdsStatus: 'pending',
       modifiers: [],
     },
     {
@@ -125,6 +127,7 @@ const singleOrderTab: Tab = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
     },
   ],
@@ -153,6 +156,7 @@ const multipleOrdersTab: Tab = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
     },
     {
@@ -164,6 +168,7 @@ const multipleOrdersTab: Tab = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
     },
     // Second order
@@ -176,6 +181,7 @@ const multipleOrdersTab: Tab = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
     },
     // Third order
@@ -188,6 +194,7 @@ const multipleOrdersTab: Tab = {
       modifierIds: ['modifier-1'],
       modifierPriceDelta: 2.0,
       notes: 'No ice',
+      kdsStatus: 'pending',
       modifiers: [],
     },
     // Fourth order
@@ -200,6 +207,7 @@ const multipleOrdersTab: Tab = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
     },
     // Fifth order
@@ -212,6 +220,7 @@ const multipleOrdersTab: Tab = {
       modifierIds: ['modifier-2'],
       modifierPriceDelta: 3.5,
       notes: 'Extra lime',
+      kdsStatus: 'pending',
       modifiers: [],
     },
   ],
@@ -238,6 +247,7 @@ const largeTab: Tab = {
     modifierIds: i % 3 === 0 ? ['modifier-1'] : [],
     modifierPriceDelta: i % 3 === 0 ? 2.5 : 0,
     notes: i % 7 === 0 ? 'Special request' : null,
+    kdsStatus: 'pending' as const,
     modifiers: [],
   })),
 };
@@ -483,6 +493,7 @@ const sampleProduct = {
   sku: null,
   isActive: true,
   imageUrl: null,
+  stock_threshold: null,
   modifiers: [],
 };
 
@@ -504,6 +515,7 @@ const withOrdersOrders: Order[] = [
         modifierIds: [],
         modifierPriceDelta: 0,
         notes: null,
+        kdsStatus: 'pending',
         modifiers: [],
         product: sampleProduct,
       },
@@ -526,6 +538,7 @@ const withOrdersOrders: Order[] = [
         modifierIds: [],
         modifierPriceDelta: 0,
         notes: 'With lime',
+        kdsStatus: 'pending',
         modifiers: [],
         product: {
           ...sampleProduct,

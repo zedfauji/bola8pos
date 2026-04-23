@@ -11,16 +11,21 @@ const RESULTS = path.join(BAR_POS, 'e2e-results', 'results.json');
 const REPO_ROOT = path.join(BAR_POS, '..');
 const REPORT = path.join(REPO_ROOT, 'VERIFICATION_REPORT.md');
 
+type ResultEntry = { status: string; error?: { message?: string } };
+
+type SpecEntry = {
+  title: string;
+  file?: string;
+  tests?: { results?: ResultEntry[] }[];
+};
+
 type Suite = {
   title: string;
   file?: string;
   suites?: Suite[];
-  tests?: Test[];
-};
-
-type Test = {
-  title: string;
-  results?: { status: string; error?: { message?: string } }[];
+  specs?: SpecEntry[];
+  /** Legacy Playwright JSON shape */
+  tests?: { title: string; results?: ResultEntry[] }[];
 };
 
 const SUITE_MAP: { match: RegExp; label: string }[] = [
@@ -38,13 +43,37 @@ const SUITE_MAP: { match: RegExp; label: string }[] = [
   { match: /^12-infrastructure/, label: 'Infrastructure' },
   { match: /^13-tauri-build/, label: 'Tauri Build' },
   { match: /^14-manual/, label: 'Manual verification stubs' },
+  { match: /^15-home-navigation/, label: 'Home Navigation' },
+  { match: /^16-table-status/, label: 'Table Status Page' },
+  { match: /^17-payment-pane/, label: 'Payment Pane' },
+  { match: /^18-void-order/, label: 'Void Order' },
+  { match: /^19-caja-entries/, label: 'Caja Entries' },
+  { match: /^20-error-scenarios/, label: 'Error Scenarios' },
+  { match: /^21-product-management/, label: 'Product Management' },
+  { match: /^22-staff-management/, label: 'Staff Management' },
+  { match: /^23-payment-edge-cases/, label: 'Payment Edge Cases' },
+  { match: /^24-pool-advanced/, label: 'Advanced Pool Operations' },
+  { match: /^25-rappi-orders/, label: 'Rappi Orders' },
+  { match: /^26-field-validation/, label: 'Field Validation' },
 ];
+
+function lastStatus(results: ResultEntry[] | undefined): string {
+  if (!results?.length) return 'unknown';
+  return results[results.length - 1]?.status ?? 'unknown';
+}
 
 function walkSuite(s: Suite, fileHint: string | undefined, onTest: (file: string, status: string) => void) {
   const file = s.file ?? fileHint;
   const nextFile = file ?? fileHint;
+  for (const spec of s.specs ?? []) {
+    const specFile = spec.file ?? nextFile;
+    for (const tr of spec.tests ?? []) {
+      const st = lastStatus(tr.results);
+      if (specFile) onTest(specFile, st);
+    }
+  }
   for (const t of s.tests ?? []) {
-    const st = t.results?.[t.results.length - 1]?.status ?? 'unknown';
+    const st = lastStatus(t.results);
     if (nextFile) onTest(nextFile, st);
   }
   for (const ch of s.suites ?? []) {
@@ -56,7 +85,17 @@ function basenameFile(f: string): string {
   return path.basename(f);
 }
 
+async function waitForResultsFile(maxMs: number): Promise<boolean> {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
+    if (existsSync(RESULTS)) return true;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  return existsSync(RESULTS);
+}
+
 export default async function globalTeardown(): Promise<void> {
+  await waitForResultsFile(15_000);
   if (!existsSync(RESULTS)) {
     const fallback = `# Bar POS — Playwright Verification Report
 **Date:** ${new Date().toISOString().slice(0, 10)}
@@ -105,8 +144,23 @@ Run \`cd bar-pos && npx playwright test\` after configuring \`.env.local\`.
 
   const walkFailures = (s: Suite, fileHint: string | undefined) => {
     const file = s.file ?? fileHint;
+    for (const spec of s.specs ?? []) {
+      const specFile = spec.file ?? file;
+      for (const tr of spec.tests ?? []) {
+        const results = tr.results ?? [];
+        const r = results[results.length - 1];
+        if (r?.status === 'failed' || r?.status === 'timedOut') {
+          failures.push({
+            title: spec.title,
+            file: basenameFile(specFile ?? 'unknown'),
+            error: r.error?.message ?? r.status,
+          });
+        }
+      }
+    }
     for (const t of s.tests ?? []) {
-      const r = t.results?.[t.results.length - 1];
+      const results = t.results ?? [];
+      const r = results[results.length - 1];
       if (r?.status === 'failed' || r?.status === 'timedOut') {
         failures.push({
           title: t.title,

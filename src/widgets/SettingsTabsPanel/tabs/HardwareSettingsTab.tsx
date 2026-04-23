@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { LogoUploader } from '@features/upload-logo';
 import { useSettings, useMutationUpdateSetting } from '@entities/settings';
 import type { ReceiptSettings } from '@entities/settings';
 import type { UserRole } from '@shared/lib/domain';
@@ -107,6 +108,8 @@ export function HardwareSettingsTab({ currentRole }: Props) {
           </div>
         </div>
 
+        {receipt && <LogoUploader receipt={receipt} />}
+
         {receipt && (
           <div className="space-y-4 rounded-lg border p-4">
             <h3 className="font-medium">Receipt Settings</h3>
@@ -136,6 +139,8 @@ export function HardwareSettingsTab({ currentRole }: Props) {
                   { key: 'showCustomerName', label: 'Show customer name' },
                   { key: 'showReceiptNumber', label: 'Show receipt number' },
                   { key: 'boldTotals', label: 'Bold totals line' },
+                  { key: 'printOnStart', label: 'Print start ticket' },
+                  { key: 'autoCut', label: 'Auto-cut paper after each receipt' },
                 ] as const
               ).map(({ key, label }) => (
                 <div key={key} className="flex items-center gap-3">

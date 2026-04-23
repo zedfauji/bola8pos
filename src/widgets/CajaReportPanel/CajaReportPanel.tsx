@@ -1,56 +1,16 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
+import { ExportButtons } from '@features/export-report';
 import { useCajaList, useCajaReport } from '@entities/caja';
-import type { CajaReport, CajaSession } from '@shared/lib/domain';
+import type { CajaEntry, CajaReport, CajaSession } from '@shared/lib/domain';
 import { DataTable } from '@shared/ui/DataTable';
 import { LoadingSpinner } from '@shared/ui/LoadingSpinner';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { SectionHeader } from '@shared/ui/SectionHeader';
+import { Badge } from '@shared/ui/badge';
 
 function formatDate(d: Date) {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function exportCsv(report: CajaReport) {
-  const rows: string[][] = [
-    ['Section', 'Item', 'Value'],
-    ['Summary', 'Total Revenue', String(report.summary.totalRevenue)],
-    ['Summary', 'Cash Sales', String(report.summary.cashSales)],
-    ['Summary', 'Card Sales', String(report.summary.cardSales)],
-    ['Summary', 'Rappi Sales', String(report.summary.rappiSales)],
-    ['Summary', 'Order Count', String(report.summary.orderCount)],
-    ['Summary', 'Tab Count', String(report.summary.tabCount)],
-    ['Cash Reconciliation', 'Opening Cash', String(report.cashReconciliation.openingCash)],
-    ['Cash Reconciliation', 'Cash Sales', String(report.cashReconciliation.cashSales)],
-    ['Cash Reconciliation', 'Expected Cash', String(report.cashReconciliation.expectedCash)],
-    ['Cash Reconciliation', 'Closing Cash', String(report.cashReconciliation.closingCash ?? '')],
-    ['Cash Reconciliation', 'Variance', String(report.cashReconciliation.variance ?? '')],
-    [],
-    ['Top Products', 'Product', 'Qty', 'Revenue'],
-    ...report.topProducts.map(p => [
-      'Top Products',
-      p.productName,
-      String(p.quantity),
-      String(p.revenue),
-    ]),
-    [],
-    ['Staff', 'Name', 'Orders', 'Sales Total'],
-    ...report.staffSummary.map(s => [
-      'Staff',
-      s.staffName,
-      String(s.orderCount),
-      String(s.salesTotal),
-    ]),
-  ];
-
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `caja-report-${formatDate(report.cajaSession.openedAt)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 const topProductsColumns: ColumnDef<CajaReport['topProducts'][number]>[] = [
@@ -70,6 +30,45 @@ const staffColumns: ColumnDef<CajaReport['staffSummary'][number]>[] = [
     accessorKey: 'salesTotal',
     header: 'Sales Total',
     cell: ({ row }) => <MoneyDisplay amount={row.original.salesTotal} size="sm" />,
+  },
+];
+
+const entriesColumns: ColumnDef<CajaEntry>[] = [
+  {
+    accessorKey: 'type',
+    header: 'Type',
+    cell: ({ row }) => (
+      <Badge
+        variant={row.original.type === 'expense' ? 'destructive' : 'default'}
+        className="capitalize"
+      >
+        {row.original.type}
+      </Badge>
+    ),
+  },
+  { accessorKey: 'concept', header: 'Concept' },
+  {
+    accessorKey: 'amount',
+    header: 'Amount',
+    cell: ({ row }) => (
+      <span className={row.original.type === 'expense' ? 'text-red-400' : 'text-green-400'}>
+        {row.original.type === 'expense' ? '-' : '+'}${row.original.amount.toFixed(2)}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'staffName',
+    header: 'Staff',
+    cell: ({ row }) => <span>{row.original.staffName ?? '—'}</span>,
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Time',
+    cell: ({ row }) =>
+      row.original.createdAt.toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+      }),
   },
 ];
 
@@ -108,17 +107,7 @@ export function CajaReportPanel() {
               </option>
             ))}
           </select>
-          {report && (
-            <button
-              type="button"
-              className="ml-auto rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
-              onClick={() => {
-                exportCsv(report);
-              }}
-            >
-              Export CSV
-            </button>
-          )}
+          {report && <ExportButtons reportType="caja" data={report} />}
         </div>
       )}
 
@@ -166,6 +155,24 @@ export function CajaReportPanel() {
                   )}
                 </div>
               ))}
+              {report.summary.totalIncome > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">+ Income entries</span>
+                  <span className="text-green-400">${report.summary.totalIncome.toFixed(2)}</span>
+                </div>
+              )}
+              {report.summary.totalExpenses > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">- Expense entries</span>
+                  <span className="text-red-400">${report.summary.totalExpenses.toFixed(2)}</span>
+                </div>
+              )}
+              {(report.summary.totalExpenses > 0 || report.summary.totalIncome > 0) && (
+                <div className="flex justify-between font-semibold">
+                  <span>= Net Balance</span>
+                  <MoneyDisplay amount={report.summary.netBalance} size="sm" />
+                </div>
+              )}
               <div className="flex justify-between border-t pt-2 font-semibold">
                 <span>Variance</span>
                 {report.cashReconciliation.variance != null ? (
@@ -193,6 +200,32 @@ export function CajaReportPanel() {
               <DataTable columns={topProductsColumns} data={report.topProducts} />
             ) : (
               <p className="text-sm text-muted-foreground">No products sold in this session.</p>
+            )}
+          </div>
+
+          {/* Expenses & Income entries */}
+          <div>
+            <h3 className="mb-3 font-semibold">Expenses & Income</h3>
+            {report.cajaEntries.length > 0 ? (
+              <>
+                <DataTable columns={entriesColumns} data={report.cajaEntries} />
+                <div className="mt-2 flex gap-4 text-sm">
+                  <span>
+                    Total Expenses:{' '}
+                    <span className="text-red-400 font-mono">
+                      ${report.summary.totalExpenses.toFixed(2)}
+                    </span>
+                  </span>
+                  <span>
+                    Total Income:{' '}
+                    <span className="text-green-400 font-mono">
+                      ${report.summary.totalIncome.toFixed(2)}
+                    </span>
+                  </span>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">No entries for this session.</p>
             )}
           </div>
 

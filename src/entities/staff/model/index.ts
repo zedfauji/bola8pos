@@ -30,5 +30,7 @@ export {
   useShiftClosePreview,
   useMutationClockIn,
   useMutationClockOut,
+  useStaffMetrics,
+  useStaffTips,
 } from './queries';
 export { usePermissions } from './usePermissions';

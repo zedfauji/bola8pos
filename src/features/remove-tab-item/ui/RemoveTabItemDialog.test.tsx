@@ -41,6 +41,7 @@ const baseItem: OrderItem = {
   modifierIds: [],
   modifierPriceDelta: 0,
   notes: null,
+  kdsStatus: 'pending',
   modifiers: [],
   product: {
     id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
@@ -51,6 +52,7 @@ const baseItem: OrderItem = {
     sku: null,
     isActive: true,
     imageUrl: null,
+    stock_threshold: null,
     modifiers: [],
   },
 };

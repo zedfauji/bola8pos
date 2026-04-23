@@ -7,7 +7,14 @@
  */
 
 import { z } from 'zod';
-import { MoneySchema, UuidSchema, TimestampSchema, PaymentMethodSchema } from './domain';
+import {
+  MoneySchema,
+  UuidSchema,
+  TimestampSchema,
+  PaymentMethodSchema,
+  DiscountScopeSchema,
+  DiscountTypeSchema,
+} from './domain';
 import { ok, err, type Result } from './result';
 import { supabase, getCachedAccessToken } from './supabase';
 import type { AppError } from './supabase-contracts';
@@ -44,6 +51,10 @@ export const ReceiptDataSchema = z.object({
   changeAmount: MoneySchema.nullable().optional(),
   /** Terminal / BBVA receipt reference — never log raw value */
   terminalReference: z.string().max(64).nullable().optional(),
+  discountAmount: MoneySchema.nullable().optional(),
+  discountScope: DiscountScopeSchema.nullable().optional(),
+  discountType: DiscountTypeSchema.nullable().optional(),
+  discountValue: z.number().nonnegative().nullable().optional(),
 });
 
 export type ReceiptData = z.infer<typeof ReceiptDataSchema>;
@@ -131,6 +142,10 @@ export const ProcessPaymentRequestSchema = z
     tenderedAmount: MoneySchema.nullable().optional(),
     referenceNumber: z.string().max(64).nullable().optional(),
     rappiOrderId: z.string().max(128).nullable().optional(),
+    discountScope: DiscountScopeSchema.optional(),
+    discountType: DiscountTypeSchema.optional(),
+    discountValue: z.number().nonnegative().optional(),
+    discountAmount: MoneySchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (data.method === 'cash' && data.tenderedAmount == null) {
@@ -999,6 +1014,56 @@ export async function callSendSettingsTestEmail(
 }
 
 // ============================================================================
+// GET SERVER TIME
+// ============================================================================
+
+/**
+ * Response schema for get-server-time edge function.
+ */
+export const GetServerTimeResponseSchema = z.object({
+  serverTime: z.string(),
+});
+
+export type GetServerTimeResponse = z.infer<typeof GetServerTimeResponseSchema>;
+
+/**
+ * Calls the get-server-time edge function.
+ *
+ * @returns Result with server ISO 8601 timestamp or error.
+ */
+export async function callGetServerTime(): Promise<Result<GetServerTimeResponse, AppError>> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- supabase.functions.invoke payload
+    const { data, error } = await supabase.functions.invoke<unknown>('get-server-time', {
+      body: {},
+    });
+
+    if (error) {
+      return err({
+        code: 'SUPABASE_ERROR',
+        message: getInvokeErrorMessage(error, 'Could not fetch server time'),
+      });
+    }
+
+    const envelope = GetServerTimeResponseSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected response from get-server-time function',
+        details: envelope.error.message,
+      });
+    }
+
+    return ok(envelope.data);
+  } catch (error) {
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+// ============================================================================
 // EDGE FUNCTION REGISTRY
 // ============================================================================
 
@@ -1056,6 +1121,11 @@ export const EDGE_FUNCTIONS = {
     requestSchema: SettingsTestEmailRequestSchema,
     responseSchema: SettingsTestEmailResponseSchema,
     caller: callSendSettingsTestEmail,
+  },
+  'get-server-time': {
+    requestSchema: z.object({}),
+    responseSchema: GetServerTimeResponseSchema,
+    caller: callGetServerTime,
   },
 } as const;
 

@@ -12,6 +12,7 @@ export interface UsePoolTimerOptions {
 export function usePoolTimer(
   startedAt: Date | null,
   ratePerHour: number | undefined,
+  firstHourMode: 'full' | 'prorated',
   options?: UsePoolTimerOptions
 ) {
   const tickMs = options?.tickMs ?? 1000;
@@ -64,6 +65,7 @@ export function usePoolTimer(
       startedAt,
       endTime: now,
       ratePerHour,
+      firstHourMode,
     });
 
     return {
@@ -75,5 +77,5 @@ export function usePoolTimer(
       currentCharge: Math.round(billing.totalCharge * 100) / 100,
       isRunning: true,
     };
-  }, [nowMs, startedAt, ratePerHour]);
+  }, [nowMs, startedAt, ratePerHour, firstHourMode]);
 }

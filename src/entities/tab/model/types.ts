@@ -34,6 +34,7 @@ export const mockTabItem: OrderItem = {
   modifierIds: [],
   modifierPriceDelta: 0,
   notes: null,
+  kdsStatus: 'pending',
   modifiers: [],
 };
 

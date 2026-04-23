@@ -52,6 +52,7 @@ const mockOrder: Order = {
       modifierIds: [],
       modifierPriceDelta: 1,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
       product: {
         id: '55555555-5555-5555-5555-555555555555',
@@ -62,6 +63,7 @@ const mockOrder: Order = {
         sku: null,
         isActive: true,
         imageUrl: null,
+        stock_threshold: null,
         modifiers: [],
       },
     },
@@ -74,6 +76,7 @@ const mockOrder: Order = {
       modifierIds: [],
       modifierPriceDelta: 0,
       notes: null,
+      kdsStatus: 'pending',
       modifiers: [],
       product: {
         id: '88888888-8888-8888-8888-888888888888',
@@ -84,6 +87,7 @@ const mockOrder: Order = {
         sku: null,
         isActive: true,
         imageUrl: null,
+        stock_threshold: null,
         modifiers: [],
       },
     },

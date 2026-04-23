@@ -5,7 +5,15 @@
  * No side effects. No async. No Supabase calls. Fully testable.
  */
 
-import type { Category, CartItem, Order, PoolSessionSummary, Product } from './domain';
+import type {
+  Category,
+  CartItem,
+  Order,
+  PoolSessionSummary,
+  Product,
+  DiscountScope,
+  DiscountType,
+} from './domain';
 import { computePoolSessionBilling } from './pool-billing';
 
 /**
@@ -342,4 +350,33 @@ export function calculateTipSuggestions(subtotal: number): {
     tip18: calculateTipAmount(subtotal, 18, null),
     tip20: calculateTipAmount(subtotal, 20, null),
   };
+}
+
+/**
+ * Returns the portion of the bill that a discount applies to, based on scope.
+ */
+export function getDiscountBase(
+  itemsSubtotal: number,
+  poolTotal: number,
+  scope: DiscountScope
+): number {
+  switch (scope) {
+    case 'pool_only':
+      return poolTotal;
+    case 'consumptions_only':
+      return itemsSubtotal;
+    case 'all':
+    default:
+      return Math.round((itemsSubtotal + poolTotal) * 100) / 100;
+  }
+}
+
+/**
+ * Calculates the discount amount from a base, type, and value.
+ * Caps the result at the base amount.
+ */
+export function calculateDiscountAmount(base: number, type: DiscountType, value: number): number {
+  if (value <= 0 || base <= 0) return 0;
+  const raw = type === 'percent' ? (value / 100) * base : Math.min(value, base);
+  return Math.round(Math.min(raw, base) * 100) / 100;
 }

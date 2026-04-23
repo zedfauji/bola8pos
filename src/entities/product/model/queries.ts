@@ -71,6 +71,8 @@ function mapProductRow(row: ProductRow): Result<Product> {
         sku: row.sku,
         isActive: row.is_active,
         imageUrl: row.image_url,
+        stock_threshold: row.stock_threshold ?? null,
+        barcode: (row as { barcode?: string | null }).barcode ?? null,
         modifiers,
         category,
       })
@@ -386,6 +388,9 @@ function productUpdateToRow(patch: Partial<Omit<ProductUpdate, 'id'>>): TablesUp
   if (patch.sku !== undefined) row.sku = patch.sku;
   if (patch.isActive !== undefined) row.is_active = patch.isActive;
   if (patch.imageUrl !== undefined) row.image_url = patch.imageUrl;
+  if (patch.barcode !== undefined) {
+    (row as Record<string, unknown>).barcode = patch.barcode;
+  }
   return row;
 }
 
@@ -408,6 +413,9 @@ export function useMutationCreateProduct() {
         is_active: product.isActive,
         image_url: product.imageUrl,
       };
+      if (product.barcode !== undefined && product.barcode !== null) {
+        (insertRow as Record<string, unknown>).barcode = product.barcode;
+      }
 
       const res = await supabaseMutation<Tables<'products'>>(() =>
         supabase.from('products').insert(insertRow).select('*').single()
