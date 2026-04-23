@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 02-combos
-current_plan: 02-04 (wave 3) — next to execute
+current_plan: 02-05 (wave 4) — next to execute
 status: in_progress
-stopped_at: Completed 02-combos plan 03 (02-03-PLAN.md) — entities/combo/ FSD slice + add_combo_to_tab RPC
-last_updated: "2026-04-23T23:49:00.000Z"
+stopped_at: Completed 02-combos plan 04 (02-04-PLAN.md) — ComboBadge, ComboUnavailableBadge, ComboSlotCard shared/ui + ProductGrid routing fork
+last_updated: "2026-04-23T23:39:45.000Z"
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 14
-  completed_plans: 9
-  percent: 64
+  completed_plans: 10
+  percent: 71
 ---
 
 # Session State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2
 **Current phase:** 02-combos
-**Current plan:** 02-04 (wave 3) — next to execute
+**Current plan:** 02-05 (wave 4) — next to execute
 **Status:** In Progress
-**Progress:** [██████░░░░] 64%
+**Progress:** [███████░░░] 71%
 
 ## Session Log
 
@@ -40,6 +40,7 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 02-01 (combo schema foundations) completed — 2 tasks, 4 SQL migrations, AppErrorCode +4 combo codes, shadcn Collapsible installed
 - 2026-04-23: Plan 02-02 (schema push + Zod types + pool-billing) completed — supabase db push applied, 6 combo Zod schemas added to domain.ts, prepaidMinutes in pool-billing, 19 tests pass
 - 2026-04-23: Plan 02-03 (entities/combo/ + add_combo_to_tab RPC) completed — 6 TanStack Query hooks, comboKeys, add_combo_to_tab PL/pgSQL migration with all 4 error strings
+- 2026-04-23: Plan 02-04 (shared/ui combo components + ProductGrid) completed — ComboBadge, ComboUnavailableBadge, ComboSlotCard + 3 story files; ProductGrid combo routing fork with useComboAvailability + ManagerPinDialog override
 
 ## Decisions
 
@@ -71,6 +72,10 @@ See: .planning/PROJECT.md
 - [Phase 02-combos 02-03]: pool_time slots in add_combo_to_tab produce no pool_sessions INSERT — table_id NOT NULL prevents pending sessions; start-pool-timer creates session with correct table_id and applies prepaid_minutes
 - [Phase 02-combos 02-03]: audit_log INSERT uses EXCEPTION WHEN undefined_table guard — audit_log not yet created; auto-activates when future migration adds the table
 - [Phase 02-combos 02-03]: export * banned by ESLint no-restricted-syntax; use explicit named exports in model/index.ts barrels
+- [Phase 02-combos 02-04]: shared/ui components import types from @shared/lib/domain (not @entities/*) — FSD layer boundary enforced by eslint-plugin-boundaries
+- [Phase 02-combos 02-04]: ComboSlotCard option rows use button+role=option inside role=listbox (a11y compliance for jsx-a11y rules)
+- [Phase 02-combos 02-04]: exactOptionalPropertyTypes fix: conditional spread {...(cond ? { className } : {})} instead of className={x || undefined}
+- [Phase 02-combos 02-04]: Storybook stories must import from @storybook/react-vite (not @storybook/react) per storybook/no-renderer-packages ESLint rule
 
 ## Performance Metrics
 
@@ -85,8 +90,9 @@ See: .planning/PROJECT.md
 | 02-combos | 01 | 4min | 2 | 6 |
 | 02-combos | 02 | 12min | 2 | 3 |
 | 02-combos | 03 | 4min | 2 | 5 |
+| 02-combos | 04 | 8min | 2 | 7 |
 
 ## Last Session
 
-- **Stopped at:** Completed 02-combos plan 03 (02-03-PLAN.md) — entities/combo/ FSD slice + add_combo_to_tab RPC
-- **Timestamp:** 2026-04-23T23:49:00Z
+- **Stopped at:** Completed 02-combos plan 04 (02-04-PLAN.md) — ComboBadge, ComboUnavailableBadge, ComboSlotCard shared/ui + ProductGrid routing fork
+- **Timestamp:** 2026-04-23T23:39:45Z
