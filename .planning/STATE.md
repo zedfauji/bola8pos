@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 01-foundation
-current_plan: 05 (ui-features)
+current_plan: 06 (e2e-categories)
 status: executing
-stopped_at: Completed 01-foundation plan 04 (04-entity-category-PLAN.md)
-last_updated: "2026-04-23T18:40:00.000Z"
+stopped_at: Completed 01-foundation plan 05 (05-ui-features-PLAN.md)
+last_updated: "2026-04-23T19:00:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
-  percent: 57
+  completed_plans: 5
+  percent: 71
 ---
 
 # Session State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2
 **Current phase:** 01-foundation
-**Current plan:** 05 (ui-features)
+**Current plan:** 06 (e2e-categories)
 **Status:** In Progress
-**Progress:** [█████░░░░░] 57%
+**Progress:** [███████░░░] 71%
 
 ## Session Log
 
@@ -35,6 +35,7 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 02 (SQL migrations) completed — 6 tasks, 6 migration files, S1-01..S1-05 + S1-11
 - 2026-04-23: Plan 03 (types-zod) completed — S1-06, 50 unit tests, supabase.types.ts + domain.ts extended
 - 2026-04-23: Plan 04 (entity-category) completed — S1-10, entities/category created, CatalogCategoriesTab + CatalogProductsTab rewired to @entities/category
+- 2026-04-23: Plan 05 (ui-features) completed — S1-07/08/09/12, CategoryTreePicker, CategoryTreeEditor, ModifierGroupEditor, category-tree property tests (29 tests, fast-check)
 
 ## Decisions
 
@@ -42,6 +43,10 @@ See: .planning/PROJECT.md
 - Category entity queries do NOT sync to useProductStore; POS flow uses product entity's own useCategories for store sync
 - useCategoryTree delegates tree construction to buildTree from @shared/lib/category-tree to avoid duplication
 - No cross-entity imports: entities/category only imports from @shared/* (valid FSD boundary)
+- CategoryTreePicker expands all nodes by default (settings usability; not POS)
+- CategoryTreeEditor replaces flat CatalogCategoriesTab in ProductsSettingsTab
+- ModifierGroupEditor uses file-level eslint-disable + supabase as any (pre-regen cast for modifier_groups)
+- Integration test failures in hourly-breakdown + product-sales-report are pre-existing (live Supabase data), deferred
 - stock_movements reason enum extended to 11 values including void, refund, prep_production, prep_consumption, combo_component
 - Depth-3 trigger fires BEFORE INSERT OR UPDATE OF parent_id (bounded, not all-UPDATE)
 - modifier_groups: all-authenticated SELECT, manager+admin write (matches inventory RLS pattern)
@@ -58,8 +63,9 @@ See: .planning/PROJECT.md
 | 01-foundation | 02 | 9min | 6 | 12 |
 | 01-foundation | 03 | 25min | 1 | 15 |
 | 01-foundation | 04 | 10min | 1 | 7 |
+| 01-foundation | 05 | 28min | 4 | 11 |
 
 ## Last Session
 
-- **Stopped at:** Completed 01-foundation plan 04 (04-entity-category-PLAN.md)
-- **Timestamp:** 2026-04-23T18:40:00Z
+- **Stopped at:** Completed 01-foundation plan 05 (05-ui-features-PLAN.md)
+- **Timestamp:** 2026-04-23T19:00:00Z
