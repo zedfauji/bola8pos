@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 01-foundation
-current_plan: 07 (regression-gate) — PHASE COMPLETE
-status: complete
-stopped_at: Completed 01-foundation plan 07 (07-regression-gate-PLAN.md) — phase 01 complete
-last_updated: "2026-04-23T20:09:33.679Z"
+current_phase: 02-combos
+current_plan: 02-02 (wave 1)
+status: in_progress
+stopped_at: Completed 02-combos plan 01 (02-01-PLAN.md) — combo DB schema foundations
+last_updated: "2026-04-23T23:15:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_plans: 14
+  completed_plans: 7
+  percent: 50
 ---
 
 # Session State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** Feature Expansion 2026 Q2
-**Current phase:** 01-foundation
-**Current plan:** 07 (regression-gate) — PHASE COMPLETE
-**Status:** Complete
-**Progress:** [██████████] 100%
+**Current phase:** 02-combos
+**Current plan:** 02-02 (wave 1) — next to execute
+**Status:** In Progress
+**Progress:** [█████░░░░░] 50%
 
 ## Session Log
 
@@ -37,6 +37,7 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 04 (entity-category) completed — S1-10, entities/category created, CatalogCategoriesTab + CatalogProductsTab rewired to @entities/category
 - 2026-04-23: Plan 05 (ui-features) completed — S1-07/08/09/12, CategoryTreePicker, CategoryTreeEditor, ModifierGroupEditor, category-tree property tests (29 tests, fast-check)
 - 2026-04-23: Plan 07 (regression-gate) completed — typecheck/lint/unit PASS; E2E 31-categories blocked by staging migration gap; manual operator steps documented
+- 2026-04-23: Plan 02-01 (combo schema foundations) completed — 2 tasks, 4 SQL migrations, AppErrorCode +4 combo codes, shadcn Collapsible installed
 
 ## Decisions
 
@@ -60,6 +61,8 @@ See: .planning/PROJECT.md
 - [Phase 01-foundation]: RLS test for bartender modifier_groups write uses E2E_BARTENDER_EMAIL/PASSWORD env vars (skippable when not set)
 - [Phase 01-foundation]: E2E 31-categories T2 failure is staging infrastructure gap (parent_id column not on remote DB), not a code bug — requires supabase db push
 - [Phase 01-foundation]: inventory_log grep: 2 hits in src/ are comments only documenting rename history — gate passes
+- [Phase 02-combos 02-01]: shadcn CLI installs collapsible to src/app/components/ui/ — always move to src/shared/ui/ to match FSD layer boundaries
+- [Phase 02-combos 02-01]: Added FK indexes on combo tables and partial indexes on order_items combo columns for query performance
 
 ## Performance Metrics
 
@@ -71,8 +74,9 @@ See: .planning/PROJECT.md
 | 01-foundation | 05 | 28min | 4 | 11 |
 | Phase 01-foundation P06 | 50min | 1 tasks | 1 files |
 | Phase 01-foundation P07 | 25min | 1 tasks | 0 files |
+| 02-combos | 01 | 4min | 2 | 6 |
 
 ## Last Session
 
-- **Stopped at:** Completed 01-foundation plan 07 (07-regression-gate-PLAN.md) — phase 01 complete
-- **Timestamp:** 2026-04-23T19:00:00Z
+- **Stopped at:** Completed 02-combos plan 01 (02-01-PLAN.md) — combo DB schema foundations
+- **Timestamp:** 2026-04-23T23:15:00Z
