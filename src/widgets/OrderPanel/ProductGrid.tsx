@@ -1,14 +1,26 @@
 import { AlertCircle, Package } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { ModifierSheet } from '@features/add-item-to-tab/ui/ModifierSheet';
+import { ManagerPinDialog } from '@features/manager-pin-gate';
+import { useComboAvailability } from '@entities/combo';
 import { useProducts, useCategories } from '@entities/product/model/queries';
 import type { Product, Modifier } from '@entities/product/model/types';
 import { CategoryTabs } from '@entities/product/ui/CategoryTabs';
 import { ProductCard } from '@entities/product/ui/ProductCard';
 import { useCartStore } from '@entities/tab/model/cartStore';
 import { resolveProductPrice, getCurrentTime } from '@shared/lib/domain-helpers';
+import { ComboBadge } from '@shared/ui/ComboBadge';
+import { ComboUnavailableBadge } from '@shared/ui/ComboUnavailableBadge';
 import { EmptyState } from '@shared/ui/EmptyState';
 import { CardSkeleton } from '@shared/ui/LoadingSkeletons';
+import { Button } from '@shared/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@shared/ui/dialog';
 import { ScrollAreaRoot } from '@shared/ui/scroll-area';
 import { HappyHourBanner } from './HappyHourBanner';
 
@@ -19,6 +31,53 @@ function gridClockFromWallTime(): Date {
   return d;
 }
 
+// ---------------------------------------------------------------------------
+// ComboAwareProductCard — per-card sub-component that checks availability.
+// Avoids N+1 by using useComboAvailability(id) per card (staleTime=30s).
+// ---------------------------------------------------------------------------
+
+interface ComboAwareProductCardProps {
+  product: Product;
+  category: { id: string; name: string; color: string } & Record<string, unknown>;
+  now: Date;
+  onSelect: (p: Product) => void;
+  onUnavailableSelect: (p: Product) => void;
+}
+
+function ComboAwareProductCard({
+  product,
+  category,
+  now,
+  onSelect,
+  onUnavailableSelect,
+}: ComboAwareProductCardProps) {
+  const { data: isAvailable = true } = useComboAvailability(product.id);
+  return (
+    <div className="relative">
+      <ProductCard
+        product={product}
+        category={category as Parameters<typeof ProductCard>[0]['category']}
+        now={now}
+        onSelect={() => {
+          if (isAvailable) {
+            onSelect(product);
+          } else {
+            onUnavailableSelect(product);
+          }
+        }}
+        {...(!isAvailable ? { className: 'opacity-60' } : {})}
+      />
+      <div className="absolute top-2 right-2 pointer-events-none">
+        {isAvailable ? <ComboBadge /> : <ComboUnavailableBadge availabilityHint="Check schedule" />}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ProductGrid
+// ---------------------------------------------------------------------------
+
 export interface ProductGridProps {
   className?: string;
 }
@@ -28,6 +87,19 @@ export function ProductGrid({ className }: ProductGridProps) {
   const [catalogNow, setCatalogNow] = useState(() => gridClockFromWallTime());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modifierSheetOpen, setModifierSheetOpen] = useState(false);
+
+  // Combo routing state — consumed by ComboBuilderSheet in Plan 05
+  const [selectedCombo, setSelectedCombo] = useState<Product | null>(null);
+  const [comboBuilderOpen, setComboBuilderOpen] = useState(false);
+  const [unavailableCombo, setUnavailableCombo] = useState<Product | null>(null);
+  const [unavailableDialogOpen, setUnavailableDialogOpen] = useState(false);
+  const [overrideActive, setOverrideActive] = useState(false);
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+
+  // Suppress unused-variable warnings for state that Plan 05 will consume
+  void selectedCombo;
+  void comboBuilderOpen;
+  void overrideActive;
 
   const { addItem } = useCartStore();
 
@@ -59,16 +131,26 @@ export function ProductGrid({ className }: ProductGridProps) {
   }, [products, activeCategory]);
 
   const handleProductSelect = (product: Product) => {
+    if (product.isCombo) {
+      setSelectedCombo(product);
+      setComboBuilderOpen(true);
+      return;
+    }
     if (product.modifiers.length > 0) {
       setSelectedProduct(product);
       setModifierSheetOpen(true);
-    } else {
-      const category = categories?.find(c => c.id === product.categoryId);
-      const resolvedPrice = category
-        ? resolveProductPrice(product, category, catalogNow)
-        : product.basePrice;
-      addItem(product, [], resolvedPrice);
+      return;
     }
+    const category = categories?.find(c => c.id === product.categoryId);
+    const resolvedPrice = category
+      ? resolveProductPrice(product, category, catalogNow)
+      : product.basePrice;
+    addItem(product, [], resolvedPrice);
+  };
+
+  const handleUnavailableComboSelect = (product: Product) => {
+    setUnavailableCombo(product);
+    setUnavailableDialogOpen(true);
   };
 
   const handleModifierConfirm = (selectedModifiers: Modifier[]) => {
@@ -129,6 +211,18 @@ export function ProductGrid({ className }: ProductGridProps) {
             {filteredProducts.map(product => {
               const category = categories?.find(c => c.id === product.categoryId);
               if (!category) return null;
+              if (product.isCombo) {
+                return (
+                  <ComboAwareProductCard
+                    key={product.id}
+                    product={product}
+                    category={category}
+                    now={catalogNow}
+                    onSelect={handleProductSelect}
+                    onUnavailableSelect={handleUnavailableComboSelect}
+                  />
+                );
+              }
               return (
                 <ProductCard
                   key={product.id}
@@ -159,6 +253,57 @@ export function ProductGrid({ className }: ProductGridProps) {
           onClose={handleModifierClose}
         />
       )}
+
+      {/* Combo unavailable dialog */}
+      <Dialog open={unavailableDialogOpen} onOpenChange={setUnavailableDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Combo not available</DialogTitle>
+            <DialogDescription>
+              {unavailableCombo?.name} is only available during specific hours. A manager can
+              override.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end pt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setUnavailableDialogOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setUnavailableDialogOpen(false);
+                setPinDialogOpen(true);
+              }}
+            >
+              Request override
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manager PIN override for combo availability */}
+      <ManagerPinDialog
+        open={pinDialogOpen}
+        onOpenChange={setPinDialogOpen}
+        requiredAction="manage_products"
+        onSuccess={() => {
+          setPinDialogOpen(false);
+          setOverrideActive(true);
+          if (unavailableCombo) {
+            setSelectedCombo(unavailableCombo);
+            setUnavailableCombo(null);
+            setComboBuilderOpen(true);
+          }
+        }}
+      />
+
+      {/* ComboBuilderSheet will be mounted here in Plan 05 */}
+      {/* selectedCombo and comboBuilderOpen state are already wired */}
+      {/* overrideActive flag will be passed to ComboBuilderSheet */}
     </div>
   );
 }
