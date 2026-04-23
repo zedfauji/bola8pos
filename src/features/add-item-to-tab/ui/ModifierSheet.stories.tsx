@@ -34,6 +34,8 @@ const mockProduct: Product = {
   isActive: true,
   sku: 'COCKTAIL-MARG',
   stock_threshold: null,
+  comboEligible: true,
+  isCombo: false,
   modifiers: [
     ModifierSchema.parse({
       id: 'a1000000-0000-4000-8000-000000000001',

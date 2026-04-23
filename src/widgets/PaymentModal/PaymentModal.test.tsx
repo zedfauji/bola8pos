@@ -48,6 +48,8 @@ function miniProduct(partial: { id: string; name: string; basePrice: number }): 
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    comboEligible: true,
+    isCombo: false,
     modifiers: [],
   };
 }

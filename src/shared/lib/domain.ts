@@ -107,6 +107,35 @@ export const InventoryAdjustReason = {
   PHYSICAL_COUNT: 'physical_count',
 } as const;
 
+/** Extended reason enum for the stock_movements ledger table (superset of InventoryAdjustReason) */
+export const StockMovementReasonSchema = z.enum([
+  'sale',
+  'manual_adjustment',
+  'waste',
+  'delivery',
+  'correction',
+  'physical_count',
+  'prep_production',
+  'prep_consumption',
+  'combo_component',
+  'refund',
+  'void',
+]);
+export const StockMovementReason = {
+  SALE: 'sale',
+  MANUAL_ADJUSTMENT: 'manual_adjustment',
+  WASTE: 'waste',
+  DELIVERY: 'delivery',
+  CORRECTION: 'correction',
+  PHYSICAL_COUNT: 'physical_count',
+  PREP_PRODUCTION: 'prep_production',
+  PREP_CONSUMPTION: 'prep_consumption',
+  COMBO_COMPONENT: 'combo_component',
+  REFUND: 'refund',
+  VOID: 'void',
+} as const;
+export type StockMovementReason = z.infer<typeof StockMovementReasonSchema>;
+
 export const DiscountScopeSchema = z.enum(['all', 'pool_only', 'consumptions_only']);
 export const DiscountScope = {
   ALL: 'all',
@@ -134,6 +163,8 @@ export const CategorySchema = z.object({
   happyHourStart: TimeStringSchema.nullable(),
   happyHourEnd: TimeStringSchema.nullable(),
   isFood: z.boolean().default(false),
+  /** Parent category id for hierarchical nesting (max depth 3). Null = root category. */
+  parentId: UuidSchema.nullable().optional(),
   createdAt: TimestampSchema,
 });
 
@@ -182,6 +213,10 @@ export const ProductSchema = z.object({
   imageUrl: UrlSchema.nullable(),
   stock_threshold: z.number().nullable(),
   barcode: z.string().nullable().optional(),
+  /** True when this product can be used as a component in a combo product */
+  comboEligible: z.boolean().optional().default(true),
+  /** True when this product IS a combo (composed of other products) */
+  isCombo: z.boolean().optional().default(false),
   category: CategorySchema.optional(),
   modifiers: z.array(ModifierSchema).default([]),
 });
@@ -595,6 +630,88 @@ export type InventoryLogCreate = z.infer<typeof InventoryLogCreateSchema>;
 export type InventoryLogUpdate = z.infer<typeof InventoryLogUpdateSchema>;
 
 // ============================================================================
+// STOCK MOVEMENT (ledger table replacing inventory_log)
+// ============================================================================
+
+export const StockMovementSchema = z.object({
+  id: UuidSchema,
+  productId: UuidSchema,
+  quantityDelta: z.number().int(),
+  reason: StockMovementReasonSchema,
+  staffId: UuidSchema,
+  /** Polymorphic reference type (e.g. 'order_item', 'manual_adjustment') */
+  refType: z.string().nullable().optional(),
+  /** Polymorphic reference id */
+  refId: UuidSchema.nullable().optional(),
+  /** FK to ingredient record (Phase 3 prep module; nullable until then) */
+  ingredientId: UuidSchema.nullable().optional(),
+  createdAt: TimestampSchema,
+});
+
+export const StockMovementCreateSchema = StockMovementSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type StockMovement = z.infer<typeof StockMovementSchema>;
+export type StockMovementCreate = z.infer<typeof StockMovementCreateSchema>;
+
+// ============================================================================
+// MODIFIER GROUP
+// ============================================================================
+
+export const ModifierGroupSchema = z.object({
+  id: UuidSchema,
+  name: z.string().min(1).max(100),
+  minSelect: z.number().int().nonnegative(),
+  maxSelect: z.number().int().min(1),
+  isRequired: z.boolean().default(false),
+  sortOrder: z.number().int().nonnegative(),
+  createdAt: TimestampSchema,
+});
+
+export const ModifierGroupCreateSchema = ModifierGroupSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export const ModifierGroupUpdateSchema = ModifierGroupSchema.partial().required({ id: true });
+
+export type ModifierGroup = z.infer<typeof ModifierGroupSchema>;
+export type ModifierGroupCreate = z.infer<typeof ModifierGroupCreateSchema>;
+export type ModifierGroupUpdate = z.infer<typeof ModifierGroupUpdateSchema>;
+
+// ============================================================================
+// MODIFIER GROUP ITEM (links modifier_groups ↔ modifiers)
+// ============================================================================
+
+export const ModifierGroupItemSchema = z.object({
+  groupId: UuidSchema,
+  modifierId: UuidSchema,
+  sortOrder: z.number().int().nonnegative(),
+});
+
+export const ModifierGroupItemCreateSchema = ModifierGroupItemSchema;
+
+export type ModifierGroupItem = z.infer<typeof ModifierGroupItemSchema>;
+export type ModifierGroupItemCreate = z.infer<typeof ModifierGroupItemCreateSchema>;
+
+// ============================================================================
+// PRODUCT MODIFIER GROUP (links products ↔ modifier_groups)
+// ============================================================================
+
+export const ProductModifierGroupSchema = z.object({
+  productId: UuidSchema,
+  groupId: UuidSchema,
+  sortOrder: z.number().int().nonnegative().nullable(),
+});
+
+export const ProductModifierGroupCreateSchema = ProductModifierGroupSchema;
+
+export type ProductModifierGroup = z.infer<typeof ProductModifierGroupSchema>;
+export type ProductModifierGroupCreate = z.infer<typeof ProductModifierGroupCreateSchema>;
+
+// ============================================================================
 // INVENTORY ALERT
 // ============================================================================
 
@@ -991,6 +1108,7 @@ export const domain = {
     PoolTableType: PoolTableTypeSchema,
     PaymentMethod: PaymentMethodSchema,
     InventoryAdjustReason: InventoryAdjustReasonSchema,
+    StockMovementReason: StockMovementReasonSchema,
 
     // Entities
     Category: CategorySchema,
@@ -1051,6 +1169,19 @@ export const domain = {
     InventoryLogCreate: InventoryLogCreateSchema,
     InventoryLogUpdate: InventoryLogUpdateSchema,
 
+    StockMovement: StockMovementSchema,
+    StockMovementCreate: StockMovementCreateSchema,
+
+    ModifierGroup: ModifierGroupSchema,
+    ModifierGroupCreate: ModifierGroupCreateSchema,
+    ModifierGroupUpdate: ModifierGroupUpdateSchema,
+
+    ModifierGroupItem: ModifierGroupItemSchema,
+    ModifierGroupItemCreate: ModifierGroupItemCreateSchema,
+
+    ProductModifierGroup: ProductModifierGroupSchema,
+    ProductModifierGroupCreate: ProductModifierGroupCreateSchema,
+
     SettingsKey: SettingsKeySchema,
     GeneralSettings: GeneralSettingsSchema,
     BillingPaymentMethods: BillingPaymentMethodsSchema,
@@ -1095,6 +1226,7 @@ export const domain = {
     PoolTableType: PoolTableType;
     PaymentMethod: z.infer<typeof PaymentMethodSchema>;
     InventoryAdjustReason: z.infer<typeof InventoryAdjustReasonSchema>;
+    StockMovementReason: StockMovementReason;
 
     // Entities
     Category: Category;
@@ -1155,6 +1287,19 @@ export const domain = {
     InventoryLogCreate: InventoryLogCreate;
     InventoryLogUpdate: InventoryLogUpdate;
 
+    StockMovement: StockMovement;
+    StockMovementCreate: StockMovementCreate;
+
+    ModifierGroup: ModifierGroup;
+    ModifierGroupCreate: ModifierGroupCreate;
+    ModifierGroupUpdate: ModifierGroupUpdate;
+
+    ModifierGroupItem: ModifierGroupItem;
+    ModifierGroupItemCreate: ModifierGroupItemCreate;
+
+    ProductModifierGroup: ProductModifierGroup;
+    ProductModifierGroupCreate: ProductModifierGroupCreate;
+
     SettingsKey: SettingsKey;
     GeneralSettings: GeneralSettings;
     BillingSettings: BillingSettings;
@@ -1210,6 +1355,8 @@ export const domain = {
       isActive: true,
       imageUrl: null,
       stock_threshold: null,
+      comboEligible: true,
+      isCombo: false,
       modifiers: [],
     } as Product,
     cartItem: {
@@ -1224,6 +1371,8 @@ export const domain = {
         isActive: true,
         imageUrl: null,
         stock_threshold: null,
+        comboEligible: true,
+        isCombo: false,
         modifiers: [],
       },
       quantity: 1,

@@ -494,6 +494,8 @@ const sampleProduct = {
   isActive: true,
   imageUrl: null,
   stock_threshold: null,
+  comboEligible: true,
+  isCombo: false,
   modifiers: [],
 };
 

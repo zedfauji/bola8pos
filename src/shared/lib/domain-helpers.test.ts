@@ -77,6 +77,8 @@ describe('resolveProductPrice', () => {
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    comboEligible: true,
+    isCombo: false,
     modifiers: [],
   };
 
@@ -157,6 +159,8 @@ describe('calculateOrderItemLineTotal', () => {
       isActive: true,
       imageUrl: null,
       stock_threshold: null,
+      comboEligible: true,
+      isCombo: false,
       modifiers: [],
     },
     quantity: 1,
