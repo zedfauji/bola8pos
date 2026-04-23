@@ -5,14 +5,14 @@ milestone_name: milestone
 current_phase: 01-foundation
 current_plan: 06 (e2e-categories)
 status: executing
-stopped_at: Completed 01-foundation plan 05 (05-ui-features-PLAN.md)
-last_updated: "2026-04-23T19:00:00.000Z"
+stopped_at: Completed 01-foundation plan 06 (06-e2e-categories-PLAN.md)
+last_updated: "2026-04-23T19:50:54.345Z"
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 6
   completed_plans: 5
-  percent: 71
+  percent: 83
 ---
 
 # Session State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 01-foundation
 **Current plan:** 06 (e2e-categories)
 **Status:** In Progress
-**Progress:** [███████░░░] 71%
+**Progress:** [████████░░] 83%
 
 ## Session Log
 
@@ -55,6 +55,8 @@ See: .planning/PROJECT.md
 - comboEligible/isCombo use z.boolean().optional().default() — absent-safe in struct literals, parse() fills defaults
 - StockMovementReason is a superset enum (11 values) separate from InventoryAdjustReason (6 values) for backwards compat
 - lint-staged --no-warn-ignored added to suppress ESLint "file ignored" warning for supabase.types.ts
+- [Phase 01-foundation]: combo_eligible tested via DB service-role client (no UI toggle in ProductForm yet — field exists in domain.ts and DB only)
+- [Phase 01-foundation]: RLS test for bartender modifier_groups write uses E2E_BARTENDER_EMAIL/PASSWORD env vars (skippable when not set)
 
 ## Performance Metrics
 
@@ -64,8 +66,9 @@ See: .planning/PROJECT.md
 | 01-foundation | 03 | 25min | 1 | 15 |
 | 01-foundation | 04 | 10min | 1 | 7 |
 | 01-foundation | 05 | 28min | 4 | 11 |
+| Phase 01-foundation P06 | 50min | 1 tasks | 1 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 01-foundation plan 05 (05-ui-features-PLAN.md)
+- **Stopped at:** Completed 01-foundation plan 06 (06-e2e-categories-PLAN.md)
 - **Timestamp:** 2026-04-23T19:00:00Z
