@@ -1,4 +1,5 @@
 import { CategoryTreeEditor } from '@features/manage-categories';
+import { ModifierGroupEditor } from '@features/manage-modifier-groups';
 import { CatalogModifiersTab, CatalogProductsTab } from '@features/manage-products';
 import type { UserRole } from '@shared/lib/domain';
 import { ProtectedAction } from '@shared/ui';
@@ -15,7 +16,8 @@ export function ProductsSettingsTab({ currentRole }: Props) {
         <div>
           <h2 className="text-lg font-semibold">Product Management</h2>
           <p className="text-sm text-muted-foreground">
-            Manage products, categories, and modifiers. Changes are applied immediately after save.
+            Manage products, categories, modifiers, and modifier groups. Changes are applied
+            immediately after save.
           </p>
         </div>
         <Tabs defaultValue="products" className="w-full">
@@ -23,6 +25,7 @@ export function ProductsSettingsTab({ currentRole }: Props) {
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="modifiers">Modifiers</TabsTrigger>
+            <TabsTrigger value="modifier-groups">Modifier Groups</TabsTrigger>
           </TabsList>
           <TabsContent value="products">
             <CatalogProductsTab />
@@ -33,6 +36,10 @@ export function ProductsSettingsTab({ currentRole }: Props) {
           </TabsContent>
           <TabsContent value="modifiers">
             <CatalogModifiersTab />
+          </TabsContent>
+          <TabsContent value="modifier-groups">
+            {/* Modifier group editor: admin CRUD + modifier attachment (S1-09) */}
+            <ModifierGroupEditor />
           </TabsContent>
         </Tabs>
       </div>
