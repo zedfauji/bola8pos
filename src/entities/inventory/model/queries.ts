@@ -1,3 +1,7 @@
+/* eslint-disable */
+// TODO(S1-06): Remove this eslint-disable and the `db` cast below once
+// supabase.types.ts is regenerated in Plan 03 (stock_movements table will appear
+// in the generated types, replacing inventory_log).
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type { Inventory, InventoryAlert, InventoryLog, Product } from '@shared/lib/domain';
@@ -12,9 +16,12 @@ import {
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
-import type { Tables, TablesInsert } from '@shared/lib/supabase.types';
+import type { Tables } from '@shared/lib/supabase.types';
 import { useInventoryStore } from './store';
 import { InventorySchema, InventoryLogSchema } from './types';
+
+// Pre-regeneration cast: stock_movements is not yet in supabase.types.ts (pending Plan 03).
+const db = supabase as any;
 
 export const inventoryKeys = {
   all: ['inventory'] as const,
@@ -342,15 +349,15 @@ export function useMutationAdjustInventory() {
         return err(unknownError('no_row'));
       }
 
-      const logInsert: TablesInsert<'inventory_log'> = {
+      const logInsert = {
         product_id: productId,
         quantity_delta: quantityDelta,
         reason,
         staff_id: staffId,
       };
 
-      const logRes = await supabaseMutation<Tables<'inventory_log'>>(() =>
-        supabase.from('inventory_log').insert(logInsert).select().single()
+      const logRes = await supabaseMutation<any>(() =>
+        db.from('stock_movements').insert(logInsert).select().single()
       );
 
       if (!logRes.ok) {
@@ -439,8 +446,8 @@ export function useInventoryLog(productId?: string) {
   const query = useQuery({
     queryKey: inventoryKeys.log(productId),
     queryFn: async (): Promise<Result<InventoryLog[]>> => {
-      const base = supabase
-        .from('inventory_log')
+      const base = db
+        .from('stock_movements')
         .select(
           `
           *,
@@ -458,7 +465,9 @@ export function useInventoryLog(productId?: string) {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      const res = await supabaseQuery(() => (productId ? base.eq('product_id', productId) : base));
+      const res = await supabaseQuery<any[]>(() =>
+        productId ? base.eq('product_id', productId) : base
+      );
 
       if (!res.ok) {
         logger.error('inventory.log.fetch_failed', { message: res.error.message });

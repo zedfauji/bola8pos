@@ -1,10 +1,16 @@
+/* eslint-disable */
+// TODO(S1-06): Remove this eslint-disable and the `db` cast below once
+// supabase.types.ts is regenerated in Plan 03 (stock_movements replaces inventory_log).
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryKeys } from '@entities/inventory';
 import type { Inventory } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { ok, supabaseMutation, supabaseQuery, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
-import type { Tables, TablesInsert } from '@shared/lib/supabase.types';
+import type { Tables } from '@shared/lib/supabase.types';
+
+// Pre-regeneration cast: stock_movements is not yet in supabase.types.ts (pending Plan 03).
+const db = supabase as any;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -51,7 +57,7 @@ type PhysicalCountInput = {
 /**
  * Submits a physical inventory count.
  *
- * For each product where actual != expected, writes an inventory_log entry
+ * For each product where actual != expected, writes a stock_movements entry
  * with reason='physical_count' and delta=(actual - expected), then updates
  * the inventory.quantity_on_hand.
  *
@@ -125,16 +131,16 @@ export function usePhysicalCount() {
           return updateRes;
         }
 
-        // Write inventory_log entry
-        const logInsert: TablesInsert<'inventory_log'> = {
+        // Write stock_movements entry
+        const logInsert = {
           product_id: row.productId,
           quantity_delta: delta,
           reason: 'physical_count',
           staff_id: staffId,
         };
 
-        const logRes = await supabaseMutation<Tables<'inventory_log'>>(() =>
-          supabase.from('inventory_log').insert(logInsert).select().single()
+        const logRes = await supabaseMutation<any>(() =>
+          db.from('stock_movements').insert(logInsert).select().single()
         );
 
         if (!logRes.ok) {

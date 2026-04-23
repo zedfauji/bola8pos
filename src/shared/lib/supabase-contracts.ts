@@ -170,12 +170,23 @@ export type Database = {
         Insert: unknown;
         Update: unknown;
       };
-      inventory_logs: {
+      stock_movements: {
         Row: {
           id: string;
           product_id: string;
           quantity_delta: number;
-          reason: 'sale' | 'manual_adjustment' | 'waste' | 'delivery' | 'correction';
+          reason:
+            | 'sale'
+            | 'manual_adjustment'
+            | 'waste'
+            | 'delivery'
+            | 'correction'
+            | 'physical_count'
+            | 'prep_production'
+            | 'prep_consumption'
+            | 'combo_component'
+            | 'refund'
+            | 'void';
           staff_id: string;
           created_at: string;
         };

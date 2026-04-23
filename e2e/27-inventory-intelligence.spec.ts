@@ -146,9 +146,9 @@ test.describe('Inventory Intelligence — Sprint 8', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // T5: Physical Count flow — submit changes inventory and writes inventory_log
+  // T5: Physical Count flow — submit changes inventory and writes stock_movements
   // ---------------------------------------------------------------------------
-  test('T5: physical count submit adjusts stock and writes inventory_log', async ({ page }) => {
+  test('T5: physical count submit adjusts stock and writes stock_movements', async ({ page }) => {
     test.setTimeout(120_000);
 
     // Set Budweiser to exactly 30 so we know the expected value
@@ -217,7 +217,7 @@ test.describe('Inventory Intelligence — Sprint 8', () => {
       await expect(varianceReport).toBeVisible();
     }
 
-    // Verify via DB: inventory_log should have a row for Budweiser with reason='physical_count'
+    // Verify via DB: stock_movements should have a row for Budweiser with reason='physical_count'
     const logEntry = await getLatestInventoryLog(PRODUCT, 'physical_count');
     expect(logEntry).not.toBeNull();
     expect(logEntry?.quantity_delta).toBe(-5);

@@ -512,7 +512,7 @@ export async function clearStockThreshold(productName: string): Promise<void> {
 }
 
 /**
- * Get the most recent inventory_log entry for a product by name with a given reason.
+ * Get the most recent stock_movements entry for a product by name with a given reason.
  * Returns null if no matching row exists.
  */
 export async function getLatestInventoryLog(
@@ -527,7 +527,7 @@ export async function getLatestInventoryLog(
     .maybeSingle();
   if (pErr || !prod) throw new Error(`getLatestInventoryLog: "${productName}" not found`);
   const { data, error } = await admin
-    .from('inventory_log')
+    .from('stock_movements')
     .select('quantity_delta, reason')
     .eq('product_id', prod.id)
     .eq('reason', reason)

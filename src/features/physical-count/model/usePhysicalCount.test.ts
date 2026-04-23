@@ -2,7 +2,7 @@
  * Unit tests for usePhysicalCount
  *
  * AC covered (S8-04):
- * - Success path: writes inventory_log entry per changed product with reason='physical_count'
+ * - Success path: writes stock_movements entry per changed product with reason='physical_count'
  *   and delta=(actual - current), then updates inventory.quantity_on_hand
  * - Products with actual == current (zero variance) are skipped — no DB writes
  * - Error path: returns Result with ok:false when Supabase fails
@@ -70,7 +70,7 @@ function makeInventoryItem(
  * Mock the sequential DB chain used by usePhysicalCount per changed row:
  *   1. supabaseQuery  → from('inventory').select('*').eq('product_id', id).single()
  *   2. supabaseMutation → from('inventory').update({...}).eq(...).select().single()
- *   3. supabaseMutation → from('inventory_log').insert({...}).select().single()
+ *   3. supabaseMutation → from('stock_movements').insert({...}).select().single()
  *
  * We track which table is passed to `from` so we can return appropriate mocks.
  */
@@ -115,7 +115,7 @@ function setupSuccessMock(productId: string, currentQty: number, opts: MockFromO
           .mockResolvedValueOnce(updateResult),
       } as unknown as ReturnType<typeof supabase.from>;
     }
-    if (table === 'inventory_log') {
+    if (table === 'stock_movements') {
       return {
         insert: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
@@ -189,7 +189,7 @@ describe('usePhysicalCount', () => {
     });
   });
 
-  it('S8-04: writes inventory_log entry with reason=physical_count and correct delta', async () => {
+  it('S8-04: writes stock_movements entry with reason=physical_count and correct delta', async () => {
     const productId = crypto.randomUUID();
     const inventory: Inventory[] = [makeInventoryItem(productId, 'Coke', 20)];
 
@@ -222,7 +222,7 @@ describe('usePhysicalCount', () => {
             }),
         } as unknown as ReturnType<typeof supabase.from>;
       }
-      if (table === 'inventory_log') {
+      if (table === 'stock_movements') {
         return {
           insert: vi.fn().mockReturnThis(),
           select: vi.fn().mockReturnThis(),
@@ -247,7 +247,7 @@ describe('usePhysicalCount', () => {
     });
 
     expect(res.ok).toBe(true);
-    // inventory_log .single() was called — confirming the insert path was hit
+    // stock_movements .single() was called — confirming the insert path was hit
     expect(logInsertSingleSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -321,7 +321,7 @@ describe('usePhysicalCount', () => {
             }),
         } as unknown as ReturnType<typeof supabase.from>;
       }
-      if (table === 'inventory_log') {
+      if (table === 'stock_movements') {
         return {
           insert: vi.fn().mockReturnThis(),
           select: vi.fn().mockReturnThis(),
@@ -397,7 +397,7 @@ describe('usePhysicalCount', () => {
     expect(res.error.code).toBe('NOT_FOUND');
   });
 
-  it('S8-04: returns Result ok:false when inventory_log insert fails', async () => {
+  it('S8-04: returns Result ok:false when stock_movements insert fails', async () => {
     const productId = crypto.randomUUID();
     const inventory: Inventory[] = [makeInventoryItem(productId, 'Vodka', 10)];
 
@@ -419,7 +419,7 @@ describe('usePhysicalCount', () => {
             }),
         } as unknown as ReturnType<typeof supabase.from>;
       }
-      if (table === 'inventory_log') {
+      if (table === 'stock_movements') {
         return {
           insert: vi.fn().mockReturnThis(),
           select: vi.fn().mockReturnThis(),
