@@ -5,7 +5,7 @@ import {
   useCategories,
   useMutationCreateCategory,
   useMutationUpdateCategory,
-} from '@entities/product';
+} from '@entities/category';
 import type { Category } from '@shared/lib/domain';
 import { POSButton } from '@shared/ui/POSButton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dialog';

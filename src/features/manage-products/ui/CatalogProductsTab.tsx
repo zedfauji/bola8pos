@@ -1,8 +1,8 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { useCategories } from '@entities/category';
 import {
-  useCategories,
   useModifiers,
   useMutationCreateProduct,
   useMutationDeactivateProduct,
