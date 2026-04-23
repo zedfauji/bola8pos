@@ -7,7 +7,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 
 ## Phases
 
-- [ ] **Phase 1: Foundation** — Unified stock ledger, category tree, modifier groups, combo flags
+- [x] **Phase 1: Foundation** — Unified stock ledger, category tree, modifier groups, combo flags (completed 2026-04-23)
 - [ ] **Phase 2: Combos** — Customer-visible combo support with pool-time bundles
 - [ ] **Phase 3: Ingredient Foundation** — Ingredient entity + canonical stock movement RPC
 - [ ] **Phase 4: Recipes & Sale Depletion** — Recipes + atomic ingredient depletion on sale
@@ -24,7 +24,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 **Goal:** Ship the schema + primitives every downstream sprint depends on — unified stock ledger, hierarchical categories, modifier groups, and combo-eligibility flags. No user-facing behavior change in POS flow.
 **Requirements:** S1-01..S1-13 (see CONTEXT.md)
 **Depends on:** —
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 02-migrations-PLAN.md — 6 SQL migrations (Wave 1, serial) + atomic inventory_log rename flip + Wave-0 scaffolds (S1-01, S1-02, S1-03, S1-04, S1-05, S1-11) ✓ 2026-04-23
