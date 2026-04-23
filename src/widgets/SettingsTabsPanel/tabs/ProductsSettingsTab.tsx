@@ -1,8 +1,5 @@
-import {
-  CatalogCategoriesTab,
-  CatalogModifiersTab,
-  CatalogProductsTab,
-} from '@features/manage-products';
+import { CategoryTreeEditor } from '@features/manage-categories';
+import { CatalogModifiersTab, CatalogProductsTab } from '@features/manage-products';
 import type { UserRole } from '@shared/lib/domain';
 import { ProtectedAction } from '@shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
@@ -31,7 +28,8 @@ export function ProductsSettingsTab({ currentRole }: Props) {
             <CatalogProductsTab />
           </TabsContent>
           <TabsContent value="categories">
-            <CatalogCategoriesTab />
+            {/* Category tree editor: supports 3-level hierarchy (S1-08) */}
+            <CategoryTreeEditor />
           </TabsContent>
           <TabsContent value="modifiers">
             <CatalogModifiersTab />
