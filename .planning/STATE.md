@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 02-combos
-current_plan: 02-03 (wave 2) — next to execute
+current_plan: 02-04 (wave 3) — next to execute
 status: in_progress
-stopped_at: Completed 02-combos plan 02 (02-02-PLAN.md) — combo Zod schemas + pool-billing prepaid
-last_updated: "2026-04-23T23:35:00.000Z"
+stopped_at: Completed 02-combos plan 03 (02-03-PLAN.md) — entities/combo/ FSD slice + add_combo_to_tab RPC
+last_updated: "2026-04-23T23:49:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 1
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2
 **Current phase:** 02-combos
-**Current plan:** 02-03 (wave 2) — next to execute
+**Current plan:** 02-04 (wave 3) — next to execute
 **Status:** In Progress
 **Progress:** [██████░░░░] 64%
 
@@ -39,6 +39,7 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 07 (regression-gate) completed — typecheck/lint/unit PASS; E2E 31-categories blocked by staging migration gap; manual operator steps documented
 - 2026-04-23: Plan 02-01 (combo schema foundations) completed — 2 tasks, 4 SQL migrations, AppErrorCode +4 combo codes, shadcn Collapsible installed
 - 2026-04-23: Plan 02-02 (schema push + Zod types + pool-billing) completed — supabase db push applied, 6 combo Zod schemas added to domain.ts, prepaidMinutes in pool-billing, 19 tests pass
+- 2026-04-23: Plan 02-03 (entities/combo/ + add_combo_to_tab RPC) completed — 6 TanStack Query hooks, comboKeys, add_combo_to_tab PL/pgSQL migration with all 4 error strings
 
 ## Decisions
 
@@ -67,6 +68,9 @@ See: .planning/PROJECT.md
 - [Phase 02-combos 02-02]: comboPriceOverride uses .nullable().optional() (no .default) to avoid exactOptionalPropertyTypes violation in existing mock objects
 - [Phase 02-combos 02-02]: prepaid deduction applies after firstHourMode block sizing — full-hour sessions with 60min prepaid yield 0 charge
 - [Phase 02-combos 02-02]: supabase gen types --local overwrites file with error text when Docker unavailable; must restore from git
+- [Phase 02-combos 02-03]: pool_time slots in add_combo_to_tab produce no pool_sessions INSERT — table_id NOT NULL prevents pending sessions; start-pool-timer creates session with correct table_id and applies prepaid_minutes
+- [Phase 02-combos 02-03]: audit_log INSERT uses EXCEPTION WHEN undefined_table guard — audit_log not yet created; auto-activates when future migration adds the table
+- [Phase 02-combos 02-03]: export * banned by ESLint no-restricted-syntax; use explicit named exports in model/index.ts barrels
 
 ## Performance Metrics
 
@@ -80,8 +84,9 @@ See: .planning/PROJECT.md
 | Phase 01-foundation P07 | 25min | 1 tasks | 0 files |
 | 02-combos | 01 | 4min | 2 | 6 |
 | 02-combos | 02 | 12min | 2 | 3 |
+| 02-combos | 03 | 4min | 2 | 5 |
 
 ## Last Session
 
-- **Stopped at:** Completed 02-combos plan 02 (02-02-PLAN.md) — combo Zod schemas + pool-billing prepaid
-- **Timestamp:** 2026-04-23T23:35:00Z
+- **Stopped at:** Completed 02-combos plan 03 (02-03-PLAN.md) — entities/combo/ FSD slice + add_combo_to_tab RPC
+- **Timestamp:** 2026-04-23T23:49:00Z
