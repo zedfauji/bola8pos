@@ -29,6 +29,8 @@ export function useKdsItems() {
           notes,
           kds_status,
           created_at,
+          parent_order_item_id,
+          combo_slot_id,
           orders!inner(
             id,
             tabs!inner(
@@ -77,6 +79,8 @@ export function useKdsItems() {
           createdAt: new Date(row.created_at as string),
           tabCustomerName: (row.orders?.tabs?.customer_name as string | undefined) ?? null,
           tableNumber: null,
+          parentOrderItemId: (row['parent_order_item_id'] as string | null | undefined) ?? null,
+          comboSlotId: (row['combo_slot_id'] as string | null | undefined) ?? null,
         });
       }
 

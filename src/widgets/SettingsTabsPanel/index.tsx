@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
+import { ManageCombosTab } from '@features/manage-combos';
 import { useStaffStore } from '@entities/staff/model/store';
 import { usePermissions } from '@entities/staff/model/usePermissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
@@ -70,6 +71,11 @@ export function SettingsTabsPanel() {
           key: 'billing',
           label: 'Billing',
           render: () => <BillingSettingsTab currentRole={currentRole} />,
+        },
+        {
+          key: 'combos',
+          label: 'Combos',
+          render: () => <ManageCombosTab />,
         }
       );
     }
