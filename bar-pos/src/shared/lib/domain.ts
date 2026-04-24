@@ -49,12 +49,13 @@ export const UserRole = {
 
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
-export const TabStatusSchema = z.enum(['open', 'closed', 'paid', 'voided']);
+export const TabStatusSchema = z.enum(['open', 'closed', 'paid', 'voided', 'split']);
 export const TabStatus = {
   OPEN: 'open',
   CLOSED: 'closed',
   PAID: 'paid',
   VOIDED: 'voided',
+  SPLIT: 'split',
 } as const;
 
 export const OrderStatusSchema = z.enum(['pending', 'served', 'voided']);
@@ -400,6 +401,12 @@ export const TabSchema = z.object({
   rappiOrderId: z.string().min(1).max(128).nullable().optional(),
   /** Caja session under which this tab was opened */
   cajaSessionId: UuidSchema.nullable().optional(),
+  /** Parent tab id when this tab is a split child */
+  parentTabId: UuidSchema.nullable().optional(),
+  /** How the bill was split (set on parent tab when status = 'split') */
+  splitMode: z.enum(['item', 'evenly', 'by_person', 'by_amount']).nullable().optional(),
+  /** Display label for split sub-tabs (e.g. "Table 3 – Part 1") */
+  splitLabel: z.string().max(50).nullable().optional(),
 });
 
 export const TabCreateSchema = TabSchema.omit({
@@ -568,6 +575,10 @@ export const PaymentSchema = z.object({
   discountType: DiscountTypeSchema.optional(),
   discountValue: z.number().nonnegative().optional(),
   discountAmount: MoneySchema.optional(),
+  /** True when this payment record represents a refund (negative flow) */
+  isRefund: z.boolean().default(false),
+  /** FK to the refund record when isRefund = true */
+  refundId: UuidSchema.nullable().optional(),
 });
 
 export const PaymentCreateSchema = PaymentSchema.omit({
@@ -1517,3 +1528,77 @@ export const IngredientUpdateSchema = IngredientSchema.partial().required({ id: 
 export type Ingredient = z.infer<typeof IngredientSchema>;
 export type IngredientCreate = z.infer<typeof IngredientCreateSchema>;
 export type IngredientUpdate = z.infer<typeof IngredientUpdateSchema>;
+
+// ============================================================================
+// S4 — SPLIT BILL + REFUND
+// ============================================================================
+
+export const RefundReasonSchema = z.enum([
+  'wrong_order',
+  'quality_issue',
+  'customer_complaint',
+  'billing_error',
+  'other',
+]);
+
+export const RefundItemSchema = z.object({
+  id: UuidSchema,
+  refundId: UuidSchema,
+  orderItemId: UuidSchema,
+  qty: z.number().int().min(1),
+  amount: z.number().positive(),
+  restock: z.boolean(),
+  createdAt: TimestampSchema,
+});
+
+export const RefundSchema = z.object({
+  id: UuidSchema,
+  originalPaymentId: UuidSchema,
+  reason: RefundReasonSchema,
+  amount: z.number().positive(),
+  createdBy: UuidSchema,
+  createdAt: TimestampSchema,
+  items: z.array(RefundItemSchema).default([]),
+});
+
+export const RefundCreateSchema = RefundSchema.omit({ id: true, createdAt: true, items: true });
+
+export type Refund = z.infer<typeof RefundSchema>;
+export type RefundCreate = z.infer<typeof RefundCreateSchema>;
+export type RefundItem = z.infer<typeof RefundItemSchema>;
+export type RefundReason = z.infer<typeof RefundReasonSchema>;
+
+// ============================================================================
+// RECIPE (Phase 4)
+// ============================================================================
+
+export const RecipeItemSchema = z.object({
+  id: UuidSchema,
+  recipeId: UuidSchema,
+  ingredientId: UuidSchema,
+  qty: z.number().positive(),
+});
+
+export const RecipeSchema = z.object({
+  id: UuidSchema,
+  productId: UuidSchema,
+  yieldQty: z.number().positive(),
+  notes: z.string().nullable().optional(),
+  createdAt: TimestampSchema,
+  updatedAt: TimestampSchema,
+});
+
+export const RecipeWithItemsSchema = RecipeSchema.extend({
+  items: z.array(RecipeItemSchema),
+});
+
+export const RecipeCreateSchema = RecipeSchema.omit({ id: true, createdAt: true, updatedAt: true });
+export const RecipeUpdateSchema = RecipeSchema.partial().required({ id: true });
+export const RecipeItemCreateSchema = RecipeItemSchema.omit({ id: true });
+
+export type Recipe = z.infer<typeof RecipeSchema>;
+export type RecipeCreate = z.infer<typeof RecipeCreateSchema>;
+export type RecipeUpdate = z.infer<typeof RecipeUpdateSchema>;
+export type RecipeItem = z.infer<typeof RecipeItemSchema>;
+export type RecipeItemCreate = z.infer<typeof RecipeItemCreateSchema>;
+export type RecipeWithItems = z.infer<typeof RecipeWithItemsSchema>;
