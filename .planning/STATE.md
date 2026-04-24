@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: milestone
 current_phase: 02-combos
 current_plan: 02-08 (wave 6) — next to execute
-status: in_progress
-stopped_at: Completed 02-combos plan 07 (02-07-PLAN.md) — P2 pricing + P3 availability property tests with fast-check; seed-combos.ts
-last_updated: "2026-04-24T00:03:20.000Z"
+status: executing
+stopped_at: Completed 02-combos plan 08 (02-08-PLAN.md) — E2E spec 32-combos.spec.ts; checkpoint pending human verification
+last_updated: "2026-04-24T00:14:39.884Z"
 progress:
   total_phases: 8
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_plans: 14
+  percent: 100
 ---
 
 # Session State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 02-combos
 **Current plan:** 02-08 (wave 6) — next to execute
 **Status:** In Progress
-**Progress:** [████████░░] 79%
+**Progress:** [██████████] 100%
 
 ## Session Log
 
@@ -80,6 +80,8 @@ See: .planning/PROJECT.md
 - [Phase 02-combos 02-07]: P2d property: prepaid deduction applies to billedMinutes (15-min block-rounded), not raw elapsedMinutes — test invariant corrected from plan draft
 - [Phase 02-combos 02-07]: combo_slots and combo_slot_options lack unique constraints on natural keys — seed uses select-then-upsert instead of upsert with onConflict
 - [Phase 02-combos 02-07]: seed-combos.ts uses eslint-disable at file level + supabase as any (service role cast; consistent with CLAUDE.md workaround pattern)
+- [Phase ?]: [Phase 02-combos 02-08]: E2E T5 uses page.evaluate with explicit parameter passing (not window globals) for NESTED_COMBO_FORBIDDEN RPC test
+- [Phase ?]: [Phase 02-combos 02-08]: 32-combos.spec.ts day-conditional tests (T3/T4) use test.info().annotations.push pattern — always runnable, reports state rather than hard-skipping
 
 ## Performance Metrics
 
@@ -96,8 +98,9 @@ See: .planning/PROJECT.md
 | 02-combos | 03 | 4min | 2 | 5 |
 | 02-combos | 04 | 8min | 2 | 7 |
 | 02-combos | 07 | 4min | 2 | 3 |
+| Phase 02-combos P08 | 3min | 1 tasks | 1 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 02-combos plan 07 (02-07-PLAN.md) — P2 pricing + P3 availability property tests with fast-check; seed-combos.ts
+- **Stopped at:** Completed 02-combos plan 08 (02-08-PLAN.md) — E2E spec 32-combos.spec.ts; checkpoint pending human verification
 - **Timestamp:** 2026-04-24T00:03:20Z

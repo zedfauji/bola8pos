@@ -54,14 +54,14 @@ Plans:
 **Plans:** 8 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — DB migrations (combo_slots, combo_slot_options, combo_availability, column extensions, triggers, is_combo_available, view) + AppErrorCode + shadcn Collapsible (Wave 1) (S2-01, S2-02, S2-03, S2-04)
-- [ ] 02-02-PLAN.md — [BLOCKING] supabase db push + combo Zod schemas in domain.ts + pool-billing prepaid extension (Wave 2) (S2-06, S2-12)
-- [ ] 02-03-PLAN.md — entities/combo/ FSD slice (6 hooks) + add_combo_to_tab PL/pgSQL RPC migration (Wave 3) (S2-05, S2-07)
-- [ ] 02-04-PLAN.md — shared/ui components (ComboBadge, ComboUnavailableBadge, ComboSlotCard + stories) + ProductGrid combo routing fork + availability display (Wave 4) (S2-11, S2-14)
-- [ ] 02-05-PLAN.md — add-combo-to-tab feature: useAddComboToTab mutation + ComboBuilderSheet + integration tests + ProductGrid wiring (Wave 5) (S2-08)
-- [ ] 02-06-PLAN.md — manage-combos admin feature + SettingsTabsPanel Combos tab + KDS Collapsible bundle grouping (Wave 5) (S2-09, S2-10, S2-13)
-- [ ] 02-07-PLAN.md — Property tests P2 (pricing) + P3 (availability) + seed-combos.ts (Wave 6) (S2-16, S2-18)
-- [ ] 02-08-PLAN.md — E2E 32-combos.spec.ts + regression gate + human sign-off checkpoint (Wave 7) (S2-17)
+- [x] 02-01-PLAN.md — DB migrations (combo_slots, combo_slot_options, combo_availability, column extensions, triggers, is_combo_available, view) + AppErrorCode + shadcn Collapsible (Wave 1) (S2-01, S2-02, S2-03, S2-04)
+- [x] 02-02-PLAN.md — [BLOCKING] supabase db push + combo Zod schemas in domain.ts + pool-billing prepaid extension (Wave 2) (S2-06, S2-12)
+- [x] 02-03-PLAN.md — entities/combo/ FSD slice (6 hooks) + add_combo_to_tab PL/pgSQL RPC migration (Wave 3) (S2-05, S2-07)
+- [x] 02-04-PLAN.md — shared/ui components (ComboBadge, ComboUnavailableBadge, ComboSlotCard + stories) + ProductGrid combo routing fork + availability display (Wave 4) (S2-11, S2-14)
+- [x] 02-05-PLAN.md — add-combo-to-tab feature: useAddComboToTab mutation + ComboBuilderSheet + integration tests + ProductGrid wiring (Wave 5) (S2-08)
+- [x] 02-06-PLAN.md — manage-combos admin feature + SettingsTabsPanel Combos tab + KDS Collapsible bundle grouping (Wave 5) (S2-09, S2-10, S2-13)
+- [x] 02-07-PLAN.md — Property tests P2 (pricing) + P3 (availability) + seed-combos.ts (Wave 6) (S2-16, S2-18)
+- [x] 02-08-PLAN.md — E2E 32-combos.spec.ts + regression gate + human sign-off checkpoint (Wave 7) (S2-17)
 
 **Success Criteria**:
 1. Combo schema (`combo_slots`, `combo_slot_options`, `combo_availability`) live with no-nesting trigger
