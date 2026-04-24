@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { RecipeEditorTab } from '@features/manage-recipe';
 import { useCategories } from '@entities/category';
 import {
   useModifiers,
@@ -11,7 +12,6 @@ import {
   type CreateProductInput,
   type UpdateProductInput,
 } from '@entities/product';
-import { RecipeEditorTab } from '@features/manage-recipe';
 import type { Category, Product } from '@shared/lib/domain';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { DataTable } from '@shared/ui/DataTable';

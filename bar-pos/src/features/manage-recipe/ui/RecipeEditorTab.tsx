@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import { useEffect, useReducer, useRef } from 'react';
 import { useIngredientsActive } from '@entities/ingredient';
 import { useRecipe, RecipePreviewPanel } from '@entities/recipe';
-import type { Ingredient, RecipeItemCreate } from '@shared/lib/domain';
+import type { Ingredient, RecipeItemCreate, RecipeWithItems } from '@shared/lib/domain';
 import { IngredientAutocomplete, Input, Label, LoadingSpinner, POSButton } from '@shared/ui';
 import { useManageRecipe } from '../model/useManageRecipe';
 
@@ -13,105 +13,125 @@ type RecipeRow = {
   qty: string;
 };
 
+type EditorState = {
+  rows: RecipeRow[];
+  yieldQty: string;
+  isDirty: boolean;
+};
+
+type EditorAction =
+  | { type: 'RESET'; savedRecipe: RecipeWithItems | null | undefined }
+  | { type: 'ADD_ROW' }
+  | { type: 'REMOVE_ROW'; rowId: string }
+  | { type: 'SELECT_INGREDIENT'; rowId: string; ingredient: Ingredient }
+  | { type: 'CLEAR_INGREDIENT'; rowId: string }
+  | { type: 'SET_QTY'; rowId: string; value: string }
+  | { type: 'SET_YIELD'; value: string }
+  | { type: 'MARK_CLEAN' };
+
+let rowCounter = 0;
+function nextRowId(): string {
+  rowCounter += 1;
+  return `row-${String(rowCounter)}`;
+}
+
+function rowsFromRecipe(savedRecipe: RecipeWithItems): RecipeRow[] {
+  return savedRecipe.items.map(item => ({
+    id: nextRowId(),
+    ingredientId: item.ingredientId,
+    ingredientName: item.ingredientId,
+    qty: String(item.qty),
+  }));
+}
+
+function reducer(state: EditorState, action: EditorAction): EditorState {
+  switch (action.type) {
+    case 'RESET':
+      if (action.savedRecipe == null) {
+        return { rows: [], yieldQty: '1', isDirty: false };
+      }
+      return {
+        rows: rowsFromRecipe(action.savedRecipe),
+        yieldQty: String(action.savedRecipe.yieldQty),
+        isDirty: false,
+      };
+    case 'ADD_ROW':
+      return {
+        ...state,
+        rows: [...state.rows, { id: nextRowId(), ingredientId: '', ingredientName: '', qty: '1' }],
+        isDirty: true,
+      };
+    case 'REMOVE_ROW':
+      return { ...state, rows: state.rows.filter(r => r.id !== action.rowId), isDirty: true };
+    case 'SELECT_INGREDIENT':
+      return {
+        ...state,
+        rows: state.rows.map(r =>
+          r.id === action.rowId
+            ? { ...r, ingredientId: action.ingredient.id, ingredientName: action.ingredient.name }
+            : r,
+        ),
+        isDirty: true,
+      };
+    case 'CLEAR_INGREDIENT':
+      return {
+        ...state,
+        rows: state.rows.map(r =>
+          r.id === action.rowId ? { ...r, ingredientId: '', ingredientName: '' } : r,
+        ),
+        isDirty: true,
+      };
+    case 'SET_QTY':
+      return {
+        ...state,
+        rows: state.rows.map(r => (r.id === action.rowId ? { ...r, qty: action.value } : r)),
+        isDirty: true,
+      };
+    case 'SET_YIELD':
+      return { ...state, yieldQty: action.value, isDirty: true };
+    case 'MARK_CLEAN':
+      return { ...state, isDirty: false };
+    default:
+      return state;
+  }
+}
+
 type RecipeEditorTabProps = {
   productId: string;
   productName: string;
 };
 
-let rowCounter = 0;
-function nextRowId(): string {
-  rowCounter += 1;
-  return `row-${rowCounter}`;
-}
-
 export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps) {
   const { data: savedRecipe, isLoading } = useRecipe(productId);
   const { data: ingredients = [], isLoading: ingredientsLoading } = useIngredientsActive();
   const { saveRecipe, isSaving } = useManageRecipe();
-  const [rows, setRows] = useState<RecipeRow[]>([]);
-  const [yieldQty, setYieldQty] = useState('1');
-  const [isDirty, setIsDirty] = useState(false);
 
+  const [state, dispatch] = useReducer(reducer, {
+    rows: [],
+    yieldQty: '1',
+    isDirty: false,
+  });
+
+  // Sync to saved recipe when data arrives — track previous value to avoid spurious resets
+  const prevRecipeRef = useRef<RecipeWithItems | null | undefined>(undefined);
   useEffect(() => {
-    if (savedRecipe == null) {
-      setRows([]);
-      setYieldQty('1');
-    } else {
-      setRows(
-        savedRecipe.items.map(item => ({
-          id: nextRowId(),
-          ingredientId: item.ingredientId,
-          ingredientName: item.ingredientId,
-          qty: String(item.qty),
-        })),
-      );
-      setYieldQty(String(savedRecipe.yieldQty));
+    if (savedRecipe !== prevRecipeRef.current) {
+      prevRecipeRef.current = savedRecipe;
+      dispatch({ type: 'RESET', savedRecipe });
     }
-    setIsDirty(false);
   }, [savedRecipe]);
 
-  function handleAddRow() {
-    setRows(prev => [...prev, { id: nextRowId(), ingredientId: '', ingredientName: '', qty: '1' }]);
-    setIsDirty(true);
-  }
-
-  function handleRemoveRow(rowId: string) {
-    setRows(prev => prev.filter(r => r.id !== rowId));
-    setIsDirty(true);
-  }
-
-  function handleSelectIngredient(rowId: string, ingredient: Ingredient) {
-    setRows(prev =>
-      prev.map(r =>
-        r.id === rowId
-          ? { ...r, ingredientId: ingredient.id, ingredientName: ingredient.name }
-          : r,
-      ),
-    );
-    setIsDirty(true);
-  }
-
-  function handleClearIngredient(rowId: string) {
-    setRows(prev =>
-      prev.map(r => (r.id === rowId ? { ...r, ingredientId: '', ingredientName: '' } : r)),
-    );
-    setIsDirty(true);
-  }
-
-  function handleQtyChange(rowId: string, value: string) {
-    setRows(prev => prev.map(r => (r.id === rowId ? { ...r, qty: value } : r)));
-    setIsDirty(true);
-  }
-
-  function handleDiscard() {
-    if (savedRecipe == null) {
-      setRows([]);
-      setYieldQty('1');
-    } else {
-      setRows(
-        savedRecipe.items.map(item => ({
-          id: nextRowId(),
-          ingredientId: item.ingredientId,
-          ingredientName: item.ingredientId,
-          qty: String(item.qty),
-        })),
-      );
-      setYieldQty(String(savedRecipe.yieldQty));
-    }
-    setIsDirty(false);
-  }
-
   async function handleSave() {
-    const items: RecipeItemCreate[] = rows
+    const items: RecipeItemCreate[] = state.rows
       .filter(r => r.ingredientId.length > 0 && parseFloat(r.qty) > 0)
       .map(r => ({ recipeId: '', ingredientId: r.ingredientId, qty: parseFloat(r.qty) }));
     await saveRecipe({
       productId,
-      yieldQty: parseFloat(yieldQty) || 1,
+      yieldQty: parseFloat(state.yieldQty) || 1,
       notes: undefined,
       items,
     });
-    setIsDirty(false);
+    dispatch({ type: 'MARK_CLEAN' });
   }
 
   if (isLoading) {
@@ -130,11 +150,11 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
           Ingredients for <span className="font-semibold">{productName}</span>
         </p>
 
-        {rows.length === 0 && (
+        {state.rows.length === 0 && (
           <p className="text-pos-muted text-sm italic">No recipe yet</p>
         )}
 
-        {rows.map(row => (
+        {state.rows.map(row => (
           <div key={row.id} className="flex items-center gap-2">
             <div className="min-w-0 flex-1">
               <IngredientAutocomplete
@@ -142,10 +162,10 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
                 ingredients={ingredients}
                 isLoading={ingredientsLoading}
                 onSelect={ingredient => {
-                  handleSelectIngredient(row.id, ingredient);
+                  dispatch({ type: 'SELECT_INGREDIENT', rowId: row.id, ingredient });
                 }}
                 onClear={() => {
-                  handleClearIngredient(row.id);
+                  dispatch({ type: 'CLEAR_INGREDIENT', rowId: row.id });
                 }}
               />
             </div>
@@ -156,7 +176,7 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
                 step="0.001"
                 value={row.qty}
                 onChange={e => {
-                  handleQtyChange(row.id, e.target.value);
+                  dispatch({ type: 'SET_QTY', rowId: row.id, value: e.target.value });
                 }}
                 className="font-mono text-right"
                 aria-label="Quantity"
@@ -166,7 +186,7 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
               variant="ghost"
               aria-label="Remove ingredient row"
               onClick={() => {
-                handleRemoveRow(row.id);
+                dispatch({ type: 'REMOVE_ROW', rowId: row.id });
               }}
               className="shrink-0 px-2"
             >
@@ -175,7 +195,13 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
           </div>
         ))}
 
-        <POSButton variant="outline" onClick={handleAddRow} className="mt-1">
+        <POSButton
+          variant="outline"
+          onClick={() => {
+            dispatch({ type: 'ADD_ROW' });
+          }}
+          className="mt-1"
+        >
           + Add ingredient
         </POSButton>
       </div>
@@ -189,10 +215,9 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
             type="number"
             min="0.001"
             step="0.001"
-            value={yieldQty}
+            value={state.yieldQty}
             onChange={e => {
-              setYieldQty(e.target.value);
-              setIsDirty(true);
+              dispatch({ type: 'SET_YIELD', value: e.target.value });
             }}
             className="mt-1 font-mono"
           />
@@ -204,13 +229,19 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
             onClick={() => {
               void handleSave();
             }}
-            disabled={!isDirty || isSaving}
+            disabled={!state.isDirty || isSaving}
           >
             {isSaving ? <LoadingSpinner className="mr-2 h-4 w-4" /> : null}
             Save recipe
           </POSButton>
-          {isDirty && (
-            <POSButton variant="outline" onClick={handleDiscard} disabled={isSaving}>
+          {state.isDirty && (
+            <POSButton
+              variant="outline"
+              onClick={() => {
+                dispatch({ type: 'RESET', savedRecipe });
+              }}
+              disabled={isSaving}
+            >
               Discard changes
             </POSButton>
           )}
