@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 06
-current_plan: 11
+current_phase: 04
+current_plan: 2
 status: checkpoint
-stopped_at: Completed 06-11-PLAN.md — E2E specs 34-split-bill.spec.ts + 35-refund.spec.ts written, awaiting human E2E verification
-last_updated: "2026-04-24T22:21:00.000Z"
+stopped_at: Completed 04-01-PLAN.md tasks 1+2 — 2 migration files written; awaiting human supabase db push (Task 3 checkpoint)
+last_updated: "2026-04-24T21:49:00Z"
 progress:
   total_phases: 8
-  completed_phases: 5
-  total_plans: 34
-  completed_plans: 33
-  percent: 97
+  completed_phases: 4
+  total_plans: 40
+  completed_plans: 34
+  percent: 85
 ---
 
 # Session State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** Feature Expansion 2026 Q2
-**Current phase:** 06
-**Current plan:** 9
-**Status:** Executing Phase 06
+**Current phase:** 04
+**Current plan:** 1
+**Status:** Executing Phase 04
 **Progress:** [██░░░░░░░░] 25% (2/8 phases complete)
 
 ## Session Log
@@ -46,6 +46,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 06-08 (process-refund FSD slice) completed — RefundSheet UI + useProcessRefund mutation hook + P10 property test (4/4 pass) + Select shared component
 - 2026-04-24: Plan 06-10 (integration tests) completed — split-tab 6/6 + process-refund 5/5 scenarios pass; Rule 1 fix: process_refund RPC missing idempotency_key (migration 20260427000005)
 - 2026-04-24: Plan 06-11 (E2E specs) completed — 34-split-bill.spec.ts (5 tests) + 35-refund.spec.ts (3 tests); CHECKPOINT awaiting human E2E run with dev server
+- 2026-04-24: Plan 04-01 (DB migrations) tasks 1+2 done — recipes, recipe_items, audit_log tables + deplete_for_order_item RPC; CHECKPOINT awaiting supabase db push
 
 ## Decisions
 
@@ -99,6 +100,8 @@ See: .planning/PROJECT.md
 - [Phase 06-split-bill-refund 06-10]: process_refund RPC fixed to include idempotency_key ('refund-' + refund UUID) — payments.idempotency_key is NOT NULL
 - [Phase 06-split-bill-refund 06-10]: Auto-close trigger integration test updates sub-tab status to 'paid' before inserting payment — trigger reads status, not payment existence
 - [Phase 06-split-bill-refund 06-10]: describe.skipIf(hasEnv) + itInt/itAuth/itBartender aliases for graceful skip when E2E creds absent
+- [Phase 04-recipes-sale-depletion 04-01]: audit_log canonical columns from add_combo_to_tab INSERT: action, entity_type, entity_id, details, created_at — actor_id added as nullable
+- [Phase 04-recipes-sale-depletion 04-01]: deplete_for_order_item v1 takes (uuid, smallint); v2 with p_allow_negative in migration 004
 
 ## Performance Metrics
 
