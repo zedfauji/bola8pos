@@ -99,9 +99,9 @@ See: .planning/PROJECT.md
 | 02-combos | 04 | 8min | 2 | 7 |
 | 02-combos | 07 | 4min | 2 | 3 |
 | Phase 02-combos P08 | 3min | 1 tasks | 1 files |
-| 03-ingredient-foundation | 08 | 12min | 3 | 6 |
+| 03-ingredient-foundation | 08 | 20min | 5 | 6 |
 
 ## Last Session
 
-- **Stopped at:** Completed 03-08 Tasks 1-3 (code changes); awaiting Task 4 human action (supabase db push)
-- **Timestamp:** 2026-04-24T02:27:00Z
+- **Stopped at:** Completed 03-08 Tasks 1-5; awaiting Task 6 human E2E verification (33-ingredients.spec.ts T4+T5)
+- **Timestamp:** 2026-04-24T12:37:00Z

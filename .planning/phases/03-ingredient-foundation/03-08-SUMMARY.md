@@ -65,10 +65,10 @@ completed: 2026-04-24
 
 ## Performance
 
-- **Duration:** 12 min
+- **Duration:** ~20 min
 - **Started:** 2026-04-24T02:15:00Z
-- **Completed:** 2026-04-24T02:27:00Z
-- **Tasks:** 3 of 6 completed (Tasks 4-6 require human action / E2E verification)
+- **Completed:** 2026-04-24T12:37:00Z
+- **Tasks:** 5 of 6 completed (Task 6 requires human E2E verification)
 - **Files modified:** 6
 
 ## Accomplishments
@@ -87,6 +87,8 @@ Each task was committed atomically:
 1. **Task 1: ALTER TABLE migration + RPC INSERT update** - `77d3a2a` (feat)
 2. **Task 2: StockMovementSchema nullable + mapMovementRow fix** - `5f5761f` (feat)
 3. **Task 3: CSV import warnings + delete dialog copy** - `692e24c` (fix)
+4. **Task 4: supabase db push** - completed by human (no code commit)
+5. **Task 5: typecheck/lint/unit verification** - `6c04a1b` (chore)
 
 ## Files Created/Modified
 
@@ -109,24 +111,37 @@ None - plan executed exactly as written.
 
 ## Issues Encountered
 
-None — typecheck passed clean after Task 2 changes. No downstream consumers had hardcoded `productId: string` assumptions that needed null guards.
+- **Pre-existing integration test failures:** `hourly-breakdown.integration.test.ts` and `product-sales-report.integration.test.ts` have 4 failing tests due to live Supabase data mismatches. These are unrelated to this plan's changes and were already documented as deferred in STATE.md. Phase 3 relevant tests (uom 11/11, queries 4/4, CsvImportSheet 8/8) all pass.
+- Typecheck passed clean after Task 2 changes. No downstream consumers had hardcoded `productId: string` assumptions that needed null guards.
 
 ## User Setup Required
 
-**Task 4 requires manual action:** Run `supabase db push` from `bar-pos/` to apply migrations to the remote database. Until this is done, the RPC will still fail with the NOT NULL constraint violation at runtime.
+**Task 6 requires human E2E verification:**
 
-Steps:
-1. `cd bar-pos`
-2. `npx supabase db push`
-3. Confirm migration `20260426000010` applies without errors
-4. Resume with Tasks 5-6 (typecheck + E2E verification)
+1. Ensure `.env.local` is configured in `bar-pos/` with E2E credentials
+2. Start the dev server: `npm run dev` (leave running in a separate terminal)
+3. Run: `npx playwright test e2e/33-ingredients.spec.ts --headed`
+4. Confirm all 7 tests pass (T1–T7), especially T4 (waste adjustment) and T5 (INVENTORY_NEGATIVE guard)
+5. If all pass, reply "all 7 pass"
 
 ## Next Phase Readiness
 
-- Code changes complete and typecheck-clean — ready for `supabase db push`
-- After db push: Tasks 5 (typecheck + unit tests) and 6 (E2E 33-ingredients.spec.ts T4+T5) can proceed
-- T4 (waste adjustment) and T5 (INVENTORY_NEGATIVE guard) were previously blocked by CR-01; they should pass after migration is applied
+- DB migration live (supabase db push completed by human — Task 4 done)
+- Code changes committed and typecheck/lint/unit-clean
+- **Pending:** Task 6 — E2E verification of T4 + T5 against live dev server
+- Once T4 + T5 pass: requirements S3a-03, S3a-07, S3a-08 fully satisfied
+
+## Self-Check: PASSED
+
+- `77d3a2a` exists in git log: confirmed
+- `5f5761f` exists in git log: confirmed
+- `692e24c` exists in git log: confirmed
+- `6c04a1b` exists in git log: confirmed
+- Migration file `20260426000010_stock_movements_product_id_nullable.sql` exists: confirmed
+- `npm run typecheck` exits 0: confirmed
+- `npm run lint` exits 0: confirmed
+- Phase 3 unit tests pass: confirmed
 
 ---
 *Phase: 03-ingredient-foundation*
-*Completed: 2026-04-24 (partial — awaiting Task 4 human action)*
+*Completed: 2026-04-24 (Tasks 1-5 done; Task 6 pending human E2E)*
