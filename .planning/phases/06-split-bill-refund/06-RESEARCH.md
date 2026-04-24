@@ -861,22 +861,25 @@ Phase 6 should add: `process_refund` (manager+). This is the `requiredAction` pa
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Sub-tab visibility in POS tab list**
    - What we know: Sub-tabs are valid `tabs` rows with `parent_tab_id` set
    - What's unclear: Should sub-tabs appear in the POS "open tabs" panel alongside regular tabs, or only inside the parent tab's sub-checks section?
    - Recommendation: Filter sub-tabs out of the main POS list (`WHERE parent_tab_id IS NULL`). This is the standard UX pattern for sub-checks in restaurant POS systems.
+   - RESOLVED: Plan 04 (entities/tab/model/queries.ts) implements `WHERE parent_tab_id IS NULL` filter in useTabList. Sub-tabs are not shown in the POS open-tabs list.
 
 2. **`process_payment` RPC compatibility with sub-tabs**
    - What we know: The existing `process_payment` edge function marks `tab.status = 'paid'`. If a sub-tab goes through `process_payment`, this fires normally.
    - What's unclear: Does `process_payment` have any guards that check tab status ('split' is a new value)?
    - Recommendation: Audit `process_payment` RPC / edge function to ensure `IF v_tab_status IS DISTINCT FROM 'open'::tab_status` does not also need to allow `'open'` status for sub-tabs. Sub-tabs have `status='open'`, so this should be fine.
+   - RESOLVED: Sub-tabs have status='open'; process_payment guards check for 'open' only, so sub-tabs pass through without modification. No edge-function change required.
 
 3. **`supabase.types.ts` regeneration**
    - What we know: Docker is unavailable on this machine; types are regenerated against local Docker or manually transcribed.
    - What's unclear: Phase 6 migration produces significant new tables/columns — manual transcription is error-prone.
    - Recommendation: Plan a "types regeneration" task after `supabase db push`. Use the established `supabase as any` cast pattern for all new tables until regeneration is done.
+   - RESOLVED: Plan 03 Task 2 manually transcribes new types into supabase.types.ts immediately after db push. All new entity files use `const db = supabase as any` with eslint-disable until transcription is complete.
 
 ---
 
