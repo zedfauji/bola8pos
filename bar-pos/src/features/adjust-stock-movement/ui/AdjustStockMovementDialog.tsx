@@ -6,13 +6,14 @@
  * Calls record_stock_movement RPC with p_ref_type='manual'.
  * Uses supabase as any pre-regen cast — ingredients/stock_movements not in supabase.types.ts yet.
  */
-import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import type { Ingredient, ManualAdjustReason } from '@entities/ingredient';
 import { ingredientKeys } from '@entities/ingredient';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
+import { Button } from '@shared/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/ui/dialog';
-import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 
@@ -92,9 +92,9 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
     },
   });
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    void mutation.mutate();
+    mutation.mutate();
   }
 
   return (
