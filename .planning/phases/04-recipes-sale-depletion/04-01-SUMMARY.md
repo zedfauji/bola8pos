@@ -15,21 +15,52 @@ key_files:
     - bar-pos/supabase/migrations/20260428000001_recipes_tables.sql
     - bar-pos/supabase/migrations/20260428000002_deplete_for_order_item.sql
   modified: []
-decisions:
-  - "audit_log canonical columns confirmed from add_combo_to_tab INSERT: action, entity_type, entity_id, details, created_at — actor_id added as nullable (not in original INSERT)"
+key-decisions:
+  - "audit_log canonical columns confirmed from add_combo_to_tab INSERT: action, entity_type, entity_id, details, created_at — actor_id added as nullable"
   - "deplete_for_order_item v1 takes (uuid, smallint); v2 with p_allow_negative comes in migration 004 as planned"
   - "No BEGIN/COMMIT wrapper on migration 002 — deplete_for_order_item uses CREATE OR REPLACE (idempotent); migration 001 wraps in BEGIN/COMMIT"
+requirements-completed: [S3b-01, S3b-02]
 metrics:
-  duration: "~2 minutes"
+  duration: "~30 minutes (including human checkpoint)"
   completed: "2026-04-24"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   files_created: 2
 ---
 
 # Phase 04 Plan 01: DB Migrations — Recipes Tables + deplete_for_order_item RPC Summary
 
-Two SQL migration files written and committed. Pending human-run `supabase db push` to apply to remote DB (Task 3 checkpoint).
+**recipes + recipe_items + audit_log tables and deplete_for_order_item(uuid, smallint) RPC applied to remote DB; audit_log canonical columns confirmed from add_combo_to_tab**
+
+## Performance
+
+- **Duration:** ~30 minutes (including human checkpoint for supabase db push)
+- **Started:** 2026-04-24
+- **Completed:** 2026-04-24
+- **Tasks:** 3/3
+- **Files modified:** 2
+
+## Accomplishments
+
+- Two SQL migration files written and applied to remote Supabase DB
+- audit_log column names confirmed from add_combo_to_tab INSERT (action, entity_type, entity_id, details, created_at) — schema matches exactly, actor_id added as nullable
+- deplete_for_order_item RPC callable from authenticated client: resolves order_item → product → recipe → depletes each ingredient via record_stock_movement
+- All STRIDE threat mitigations in place: RLS manager/admin write, CHECK (qty > 0), SECURITY DEFINER audit trail, SELECT FOR UPDATE concurrency safety
+
+## Task Commits
+
+Each task was committed atomically:
+
+1. **Task 1: Write migration 20260428000001 — recipes, recipe_items, audit_log tables** - `5a5733d` (feat)
+2. **Task 2: Write migration 20260428000002 — deplete_for_order_item RPC** - `4919965` (feat)
+3. **Task 3: [BLOCKING] Apply migrations 001 + 002** - human checkpoint; both migrations confirmed "applied" by user
+
+**Plan metadata:** `f37a397` (docs: SUMMARY.md + STATE.md, prior checkpoint commit, now updated)
+
+## Files Created/Modified
+
+- `bar-pos/supabase/migrations/20260428000001_recipes_tables.sql` — recipes, recipe_items, audit_log tables with RLS policies
+- `bar-pos/supabase/migrations/20260428000002_deplete_for_order_item.sql` — SECURITY DEFINER depletion RPC, GRANT EXECUTE to authenticated
 
 ## What Was Built
 
@@ -71,20 +102,25 @@ Also: `update_recipes_updated_at()` trigger on recipes table.
 
 ## Audit_log Column Confirmation
 
-Confirmed by reading `add_combo_to_tab`'s INSERT (line 66):
+Confirmed by reading `add_combo_to_tab`'s INSERT:
 ```sql
 INSERT INTO audit_log (action, entity_type, entity_id, details, created_at)
 ```
 Migration schema matches exactly. `actor_id` column is nullable and absent from existing INSERT — no migration needed for `add_combo_to_tab` when audit_log goes live.
 
-## Checkpoint Status
+## Migration Application Verification
 
-Task 3 is a blocking human checkpoint — requires:
-```bash
-cd bar-pos
-npx supabase db push
-```
-Expected output: both `20260428000001` and `20260428000002` show "applied" in `npx supabase migration list`.
+User confirmed both migrations applied to remote DB:
+- `20260428000001_recipes_tables.sql` — applied
+- `20260428000002_deplete_for_order_item.sql` — applied
+
+Both show "applied" status in `npx supabase migration list`.
+
+## Decisions Made
+
+- audit_log canonical columns from add_combo_to_tab INSERT: action, entity_type, entity_id, details, created_at; actor_id added as nullable
+- deplete_for_order_item v1 takes (uuid, smallint); v2 with p_allow_negative in migration 004
+- No BEGIN/COMMIT wrapper on migration 002 — CREATE OR REPLACE is idempotent; migration 001 wraps in BEGIN/COMMIT
 
 ## Deviations from Plan
 
@@ -93,10 +129,16 @@ None — plan executed exactly as written.
 ## Threat Surface Scan
 
 No new network endpoints. RLS policies align with threat model:
-- T-04-01: manager/admin-only write RLS on recipes + recipe_items ✓
-- T-04-02: `CHECK (qty > 0)` on recipe_items.qty ✓
-- T-04-04: SECURITY DEFINER on deplete_for_order_item; audit_log INSERT inaccessible to client ✓
-- T-04-05: `record_stock_movement` uses SELECT FOR UPDATE; inherited by deplete_for_order_item ✓
+- T-04-01: manager/admin-only write RLS on recipes + recipe_items
+- T-04-02: `CHECK (qty > 0)` on recipe_items.qty
+- T-04-04: SECURITY DEFINER on deplete_for_order_item; audit_log INSERT inaccessible to client
+- T-04-05: `record_stock_movement` uses SELECT FOR UPDATE; inherited by deplete_for_order_item
+
+## Next Phase Readiness
+
+- Plan 04-02 can now extend domain.ts with RecipeSchema, RecipeItemSchema Zod types
+- deplete_for_order_item(uuid, smallint) is callable from authenticated client
+- audit_log table is live — add_combo_to_tab's EXCEPTION WHEN undefined_table guard will auto-activate and start writing audit rows (expected behavior, documented in decisions)
 
 ## Self-Check
 
@@ -107,5 +149,7 @@ Files created:
 Commits:
 - 5a5733d (feat(04-01): migration 20260428000001) — FOUND
 - 4919965 (feat(04-01): migration 20260428000002) — FOUND
+
+Remote DB: both migrations confirmed applied by user (2026-04-24)
 
 ## Self-Check: PASSED

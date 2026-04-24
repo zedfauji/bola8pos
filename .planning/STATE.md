@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 2
-status: checkpoint
-stopped_at: Completed 04-01-PLAN.md tasks 1+2 — 2 migration files written; awaiting human supabase db push (Task 3 checkpoint)
-last_updated: "2026-04-24T21:49:00Z"
+current_plan: 1
+status: executing
+stopped_at: Completed 06-10-PLAN.md — 11 integration tests pass; idempotency_key RPC bug fixed and pushed
+last_updated: "2026-04-24T21:55:06.544Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 40
-  completed_plans: 34
-  percent: 85
+  completed_plans: 35
+  percent: 88
 ---
 
 # Session State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 04
 **Current plan:** 1
 **Status:** Executing Phase 04
-**Progress:** [██░░░░░░░░] 25% (2/8 phases complete)
+**Progress:** [█████████░] 88%
 
 ## Session Log
 
@@ -46,7 +46,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 06-08 (process-refund FSD slice) completed — RefundSheet UI + useProcessRefund mutation hook + P10 property test (4/4 pass) + Select shared component
 - 2026-04-24: Plan 06-10 (integration tests) completed — split-tab 6/6 + process-refund 5/5 scenarios pass; Rule 1 fix: process_refund RPC missing idempotency_key (migration 20260427000005)
 - 2026-04-24: Plan 06-11 (E2E specs) completed — 34-split-bill.spec.ts (5 tests) + 35-refund.spec.ts (3 tests); CHECKPOINT awaiting human E2E run with dev server
-- 2026-04-24: Plan 04-01 (DB migrations) tasks 1+2 done — recipes, recipe_items, audit_log tables + deplete_for_order_item RPC; CHECKPOINT awaiting supabase db push
+- 2026-04-24: Plan 04-01 (DB migrations) completed — recipes, recipe_items, audit_log tables + deplete_for_order_item RPC; both migrations applied to remote DB (user confirmed)
 
 ## Decisions
 
@@ -126,5 +126,5 @@ See: .planning/PROJECT.md
 
 ## Last Session
 
-- **Stopped at:** Completed 06-10-PLAN.md — 11 integration tests pass; idempotency_key RPC bug fixed and pushed
-- **Timestamp:** 2026-04-24T20:55:00Z
+- **Stopped at:** Completed 04-01-PLAN.md — all 3 tasks done; recipes + recipe_items + audit_log + deplete_for_order_item RPC applied to remote DB
+- **Timestamp:** 2026-04-24T22:15:00Z
