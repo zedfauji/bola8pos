@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 02-combos
-current_plan: 02-05 (wave 4) — next to execute
+current_plan: 02-08 (wave 6) — next to execute
 status: in_progress
-stopped_at: Completed 02-combos plan 04 (02-04-PLAN.md) — ComboBadge, ComboUnavailableBadge, ComboSlotCard shared/ui + ProductGrid routing fork
-last_updated: "2026-04-23T23:39:45.000Z"
+stopped_at: Completed 02-combos plan 07 (02-07-PLAN.md) — P2 pricing + P3 availability property tests with fast-check; seed-combos.ts
+last_updated: "2026-04-24T00:03:20.000Z"
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 14
-  completed_plans: 10
-  percent: 71
+  completed_plans: 11
+  percent: 79
 ---
 
 # Session State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2
 **Current phase:** 02-combos
-**Current plan:** 02-05 (wave 4) — next to execute
+**Current plan:** 02-08 (wave 6) — next to execute
 **Status:** In Progress
-**Progress:** [███████░░░] 71%
+**Progress:** [████████░░] 79%
 
 ## Session Log
 
@@ -41,6 +41,7 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 02-02 (schema push + Zod types + pool-billing) completed — supabase db push applied, 6 combo Zod schemas added to domain.ts, prepaidMinutes in pool-billing, 19 tests pass
 - 2026-04-23: Plan 02-03 (entities/combo/ + add_combo_to_tab RPC) completed — 6 TanStack Query hooks, comboKeys, add_combo_to_tab PL/pgSQL migration with all 4 error strings
 - 2026-04-23: Plan 02-04 (shared/ui combo components + ProductGrid) completed — ComboBadge, ComboUnavailableBadge, ComboSlotCard + 3 story files; ProductGrid combo routing fork with useComboAvailability + ManagerPinDialog override
+- 2026-04-24: Plan 02-07 (property tests + seed data) completed — P2 pricing + P3 availability property tests (10 tests, 2800+ runs), seed-combos.ts for Cubeta Regular/Premium + Martes de Cubeta + Pool
 
 ## Decisions
 
@@ -76,6 +77,9 @@ See: .planning/PROJECT.md
 - [Phase 02-combos 02-04]: ComboSlotCard option rows use button+role=option inside role=listbox (a11y compliance for jsx-a11y rules)
 - [Phase 02-combos 02-04]: exactOptionalPropertyTypes fix: conditional spread {...(cond ? { className } : {})} instead of className={x || undefined}
 - [Phase 02-combos 02-04]: Storybook stories must import from @storybook/react-vite (not @storybook/react) per storybook/no-renderer-packages ESLint rule
+- [Phase 02-combos 02-07]: P2d property: prepaid deduction applies to billedMinutes (15-min block-rounded), not raw elapsedMinutes — test invariant corrected from plan draft
+- [Phase 02-combos 02-07]: combo_slots and combo_slot_options lack unique constraints on natural keys — seed uses select-then-upsert instead of upsert with onConflict
+- [Phase 02-combos 02-07]: seed-combos.ts uses eslint-disable at file level + supabase as any (service role cast; consistent with CLAUDE.md workaround pattern)
 
 ## Performance Metrics
 
@@ -91,8 +95,9 @@ See: .planning/PROJECT.md
 | 02-combos | 02 | 12min | 2 | 3 |
 | 02-combos | 03 | 4min | 2 | 5 |
 | 02-combos | 04 | 8min | 2 | 7 |
+| 02-combos | 07 | 4min | 2 | 3 |
 
 ## Last Session
 
-- **Stopped at:** Completed 02-combos plan 04 (02-04-PLAN.md) — ComboBadge, ComboUnavailableBadge, ComboSlotCard shared/ui + ProductGrid routing fork
-- **Timestamp:** 2026-04-23T23:39:45Z
+- **Stopped at:** Completed 02-combos plan 07 (02-07-PLAN.md) — P2 pricing + P3 availability property tests with fast-check; seed-combos.ts
+- **Timestamp:** 2026-04-24T00:03:20Z
