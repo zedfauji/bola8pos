@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 06
-current_plan: 10
-status: executing
-stopped_at: Completed 06-09-PLAN.md — PaymentsPage tabs, RefundsList widget, Refund button, Split bill button
-last_updated: "2026-04-24T21:00:00.000Z"
+current_plan: 11
+status: checkpoint
+stopped_at: Completed 06-11-PLAN.md — E2E specs 34-split-bill.spec.ts + 35-refund.spec.ts written, awaiting human E2E verification
+last_updated: "2026-04-24T22:21:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 34
-  completed_plans: 32
-  percent: 94
+  completed_plans: 33
+  percent: 97
 ---
 
 # Session State
@@ -44,6 +44,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 02-07 (property tests + seed data) completed — P2 pricing + P3 availability property tests
 - 2026-04-24: Plan 06-05 (entity hooks) completed — useSubTabs + parent_tab_id IS NULL filter on useTabs + entities/refund FSD slice (useRefunds, useRefundsByPayment, refundKeys) — P2 pricing + P3 availability property tests (10 tests, 2800+ runs), seed-combos.ts for Cubeta Regular/Premium + Martes de Cubeta + Pool
 - 2026-04-24: Plan 06-08 (process-refund FSD slice) completed — RefundSheet UI + useProcessRefund mutation hook + P10 property test (4/4 pass) + Select shared component
+- 2026-04-24: Plan 06-11 (E2E specs) completed — 34-split-bill.spec.ts (5 tests) + 35-refund.spec.ts (3 tests); CHECKPOINT awaiting human E2E run with dev server
 
 ## Decisions
 
