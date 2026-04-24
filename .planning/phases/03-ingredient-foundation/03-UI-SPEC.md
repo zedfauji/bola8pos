@@ -47,7 +47,7 @@ All values are multiples of 4. Match existing SettingsPage and manage-combos pat
 | 3xl | 64px | Not used in this phase |
 
 Exceptions:
-- Row padding inside DataTable body rows: `py-2.5 px-3` (10px / 12px) — matches ManageCombosTab list pattern
+- Row padding inside IngredientsTable body rows: `py-2 px-3` (8px / 12px) — both multiples of 4. Note: ManageCombosTab uses `py-2.5 px-3` (10px vertical), which is a pre-existing deviation; this phase declares `py-2 px-3` as the standard for IngredientsTable rows.
 - Empty state vertical padding: `py-10` (40px) — matches existing EmptyState component (`py-12`)
 - Dialog max-width: `max-w-lg sm:max-w-lg` — matches ComboBuilderForm Dialog
 
@@ -60,12 +60,9 @@ Match SettingsPage and manage-categories patterns. Font is Geist Variable throug
 | Role | Size | Weight | Line Height | Tailwind |
 |------|------|--------|-------------|---------|
 | Body | 14px | 400 (regular) | 1.5 | `text-sm` |
-| Label | 14px | 500 (medium) | 1.4 | `text-sm font-medium` |
-| Heading (tab section) | 16px | 600 (semibold) | 1.4 | `text-base font-semibold` |
-| Page heading | 30px | 700 (bold) | 1.2 | `text-3xl font-bold` (inherited from SettingsPage `<h1>`) |
+| Heading (tab section) / Form labels | 16px / 14px | 600 (semibold) | 1.4 | `text-base font-semibold` / `text-sm font-semibold` |
 
-Exactly 3 sizes in this phase: 14px (body/label), 16px (section heading), 30px (page h1 — inherited, not re-declared).
-Exactly 2 weights used in new components: regular 400 + semibold 600 (medium 500 for form labels only).
+Exactly 2 weights declared for new components in this phase: 400 (regular) and 600 (semibold). Form labels use `font-semibold` (600) — not medium/500. The page `<h1>` (30px, bold) is inherited from SettingsPage and is NOT re-declared in this phase's type contract.
 
 Muted text: `text-muted-foreground text-sm` — used for descriptions, timestamps, helper copy.
 Mono for numeric values (stock qty, cost, factor): `font-mono text-sm` — ensures alignment in DataTable cells.
@@ -412,7 +409,7 @@ All interactive states must be implemented for each component:
 Inherits from locked decisions in `04-navigation-ui-flows.md`:
 - All interactive elements reachable via keyboard
 - Focus traps in Dialog and Sheet (shadcn defaults — do not override)
-- Color contrast ≥ 4.5:1 on all text (met by CSS variable system)
+- Color contrast >= 4.5:1 on all text (met by CSS variable system)
 - `aria-label` on all icon-only buttons (Pencil, Trash2)
 - `role="status"` + `aria-live="polite"` on EmptyState (already in shared component)
 - DataTable: `data-state` on selected rows (shadcn default)
