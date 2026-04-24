@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 4
+current_plan: 1
 status: executing
-stopped_at: "04-03 complete (b9b6713) — recipe entity + shadcn command/popover + v2 migrations applied; next: 04-04 useOverrideNegativeStock feature"
-last_updated: "2026-04-24T23:10:00Z"
+stopped_at: Completed 04-03-PLAN.md — recipe entity + shadcn command/popover + v2 migrations 003/004/005 applied; typecheck + lint pass
+last_updated: "2026-04-24T22:32:35.755Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 40
-  completed_plans: 37
-  percent: 93
+  completed_plans: 38
+  percent: 95
 ---
 
 # Session State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 04
 **Current plan:** 1
 **Status:** Executing Phase 04
-**Progress:** [█████████░] 93%
+**Progress:** [██████████] 95%
 
 ## Session Log
 
@@ -50,6 +50,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 04-02 (Zod schemas + types + stubs) completed — RecipeSchema family + computeDepletion exported; supabase.types.ts extended with recipes/recipe_items/audit_log/deplete_for_order_item; 3 Wave 0 stub files (18 todo tests)
 - 2026-04-24: Plan 04-03 Task 1 complete (408b82d) — 3 v2 SQL migrations: create_order_with_items v2 (p_skip_depletion), deplete_for_order_item v2 (p_allow_negative + audit_log), add_combo_to_tab depletion loop; BLOCKING checkpoint awaiting supabase db push
 - 2026-04-24: Plan 04-03 complete (b9b6713) — recipe entity (useRecipe + useMutationSaveRecipe + RecipePreviewPanel) + shadcn command/popover moved to shared/ui; v2 migrations 003/004/005 applied (user confirmed); typecheck + lint pass
+- 2026-04-24: Plan 04-04 complete (a8a1de0) — void reversal + useOverrideNegativeStock (p_skip_depletion + p_allow_negative) + IngredientAutocomplete (5/5 tests) + CartPanel INVENTORY_NEGATIVE override flow; typecheck + lint pass
 
 ## Decisions
 
@@ -111,6 +112,9 @@ See: .planning/PROJECT.md
 - [Phase 04-recipes-sale-depletion 04-03]: shadcn CLI installs to src/app/components/ui/ — always move to src/shared/ui/ and fix @app/lib/utils → @shared/lib/utils (FSD boundary; same as Plan 02-01 collapsible)
 - [Phase 04-recipes-sale-depletion 04-03]: useMutationSaveRecipe uses upsert+delete-all+insert-new replace strategy (Wave 4 UI always saves full recipe)
 - [Phase 04-recipes-sale-depletion 04-03]: RecipePreviewPanel shows ingredientId UUID (not name) — name requires join; Wave 4 form resolves via useIngredientsActive()
+- [Phase 04-recipes-sale-depletion 04-04]: IngredientAutocomplete accepts ingredients/isLoading as props (FSD: shared cannot import from entities; parent widget passes data from useIngredients)
+- [Phase 04-recipes-sale-depletion 04-04]: Void depletion reversal is non-atomic with edge function void — eventual consistency acceptable; idempotent on 23505
+- [Phase 04-recipes-sale-depletion 04-04]: override-negative-stock audit_log failure does not fail the mutation — order is placed; audit is best-effort server-side
 
 ## Performance Metrics
 
@@ -134,8 +138,9 @@ See: .planning/PROJECT.md
 | 06-split-bill-refund | 10 | ~2 sessions | 2 | 3 |
 | 04-recipes-sale-depletion | 02 | 5min | 3 | 6 |
 | 04-recipes-sale-depletion | 03 | 50min | 3 | 15 |
+| 04-recipes-sale-depletion | 04 | 9min | 3 | 8 |
 
 ## Last Session
 
-- **Stopped at:** Completed 04-03-PLAN.md — recipe entity + shadcn command/popover + v2 migrations 003/004/005 applied; typecheck + lint pass
-- **Timestamp:** 2026-04-24T23:10:00Z
+- **Stopped at:** Completed 04-04-PLAN.md — void reversal + useOverrideNegativeStock + IngredientAutocomplete (5/5 tests) + CartPanel INVENTORY_NEGATIVE override flow; next: 04-05
+- **Timestamp:** 2026-04-24T23:40:00Z
