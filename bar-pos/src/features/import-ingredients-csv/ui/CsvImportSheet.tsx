@@ -90,6 +90,14 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
 
       // Skip header row (first row)
       const dataRows = rows.slice(1);
+
+      const MAX_IMPORT_ROWS = 500;
+      if (dataRows.length > MAX_IMPORT_ROWS) {
+        toast.error(`CSV has ${String(dataRows.length)} rows — max ${String(MAX_IMPORT_ROWS)} allowed. Split into smaller files.`);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+
       const validRows: IngredientCreate[] = [];
       const failedRows: Array<{ rowNum: number; reason: string }> = [];
 
@@ -164,7 +172,7 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
     if (error) {
       logger.error('CsvImportSheet: bulk insert failed', { error });
       toast.error(`Import failed: ${String(error.message)}`);
-      setImportState({ step: 'staged', validRows, failedRows: [] });
+      setImportState({ step: 'staged', validRows, failedRows: importState.failedRows });
       return;
     }
 

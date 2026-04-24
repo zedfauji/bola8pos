@@ -294,7 +294,7 @@ export function ManageIngredientsTab() {
         <ConfirmDialog
           open
           title={`Delete "${dialogState.ingredient.name}"?`}
-          description="This will permanently remove the ingredient and all its stock movement history. This cannot be undone."
+          description="This will hide the ingredient from the list. Its stock movement history is preserved and it can be restored from the database if needed."
           confirmLabel="Delete ingredient"
           variant="destructive"
           isLoading={deleteMutation.isPending}
