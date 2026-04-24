@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { IngredientAutocomplete } from './IngredientAutocomplete';
-import * as ingredientQueries from '@entities/ingredient/model/queries';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Ingredient } from '@shared/lib/domain';
+import { IngredientAutocomplete } from './IngredientAutocomplete';
 
 // jsdom does not implement scrollIntoView — cmdk calls it when opening the list
 beforeEach(() => {
@@ -42,19 +41,18 @@ const mockIngredients: Ingredient[] = [
   },
 ];
 
-vi.mock('@entities/ingredient/model/queries', () => ({
-  useIngredients: vi.fn(),
-}));
-
 function setup(value: string | null = null) {
   const onSelect = vi.fn();
   const onClear = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  vi.mocked(ingredientQueries.useIngredients).mockReturnValue({
-    data: mockIngredients,
-    isLoading: false,
-  } as any);
-  render(<IngredientAutocomplete value={value} onSelect={onSelect} onClear={onClear} />);
+  render(
+    <IngredientAutocomplete
+      value={value}
+      onSelect={onSelect}
+      onClear={onClear}
+      ingredients={mockIngredients}
+      isLoading={false}
+    />
+  );
   return { onSelect, onClear };
 }
 
@@ -87,12 +85,15 @@ describe('IngredientAutocomplete', () => {
   });
 
   it('shows loading skeleton while isLoading=true', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(ingredientQueries.useIngredients).mockReturnValue({
-      data: [],
-      isLoading: true,
-    } as any);
-    render(<IngredientAutocomplete value={null} onSelect={vi.fn()} onClear={vi.fn()} />);
+    render(
+      <IngredientAutocomplete
+        value={null}
+        onSelect={vi.fn()}
+        onClear={vi.fn()}
+        ingredients={[]}
+        isLoading={true}
+      />
+    );
     expect(screen.queryByText('Beer')).not.toBeInTheDocument();
   });
 });

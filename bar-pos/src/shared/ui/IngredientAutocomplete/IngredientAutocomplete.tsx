@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { useState } from 'react';
+import type { Ingredient } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
+import { POSButton } from '@shared/ui/POSButton';
 import {
   Command,
   CommandEmpty,
@@ -10,15 +11,21 @@ import {
   CommandItem,
   CommandList,
 } from '@shared/ui/command';
-import { useIngredients } from '@entities/ingredient/model/queries';
-import type { Ingredient } from '@shared/lib/domain';
-import { POSButton } from '@shared/ui/POSButton';
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 import { Skeleton } from '@shared/ui/skeleton';
 
+/**
+ * IngredientAutocomplete — shared/ui primitive.
+ *
+ * FSD: shared/* cannot import from entities/*. The parent component (widget or feature)
+ * is responsible for fetching ingredients via useIngredients() and passing them as props.
+ */
 type IngredientAutocompleteProps = {
   value: string | null;
   onSelect: (ingredient: Ingredient) => void;
   onClear: () => void;
+  ingredients?: Ingredient[];
+  isLoading?: boolean;
   disabled?: boolean;
 };
 
@@ -26,10 +33,11 @@ export function IngredientAutocomplete({
   value,
   onSelect,
   onClear,
+  ingredients = [],
+  isLoading = false,
   disabled = false,
 }: IngredientAutocompleteProps) {
   const [open, setOpen] = useState(false);
-  const { data: ingredients = [], isLoading } = useIngredients();
   const selected = ingredients.find(i => i.id === value) ?? null;
 
   function getStockColor(ingredient: Ingredient): string {
