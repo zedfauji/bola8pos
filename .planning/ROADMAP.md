@@ -79,7 +79,16 @@ Plans:
 **Goal:** Build the ingredient entity and the canonical `record_stock_movement` RPC. No sale-time depletion yet — get the ledger right before anything writes to it.
 **Requirements:** S3a-01..S3a-08
 **Depends on:** Phase 1
-**Plans:** 0 plans
+**Plans:** 7 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — SQL migrations: ingredients table + idempotency index + record_stock_movement RPC + [BLOCKING] supabase db push (Wave 1) (S3a-01, S3a-02, S3a-03)
+- [ ] 03-02-PLAN.md — Zod schemas in domain.ts (Ingredient, UOM, ManualAdjustReason) + uom.ts utility + P5 round-trip property test (Wave 1, parallel) (S3a-04, S3a-05)
+- [ ] 03-03-PLAN.md — entities/ingredient/ FSD slice: types.ts, queries.ts, index.ts (Wave 2) (S3a-06)
+- [ ] 03-04-PLAN.md — features/adjust-stock-movement/ + features/import-ingredients-csv/ (Wave 2, parallel with 03-03) (S3a-07, S3a-08)
+- [ ] 03-05-PLAN.md — features/manage-ingredients/ (IngredientForm + ManageIngredientsTab) + widgets/IngredientsTable/ + widgets/StockMovementsList/ (Wave 3) (S3a-07)
+- [ ] 03-06-PLAN.md — SettingsTabsPanel wiring: Ingredients tab after Combos (Wave 4) (S3a-07)
+- [ ] 03-07-PLAN.md — E2E 33-ingredients.spec.ts (T1–T7) + P4 ledger invariant + seed-ingredients.ts + human sign-off (Wave 5) (S3a-07, S3a-08)
 
 **Success Criteria**:
 1. `ingredients` table + `record_stock_movement` RPC atomic (ledger + quantity)
