@@ -49,12 +49,13 @@ export const UserRole = {
 
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
-export const TabStatusSchema = z.enum(['open', 'closed', 'paid', 'voided']);
+export const TabStatusSchema = z.enum(['open', 'closed', 'paid', 'voided', 'split']);
 export const TabStatus = {
   OPEN: 'open',
   CLOSED: 'closed',
   PAID: 'paid',
   VOIDED: 'voided',
+  SPLIT: 'split',
 } as const;
 
 export const OrderStatusSchema = z.enum(['pending', 'served', 'voided']);
@@ -400,6 +401,12 @@ export const TabSchema = z.object({
   rappiOrderId: z.string().min(1).max(128).nullable().optional(),
   /** Caja session under which this tab was opened */
   cajaSessionId: UuidSchema.nullable().optional(),
+  /** Parent tab id when this tab is a split child */
+  parentTabId: UuidSchema.nullable().optional(),
+  /** How the bill was split (set on parent tab when status = 'split') */
+  splitMode: z.enum(['item', 'evenly', 'by_person', 'by_amount']).nullable().optional(),
+  /** Display label for split sub-tabs (e.g. "Table 3 – Part 1") */
+  splitLabel: z.string().max(50).nullable().optional(),
 });
 
 export const TabCreateSchema = TabSchema.omit({
@@ -568,6 +575,10 @@ export const PaymentSchema = z.object({
   discountType: DiscountTypeSchema.optional(),
   discountValue: z.number().nonnegative().optional(),
   discountAmount: MoneySchema.optional(),
+  /** True when this payment record represents a refund (negative flow) */
+  isRefund: z.boolean().default(false),
+  /** FK to the refund record when isRefund = true */
+  refundId: UuidSchema.nullable().optional(),
 });
 
 export const PaymentCreateSchema = PaymentSchema.omit({
@@ -637,8 +648,9 @@ export type InventoryLogUpdate = z.infer<typeof InventoryLogUpdateSchema>;
 
 export const StockMovementSchema = z.object({
   id: UuidSchema,
-  productId: UuidSchema,
-  quantityDelta: z.number().int(),
+  /** FK to products. null for ingredient-only movements (Phase 3+). */
+  productId: UuidSchema.nullable(),
+  quantityDelta: z.number(),
   reason: StockMovementReasonSchema,
   staffId: UuidSchema,
   /** Polymorphic reference type (e.g. 'order_item', 'manual_adjustment') */
@@ -1467,3 +1479,91 @@ export const AddComboToTabInputSchema = z.object({
 });
 
 export type AddComboToTabInput = z.infer<typeof AddComboToTabInputSchema>;
+
+// ============================================================================
+// S3a — INGREDIENT FOUNDATION
+// ============================================================================
+
+export const UomSchema = z.enum(['g', 'kg', 'ml', 'L', 'unit', 'case_24', 'portion']);
+export type Uom = z.infer<typeof UomSchema>;
+
+/** Base UOM: the smallest measuring unit stored per ingredient. Excludes case_24. */
+export const BaseUomSchema = z.enum(['g', 'kg', 'ml', 'L', 'unit', 'portion']);
+export type BaseUom = z.infer<typeof BaseUomSchema>;
+
+/** Reasons valid for manual stock adjustments (the 4 operator-initiated reasons). */
+export const ManualAdjustReasonSchema = z.enum([
+  'waste',
+  'delivery',
+  'correction',
+  'physical_count',
+]);
+export type ManualAdjustReason = z.infer<typeof ManualAdjustReasonSchema>;
+
+export const IngredientSchema = z.object({
+  id: UuidSchema,
+  name: z.string().min(1).max(100),
+  uom: BaseUomSchema,
+  purchaseUom: UomSchema.nullable().optional(),
+  purchaseToBaseFactor: z.number().positive(),
+  costPerBaseUnit: z.number().nonnegative(),
+  quantityOnHand: z.number(),
+  reorderPoint: z.number().nonnegative().nullable().optional(),
+  isPrep: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+  category: z.string().nullable().optional(),
+  createdAt: TimestampSchema,
+  updatedAt: TimestampSchema,
+});
+
+export const IngredientCreateSchema = IngredientSchema.omit({
+  id: true,
+  quantityOnHand: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const IngredientUpdateSchema = IngredientSchema.partial().required({ id: true });
+
+export type Ingredient = z.infer<typeof IngredientSchema>;
+export type IngredientCreate = z.infer<typeof IngredientCreateSchema>;
+export type IngredientUpdate = z.infer<typeof IngredientUpdateSchema>;
+
+// ============================================================================
+// S4 — SPLIT BILL + REFUND
+// ============================================================================
+
+export const RefundReasonSchema = z.enum([
+  'wrong_order',
+  'quality_issue',
+  'customer_complaint',
+  'billing_error',
+  'other',
+]);
+
+export const RefundItemSchema = z.object({
+  id: UuidSchema,
+  refundId: UuidSchema,
+  orderItemId: UuidSchema,
+  qty: z.number().int().min(1),
+  amount: z.number().positive(),
+  restock: z.boolean(),
+  createdAt: TimestampSchema,
+});
+
+export const RefundSchema = z.object({
+  id: UuidSchema,
+  originalPaymentId: UuidSchema,
+  reason: RefundReasonSchema,
+  amount: z.number().positive(),
+  createdBy: UuidSchema,
+  createdAt: TimestampSchema,
+  items: z.array(RefundItemSchema).default([]),
+});
+
+export const RefundCreateSchema = RefundSchema.omit({ id: true, createdAt: true, items: true });
+
+export type Refund = z.infer<typeof RefundSchema>;
+export type RefundCreate = z.infer<typeof RefundCreateSchema>;
+export type RefundItem = z.infer<typeof RefundItemSchema>;
+export type RefundReason = z.infer<typeof RefundReasonSchema>;

@@ -185,6 +185,12 @@ export type AppErrorCode =
   | 'TAURI_ERROR'
   | 'EXPORT_CANCELLED'
   | 'EXPORT_FAILED'
+  | 'PARENT_TAB_PAID' // parent tab already paid — cannot split
+  | 'ITEM_NOT_IN_PARENT' // order item does not belong to parent tab
+  | 'ITEM_ASSIGNED_TWICE' // same item assigned to two sub-tabs
+  | 'UNASSIGNED_ITEMS' // split completed but some items were not assigned
+  | 'REFUND_EXCEEDS_ORIGINAL' // refund amount > original payment amount
+  | 'ITEM_NOT_IN_ORIGINAL_ORDER' // refund item not found in original order
   | 'UNKNOWN_ERROR';
 
 /**

@@ -30,6 +30,7 @@ export const STAFF_ACTIONS = [
   'manage_caja',
   'transfer_tab',
   'view_kds',
+  'process_refund',
 ] as const;
 
 export type StaffAction = (typeof STAFF_ACTIONS)[number];
@@ -53,6 +54,7 @@ const MANAGER_EXTRA: ReadonlySet<StaffAction> = new Set([
   'adjust_inventory',
   'manage_products',
   'manage_caja', // open and close the daily caja session
+  'process_refund', // process payment refunds (manager+ only)
 ]);
 
 const KITCHEN_ACTIONS: ReadonlySet<StaffAction> = new Set(['view_kds', 'clock_in', 'clock_out']);
