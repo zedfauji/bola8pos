@@ -1,11 +1,10 @@
-import { describe, it } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it } from 'vitest';
 import { computeDepletion } from '@shared/lib/domain-helpers';
-import type { RecipeWithItems } from '@shared/lib/domain';
 
-// Suppress unused import warnings — these will be used in Plan 04-06
+// RecipeWithItems will be used in Plan 04-06 when todo tests are filled in
+// fc and computeDepletion suppressed until Plan 04-06 fills in the tests
 void fc; void computeDepletion;
-type _R = RecipeWithItems;
 
 describe('computeDepletion', () => {
   it.todo('sale direction returns negative deltas (stock decreases)');
