@@ -637,7 +637,8 @@ export type InventoryLogUpdate = z.infer<typeof InventoryLogUpdateSchema>;
 
 export const StockMovementSchema = z.object({
   id: UuidSchema,
-  productId: UuidSchema,
+  /** FK to products. null for ingredient-only movements (Phase 3+). */
+  productId: UuidSchema.nullable(),
   quantityDelta: z.number(),
   reason: StockMovementReasonSchema,
   staffId: UuidSchema,

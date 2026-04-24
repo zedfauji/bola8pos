@@ -59,7 +59,7 @@ function mapIngredientRow(row: Record<string, unknown>): Ingredient {
 function mapMovementRow(row: Record<string, unknown>): StockMovement {
   return {
     id: row['id'] as string,
-    productId: (row['product_id'] ?? '') as string,
+    productId: (row['product_id'] ?? null) as string | null,
     ingredientId: (row['ingredient_id'] ?? null) as string | null | undefined,
     quantityDelta: Number(row['quantity_delta']),
     reason: row['reason'] as StockMovement['reason'],
