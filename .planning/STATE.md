@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 1
+current_plan: 2
 status: executing
-stopped_at: Completed 06-10-PLAN.md — 11 integration tests pass; idempotency_key RPC bug fixed and pushed
-last_updated: "2026-04-24T21:55:06.544Z"
+stopped_at: Completed 04-02-PLAN.md — RecipeSchema family + computeDepletion + supabase.types.ts extended + 3 Wave 0 test stubs (18 todo tests)
+last_updated: "2026-04-24T22:01:20Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 40
-  completed_plans: 35
-  percent: 88
+  completed_plans: 36
+  percent: 90
 ---
 
 # Session State
@@ -47,6 +47,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 06-10 (integration tests) completed — split-tab 6/6 + process-refund 5/5 scenarios pass; Rule 1 fix: process_refund RPC missing idempotency_key (migration 20260427000005)
 - 2026-04-24: Plan 06-11 (E2E specs) completed — 34-split-bill.spec.ts (5 tests) + 35-refund.spec.ts (3 tests); CHECKPOINT awaiting human E2E run with dev server
 - 2026-04-24: Plan 04-01 (DB migrations) completed — recipes, recipe_items, audit_log tables + deplete_for_order_item RPC; both migrations applied to remote DB (user confirmed)
+- 2026-04-24: Plan 04-02 (Zod schemas + types + stubs) completed — RecipeSchema family + computeDepletion exported; supabase.types.ts extended with recipes/recipe_items/audit_log/deplete_for_order_item; 3 Wave 0 stub files (18 todo tests)
 
 ## Decisions
 
@@ -102,6 +103,9 @@ See: .planning/PROJECT.md
 - [Phase 06-split-bill-refund 06-10]: describe.skipIf(hasEnv) + itInt/itAuth/itBartender aliases for graceful skip when E2E creds absent
 - [Phase 04-recipes-sale-depletion 04-01]: audit_log canonical columns from add_combo_to_tab INSERT: action, entity_type, entity_id, details, created_at — actor_id added as nullable
 - [Phase 04-recipes-sale-depletion 04-01]: deplete_for_order_item v1 takes (uuid, smallint); v2 with p_allow_negative in migration 004
+- [Phase 04-recipes-sale-depletion 04-02]: UuidSchema and TimestampSchema confirmed exact primitive names in domain.ts — used in RecipeSchema family without new primitives
+- [Phase 04-recipes-sale-depletion 04-02]: deplete_for_order_item p_allow_negative? pre-added to supabase.types.ts to avoid second edit when migration 004 lands
+- [Phase 04-recipes-sale-depletion 04-02]: fast-check import must precede vitest in test files per import/order ESLint rule (alphabetical package ordering)
 
 ## Performance Metrics
 
@@ -123,8 +127,9 @@ See: .planning/PROJECT.md
 | 06-split-bill-refund | 04 | 25min | 2 | 5 |
 | 06-split-bill-refund | 06 | 25min | 2 | 7 |
 | 06-split-bill-refund | 10 | ~2 sessions | 2 | 3 |
+| 04-recipes-sale-depletion | 02 | 5min | 3 | 6 |
 
 ## Last Session
 
-- **Stopped at:** Completed 04-01-PLAN.md — all 3 tasks done; recipes + recipe_items + audit_log + deplete_for_order_item RPC applied to remote DB
-- **Timestamp:** 2026-04-24T22:15:00Z
+- **Stopped at:** Completed 04-02-PLAN.md — RecipeSchema family + computeDepletion + supabase.types.ts extended + 3 Wave 0 test stubs (18 todo)
+- **Timestamp:** 2026-04-24T22:01:20Z
