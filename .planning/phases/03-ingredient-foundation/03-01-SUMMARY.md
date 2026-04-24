@@ -33,7 +33,7 @@ decisions:
 metrics:
   duration: "~3 minutes"
   completed_date: "2026-04-24"
-  tasks_completed: 3
+  tasks_completed: 4
   tasks_total: 4
   files_created: 3
   files_modified: 0
@@ -54,7 +54,7 @@ Three SQL migration files created for the ingredient database foundation: ingred
 | 1 | Migration 1: ingredients table + indexes + RLS | 2937be1 | bar-pos/supabase/migrations/20260426000001_ingredients_table.sql |
 | 2 | Migration 2: stock_movements idempotency index | 8b63ee4 | bar-pos/supabase/migrations/20260426000002_stock_movements_idempotency_index.sql |
 | 3 | Migration 3: record_stock_movement PL/pgSQL RPC | f26d47a | bar-pos/supabase/migrations/20260426000003_record_stock_movement_rpc.sql |
-| 4 | [BLOCKING] Push schema to remote Supabase | — | Awaiting human: `cd bar-pos && supabase db push` |
+| 4 | Push schema to remote Supabase | confirmed | Human confirmed: `supabase db push` applied all 3 migrations |
 
 ## What Was Built
 
@@ -97,25 +97,15 @@ Three SQL migration files created for the ingredient database foundation: ingred
 
 None — plan executed exactly as written in the updated plan file.
 
-## Checkpoint: Awaiting Schema Push
+## Schema Push: Complete
 
-Task 4 is a blocking `checkpoint:human-verify` requiring the user to run `supabase db push` from `bar-pos/`.
+Task 4 (`supabase db push`) was confirmed complete by the human operator. All three migrations were applied to the remote Supabase project:
 
-**Steps:**
-```bash
-cd bar-pos
-supabase db push
-```
+- `20260426000001_ingredients_table.sql` — applied
+- `20260426000002_stock_movements_idempotency_index.sql` — applied
+- `20260426000003_record_stock_movement_rpc.sql` — applied
 
-**Expected output:** Three migrations applied:
-- `Applying migration 20260426000001_ingredients_table.sql`
-- `Applying migration 20260426000002_stock_movements_idempotency_index.sql`
-- `Applying migration 20260426000003_record_stock_movement_rpc.sql`
-
-**Verification after push:**
-1. Supabase Studio → Table Editor → `ingredients` table appears with all 13 columns
-2. Database → Functions → `record_stock_movement` function exists
-3. SQL editor: `SELECT COUNT(*) FROM ingredients;` → returns 0 (not an error)
+The `ingredients` table is queryable and the `record_stock_movement` RPC is callable by authenticated users.
 
 ## Threat Surface Scan
 
@@ -136,7 +126,9 @@ None — this plan creates SQL migration files only; no UI stubs or placeholder 
 
 ## Self-Check: PASSED
 
-- `bar-pos/supabase/migrations/20260426000001_ingredients_table.sql`: FOUND (committed at 2937be1)
-- `bar-pos/supabase/migrations/20260426000002_stock_movements_idempotency_index.sql`: FOUND (committed at 8b63ee4)
-- `bar-pos/supabase/migrations/20260426000003_record_stock_movement_rpc.sql`: FOUND (committed at f26d47a)
-- Commits 2937be1, 8b63ee4, f26d47a: FOUND in git log
+- `bar-pos/supabase/migrations/20260426000001_ingredients_table.sql`: FOUND on disk
+- `bar-pos/supabase/migrations/20260426000002_stock_movements_idempotency_index.sql`: FOUND on disk
+- `bar-pos/supabase/migrations/20260426000003_record_stock_movement_rpc.sql`: FOUND on disk
+- Commits 2937be1, 8b63ee4, f26d47a, a653b64: FOUND in git log (all branches)
+- Task 4 (supabase db push): CONFIRMED by human operator
+- All 4/4 tasks complete
