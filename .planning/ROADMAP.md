@@ -8,7 +8,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 ## Phases
 
 - [x] **Phase 1: Foundation** — Unified stock ledger, category tree, modifier groups, combo flags (completed 2026-04-23)
-- [ ] **Phase 2: Combos** — Customer-visible combo support with pool-time bundles
+- [x] **Phase 2: Combos** — Customer-visible combo support with pool-time bundles (completed 2026-04-24)
 - [ ] **Phase 3: Ingredient Foundation** — Ingredient entity + canonical stock movement RPC
 - [ ] **Phase 4: Recipes & Sale Depletion** — Recipes + atomic ingredient depletion on sale
 - [ ] **Phase 5: Kitchen Prep + Cocktails** — Chef prep batches and Michelada extension
@@ -51,17 +51,18 @@ Plans:
 **Goal:** Ship customer-visible combo support: Cubeta x10 with beer selection, combos with 1-hour free pool, multi-slot bundle pricing, day-of-week availability.
 **Requirements:** S2-01..S2-11
 **Depends on:** Phase 1
-**Plans:** 8 plans
+**Plans:** 9/9 plans complete
 
 Plans:
-- [x] 02-01-PLAN.md — DB migrations (combo_slots, combo_slot_options, combo_availability, column extensions, triggers, is_combo_available, view) + AppErrorCode + shadcn Collapsible (Wave 1) (S2-01, S2-02, S2-03, S2-04)
-- [x] 02-02-PLAN.md — [BLOCKING] supabase db push + combo Zod schemas in domain.ts + pool-billing prepaid extension (Wave 2) (S2-06, S2-12)
-- [x] 02-03-PLAN.md — entities/combo/ FSD slice (6 hooks) + add_combo_to_tab PL/pgSQL RPC migration (Wave 3) (S2-05, S2-07)
-- [x] 02-04-PLAN.md — shared/ui components (ComboBadge, ComboUnavailableBadge, ComboSlotCard + stories) + ProductGrid combo routing fork + availability display (Wave 4) (S2-11, S2-14)
-- [x] 02-05-PLAN.md — add-combo-to-tab feature: useAddComboToTab mutation + ComboBuilderSheet + integration tests + ProductGrid wiring (Wave 5) (S2-08)
-- [x] 02-06-PLAN.md — manage-combos admin feature + SettingsTabsPanel Combos tab + KDS Collapsible bundle grouping (Wave 5) (S2-09, S2-10, S2-13)
-- [x] 02-07-PLAN.md — Property tests P2 (pricing) + P3 (availability) + seed-combos.ts (Wave 6) (S2-16, S2-18)
-- [x] 02-08-PLAN.md — E2E 32-combos.spec.ts + regression gate + human sign-off checkpoint (Wave 7) (S2-17)
+- [x] 02-01-PLAN.md — DB migrations (combo_slots, combo_slot_options, combo_availability, column extensions, triggers, is_combo_available, view) + AppErrorCode + shadcn Collapsible (Wave 1) (S2-01, S2-02, S2-03, S2-04) ✓ 2026-04-23
+- [x] 02-02-PLAN.md — [BLOCKING] supabase db push + combo Zod schemas in domain.ts + pool-billing prepaid extension (Wave 2) (S2-06, S2-12) ✓ 2026-04-23
+- [x] 02-03-PLAN.md — entities/combo/ FSD slice (6 hooks) + add_combo_to_tab PL/pgSQL RPC migration (Wave 3) (S2-05, S2-07) ✓ 2026-04-23
+- [x] 02-04-PLAN.md — shared/ui components (ComboBadge, ComboUnavailableBadge, ComboSlotCard + stories) + ProductGrid combo routing fork + availability display (Wave 4) (S2-11, S2-14) ✓ 2026-04-23
+- [x] 02-05-PLAN.md — add-combo-to-tab feature: useAddComboToTab mutation + ComboBuilderSheet + integration tests + ProductGrid wiring (Wave 5) (S2-08) ✓ 2026-04-23
+- [x] 02-06-PLAN.md — manage-combos admin feature + SettingsTabsPanel Combos tab + KDS Collapsible bundle grouping (Wave 5) (S2-09, S2-10, S2-13) ✓ 2026-04-23
+- [x] 02-07-PLAN.md — Property tests P2 (pricing) + P3 (availability) + seed-combos.ts (Wave 6) (S2-16, S2-18) ✓ 2026-04-23
+- [x] 02-08-PLAN.md — E2E 32-combos.spec.ts + regression gate + human sign-off checkpoint (Wave 7) (S2-17) ✓ 2026-04-24
+- [x] 02-09-PLAN.md — Gap closure: NESTED_COMBO_FORBIDDEN integration test (S2-08) ✓ 2026-04-24
 
 **Success Criteria**:
 1. Combo schema (`combo_slots`, `combo_slot_options`, `combo_availability`) live with no-nesting trigger
