@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 1
+current_plan: 6
 status: executing
-stopped_at: Completed 04-03-PLAN.md — recipe entity + shadcn command/popover + v2 migrations 003/004/005 applied; typecheck + lint pass
-last_updated: "2026-04-24T22:32:35.755Z"
+stopped_at: "Completed 04-05-PLAN.md — manage-recipe feature (useManageRecipe + RecipeEditorTab) + Recipe tab in product edit Dialog (max-w-2xl) + seed-recipes.ts; typecheck + lint pass"
+last_updated: "2026-04-24T23:50:00Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 40
-  completed_plans: 38
-  percent: 95
+  completed_plans: 40
+  percent: 100
 ---
 
 # Session State
@@ -51,6 +51,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 04-03 Task 1 complete (408b82d) — 3 v2 SQL migrations: create_order_with_items v2 (p_skip_depletion), deplete_for_order_item v2 (p_allow_negative + audit_log), add_combo_to_tab depletion loop; BLOCKING checkpoint awaiting supabase db push
 - 2026-04-24: Plan 04-03 complete (b9b6713) — recipe entity (useRecipe + useMutationSaveRecipe + RecipePreviewPanel) + shadcn command/popover moved to shared/ui; v2 migrations 003/004/005 applied (user confirmed); typecheck + lint pass
 - 2026-04-24: Plan 04-04 complete (a8a1de0) — void reversal + useOverrideNegativeStock (p_skip_depletion + p_allow_negative) + IngredientAutocomplete (5/5 tests) + CartPanel INVENTORY_NEGATIVE override flow; typecheck + lint pass
+- 2026-04-24: Plan 04-05 complete (3ff88bc) — manage-recipe feature (useManageRecipe + RecipeEditorTab via useReducer) + Recipe tab in product edit Dialog (max-w-2xl Tabs wrapper) + seed-recipes.ts; typecheck + lint pass
 
 ## Decisions
 
@@ -115,6 +116,10 @@ See: .planning/PROJECT.md
 - [Phase 04-recipes-sale-depletion 04-04]: IngredientAutocomplete accepts ingredients/isLoading as props (FSD: shared cannot import from entities; parent widget passes data from useIngredients)
 - [Phase 04-recipes-sale-depletion 04-04]: Void depletion reversal is non-atomic with edge function void — eventual consistency acceptable; idempotent on 23505
 - [Phase 04-recipes-sale-depletion 04-04]: override-negative-stock audit_log failure does not fail the mutation — order is placed; audit is best-effort server-side
+- [Phase 04-recipes-sale-depletion 04-05]: useReducer replaces multiple useState + multi-setState in useEffect to satisfy react-hooks/set-state-in-effect ESLint rule — single dispatch per useEffect avoids the violation
+- [Phase 04-recipes-sale-depletion 04-05]: RecipeEditorTab fetches ingredients via useIngredientsActive() internally (features can import from entities); passes them as ingredients prop to IngredientAutocomplete (FSD: shared cannot import from entities)
+- [Phase 04-recipes-sale-depletion 04-05]: seed-recipes.ts follows seed-combos.ts pattern — VITE_SUPABASE_URL from .env.local, eslint-disable at file level, supabase as any cast
+- [Phase 04-recipes-sale-depletion 04-05]: import order in CatalogProductsTab: @features/* before @entities/* per ESLint import/order rule (FSD layer hierarchy)
 
 ## Performance Metrics
 
@@ -139,8 +144,9 @@ See: .planning/PROJECT.md
 | 04-recipes-sale-depletion | 02 | 5min | 3 | 6 |
 | 04-recipes-sale-depletion | 03 | 50min | 3 | 15 |
 | 04-recipes-sale-depletion | 04 | 9min | 3 | 8 |
+| 04-recipes-sale-depletion | 05 | 10min | 3 | 5 |
 
 ## Last Session
 
-- **Stopped at:** Completed 04-04-PLAN.md — void reversal + useOverrideNegativeStock + IngredientAutocomplete (5/5 tests) + CartPanel INVENTORY_NEGATIVE override flow; next: 04-05
-- **Timestamp:** 2026-04-24T23:40:00Z
+- **Stopped at:** Completed 04-05-PLAN.md — manage-recipe feature (useManageRecipe + RecipeEditorTab) + Recipe tab in product edit Dialog (max-w-2xl) + seed-recipes.ts; typecheck + lint pass
+- **Timestamp:** 2026-04-24T23:50:00Z
