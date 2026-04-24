@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 2
-status: executing
-stopped_at: Completed 04-02-PLAN.md — RecipeSchema family + computeDepletion + supabase.types.ts extended + 3 Wave 0 test stubs (18 todo tests)
-last_updated: "2026-04-24T22:01:20Z"
+current_plan: 3
+status: checkpoint
+stopped_at: "04-03 Task 1 complete (408b82d) — 3 v2 migration SQL files written; BLOCKING checkpoint: awaiting supabase db push for migrations 003+004+005; resume signal: v2 migrations applied"
+last_updated: "2026-04-24T22:30:00Z"
 progress:
   total_phases: 8
   completed_phases: 4
@@ -48,6 +48,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 06-11 (E2E specs) completed — 34-split-bill.spec.ts (5 tests) + 35-refund.spec.ts (3 tests); CHECKPOINT awaiting human E2E run with dev server
 - 2026-04-24: Plan 04-01 (DB migrations) completed — recipes, recipe_items, audit_log tables + deplete_for_order_item RPC; both migrations applied to remote DB (user confirmed)
 - 2026-04-24: Plan 04-02 (Zod schemas + types + stubs) completed — RecipeSchema family + computeDepletion exported; supabase.types.ts extended with recipes/recipe_items/audit_log/deplete_for_order_item; 3 Wave 0 stub files (18 todo tests)
+- 2026-04-24: Plan 04-03 Task 1 complete (408b82d) — 3 v2 SQL migrations: create_order_with_items v2 (p_skip_depletion), deplete_for_order_item v2 (p_allow_negative + audit_log), add_combo_to_tab depletion loop; BLOCKING checkpoint awaiting supabase db push
 
 ## Decisions
 
