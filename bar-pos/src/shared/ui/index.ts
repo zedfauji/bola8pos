@@ -146,3 +146,4 @@ export {
   CommandShortcut,
 } from './command';
 export { Popover, PopoverAnchor, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from './popover';
+export { IngredientAutocomplete } from './IngredientAutocomplete/IngredientAutocomplete';
