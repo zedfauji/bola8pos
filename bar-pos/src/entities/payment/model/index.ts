@@ -19,5 +19,5 @@ export {
 } from './store';
 
 // Data Fetching
-export { useOrderItemsByPayment, paymentItemKeys } from './queries';
+export { useOrderItemsByPayment, usePayments, paymentItemKeys, paymentKeys } from './queries';
 export type { OrderItemForRefund } from './queries';

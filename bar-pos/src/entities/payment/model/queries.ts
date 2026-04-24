@@ -10,12 +10,54 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { supabase } from '@shared/lib/supabase';
+import { PaymentSchema } from './types';
+import type { Payment } from './types';
 
 const db = supabase as any;
+
+export const paymentKeys = {
+  all: ['payments'] as const,
+  lists: () => [...paymentKeys.all, 'list'] as const,
+};
 
 export const paymentItemKeys = {
   byPayment: (paymentId: string) => ['payment', 'order-items', paymentId] as const,
 };
+
+function mapPaymentRow(row: Record<string, unknown>): Payment {
+  return PaymentSchema.parse({
+    id: row['id'],
+    tabId: row['tab_id'],
+    amount: row['amount'],
+    tipAmount: row['tip_amount'] ?? 0,
+    method: row['method'],
+    squarePaymentId: row['square_payment_id'],
+    squareReceiptUrl: row['square_receipt_url'],
+    tenderedAmount: row['tendered_amount'],
+    referenceNumber: row['reference_number'],
+    idempotencyKey: row['idempotency_key'],
+    processedAt: new Date(row['processed_at'] as string),
+    processedBy: row['processed_by'],
+    isRefund: row['is_refund'] ?? false,
+    refundId: row['refund_id'] ?? null,
+  });
+}
+
+/** Fetch all recent payments (newest first, limit 100). */
+export function usePayments() {
+  return useQuery({
+    queryKey: paymentKeys.lists(),
+    queryFn: async (): Promise<Payment[]> => {
+      const { data, error } = await db
+        .from('payments')
+        .select('*')
+        .order('processed_at', { ascending: false })
+        .limit(100);
+      if (error) throw error as Error;
+      return ((data ?? []) as Record<string, unknown>[]).map(mapPaymentRow);
+    },
+  });
+}
 
 export interface OrderItemForRefund {
   id: string;
@@ -36,11 +78,13 @@ export function useOrderItemsByPayment(paymentId: string | null) {
       : (['payment', 'order-items', null] as const),
     enabled: paymentId != null,
     queryFn: async (): Promise<OrderItemForRefund[]> => {
+      if (paymentId == null) return [];  // guard: enabled only when paymentId != null
+
       // Step 1: resolve the tab_id from the payment
       const { data: paymentRow, error: payErr } = await db
         .from('payments')
         .select('tab_id')
-        .eq('id', paymentId!)
+        .eq('id', paymentId)
         .single();
       if (payErr) throw payErr as Error;
 
