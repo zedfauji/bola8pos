@@ -70,6 +70,12 @@ export type { SplitLayoutProps } from './SplitLayout';
 export { ScrollArea } from './ScrollArea';
 export type { ScrollAreaProps } from './ScrollArea';
 
+// Split-bill building blocks
+export { SubTabColumn } from './SubTabColumn';
+export type { SubTabColumnProps } from './SubTabColumn';
+export { PersonCard } from './PersonCard';
+export type { PersonCardProps } from './PersonCard';
+
 // shadcn primitives
 export { Badge, badgeVariants } from './badge';
 export type { BadgeProps } from './badge';
