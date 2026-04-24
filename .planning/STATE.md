@@ -90,6 +90,9 @@ See: .planning/PROJECT.md
 - [Phase 06-split-bill-refund 06-06]: SubTabColumn uses labelSlot?: React.ReactNode prop so PersonCard composes without duplicating layout
 - [Phase 06-split-bill-refund 06-06]: data-item-list + closest() check used instead of stopPropagation on li (avoids jsx-a11y/no-noninteractive-element-interactions)
 - [Phase 06-split-bill-refund 06-06]: PersonCard uses useRef+useEffect for focus (autoFocus HTML prop blocked by jsx-a11y/no-autofocus)
+- [Phase 06-split-bill-refund 06-07]: useSplitEvenly calls split_tab_evenly for validation then runs N callProcessPayment calls — does NOT create sub-tabs; parent stays 'open'
+- [Phase 06-split-bill-refund 06-07]: SplitEvenlyInput.method is 'cash' | 'card' | 'rappi' (no 'transfer') — PaymentMethodSchema constraint
+- [Phase 06-split-bill-refund 06-07]: isValid ternary chain (not switch) to satisfy @typescript-eslint/no-unnecessary-condition on last enum branch
 
 ## Performance Metrics
 
@@ -113,5 +116,5 @@ See: .planning/PROJECT.md
 
 ## Last Session
 
-- **Stopped at:** Completed 06-05-PLAN.md — entity hooks (useSubTabs + refund FSD slice)
-- **Timestamp:** 2026-04-24T19:30:00Z
+- **Stopped at:** Completed 06-07-PLAN.md — SplitTabSheet + useSplitTab hooks (all 4 split modes)
+- **Timestamp:** 2026-04-24T20:05:00Z
