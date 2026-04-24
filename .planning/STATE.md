@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 03
-current_plan: 1
+current_phase: 06
+current_plan: 9
 status: executing
-stopped_at: Completed 02-combos plan 08 (02-08-PLAN.md) — E2E spec 32-combos.spec.ts; checkpoint pending human verification
-last_updated: "2026-04-24T18:05:08.530Z"
+stopped_at: Completed 06-08-PLAN.md — RefundSheet + useProcessRefund + P10 property test
+last_updated: "2026-04-24T20:15:00.000Z"
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 5
   total_plans: 34
-  completed_plans: 23
-  percent: 68
+  completed_plans: 31
+  percent: 91
 ---
 
 # Session State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** Feature Expansion 2026 Q2
-**Current phase:** 03
-**Current plan:** 1
-**Status:** Executing Phase 03
+**Current phase:** 06
+**Current plan:** 9
+**Status:** Executing Phase 06
 **Progress:** [██░░░░░░░░] 25% (2/8 phases complete)
 
 ## Session Log
@@ -43,6 +43,7 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 02-04 (shared/ui combo components + ProductGrid) completed — ComboBadge, ComboUnavailableBadge, ComboSlotCard + 3 story files; ProductGrid combo routing fork with useComboAvailability + ManagerPinDialog override
 - 2026-04-24: Plan 02-07 (property tests + seed data) completed — P2 pricing + P3 availability property tests
 - 2026-04-24: Plan 06-05 (entity hooks) completed — useSubTabs + parent_tab_id IS NULL filter on useTabs + entities/refund FSD slice (useRefunds, useRefundsByPayment, refundKeys) — P2 pricing + P3 availability property tests (10 tests, 2800+ runs), seed-combos.ts for Cubeta Regular/Premium + Martes de Cubeta + Pool
+- 2026-04-24: Plan 06-08 (process-refund FSD slice) completed — RefundSheet UI + useProcessRefund mutation hook + P10 property test (4/4 pass) + Select shared component
 
 ## Decisions
 
@@ -116,5 +117,5 @@ See: .planning/PROJECT.md
 
 ## Last Session
 
-- **Stopped at:** Completed 06-07-PLAN.md — SplitTabSheet + useSplitTab hooks (all 4 split modes)
-- **Timestamp:** 2026-04-24T20:05:00Z
+- **Stopped at:** Completed 06-08-PLAN.md — RefundSheet + useProcessRefund + P10 property test
+- **Timestamp:** 2026-04-24T20:15:00Z
