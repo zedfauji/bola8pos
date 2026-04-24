@@ -33,9 +33,11 @@ test.describe('Recipes & depletion', () => {
 
     // Recipe tab must be visible inside the edit dialog
     await page.getByRole('tab', { name: 'Recipe' }).click();
+    // Scope to dialog to avoid matching duplicate elements outside it
+    const dialog = page.getByRole('dialog');
     await expect(
-      page.getByText('No recipe yet').or(page.getByRole('button', { name: /add ingredient/i })),
-    ).toBeVisible();
+      dialog.getByRole('button', { name: /add ingredient/i }),
+    ).toBeVisible({ timeout: 5000 });
   });
 
   test('can add ingredients to recipe and save', async ({ page }) => {
@@ -51,8 +53,8 @@ test.describe('Recipes & depletion', () => {
     // Add an ingredient row
     await page.getByRole('button', { name: /\+ add ingredient/i }).click();
 
-    // Open the ingredient autocomplete combobox (first row)
-    await page.getByRole('combobox', { name: /search ingredients/i }).first().click();
+    // Open the ingredient autocomplete combobox — aria-label is "Select ingredient" on the trigger
+    await page.getByRole('combobox', { name: /select ingredient/i }).first().click();
 
     // Type to filter — use a broad term that matches any ingredient
     await page.keyboard.type('e');
