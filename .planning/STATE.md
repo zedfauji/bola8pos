@@ -86,6 +86,9 @@ See: .planning/PROJECT.md
 - [Phase 06-split-bill-refund 06-04]: computeEvenSplit absorbs rounding remainder in lastAmount; P9 invariant: base*(n-1)+last===totalCents
 - [Phase 06-split-bill-refund 06-04]: process_refund in MANAGER_EXTRA only (not BARTENDER_ACTIONS) — threat T-06-12 mitigated
 - [Phase 06-split-bill-refund 06-04]: RefundSchema.amount uses z.number().positive() (not MoneySchema) — prevents zero/negative refunds at schema level
+- [Phase 06-split-bill-refund 06-06]: SubTabColumn uses labelSlot?: React.ReactNode prop so PersonCard composes without duplicating layout
+- [Phase 06-split-bill-refund 06-06]: data-item-list + closest() check used instead of stopPropagation on li (avoids jsx-a11y/no-noninteractive-element-interactions)
+- [Phase 06-split-bill-refund 06-06]: PersonCard uses useRef+useEffect for focus (autoFocus HTML prop blocked by jsx-a11y/no-autofocus)
 
 ## Performance Metrics
 
@@ -105,8 +108,9 @@ See: .planning/PROJECT.md
 | Phase 02-combos P08 | 3min | 1 tasks | 1 files |
 | 03-ingredient-foundation | 08 | 20min | 5 | 6 |
 | 06-split-bill-refund | 04 | 25min | 2 | 5 |
+| 06-split-bill-refund | 06 | 25min | 2 | 7 |
 
 ## Last Session
 
-- **Stopped at:** Completed 06-04 Plan (domain.ts + result.ts + rbac.ts + split-math.ts + P8/P9 tests)
-- **Timestamp:** 2026-04-24T19:35:00Z
+- **Stopped at:** Completed 06-06 Plan (SubTabColumn + PersonCard shared/ui components + Storybook stories)
+- **Timestamp:** 2026-04-24T19:55:00Z
