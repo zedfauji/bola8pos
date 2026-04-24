@@ -40,7 +40,7 @@ import {
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-interface SplitTabSheetProps {
+export interface SplitTabSheetProps {
   open: boolean;
   onClose: () => void;
   tab: Tab;
