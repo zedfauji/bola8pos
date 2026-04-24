@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * Integration tests: split-tab RPCs (Phase 6, Plan 10)
  *

@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { PaymentForm } from '@widgets/PaymentModal';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
 import { RefundSheet } from '@features/process-refund';
+import type { Payment } from '@entities/payment';
 import { usePayments } from '@entities/payment';
 import { useRefundsByPayment } from '@entities/refund';
 import { useStaffStore } from '@entities/staff/model/store';
 import { tabKeys } from '@entities/tab/model/queries';
 import type { Tab } from '@entities/tab/model/types';
-import type { Payment } from '@entities/payment';
-import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { POSButton } from '@shared/ui';
+import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { TabPaymentList } from './TabPaymentList';
 
 interface RefundButtonProps {
