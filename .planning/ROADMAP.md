@@ -10,7 +10,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [x] **Phase 1: Foundation** — Unified stock ledger, category tree, modifier groups, combo flags (completed 2026-04-23)
 - [x] **Phase 2: Combos** — Customer-visible combo support with pool-time bundles (completed 2026-04-24)
 - [ ] **Phase 3: Ingredient Foundation** — Ingredient entity + canonical stock movement RPC
-- [ ] **Phase 4: Recipes & Sale Depletion** — Recipes + atomic ingredient depletion on sale
+- [x] **Phase 4: Recipes & Sale Depletion** — Recipes + atomic ingredient depletion on sale (completed 2026-04-24)
 - [ ] **Phase 5: Kitchen Prep + Cocktails** — Chef prep batches and Michelada extension
 - [ ] **Phase 6: Split Bill + Refund** — Four split modes + PIN-gated refunds
 - [ ] **Phase 7: Waitlist + WhatsApp** — FIFO queue + WasenderAPI notifications
@@ -106,19 +106,22 @@ Plans:
 **Goal:** Wire the stock ledger into the order flow. Selling a recipe-backed item depletes all ingredients atomically. Cocktails work for free as products-with-recipes.
 **Requirements:** S3b-01..S3b-09
 **Depends on:** Phase 3
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 04-01-PLAN.md — DB migrations: recipes + recipe_items + audit_log tables + deplete_for_order_item RPC + [BLOCKING] supabase db push (Wave 1) (S3b-01, S3b-02) ✓ 2026-04-24
 - [x] 04-02-PLAN.md — Zod schemas (RecipeSchema family + computeDepletion) + supabase.types.ts extension + 3 Wave 0 test stubs (Wave 2) (S3b-05) ✓ 2026-04-24
+- [x] 04-03-PLAN.md — v2 SQL migrations (p_skip_depletion, p_allow_negative, add_combo_to_tab depletion loop) + recipe entity + shadcn command/popover (Wave 3) ✓ 2026-04-24
+- [x] 04-04-PLAN.md — void reversal + useOverrideNegativeStock + IngredientAutocomplete + CartPanel INVENTORY_NEGATIVE override (Wave 4) ✓ 2026-04-24
 - [x] 04-05-PLAN.md — manage-recipe feature (useManageRecipe + RecipeEditorTab) + Recipe tab in product edit Dialog (max-w-2xl) + seed-recipes.ts (Wave 5) (S3b-07, S3b-09, S3b-14) ✓ 2026-04-24
+- [x] 04-06-PLAN.md — Tests: unit (6/6) + property (fast-check) + integration (4/4) + E2E 36-recipes.spec.ts (3/3 pass, 1 skip) (Wave 6) ✓ 2026-04-24
 
 **Success Criteria**:
-1. `recipes` + `recipe_items` tables + `deplete_for_order_item` RPC
-2. Negative-stock guard with manager PIN override + audit log
-3. Recipe editor UI on product detail page with ingredient autocomplete
-4. Refund/void ledger reversal contract in place for Phase 6 reuse
-5. E2E `20-recipes.spec.ts` passes
+1. `recipes` + `recipe_items` tables + `deplete_for_order_item` RPC — DONE
+2. Negative-stock guard with manager PIN override + audit log — DONE
+3. Recipe editor UI on product detail page with ingredient autocomplete — DONE
+4. Refund/void ledger reversal contract in place for Phase 6 reuse — DONE
+5. E2E `36-recipes.spec.ts` passes (3/3, 1 intentional skip) — DONE
 
 ---
 

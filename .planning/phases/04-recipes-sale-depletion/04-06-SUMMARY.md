@@ -87,7 +87,7 @@ Commit: `356e199`
 |-------|-------|---------|
 | Unit (depletion.test.ts) | 6 | 6 |
 | Integration (depletion.integration.test.ts) | 4 | 4 |
-| E2E (36-recipes.spec.ts) | 4 (1 skip) | Pending human run |
+| E2E (36-recipes.spec.ts) | 4 (1 skip) | 3/3 PASS (1 intentional skip) |
 
 ## Deviations from Plan
 
@@ -149,6 +149,29 @@ Commit: `356e199`
 - **Files modified:** `bar-pos/e2e/36-recipes.spec.ts`
 - **Commit:** 356e199
 
+### Post-Checkpoint E2E Fixes (orchestrator commits)
+
+After the human-verify checkpoint, the orchestrator made 3 additional fix commits to resolve selector failures found during the live E2E run:
+
+**9. [Rule 1 - Bug] Use fixtures import so browser console is tailed**
+- **Found during:** E2E run — console errors not captured
+- **Fix:** Changed `import { test, expect } from '@playwright/test'` to fixtures import in `36-recipes.spec.ts`
+- **Commit:** `fix(04-06): use fixtures test import so browser console is tailed in 36-recipes.spec.ts`
+
+**10. [Rule 1 - Bug] 3 selector bugs in 36-recipes.spec.ts**
+- **Found during:** E2E run T1/T2/T3
+- **Issue:** Products tab selector not strict-mode safe; New Tab button selector too broad; `openCaja` helper missing for POS page setup
+- **Fix:** Tightened selectors; added `openCaja` call before POS navigation
+- **Commit:** `fix(04-06): fix 3 selector bugs in 36-recipes.spec — strict Products tab, New Tab button, openCaja for POS`
+
+**11. [Rule 1 - Bug] T1 strict-mode dialog scope + T2 combobox aria-label selector**
+- **Found during:** E2E run T1/T2 second pass
+- **Issue:** Dialog scope query matched multiple elements; combobox aria-label didn't match rendered label
+- **Fix:** Scoped dialog queries; corrected combobox aria-label to match actual rendered attribute
+- **Commit:** `fix(04-06): fix T1 strict-mode dialog scope + T2 combobox aria-label selector`
+
+**Final E2E result:** 3/3 tests pass, 1 intentionally skipped (T4 covered by integration tests).
+
 ## Known Stubs
 
 - T4 in `36-recipes.spec.ts` is intentionally `.skip` — the full sell→ledger→void→reversal flow requires seed data with known stock quantities. Covered by integration tests I1/I2 in `depletion.integration.test.ts`.
@@ -174,3 +197,4 @@ Commits:
 - `b539030` (unit tests) — FOUND
 - `29a329f` (integration tests) — FOUND
 - `356e199` (E2E spec) — FOUND
+- Post-checkpoint orchestrator fixes — 3 additional commits resolving E2E selector failures; E2E result confirmed 3/3 PASS, 1 skip.

@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 04
 current_plan: 1
 status: executing
-stopped_at: "Completed 04-06-PLAN.md — depletion unit+property (6/6) + integration (4/4) + 36-recipes.spec.ts E2E; typecheck+lint pass; CHECKPOINT awaiting human E2E run"
-last_updated: "2026-04-24T23:58:00Z"
+stopped_at: "Phase 04 complete — 04-06 E2E verified 3/3 pass (1 skip); 3 post-checkpoint selector fixes applied; all 6 plans done"
+last_updated: "2026-04-24T23:59:00Z"
 progress:
   total_phases: 8
   completed_phases: 5
@@ -52,6 +52,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 04-03 complete (b9b6713) — recipe entity (useRecipe + useMutationSaveRecipe + RecipePreviewPanel) + shadcn command/popover moved to shared/ui; v2 migrations 003/004/005 applied (user confirmed); typecheck + lint pass
 - 2026-04-24: Plan 04-04 complete (a8a1de0) — void reversal + useOverrideNegativeStock (p_skip_depletion + p_allow_negative) + IngredientAutocomplete (5/5 tests) + CartPanel INVENTORY_NEGATIVE override flow; typecheck + lint pass
 - 2026-04-24: Plan 04-05 complete (3ff88bc) — manage-recipe feature (useManageRecipe + RecipeEditorTab via useReducer) + Recipe tab in product edit Dialog (max-w-2xl Tabs wrapper) + seed-recipes.ts; typecheck + lint pass
+- 2026-04-24: Plan 04-06 complete — depletion unit (6/6) + integration (4/4) + 36-recipes.spec.ts E2E; 3 post-checkpoint selector fixes; E2E 3/3 PASS 1 skip; Phase 04 complete
 
 ## Decisions
 
@@ -150,8 +151,9 @@ See: .planning/PROJECT.md
 | 04-recipes-sale-depletion | 03 | 50min | 3 | 15 |
 | 04-recipes-sale-depletion | 04 | 9min | 3 | 8 |
 | 04-recipes-sale-depletion | 05 | 10min | 3 | 5 |
+| 04-recipes-sale-depletion | 06 | ~30min | 2 | 3 |
 
 ## Last Session
 
-- **Stopped at:** Completed 04-05-PLAN.md — manage-recipe feature (useManageRecipe + RecipeEditorTab) + Recipe tab in product edit Dialog (max-w-2xl) + seed-recipes.ts; typecheck + lint pass
-- **Timestamp:** 2026-04-24T23:50:00Z
+- **Stopped at:** Phase 04 complete — 04-06 E2E verified 3/3 pass (1 skip); 3 post-checkpoint selector fixes applied; all 6 plans done
+- **Timestamp:** 2026-04-24T23:59:00Z
