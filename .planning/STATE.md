@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 3
-status: checkpoint
-stopped_at: "04-03 Task 1 complete (408b82d) — 3 v2 migration SQL files written; BLOCKING checkpoint: awaiting supabase db push for migrations 003+004+005; resume signal: v2 migrations applied"
-last_updated: "2026-04-24T22:30:00Z"
+current_plan: 4
+status: executing
+stopped_at: "04-03 complete (b9b6713) — recipe entity + shadcn command/popover + v2 migrations applied; next: 04-04 useOverrideNegativeStock feature"
+last_updated: "2026-04-24T23:10:00Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 40
-  completed_plans: 36
-  percent: 90
+  completed_plans: 37
+  percent: 93
 ---
 
 # Session State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 04
 **Current plan:** 1
 **Status:** Executing Phase 04
-**Progress:** [█████████░] 88%
+**Progress:** [█████████░] 93%
 
 ## Session Log
 
@@ -49,6 +49,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 04-01 (DB migrations) completed — recipes, recipe_items, audit_log tables + deplete_for_order_item RPC; both migrations applied to remote DB (user confirmed)
 - 2026-04-24: Plan 04-02 (Zod schemas + types + stubs) completed — RecipeSchema family + computeDepletion exported; supabase.types.ts extended with recipes/recipe_items/audit_log/deplete_for_order_item; 3 Wave 0 stub files (18 todo tests)
 - 2026-04-24: Plan 04-03 Task 1 complete (408b82d) — 3 v2 SQL migrations: create_order_with_items v2 (p_skip_depletion), deplete_for_order_item v2 (p_allow_negative + audit_log), add_combo_to_tab depletion loop; BLOCKING checkpoint awaiting supabase db push
+- 2026-04-24: Plan 04-03 complete (b9b6713) — recipe entity (useRecipe + useMutationSaveRecipe + RecipePreviewPanel) + shadcn command/popover moved to shared/ui; v2 migrations 003/004/005 applied (user confirmed); typecheck + lint pass
 
 ## Decisions
 
@@ -107,6 +108,9 @@ See: .planning/PROJECT.md
 - [Phase 04-recipes-sale-depletion 04-02]: UuidSchema and TimestampSchema confirmed exact primitive names in domain.ts — used in RecipeSchema family without new primitives
 - [Phase 04-recipes-sale-depletion 04-02]: deplete_for_order_item p_allow_negative? pre-added to supabase.types.ts to avoid second edit when migration 004 lands
 - [Phase 04-recipes-sale-depletion 04-02]: fast-check import must precede vitest in test files per import/order ESLint rule (alphabetical package ordering)
+- [Phase 04-recipes-sale-depletion 04-03]: shadcn CLI installs to src/app/components/ui/ — always move to src/shared/ui/ and fix @app/lib/utils → @shared/lib/utils (FSD boundary; same as Plan 02-01 collapsible)
+- [Phase 04-recipes-sale-depletion 04-03]: useMutationSaveRecipe uses upsert+delete-all+insert-new replace strategy (Wave 4 UI always saves full recipe)
+- [Phase 04-recipes-sale-depletion 04-03]: RecipePreviewPanel shows ingredientId UUID (not name) — name requires join; Wave 4 form resolves via useIngredientsActive()
 
 ## Performance Metrics
 
@@ -129,8 +133,9 @@ See: .planning/PROJECT.md
 | 06-split-bill-refund | 06 | 25min | 2 | 7 |
 | 06-split-bill-refund | 10 | ~2 sessions | 2 | 3 |
 | 04-recipes-sale-depletion | 02 | 5min | 3 | 6 |
+| 04-recipes-sale-depletion | 03 | 50min | 3 | 15 |
 
 ## Last Session
 
-- **Stopped at:** Completed 04-02-PLAN.md — RecipeSchema family + computeDepletion + supabase.types.ts extended + 3 Wave 0 test stubs (18 todo)
-- **Timestamp:** 2026-04-24T22:01:20Z
+- **Stopped at:** Completed 04-03-PLAN.md — recipe entity + shadcn command/popover + v2 migrations 003/004/005 applied; typecheck + lint pass
+- **Timestamp:** 2026-04-24T23:10:00Z

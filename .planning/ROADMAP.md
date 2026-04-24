@@ -106,7 +106,7 @@ Plans:
 **Goal:** Wire the stock ledger into the order flow. Selling a recipe-backed item depletes all ingredients atomically. Cocktails work for free as products-with-recipes.
 **Requirements:** S3b-01..S3b-09
 **Depends on:** Phase 3
-**Plans:** 2 plans complete
+**Plans:** 3/6 plans executed
 
 Plans:
 - [x] 04-01-PLAN.md — DB migrations: recipes + recipe_items + audit_log tables + deplete_for_order_item RPC + [BLOCKING] supabase db push (Wave 1) (S3b-01, S3b-02) ✓ 2026-04-24

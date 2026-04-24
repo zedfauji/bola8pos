@@ -1,16 +1,33 @@
 ---
-phase: "04"
-plan: "04-03"
-subsystem: "v2 Migrations (p_skip_depletion + p_allow_negative + combo depletion) + recipe entity + shadcn"
-tags: [sql, migrations, rpc, recipes, shadcn, entity, depletion, override]
-dependency_graph:
-  requires: [04-02, 04-01]
-  provides: [create_order_with_items_v2, deplete_for_order_item_v2, add_combo_to_tab_depletion, entities/recipe, command.tsx, popover.tsx]
-  affects: [04-04-override-feature, 04-05-manage-recipes-feature, 04-06-integration-tests]
-tech_stack:
-  added: [shadcn/command, shadcn/popover]
-  patterns: [Postgres function overloads, EXCEPTION WHEN OTHERS bypass, TanStack Query entity hooks, shadcn CLI → shared/ui move]
-key_files:
+phase: 04-recipes-sale-depletion
+plan: "03"
+subsystem: database, ui, entities
+tags: [supabase, postgresql, tanstack-query, shadcn, cmdk, radix-ui, recipe, ingredient, rpc]
+
+requires:
+  - phase: 04-02
+    provides: RecipeSchema/RecipeWithItemsSchema in domain.ts; supabase.types.ts extended with recipes/recipe_items/audit_log
+  - phase: 04-01
+    provides: deplete_for_order_item v1, recipes/recipe_items/audit_log tables
+
+provides:
+  - v2 migrations applied: create_order_with_items v2 (p_skip_depletion), deplete_for_order_item v2 (p_allow_negative + audit_log bypass), add_combo_to_tab depletion loop
+  - entities/recipe/ FSD slice with useRecipe + useMutationSaveRecipe + RecipePreviewPanel
+  - shared/ui/command.tsx (shadcn Command with cmdk)
+  - shared/ui/popover.tsx (shadcn Popover with radix-ui)
+  - shared/ui/input-group.tsx (InputGroup moved to shared layer)
+
+affects: [04-04, 04-05, wave4-recipe-editor, wave4-ingredient-combobox]
+
+tech-stack:
+  added: [cmdk ^1.1.1 (already in package.json — activated), shadcn/command, shadcn/popover]
+  patterns:
+    - shadcn CLI output goes to src/app/components/ui/ — always move to src/shared/ui/ and fix @app/lib/utils → @shared/lib/utils
+    - input-group.tsx role=group onClick uses eslint-disable-next-line (shadcn click-to-focus UX pattern)
+    - Recipe entity uses db = supabase as any pre-regen cast (same as ingredient entity pattern)
+    - useMutationSaveRecipe upsert+delete-all+insert-new replace strategy
+
+key-files:
   created:
     - bar-pos/supabase/migrations/20260428000003_create_order_with_items_v2.sql
     - bar-pos/supabase/migrations/20260428000004_deplete_for_order_item_v2.sql
@@ -21,118 +38,146 @@ key_files:
     - bar-pos/src/entities/recipe/index.ts
     - bar-pos/src/shared/ui/command.tsx
     - bar-pos/src/shared/ui/popover.tsx
+    - bar-pos/src/shared/ui/input-group.tsx
   modified:
     - bar-pos/src/shared/ui/index.ts
+
 key-decisions:
-  - "Migration 003 uses 6-arg signature CREATE OR REPLACE — Postgres overloads the function (5-arg original coexists)"
-  - "Migration 004 creates a 3-arg overload of deplete_for_order_item — both 2-arg (v1) and 3-arg (v2) coexist"
-  - "Migration 005 collects child order_item IDs into a uuid[] array during INSERT loop, then depletes in a second loop — avoids re-querying"
-  - "shadcn CLI installs to src/app/components/ui/ — moved to src/shared/ui/ to match FSD layer boundaries (consistent with Plan 02-01 collapsible pattern)"
+  - "shadcn CLI always writes to src/app/components/ui/ — must move to src/shared/ui/ (FSD boundary; same as Plan 02-01 Collapsible)"
+  - "input-group.tsx role=group onClick: eslint-disable-next-line for jsx-a11y (shadcn design pattern; keyboard users use inner input directly)"
+  - "useMutationSaveRecipe: upsert+delete-all+insert-new (replace strategy — Wave 4 UI always saves full recipe)"
+  - "RecipePreviewPanel shows ingredientId UUID (not name) — name requires join; Wave 4 form resolves via useIngredientsActive()"
+  - "Migration 003: 6-arg overload of create_order_with_items (5-arg original coexists)"
+  - "Migration 004: 3-arg overload of deplete_for_order_item (2-arg v1 coexists)"
+  - "Migration 005: child IDs collected into uuid[] array during INSERT loop; depleted in second loop (avoids re-query)"
+
+patterns-established:
+  - "Recipe entity follows ingredient entity pattern: db = supabase as any; mapRecipeRow with schema.parse; staleTime 5min"
+  - "shadcn components moved from app/ to shared/: fix @app/lib/utils → @shared/lib/utils; fix @app/components/ui/* → relative ./sibling"
+
 requirements-completed: [S3b-03, S3b-06, S3b-08]
-metrics:
-  duration: "~15 minutes (auto tasks only; checkpoint pending)"
-  completed: "2026-04-24"
-  tasks_completed: 1
-  tasks_total: 3
-  files_created: 9
-  files_modified: 1
+
+duration: 50min
+completed: 2026-04-24
 ---
 
-# Phase 04 Plan 03: v2 Migrations + recipe entity + shadcn Summary
+# Phase 04 Plan 03: v2 Migrations + Recipe Entity + shadcn Command/Popover Summary
 
-**Three v2 migration SQL files written and committed; blocking checkpoint awaiting supabase db push; Task 3 (recipe entity + shadcn) to be completed after resume**
+**entities/recipe/ FSD slice (useRecipe + useMutationSaveRecipe) and shadcn Command/Popover moved to shared/ui; v2 migrations applied — Wave 4 recipe editor pre-requisites complete**
 
 ## Performance
 
-- **Duration:** ~15 minutes (Task 1 complete; Task 2 checkpoint pending; Task 3 pending resume)
-- **Started:** 2026-04-24
-- **Completed:** 2026-04-24 (partial — checkpoint reached)
-- **Tasks:** 1/3 complete (Task 2 = blocking checkpoint, Task 3 = pending resume)
-- **Files created:** 3 migration files (Task 1)
+- **Duration:** ~50 min (Task 1 in prior session + Task 3 in this session)
+- **Started:** 2026-04-24T22:00:00Z
+- **Completed:** 2026-04-24T23:10:00Z
+- **Tasks:** 3 (Task 1 auto, Task 2 blocking checkpoint, Task 3 auto)
+- **Files modified:** 15
 
 ## Accomplishments
 
-### Task 1 (complete — `408b82d`)
-
-Three v2 SQL migration files written and committed atomically:
-
-**Migration 003** — `create_order_with_items` v2:
-- Added `p_skip_depletion boolean DEFAULT false` as 6th parameter
-- Added `v_inserted_item record;` in DECLARE block
-- Added depletion loop after all order_items inserted: `FOR v_inserted_item IN SELECT id FROM order_items WHERE order_id = v_order.id LOOP PERFORM deplete_for_order_item(v_inserted_item.id, 1::smallint); END LOOP;`
-- Loop wrapped in `IF NOT p_skip_depletion THEN ... END IF;`
-- GRANT updated to 6-arg signature
-
-**Migration 004** — `deplete_for_order_item` v2 overload:
-- New 3-arg overload: `deplete_for_order_item(uuid, smallint, boolean DEFAULT false)`
-- `PERFORM record_stock_movement(...)` wrapped in `BEGIN/EXCEPTION WHEN OTHERS THEN`
-- When `p_allow_negative=true` and `SQLERRM LIKE '%INVENTORY_NEGATIVE%'`: directly updates `ingredients.quantity_on_hand`, inserts `audit_log` row (T-04-07 mitigation)
-- Otherwise: `RAISE;` re-raises the error
-- GRANT to 3-arg signature; 2-arg v1 grant (migration 002) remains unchanged
-
-**Migration 005** — `add_combo_to_tab` with depletion:
-- Added `v_child_item_id uuid; v_child_item_ids uuid[];` to DECLARE
-- `v_child_item_ids := ARRAY[]::uuid[];` initialized before loops
-- Child INSERT loop changed to `INSERT ... RETURNING id INTO v_child_item_id` + `v_child_item_ids := v_child_item_ids || v_child_item_id;`
-- Depletion loop after all children inserted: `FOR v_combo_item_depl IN SELECT unnest(v_child_item_ids) AS id LOOP PERFORM deplete_for_order_item(...) END LOOP;`
-
-### Task 2 (blocking checkpoint — pending)
-
-Awaiting: `cd bar-pos && npx supabase db push` to apply migrations 003, 004, 005 to remote DB.
-
-### Task 3 (pending — after checkpoint resume)
-
-To be completed after "v2 migrations applied" signal:
-- `entities/recipe/` entity with `useRecipe`, `useMutationSaveRecipe` hooks
-- `src/shared/ui/command.tsx` and `popover.tsx` installed via shadcn CLI
-- `src/shared/ui/index.ts` updated with command + popover exports
+- Three v2 SQL migration files written and applied to remote DB (migrations 003/004/005 all confirmed applied via checkpoint)
+- entities/recipe/ entity built following ingredient entity pattern: useRecipe (byProduct maybeSingle), useMutationSaveRecipe (upsert-replace), RecipePreviewPanel, barrel index
+- shadcn command.tsx and popover.tsx installed via CLI, moved from app/components/ui/ to shared/ui/, imports corrected to @shared/*
+- input-group.tsx (Command dependency) moved to shared layer with corrected imports
+- shared/ui/index.ts updated to export Command family (9 named exports) + Popover family (7 named exports)
+- typecheck and lint both pass (0 errors, 0 warnings)
 
 ## Task Commits
 
-| Task | Description | Commit | Files |
-|------|-------------|--------|-------|
-| 1 | Write migrations 003, 004, 005 | `408b82d` | 3 migration SQL files |
-| 2 | (checkpoint) | pending | — |
-| 3 | Recipe entity + shadcn | pending | 7 files |
+1. **Task 1: Write migrations 003, 004, 005** — `408b82d` (feat)
+2. **Task 2: [BLOCKING checkpoint] Apply migrations** — user confirmed applied; no commit
+3. **Task 3: Recipe entity + shadcn command/popover** — `b9b6713` (feat)
 
-## Migration File Verification
+**Plan metadata:** docs commit (this file)
 
-```
-grep -c "p_skip_depletion" .../20260428000003_create_order_with_items_v2.sql  → 5
-grep -c "p_allow_negative" .../20260428000004_deplete_for_order_item_v2.sql   → 4
-grep -c "deplete_for_order_item" .../20260428000005_add_combo_to_tab_depletion.sql → 3
-```
+## Files Created/Modified
 
-All grep checks pass.
+**Migration files (Task 1):**
+- `bar-pos/supabase/migrations/20260428000003_create_order_with_items_v2.sql` — create_order_with_items v2 with p_skip_depletion + depletion loop
+- `bar-pos/supabase/migrations/20260428000004_deplete_for_order_item_v2.sql` — 3-arg overload with p_allow_negative + audit_log bypass
+- `bar-pos/supabase/migrations/20260428000005_add_combo_to_tab_depletion.sql` — add_combo_to_tab updated with child depletion loop
+
+**Recipe entity (Task 3):**
+- `bar-pos/src/entities/recipe/model/queries.ts` — useRecipe + useMutationSaveRecipe TanStack Query hooks
+- `bar-pos/src/entities/recipe/model/types.ts` — re-exports from domain.ts
+- `bar-pos/src/entities/recipe/ui/RecipePreviewPanel.tsx` — read-only ingredient depletion list
+- `bar-pos/src/entities/recipe/index.ts` — FSD public API barrel
+
+**shadcn components (Task 3):**
+- `bar-pos/src/shared/ui/command.tsx` — shadcn Command (cmdk-based; imports fixed to @shared/*)
+- `bar-pos/src/shared/ui/popover.tsx` — shadcn Popover (radix-ui; imports fixed)
+- `bar-pos/src/shared/ui/input-group.tsx` — InputGroup moved from app layer to shared layer
+- `bar-pos/src/shared/ui/index.ts` — added Command family + Popover exports
+
+## Decisions Made
+
+- shadcn CLI output goes to `src/app/components/ui/` — must always move to `src/shared/ui/` and fix `@app/lib/utils` → `@shared/lib/utils`; this matches the FSD boundary (same pattern documented in 02-01 for Collapsible)
+- input-group.tsx `role="group"` `onClick`: eslint-disable-next-line for `jsx-a11y` (shadcn design pattern; keyboard users interact with the inner `<input>` directly)
+- useMutationSaveRecipe uses upsert+delete-all+insert-new replace strategy — simpler and correct for recipe editing; Wave 4 UI always saves full recipe
 
 ## Deviations from Plan
 
-None — Task 1 executed exactly as written. The depletion loop in migration 005 uses `SELECT unnest(v_child_item_ids) AS id` which is equivalent to iterating the collected IDs array (cleaner than re-querying order_items for child items, avoids potential timing issues with concurrent inserts).
+### Auto-fixed Issues
 
-## Threat Surface Scan
+**1. [Rule 1 - Bug] Fixed shadcn-generated files with invalid @app/lib/utils imports**
+- **Found during:** Task 3 (shadcn install + move)
+- **Issue:** `npx shadcn@latest add command` installs to `src/app/components/ui/` with `@app/lib/utils` import alias that doesn't exist in this project; typecheck produced 7 errors
+- **Fix:** Rewrote command.tsx, popover.tsx, input-group.tsx with corrected `@shared/lib/utils` and relative sibling imports; deleted shadcn-generated files from wrong location
+- **Files modified:** shared/ui/command.tsx, shared/ui/popover.tsx, shared/ui/input-group.tsx
+- **Verification:** `npm run typecheck` exits 0
+- **Committed in:** b9b6713
 
-No new network endpoints. Migration 004's audit_log INSERT is in SECURITY DEFINER context — client cannot bypass the audit trail when p_allow_negative=true (T-04-07 mitigated).
+**2. [Rule 1 - Bug] Fixed pre-existing import order lint errors in 4 unrelated files**
+- **Found during:** Task 3 lint gate
+- **Issue:** OrderPanel.tsx, PaymentPane.tsx, RefundsList/index.tsx, split-tab-rpc.integration.test.ts had import ordering violations and unused eslint-disable comments (pre-existing from Phase 6)
+- **Fix:** Reordered imports; removed unused blanket `/* eslint-disable */` from split-tab integration test (test files have any-rules disabled globally in ESLint config) and unused disable from RefundsList
+- **Files modified:** 4 pre-existing files
+- **Verification:** `npm run lint` exits 0, 0 warnings
+- **Committed in:** b9b6713
+
+---
+
+**Total deviations:** 2 auto-fixed (2 Rule 1 bugs)
+**Impact on plan:** Both fixes required to pass lint gate (max-warnings: 0). No scope creep.
+
+## Issues Encountered
+
+- shadcn CLI always writes to `src/app/components/ui/` — this is a known pattern (documented in STATE.md decisions for 02-01 Collapsible). Manual move + import correction required every time shadcn is used.
 
 ## Known Stubs
 
-None from Task 1. Task 3 pending — RecipePreviewPanel will show `item.ingredientId` UUID directly (stub behavior: future Plan 04-05 will wire ingredient name lookup).
+- `RecipePreviewPanel` shows `item.ingredientId` (raw UUID) instead of ingredient name — intentional; the Wave 4 recipe editor form will resolve names via `useIngredientsActive()`. The panel is a read-only preview, not the editing UI.
+
+## Threat Surface Scan
+
+No new network endpoints introduced. Migration 004's `audit_log INSERT` is in SECURITY DEFINER context — client cannot bypass the audit trail when p_allow_negative=true (T-04-07 mitigated as planned).
 
 ## Self-Check
 
-Files created (Task 1):
+Files created (verified):
 - bar-pos/supabase/migrations/20260428000003_create_order_with_items_v2.sql — FOUND
 - bar-pos/supabase/migrations/20260428000004_deplete_for_order_item_v2.sql — FOUND
 - bar-pos/supabase/migrations/20260428000005_add_combo_to_tab_depletion.sql — FOUND
+- bar-pos/src/entities/recipe/model/queries.ts — FOUND
+- bar-pos/src/entities/recipe/model/types.ts — FOUND
+- bar-pos/src/entities/recipe/ui/RecipePreviewPanel.tsx — FOUND
+- bar-pos/src/entities/recipe/index.ts — FOUND
+- bar-pos/src/shared/ui/command.tsx — FOUND
+- bar-pos/src/shared/ui/popover.tsx — FOUND
+- bar-pos/src/shared/ui/input-group.tsx — FOUND
 
-Commit:
+Commits verified:
 - 408b82d (feat(04-03): write v2 migration files) — FOUND
+- b9b6713 (feat(04-03): recipe entity + shadcn command/popover) — FOUND
 
-Task 3 files (pending after checkpoint):
-- bar-pos/src/entities/recipe/model/queries.ts — NOT YET
-- bar-pos/src/entities/recipe/model/types.ts — NOT YET
-- bar-pos/src/entities/recipe/ui/RecipePreviewPanel.tsx — NOT YET
-- bar-pos/src/entities/recipe/index.ts — NOT YET
-- bar-pos/src/shared/ui/command.tsx — NOT YET
-- bar-pos/src/shared/ui/popover.tsx — NOT YET
+## Self-Check: PASSED
 
-## Self-Check: PARTIAL (Task 1 PASSED; Tasks 2-3 pending checkpoint resume)
+## Next Phase Readiness
+
+- Plan 04-04 (useOverrideNegativeStock feature) can now proceed — migrations 003/004 applied
+- Wave 4 recipe editor (plan TBD) can import from `@entities/recipe` and use Command + Popover for ingredient combobox
+- No blockers
+
+---
+*Phase: 04-recipes-sale-depletion*
+*Completed: 2026-04-24*
