@@ -138,17 +138,30 @@ Plans:
 
 **Source:** S4-split-refund.md
 **Goal:** Ship split bill (4 modes) and post-payment refund with PIN gate and optional per-line inventory reversal, sharing the sub-tab pattern.
-**Requirements:** S4-01..S4-11
-**Depends on:** Phase 4
-**Plans:** 0 plans
+**Requirements:** S4-01..S4-19
+**Depends on:** Phase 4 (deplete_for_order_item stubbed for Phase 6 independence)
+**Plans:** 11 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — ENUM extension migration (no-transaction) + main schema migration: tabs split columns, refunds/refund_items tables, payments is_refund/refund_id, CHECK fixes (Wave 1) (S4-01, S4-02)
+- [ ] 06-02-PLAN.md — Split tab RPCs (split_tab_by_item/evenly/by_person/by_amount) + process_refund RPC + parent auto-close trigger (Wave 1) (S4-03, S4-04, S4-05, S4-06, S4-07, S4-14)
+- [ ] 06-03-PLAN.md — [BLOCKING] supabase db push + manual supabase.types.ts transcription (Wave 2) (S4-01, S4-02, S4-03, S4-04, S4-05, S4-06, S4-07, S4-14)
+- [ ] 06-04-PLAN.md — domain.ts Zod extensions (TabStatus+split, TabSchema, PaymentSchema, RefundSchema) + result.ts 6 new AppErrorCodes + rbac.ts process_refund + split-math.ts + P8/P9 property tests (Wave 3) (S4-08, S4-15)
+- [ ] 06-05-PLAN.md — entities/tab: useSubTabs + useTabList parent_tab_id filter; entities/payment: isRefund; entities/refund: new FSD slice (Wave 3) (S4-09)
+- [ ] 06-06-PLAN.md — shared/ui: SubTabColumn + PersonCard + Storybook stories (Wave 3) (S4-12)
+- [ ] 06-07-PLAN.md — features/split-tab: useSplitTab + SplitTabSheet (4 modes: evenly/item/person/amount) (Wave 4) (S4-10)
+- [ ] 06-08-PLAN.md — features/process-refund: useProcessRefund + RefundSheet + P10 property test (Wave 4) (S4-11, S4-15)
+- [ ] 06-09-PLAN.md — PaymentsPage Refunds tab + RefundsList widget + PaymentPane Refund button + OrderPanel Split bill button + sub-checks section (Wave 4) (S4-13)
+- [ ] 06-10-PLAN.md — Integration tests: split-by-item flow (S4-16) + refund-with-restock flow (S4-17) (Wave 5) (S4-16, S4-17)
+- [ ] 06-11-PLAN.md — E2E 34-split-bill.spec.ts + 35-refund.spec.ts + regression gate + human sign-off (Wave 5) (S4-18, S4-19)
 
 **Success Criteria**:
 1. `tabs.parent_tab_id` + `refunds/refund_items` schema live
 2. RPCs: `split_tab_by_item/evenly/by_person/by_amount`, `process_refund`
 3. `SplitTabSheet` 4-mode tabs + `RefundSheet` with manager PIN
 4. Parent tab auto-closes when all sub-tabs paid
-5. Ledger reversal reuses `deplete_for_order_item(id, -1)` from Phase 4
-6. E2E specs `22-split-bill.spec.ts`, `23-refund.spec.ts` pass
+5. `deplete_for_order_item` stubbed with graceful fallback (Phase 4 not yet built)
+6. E2E specs `34-split-bill.spec.ts`, `35-refund.spec.ts` pass
 
 ---
 
