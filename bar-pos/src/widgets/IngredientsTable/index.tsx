@@ -8,10 +8,10 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { Package2, Pencil, Trash2 } from 'lucide-react';
 import type { Ingredient } from '@entities/ingredient';
-import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 import { DataTable } from '@shared/ui/DataTable';
 import { EmptyState } from '@shared/ui/EmptyState';
+import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
 
 interface Props {
   ingredients: Ingredient[];

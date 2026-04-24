@@ -5,7 +5,7 @@
  * No widget imports — pure feature-layer action component.
  * Uses native <select> elements (no @shared/ui/select — not yet installed).
  */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Ingredient, IngredientCreate } from '@entities/ingredient';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
@@ -56,10 +56,10 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
   const [uom, setUom] = useState(ingredient?.uom ?? '');
   const [purchaseUom, setPurchaseUom] = useState(ingredient?.purchaseUom ?? '');
   const [purchaseToBaseFactor, setPurchaseToBaseFactor] = useState(
-    ingredient?.purchaseToBaseFactor?.toString() ?? '1',
+    ingredient?.purchaseToBaseFactor.toString() ?? '1',
   );
   const [costPerBaseUnit, setCostPerBaseUnit] = useState(
-    ingredient?.costPerBaseUnit?.toString() ?? '0',
+    ingredient?.costPerBaseUnit.toString() ?? '0',
   );
   const [reorderPoint, setReorderPoint] = useState(
     ingredient?.reorderPoint?.toString() ?? '',
@@ -67,18 +67,6 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
   const [isPrep, setIsPrep] = useState(ingredient?.isPrep ?? false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
-  // Reset form when ingredient changes (e.g. switching from create to edit)
-  useEffect(() => {
-    setName(ingredient?.name ?? '');
-    setCategory(ingredient?.category ?? '');
-    setUom(ingredient?.uom ?? '');
-    setPurchaseUom(ingredient?.purchaseUom ?? '');
-    setPurchaseToBaseFactor(ingredient?.purchaseToBaseFactor?.toString() ?? '1');
-    setCostPerBaseUnit(ingredient?.costPerBaseUnit?.toString() ?? '0');
-    setReorderPoint(ingredient?.reorderPoint?.toString() ?? '');
-    setIsPrep(ingredient?.isPrep ?? false);
-    setErrors({});
-  }, [ingredient]);
 
   function validate(): boolean {
     const next: Partial<Record<string, string>> = {};
@@ -98,7 +86,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
 
     const data: IngredientCreate = {
       name: name.trim(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
       uom: uom as any,
       purchaseUom: purchaseUom.length > 0 ? (purchaseUom as IngredientCreate['purchaseUom']) : null,
       purchaseToBaseFactor: parseFloat(purchaseToBaseFactor),
@@ -127,7 +115,6 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
             setName(e.target.value);
           }}
           disabled={isPending}
-          autoFocus
           maxLength={100}
         />
         {errors['name'] !== undefined && (

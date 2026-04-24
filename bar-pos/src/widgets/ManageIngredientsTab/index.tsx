@@ -11,14 +11,16 @@
  *
  * Uses supabase as any pre-regen cast for ingredient mutations.
  */
-import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import { useIngredients, ingredientKeys } from '@entities/ingredient';
-import type { Ingredient, IngredientCreate } from '@entities/ingredient';
+import { IngredientsTable } from '@widgets/IngredientsTable';
+import { StockMovementsList } from '@widgets/StockMovementsList';
 import { AdjustStockMovementDialog } from '@features/adjust-stock-movement';
 import { CsvImportSheet } from '@features/import-ingredients-csv';
 import { IngredientForm } from '@features/manage-ingredients';
+import { useIngredients, ingredientKeys } from '@entities/ingredient';
+import type { Ingredient, IngredientCreate } from '@entities/ingredient';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
@@ -28,8 +30,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/ui/dialog';
-import { IngredientsTable } from '@widgets/IngredientsTable';
-import { StockMovementsList } from '@widgets/StockMovementsList';
 
 const db = supabase as any;
 
@@ -81,7 +81,7 @@ function useMutationUpdateIngredient() {
           cost_per_base_unit: input.costPerBaseUnit,
           reorder_point: input.reorderPoint ?? null,
           is_prep: input.isPrep,
-          is_active: input.isActive ?? true,
+          is_active: input.isActive,
           category: input.category ?? null,
           updated_at: new Date().toISOString(),
         })
@@ -152,7 +152,7 @@ export function ManageIngredientsTab() {
   if (queryError) {
     return (
       <p className="text-sm text-destructive">
-        Could not load ingredients: {(queryError as Error).message}
+        Could not load ingredients: {queryError.message}
       </p>
     );
   }
@@ -269,9 +269,7 @@ export function ManageIngredientsTab() {
                     type="button"
                     className="text-xs text-primary underline-offset-4 hover:underline"
                     onClick={() => {
-                      if (dialogState.kind === 'edit') {
-                        setDialogState({ kind: 'adjust', ingredient: dialogState.ingredient });
-                      }
+                      setDialogState({ kind: 'adjust', ingredient: dialogState.ingredient });
                     }}
                   >
                     Record adjustment

@@ -51,7 +51,7 @@ export function StockMovementsList({ ingredientId, uom }: Props) {
   if (error) {
     return (
       <p className="text-sm text-destructive">
-        Could not load movements: {(error as Error).message}
+        Could not load movements: {error.message}
       </p>
     );
   }
@@ -89,8 +89,8 @@ export function StockMovementsList({ ingredientId, uom }: Props) {
       accessorKey: 'reason',
       header: 'Reason',
       cell: ({ row }) => {
-        const r = row.original.reason ?? '';
-        return r.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const r = row.original.reason;
+        return r.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
       },
     },
     {
