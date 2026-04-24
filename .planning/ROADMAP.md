@@ -152,7 +152,7 @@ Plans:
 - [ ] 06-07-PLAN.md — features/split-tab: useSplitTab + SplitTabSheet (4 modes: evenly/item/person/amount) (Wave 4) (S4-10)
 - [ ] 06-08-PLAN.md — features/process-refund: useProcessRefund + RefundSheet + P10 property test (Wave 4) (S4-11, S4-15)
 - [ ] 06-09-PLAN.md — PaymentsPage Refunds tab + RefundsList widget + PaymentPane Refund button + OrderPanel Split bill button + sub-checks section (Wave 4) (S4-13)
-- [ ] 06-10-PLAN.md — Integration tests: split-by-item flow (S4-16) + refund-with-restock flow (S4-17) (Wave 5) (S4-16, S4-17)
+- [x] 06-10-PLAN.md — Integration tests: split-by-item flow (S4-16) + refund-with-restock flow (S4-17) (Wave 5) (S4-16, S4-17)
 - [ ] 06-11-PLAN.md — E2E 34-split-bill.spec.ts + 35-refund.spec.ts + regression gate + human sign-off (Wave 5) (S4-18, S4-19)
 
 **Success Criteria**:

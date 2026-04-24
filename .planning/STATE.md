@@ -44,6 +44,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 02-07 (property tests + seed data) completed — P2 pricing + P3 availability property tests
 - 2026-04-24: Plan 06-05 (entity hooks) completed — useSubTabs + parent_tab_id IS NULL filter on useTabs + entities/refund FSD slice (useRefunds, useRefundsByPayment, refundKeys) — P2 pricing + P3 availability property tests (10 tests, 2800+ runs), seed-combos.ts for Cubeta Regular/Premium + Martes de Cubeta + Pool
 - 2026-04-24: Plan 06-08 (process-refund FSD slice) completed — RefundSheet UI + useProcessRefund mutation hook + P10 property test (4/4 pass) + Select shared component
+- 2026-04-24: Plan 06-10 (integration tests) completed — split-tab 6/6 + process-refund 5/5 scenarios pass; Rule 1 fix: process_refund RPC missing idempotency_key (migration 20260427000005)
 - 2026-04-24: Plan 06-11 (E2E specs) completed — 34-split-bill.spec.ts (5 tests) + 35-refund.spec.ts (3 tests); CHECKPOINT awaiting human E2E run with dev server
 
 ## Decisions
@@ -95,6 +96,9 @@ See: .planning/PROJECT.md
 - [Phase 06-split-bill-refund 06-07]: useSplitEvenly calls split_tab_evenly for validation then runs N callProcessPayment calls — does NOT create sub-tabs; parent stays 'open'
 - [Phase 06-split-bill-refund 06-07]: SplitEvenlyInput.method is 'cash' | 'card' | 'rappi' (no 'transfer') — PaymentMethodSchema constraint
 - [Phase 06-split-bill-refund 06-07]: isValid ternary chain (not switch) to satisfy @typescript-eslint/no-unnecessary-condition on last enum branch
+- [Phase 06-split-bill-refund 06-10]: process_refund RPC fixed to include idempotency_key ('refund-' + refund UUID) — payments.idempotency_key is NOT NULL
+- [Phase 06-split-bill-refund 06-10]: Auto-close trigger integration test updates sub-tab status to 'paid' before inserting payment — trigger reads status, not payment existence
+- [Phase 06-split-bill-refund 06-10]: describe.skipIf(hasEnv) + itInt/itAuth/itBartender aliases for graceful skip when E2E creds absent
 
 ## Performance Metrics
 
@@ -115,8 +119,9 @@ See: .planning/PROJECT.md
 | 03-ingredient-foundation | 08 | 20min | 5 | 6 |
 | 06-split-bill-refund | 04 | 25min | 2 | 5 |
 | 06-split-bill-refund | 06 | 25min | 2 | 7 |
+| 06-split-bill-refund | 10 | ~2 sessions | 2 | 3 |
 
 ## Last Session
 
-- **Stopped at:** Completed 06-08-PLAN.md — RefundSheet + useProcessRefund + P10 property test
-- **Timestamp:** 2026-04-24T20:15:00Z
+- **Stopped at:** Completed 06-10-PLAN.md — 11 integration tests pass; idempotency_key RPC bug fixed and pushed
+- **Timestamp:** 2026-04-24T20:55:00Z
