@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 6
+current_plan: 1
 status: executing
-stopped_at: "Completed 04-05-PLAN.md — manage-recipe feature (useManageRecipe + RecipeEditorTab) + Recipe tab in product edit Dialog (max-w-2xl) + seed-recipes.ts; typecheck + lint pass"
-last_updated: "2026-04-24T23:50:00Z"
+stopped_at: "Completed 04-06-PLAN.md — depletion unit+property (6/6) + integration (4/4) + 36-recipes.spec.ts E2E; typecheck+lint pass; CHECKPOINT awaiting human E2E run"
+last_updated: "2026-04-24T23:58:00Z"
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 40
   completed_plans: 40
   percent: 100
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 04
 **Current plan:** 1
 **Status:** Executing Phase 04
-**Progress:** [██████████] 95%
+**Progress:** [██████████] 100%
 
 ## Session Log
 
@@ -120,6 +120,11 @@ See: .planning/PROJECT.md
 - [Phase 04-recipes-sale-depletion 04-05]: RecipeEditorTab fetches ingredients via useIngredientsActive() internally (features can import from entities); passes them as ingredients prop to IngredientAutocomplete (FSD: shared cannot import from entities)
 - [Phase 04-recipes-sale-depletion 04-05]: seed-recipes.ts follows seed-combos.ts pattern — VITE_SUPABASE_URL from .env.local, eslint-disable at file level, supabase as any cast
 - [Phase 04-recipes-sale-depletion 04-05]: import order in CatalogProductsTab: @features/* before @entities/* per ESLint import/order rule (FSD layer hierarchy)
+- [Phase 04-recipes-sale-depletion 04-06]: fc.float min/max must be Math.fround() in fast-check v4 (32-bit float constraint)
+- [Phase 04-recipes-sale-depletion 04-06]: deplete_for_order_item has two PG overloads; always pass p_allow_negative explicitly to avoid PGRST203
+- [Phase 04-recipes-sale-depletion 04-06]: integration tests use anon client (signInWithPassword) for RPC calls — auth.uid() NULL with service-role JWT
+- [Phase 04-recipes-sale-depletion 04-06]: one order_item per integration test due to UNIQUE index on (ref_type, ref_id, ingredient_id)
+- [Phase 04-recipes-sale-depletion 04-06]: E2E spec named 36-recipes.spec.ts to avoid collision with existing 20-*.spec.ts files
 
 ## Performance Metrics
 
