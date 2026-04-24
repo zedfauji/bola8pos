@@ -10,9 +10,9 @@ last_updated: "2026-04-24T18:05:08.530Z"
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 23
+  total_plans: 34
   completed_plans: 23
-  percent: 100
+  percent: 68
 ---
 
 # Session State
@@ -82,6 +82,10 @@ See: .planning/PROJECT.md
 - [Phase 02-combos 02-07]: seed-combos.ts uses eslint-disable at file level + supabase as any (service role cast; consistent with CLAUDE.md workaround pattern)
 - [Phase ?]: [Phase 02-combos 02-08]: E2E T5 uses page.evaluate with explicit parameter passing (not window globals) for NESTED_COMBO_FORBIDDEN RPC test
 - [Phase ?]: [Phase 02-combos 02-08]: 32-combos.spec.ts day-conditional tests (T3/T4) use test.info().annotations.push pattern — always runnable, reports state rather than hard-skipping
+- [Phase 06-split-bill-refund 06-04]: splitMode/splitLabel/parentTabId use .nullable().optional() — consistent with cajaSessionId pattern in TabSchema
+- [Phase 06-split-bill-refund 06-04]: computeEvenSplit absorbs rounding remainder in lastAmount; P9 invariant: base*(n-1)+last===totalCents
+- [Phase 06-split-bill-refund 06-04]: process_refund in MANAGER_EXTRA only (not BARTENDER_ACTIONS) — threat T-06-12 mitigated
+- [Phase 06-split-bill-refund 06-04]: RefundSchema.amount uses z.number().positive() (not MoneySchema) — prevents zero/negative refunds at schema level
 
 ## Performance Metrics
 
@@ -100,8 +104,9 @@ See: .planning/PROJECT.md
 | 02-combos | 07 | 4min | 2 | 3 |
 | Phase 02-combos P08 | 3min | 1 tasks | 1 files |
 | 03-ingredient-foundation | 08 | 20min | 5 | 6 |
+| 06-split-bill-refund | 04 | 25min | 2 | 5 |
 
 ## Last Session
 
-- **Stopped at:** Completed 03-08 Tasks 1-5; awaiting Task 6 human E2E verification (33-ingredients.spec.ts T4+T5)
-- **Timestamp:** 2026-04-24T12:37:00Z
+- **Stopped at:** Completed 06-04 Plan (domain.ts + result.ts + rbac.ts + split-math.ts + P8/P9 tests)
+- **Timestamp:** 2026-04-24T19:35:00Z
