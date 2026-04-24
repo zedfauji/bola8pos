@@ -76,10 +76,8 @@ test('T1: Admin creates ingredient via Settings → Ingredients', async ({ page 
   // Fill name field
   await page.getByLabel('Name').fill('Test Tomato E2E');
 
-  // Select base unit (first combobox in the form)
-  const baseUomTrigger = page.getByRole('combobox').first();
-  await baseUomTrigger.click();
-  await page.getByRole('option', { name: /^g/i }).first().click();
+  // Select base unit — native <select id="ing-uom">
+  await page.locator('select#ing-uom').selectOption('g');
 
   // Fill cost per base unit
   await page.getByLabel(/cost per base unit/i).fill('0.012');
@@ -236,10 +234,8 @@ test('T4: Manual adjustment — waste recorded, success toast + DB movement row 
   // Fill quantity change (negative = remove stock) — UI-SPEC field: "Quantity change"
   await page.getByLabel(/quantity change/i).fill('-100');
 
-  // Select Waste reason — UI-SPEC options: Waste | Delivery | Correction | Physical count
-  const reasonSelect = page.getByRole('combobox').first();
-  await reasonSelect.click();
-  await page.getByRole('option', { name: 'Waste' }).click();
+  // Select Waste reason — native <select id="reason">
+  await page.locator('select#reason').selectOption('waste');
 
   // Submit — UI-SPEC button: "Record adjustment"
   await page.getByRole('button', { name: 'Record adjustment' }).last().click();
@@ -315,9 +311,7 @@ test('T5: INVENTORY_NEGATIVE guard — error toast shown, dialog stays open', as
   await page.getByLabel(/quantity change/i).fill('-999');
 
   // Select Waste (non-override reason — Correction/Physical count would bypass the guard)
-  const reasonSelect = page.getByRole('combobox').first();
-  await reasonSelect.click();
-  await page.getByRole('option', { name: 'Waste' }).click();
+  await page.locator('select#reason').selectOption('waste');
 
   // Submit
   await page.getByRole('button', { name: 'Record adjustment' }).last().click();
@@ -405,7 +399,7 @@ test('T7: Admin deletes ingredient — ConfirmDialog, row removed from list', as
   await navigateToIngredients(page);
 
   // Verify row is present
-  await expect(page.getByRole('cell', { name: 'E2E Delete Me Ingredient' })).toBeVisible({
+  await expect(page.getByRole('cell', { name: 'E2E Delete Me Ingredient', exact: true })).toBeVisible({
     timeout: 10_000,
   });
 
