@@ -133,11 +133,13 @@ function setupMocks() {
   } as unknown as ReturnType<typeof productQueries.useProducts>);
 }
 
-function renderSheet(overrides: {
-  open?: boolean;
-  overrideActive?: boolean;
-  combo?: Product | null;
-} = {}) {
+function renderSheet(
+  overrides: {
+    open?: boolean;
+    overrideActive?: boolean;
+    combo?: Product | null;
+  } = {}
+) {
   const onClose = vi.fn();
 
   const utils = renderWithProviders(
@@ -221,6 +223,35 @@ describe('ComboBuilderSheet', () => {
           p_override_availability: false,
         })
       );
+    });
+  });
+
+  it('NESTED_COMBO_FORBIDDEN error: shows nested combo toast', async () => {
+    // Override the default success mock for this test only
+    vi.mocked(supabaseModule.supabase.rpc).mockResolvedValueOnce({
+      data: null,
+      error: {
+        message: 'NESTED_COMBO_FORBIDDEN: Product X is a combo; cannot be a child',
+        code: '22000',
+      },
+    } as unknown as ReturnType<typeof supabaseModule.supabase.rpc>);
+
+    const user = userEvent.setup();
+    renderSheet();
+
+    // Fill the required slot so the button becomes enabled
+    const optionButtons = screen.getAllByRole('option', { hidden: true });
+    await user.click(optionButtons[0]!);
+
+    // Confirm
+    const addButton = screen.getByRole('button', { name: /add to order/i });
+    await user.click(addButton);
+
+    // The onError handler in useAddComboToTab fires toast.error('Nested combos are not allowed.')
+    // sonner's toast is mocked, so assert via the mock
+    const { toast } = await import('sonner');
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Nested combos are not allowed.');
     });
   });
 });
