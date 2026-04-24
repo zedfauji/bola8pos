@@ -1,10 +1,11 @@
 ---
 phase: 4
 slug: recipes-sale-depletion
-status: draft
+status: approved
 shadcn_initialized: true
 preset: none
 created: 2026-04-24
+reviewed_at: 2026-04-24T20:19:00Z
 ---
 
 # Phase 4 — UI Design Contract
@@ -37,8 +38,7 @@ The project uses the Tailwind 4px grid throughout. Recipe editor components must
 | Token | px | Use |
 |-------|----|-----|
 | `gap-1` / `space-y-1` | 4px | Tight label-to-input gap, hint text |
-| `gap-1.5` / `space-y-1.5` | 6px | Label-to-input within a field group (matches `IngredientForm`) |
-| `gap-2` | 8px | Icon + text, badge + label, row cell spacing |
+| `gap-2` / `space-y-2` | 8px | Label-to-input within a field group; icon + text; badge + label; row cell spacing |
 | `gap-4` | 16px | Between fields in a form section |
 | `gap-6` | 24px | Between major sections (e.g. recipe rows vs footer) |
 | `p-4` | 16px | Tab content inner padding |
@@ -48,6 +48,8 @@ The project uses the Tailwind 4px grid throughout. Recipe editor components must
 | `min-h-[44px]` | 44px | Minimum touch target height for recipe row remove button |
 
 > **Exception:** The `IngredientAutocomplete` trigger button must be at least 44px tall to meet WCAG 2.1 AA touch target. Use `h-11` (44px) on the trigger.
+
+> **Implementation note:** `IngredientForm.tsx` currently uses `space-y-1.5` (6px) — align to `gap-2` / `space-y-2` (8px) during implementation of this phase.
 
 ---
 
@@ -62,9 +64,9 @@ Inherits the project's Geist Variable + shadcn scale. No new type styles are int
 | Hint / muted | `text-xs text-muted-foreground` | 12px, 400 | regular | 1.5 | Hint text under fields, yield label |
 | Error | `text-xs text-destructive` | 12px, 400 | regular | 1.5 | Inline field errors (matches `IngredientForm`) |
 | Numeric input | `font-mono text-sm` | 14px | 400 | 1.5 | Qty and yield inputs (matches `IngredientForm` cost field) |
-| Badge / UOM chip | `text-xs font-medium` | 12px, 500 | medium | 1 | UOM display badge in autocomplete and row |
+| Badge / UOM chip | `text-xs font-semibold` | 12px, 600 | semibold | 1 | UOM display badge in autocomplete and row |
 
-**Rule:** Maximum 4 sizes in use (xs=12px, sm=14px, base=16px for inputs, mono-sm=14px). Maximum 2 weights (400 regular, 600 semibold). No new heading sizes.
+**Rule:** Maximum 4 sizes in use (xs=12px, sm=14px, base=16px for inputs, mono-sm=14px). Maximum 2 weights (400 regular + 600 semibold). No new heading sizes. Weight 500 (medium) is not used anywhere in this phase.
 
 ---
 
@@ -105,6 +107,8 @@ All colors are CSS variable tokens from `globals.css`. No hardcoded hex or oklch
 ---
 
 ## Components
+
+**Primary visual anchor:** The ingredient rows in the left column are the primary focal point; the depletion preview panel is supporting context.
 
 ### New: `IngredientAutocomplete` (`src/shared/ui/IngredientAutocomplete/`)
 
@@ -210,7 +214,7 @@ Two-column layout on `md+` screens, stacked on mobile:
 │                                 │                                │
 │  Yield: [__] servings           │                                │
 │                                 │                                │
-│  [Cancel]          [Save recipe]│                                │
+│  [Discard changes] [Save recipe]│                                │
 └─────────────────────────────────┴────────────────────────────────┘
 ```
 
@@ -227,12 +231,12 @@ Each row is a `div` with `flex items-center gap-2`:
 - `IngredientAutocomplete`: `flex-1 min-w-0`
 - Qty input: `w-24 font-mono text-sm` (shadcn `Input`, `type="number"`, `step="any"`, `min="0.000001"`)
 - UOM label: `text-xs text-muted-foreground min-w-[2.5rem] text-center` — reads from selected ingredient, not editable
-- Remove button: `POSButton touchSize="default" variant="ghost" aria-label="Remove ingredient"` with `X` icon from lucide-react; `min-h-[44px] min-w-[44px]`
+- Remove button: `POSButton touchSize="large" variant="ghost" aria-label="Remove ingredient"` with `X` icon from lucide-react; enforces 48px minimum touch target
 
 #### Footer Controls
 
 ```
-[POSButton touchSize="default" variant="outline" onClick={addRow}]  ← "+ Add ingredient"
+[POSButton touchSize="large" variant="outline" onClick={addRow}]  ← "+ Add ingredient"
 Yield: [Input type="number" className="w-16 font-mono text-sm"] servings
 ```
 
@@ -241,8 +245,8 @@ Footer uses `flex items-center gap-4 pt-4 border-t`.
 #### Action Buttons (bottom of tab)
 
 ```
-[POSButton variant="outline" touchSize="default"]  ← "Cancel"
-[POSButton variant="default" touchSize="default" type="submit"]  ← "Save recipe"  (or "Saving…" when pending)
+[POSButton variant="outline" touchSize="large"]  ← "Discard changes"
+[POSButton variant="default" touchSize="large" type="submit"]  ← "Save recipe"  (or "Saving…" when pending)
 ```
 
 Aligned `justify-end gap-2` — matches `ProductForm` footer.
@@ -296,7 +300,7 @@ When `add-item-to-tab` mutation returns `{ code: 'INVENTORY_NEGATIVE', ... }`:
 toast.error(`${ingredientName} is out of stock. Manager PIN required to override.`, {
   duration: 6000,
   action: {
-    label: 'Override',
+    label: 'Allow override',
     onClick: () => openManagerPinGate({ context: 'override_negative_stock', payload: pendingOrderItem }),
   },
 });
@@ -304,14 +308,14 @@ toast.error(`${ingredientName} is out of stock. Manager PIN required to override
 
 - Toast variant: `toast.error` (sonner destructive style — matches `--destructive` token)
 - Duration: 6000ms (longer than default 4000ms — user needs time to read and act)
-- Action button label: **"Override"** — single word, imperative
+- Action button label: **"Allow override"** — two words, explicit intent
 - If multiple ingredients are out of stock, list only the first in the toast; include count: "…and 2 more."
 
 #### Override Flow
 
 ```
-1. Toast appears: "Wings is out of stock. Manager PIN required to override." [Override]
-2. User taps "Override" → existing ManagerPinGate modal opens
+1. Toast appears: "Wings is out of stock. Manager PIN required to override." [Allow override]
+2. User taps "Allow override" → existing ManagerPinGate modal opens
 3. Manager enters PIN → mutation retries with allow_negative flag
 4. On success → order item added; ledger row written; audit_log row written
 5. Confirmation toast: "Override approved. Order item added." (sonner toast.success)
@@ -341,8 +345,8 @@ All copy strings are exact. No placeholder text permitted in production.
 | Add recipe row | "+ Add ingredient" | `POSButton variant="outline"` |
 | Save recipe (idle) | "Save recipe" | `POSButton variant="default"` |
 | Save recipe (saving) | "Saving…" | `POSButton variant="default" disabled` |
-| Cancel recipe edit | "Cancel" | `POSButton variant="outline"` |
-| Toast override action | "Override" | sonner action button |
+| Discard recipe edit | "Discard changes" | `POSButton variant="outline"` |
+| Toast override action | "Allow override" | sonner action button |
 
 ### Empty States
 
@@ -398,18 +402,18 @@ No third-party registries are used in this phase.
 - `IngredientAutocomplete` trigger: `aria-expanded`, `aria-haspopup="listbox"`, `role="combobox"` — handled by shadcn Command pattern
 - Remove row button: `aria-label="Remove {ingredientName} from recipe"` — dynamic label for screen readers
 - Depletion preview low/negative stock: `role="status"` on the aside, updated live — consumers get announced changes
-- All touch targets ≥ 44px (`min-h-[44px]`) — enforced by `POSButton touchSize="default"` (48px) and explicit `h-11` on autocomplete trigger
+- All touch targets ≥ 44px — enforced by `POSButton touchSize="large"` (48px) on "+ Add ingredient", "Discard changes", "Save recipe", and remove-row buttons; explicit `h-11` (44px) on `IngredientAutocomplete` trigger. `touchSize="default"` is NOT 48px — do not use it for interactive POS controls.
 - Color is never the only differentiator — stock state icons (`Check`, `AlertTriangle`) accompany color indicators
 
 ---
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS (text-yellow-500 one-time exception documented)
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** pending re-verification
