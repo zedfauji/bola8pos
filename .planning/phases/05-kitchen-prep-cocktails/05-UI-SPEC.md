@@ -1,7 +1,8 @@
 ---
 phase: 5
 slug: kitchen-prep-cocktails
-status: draft
+status: approved
+reviewed_at: 2026-04-24
 shadcn_initialized: true
 preset: "style=radix-nova, baseColor=neutral, cssVariables=true"
 created: 2026-04-24
@@ -245,7 +246,7 @@ Dialog (max-w-sm)
     {recipe && <PrepBatchPreview recipe={recipe} qtyProduced={parsedQty} />}
 
   DialogFooter (px-6 pb-6 flex gap-3)
-    <Button variant="outline" flex-1 onClick={onClose} disabled={isPending}>Cancel</Button>
+    <Button variant="outline" flex-1 onClick={onClose} disabled={isPending}>Discard batch</Button>
     <Button
       flex-1
       disabled={!isValid || isPending}
@@ -466,7 +467,7 @@ Tile appearance: same card size and layout as existing tiles. `ChefHat` icon fro
 | Notes placeholder | "e.g. Morning batch — double yield" |
 | Primary CTA | "Record batch" |
 | Primary CTA (loading) | [LoadingSpinner — no text] |
-| Secondary CTA | "Cancel" |
+| Secondary CTA | "Discard batch" |
 
 ### PrepBatchPreview
 

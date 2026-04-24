@@ -621,7 +621,7 @@ export function computePoolSessionBilling(
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`add_combo_to_tab` as PL/pgSQL vs. edge function**
    - What we know: existing `create_order_with_items` is PL/pgSQL (migration 20260416120000); `process-payment` is edge (external Square API). Combo add has no external API.

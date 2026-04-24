@@ -1,5 +1,9 @@
 # Phase 6: Split Bill + Refund — Research
 
+> **MANDATORY AGENT GUARDRAIL — E2E runs and browser console**
+>
+> On **every** E2E test run (Playwright, CI, or agent retry loops), **tail or otherwise capture the browser console for that run** (project-standard: trace/console events, reporter output, headed DevTools, or equivalent) and **read it before concluding why a test failed or before re-running the same spec**. Failures are often explained only in the console (uncaught exceptions, failed network calls, React errors, hydration warnings). **Do not** repeatedly execute the same failing E2E in a tight loop without console evidence — that burns tokens and time while the real signal sits in logs the agent never opened. Treat “console captured and reviewed for this run” as **non-optional** and part of the same step as “test run completed.”
+
 **Researched:** 2026-04-24
 **Domain:** Supabase PL/pgSQL (RPCs + triggers) + FSD feature/entity extension + property-based testing
 **Confidence:** HIGH

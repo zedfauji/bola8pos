@@ -1,175 +1,88 @@
-# Phase 1: Foundation — Context
+---
+phase: S1
+title: Foundation
+discuss_phase: 2026-04-23
+mode: assumptions
+status: locked_for_execution
+source_prd: .planning/feature-expansion-2026q2/sprints/S1-foundation.md
+supplements:
+  - .planning/feature-expansion-2026q2/01-locked-decisions.md
+  - .planning/feature-expansion-2026q2/02-data-model.md
+---
 
-**Gathered:** 2026-04-23
-**Status:** Ready for planning
-**Source:** PRD Express Path (`.planning/feature-expansion-2026q2/sprints/S1-foundation.md`)
+# Phase 1 (S1) — Discuss-phase context
 
-<domain>
-## Phase Boundary
-
-Infrastructure-only sprint. Delivers the schema + primitives every downstream sprint (S2–S6) depends on: unified stock ledger, hierarchical categories, modifier groups, and combo-eligibility flags. **No user-facing POS flow change** — the POS and Tab pages must render identically after this phase. Only Settings gains new admin editors.
-
-Explicit out-of-scope:
-- Any runtime use of combos (deferred to Phase 2)
-- Any runtime use of ingredients/recipes (deferred to Phase 3+)
-- Any UI change on POS/Tab pages
-
-</domain>
-
-<decisions>
-## Implementation Decisions — Locked by PRD
-
-### S1-01 — Stock movements rename
-- Rename table `inventory_log` → `stock_movements`
-- Extend reason enum (new values will be used in Phase 3+: `'sale' | 'refund' | 'void' | 'prep_production' | 'prep_consumption'` on top of existing values)
-- Add polymorphic columns: `ref_type text`, `ref_id uuid`
-- Add nullable `ingredient_id uuid` (FK target lands in Phase 3)
-- Reversible migration with DOWN script
-
-### S1-02 — Categories tree
-- Add `categories.parent_id uuid` self-reference (nullable, FK to `categories.id`)
-- Add CHECK trigger enforcing **depth ≤ 3** on INSERT/UPDATE of `parent_id`
-- Trigger must reject cycles
-
-### S1-03 — Modifier groups
-- New tables: `modifier_groups`, `modifier_group_items`, `product_modifier_groups`
-- Reversible migration with DOWN script
-- RLS: bartender read-only; manager+/admin write (enforced in S1-11)
-
-### S1-04 — Products combo flags
-- Add `products.combo_eligible boolean NOT NULL DEFAULT true`
-- Add `products.is_combo boolean NOT NULL DEFAULT false`
-
-### S1-05 — Payments constraint
-- Drop the `payments.tab_id` `isOneToOne` / unique constraint (prepares Phase 6 sub-tabs/refunds)
-- Audit for client code that assumes single payment per tab (grep `isOneToOne`, `one-payment`, `single payment`)
-
-### S1-06 — Types + Zod
-- Run `npx supabase gen types typescript` once after all 5 migrations land
-- Extend Zod schemas in `src/shared/lib/domain.ts` for: Category (with `parent_id`), ModifierGroup, ModifierGroupItem, ProductModifierGroup, StockMovement (renamed), Product (with combo flags)
-- Do not hand-write entity types — infer from Zod (`type X = z.infer<typeof XSchema>`)
-
-### S1-07 — CategoryTreePicker
-- New `shared/ui/CategoryTreePicker/` component
-- Storybook story required (project rule: every new `shared/ui/` component ships a story)
-
-### S1-08 — Category tree admin
-- New feature folder `src/features/manage-categories/`
-- Mounted as a Settings tab (admin-only — gated by `manage_settings` RBAC)
-- Uses `CategoryTreePicker`
-
-### S1-09 — Modifier group editor
-- New feature folder `src/features/manage-modifier-groups/`
-- Mounted as a Settings tab (admin-only)
-
-### S1-10 — Category entity refactor
-- Update `src/entities/category/model/{types,store,queries}.ts` for the tree model
-- Tree-aware queries (`descendants()`, `ancestors()`) backed by recursive CTE
-
-### S1-11 — RLS
-- New policies for `modifier_groups`, `modifier_group_items`, `product_modifier_groups`, `stock_movements` (post-rename)
-- Bartender: read-only on modifier tables
-- Manager+: write on modifier tables
-- Verify via `loginAs(page, 'bartender')` in E2E
-
-### S1-12 — Property test P1
-- `fast-check` property test: random tree construction up to 1000 nodes; assert no cycle and depth ≤ 3 after each insert
-- File: `src/shared/lib/category-tree.test.ts`
-
-### S1-13 — E2E 18-categories
-- New spec `e2e/18-categories.spec.ts`
-- Flow: admin creates root → child → grandchild, attempts great-grandchild (expect UI refusal + backend 4xx), toggles a product's `combo_eligible=false` and confirms DB state
-
-### Migration order — locked
-1. `stock_movements` rename
-2. `categories.parent_id` + trigger
-3. modifier_groups trio
-4. products flags
-5. payments constraint drop
-
-Each migration is reversible with a `DOWN` script.
-
-### Breaking-change audit — locked
-Before touching S1-01, run:
-```
-grep -rn "inventory_log" bar-pos/src bar-pos/supabase bar-pos/e2e
-```
-Every hit must be updated to `stock_movements` in the **same commit** as the rename migration.
-
-### Claude's Discretion
-- Exact migration timestamps (`2026xxxx_*.sql`) — pick sequential UTC dates
-- Internal component structure of `CategoryTreePicker` and the two Settings editors (layout, drag/drop vs picker, etc.) — follow existing `shared/ui/` and `features/` patterns
-- Query-cache keys for TanStack Query — follow existing `entities/<name>/model/queries.ts` convention
-- Zustand store shape for category tree — mirror existing entity stores
-- Test fixture data for property/E2E tests
-
-</decisions>
-
-<specifics>
-## Specific Ideas
-
-**Tickets — all 13 must ship:**
-
-| ID | Title | Files | Est |
-|---|---|---|---|
-| S1-01 | DB migration: rename inventory_log → stock_movements + columns | `supabase/migrations/2026xxxx_stock_movements.sql` | S |
-| S1-02 | DB migration: categories.parent_id + depth-3 trigger | `supabase/migrations/2026xxxx_categories_tree.sql` | S |
-| S1-03 | DB migration: modifier_groups trio + product link | `supabase/migrations/2026xxxx_modifier_groups.sql` | S |
-| S1-04 | DB migration: products.combo_eligible, products.is_combo | `supabase/migrations/2026xxxx_product_combo_flags.sql` | XS |
-| S1-05 | DB migration: drop payments.tab_id isOneToOne | `supabase/migrations/2026xxxx_payments_constraint.sql` | XS |
-| S1-06 | Regenerate types, update Zod schemas | `src/shared/lib/supabase.types.ts`, `src/shared/lib/domain.ts` | M |
-| S1-07 | `CategoryTreePicker` shared/ui component | `src/shared/ui/CategoryTreePicker/` + story | M |
-| S1-08 | Category tree admin editor in Settings | `src/features/manage-categories/`, Settings tab | M |
-| S1-09 | `ModifierGroupEditor` feature | `src/features/manage-modifier-groups/`, Settings tab | M |
-| S1-10 | Entity `category` refactor to tree model | `src/entities/category/model/*` | M |
-| S1-11 | RLS policies for new tables | `supabase/migrations/2026xxxx_s1_rls.sql` | S |
-| S1-12 | Property tests: P1 (tree depth + no cycles) | `src/shared/lib/category-tree.test.ts` | S |
-| S1-13 | E2E `18-categories.spec.ts` | `e2e/18-categories.spec.ts` | S |
-
-**Execution notes (PRD):**
-- Start with S1-01 (rename) — everything else depends on the new column names
-- S1-06 (type regen) is a fan-out point: do it once after all migrations, not per-migration
-- S1-07..S1-10 can parallelize after S1-06
-
-**Feature flags:** None. All changes are additive except the rename (handled atomically).
-
-**Risks (PRD):**
-
-| Risk | Mitigation |
-|---|---|
-| Table rename breaks live queries | Feature-flag if needed; stage on local first; confirm with `grep` + tests |
-| Depth-3 trigger performance | Trigger fires only on INSERT/UPDATE of `parent_id`; bounded recursion; expected <100 categories |
-| Dropping payments 1:1 constraint exposes hidden assumptions | Grep `isOneToOne`, `one-payment`, `single payment` in client code |
-
-**Definition of Done — from PRD:**
-- All 5 migrations run clean against local + staging Supabase
-- `npx supabase gen types typescript` output committed
-- `domain.ts` Zod schemas updated; `z.infer` only, no manual interfaces
-- `npm run typecheck` passes
-- `npm run lint` passes (zero warnings)
-- `npm run test` passes; P1 property test included
-- Existing E2E suite still green (no regression — specs 01–17)
-- `18-categories.spec.ts` green
-- Settings → Categories + Modifier Groups manually verified in Tauri dev build
-- RLS verified: bartender cannot write to `modifier_groups`
-- No reference to `inventory_log` remains in codebase
-- Atomic commits per ticket with conventional-commit messages
-
-</specifics>
-
-<deferred>
-## Deferred Ideas
-
-Explicitly out-of-scope for Phase 1 — do **not** implement:
-
-- Runtime use of combos → Phase 2 (S2)
-- Runtime use of ingredients / recipes / depletion → Phase 3+ (S3a/S3b/S3c)
-- Any UI change on POS or Tab pages
-- FK on `stock_movements.ingredient_id` pointing at the `ingredients` table — the column is nullable in Phase 1; FK lands when Phase 3 creates `ingredients`
-
-</deferred>
+This file is the output of **`/gsd:discuss-phase S1`** in **assumptions mode**: the sprint PRD and locked milestone decisions are treated as authoritative; open items are listed under **Assumptions to confirm** so you can reject or correct any line before execution.
 
 ---
 
-*Phase: 01-foundation*
-*Context gathered: 2026-04-23 via PRD Express Path*
+## Domain
+
+**Boundary:** Infrastructure-only. Ship schema + primitives for S2–S6: unified **stock movements** ledger, **hierarchical categories**, **modifier groups**, **combo flags**. **No change to POS/Tab customer flows** — only **Settings** gains admin editors.
+
+**Explicitly out:** runtime combos (S2), ingredients/recipes/depletion (S3+), any POS/Tab UI change.
+
+---
+
+## Numbered decisions (D-01 …)
+
+These are **execution contracts**. They subsume ad-hoc bullets from earlier drafts; if the PRD disagrees, **this file + `01-locked-decisions.md` win** for this repo.
+
+| ID | Decision |
+|----|------------|
+| **D-01** | **Atomic S1-01:** One commit contains the migration renaming `inventory_log` → `stock_movements` **and** every non-generated reference under `bar-pos/src`, `bar-pos/supabase`, `bar-pos/e2e` updated. Grep gate: zero `inventory_log` in those paths after commit. |
+| **D-02** | **Reason values** for the ledger align with **D2** in `01-locked-decisions.md` (`sale \| void \| refund \| waste \| delivery \| correction \| physical_count \| prep_production \| prep_consumption \| combo_component`). Existing DB CHECK may list `manual_adjustment` — migration **replaces** the CHECK with the full allowed set consistent with D2 + backward compatibility for existing rows (see `01-RESEARCH.md` §CHECK). |
+| **D-03** | **Polymorphic audit columns** on `stock_movements`: `ref_type text`, `ref_id uuid`, nullable `ingredient_id uuid` with **no FK** to `ingredients` until Phase 3. |
+| **D-04** | **Categories:** `parent_id uuid NULL REFERENCES categories(id)`, trigger (or equivalent) enforcing **max depth 3** and **no cycles** on `parent_id` INSERT/UPDATE. |
+| **D-05** | **Modifier groups:** create `modifier_groups`, `modifier_group_items`, `product_modifier_groups` per `02-data-model.md` §S1. |
+| **D-06** | **Products:** `combo_eligible boolean NOT NULL DEFAULT true`, `is_combo boolean NOT NULL DEFAULT false`. |
+| **D-07** | **Payments:** drop uniqueness / isOneToOne on `payments.tab_id` so multiple payments per tab are allowed (per D3 roadmap). Grep client for false assumptions. |
+| **D-08** | **Types + Zod (S1-06):** run `npx supabase gen types typescript` **once** after **all** schema migrations including **S1-11 RLS file** (sixth migration batch). Extend `src/shared/lib/domain.ts` only; **infer** types from Zod, no parallel hand-written domain interfaces for these shapes. |
+| **D-09** | **`CategoryTreePicker`:** new `src/shared/ui/CategoryTreePicker/` + Storybook story (project rule for `shared/ui`). |
+| **D-10** | **`manage-categories`:** new `src/features/manage-categories/`, mounted in **Settings**, **admin-only** (`manage_settings` / existing RBAC). |
+| **D-11** | **`manage-modifier-groups`:** new `src/features/manage-modifier-groups/`, Settings tab, **admin-only**. |
+| **D-12** | **Category entity (S1-10):** introduce `src/entities/category/` (today category logic lives under **product** entity — **create** the folder and move/refactor; tree queries `descendants()` / `ancestors()` via recursive CTE or Supabase RPC as appropriate). |
+| **D-13** | **RLS (S1-11):** policies for new tables + **rename/migrate** policies that reference `inventory_log` to `stock_movements`. **Bartender:** no write on modifier group tables; **manager+:** write. Verify with E2E role helpers. |
+| **D-14** | **P1 property test (S1-12):** `src/shared/lib/category-tree.test.ts` with `fast-check`, up to 1000 nodes, **acyclic** and **depth ≤ 3** invariants. |
+| **D-15** | **E2E spec file:** PRD names `e2e/18-categories.spec.ts`, but **`e2e/18-void-order.spec.ts` already exists**. **Locked file name:** `e2e/31-categories.spec.ts` (see `01-RESEARCH.md` / `01-VALIDATION.md`). Behavior in PRD § E2E unchanged. |
+| **D-16** | **Migration order:** (1) stock_movements + code flip → (2) categories tree → (3) modifier_groups trio → (4) product flags → (5) payments constraint → (6) RLS (S1-11). Each file includes **`-- DOWN:`** rollback notes. |
+| **D-17** | **Commits:** one **conventional** commit per ticket where possible; never split S1-01 across commits. |
+
+---
+
+## Assumptions to confirm (reply inline or edit this file)
+
+Assumptions mode treats the following as **accepted** unless you strike or edit them:
+
+| ID | Assumption | Default |
+|----|------------|---------|
+| **A-01** | Staging Supabase exists and `supabase db push` (or org process) will be run before calling S1 “done”. | ✅ |
+| **A-02** | Local types are generated with **`--local`** against a DB that has all migrations applied (`db reset` path is valid). | ✅ |
+| **A-03** | **D-15** — you accept **`31-categories.spec.ts`** instead of `18-categories.spec.ts` to avoid spec number collision. | ✅ |
+| **A-04** | No feature-flagged dual write: **cutover** for `inventory_log` → `stock_movements` is single deploy with atomic commit. | ✅ |
+| **A-05** | `TANSTACK-QUERY-HOOKS.md` and other **docs** may lag one commit; **runtime** paths in `src/`, `supabase/`, `e2e/` must be consistent. | ✅ |
+| **A-06** | Manual UAT: **`npm run tauri dev`**, Settings → Categories + Modifier Groups, admin PIN per project test docs. | ✅ |
+
+**If any assumption is wrong:** update the table and, if needed, `D-15` or scope in `01-VALIDATION.md`.
+
+---
+
+## Ticket trace (13 + DoD)
+
+All items from `S1-foundation.md` § Tickets are in scope; sizes and file hints follow the PRD table. **S1-11** is a **sixth** migration file (RLS), not part of the PRD’s “5 migrations” bullet count — those five are schema shape; RLS is separate ticket (see `01-RESEARCH.md` migration order).
+
+---
+
+## Deferred (do not implement in S1)
+
+- Runtime combo logic, ingredient FK on `stock_movements.ingredient_id`, recipe depletion, POS/Tab UI changes.
+
+---
+
+## Reference
+
+- Plans: `.planning/phases/01-foundation/02-*-PLAN.md` … `07-regression-gate-PLAN.md`
+- Research: `01-RESEARCH.md`
+- Validation: `01-VALIDATION.md`
+
+*Context: sprint **S1** · folder `01-foundation`.*
