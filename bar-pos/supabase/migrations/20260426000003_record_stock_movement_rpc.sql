@@ -55,6 +55,7 @@ BEGIN
 
   -- 4. Insert the movement row
   INSERT INTO stock_movements (
+    product_id,
     ingredient_id,
     quantity_delta,
     reason,
@@ -64,6 +65,7 @@ BEGIN
     notes
   )
   VALUES (
+    NULL,
     p_ingredient_id,
     p_delta,
     p_reason,
