@@ -55,6 +55,7 @@ Inherited from Phases 2–3 (4px base unit, all multiples of 4).
 | Qty spinner buttons in RefundSheet | 44px (`h-11 w-11`) | Reuses existing `QuantityControl` pattern — minimum touch target |
 | N-persons keypad in Evenly mode | `min-h-[72px]` digit buttons | XL touch target for numeric keypad (same as PINKeypad pattern) |
 | SplitTabSheet height | `h-[85vh]` | Slightly taller than 80vh to accommodate 4 mode tabs + column scroll area |
+| Selected item indicator bar | `py-2` (8px = sm token) | Inner bar vertical padding; aligns to sm token on scale |
 
 ---
 
@@ -135,13 +136,13 @@ SubTabColumn (flex flex-col min-w-[140px] bg-card rounded-lg border)
     total (MoneyDisplay size="sm")
   ItemList (flex-1 overflow-y-auto divide-y min-h-[120px])
     [ItemRow × N] — see below
-  DropZone (px-3 py-2 text-xs text-muted-foreground text-center border-t)
+  DropZone (px-3 py-2 text-sm text-muted-foreground text-center border-t)
     "Tap an item to assign here"  — hidden when column has ≥ 1 item
 ```
 
 **ItemRow within SubTabColumn:**
 ```
-div.flex.items-center.justify-between.px-3.py-1.5.gap-2 + hover:bg-accent/30 + cursor-pointer
+div.flex.items-center.justify-between.px-3.py-2.gap-2 + hover:bg-accent/30 + cursor-pointer
   span.text-sm.truncate  — item name
   span.text-sm.text-muted-foreground.font-mono  — "×{qty}"
   MoneyDisplay size="sm"
@@ -239,7 +240,7 @@ Default active tab: `"evenly"` (fastest for bartenders, pre-populated from S4 PR
 **Footer (shared across all modes, sticky bottom):**
 ```
 SheetFooter (px-6 pb-6 pt-4 border-t flex gap-3)
-  <Button variant="outline" flex-1 onClick={onClose}>Cancel</Button>
+  <Button variant="outline" flex-1 onClick={onClose}>Keep tab open</Button>
   <POSButton touchSize="large" flex-1 disabled={!isValid} onClick={handleConfirm}>
     Confirm Split
   </POSButton>
@@ -339,7 +340,7 @@ TabsContent[value="item"] (flex flex-col h-full)
 
 **Selected item indicator bar (shown while an item is selected):**
 ```
-<div className="mx-6 mb-3 flex items-center gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-1.5">
+<div className="mx-6 mb-3 flex items-center gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-2">
   <span className="text-sm text-primary">"{selectedItem.name}" selected</span>
   <span className="text-sm text-muted-foreground ml-auto">Tap a column to assign</span>
 </div>
@@ -476,7 +477,7 @@ SheetContent (flex flex-col px-0 overflow-hidden)
   </div>
 
 SheetFooter (px-6 pb-6 flex gap-3)
-  <Button variant="outline" flex-1 onClick={onClose}>Cancel</Button>
+  <Button variant="outline" flex-1 onClick={onClose}>Close refund</Button>
   <POSButton touchSize="large" flex-1 disabled={!isValid} onClick={handleRequestApproval}>
     Request approval
   </POSButton>
@@ -495,7 +496,7 @@ div.flex.items-center.gap-3.py-2.border-b (last:border-0)
   [Item info]
   <div className="flex-1 min-w-0">
     <p className="text-sm font-medium truncate">{item.product_name}</p>
-    <p className="text-xs text-muted-foreground">
+    <p className="text-sm text-muted-foreground">
       Paid qty: {item.original_qty} · {MoneyDisplay amount={item.unit_price} size="sm"} each
     </p>
   </div>
@@ -520,7 +521,7 @@ div.flex.items-center.gap-3.py-2.border-b (last:border-0)
         aria-label={`Restock ${item.product_name}`}
         className={item.restock ? "data-[state=checked]:bg-pos-accent data-[state=checked]:border-pos-accent" : ""}
       />
-      <span className="text-xs text-muted-foreground">Restock</span>
+      <span className="text-sm text-muted-foreground">Restock</span>
     </div>
   )}
 
@@ -555,7 +556,7 @@ Uses `DataTable` with the following columns:
 | Column key | Header | Cell content | Sortable | Width |
 |-----------|--------|--------------|---------|-------|
 | `created_at` | Date | `dd MMM yyyy HH:mm` | Yes (default: newest first) | 160px |
-| `original_payment_id` | Payment ref | First 8 chars + `…` `font-mono text-xs text-muted-foreground` | No | 100px |
+| `original_payment_id` | Payment ref | First 8 chars + `…` `font-mono text-sm text-muted-foreground` | No | 100px |
 | `reason` | Reason | Capitalized reason label | No | 140px |
 | `items_count` | Items | `{count} item(s)` in `text-sm` | No | 80px |
 | `amount` | Amount | `MoneyDisplay amount={refund.amount} negative={true} size="sm"` | Yes | 100px |
@@ -616,7 +617,7 @@ On click: opens `RefundSheet` with `paymentId={payment.id}`.
 
 #### Tab detail / OrderPanel (existing widget, minimal change)
 
-Add a "Split" button in the tab action row (near existing "Close tab" / "Transfer" actions):
+Add a "Split bill" button in the tab action row (near existing "Close tab" / "Transfer" actions):
 
 ```
 <Button
@@ -627,7 +628,7 @@ Add a "Split" button in the tab action row (near existing "Close tab" / "Transfe
   aria-label={`Split tab ${tab.label}`}
 >
   <SplitSquareHorizontal className="h-4 w-4 mr-2" />
-  Split
+  Split bill
 </Button>
 ```
 
@@ -647,7 +648,7 @@ Below the parent tab's item list, add a section:
 <div className="border-t pt-4 mt-4">
   <p className="text-sm font-semibold mb-2">Sub-checks</p>
   {subTabs.map(sub => (
-    <div key={sub.id} className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-muted/40">
+    <div key={sub.id} className="flex items-center justify-between py-2 px-2 rounded-md hover:bg-muted/40">
       <span className="text-sm">{sub.split_label || `Check ${sub.id[:4]}`}</span>
       <StatusBadge status={sub.status} size="sm" />
       <MoneyDisplay amount={sub.total} size="sm" />
@@ -671,7 +672,7 @@ Below the parent tab's item list, add a section:
 | Mode tab: Person | "By Person" |
 | Mode tab: Amount | "By Amount" |
 | Primary CTA (all modes) | "Confirm Split" |
-| Secondary CTA | "Cancel" |
+| Secondary CTA | "Keep tab open" |
 | Evenly — prompt | "How many people are splitting this tab?" |
 | Evenly — preview section heading | "Preview" |
 | Evenly — N−1 row label | "{N-1} × payments" |
@@ -692,7 +693,7 @@ Below the parent tab's item list, add a section:
 | By Amount — remaining label | "Remaining" |
 | By Amount — tab total label | "Tab total" |
 | By Amount — warning banner | "Amount split does not preserve item-level reporting. Use By Item when possible." |
-| Split button in tab detail | "Split" |
+| Split button in tab detail | "Split bill" |
 | Sub-checks section heading | "Sub-checks" |
 
 ### RefundSheet
@@ -710,7 +711,7 @@ Below the parent tab's item list, add a section:
 | Reason option: other | "Other" |
 | Refund total label | "Refund total" |
 | Primary CTA | "Request approval" |
-| Secondary CTA | "Cancel" |
+| Secondary CTA | "Close refund" |
 | Restock toggle label | "Restock" |
 | Restock tooltip (food) | "Ingredients will not be returned to stock" |
 | Restock tooltip (retail) | "Item will be returned to inventory" |
@@ -718,6 +719,7 @@ Below the parent tab's item list, add a section:
 | Receipt reprint prompt body | "Print a receipt for this refund?" |
 | Receipt reprint confirm | "Print receipt" |
 | Receipt reprint dismiss | "Skip" |
+| Receipt print failure toast | "Receipt print failed — check printer connection." |
 
 ### RefundsList (widget)
 
@@ -765,7 +767,7 @@ Below the parent tab's item list, add a section:
 
 | Action | Trigger | Confirmation approach |
 |--------|---------|----------------------|
-| Cancel split (if any assignments made) | Tap "Cancel" after assigning items | `ConfirmDialog`: title "Discard split?" / body "Your assignments will be lost." / confirm "Discard" (destructive) / cancel "Keep editing" |
+| Cancel split (if any assignments made) | Tap "Keep tab open" after assigning items | `ConfirmDialog`: title "Discard split?" / body "Your assignments will be lost." / confirm "Discard" (destructive) / cancel "Keep editing" |
 | Process refund | "Request approval" → manager PIN → final confirm | Manager PIN dialog IS the confirmation gate. No additional ConfirmDialog needed. |
 
 ---
@@ -776,7 +778,7 @@ Below the parent tab's item list, add a section:
 
 ```
 CLOSED
-  → [Split button tap on open tab] → OPEN (default mode: Evenly)
+  → [Split bill button tap on open tab] → OPEN (default mode: Evenly)
 
 OPEN/Evenly
   Substates: N_UNSET (N=0), N_SET (N >= 2), INVALID (N=1)
@@ -842,6 +844,8 @@ OPEN
 
   RECEIPT_REPRINT_PROMPT (post-success Dialog)
     → "Print receipt" → triggers Tauri IPC print
+        → [print success] → dismissed; no further action
+        → [print failure] → error toast "Receipt print failed — check printer connection."
     → "Skip" → dismissed; no action
 ```
 
@@ -853,7 +857,7 @@ OPEN
 
 ### Sub-tab visibility in tab detail
 
-When `tab.status === 'split'`: hide the "Split" button entirely; show sub-checks panel (see component spec above). Sub-tabs with `status === 'paid'` show `text-pos-accent` label + paid StatusBadge.
+When `tab.status === 'split'`: hide the "Split bill" button entirely; show sub-checks panel (see component spec above). Sub-tabs with `status === 'paid'` show `text-pos-accent` label + paid StatusBadge.
 
 ---
 
@@ -893,7 +897,7 @@ Inherited from locked decisions in `04-navigation-ui-flows.md`:
 No new shadcn primitives need to be installed — all required primitives were installed in Phases 1–3.
 
 **New lucide icons introduced in this phase:**
-- `SplitSquareHorizontal` — Split button in tab detail
+- `SplitSquareHorizontal` — Split bill button in tab detail
 - `ReceiptText` — RefundsList empty state icon (fallback: `Receipt` if not available in installed version)
 
 Verify lucide version supports these icons:
@@ -945,11 +949,13 @@ Stories must import from `@storybook/react-vite` (not `@storybook/react`) per pr
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
+- [x] Dimension 1 Copywriting: RESOLVED — SplitTabSheet secondary CTA → "Keep tab open"; RefundSheet secondary CTA → "Close refund"; Split button in tab detail → "Split bill"
 - [ ] Dimension 2 Visuals: PASS
 - [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
+- [x] Dimension 4 Typography: RESOLVED — all `text-xs` instances replaced with `text-sm` (RefundItemRow metadata + Restock label + SubTabColumn DropZone + RefundsList payment ref cell); scale remains exactly 4 sizes
+- [x] Dimension 5 Spacing: RESOLVED — all `py-1.5` (6px, non-grid) replaced with `py-2` (8px = sm token): indicator bar, SubTabColumn ItemRow, sub-checks display row
 - [ ] Dimension 6 Registry Safety: PASS
+
+**Checker revision applied:** 2026-04-24 — fixed BLOCK 1 (copywriting), BLOCK 2 (typography text-xs), BLOCK 3 (spacing py-1.5); added print-failure fallback toast to RECEIPT_REPRINT_PROMPT branch.
 
 **Approval:** pending
