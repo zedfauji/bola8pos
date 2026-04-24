@@ -41,7 +41,8 @@ See: .planning/PROJECT.md
 - 2026-04-23: Plan 02-02 (schema push + Zod types + pool-billing) completed — supabase db push applied, 6 combo Zod schemas added to domain.ts, prepaidMinutes in pool-billing, 19 tests pass
 - 2026-04-23: Plan 02-03 (entities/combo/ + add_combo_to_tab RPC) completed — 6 TanStack Query hooks, comboKeys, add_combo_to_tab PL/pgSQL migration with all 4 error strings
 - 2026-04-23: Plan 02-04 (shared/ui combo components + ProductGrid) completed — ComboBadge, ComboUnavailableBadge, ComboSlotCard + 3 story files; ProductGrid combo routing fork with useComboAvailability + ManagerPinDialog override
-- 2026-04-24: Plan 02-07 (property tests + seed data) completed — P2 pricing + P3 availability property tests (10 tests, 2800+ runs), seed-combos.ts for Cubeta Regular/Premium + Martes de Cubeta + Pool
+- 2026-04-24: Plan 02-07 (property tests + seed data) completed — P2 pricing + P3 availability property tests
+- 2026-04-24: Plan 06-05 (entity hooks) completed — useSubTabs + parent_tab_id IS NULL filter on useTabs + entities/refund FSD slice (useRefunds, useRefundsByPayment, refundKeys) — P2 pricing + P3 availability property tests (10 tests, 2800+ runs), seed-combos.ts for Cubeta Regular/Premium + Martes de Cubeta + Pool
 
 ## Decisions
 
@@ -112,5 +113,5 @@ See: .planning/PROJECT.md
 
 ## Last Session
 
-- **Stopped at:** Completed 06-06 Plan (SubTabColumn + PersonCard shared/ui components + Storybook stories)
-- **Timestamp:** 2026-04-24T19:55:00Z
+- **Stopped at:** Completed 06-05-PLAN.md — entity hooks (useSubTabs + refund FSD slice)
+- **Timestamp:** 2026-04-24T19:30:00Z
