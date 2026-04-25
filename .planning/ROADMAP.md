@@ -189,13 +189,13 @@ Plans:
 **Plans:** 8 plans (7 executed + 1 gap closure)
 
 Plans:
-- [x] 07-01-PLAN.md � DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
-- [x] 07-02-PLAN.md � [BLOCKING] supabase db push + shared utilities (phone.ts, waitlist-math.ts, tauri-notify.ts) + Zod schemas + AppErrorCodes + RBAC (Wave 2) (S5-04, S5-06, S5-07)
-- [x] 07-03-PLAN.md � Edge function send-waitlist-notification (Deno + WasenderAPI + rate-limit guard) (Wave 3) (S5-05)
-- [x] 07-04-PLAN.md � entities/waitlist/ FSD slice (types, queries, WaitlistEntryCard + Storybook) + WaitlistRealtimeListener (Wave 3) (S5-08)
-- [x] 07-05-PLAN.md � Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
-- [x] 07-06-PLAN.md � Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
-- [x] 07-07-PLAN.md � Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
+- [x] 07-01-PLAN.md — DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
+- [x] 07-02-PLAN.md — [BLOCKING] supabase db push + shared utilities (phone.ts, waitlist-math.ts, tauri-notify.ts) + Zod schemas + AppErrorCodes + RBAC (Wave 2) (S5-04, S5-06, S5-07)
+- [x] 07-03-PLAN.md — Edge function send-waitlist-notification (Deno + WasenderAPI + rate-limit guard) (Wave 3) (S5-05)
+- [x] 07-04-PLAN.md — entities/waitlist/ FSD slice (types, queries, WaitlistEntryCard + Storybook) + WaitlistRealtimeListener (Wave 3) (S5-08)
+- [x] 07-05-PLAN.md — Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
+- [x] 07-06-PLAN.md — Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
+- [x] 07-07-PLAN.md — Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
 - [x] 07-08-PLAN.md — Gap closure CR-01+CR-02: register /waitlist route in router.tsx, mount WaitlistRealtimeListener, fix pool_tables name→label+number column bug in 3 files (Wave 7) (S5-08, S5-11) ✓ 2026-04-25
 
 **Success Criteria**:
@@ -212,16 +212,24 @@ Plans:
 
 **Source:** S6-polish-reports.md
 **Goal:** Ship operator analytics for Phases 2–7, fix paper-cuts, harden E2E suite, resolve deferred debt.
-**Requirements:** S6-01..S6-10
+**Requirements:** S6-01..S6-15
 **Depends on:** Phases 2, 4, 5, 6, 7
-**Plans:** 0 plans
+**Plans:** 5 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Wave 0 lint fixes + Wave 0 test stubs + Wave 1 DB migrations (3 views + 2 indexes) + S6-15 DOWN scripts + [BLOCKING] supabase db push (S6-01, S6-02, S6-15)
+- [ ] 08-02-PLAN.md — Wave 2 domain types (5 Zod schemas + supabase.types.ts extension) + Wave 3 query hooks (5 hooks + 365-day guard) (S6-01, S6-03, S6-04, S6-05, S6-06, S6-09)
+- [ ] 08-03-PLAN.md — Wave 4 report widgets: ComboMixReport + RecipeVarianceReport + WaitlistAnalyticsReport + RefundsRegister + ComboOverrideReport (S6-03, S6-04, S6-05, S6-06, S6-09)
+- [ ] 08-04-PLAN.md — Wave 5 export infrastructure extension + ReportsPage 5 new tabs wired (S6-07, S6-08)
+- [ ] 08-05-PLAN.md — Wave 6+7: seed-reports.ts + 37-analytics-reports.spec.ts + 21-prep T5 fix + CLAUDE.md update + human E2E sign-off (S6-10, S6-11, S6-12, S6-13, S6-14)
 
 **Success Criteria**:
-1. Reports: Combo Mix, Recipe Variance, Waitlist Analytics, Refunds Register live on `/reports`
-2. Performance indexes applied per data-model § S6
-3. E2E suite green with zero flakes across specs 01–24
-4. Paper-cuts backlog triaged — ~30% of sprint reserved for field feedback
+1. Reports: Combo Mix, Recipe Variance, Waitlist Analytics, Refunds Register, Combo Overrides live on `/reports`
+2. Performance indexes applied — idx_stock_movements_ingredient_ts + idx_waitlist_entries_status_created_at
+3. E2E suite green with zero flakes across specs 01–37
+4. Paper-cuts backlog triaged — 8 import-order lint fixes committed
 5. `CLAUDE.md` "Implemented Features" list + Obsidian Feature Backlog updated
+6. All S6 migrations include DOWN script comment blocks (S6-15)
 
 ---
 
