@@ -509,3 +509,16 @@ describe('aggregateHourlyRevenue', () => {
     expect(aggregateHourlyRevenue([])).toHaveLength(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Phase 8 report hooks — Wave 0 stubs
+// ---------------------------------------------------------------------------
+
+describe('Phase 8 report hooks — Wave 0 stubs', () => {
+  it.todo('useComboMixReport: returns ok(rows) for valid date range');
+  it.todo('useComboMixReport: throws ValidationError when range > 365 days');
+  it.todo('useRecipeVarianceReport: returns ok(rows) for valid date range');
+  it.todo('useWaitlistAnalyticsReport: returns ok(rows) for valid date range');
+  it.todo('useRefundsRegister: returns ok(rows) for valid date range');
+  it.todo('useComboOverrides: returns ok(rows) from audit_log');
+});
