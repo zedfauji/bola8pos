@@ -1,7 +1,8 @@
 ---
 phase: 7
 slug: waitlist-whatsapp
-status: draft
+status: approved
+reviewed_at: 2026-04-25
 shadcn_initialized: true
 preset: "style=radix-nova, baseColor=neutral, cssVariables=true"
 created: 2026-04-25
@@ -88,11 +89,11 @@ Inherited from Phases 2–6. All sizes use Geist Variable. Exactly 4 sizes, exac
 | Display | `text-2xl font-semibold` | 24px | 600 | 1.2 | Waiting count badge on Home tile; WaitlistPage section count header |
 | Heading | `text-lg font-semibold` | 18px | 600 | 1.2 | WaitlistPage section headers ("Waiting", "Notified"); Sheet/Dialog titles |
 | Body | `text-base` | 16px | 400 | 1.5 | WaitlistEntryCard party name; AddWaitlistEntryForm field labels and inputs |
-| Label | `text-sm` | 14px | 400 | 1.4 | WaitlistEntryCard metadata (party size, wait time, phone indicator); PoolTableOccupancyPanel table labels; muted hints |
+| Label | `text-sm` | 14px | 400 | 1.4 | WaitlistEntryCard metadata (party size, wait time, phone indicator, timestamps); PoolTableOccupancyPanel table labels; muted hints |
 
 Mono for numeric values: `font-mono tabular-nums text-sm` — used for quoted-wait minutes display (`~{N} min`). Consistent with Phase 5 `MoneyDisplay` pattern.
 
-No `text-xs` in primary content. `text-xs` permitted for secondary metadata only (e.g., "added {time ago}" under party name in WaitlistEntryCard).
+`text-sm` (14px) covers ALL metadata including secondary metadata such as "added {time ago}" timestamps. The scale is exactly 4 sizes: 24px / 18px / 16px / 14px.
 
 ---
 
@@ -169,7 +170,7 @@ Card (rounded-lg border p-4 flex flex-col gap-2)
   [Header row]
   div.flex.items-center.justify-between.gap-2
     div.flex.items-center.gap-2
-      span.text-base.font-medium.truncate  — party name
+      span.text-base.font-semibold.truncate  — party name
       <StatusBadge status={entry.status} />
     div.flex.items-center.gap-1.text-sm.text-muted-foreground
       (entry.phoneE164 ? <Phone h-3 w-3 /> : <PhoneOff h-3 w-3 />)
@@ -183,7 +184,7 @@ Card (rounded-lg border p-4 flex flex-col gap-2)
     div.flex.items-center.gap-1
       <Clock h-3 w-3 />
       "~{quotedWait} min wait"
-    span.text-xs  — "added {timeAgo}"
+    span.text-sm  — "added {timeAgo}"
 
   [Notification status — only when status = 'notified']
   {entry.status === 'notified' && (
@@ -240,7 +241,7 @@ Sheet (side="right" max-w-md)
       )}
 
   SheetFooter (px-6 pb-6 flex gap-3)
-    <Button variant="outline" flex-1 onClick={onClose}>Cancel</Button>
+    <Button variant="outline" flex-1 onClick={onClose}>Discard</Button>
     <Button flex-1 disabled={!isValid || isPending} onClick={handleSubmit}>
       {isPending ? <LoadingSpinner size="sm" /> : "Add to waitlist"}
     </Button>
@@ -268,7 +269,7 @@ Sheet (side="right" max-w-md)
           )}
           onClick={() => setSelectedTableId(table.id)}
         >
-          <span.text-base.font-medium> {table.name} </span>
+          <span.text-base.font-semibold> {table.name} </span>
         </button>
       ))}
 
@@ -282,7 +283,7 @@ Sheet (side="right" max-w-md)
     )}
 
   SheetFooter
-    <Button variant="outline" flex-1 onClick={onClose}>Cancel</Button>
+    <Button variant="outline" flex-1 onClick={onClose}>Close</Button>
     <Button flex-1 disabled={!selectedTableId || isPending} onClick={handleSeat}>
       {isPending ? <LoadingSpinner size="sm" /> : "Seat party"}
     </Button>
@@ -331,8 +332,8 @@ div.space-y-3 (aria-label="Pool table occupancy")
           available: "border-pos-accent/50 bg-pos-accent/5"
           occupied:  "border-pos-danger/50 bg-pos-danger/5 opacity-75"
       )
-        span.text-sm.font-medium  — table.name
-        span.text-xs.text-muted-foreground  — (occupied ? "Occupied" : "Free")
+        span.text-sm.font-semibold  — table.name
+        span.text-sm.text-muted-foreground  — (occupied ? "Occupied" : "Free")
     ))}
 ```
 
@@ -358,7 +359,7 @@ The waiting-count badge is a numeric overlay on the tile icon. Since `HomeDashbo
 {waitingCount > 0 && (
   <Badge
     variant="destructive"
-    className="absolute -right-1 -top-1 h-5 min-w-[20px] rounded-full px-1 text-xs"
+    className="absolute -right-1 -top-1 h-5 min-w-[20px] rounded-full px-1 text-sm"
   >
     {waitingCount > 99 ? '99+' : waitingCount}
   </Badge>
@@ -533,7 +534,7 @@ The `useWaitlistWaitingCount` hook is a lightweight TanStack Query hook in `enti
 | Phone number validation error | "Not a valid MX or US phone number." |
 | Primary CTA | "Add to waitlist" |
 | Primary CTA (loading) | [LoadingSpinner — no text] |
-| Secondary CTA | "Cancel" |
+| Secondary CTA | "Discard" |
 
 ### SeatPartySheet
 
@@ -547,7 +548,7 @@ The `useWaitlistWaitingCount` hook is a lightweight TanStack Query hook in `enti
 | Table free label | "Free" |
 | Empty state (no tables) | "No tables available right now." |
 | Primary CTA | "Seat party" |
-| Secondary CTA | "Cancel" |
+| Secondary CTA | "Close" |
 
 ### Toast / notification copy
 

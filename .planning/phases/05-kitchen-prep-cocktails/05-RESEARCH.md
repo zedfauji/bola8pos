@@ -700,19 +700,19 @@ Follows `36-recipes.spec.ts` and `33-ingredients.spec.ts` patterns.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **RBAC: produce_prep_batch vs. adjust_inventory**
+1. **RBAC: produce_prep_batch vs. adjust_inventory** — RESOLVED: Add `produce_prep_batch` to STAFF_ACTIONS + KITCHEN_ACTIONS + MANAGER_EXTRA. Surgical new action avoids accidentally granting kitchen access to full `/inventory` page.
    - What we know: `kitchen` role exists; PRD says "treat as manager for prep"; adjust_inventory is the closest existing action
    - What's unclear: Whether granting kitchen the full `/inventory` page access is acceptable
    - Recommendation: Add `produce_prep_batch` action — surgical and reversible
 
-2. **useMutationSavePrepRecipe — separate hook or extend existing?**
+2. **useMutationSavePrepRecipe — separate hook or extend existing?** — RESOLVED: Two separate hooks. `useMutationSaveRecipe` unchanged (product-owner upsert); new `useMutationSavePrepRecipe` in entities/prep/ (prep-owner upsert on prep_ingredient_id conflict).
    - What we know: `useMutationSaveRecipe` currently upserts on `product_id` conflict
    - What's unclear: Whether a single hook with a discriminated union input or two separate hooks is cleaner
    - Recommendation: Two hooks (`useMutationSaveRecipe` unchanged, new `useMutationSavePrepRecipe`) — simpler and avoids conditional upsert logic
 
-3. **Trigger: AFTER INSERT vs BEFORE INSERT**
+3. **Trigger: AFTER INSERT vs BEFORE INSERT** — RESOLVED: Use AFTER INSERT. Postgres AFTER triggers can RAISE EXCEPTION which rolls back the triggering INSERT. Same pattern as add_combo_to_tab exception guards.
    - What we know: The trigger must reject non-prep ingredients (step 1) before writing movements
    - What's unclear: BEFORE INSERT triggers can prevent the INSERT but cannot call RPCs that modify other tables in some configurations
    - Recommendation: Use AFTER INSERT trigger with the RAISE EXCEPTION in step 1 still working (Postgres AFTER triggers can raise exceptions, which rolls back the INSERT). This is the same pattern as `add_combo_to_tab` EXCEPTION guards.
