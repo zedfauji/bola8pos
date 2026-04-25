@@ -186,7 +186,7 @@ Plans:
 **Goal:** Walk-in queue with FIFO ordering, party size, and per-party WhatsApp notification on table-available events (fallback to Realtime pane + Tauri notification).
 **Requirements:** S5-01..S5-11
 **Depends on:** Phase 1
-**Plans:** 7 plans
+**Plans:** 8 plans (7 executed + 1 gap closure)
 
 Plans:
 - [x] 07-01-PLAN.md � DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
@@ -196,6 +196,7 @@ Plans:
 - [x] 07-05-PLAN.md � Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
 - [x] 07-06-PLAN.md � Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
 - [x] 07-07-PLAN.md � Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
+- [ ] 07-08-PLAN.md — Gap closure CR-01+CR-02: register /waitlist route in router.tsx, mount WaitlistRealtimeListener, fix pool_tables name→label+number column bug in 3 files (Wave 7) (S5-08, S5-11)
 
 **Success Criteria**:
 1. `waitlist_entries` + `waitlist_notifications` schema live
