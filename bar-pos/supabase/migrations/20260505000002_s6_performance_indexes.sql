@@ -3,7 +3,7 @@
 
 -- 1. stock_movements: ingredient ledger drilldown queries
 CREATE INDEX IF NOT EXISTS idx_stock_movements_ingredient_ts
-  ON stock_movements (ingredient_id, ts DESC)
+  ON stock_movements (ingredient_id, created_at DESC)
   WHERE ingredient_id IS NOT NULL;
 
 -- 2. waitlist_entries: composite for reporting + FIFO queue queries
