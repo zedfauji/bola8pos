@@ -13,7 +13,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [x] **Phase 4: Recipes & Sale Depletion** — Recipes + atomic ingredient depletion on sale (completed 2026-04-24)
 - [ ] **Phase 5: Kitchen Prep + Cocktails** — Chef prep batches and Michelada extension
 - [ ] **Phase 6: Split Bill + Refund** — Four split modes + PIN-gated refunds
-- [ ] **Phase 7: Waitlist + WhatsApp** — FIFO queue + WasenderAPI notifications
+- [x] **Phase 7: Waitlist + WhatsApp** — FIFO queue + WasenderAPI notifications (completed 2026-04-25)
 - [ ] **Phase 8: Polish + Reports + E2E Hardening** — Operator analytics + flake cleanup
 
 ---
@@ -196,7 +196,7 @@ Plans:
 - [x] 07-05-PLAN.md � Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
 - [x] 07-06-PLAN.md � Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
 - [x] 07-07-PLAN.md � Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
-- [ ] 07-08-PLAN.md — Gap closure CR-01+CR-02: register /waitlist route in router.tsx, mount WaitlistRealtimeListener, fix pool_tables name→label+number column bug in 3 files (Wave 7) (S5-08, S5-11)
+- [x] 07-08-PLAN.md — Gap closure CR-01+CR-02: register /waitlist route in router.tsx, mount WaitlistRealtimeListener, fix pool_tables name→label+number column bug in 3 files (Wave 7) (S5-08, S5-11) ✓ 2026-04-25
 
 **Success Criteria**:
 1. `waitlist_entries` + `waitlist_notifications` schema live
