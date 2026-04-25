@@ -884,6 +884,49 @@ export type Database = {
           },
         ];
       };
+      // TODO: regenerate types after Phase 5 migrations applied (Docker unavailable — manual transcription)
+      prep_productions: {
+        Row: {
+          id: string;
+          prep_ingredient_id: string;
+          qty_produced: number;
+          notes: string | null;
+          produced_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          prep_ingredient_id: string;
+          qty_produced: number;
+          notes?: string | null;
+          produced_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          prep_ingredient_id?: string;
+          qty_produced?: number;
+          notes?: string | null;
+          produced_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'prep_productions_prep_ingredient_id_fkey';
+            columns: ['prep_ingredient_id'];
+            isOneToOne: false;
+            referencedRelation: 'ingredients';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prep_productions_produced_by_fkey';
+            columns: ['produced_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       product_modifiers: {
         Row: {
           created_at: string;
@@ -1358,7 +1401,8 @@ export type Database = {
       recipes: {
         Row: {
           id: string;
-          product_id: string;
+          product_id: string | null;
+          prep_ingredient_id: string | null;
           yield_qty: number;
           notes: string | null;
           created_at: string;
@@ -1366,7 +1410,8 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          product_id: string;
+          product_id?: string | null;
+          prep_ingredient_id?: string | null;
           yield_qty?: number;
           notes?: string | null;
           created_at?: string;
@@ -1374,7 +1419,8 @@ export type Database = {
         };
         Update: {
           id?: string;
-          product_id?: string;
+          product_id?: string | null;
+          prep_ingredient_id?: string | null;
           yield_qty?: number;
           notes?: string | null;
           updated_at?: string;
@@ -1383,8 +1429,15 @@ export type Database = {
           {
             foreignKeyName: 'recipes_product_id_fkey';
             columns: ['product_id'];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipes_prep_ingredient_id_fkey';
+            columns: ['prep_ingredient_id'];
+            isOneToOne: false;
+            referencedRelation: 'ingredients';
             referencedColumns: ['id'];
           },
         ];
