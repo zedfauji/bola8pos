@@ -192,6 +192,9 @@ export type AppErrorCode =
   | 'REFUND_EXCEEDS_ORIGINAL' // refund amount > original payment amount
   | 'ITEM_NOT_IN_ORIGINAL_ORDER' // refund item not found in original order
   | 'PREP_INGREDIENT_REQUIRED' // prep batch attempted on a non-prep ingredient
+  | 'WAITLIST_ENTRY_NOT_FOUND' // waitlist entry not found
+  | 'WAITLIST_NOTIFICATION_RATE_LIMITED' // notification sent too recently
+  | 'WAITLIST_INVALID_PHONE' // phone number failed E.164 validation
   | 'UNKNOWN_ERROR';
 
 /**

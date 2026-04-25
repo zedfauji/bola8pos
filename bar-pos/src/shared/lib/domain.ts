@@ -1657,3 +1657,52 @@ export const PrepProductionCreateSchema = z.object({
 
 export type PrepProduction = z.infer<typeof PrepProductionSchema>;
 export type PrepProductionCreate = z.infer<typeof PrepProductionCreateSchema>;
+
+// ============================================================================
+// WAITLIST (Phase 7)
+// ============================================================================
+
+export const WaitlistEntryStatusSchema = z.enum([
+  'waiting',
+  'notified',
+  'seated',
+  'no_show',
+  'cancelled',
+]);
+export type WaitlistEntryStatus = z.infer<typeof WaitlistEntryStatusSchema>;
+
+export const PhoneE164Schema = z
+  .string()
+  .regex(/^\+[1-9]\d{6,14}$/, 'Must be a valid E.164 phone number');
+
+export const WaitlistEntrySchema = z.object({
+  id: UuidSchema,
+  name: z.string().min(1).max(100),
+  partySize: z.number().int().min(1).max(20),
+  phoneE164: PhoneE164Schema.nullable(),
+  status: WaitlistEntryStatusSchema,
+  tableId: UuidSchema.nullable(),
+  seatedAt: TimestampSchema.nullable(),
+  notifiedAt: TimestampSchema.nullable(),
+  createdAt: TimestampSchema,
+});
+
+export const WaitlistEntryCreateSchema = z.object({
+  name: z.string().min(1).max(100),
+  partySize: z.number().int().min(1).max(20),
+  phoneE164: PhoneE164Schema.nullable(),
+});
+
+export const WaitlistNotificationSchema = z.object({
+  id: UuidSchema,
+  waitlistEntryId: UuidSchema,
+  channel: z.enum(['whatsapp', 'manager']),
+  status: z.enum(['sent', 'failed', 'pending']),
+  providerMessageId: z.string().nullable(),
+  error: z.string().nullable(),
+  createdAt: TimestampSchema,
+});
+
+export type WaitlistEntry = z.infer<typeof WaitlistEntrySchema>;
+export type WaitlistEntryCreate = z.infer<typeof WaitlistEntryCreateSchema>;
+export type WaitlistNotification = z.infer<typeof WaitlistNotificationSchema>;
