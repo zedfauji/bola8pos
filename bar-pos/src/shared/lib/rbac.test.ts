@@ -37,9 +37,10 @@ const ALLOWED: Record<StaffRole, ReadonlySet<string>> = {
     'manage_products',
     'manage_caja',
     'process_refund',
+    'produce_prep_batch',
   ]),
   admin: new Set(STAFF_ACTIONS),
-  kitchen: new Set(['view_kds', 'clock_in', 'clock_out']),
+  kitchen: new Set(['view_kds', 'clock_in', 'clock_out', 'produce_prep_batch']),
 };
 
 describe('rbac', () => {
