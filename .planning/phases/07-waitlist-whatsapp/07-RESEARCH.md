@@ -751,22 +751,22 @@ The `waitlist_entries_seated_at_party_idx` partial index defined in the schema s
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **pg_net trigger — hardcode URL or use DB settings?**
+   - **RESOLVED: DB settings approach with COALESCE fallback (implemented in Plan 07-01 Task 2)**
    - What we know: Both approaches work; hardcoding is simpler for single-venue
-   - What's unclear: User preference on whether Supabase project ref appears in committed migration files
-   - Recommendation: Use DB settings approach (`alter database postgres set app.supabase_url`) so the migration file does not contain the project reference; document the required `SET` commands in the operator runbook
+   - Decision: Use DB settings approach (`alter database postgres set app.supabase_url`) with COALESCE fallback so the migration works even before settings are configured; document the required `SET` commands in the operator runbook
 
 2. **WasenderAPI account — will it be live for E2E testing?**
+   - **RESOLVED: E2E tests run against live state; edge function route interception used in Playwright for WasenderAPI calls (Plan 07-07)**
    - What we know: The feature flag allows WhatsApp-disabled mode
-   - What's unclear: Whether the user wants E2E to mock the edge function (MSW/vitest) or test against a live WasenderAPI sandbox
-   - Recommendation: E2E spec mocks the edge function response via Playwright route interception; contract tests use MSW; no live WasenderAPI calls in CI
+   - Decision: E2E spec mocks the edge function response via Playwright route interception; no live WasenderAPI calls in CI
 
 3. **`manage_waitlist` RBAC action — new action or reuse existing?**
+   - **RESOLVED: New `manage_waitlist` action added to MANAGER_EXTRA only (Plan 07-02 Task 3)**
    - What we know: No existing action covers waitlist management; `manage_products` is the closest analog (manager+)
-   - What's unclear: Whether bartenders should be able to view-only the waitlist (separate `view_waitlist` action)
-   - Recommendation: Add `manage_waitlist` to `MANAGER_EXTRA`; add `view_waitlist` to `BARTENDER_ACTIONS` if the PRD adds read-only access for bartenders (not mentioned in S5, so default to manager-only)
+   - Decision: Add `manage_waitlist` to `MANAGER_EXTRA` only; bartenders get SELECT via RLS but no UI action (not mentioned in S5 PRD)
 
 ---
 
