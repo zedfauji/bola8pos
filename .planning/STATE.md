@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 05
-current_plan: 3
+current_plan: 4
 status: ready_to_execute
-stopped_at: "Phase 05 Plan 02 complete — domain types + RBAC + prep-math + Wave 0 stubs"
-last_updated: "2026-04-25T18:00:00Z"
+stopped_at: "Phase 05 Plan 03 complete — ChefHatBadge + entities/prep FSD slice + useProducePrepBatch + I1-I6 integration tests"
+last_updated: "2026-04-25T19:30:00Z"
 progress:
   total_phases: 8
   completed_phases: 5
@@ -55,6 +55,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 04-06 complete — depletion unit (6/6) + integration (4/4) + 36-recipes.spec.ts E2E; 3 post-checkpoint selector fixes; E2E 3/3 PASS 1 skip; Phase 04 complete
 - 2026-04-25: Plan 05-01 complete (98cb6a1) — 3 SQL migrations (prep_productions table + recipes extension + trigger), applied to remote DB (user confirmed), supabase.types.ts updated; typecheck pass
 - 2026-04-25: Plan 05-02 complete (d5de8e8) — PrepProductionSchema + PREP_INGREDIENT_REQUIRED + produce_prep_batch RBAC; computePrepConsumption pure function; 5 unit tests + P7 property tests pass; 5 Wave 0 stubs created
+- 2026-04-25: Plan 05-03 complete (8065774) — ChefHatBadge + entities/prep FSD slice (prepKeys, usePrepProductions, useMutationCreatePrepProduction, useRecipeByPrepIngredient, PrepOnHandCard + 4 stories) + useProducePrepBatch hook + I1-I6 integration tests; 5 unit tests pass; typecheck + lint pass
 
 ## Decisions
 
