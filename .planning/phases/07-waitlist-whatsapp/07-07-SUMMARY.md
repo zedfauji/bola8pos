@@ -17,6 +17,8 @@ key_files:
     - bar-pos/src/shared/lib/phone.test.ts
     - bar-pos/src/shared/lib/waitlist-math.test.ts
     - bar-pos/src/entities/waitlist/model/waitlist-queries.integration.test.ts
+    - bar-pos/src/app/pages/home/HomeDashboard.tsx
+    - bar-pos/src/shared/lib/rbac.test.ts
 decisions:
   - "Integration test file (*.integration.test.ts) is excluded from the default unit project; run with dedicated vitest.integration.config.ts or explicitly pass the file path"
   - "Schema round-trip tests used in place of live-DB integration tests (no live DB dependency in unit CI)"
@@ -24,9 +26,9 @@ decisions:
 metrics:
   duration: "5min"
   completed_date: "2026-04-25"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
-  files_changed: 4
+  files_changed: 6
 ---
 
 # Phase 07 Plan 07: Fill in Phase 7 Tests Summary
@@ -40,9 +42,13 @@ metrics:
 | 1 | Fill in unit tests for phone.ts and waitlist-math.ts | f553601 | phone.test.ts, waitlist-math.test.ts |
 | 2 | Fill in integration test stub + create E2E spec | 506fd02 | waitlist-queries.integration.test.ts, e2e/24-waitlist.spec.ts |
 
-## Task 3: PENDING (checkpoint:human-verify)
+## Task 3: COMPLETE (post-checkpoint fixes)
 
-Task 3 is a `checkpoint:human-verify` — stopped here per plan. Human must run dev server + Playwright E2E to validate T1–T5.
+After human verification approved the checkpoint, post-merge lint/test fixes were applied:
+- Restored `HomeDashboard.tsx` Waitlist + KitchenPrep tiles that were dropped in a merge conflict
+- Updated `rbac.test.ts` to match current `RbacAction` union (removed stale action strings that no longer exist)
+- Fixed template literal syntax errors in E2E spec (`e2e/24-waitlist.spec.ts`)
+- All 105 test files, 1054 tests passing, 0 lint errors, 0 type errors confirmed
 
 ## Test Results
 
@@ -75,6 +81,27 @@ Task 3 is a `checkpoint:human-verify` — stopped here per plan. Human must run 
 - **Files modified:** `bar-pos/vitest.integration.config.ts` (untracked, not committed)
 - **Commit:** N/A
 
+**3. [Rule 1 - Bug] HomeDashboard Waitlist+KitchenPrep tiles dropped in merge conflict**
+- **Found during:** Post-checkpoint merge verification
+- **Issue:** Merge conflict resolution in HomeDashboard.tsx accidentally removed the Waitlist tile (with waiting-count badge) and KitchenPrep tile that were added in earlier plans.
+- **Fix:** Restored both tiles from the worktree commit history.
+- **Files modified:** `bar-pos/src/app/pages/home/HomeDashboard.tsx`
+- **Commit:** (post-merge fix commit)
+
+**4. [Rule 1 - Bug] rbac.test.ts referenced stale RbacAction strings**
+- **Found during:** Post-checkpoint `npm run test` verification
+- **Issue:** `rbac.test.ts` contained action strings (e.g. `'create_tab'`) that no longer exist in the `RbacAction` union in `rbac.ts`, causing TypeScript errors and test failures.
+- **Fix:** Updated test to use only current valid `RbacAction` values.
+- **Files modified:** `bar-pos/src/shared/lib/rbac.test.ts`
+- **Commit:** (post-merge fix commit)
+
+**5. [Rule 1 - Bug] Template literal syntax errors in E2E spec**
+- **Found during:** Post-checkpoint lint check
+- **Issue:** `e2e/24-waitlist.spec.ts` had malformed template literals causing ESLint errors.
+- **Fix:** Corrected template literal syntax.
+- **Files modified:** `bar-pos/e2e/24-waitlist.spec.ts`
+- **Commit:** (post-merge fix commit)
+
 ## Known Stubs
 
 None — all implemented test cases use real assertions. The E2E T3 (seat party) has a conditional path when no free tables are available in the test environment, but this is an environment constraint, not a code stub.
@@ -93,4 +120,4 @@ None — test files only; no new network endpoints, auth paths, or schema change
 
 ## Self-Check: PASSED
 
-All 4 modified/created files found on disk. Both task commits (f553601, 506fd02) verified in git log.
+All modified/created files found on disk. Task commits (f553601, 506fd02) verified in git log. Post-merge fixes applied: HomeDashboard restored, rbac.test.ts updated, E2E template literals fixed. Final state: 105 test files, 1054 tests passing, 0 lint errors, 0 type errors. VALIDATION.md updated to status: complete, nyquist_compliant: true, wave_0_complete: true.
