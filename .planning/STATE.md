@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 08
-current_plan: 1
-status: planning
-stopped_at: Phase 07 complete — all 8 plans done, human UAT approved 2026-04-25
-last_updated: "2026-04-25T00:00:00.000Z"
+current_plan: 2
+status: in_progress
+stopped_at: "08-01 Tasks 1+2 done — Task 3 (supabase db push) is a blocking human-verify checkpoint awaiting user"
+last_updated: "2026-04-25T23:11:56.308Z"
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 53
-  completed_plans: 51
-  percent: 96
+  total_plans: 59
+  completed_plans: 53
+  percent: 90
 ---
 
 # Session State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 08
 **Current plan:** 1
 **Status:** Planning Phase 08
-**Progress:** [█████████░] 96%
+**Progress:** [█████████░] 90%
 
 ## Session Log
 
@@ -56,9 +56,12 @@ See: .planning/PROJECT.md
 - 2026-04-25: Plan 05-01 complete (98cb6a1) — 3 SQL migrations (prep_productions table + recipes extension + trigger), applied to remote DB (user confirmed), supabase.types.ts updated; typecheck pass
 - 2026-04-25: Plan 05-02 complete (d5de8e8) — PrepProductionSchema + PREP_INGREDIENT_REQUIRED + produce_prep_batch RBAC; computePrepConsumption pure function; 5 unit tests + P7 property tests pass; 5 Wave 0 stubs created
 - 2026-04-25: Plan 05-03 complete (8065774) — ChefHatBadge + entities/prep FSD slice (prepKeys, usePrepProductions, useMutationCreatePrepProduction, useRecipeByPrepIngredient, PrepOnHandCard + 4 stories) + useProducePrepBatch hook + I1-I6 integration tests; 5 unit tests pass; typecheck + lint pass
+- 2026-04-25: Plan 08-01 Tasks 1+2 complete — 6 lint fixes committed (716154e), 6 it.todo stubs (0c2d617), S6-01 views + S6-02 indexes + S6-15 DOWN scripts (0eaa10d); Task 3 blocking human-verify: supabase db push
 
 ## Decisions
 
+- [Phase 08-polish 08-01]: waitlist_metrics_daily uses NULL::numeric AS avg_quoted_wait — quoted_wait_minutes column absent from waitlist_entries schema; to be wired when column is added
+- [Phase 08-polish 08-01]: Phase 7 migration files named waitlist_notify_trigger.sql + waitlist_trigger_url.sql (plan stated pg_net_trigger + schema_fix) — DOWN blocks added to actual files
 - Use `db = supabase as any` pre-regen cast for stock_movements queries until Plan 03 regenerates types (per CLAUDE.md workaround)
 - Category entity queries do NOT sync to useProductStore; POS flow uses product entity's own useCategories for store sync
 - useCategoryTree delegates tree construction to buildTree from @shared/lib/category-tree to avoid duplication
