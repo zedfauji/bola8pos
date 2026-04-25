@@ -186,11 +186,20 @@ Plans:
 **Goal:** Walk-in queue with FIFO ordering, party size, and per-party WhatsApp notification on table-available events (fallback to Realtime pane + Tauri notification).
 **Requirements:** S5-01..S5-11
 **Depends on:** Phase 1
-**Plans:** 0 plans
+**Plans:** 7 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
+- [ ] 07-02-PLAN.md — [BLOCKING] supabase db push + shared utilities (phone.ts, waitlist-math.ts, tauri-notify.ts) + Zod schemas + AppErrorCodes + RBAC (Wave 2) (S5-04, S5-06, S5-07)
+- [ ] 07-03-PLAN.md — Edge function send-waitlist-notification (Deno + WasenderAPI + rate-limit guard) (Wave 3) (S5-05)
+- [ ] 07-04-PLAN.md — entities/waitlist/ FSD slice (types, queries, WaitlistEntryCard + Storybook) + WaitlistRealtimeListener (Wave 3) (S5-08)
+- [ ] 07-05-PLAN.md — Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
+- [ ] 07-06-PLAN.md — Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
+- [ ] 07-07-PLAN.md — Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
 
 **Success Criteria**:
 1. `waitlist_entries` + `waitlist_notifications` schema live
-2. `send-waitlist-notification` edge function integrates WasenderAPI via Vault secret
+2. `send-waitlist-notification` edge function integrates WasenderAPI via supabase secrets set
 3. `/waitlist` page + Home tile + Realtime manager pane
 4. Auto-notify trigger fires on `status â†’ 'notified'`
 5. Seat-to-table flow assigns `table_id` and clears entry
