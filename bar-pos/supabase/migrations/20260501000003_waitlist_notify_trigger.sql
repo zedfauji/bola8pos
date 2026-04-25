@@ -59,3 +59,9 @@ CREATE TRIGGER trg_waitlist_notify
   AFTER UPDATE OF status ON public.waitlist_entries
   FOR EACH ROW
   EXECUTE FUNCTION public.notify_waitlist_entry();
+
+-- DOWN:
+-- BEGIN;
+-- DROP TRIGGER IF EXISTS trg_waitlist_notify ON waitlist_entries;
+-- DROP FUNCTION IF EXISTS fn_waitlist_notify();
+-- COMMIT;

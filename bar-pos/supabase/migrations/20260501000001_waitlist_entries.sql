@@ -48,3 +48,8 @@ CREATE INDEX IF NOT EXISTS waitlist_entries_status_idx
 CREATE INDEX IF NOT EXISTS waitlist_entries_seated_at_party_idx
   ON public.waitlist_entries (party_size, seated_at)
   WHERE status = 'seated' AND seated_at IS NOT NULL;
+
+-- DOWN:
+-- BEGIN;
+-- DROP TABLE IF EXISTS waitlist_entries CASCADE;
+-- COMMIT;

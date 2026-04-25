@@ -25,3 +25,8 @@ CREATE POLICY "waitlist_notifications_select_manager" ON public.waitlist_notific
 -- Index for per-entry notification history lookup
 CREATE INDEX IF NOT EXISTS waitlist_notifications_entry_idx
   ON public.waitlist_notifications (waitlist_entry_id);
+
+-- DOWN:
+-- BEGIN;
+-- DROP TABLE IF EXISTS waitlist_notifications CASCADE;
+-- COMMIT;
