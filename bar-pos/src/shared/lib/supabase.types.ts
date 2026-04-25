@@ -1495,7 +1495,37 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      // Report views — Phase 8 S6-01 (pre-regen manual transcription)
+      combo_mix_daily: {
+        Row: {
+          date: string | null;
+          combo_product_id: string | null;
+          combo_name: string | null;
+          qty_sold: number | null;
+          net_revenue: number | null;
+          avg_price: number | null;
+          override_count: number | null;
+        };
+      };
+      recipe_variance_daily: {
+        Row: {
+          date: string | null;
+          ingredient_id: string | null;
+          ingredient_name: string | null;
+          theoretical_used: number | null;
+          physical_delta: number | null;
+          variance_pct: number | null;
+        };
+      };
+      waitlist_metrics_daily: {
+        Row: {
+          date: string | null;
+          parties_seated: number | null;
+          avg_quoted_wait: number | null;
+          avg_actual_wait: number | null;
+          no_show_rate: number | null;
+        };
+      };
     };
     Functions: {
       close_caja_session: {
