@@ -1591,7 +1591,7 @@ const RecipeRowSchema = z.object({
 
 function recipeOwnerRefine(
   val: { productId: string | null; prepIngredientId: string | null },
-  ctx: z.RefinementCtx,
+  ctx: z.RefinementCtx
 ): void {
   const hasProduct = val.productId != null;
   const hasPrep = val.prepIngredientId != null;
@@ -1610,22 +1610,26 @@ export const RecipeWithItemsSchema = RecipeSchema.extend({
   items: z.array(RecipeItemSchema),
 });
 
-export const RecipeCreateSchema = RecipeRowSchema.omit({ id: true, createdAt: true, updatedAt: true }).superRefine(
-  recipeOwnerRefine,
-);
+export const RecipeCreateSchema = RecipeRowSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).superRefine(recipeOwnerRefine);
 
-export const RecipeUpdateSchema = RecipeRowSchema.partial().required({ id: true }).superRefine((val, ctx) => {
-  if (val.productId === undefined && val.prepIngredientId === undefined) {
-    return;
-  }
-  recipeOwnerRefine(
-    {
-      productId: val.productId ?? null,
-      prepIngredientId: val.prepIngredientId ?? null,
-    },
-    ctx,
-  );
-});
+export const RecipeUpdateSchema = RecipeRowSchema.partial()
+  .required({ id: true })
+  .superRefine((val, ctx) => {
+    if (val.productId === undefined && val.prepIngredientId === undefined) {
+      return;
+    }
+    recipeOwnerRefine(
+      {
+        productId: val.productId ?? null,
+        prepIngredientId: val.prepIngredientId ?? null,
+      },
+      ctx
+    );
+  });
 export const RecipeItemCreateSchema = RecipeItemSchema.omit({ id: true });
 
 export type Recipe = z.infer<typeof RecipeSchema>;
@@ -1657,3 +1661,61 @@ export const PrepProductionCreateSchema = z.object({
 
 export type PrepProduction = z.infer<typeof PrepProductionSchema>;
 export type PrepProductionCreate = z.infer<typeof PrepProductionCreateSchema>;
+
+// ────────────────────────────────────────────────────────────────────────────
+// Phase 7: Waitlist + WhatsApp
+// ────────────────────────────────────────────────────────────────────────────
+
+export const WaitlistEntryStatusSchema = z.enum([
+  'waiting',
+  'notified',
+  'seated',
+  'no_show',
+  'cancelled',
+]);
+export type WaitlistEntryStatus = z.infer<typeof WaitlistEntryStatusSchema>;
+
+/**
+ * E.164 phone number (e.g. +525512345678).
+ * Validated client-side by libphonenumber-js (phone.ts).
+ * This schema enforces the format regex for Zod parsing only.
+ */
+export const PhoneE164Schema = z
+  .string()
+  .regex(/^\+[1-9]\d{6,14}$/, 'Must be a valid E.164 phone number');
+
+export const WaitlistEntrySchema = z.object({
+  id: UuidSchema,
+  name: z.string().min(1).max(100),
+  partySize: z.number().int().min(1).max(20),
+  phoneE164: PhoneE164Schema.nullable(),
+  status: WaitlistEntryStatusSchema,
+  tableId: UuidSchema.nullable(),
+  seatedAt: TimestampSchema.nullable(),
+  notifiedAt: TimestampSchema.nullable(),
+  createdAt: TimestampSchema,
+});
+
+/** Input for creating a new waitlist entry — omits server-generated fields */
+export const WaitlistEntryCreateSchema = WaitlistEntrySchema.omit({
+  id: true,
+  status: true,
+  tableId: true,
+  seatedAt: true,
+  notifiedAt: true,
+  createdAt: true,
+});
+
+export const WaitlistNotificationSchema = z.object({
+  id: UuidSchema,
+  waitlistEntryId: UuidSchema,
+  channel: z.enum(['whatsapp', 'manager']),
+  status: z.enum(['sent', 'failed', 'pending']),
+  providerMessageId: z.string().nullable(),
+  error: z.string().nullable(),
+  createdAt: TimestampSchema,
+});
+
+export type WaitlistEntry = z.infer<typeof WaitlistEntrySchema>;
+export type WaitlistEntryCreate = z.infer<typeof WaitlistEntryCreateSchema>;
+export type WaitlistNotification = z.infer<typeof WaitlistNotificationSchema>;

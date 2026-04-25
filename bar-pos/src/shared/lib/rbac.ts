@@ -32,6 +32,7 @@ export const STAFF_ACTIONS = [
   'view_kds',
   'process_refund',
   'produce_prep_batch',
+  'manage_waitlist',
 ] as const;
 
 export type StaffAction = (typeof STAFF_ACTIONS)[number];
@@ -57,6 +58,7 @@ const MANAGER_EXTRA: ReadonlySet<StaffAction> = new Set([
   'manage_caja', // open and close the daily caja session
   'process_refund', // process payment refunds (manager+ only)
   'produce_prep_batch',
+  'manage_waitlist', // manage waitlist entries — manager+ only per PRD
 ]);
 
 const KITCHEN_ACTIONS: ReadonlySet<StaffAction> = new Set([
