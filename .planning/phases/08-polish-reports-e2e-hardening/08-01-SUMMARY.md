@@ -62,10 +62,10 @@ completed: 2026-04-25
 
 ## Performance
 
-- **Duration:** ~15 min
+- **Duration:** ~20 min
 - **Started:** 2026-04-25T17:00:00Z
-- **Completed:** 2026-04-25T17:15:00Z
-- **Tasks:** 2 of 3 (Task 3 is a blocking human-verify checkpoint: `supabase db push`)
+- **Completed:** 2026-04-25T17:20:00Z
+- **Tasks:** 3 of 3 (Task 3: supabase db push confirmed — 3 views + 2 indexes applied)
 - **Files modified:** 11
 
 ## Accomplishments
@@ -79,9 +79,10 @@ completed: 2026-04-25
 
 ## Task Commits
 
-1. **Task 1a: Fix import order lint violations** - `716154e` (fix)
-2. **Task 1b: Wave 0 query-hook stubs** - `0c2d617` (test)
-3. **Task 2: S6-01 views + S6-02 indexes + S6-15 DOWN scripts** - `0eaa10d` (feat)
+1. **Task 1a: Fix import order lint violations** - `d631c50` (fix)
+2. **Task 1b: Wave 0 query-hook stubs** - `65f5ed0` (test)
+3. **Task 2: S6-01 views + S6-02 indexes + S6-15 DOWN scripts** - `8133117` (feat)
+4. **Task 3: supabase db push confirmed** — 3 reporting views + 2 indexes applied to remote DB (human-verified)
 
 ## Files Created/Modified
 
@@ -112,27 +113,9 @@ None — plan executed exactly as written. The `quoted_wait_minutes` absence was
 
 - Phase 7 migration file names in the plan (`20260501000003_waitlist_pg_net_trigger.sql`, `20260501000004_waitlist_schema_fix.sql`) did not match the actual files on disk (`20260501000003_waitlist_notify_trigger.sql`, `20260501000004_waitlist_trigger_url.sql`). Resolved by working with the actual files.
 
-## User Setup Required (Task 3 — Blocking Checkpoint)
+## User Setup Required
 
-**`supabase db push` must be run manually to apply the new migrations to the remote DB.**
-
-Run from `bar-pos/`:
-```
-supabase db push
-```
-
-After push, verify:
-```
-supabase db psql -c "\dv combo_mix_daily"
-supabase db psql -c "\dv recipe_variance_daily"
-supabase db psql -c "\dv waitlist_metrics_daily"
-supabase db psql -c "\d stock_movements" | grep idx_stock_movements_ingredient_ts
-```
-
-Report whether `quoted_wait_minutes` column exists on `waitlist_entries` (affects view accuracy):
-```
-supabase db psql -c "\d waitlist_entries" | grep quoted_wait
-```
+None — `supabase db push` was confirmed by user. All 5 DB objects (3 views + 2 indexes) are live on the remote DB. The `quoted_wait_minutes` column is NOT present in `waitlist_entries`; the `waitlist_metrics_daily` view uses `NULL::numeric AS avg_quoted_wait` as planned.
 
 ## Next Phase Readiness
 

@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 08
 current_plan: 2
 status: in_progress
-stopped_at: "08-01 Tasks 1+2 done — Task 3 (supabase db push) is a blocking human-verify checkpoint awaiting user"
-last_updated: "2026-04-25T23:11:56.308Z"
+stopped_at: "08-01 complete — Tasks 1+2+3 done (supabase db push confirmed); advancing to 08-02"
+last_updated: "2026-04-25T17:22:00Z"
 progress:
   total_phases: 8
   completed_phases: 6
@@ -56,7 +56,7 @@ See: .planning/PROJECT.md
 - 2026-04-25: Plan 05-01 complete (98cb6a1) — 3 SQL migrations (prep_productions table + recipes extension + trigger), applied to remote DB (user confirmed), supabase.types.ts updated; typecheck pass
 - 2026-04-25: Plan 05-02 complete (d5de8e8) — PrepProductionSchema + PREP_INGREDIENT_REQUIRED + produce_prep_batch RBAC; computePrepConsumption pure function; 5 unit tests + P7 property tests pass; 5 Wave 0 stubs created
 - 2026-04-25: Plan 05-03 complete (8065774) — ChefHatBadge + entities/prep FSD slice (prepKeys, usePrepProductions, useMutationCreatePrepProduction, useRecipeByPrepIngredient, PrepOnHandCard + 4 stories) + useProducePrepBatch hook + I1-I6 integration tests; 5 unit tests pass; typecheck + lint pass
-- 2026-04-25: Plan 08-01 Tasks 1+2 complete — 6 lint fixes committed (716154e), 6 it.todo stubs (0c2d617), S6-01 views + S6-02 indexes + S6-15 DOWN scripts (0eaa10d); Task 3 blocking human-verify: supabase db push
+- 2026-04-25: Plan 08-01 complete — 6 lint fixes (d631c50), Wave 0 stubs (65f5ed0), S6-01 views + S6-02 indexes + S6-15 DOWN scripts (8133117); supabase db push confirmed (3 views + 2 indexes live); typecheck + lint + 105 tests green
 
 ## Decisions
 
