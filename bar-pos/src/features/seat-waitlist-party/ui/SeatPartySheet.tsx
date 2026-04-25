@@ -24,7 +24,8 @@ import { useSeatWaitlistParty } from '../model/useSeatWaitlistParty';
 
 type PoolTable = {
   id: string;
-  name: string;
+  label: string;
+  number: number;
   status: string;
 };
 
@@ -36,8 +37,8 @@ function usePoolTables() {
     queryFn: async (): Promise<PoolTable[]> => {
       const { data, error } = await db
         .from('pool_tables')
-        .select('id, name, status')
-        .order('name', { ascending: true });
+        .select('id, label, number, status')
+        .order('number', { ascending: true });
 
       if (error) throw error;
       return (data ?? []) as PoolTable[];
@@ -69,8 +70,8 @@ export function SeatPartySheet({
   const { data: tables = [] } = usePoolTables();
   const { seatParty, isPending } = useSeatWaitlistParty();
 
-  const availableTables = tables.filter((t) => t.status === 'available' || t.status === 'idle' || t.status === 'free');
-  const occupiedTables = tables.filter((t) => t.status !== 'available' && t.status !== 'idle' && t.status !== 'free');
+  const availableTables = tables.filter((t) => t.status === 'available');
+  const occupiedTables = tables.filter((t) => t.status !== 'available');
 
   function handleClose() {
     setSelectedTableId(null);
@@ -85,7 +86,7 @@ export function SeatPartySheet({
       entryId,
       entryName,
       tableId: selectedTableId,
-      tableName: table.name,
+      tableName: 'Table ' + String(table.number) + ' – ' + table.label,
     });
     if (result.ok) {
       handleClose();
@@ -126,7 +127,7 @@ export function SeatPartySheet({
                     )}
                     onClick={() => { setSelectedTableId(table.id); }}
                   >
-                    <span className="text-base font-semibold">{table.name}</span>
+                    <span className="text-base font-semibold">Table {table.number} – {table.label}</span>
                   </button>
                 ))}
               </div>
@@ -143,10 +144,10 @@ export function SeatPartySheet({
                     key={table.id}
                     type="button"
                     disabled
-                    aria-label={`${table.name}: occupied`}
+                    aria-label={`Table ${String(table.number)} – ${table.label}: occupied`}
                     className="rounded-lg border p-4 text-left opacity-50 cursor-not-allowed"
                   >
-                    <span className="text-base font-semibold">{table.name}</span>
+                    <span className="text-base font-semibold">Table {table.number} – {table.label}</span>
                     <span className="block text-sm text-muted-foreground">Occupied</span>
                   </button>
                 ))}

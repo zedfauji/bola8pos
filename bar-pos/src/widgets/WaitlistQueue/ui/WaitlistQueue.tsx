@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment,
    @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+import { useQuery } from '@tanstack/react-query';
 import { Plus, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { AddWaitlistEntryForm } from '@features/add-waitlist-entry/ui/AddWaitlistEntryForm';
 import { useMarkCancelled } from '@features/mark-waitlist-entry-cancelled/model/useMarkCancelled';
 import { useMarkNoShow } from '@features/mark-waitlist-no-show/model/useMarkNoShow';
 import { NotifyButton } from '@features/notify-waitlist/ui/NotifyButton';
-import { AddWaitlistEntryForm } from '@features/add-waitlist-entry/ui/AddWaitlistEntryForm';
 import { SeatPartySheet } from '@features/seat-waitlist-party/ui/SeatPartySheet';
 import {
   useWaitlistEntries,
   useWaitlistLastNotificationsMap,
   WaitlistEntryCard,
 } from '@entities/waitlist';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@shared/lib/supabase';
 import { computeQuotedWait } from '@shared/lib/waitlist-math';
 import { CardSkeleton, EmptyState, POSButton } from '@shared/ui';
@@ -23,7 +23,7 @@ import { CardSkeleton, EmptyState, POSButton } from '@shared/ui';
 // ────────────────────────────────────────────────────────────────────────────
 const db = supabase as any;
 
-type PoolTableStatus = { id: string; name: string; status: string };
+type PoolTableStatus = { id: string; label: string; number: number; status: string };
 
 function usePoolTablesCount() {
   return useQuery({
@@ -31,8 +31,8 @@ function usePoolTablesCount() {
     queryFn: async (): Promise<PoolTableStatus[]> => {
       const { data, error } = await db
         .from('pool_tables')
-        .select('id, name, status')
-        .order('name', { ascending: true });
+        .select('id, label, number, status')
+        .order('number', { ascending: true });
       if (error) throw error;
       return (data ?? []) as PoolTableStatus[];
     },
@@ -56,7 +56,7 @@ export function WaitlistQueue() {
   const entryIds = entries.map((e) => e.id);
   const { data: notificationsMap = {} } = useWaitlistLastNotificationsMap(entryIds);
 
-  const availableTableCount = tables.filter((t) => t.status === 'available' || t.status === 'idle' || t.status === 'free').length;
+  const availableTableCount = tables.filter((t) => t.status === 'available').length;
 
   // Placeholder average turn time map (real avg would come from useWaitlistAvgTurnBySize)
   const avgTurnMap = useMemo(() => new Map<number, number>([[2, 30], [4, 45]]), []);
