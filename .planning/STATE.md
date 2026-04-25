@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 04
-current_plan: 1
-status: executing
-stopped_at: "Phase 04 complete — 04-06 E2E verified 3/3 pass (1 skip); 3 post-checkpoint selector fixes applied; all 6 plans done"
-last_updated: "2026-04-24T23:59:00Z"
+current_phase: 05
+current_plan: 2
+status: ready_to_execute
+stopped_at: "Phase 05 Plan 01 complete — DB migrations applied, supabase.types.ts updated"
+last_updated: "2026-04-25T17:35:15Z"
 progress:
   total_phases: 8
-  completed_phases: 5
-  total_plans: 40
-  completed_plans: 40
-  percent: 100
+  completed_phases: 4
+  total_plans: 45
+  completed_plans: 41
+  percent: 91
 ---
 
 # Session State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** Feature Expansion 2026 Q2
-**Current phase:** 04
-**Current plan:** 1
-**Status:** Executing Phase 04
-**Progress:** [██████████] 100%
+**Current phase:** 05
+**Current plan:** 2
+**Status:** Executing Phase 05
+**Progress:** [█████████░] 91%
 
 ## Session Log
 
@@ -53,6 +53,7 @@ See: .planning/PROJECT.md
 - 2026-04-24: Plan 04-04 complete (a8a1de0) — void reversal + useOverrideNegativeStock (p_skip_depletion + p_allow_negative) + IngredientAutocomplete (5/5 tests) + CartPanel INVENTORY_NEGATIVE override flow; typecheck + lint pass
 - 2026-04-24: Plan 04-05 complete (3ff88bc) — manage-recipe feature (useManageRecipe + RecipeEditorTab via useReducer) + Recipe tab in product edit Dialog (max-w-2xl Tabs wrapper) + seed-recipes.ts; typecheck + lint pass
 - 2026-04-24: Plan 04-06 complete — depletion unit (6/6) + integration (4/4) + 36-recipes.spec.ts E2E; 3 post-checkpoint selector fixes; E2E 3/3 PASS 1 skip; Phase 04 complete
+- 2026-04-25: Plan 05-01 complete (98cb6a1) — 3 SQL migrations (prep_productions table + recipes extension + trigger), applied to remote DB (user confirmed), supabase.types.ts updated; typecheck pass
 
 ## Decisions
 
@@ -155,5 +156,5 @@ See: .planning/PROJECT.md
 
 ## Last Session
 
-- **Stopped at:** Phase 04 complete — 04-06 E2E verified 3/3 pass (1 skip); 3 post-checkpoint selector fixes applied; all 6 plans done
+- **Stopped at:** Phase 5 UI-SPEC approved
 - **Timestamp:** 2026-04-24T23:59:00Z
