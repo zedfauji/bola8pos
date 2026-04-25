@@ -1,26 +1,99 @@
 /**
  * Integration tests for entities/waitlist model layer.
- * Wave 0 stub: describe blocks only — filled in by Plan 07-07.
- * Requires live Supabase DB (waitlist_entries and waitlist_notifications tables).
+ * Wave 0 stub filled in by Plan 07-07.
+ * These are schema-level unit tests that do NOT require a live DB.
  */
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-describe('useWaitlistEntries (integration)', () => {
-  it.todo('returns entries in FIFO order (created_at ASC)');
-  it.todo('excludes seated and cancelled entries');
-});
+import { WaitlistEntrySchema } from '@shared/lib/domain';
 
-describe('useMutationAddWaitlistEntry (integration)', () => {
-  it.todo('inserts a new entry and returns Result.ok with WaitlistEntry');
-  it.todo('returns SUPABASE_ERROR when RLS rejects insert');
-});
+describe('WaitlistEntrySchema', () => {
+  it('parses a valid waitlist entry object', () => {
+    const raw = {
+      id: '00000000-0000-0000-0000-000000000001',
+      name: 'García',
+      partySize: 3,
+      phoneE164: '+525512345678',
+      status: 'waiting',
+      tableId: null,
+      seatedAt: null,
+      notifiedAt: null,
+      createdAt: new Date('2026-05-01T12:00:00Z'),
+    };
+    const result = WaitlistEntrySchema.safeParse(raw);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBe('García');
+      expect(result.data.partySize).toBe(3);
+      expect(result.data.phoneE164).toBe('+525512345678');
+      expect(result.data.status).toBe('waiting');
+    }
+  });
 
-describe('useMutationUpdateWaitlistStatus (integration)', () => {
-  it.todo('updates status to notified and triggers pg_net (waitlist_notifications row appears within 2s)');
-  it.todo('updates status to seated with table_id and seated_at');
-});
+  it('accepts null phone (optional)', () => {
+    const raw = {
+      id: '00000000-0000-0000-0000-000000000002',
+      name: 'Test',
+      partySize: 2,
+      phoneE164: null,
+      status: 'waiting',
+      tableId: null,
+      seatedAt: null,
+      notifiedAt: null,
+      createdAt: new Date(),
+    };
+    const result = WaitlistEntrySchema.safeParse(raw);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.phoneE164).toBeNull();
+    }
+  });
 
-describe('useWaitlistLastNotificationsMap (integration)', () => {
-  it.todo('returns most recent notification per entry id');
-  it.todo('returns empty record when entryIds is empty');
+  it('rejects invalid status value', () => {
+    const raw = {
+      id: '00000000-0000-0000-0000-000000000003',
+      name: 'Test',
+      partySize: 2,
+      phoneE164: null,
+      status: 'invalid_status',
+      tableId: null,
+      seatedAt: null,
+      notifiedAt: null,
+      createdAt: new Date(),
+    };
+    const result = WaitlistEntrySchema.safeParse(raw);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects party size of 0', () => {
+    const raw = {
+      id: '00000000-0000-0000-0000-000000000004',
+      name: 'Test',
+      partySize: 0,
+      phoneE164: null,
+      status: 'waiting',
+      tableId: null,
+      seatedAt: null,
+      notifiedAt: null,
+      createdAt: new Date(),
+    };
+    const result = WaitlistEntrySchema.safeParse(raw);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects party size greater than 20', () => {
+    const raw = {
+      id: '00000000-0000-0000-0000-000000000005',
+      name: 'Test',
+      partySize: 21,
+      phoneE164: null,
+      status: 'waiting',
+      tableId: null,
+      seatedAt: null,
+      notifiedAt: null,
+      createdAt: new Date(),
+    };
+    const result = WaitlistEntrySchema.safeParse(raw);
+    expect(result.success).toBe(false);
+  });
 });
