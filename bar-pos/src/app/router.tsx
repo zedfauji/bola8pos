@@ -5,6 +5,8 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { KdsRoute } from './kds-route';
 import { KitchenPrepRoute } from './kitchen-prep-route';
 import { ReportsRoute } from './reports-route';
+import { WaitlistRoute } from './waitlist-route';
+import { WaitlistRealtimeListener } from './WaitlistRealtimeListener';
 
 const LoginPage = lazy(() => import('../pages/login'));
 const HomePage = lazy(() => import('../pages/home'));
@@ -19,6 +21,7 @@ const TableStatusPage = lazy(() => import('../pages/pool-table-status'));
 const PaymentsPage = lazy(() => import('../pages/payments'));
 const KdsPage = lazy(() => import('../pages/kds'));
 const KitchenPrepPage = lazy(() => import('../pages/kitchen-prep'));
+const WaitlistPage = lazy(() => import('../pages/waitlist'));
 
 function LoadingFallback() {
   return (
@@ -32,6 +35,7 @@ export function Router() {
   return (
     <BrowserRouter>
       <HelpSheet />
+      <WaitlistRealtimeListener />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -135,6 +139,16 @@ export function Router() {
                 <KitchenPrepRoute>
                   <KitchenPrepPage />
                 </KitchenPrepRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/waitlist"
+            element={
+              <ProtectedRoute>
+                <WaitlistRoute>
+                  <WaitlistPage />
+                </WaitlistRoute>
               </ProtectedRoute>
             }
           />
