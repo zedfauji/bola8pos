@@ -14,6 +14,7 @@ import {
   findPeakHour,
   findSlowestHour,
   filterVoidRefundRows,
+  assertDateRangeValid,
   type HourlyRow,
   type VoidRefundRow,
 } from './queries-reports';
@@ -511,14 +512,31 @@ describe('aggregateHourlyRevenue', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 8 report hooks — Wave 0 stubs
+// assertDateRangeValid — Phase 8 365-day guard
 // ---------------------------------------------------------------------------
 
-describe('Phase 8 report hooks — Wave 0 stubs', () => {
-  it.todo('useComboMixReport: returns ok(rows) for valid date range');
-  it.todo('useComboMixReport: throws ValidationError when range > 365 days');
-  it.todo('useRecipeVarianceReport: returns ok(rows) for valid date range');
-  it.todo('useWaitlistAnalyticsReport: returns ok(rows) for valid date range');
-  it.todo('useRefundsRegister: returns ok(rows) for valid date range');
-  it.todo('useComboOverrides: returns ok(rows) from audit_log');
+describe('assertDateRangeValid', () => {
+  it('does not throw for a 30-day range', () => {
+    const from = new Date('2026-04-01');
+    const to = new Date('2026-05-01');
+    expect(() => { assertDateRangeValid(from, to); }).not.toThrow();
+  });
+
+  it('does not throw for exactly 365 days', () => {
+    const from = new Date('2025-05-01');
+    const to = new Date('2026-05-01');
+    expect(() => { assertDateRangeValid(from, to); }).not.toThrow();
+  });
+
+  it('throws for 366 days', () => {
+    const from = new Date('2025-04-30');
+    const to = new Date('2026-05-01');
+    expect(() => { assertDateRangeValid(from, to); }).toThrow('365 days');
+  });
+
+  it('throws for reversed range > 365 days (uses Math.abs)', () => {
+    const from = new Date('2026-05-01');
+    const to = new Date('2025-04-30');
+    expect(() => { assertDateRangeValid(from, to); }).toThrow('365 days');
+  });
 });
