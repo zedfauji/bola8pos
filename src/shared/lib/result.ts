@@ -191,6 +191,10 @@ export type AppErrorCode =
   | 'UNASSIGNED_ITEMS' // split completed but some items were not assigned
   | 'REFUND_EXCEEDS_ORIGINAL' // refund amount > original payment amount
   | 'ITEM_NOT_IN_ORIGINAL_ORDER' // refund item not found in original order
+  | 'PREP_INGREDIENT_REQUIRED' // prep batch attempted on a non-prep ingredient
+  | 'WAITLIST_ENTRY_NOT_FOUND'
+  | 'WAITLIST_NOTIFICATION_RATE_LIMITED'
+  | 'WAITLIST_INVALID_PHONE'
   | 'UNKNOWN_ERROR';
 
 /**
