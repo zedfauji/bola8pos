@@ -29,14 +29,14 @@ SELECT
   date_trunc('day', sm.created_at AT TIME ZONE 'America/Mexico_City')::date AS date,
   sm.ingredient_id,
   i.name                                                              AS ingredient_name,
-  ABS(SUM(sm.delta) FILTER (WHERE sm.reason = 'sale'))::numeric      AS theoretical_used,
-  ABS(SUM(sm.delta) FILTER (WHERE sm.reason = 'physical_count'))::numeric AS physical_delta,
+  ABS(SUM(sm.quantity_delta) FILTER (WHERE sm.reason = 'sale'))::numeric      AS theoretical_used,
+  ABS(SUM(sm.quantity_delta) FILTER (WHERE sm.reason = 'physical_count'))::numeric AS physical_delta,
   CASE
-    WHEN ABS(SUM(sm.delta) FILTER (WHERE sm.reason = 'sale')) = 0 THEN 0
+    WHEN ABS(SUM(sm.quantity_delta) FILTER (WHERE sm.reason = 'sale')) = 0 THEN 0
     ELSE ROUND(
-      (ABS(SUM(sm.delta) FILTER (WHERE sm.reason = 'physical_count'))
-       - ABS(SUM(sm.delta) FILTER (WHERE sm.reason = 'sale')))
-      / NULLIF(ABS(SUM(sm.delta) FILTER (WHERE sm.reason = 'sale')), 0) * 100,
+      (ABS(SUM(sm.quantity_delta) FILTER (WHERE sm.reason = 'physical_count'))
+       - ABS(SUM(sm.quantity_delta) FILTER (WHERE sm.reason = 'sale')))
+      / NULLIF(ABS(SUM(sm.quantity_delta) FILTER (WHERE sm.reason = 'sale')), 0) * 100,
       2
     )
   END                                                                AS variance_pct
