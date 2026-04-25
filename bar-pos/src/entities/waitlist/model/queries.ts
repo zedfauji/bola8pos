@@ -129,7 +129,7 @@ export function useWaitlistWaitingCount() {
         logger.error('useWaitlistWaitingCount: query failed', { error });
         throw error;
       }
-      return count ?? 0;
+      return (count as number | null) ?? 0;
     },
     staleTime: 15 * 1000,
   });

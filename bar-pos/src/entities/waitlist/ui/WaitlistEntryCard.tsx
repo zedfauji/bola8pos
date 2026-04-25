@@ -12,7 +12,7 @@ import { Button } from '@shared/ui';
 
 function formatWait(minutes: number): string {
   if (minutes > 120) return '>2 hr wait';
-  return `~${minutes} min wait`;
+  return '~' + String(minutes) + ' min wait';
 }
 
 function formatTimeAgo(date: Date): string {
@@ -20,10 +20,10 @@ function formatTimeAgo(date: Date): string {
   const diffMin = Math.floor(diffMs / 60_000);
   if (diffMin < 1) return 'just now';
   if (diffMin === 1) return '1 min ago';
-  if (diffMin < 60) return `${diffMin} min ago`;
+  if (diffMin < 60) return String(diffMin) + ' min ago';
   const diffHr = Math.floor(diffMin / 60);
   if (diffHr === 1) return '1 hr ago';
-  return `${diffHr} hr ago`;
+  return String(diffHr) + ' hr ago';
 }
 
 function getCardBorderClass(status: WaitlistEntry['status']): string {
