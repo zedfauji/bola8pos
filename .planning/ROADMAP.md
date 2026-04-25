@@ -194,8 +194,8 @@ Plans:
 - [x] 07-03-PLAN.md � Edge function send-waitlist-notification (Deno + WasenderAPI + rate-limit guard) (Wave 3) (S5-05)
 - [x] 07-04-PLAN.md � entities/waitlist/ FSD slice (types, queries, WaitlistEntryCard + Storybook) + WaitlistRealtimeListener (Wave 3) (S5-08)
 - [x] 07-05-PLAN.md � Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
-- [ ] 07-06-PLAN.md � Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
-- [ ] 07-07-PLAN.md � Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
+- [x] 07-06-PLAN.md � Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
+- [x] 07-07-PLAN.md � Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
 
 **Success Criteria**:
 1. `waitlist_entries` + `waitlist_notifications` schema live
