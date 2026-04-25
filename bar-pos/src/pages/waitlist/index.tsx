@@ -1,5 +1,5 @@
-import { WaitlistQueue } from '@widgets/WaitlistQueue';
 import { PoolTableOccupancyPanel } from '@widgets/PoolTableOccupancyPanel';
+import { WaitlistQueue } from '@widgets/WaitlistQueue';
 import { BackToHomeButton, PageContainer } from '@shared/ui';
 
 export default function WaitlistPage() {

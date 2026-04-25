@@ -124,7 +124,7 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
               placeholder="e.g. García"
               maxLength={100}
               value={state.name}
-              onChange={(e) => dispatch({ type: 'SET_NAME', name: e.target.value })}
+              onChange={(e) => { dispatch({ type: 'SET_NAME', name: e.target.value }); }}
             />
           </FormField>
 
@@ -135,7 +135,7 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
             </Label>
             <Select
               value={String(state.partySize)}
-              onValueChange={(val) => dispatch({ type: 'SET_PARTY_SIZE', size: Number(val) })}
+              onValueChange={(val) => { dispatch({ type: 'SET_PARTY_SIZE', size: Number(val) }); }}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -160,8 +160,8 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
               placeholder="e.g. 55 1234 5678"
               value={state.phoneRaw}
               aria-describedby={phoneError ? 'waitlist-phone-error' : undefined}
-              onChange={(e) => dispatch({ type: 'SET_PHONE', raw: e.target.value })}
-              onBlur={() => dispatch({ type: 'PHONE_BLUR' })}
+              onChange={(e) => { dispatch({ type: 'SET_PHONE', raw: e.target.value }); }}
+              onBlur={() => { dispatch({ type: 'PHONE_BLUR' }); }}
             />
             <span className="text-sm text-muted-foreground">
               MX/US number. Used to send WhatsApp notification.
