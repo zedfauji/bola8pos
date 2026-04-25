@@ -32,7 +32,8 @@ export const recipeKeys = {
 function mapRecipeRow(row: Record<string, unknown>): RecipeWithItems {
   return RecipeWithItemsSchema.parse({
     id: row['id'],
-    productId: row['product_id'],
+    productId: row['product_id'] != null ? (row['product_id'] as string) : null,
+    prepIngredientId: row['prep_ingredient_id'] != null ? (row['prep_ingredient_id'] as string) : null,
     yieldQty: Number(row['yield_qty']),
     notes: row['notes'] ?? null,
     createdAt: new Date(row['created_at'] as string),

@@ -13,5 +13,5 @@ interface WaitlistStore {
 
 export const useWaitlistStore = create<WaitlistStore>((set) => ({
   selectedEntryId: null,
-  setSelectedEntryId: (id) => set({ selectedEntryId: id }),
+  setSelectedEntryId: (id) => { set({ selectedEntryId: id }); },
 }));

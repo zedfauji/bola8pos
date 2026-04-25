@@ -1,6 +1,6 @@
+import { BellRing, CheckSquare, Clock, Phone, PhoneOff, UserX, Users, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-import { BellRing, CheckSquare, Clock, Phone, PhoneOff, UserX, Users, X } from 'lucide-react';
 
 import type { WaitlistEntry, WaitlistNotification } from '@entities/waitlist/model/types';
 import { Badge } from '@shared/ui';
@@ -199,7 +199,7 @@ export function WaitlistEntryCard({
             variant="outline"
             size="sm"
             disabled={isSeating}
-            onClick={() => onSeat(entry.id)}
+            onClick={() => { onSeat(entry.id); }}
             aria-label="Seat party"
           >
             <CheckSquare className="h-4 w-4 mr-1" aria-hidden="true" />
@@ -210,7 +210,7 @@ export function WaitlistEntryCard({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onNoShow(entry.id)}
+            onClick={() => { onNoShow(entry.id); }}
             aria-label="Mark as no-show"
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
@@ -222,7 +222,7 @@ export function WaitlistEntryCard({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onCancel(entry.id)}
+              onClick={() => { onCancel(entry.id); }}
               aria-label="Cancel entry"
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >

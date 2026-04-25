@@ -32,26 +32,28 @@ test.describe('Kitchen Prep', () => {
     // Prep on hand section heading
     await expect(page.getByText('Prep on hand')).toBeVisible();
 
-    // "New batch" button is visible
-    await expect(page.getByRole('button', { name: /new batch/i })).toBeVisible();
+    // "New batch" button is visible (aria-label="Record new prep batch")
+    await expect(page.getByRole('button', { name: /new prep batch/i })).toBeVisible();
 
-    // Seeded prep ingredients appear as cards
+    // Seeded prep ingredients appear as cards (scoped to the cards grid, not the history table)
     // (Requires seed-prep.ts to have run first)
-    await expect(page.getByText('Salsa Mexicana')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('Michelada Mix')).toBeVisible({ timeout: 5_000 });
+    const prepCards = page.getByLabel('Kitchen prep dashboard').locator('section').first();
+    await expect(prepCards.getByText('Salsa Mexicana')).toBeVisible({ timeout: 10_000 });
+    await expect(prepCards.getByText('Michelada Mix')).toBeVisible({ timeout: 5_000 });
   });
 
   test('T2: produce 10 Salsa Mexicana batches — batch recorded; stock movements written', async ({ page }) => {
     await page.goto('/kitchen-prep');
 
     // Open the form
-    await page.getByRole('button', { name: /new batch/i }).click();
+    await page.getByRole('button', { name: /new prep batch/i }).click();
 
     // Dialog should appear
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByText('Record prep batch')).toBeVisible();
 
     // Search for Salsa Mexicana in autocomplete
+    await page.getByRole('combobox', { name: /select ingredient/i }).click();
     await page.getByPlaceholder('Search prep ingredients…').fill('Salsa');
     await page.getByRole('option', { name: /Salsa Mexicana/i }).click();
 
@@ -73,7 +75,14 @@ test.describe('Kitchen Prep', () => {
 
     // Salsa Mexicana PrepOnHandCard shows updated qty (10.00)
     // (The card updates via TanStack Query cache invalidation)
-    await expect(page.getByText('10.00')).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByLabel('Kitchen prep dashboard')
+        .locator('section').first()
+        .locator('div')
+        .filter({ hasText: 'Salsa Mexicana' })
+        .filter({ hasText: '10.00' })
+        .first()
+    ).toBeVisible({ timeout: 10_000 });
   });
 
   test('T3: selling menu item depletes prep ingredient qty', async ({ page }) => {
@@ -89,9 +98,10 @@ test.describe('Kitchen Prep', () => {
     // Producing 10 more Salsa (needs exactly 1000g tomato) should succeed.
     await page.goto('/kitchen-prep');
 
-    await page.getByRole('button', { name: /new batch/i }).click();
+    await page.getByRole('button', { name: /new prep batch/i }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
 
+    await page.getByRole('combobox', { name: /select ingredient/i }).click();
     await page.getByPlaceholder('Search prep ingredients…').fill('Salsa');
     await page.getByRole('option', { name: /Salsa Mexicana/i }).click();
     await page.getByPlaceholder('e.g. 10').fill('10');
@@ -108,9 +118,10 @@ test.describe('Kitchen Prep', () => {
 
     await page.goto('/kitchen-prep');
 
-    await page.getByRole('button', { name: /new batch/i }).click();
+    await page.getByRole('button', { name: /new prep batch/i }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
 
+    await page.getByRole('combobox', { name: /select ingredient/i }).click();
     await page.getByPlaceholder('Search prep ingredients…').fill('Salsa');
     await page.getByRole('option', { name: /Salsa Mexicana/i }).click();
     await page.getByPlaceholder('e.g. 10').fill('1');

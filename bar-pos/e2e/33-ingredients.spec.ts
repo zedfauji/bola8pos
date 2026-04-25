@@ -15,7 +15,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { openCaja, resetTestState } from './helpers/supabase';
@@ -38,7 +38,7 @@ function getServiceClient() {
   }) as any;
 }
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
   requireIntegrationEnv();
   await resetTestState();
   await openCaja(570);
@@ -88,8 +88,9 @@ test('T1: Admin creates ingredient via Settings → Ingredients', async ({ page 
   // Verify success toast — UI-SPEC: "Ingredient added"
   await expect(page.getByText('Ingredient added')).toBeVisible({ timeout: 10_000 });
 
-  // Verify row appears in table
-  await expect(page.getByRole('cell', { name: 'Test Tomato E2E' })).toBeVisible({
+  // Verify row appears in table — exact:true prevents matching the actions cell
+  // whose accessible name also contains "Edit Test Tomato E2E Delete".
+  await expect(page.getByRole('cell', { name: 'Test Tomato E2E', exact: true })).toBeVisible({
     timeout: 10_000,
   });
 });

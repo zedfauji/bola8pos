@@ -90,15 +90,23 @@ export function useSplitEvenly() {
       for (let i = 0; i < payments.length; i++) {
         const amountCents = payments[i] ?? 0;
         const isLast = i === payments.length - 1;
+        const amountDollars = amountCents / 100;
+        // ProcessPaymentRequestSchema requires tenderedAmount for every cash charge (exact pay = no change).
+        // When the sheet passes a final tender (e.g. one bill for all slices), use it on the last charge only.
+        const tenderedForThisCharge =
+          input.method === 'cash'
+            ? isLast && input.tenderedAmount != null
+              ? input.tenderedAmount
+              : amountDollars
+            : undefined;
         const payResult = await callProcessPayment({
           tabId: input.parentTabId,
-          amount: amountCents / 100,
+          amount: amountDollars,
           tipAmount: 0,
           method: input.method,
           idempotencyKey: `split-evenly-${input.parentTabId}-${String(i)}-${String(Date.now())}`,
-          // Cash payments require tenderedAmount; non-cash must omit field entirely (exactOptionalPropertyTypes)
-          ...(input.method === 'cash' && input.tenderedAmount != null
-            ? { tenderedAmount: isLast ? input.tenderedAmount : amountCents / 100 }
+          ...(input.method === 'cash'
+            ? { tenderedAmount: tenderedForThisCharge }
             : {}),
         });
         if (!payResult.ok) {

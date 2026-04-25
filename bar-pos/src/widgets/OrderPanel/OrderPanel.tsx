@@ -15,18 +15,17 @@ import { TransferTabDialog } from '@features/transfer-tab';
 import { VoidOrderDialog } from '@features/void-order';
 import { usePermissions } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
-import { useSubTabs } from '@entities/tab';
 import { tabKeys, useTab } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import type { Order, OrderItem } from '@entities/tab/model/types';
 import { EmptyState } from '@shared/ui/EmptyState';
 import { LoadingSpinner } from '@shared/ui/LoadingSpinner';
-import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { POSButton } from '@shared/ui/POSButton';
 import { ProtectedAction } from '@shared/ui/ProtectedAction';
 import { ScrollArea } from '@shared/ui/ScrollArea';
 import { CartSummary } from './CartSummary';
 import { OrderItemCard } from './OrderItemCard';
+import { SubChecksSection } from './SubChecksSection';
 
 const TAX_RATE = 0.0825;
 
@@ -35,43 +34,6 @@ function calculateSubtotal(items: OrderItem[]): number {
     const lineTotal = (item.unitPrice + item.modifierPriceDelta) * item.quantity;
     return sum + lineTotal;
   }, 0);
-}
-
-interface SubChecksSectionProps {
-  parentTabId: string;
-}
-
-function SubChecksSection({ parentTabId }: SubChecksSectionProps) {
-  // useSubTabs returns a TanStack Query result: { data: Result<Tab[]> | undefined, isLoading, isError }
-  // where Result<Tab[]> is { ok: true, data: Tab[] } | { ok: false, error: AppError }.
-  // Access pattern: unwrap via result.data?.ok check.
-  const queryResult = useSubTabs(parentTabId);
-  const subTabs = queryResult.data?.ok ? queryResult.data.data : [];
-
-  if (subTabs.length === 0) return null;
-
-  return (
-    <div className="border-t pt-4 mt-4 px-4">
-      <p className="text-sm font-semibold mb-2">Sub-checks</p>
-      {subTabs.map(sub => {
-        const total = sub.items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
-        return (
-          <div
-            key={sub.id}
-            className="flex items-center justify-between py-2 px-2 rounded-md hover:bg-muted/40"
-          >
-            <span className="text-sm">{sub.splitLabel ?? `Check ${sub.id.slice(0, 4)}`}</span>
-            <span
-              className={`text-sm ${sub.status === 'paid' ? 'text-pos-accent' : 'text-muted-foreground'}`}
-            >
-              {sub.status}
-            </span>
-            <MoneyDisplay amount={total} size="sm" />
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 export function OrderPanel() {
@@ -173,6 +135,7 @@ export function OrderPanel() {
         {/* Split bill button — visible only when tab is open */}
         {tab?.status === 'open' && (
           <POSButton
+            data-testid="split-bill-button"
             variant="outline"
             size="sm"
             onClick={() => {

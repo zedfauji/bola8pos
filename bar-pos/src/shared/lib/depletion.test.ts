@@ -1,17 +1,21 @@
 import * as fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { computeDepletion } from '@shared/lib/domain-helpers';
 import type { RecipeWithItems } from '@shared/lib/domain';
+import { computeDepletion } from '@shared/lib/domain-helpers';
 
 function makeRecipe(
   items: { ingredientId: string; qty: number }[],
   yieldQty = 1,
 ): RecipeWithItems {
+  const now = new Date();
   return {
     id: 'r1',
     productId: 'p1',
+    prepIngredientId: null,
     yieldQty,
     notes: null,
+    createdAt: now,
+    updatedAt: now,
     items: items.map((item, i) => ({ id: `ri${String(i)}`, recipeId: 'r1', ...item })),
   };
 }

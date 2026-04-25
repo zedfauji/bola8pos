@@ -242,7 +242,7 @@ export function ManageIngredientsTab() {
       <Dialog
         open={dialogState?.kind === 'edit'}
         onOpenChange={o => {
-          if (!o) setDialogState(null);
+          if (!o && dialogState?.kind === 'edit') setDialogState(null);
         }}
       >
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto sm:max-w-lg" showCloseButton>

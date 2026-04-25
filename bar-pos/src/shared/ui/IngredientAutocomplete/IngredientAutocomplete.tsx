@@ -27,6 +27,8 @@ type IngredientAutocompleteProps = {
   ingredients?: Ingredient[];
   isLoading?: boolean;
   disabled?: boolean;
+  /** Overrides default "Search ingredients…" on the command input */
+  commandInputPlaceholder?: string;
 };
 
 export function IngredientAutocomplete({
@@ -36,6 +38,7 @@ export function IngredientAutocomplete({
   ingredients = [],
   isLoading = false,
   disabled = false,
+  commandInputPlaceholder = 'Search ingredients…',
 }: IngredientAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const selected = ingredients.find(i => i.id === value) ?? null;
@@ -75,7 +78,7 @@ export function IngredientAutocomplete({
         </PopoverTrigger>
         <PopoverContent className="w-[320px] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search ingredients…" />
+            <CommandInput placeholder={commandInputPlaceholder} />
             <CommandList>
               <CommandEmpty>No ingredient found.</CommandEmpty>
               <CommandGroup>

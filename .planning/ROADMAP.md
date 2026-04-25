@@ -189,13 +189,13 @@ Plans:
 **Plans:** 7 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
-- [ ] 07-02-PLAN.md — [BLOCKING] supabase db push + shared utilities (phone.ts, waitlist-math.ts, tauri-notify.ts) + Zod schemas + AppErrorCodes + RBAC (Wave 2) (S5-04, S5-06, S5-07)
-- [ ] 07-03-PLAN.md — Edge function send-waitlist-notification (Deno + WasenderAPI + rate-limit guard) (Wave 3) (S5-05)
-- [ ] 07-04-PLAN.md — entities/waitlist/ FSD slice (types, queries, WaitlistEntryCard + Storybook) + WaitlistRealtimeListener (Wave 3) (S5-08)
-- [ ] 07-05-PLAN.md — Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
-- [ ] 07-06-PLAN.md — Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
-- [ ] 07-07-PLAN.md — Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
+- [x] 07-01-PLAN.md ï¿½ DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
+- [x] 07-02-PLAN.md ï¿½ [BLOCKING] supabase db push + shared utilities (phone.ts, waitlist-math.ts, tauri-notify.ts) + Zod schemas + AppErrorCodes + RBAC (Wave 2) (S5-04, S5-06, S5-07)
+- [x] 07-03-PLAN.md ï¿½ Edge function send-waitlist-notification (Deno + WasenderAPI + rate-limit guard) (Wave 3) (S5-05)
+- [x] 07-04-PLAN.md ï¿½ entities/waitlist/ FSD slice (types, queries, WaitlistEntryCard + Storybook) + WaitlistRealtimeListener (Wave 3) (S5-08)
+- [x] 07-05-PLAN.md ï¿½ Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
+- [ ] 07-06-PLAN.md ï¿½ Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
+- [ ] 07-07-PLAN.md ï¿½ Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
 
 **Success Criteria**:
 1. `waitlist_entries` + `waitlist_notifications` schema live

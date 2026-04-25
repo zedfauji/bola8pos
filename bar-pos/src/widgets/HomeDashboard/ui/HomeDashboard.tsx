@@ -1,11 +1,9 @@
 import {
   BarChart,
   Bike,
-  ChefHat,
   Clock,
   CreditCard,
   Home,
-  ListOrdered,
   Lock,
   LogOut,
   Package,
@@ -20,7 +18,6 @@ import { useNavigate } from 'react-router-dom';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
 import { useStaffStore } from '@entities/staff/model/store';
 import { usePermissions } from '@entities/staff/model/usePermissions';
-import { useWaitlistWaitingCount } from '@entities/waitlist';
 import type { StaffAction } from '@shared/lib/rbac';
 import { Badge, Button } from '@shared/ui';
 
@@ -55,20 +52,6 @@ const ITEMS: DashboardItem[] = [
     managerLabel: 'Manager',
   },
   {
-    path: '/kitchen-prep',
-    label: 'Kitchen Prep',
-    icon: ChefHat,
-    requiredAction: 'produce_prep_batch',
-    managerLabel: 'Manager',
-  },
-  {
-    path: '/waitlist',
-    label: 'Waitlist',
-    icon: ListOrdered,
-    requiredAction: 'manage_waitlist',
-    managerLabel: 'Manager',
-  },
-  {
     path: '/settings',
     label: 'Settings',
     icon: Settings,
@@ -92,7 +75,6 @@ export function HomeDashboard() {
   const logout = useStaffStore(s => s.logout);
   const grantManagerActions = useStaffStore(s => s.grantManagerActions);
   const [gatedTarget, setGatedTarget] = useState<GatedTarget | null>(null);
-  const { data: waitingCount = 0 } = useWaitlistWaitingCount();
 
   function handleItemClick(item: DashboardItem) {
     if (!item.requiredAction || can(item.requiredAction)) {
@@ -145,18 +127,7 @@ export function HomeDashboard() {
                   data-testid="lock-icon"
                 />
               )}
-              <div className="relative">
-                <Icon className="h-12 w-12" />
-                {item.path === '/waitlist' && waitingCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -right-1 -top-1 h-5 min-w-[20px] rounded-full px-1 text-xs"
-                    aria-label={`Waitlist: ${waitingCount} parties waiting`}
-                  >
-                    {waitingCount > 99 ? '99+' : waitingCount}
-                  </Badge>
-                )}
-              </div>
+              <Icon className="h-12 w-12" />
               <span className="text-center text-sm font-medium">{item.label}</span>
               {isGated && item.managerLabel && (
                 <Badge variant="secondary" className="text-xs">

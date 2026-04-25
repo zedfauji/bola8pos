@@ -77,10 +77,7 @@ export const WithItems: Story = {
   args: {
     ...DefaultName.args,
     name: 'Charlie',
-    items: [
-      mockItem('1', 'Corona 355ml', 8500),
-      mockItem('2', 'Nachos', 8500),
-    ],
+    items: [mockItem('1', 'Corona 355ml', 8500), mockItem('2', 'Nachos', 8500)],
     total: 17000,
   },
 };
