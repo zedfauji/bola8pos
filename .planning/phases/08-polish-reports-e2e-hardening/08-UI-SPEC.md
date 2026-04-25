@@ -1,10 +1,11 @@
 ---
 phase: 8
 slug: polish-reports-e2e-hardening
-status: draft
+status: approved
 shadcn_initialized: true
 preset: radix-nova / neutral / cssVariables
 created: 2026-04-25
+reviewed_at: 2026-04-25
 ---
 
 # Phase 8 — UI Design Contract
@@ -56,11 +57,11 @@ All sizes use the Geist Variable font. No new font sizes are introduced in Phase
 | Role | Size | Weight | Line Height | Tailwind Class | Usage in This Phase |
 |------|------|--------|-------------|----------------|---------------------|
 | Body | 14px | 400 (regular) | 1.5 | `text-sm` | Table cell content, filter labels, description text |
-| Label | 14px | 500 (medium) | 1.4 | `text-sm font-medium` | Table column headers (`TableHead`), metric card labels |
+| Label | 14px | 600 (semibold) | 1.4 | `text-sm font-semibold` | Table column headers (`TableHead`), metric card labels |
 | Heading | 16px | 600 (semibold) | 1.3 | `text-base font-semibold` | Report widget section headings, metric callout values |
 | Display | 20px | 600 (semibold) | 1.2 | `text-xl font-semibold` | Large metric numbers in WaitlistAnalyticsReport metric cards |
 
-**Weights used:** regular (400) + semibold (600). Medium (500) used only for `TableHead` labels (matches existing panels). This is a maximum of 3 effective weights — within the 2-weight guidance; the medium is reserved for headers only.
+**Weights used:** regular (400) + semibold (600). 2 weights total. `TableHead` column headers use `text-sm font-semibold` — matches `CategoryRevenuePanel` column header pattern.
 
 **Monospace exception:** Tabular-numeric cells use `tabular-nums` utility (not a new font-family). Timestamp cells in RefundsRegister use `font-mono` for alignment — matches `HourlyBreakdownPanel` precedent.
 
@@ -227,7 +228,7 @@ Two-section layout:
 
   {/* Section 2: hourly heatmap */}
   <div>
-    <h3 className="mb-2 text-sm font-medium text-muted-foreground">Queue Length by Hour</h3>
+    <h3 className="mb-2 text-sm font-normal text-muted-foreground">Queue Length by Hour</h3>
     <div className="grid grid-cols-12 gap-1">
       {hours.map(h => (
         <div
