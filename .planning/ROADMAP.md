@@ -131,7 +131,14 @@ Plans:
 **Goal:** Enable chef-side batch production: prep writes +N prep-ingredient and consumes raw ingredients; prep ingredients then flow into menu recipes. Ship `/kitchen-prep` UI.
 **Requirements:** S3c-01..S3c-09
 **Depends on:** Phase 4
-**Plans:** 0 plans
+**Plans:** 5 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — DB migrations: prep_productions table + recipes extension (nullable product_id + prep_ingredient_id + CHECK) + trg_prep_production_insert trigger + [BLOCKING] supabase db push + supabase.types.ts transcription (Wave 1) (S3c-01, S3c-02, S3c-03)
+- [ ] 05-02-PLAN.md — domain.ts PrepProductionSchema family + RecipeSchema update (nullable productId + prepIngredientId) + result.ts PREP_INGREDIENT_REQUIRED + rbac.ts produce_prep_batch + prep-math.ts pure function + Wave 0 test stubs (Wave 2) (S3c-04, S3c-05)
+- [ ] 05-03-PLAN.md — entities/prep/ FSD slice (queries, types, PrepOnHandCard, stories, barrel) + features/produce-prep-batch/model/ (useProducePrepBatch + integration tests I1–I5) (Wave 3) (S3c-04, S3c-05, S3c-06)
+- [ ] 05-04-PLAN.md — ChefHatBadge shared/ui + Storybook + PrepProductionForm Dialog + PrepBatchPreview + KitchenPrepDashboard widget + /kitchen-prep page + KitchenPrepRoute + router + Home tile + IngredientsTable filterPrep prop (Wave 4) (S3c-06, S3c-07, S3c-08, S3c-09)
+- [ ] 05-05-PLAN.md — seed-prep.ts (Salsa Mexicana + Michelada Mix + raw ingredients + prep recipes) + E2E 21-prep.spec.ts T1–T5 + quality gate + human sign-off (Wave 5) (S3c-01, S3c-02, S3c-03, S3c-06, S3c-07, S3c-08, S3c-09)
 
 **Success Criteria**:
 1. `prep_productions` table + trigger writes movements atomically
