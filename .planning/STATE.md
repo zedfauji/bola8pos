@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 08
-current_plan: 3
+current_plan: 4
 status: in_progress
-stopped_at: "08-02 complete — Tasks 1+2 done; 5 Zod schemas + 5 query hooks + 4 guard tests committed; advancing to 08-03"
-last_updated: "2026-04-25T17:31:00Z"
+stopped_at: "08-03 complete — 5 widgets (ComboMixReport, RecipeVarianceReport, WaitlistAnalyticsReport, RefundsRegister, ComboOverrideReport) + 18 RTL tests; advancing to 08-04"
+last_updated: "2026-04-26T13:50:00Z"
 progress:
   total_phases: 8
   completed_phases: 6
@@ -58,6 +58,7 @@ See: .planning/PROJECT.md
 - 2026-04-25: Plan 05-03 complete (8065774) — ChefHatBadge + entities/prep FSD slice (prepKeys, usePrepProductions, useMutationCreatePrepProduction, useRecipeByPrepIngredient, PrepOnHandCard + 4 stories) + useProducePrepBatch hook + I1-I6 integration tests; 5 unit tests pass; typecheck + lint pass
 - 2026-04-25: Plan 08-01 complete — 6 lint fixes (d631c50), Wave 0 stubs (65f5ed0), S6-01 views + S6-02 indexes + S6-15 DOWN scripts (8133117); supabase db push confirmed (3 views + 2 indexes live); typecheck + lint + 105 tests green
 - 2026-04-25: Plan 08-02 complete — 5 Zod report row schemas (67e01db), 3 supabase.types.ts view shapes, 5 TanStack Query hooks + assertDateRangeValid 365-day guard + 4 unit tests (8370e48); 105 test files, 1058 tests pass
+- 2026-04-26: Plan 08-03 complete — 5 report widgets (c5d5743, a8e71a4): ComboMixReport + RecipeVarianceReport + WaitlistAnalyticsReport + RefundsRegister + ComboOverrideReport; 4 RTL test files (18 new tests); 109 test files, 1076 tests pass
 
 ## Decisions
 
@@ -159,8 +160,9 @@ See: .planning/PROJECT.md
 | 04-recipes-sale-depletion | 04 | 9min | 3 | 8 |
 | 04-recipes-sale-depletion | 05 | 10min | 3 | 5 |
 | 04-recipes-sale-depletion | 06 | ~30min | 2 | 3 |
+| 08-polish-reports-e2e-hardening | 03 | 25min | 2 | 14 |
 
 ## Last Session
 
-- **Stopped at:** Phase 7 UI-SPEC approved
-- **Timestamp:** 2026-04-24T23:59:00Z
+- **Stopped at:** Completed 08-03-PLAN.md — 5 report widgets + 18 RTL tests committed
+- **Timestamp:** 2026-04-26T13:50:00Z
