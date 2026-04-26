@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 08
-current_plan: 4
+current_plan: 7
 status: executing
-stopped_at: "Completed 08-04-PLAN.md — ExportType +9 variants, ExportButtons +5 branches, 5 Excel builders, 4 PDF builders, ReportsPage 12 tabs, as-never casts removed"
-last_updated: "2026-04-26T19:58:31.508Z"
+stopped_at: "Completed 08-06-PLAN.md — waitlist UX paper-cuts: touch targets + focus traps + toast copy"
+last_updated: "2026-04-26T20:15:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 59
-  completed_plans: 56
-  percent: 95
+  completed_plans: 58
+  percent: 98
 ---
 
 # Session State
@@ -60,9 +60,12 @@ See: .planning/PROJECT.md
 - 2026-04-25: Plan 08-02 complete — 5 Zod report row schemas (67e01db), 3 supabase.types.ts view shapes, 5 TanStack Query hooks + assertDateRangeValid 365-day guard + 4 unit tests (8370e48); 105 test files, 1058 tests pass
 - 2026-04-26: Plan 08-03 complete — 5 report widgets (c5d5743, a8e71a4): ComboMixReport + RecipeVarianceReport + WaitlistAnalyticsReport + RefundsRegister + ComboOverrideReport; 4 RTL test files (18 new tests); 109 test files, 1076 tests pass
 - 2026-04-26: Plan 08-04 complete — ExportType +9 variants (9dbfe0e), ReportsPage 12 tabs (40f8480): 5 Excel builders + 4 PDF builders + ExportButtons Props +5 + as-never casts removed; 109 test files, 1076 tests pass
+- 2026-04-26: Plan 08-06 complete — S6-12 waitlist UX paper-cuts (9635c17, 7e77e60): size="lg" touch targets on SeatPartySheet + AddWaitlistEntryForm + NotifyButton; focus-trap comments; specific toast copy in useMarkCancelled + useMarkNoShow + useSeatWaitlistParty; 109 test files, 1076 tests pass
 
 ## Decisions
 
+- [Phase 08-polish 08-06]: Actual UI filenames differ from plan spec — SeatPartySheet.tsx not SeatWaitlistPartySheet.tsx, NotifyButton.tsx not NotifyWaitlistButton.tsx; fixes applied to real files
+- [Phase 08-polish 08-06]: POSButton exists in @shared/ui but size="lg" on shadcn Button used — equally valid; Radix SheetContent traps focus by default so only comment needed
 - [Phase 08-polish 08-01]: waitlist_metrics_daily uses NULL::numeric AS avg_quoted_wait — quoted_wait_minutes column absent from waitlist_entries schema; to be wired when column is added
 - [Phase 08-polish 08-01]: Phase 7 migration files named waitlist_notify_trigger.sql + waitlist_trigger_url.sql (plan stated pg_net_trigger + schema_fix) — DOWN blocks added to actual files
 - Use `db = supabase as any` pre-regen cast for stock_movements queries until Plan 03 regenerates types (per CLAUDE.md workaround)
@@ -165,8 +168,9 @@ See: .planning/PROJECT.md
 | 08-polish-reports-e2e-hardening | 03 | 25min | 2 | 14 |
 | 08-polish-reports-e2e-hardening | 04 | 20min | 2 | 10 |
 | Phase 08 P04 | 20min | 2 tasks | 10 files |
+| 08-polish-reports-e2e-hardening | 06 | 8min | 1 | 6 |
 
 ## Last Session
 
-- **Stopped at:** Completed 08-03-PLAN.md — 5 report widgets + 18 RTL tests committed
-- **Timestamp:** 2026-04-26T13:50:00Z
+- **Stopped at:** Completed 08-06-PLAN.md — waitlist UX paper-cuts: touch targets + focus traps + toast copy
+- **Timestamp:** 2026-04-26T20:15:00Z
