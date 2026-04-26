@@ -17,6 +17,8 @@ export const PaymentSchema = z.object({
   idempotencyKey: z.string().min(1).max(255).nullable().optional(),
   processedAt: z.date(),
   processedBy: z.uuid(),
+  isRefund: z.boolean().optional(),
+  refundId: z.uuid().nullable().optional(),
 });
 
 export type Payment = z.infer<typeof PaymentSchema>;

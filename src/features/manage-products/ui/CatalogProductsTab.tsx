@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { RecipeEditorTab } from '@features/manage-recipe';
 import { useCategories } from '@entities/category';
 import {
   useModifiers,
@@ -19,6 +20,7 @@ import { POSButton } from '@shared/ui/POSButton';
 import { Badge } from '@shared/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 
 import { ProductForm } from './ProductForm';
 
@@ -417,33 +419,47 @@ export function CatalogProductsTab() {
           if (!o) setEditProduct(null);
         }}
       >
-        <DialogContent className="max-w-md sm:max-w-md" showCloseButton>
+        <DialogContent className="max-w-2xl sm:max-w-2xl" showCloseButton>
           <DialogHeader>
             <DialogTitle>Edit product</DialogTitle>
           </DialogHeader>
           {editProduct ? (
-            <ProductForm
-              key={editProduct.id}
-              categories={catList}
-              modifiers={modList}
-              initialProduct={editProduct}
-              submitting={updateMutation.isPending}
-              onCancel={() => {
-                setEditProduct(null);
-              }}
-              onSubmitCreate={() => {}}
-              onSubmitUpdate={payload => {
-                void updateMutation.mutateAsync(payload, {
-                  onSuccess: r => {
-                    if (!r.ok) toast.error(r.error.message);
-                    else {
-                      toast.success('Product saved');
-                      setEditProduct(null);
-                    }
-                  },
-                });
-              }}
-            />
+            <Tabs defaultValue="details">
+              <TabsList>
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="recipe">Recipe</TabsTrigger>
+              </TabsList>
+              <TabsContent value="details">
+                <ProductForm
+                  key={editProduct.id}
+                  categories={catList}
+                  modifiers={modList}
+                  initialProduct={editProduct}
+                  submitting={updateMutation.isPending}
+                  onCancel={() => {
+                    setEditProduct(null);
+                  }}
+                  onSubmitCreate={() => {}}
+                  onSubmitUpdate={payload => {
+                    void updateMutation.mutateAsync(payload, {
+                      onSuccess: r => {
+                        if (!r.ok) toast.error(r.error.message);
+                        else {
+                          toast.success('Product saved');
+                          setEditProduct(null);
+                        }
+                      },
+                    });
+                  }}
+                />
+              </TabsContent>
+              <TabsContent value="recipe">
+                <RecipeEditorTab
+                  productId={editProduct.id}
+                  productName={editProduct.name}
+                />
+              </TabsContent>
+            </Tabs>
           ) : null}
         </DialogContent>
       </Dialog>

@@ -24,6 +24,10 @@ vi.mock('@entities/staff/model/store', () => ({
   useStaffStore: vi.fn(),
 }));
 
+vi.mock('@entities/waitlist', () => ({
+  useWaitlistWaitingCount: () => ({ data: 0 }),
+}));
+
 // Suppress ManagerPinDialog queries in unit tests
 vi.mock('@features/manager-pin-gate', () => ({
   ManagerPinDialog: ({ open }: { open: boolean }) =>
@@ -68,7 +72,14 @@ function setupBartender() {
 function setupManager() {
   vi.mocked(usePermissions).mockReturnValue({
     can: (action: string) =>
-      ['create_order', 'view_reports', 'adjust_inventory', 'close_tab'].includes(action),
+      [
+        'create_order',
+        'view_reports',
+        'adjust_inventory',
+        'close_tab',
+        'produce_prep_batch',
+        'manage_waitlist',
+      ].includes(action),
   });
   vi.mocked(useStaffStore).mockImplementation(
     mockStoreState({ currentStaff: mockManager, logout: mockLogout })
@@ -81,14 +92,17 @@ describe('HomeDashboard', () => {
     setupBartender();
   });
 
-  it('renders all 7 navigation button labels', () => {
+  it('renders all main navigation button labels', () => {
     renderWithProviders(<HomeDashboard />);
     expect(screen.getByRole('button', { name: 'POS Register' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Payments' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pool Tables' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Rappi Orders' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Staff' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reports' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Inventory' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Kitchen Prep' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Waitlist' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Settings' })).toBeInTheDocument();
   });
 
@@ -132,8 +146,8 @@ describe('HomeDashboard', () => {
   it('gated buttons show lock icon for bartender', () => {
     renderWithProviders(<HomeDashboard />);
     const lockIcons = screen.getAllByTestId('lock-icon');
-    // Reports, Inventory, Settings are gated for bartender
-    expect(lockIcons.length).toBe(3);
+    // Reports, Inventory, Settings, Kitchen Prep, Waitlist are gated for bartender
+    expect(lockIcons.length).toBe(5);
   });
 
   it('logout button calls logout and navigates to /login', async () => {

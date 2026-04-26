@@ -28,6 +28,15 @@ vi.mock('@entities/staff/model/store', () => ({
   useStaffStore: vi.fn(),
 }));
 
+vi.mock('@entities/payment', () => ({
+  usePayments: vi.fn().mockReturnValue({ data: [], isLoading: false }),
+  useOrderItemsByPayment: vi.fn().mockReturnValue({ data: [], isLoading: false }),
+}));
+
+vi.mock('@entities/refund', () => ({
+  useRefundsByPayment: vi.fn().mockReturnValue({ data: [] }),
+}));
+
 // ManagerPinDialog: expose a simplified version that calls onSuccess immediately
 // when the test fires a click on the "Verify PIN" sentinel button, without
 // requiring a real keypad interaction.
@@ -163,7 +172,8 @@ describe('PaymentPane', () => {
     renderWithProviders(<PaymentPane />);
 
     expect(screen.getByText(/tabs awaiting payment/i)).toBeInTheDocument();
-    expect(screen.getByText(/select a tab from the list to process payment/i)).toBeInTheDocument();
+    // No tab selected → shows payment history empty state
+    expect(screen.getByText(/no payment records found/i)).toBeInTheDocument();
     // No payment form visible yet
     expect(screen.queryByTestId('payment-form')).not.toBeInTheDocument();
   });
@@ -274,8 +284,9 @@ describe('PaymentPane', () => {
     mockOnClose();
 
     await waitFor(() => {
+      // After clearing selection, shows payment history empty state
       expect(
-        screen.getByText(/select a tab from the list to process payment/i)
+        screen.getByText(/no payment records found/i)
       ).toBeInTheDocument();
     });
     expect(screen.queryByTestId('payment-form')).not.toBeInTheDocument();
@@ -295,8 +306,9 @@ describe('PaymentPane', () => {
     await user.click(screen.getByRole('button', { name: /back to tab list/i }));
 
     await waitFor(() => {
+      // After clearing selection, shows payment history empty state
       expect(
-        screen.getByText(/select a tab from the list to process payment/i)
+        screen.getByText(/no payment records found/i)
       ).toBeInTheDocument();
     });
     expect(screen.queryByRole('heading', { name: 'Grace' })).not.toBeInTheDocument();

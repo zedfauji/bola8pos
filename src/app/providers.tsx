@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { CajaListener } from '@app/CajaListener';
 import { OfflineQueueProcessor } from '@app/OfflineQueueProcessor';
 import { PoolRealtimeListener } from '@app/PoolRealtimeListener';
+import { WaitlistRealtimeListener } from '@app/WaitlistRealtimeListener';
 import { useRappiOrdersRealtimeBridge } from '@entities/rappi-order';
 import { useStaffStore } from '@entities/staff/model/store';
 import { logger } from '@shared/lib/logger-instance';
@@ -85,6 +86,7 @@ export function Providers({ children }: ProvidersProps) {
       <CajaListener />
       <OfflineQueueProcessor />
       <PoolRealtimeListener />
+      <WaitlistRealtimeListener />
       <RappiRealtimeBridge />
       {children}
     </QueryClientProvider>

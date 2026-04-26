@@ -6,10 +6,11 @@
  */
 
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, RefreshCw, Receipt, ArrowLeftRight } from 'lucide-react';
+import { Plus, RefreshCw, Receipt, ArrowLeftRight, SplitSquareHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { PaymentModal } from '@widgets/PaymentModal';
 import { OpenTabButton } from '@features/open-tab/ui/OpenTabButton';
+import { SplitTabSheet } from '@features/split-tab';
 import { TransferTabDialog } from '@features/transfer-tab';
 import { VoidOrderDialog } from '@features/void-order';
 import { usePermissions } from '@entities/staff';
@@ -24,6 +25,7 @@ import { ProtectedAction } from '@shared/ui/ProtectedAction';
 import { ScrollArea } from '@shared/ui/ScrollArea';
 import { CartSummary } from './CartSummary';
 import { OrderItemCard } from './OrderItemCard';
+import { SubChecksSection } from './SubChecksSection';
 
 const TAX_RATE = 0.0825;
 
@@ -41,6 +43,7 @@ export function OrderPanel() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [orderToVoid, setOrderToVoid] = useState<Order | null>(null);
   const [transferOpen, setTransferOpen] = useState(false);
+  const [splitSheetOpen, setSplitSheetOpen] = useState(false);
   const { can } = usePermissions();
   const { data: tab, isLoading } = useTab(activeTabId ?? '');
 
@@ -129,6 +132,23 @@ export function OrderPanel() {
             <Plus className="h-4 w-4" />
           </POSButton>
         </div>
+        {/* Split bill button — visible only when tab is open */}
+        {tab?.status === 'open' && (
+          <POSButton
+            data-testid="split-bill-button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSplitSheetOpen(true);
+            }}
+            disabled={items.length === 0}
+            title={items.length === 0 ? 'Add items before splitting' : undefined}
+            aria-label={`Split tab ${tab.customerName}`}
+          >
+            <SplitSquareHorizontal className="h-4 w-4 mr-2" />
+            Split bill
+          </POSButton>
+        )}
       </div>
 
       {/* Order Items */}
@@ -145,6 +165,11 @@ export function OrderPanel() {
           </ul>
         )}
       </ScrollArea>
+
+      {/* Sub-checks section — shown when tab has been split */}
+      {tab?.status === 'split' && tab.id && (
+        <SubChecksSection parentTabId={tab.id} />
+      )}
 
       {/* Summary */}
       {items.length > 0 && (
@@ -238,6 +263,18 @@ export function OrderPanel() {
       />
 
       <TransferTabDialog open={transferOpen} onOpenChange={setTransferOpen} tab={tab ?? null} />
+
+      {/* SplitTabSheet — opened when Split bill button is clicked */}
+      {splitSheetOpen && tab && (
+        <SplitTabSheet
+          open={splitSheetOpen}
+          onClose={() => {
+            setSplitSheetOpen(false);
+          }}
+          tab={tab}
+          orderItems={items}
+        />
+      )}
     </div>
   );
 }

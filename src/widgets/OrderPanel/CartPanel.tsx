@@ -1,6 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { ManagerPinDialog } from '@features/manager-pin-gate';
+import { useOverrideNegativeStock, type OverrideInput } from '@features/override-negative-stock';
 import { inventoryKeys, inventoryStore } from '@entities/inventory';
 import { useStaffStore } from '@entities/staff/model/store';
 import { useCartStore } from '@entities/tab/model/cartStore';
@@ -18,6 +21,9 @@ export function CartPanel() {
   const { items, setLineQuantity, removeItem, clearCart, totalAmount, itemCount } = useCartStore();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const addOrderMutation = useMutationAddOrder();
+  const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
+  const [pendingOverride, setPendingOverride] = useState<OverrideInput | null>(null);
+  const overrideMutation = useOverrideNegativeStock();
 
   const total = totalAmount();
   const count = itemCount();
@@ -69,6 +75,26 @@ export function CartPanel() {
         clearCart();
         return;
       }
+      // Phase 4: INVENTORY_NEGATIVE override flow
+      if (
+        result.error.code === 'INVENTORY_NEGATIVE' ||
+        result.error.message.includes('INVENTORY_NEGATIVE')
+      ) {
+        setPendingOverride({
+          tabId: activeTabId,
+          staffId: currentStaff.id,
+          items: orderItems,
+          actorId: currentStaff.id,
+        });
+        toast.error('An ingredient is out of stock. Manager PIN required to override.', {
+          duration: 6000,
+          action: {
+            label: 'Allow override',
+            onClick: () => { setIsPinDialogOpen(true); },
+          },
+        });
+        return;
+      }
       toast.error(result.error.message);
       return;
     }
@@ -79,6 +105,19 @@ export function CartPanel() {
     toast.success('Order placed successfully');
     clearCart();
   };
+
+  function handleOverrideSuccess(override: OverrideInput) {
+    setIsPinDialogOpen(false);
+    void overrideMutation.mutateAsync(override).then(result => {
+      if (!result.ok) {
+        toast.error(result.error.message);
+        return;
+      }
+      toast.success('Order placed with manager override');
+      clearCart();
+      setPendingOverride(null);
+    });
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
@@ -158,6 +197,22 @@ export function CartPanel() {
           </p>
         )}
       </div>
+
+      {/* Phase 4: Manager PIN override for INVENTORY_NEGATIVE */}
+      {pendingOverride !== null && (
+        <ManagerPinDialog
+          open={isPinDialogOpen}
+          onOpenChange={open => {
+            setIsPinDialogOpen(open);
+            if (!open) setPendingOverride(null);
+          }}
+          requiredAction="void_order"
+          onSuccess={() => {
+            // pendingOverride is guaranteed non-null here — this block only renders when pendingOverride !== null
+            handleOverrideSuccess(pendingOverride);
+          }}
+        />
+      )}
     </div>
   );
 }

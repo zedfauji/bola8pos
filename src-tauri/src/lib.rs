@@ -1,6 +1,7 @@
 mod commands;
 
 use commands::printer::{open_cash_drawer, print_receipt, test_print};
+use tauri::Manager;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -47,6 +48,7 @@ pub fn run() {
     let config = read_env_config();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())

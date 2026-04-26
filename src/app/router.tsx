@@ -4,6 +4,7 @@ import { HelpSheet } from '@widgets/HelpSheet';
 import { ProtectedRoute } from './ProtectedRoute';
 import { KdsRoute } from './kds-route';
 import { ReportsRoute } from './reports-route';
+import { WaitlistRoute } from './waitlist-route';
 
 const LoginPage = lazy(() => import('../pages/login'));
 const HomePage = lazy(() => import('../pages/home'));
@@ -17,6 +18,7 @@ const RappiOrdersPage = lazy(() => import('../pages/rappi'));
 const TableStatusPage = lazy(() => import('../pages/pool-table-status'));
 const PaymentsPage = lazy(() => import('../pages/payments'));
 const KdsPage = lazy(() => import('../pages/kds'));
+const WaitlistPage = lazy(() => import('../pages/waitlist'));
 
 function LoadingFallback() {
   return (
@@ -123,6 +125,16 @@ export function Router() {
                 <KdsRoute>
                   <KdsPage />
                 </KdsRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/waitlist"
+            element={
+              <ProtectedRoute>
+                <WaitlistRoute>
+                  <WaitlistPage />
+                </WaitlistRoute>
               </ProtectedRoute>
             }
           />

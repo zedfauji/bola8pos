@@ -1,15 +1,18 @@
-import { ArrowLeftRight, Loader2, Plus, RefreshCw, User } from 'lucide-react';
+import { ArrowLeftRight, Loader2, Plus, RefreshCw, SplitSquareHorizontal, User } from 'lucide-react';
 import { useState } from 'react';
 import { OpenTabDialog } from '@features/open-tab/ui/OpenTabDialog';
+import { SplitTabSheet } from '@features/split-tab';
 import { TransferTabDialog } from '@features/transfer-tab';
 import { VoidOrderDialog } from '@features/void-order';
 import { usePermissions, useStaffStore } from '@entities/staff';
 import { useTabs, useTab } from '@entities/tab/model/queries';
 import { selectTabById, useTabStore } from '@entities/tab/model/store';
 import type { Order } from '@entities/tab/model/types';
+import { POSButton } from '@shared/ui/POSButton';
 import { ProtectedAction } from '@shared/ui/ProtectedAction';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
+import { SubChecksSection } from './SubChecksSection';
 
 export interface ActiveTabSelectorProps {
   /** Defaults to opening the tab drawer. */
@@ -23,6 +26,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
   const [openTabDialogOpen, setOpenTabDialogOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [orderToVoid, setOrderToVoid] = useState<Order | null>(null);
+  const [splitSheetOpen, setSplitSheetOpen] = useState(false);
   const { can } = usePermissions();
 
   const { data: tabList } = useTabs();
@@ -105,6 +109,26 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 New Tab +
               </Button>
             </div>
+            {currentTab && currentTab.status === 'open' && (
+              <POSButton
+                data-testid="split-bill-button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setSplitSheetOpen(true);
+                }}
+                disabled={currentTab.items.length === 0}
+                title={currentTab.items.length === 0 ? 'Add items before splitting' : undefined}
+                aria-label={`Split tab ${currentTab.customerName}`}
+              >
+                <SplitSquareHorizontal className="mr-2 h-4 w-4" />
+                Split bill
+              </POSButton>
+            )}
+            {currentTab?.status === 'split' && currentTab.id && (
+              <SubChecksSection parentTabId={currentTab.id} />
+            )}
             {(currentTab?.orders.length ?? 0) > 0 && (
               <div className="space-y-2 border-t pt-2">
                 <p className="text-xs text-muted-foreground">Order history</p>
@@ -198,6 +222,16 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
               setOrderToVoid(null);
             }
           }}
+        />
+      )}
+      {splitSheetOpen && currentTab && currentTab.items.length > 0 && (
+        <SplitTabSheet
+          open={splitSheetOpen}
+          onClose={() => {
+            setSplitSheetOpen(false);
+          }}
+          tab={currentTab}
+          orderItems={currentTab.items}
         />
       )}
     </>

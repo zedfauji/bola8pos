@@ -30,6 +30,8 @@ export default defineConfig({
     ['json', { outputFile: 'e2e-results/results.json' }],
   ],
   use: {
+    // E2E specs import `test` from `e2e/fixtures.ts` so every test tails browser
+    // `console` + `pageerror` to the runner process.
     baseURL: 'http://localhost:1420',
     trace: 'on',
     video: 'on',

@@ -4,6 +4,7 @@ import type { Order } from '@shared/lib/domain';
 import { callVoidOrder } from '@shared/lib/edge-function-contracts';
 import { logger } from '@shared/lib/logger';
 import { err, ok, type Result } from '@shared/lib/result';
+import { supabase } from '@shared/lib/supabase';
 
 type VoidOrderInput = {
   tabId: string;
@@ -70,6 +71,31 @@ export function useVoidOrder() {
           message: result.error.message,
         });
       }
+
+      // Phase 4: Reverse ingredient depletion for each voided order item.
+      // Not atomic with void (edge function is remote) — eventual consistency acceptable.
+      // Idempotent: duplicate reversal calls produce 23505 (unique_violation) — safe to ignore.
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment,
+         @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+      const deplDb = supabase as any;
+      for (const item of input.order.items) {
+        const { error: deplError } = await deplDb.rpc('deplete_for_order_item', {
+          p_order_item_id: item.id,
+          p_direction: -1,
+        });
+        if (deplError != null) {
+          const isIdempotent = (deplError as { code?: string }).code === '23505';
+          if (!isIdempotent) {
+            logger.warn('void_order.depletion_reversal_failed', {
+              orderItemId: item.id,
+              orderId: input.order.id,
+              errorCode: (deplError as { code?: string }).code,
+            });
+          }
+        }
+      }
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment,
+         @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
       logger.info('order.void.succeeded', {
         orderId: input.order.id,
