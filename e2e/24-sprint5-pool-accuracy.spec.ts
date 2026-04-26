@@ -23,7 +23,7 @@
  *   - e2e/04-pool-timer.spec.ts    (startFirstPoolSession helper pattern)
  */
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import {

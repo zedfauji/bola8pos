@@ -9,12 +9,11 @@
  *  T5: By-person split with unassigned items — 3 sub-tabs created
  *  T6: Split button hidden / tab guarded when status = 'split' or 'paid'
  *
- * NOTE (autonomous: false): These tests require a running dev server + Supabase
- * with migrations 20260427000000–20260427000004 applied. Run with:
- *   cd bar-pos && npx playwright test e2e/34-split-bill.spec.ts --headed
+ * NOTE (autonomous: false): Requires `bar-pos/.env.local` + remote Supabase with
+ * migrations 20260427000000–20260427000004 applied. Browser console is tailed via `e2e/fixtures.ts`.
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { getServiceClient, openCaja, resetTestState } from './helpers/supabase';
@@ -128,6 +127,8 @@ async function selectTabByName(
     .or(page.getByRole('button', { name: /select.*tab/i }))
     .or(page.getByRole('button', { name: /select existing tab/i }));
   await expect(switchBtn.first()).toBeVisible({ timeout: 20_000 });
+  // Empty-state "Switch Tab" is disabled until open tabs load from the server
+  await expect(switchBtn.first()).toBeEnabled({ timeout: 30_000 });
   await switchBtn.first().click();
 
   // Tab drawer opens — find tab by customer name
@@ -146,14 +147,6 @@ async function selectTabByName(
 // ---------------------------------------------------------------------------
 
 test.beforeEach(async ({ page }) => {
-  // Pipe browser console to Playwright stdout so failures are diagnosable
-  page.on('console', msg => {
-    console.log(`[browser:${msg.type()}] ${msg.text()}`);
-  });
-  page.on('pageerror', err => {
-    console.error(`[browser:pageerror] ${err.message}`);
-  });
-
   requireIntegrationEnv();
   await resetTestState();
   await openCaja(570);
@@ -177,8 +170,9 @@ test('T1: evenly split 3 ways — payments sum to tab total', async ({ page }) =
   await selectTabByName(page, 'E2E Split Evenly');
 
   // Split bill button is visible for open tabs with items
-  const splitBtn = page.getByRole('button', { name: /split.*tab/i });
+  const splitBtn = page.getByTestId('split-bill-button');
   await expect(splitBtn).toBeVisible({ timeout: 15_000 });
+  await expect(splitBtn).toBeEnabled({ timeout: 15_000 });
   await splitBtn.click();
 
   // SplitTabSheet opens (bottom Sheet = dialog)
@@ -225,8 +219,9 @@ test('T2: by-item split — 3 sub-tabs created with assigned items', async ({ pa
   await loginAs(page, 'admin');
   await selectTabByName(page, 'E2E Split By Item');
 
-  const splitBtn = page.getByRole('button', { name: /split.*tab/i });
+  const splitBtn = page.getByTestId('split-bill-button');
   await expect(splitBtn).toBeVisible({ timeout: 15_000 });
+  await expect(splitBtn).toBeEnabled({ timeout: 15_000 });
   await splitBtn.click();
 
   const sheet = page.getByRole('dialog');
@@ -353,23 +348,45 @@ test('T3+T4: paying all sub-tabs auto-closes parent (status = paid)', async ({ p
   const { data: parentBeforePay } = await db.from('tabs').select('status').eq('id', tabId).single();
   expect((parentBeforePay as { status: string }).status).toBe('split');
 
-  // Pay each sub-tab via direct DB (mark as paid + insert payment)
-  for (const subId of resolvedSubTabIds) {
+  const { data: payProfile } = await db
+    .from('profiles')
+    .select('id')
+    .eq('role', 'admin')
+    .limit(1)
+    .single();
+  if (!payProfile) {
+    throw new Error('T3+T4: no admin profile for payments.processed_by');
+  }
+
+  // Pay each sub-tab via direct DB (mark as paid + insert payment; trigger reads NEW.tab_id)
+  for (const [idx, subId] of resolvedSubTabIds.entries()) {
     await db.from('tabs').update({ status: 'paid', closed_at: new Date().toISOString() }).eq('id', subId);
-    await db.from('payments').insert({
+    const { error: insErr } = await db.from('payments').insert({
       tab_id: subId,
       amount: 10.0,
       tip_amount: 0,
       method: 'cash',
       is_refund: false,
+      processed_by: payProfile.id,
+      idempotency_key: `e2e-split-t3t4-${tabId}-${subId}-${String(idx)}`,
     });
+    if (insErr) {
+      throw new Error(`T3+T4: payment insert failed: ${insErr.message}`);
+    }
   }
 
   // Trigger after_payment_insert_check_parent_close trigger by inserting a payment on last sub-tab
   // (Already done above — the trigger fires on each insert)
 
-  // Wait briefly for the DB trigger to fire, then check parent status
-  await page.waitForTimeout(1000); // 1s for trigger propagation — acceptable in integration context
+  await expect
+    .poll(
+      async () => {
+        const { data: row } = await db.from('tabs').select('status').eq('id', tabId).single();
+        return (row as { status: string } | null)?.status ?? null;
+      },
+      { timeout: 10_000 },
+    )
+    .toBe('paid');
 
   const { data: parentAfterPay } = await db.from('tabs').select('status').eq('id', tabId).single();
   // The auto-close trigger sets parent to 'paid' when all sub-tabs are paid
@@ -389,8 +406,9 @@ test('T5: by-person split — 3 persons, unassigned items remain in parent', asy
   await loginAs(page, 'admin');
   await selectTabByName(page, 'E2E Split By Person');
 
-  const splitBtn = page.getByRole('button', { name: /split.*tab/i });
+  const splitBtn = page.getByTestId('split-bill-button');
   await expect(splitBtn).toBeVisible({ timeout: 15_000 });
+  await expect(splitBtn).toBeEnabled({ timeout: 15_000 });
   await splitBtn.click();
 
   const sheet = page.getByRole('dialog');
@@ -447,11 +465,8 @@ test('T6: split button hidden when tab status is split or paid', async ({ page }
   await loginAs(page, 'admin');
   await selectTabByName(page, 'E2E Split Guard');
 
-  // For a 'split' status tab, the "Split bill" button should not be visible
-  // (OrderPanel only renders it when tab?.status === 'open')
-  const splitBtn = page.getByRole('button', { name: /split.*tab/i });
-  // Give the UI 5 seconds to settle — if button appears, the guard is missing
-  await expect(splitBtn).not.toBeVisible({ timeout: 5_000 });
+  // For a 'split' status tab, Split bill is not mounted (OrderPanel: tab?.status === 'open' only)
+  await expect(page.getByTestId('split-bill-button')).toHaveCount(0);
 
   // Additionally verify the tab status in DB is still 'split'
   const { data: tabRow } = await db.from('tabs').select('status').eq('id', tabId).single();

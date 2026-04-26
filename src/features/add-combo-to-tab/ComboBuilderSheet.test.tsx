@@ -125,7 +125,7 @@ function setupMocks() {
   vi.mocked(supabaseModule.supabase.rpc).mockResolvedValue({
     data: 'parent-order-item-id',
     error: null,
-  } as unknown as ReturnType<typeof supabaseModule.supabase.rpc>);
+  } as unknown as Awaited<ReturnType<typeof supabaseModule.supabase.rpc>>);
 
   vi.mocked(productQueries.useProducts).mockReturnValue({
     data: [mockCombo, mockChildProduct],
@@ -234,7 +234,7 @@ describe('ComboBuilderSheet', () => {
         message: 'NESTED_COMBO_FORBIDDEN: Product X is a combo; cannot be a child',
         code: '22000',
       },
-    } as unknown as ReturnType<typeof supabaseModule.supabase.rpc>);
+    } as unknown as Awaited<ReturnType<typeof supabaseModule.supabase.rpc>>);
 
     const user = userEvent.setup();
     renderSheet();

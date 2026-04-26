@@ -44,14 +44,17 @@ export function PINLoginForm() {
     }
 
     // Check for an existing open shift — if found, resume it instead of starting a new one.
-    const { data: existingShift } = await supabase
+    // supabase.types.ts may lag behind schema; cast to any until types are regenerated.
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+    const db = supabase as any;
+    const { data: existingShift } = (await db
       .from('shifts')
       .select('*')
       .eq('staff_id', selectedStaff.id)
       .is('clock_out', null)
       .order('clock_in', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle()) as { data: any };
 
     if (existingShift) {
       useStaffStore.getState().login(selectedStaff, {
@@ -62,6 +65,7 @@ export function PINLoginForm() {
         openingCash: existingShift.opening_cash,
         closingCash: existingShift.closing_cash,
       });
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
       clearSelection();
       navigate('/home');
       return;

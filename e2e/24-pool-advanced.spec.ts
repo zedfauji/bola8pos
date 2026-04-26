@@ -5,7 +5,7 @@
  * rate validation, and the edit-session-start-time feature.
  */
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import {

@@ -10,6 +10,7 @@ export function LoadingSpinner({ size = 24, className }: LoadingSpinnerProps) {
   return (
     <div
       className={cn('flex items-center justify-center p-4', className)}
+      data-testid="loading-spinner"
       role="status"
       aria-live="polite"
       aria-label="Loading"

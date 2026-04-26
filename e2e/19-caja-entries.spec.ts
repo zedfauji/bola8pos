@@ -5,7 +5,7 @@
  * success toasts, and appearance in reports.
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { openCaja, resetTestState, seedCajaEntry } from './helpers/supabase';

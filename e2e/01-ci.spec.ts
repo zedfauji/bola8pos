@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { test } from '@playwright/test';
+import { test } from './fixtures';
 
 const BAR_POS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 

@@ -50,11 +50,14 @@ describe('useCajaPaymentSummary', () => {
   });
 
   it('returns all zeros when there are no payments for the session', async () => {
-    mockedFrom.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      is: vi.fn().mockResolvedValue({ data: [], error: null }),
-    }));
+    mockedFrom.mockImplementation(
+      () =>
+        ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          is: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }) as unknown as ReturnType<typeof supabase.from>
+    );
 
     const qc = createTestQueryClient();
     const { result } = renderHook(() => useCajaPaymentSummary(testSession), {
@@ -77,11 +80,14 @@ describe('useCajaPaymentSummary', () => {
       { amount: 75, method: 'rappi' },
     ];
 
-    mockedFrom.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      is: vi.fn().mockResolvedValue({ data: payments, error: null }),
-    }));
+    mockedFrom.mockImplementation(
+      () =>
+        ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          is: vi.fn().mockResolvedValue({ data: payments, error: null }),
+        }) as unknown as ReturnType<typeof supabase.from>
+    );
 
     const qc = createTestQueryClient();
     const { result } = renderHook(() => useCajaPaymentSummary(testSession), {
@@ -97,11 +103,16 @@ describe('useCajaPaymentSummary', () => {
   });
 
   it('returns error Result when Supabase returns an error', async () => {
-    mockedFrom.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      is: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error', code: '500' } }),
-    }));
+    mockedFrom.mockImplementation(
+      () =>
+        ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          is: vi
+            .fn()
+            .mockResolvedValue({ data: null, error: { message: 'DB error', code: '500' } }),
+        }) as unknown as ReturnType<typeof supabase.from>
+    );
 
     const qc = createTestQueryClient();
     const { result } = renderHook(() => useCajaPaymentSummary(testSession), {
@@ -304,11 +315,14 @@ describe('useCajaPaymentSummary – property-based', () => {
         async payments => {
           vi.clearAllMocks();
 
-          mockedFrom.mockImplementation(() => ({
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            is: vi.fn().mockResolvedValue({ data: payments, error: null }),
-          }));
+          mockedFrom.mockImplementation(
+            () =>
+              ({
+                select: vi.fn().mockReturnThis(),
+                eq: vi.fn().mockReturnThis(),
+                is: vi.fn().mockResolvedValue({ data: payments, error: null }),
+              }) as unknown as ReturnType<typeof supabase.from>
+          );
 
           const qc = createTestQueryClient();
           const { result } = renderHook(() => useCajaPaymentSummary(testSession), {

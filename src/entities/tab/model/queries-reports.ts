@@ -20,7 +20,17 @@ import { logger } from '@shared/lib/logger-instance';
 import { err, ok, unknownError, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 
-export type { HourlyRow, ProductSalesRow, VoidRefundRow, CategoryRevenueRow, ComboMixRow, RecipeVarianceRow, WaitlistMetricsRow, RefundRegisterRow, ComboOverrideRow };
+export type {
+  HourlyRow,
+  ProductSalesRow,
+  VoidRefundRow,
+  CategoryRevenueRow,
+  ComboMixRow,
+  RecipeVarianceRow,
+  WaitlistMetricsRow,
+  RefundRegisterRow,
+  ComboOverrideRow,
+};
 
 // Intermediate type used during aggregation before pctTotal is computed
 type CategoryRevenueAggregate = Omit<CategoryRevenueRow, 'pctTotal'>;
@@ -560,7 +570,8 @@ export function useRefundsRegister(from: Date, to: Date) {
       assertDateRangeValid(from, to);
       const { data, error } = await db
         .from('refunds')
-        .select(`
+        .select(
+          `
           id,
           created_at,
           original_payment_id,
@@ -568,7 +579,8 @@ export function useRefundsRegister(from: Date, to: Date) {
           reason,
           profiles!created_by ( full_name ),
           refund_items ( id, restock )
-        `)
+        `
+        )
         .gte('created_at', from.toISOString())
         .lte('created_at', to.toISOString())
         .order('created_at', { ascending: false });
@@ -579,13 +591,13 @@ export function useRefundsRegister(from: Date, to: Date) {
           const items = (r['refund_items'] as Array<{ id: string; restock: boolean }> | null) ?? [];
           return {
             id: r['id'] as string,
-            date: r['created_at'] as string,
+            date: new Date(r['created_at'] as string),
             operatorName: (profile?.['full_name'] as string | undefined) ?? '—',
             originalPaymentId: r['original_payment_id'] as string,
             amount: r['amount'] as number,
-            reason: r['reason'] as string,
+            reason: r['reason'] as RefundRegisterRow['reason'],
             restockCount: items.filter(i => i.restock).length,
-            items: [],
+            items: [] as RefundRegisterRow['items'],
           };
         })
       );
@@ -603,13 +615,15 @@ export function useComboOverrides(from: Date, to: Date) {
       assertDateRangeValid(from, to);
       const { data, error } = await db
         .from('audit_log')
-        .select(`
+        .select(
+          `
           id,
           ts,
           action,
           details,
           profiles!actor_id ( full_name )
-        `)
+        `
+        )
         .eq('action', 'combo_availability_override')
         .gte('ts', from.toISOString())
         .lte('ts', to.toISOString())
@@ -621,7 +635,7 @@ export function useComboOverrides(from: Date, to: Date) {
           const details = r['details'] as Record<string, unknown> | null;
           return {
             id: r['id'] as string,
-            ts: r['ts'] as string,
+            ts: new Date(r['ts'] as string),
             actorName: (profile?.['full_name'] as string | undefined) ?? '—',
             comboName: (details?.['combo_name'] as string | undefined) ?? '—',
             reason: (details?.['reason'] as string | null | undefined) ?? null,

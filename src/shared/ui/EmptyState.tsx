@@ -45,6 +45,7 @@ export function EmptyState({ icon: Icon, title, description, action, className }
   return (
     <div
       className={cn('flex flex-col items-center justify-center py-12 text-center', className)}
+      data-testid="empty-state"
       role="status"
       aria-live="polite"
     >

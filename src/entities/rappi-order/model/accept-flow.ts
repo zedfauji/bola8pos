@@ -10,6 +10,7 @@ type RpcPayload = {
   p_status: 'pending';
   p_notes: string;
   p_items: Json;
+  p_skip_depletion: boolean;
 };
 
 function buildOrderItemsPayload(order: RappiOrder) {
@@ -66,6 +67,7 @@ export async function acceptRappiOrder(
     p_status: 'pending',
     p_notes: 'Rappi delivery',
     p_items: buildOrderItemsPayload(order) as unknown as Json,
+    p_skip_depletion: false,
   };
 
   const rpcRes = await supabaseQuery(() => supabase.rpc('create_order_with_items', rpcPayload));

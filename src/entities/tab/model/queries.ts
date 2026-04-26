@@ -599,6 +599,7 @@ export function useMutationAddOrder() {
         p_status: order.status,
         p_notes: order.notes ?? '',
         p_items: buildRpcItemsJson(items) as unknown as Json,
+        p_skip_depletion: false,
       };
 
       const res = await supabaseQuery(() => supabase.rpc('create_order_with_items', payload));

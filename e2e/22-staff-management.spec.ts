@@ -5,7 +5,7 @@
  * clock-in/out flows, and shifts visibility RBAC.
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { loginAs, loginAsNamed, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { deleteTestStaff, openCaja, resetTestState } from './helpers/supabase';

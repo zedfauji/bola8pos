@@ -27,5 +27,13 @@ design_handoff_pool_table_card/
 installer/
 tickets/
 
+# Test / CI outputs (keep clones lean)
+coverage/
+artifacts/
+e2e-results/
+e2e-blob-reports/
+playwright-report/
+verification-artifacts/
+
 # Markdown docs at repo root (CLAUDE.md lives inside bar-pos/, not here)
 *.md

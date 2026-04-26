@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { openCaja, resetTestState } from './helpers/supabase';
@@ -187,8 +187,11 @@ test.describe('Payments', () => {
     await tipInput.fill('2');
     await modal.getByLabel(/amount tendered/i).fill('500');
     await modal.getByRole('button', { name: /process payment/i }).click();
-    await expect(page.getByRole('heading', { name: 'Receipt' })).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByText(/tip/i)).toBeVisible({ timeout: 5_000 });
+    const receiptDialog = page
+      .getByRole('dialog')
+      .filter({ has: page.getByRole('heading', { name: 'Receipt' }) });
+    await expect(receiptDialog.getByRole('heading', { name: 'Receipt' })).toBeVisible({ timeout: 90_000 });
+    await expect(receiptDialog.locator('pre').getByText(/tip/i).first()).toBeVisible({ timeout: 5_000 });
     await page.getByRole('button', { name: 'Done' }).click();
     await logout(page);
   });
@@ -216,11 +219,9 @@ test.describe('Payments', () => {
       test.skip(true, 'tip/discount UI not implemented');
       return;
     }
-    const originalTotal = await modal.getByText(/\$\d+\.\d{2}/).first().textContent();
     await discountInput.fill('10');
-    await page.waitForTimeout(500);
-    const newTotal = await modal.getByText(/\$\d+\.\d{2}/).first().textContent();
-    expect(newTotal).not.toBe(originalTotal);
+    await expect(modal.getByTestId('discount-applied-label')).toBeVisible({ timeout: 5_000 });
+    await expect(modal.getByTestId('discount-row')).toBeVisible();
     await modal.getByRole('button', { name: 'Cancel' }).click();
     await logout(page);
   });

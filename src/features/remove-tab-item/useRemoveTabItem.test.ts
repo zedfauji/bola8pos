@@ -103,9 +103,9 @@ describe('useRemoveTabItem', () => {
     let callCount = 0;
     mockedFrom.mockImplementation(() => {
       callCount += 1;
-      if (callCount === 1) return deleteBuilder as ReturnType<typeof supabase.from>;
-      if (callCount === 2) return remainingBuilder as ReturnType<typeof supabase.from>;
-      return voidBuilder as ReturnType<typeof supabase.from>;
+      if (callCount === 1) return deleteBuilder as unknown as ReturnType<typeof supabase.from>;
+      if (callCount === 2) return remainingBuilder as unknown as ReturnType<typeof supabase.from>;
+      return voidBuilder as unknown as ReturnType<typeof supabase.from>;
     });
 
     const wrapper = makeWrapper(queryClient);
@@ -134,9 +134,9 @@ describe('useRemoveTabItem', () => {
     let callCount = 0;
     mockedFrom.mockImplementation(() => {
       callCount += 1;
-      if (callCount === 1) return deleteBuilder as ReturnType<typeof supabase.from>;
-      if (callCount === 2) return remainingBuilder as ReturnType<typeof supabase.from>;
-      return voidBuilder as ReturnType<typeof supabase.from>;
+      if (callCount === 1) return deleteBuilder as unknown as ReturnType<typeof supabase.from>;
+      if (callCount === 2) return remainingBuilder as unknown as ReturnType<typeof supabase.from>;
+      return voidBuilder as unknown as ReturnType<typeof supabase.from>;
     });
 
     const wrapper = makeWrapper(queryClient);
@@ -157,9 +157,9 @@ describe('useRemoveTabItem', () => {
     let callCount = 0;
     mockedFrom.mockImplementation(() => {
       callCount += 1;
-      if (callCount === 1) return deleteBuilder as ReturnType<typeof supabase.from>;
-      if (callCount === 2) return remainingBuilder as ReturnType<typeof supabase.from>;
-      return voidBuilder as ReturnType<typeof supabase.from>;
+      if (callCount === 1) return deleteBuilder as unknown as ReturnType<typeof supabase.from>;
+      if (callCount === 2) return remainingBuilder as unknown as ReturnType<typeof supabase.from>;
+      return voidBuilder as unknown as ReturnType<typeof supabase.from>;
     });
 
     const wrapper = makeWrapper(queryClient);
@@ -178,7 +178,7 @@ describe('useRemoveTabItem', () => {
       error: { message: 'delete failed', code: '500', details: '', hint: '' },
     });
 
-    mockedFrom.mockReturnValue(failBuilder as ReturnType<typeof supabase.from>);
+    mockedFrom.mockReturnValue(failBuilder as unknown as ReturnType<typeof supabase.from>);
 
     const wrapper = makeWrapper(queryClient);
     const { result } = renderHook(() => useRemoveTabItem(), { wrapper });

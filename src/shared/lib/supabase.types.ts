@@ -6,33 +6,46 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '14.5';
   };
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string;
+          actor_id: string | null;
+          created_at: string;
+          details: Json | null;
+          entity_id: string | null;
+          entity_type: string | null;
+          id: string;
+        };
+        Insert: {
+          action: string;
+          actor_id?: string | null;
+          created_at?: string;
+          details?: Json | null;
+          entity_id?: string | null;
+          entity_type?: string | null;
+          id?: string;
+        };
+        Update: {
+          action?: string;
+          actor_id?: string | null;
+          created_at?: string;
+          details?: Json | null;
+          entity_id?: string | null;
+          entity_type?: string | null;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'audit_log_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       caja_entries: {
         Row: {
           amount: number;
@@ -182,6 +195,202 @@ export type Database = {
           },
         ];
       };
+      combo_availability: {
+        Row: {
+          combo_product_id: string;
+          created_at: string;
+          days_of_week: number[];
+          end_date: string | null;
+          end_time: string | null;
+          id: string;
+          start_date: string | null;
+          start_time: string | null;
+        };
+        Insert: {
+          combo_product_id: string;
+          created_at?: string;
+          days_of_week?: number[];
+          end_date?: string | null;
+          end_time?: string | null;
+          id?: string;
+          start_date?: string | null;
+          start_time?: string | null;
+        };
+        Update: {
+          combo_product_id?: string;
+          created_at?: string;
+          days_of_week?: number[];
+          end_date?: string | null;
+          end_time?: string | null;
+          id?: string;
+          start_date?: string | null;
+          start_time?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'combo_availability_combo_product_id_fkey';
+            columns: ['combo_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'combo_availability_combo_product_id_fkey';
+            columns: ['combo_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      combo_slot_options: {
+        Row: {
+          child_product_id: string | null;
+          combo_slot_id: string;
+          created_at: string;
+          id: string;
+          prepaid_minutes: number | null;
+          sort_order: number;
+        };
+        Insert: {
+          child_product_id?: string | null;
+          combo_slot_id: string;
+          created_at?: string;
+          id?: string;
+          prepaid_minutes?: number | null;
+          sort_order?: number;
+        };
+        Update: {
+          child_product_id?: string | null;
+          combo_slot_id?: string;
+          created_at?: string;
+          id?: string;
+          prepaid_minutes?: number | null;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'combo_slot_options_child_product_id_fkey';
+            columns: ['child_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'combo_slot_options_child_product_id_fkey';
+            columns: ['child_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'combo_slot_options_combo_slot_id_fkey';
+            columns: ['combo_slot_id'];
+            isOneToOne: false;
+            referencedRelation: 'combo_slots';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      combo_slots: {
+        Row: {
+          combo_product_id: string;
+          created_at: string;
+          id: string;
+          is_required: boolean;
+          label: string;
+          max_qty: number;
+          min_qty: number;
+          slot_type: string;
+          sort_order: number;
+        };
+        Insert: {
+          combo_product_id: string;
+          created_at?: string;
+          id?: string;
+          is_required?: boolean;
+          label: string;
+          max_qty?: number;
+          min_qty?: number;
+          slot_type: string;
+          sort_order?: number;
+        };
+        Update: {
+          combo_product_id?: string;
+          created_at?: string;
+          id?: string;
+          is_required?: boolean;
+          label?: string;
+          max_qty?: number;
+          min_qty?: number;
+          slot_type?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'combo_slots_combo_product_id_fkey';
+            columns: ['combo_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'combo_slots_combo_product_id_fkey';
+            columns: ['combo_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      ingredients: {
+        Row: {
+          category: string | null;
+          cost_per_base_unit: number;
+          created_at: string | null;
+          id: string;
+          is_active: boolean;
+          is_prep: boolean;
+          name: string;
+          purchase_to_base_factor: number;
+          purchase_uom: string | null;
+          quantity_on_hand: number;
+          reorder_point: number | null;
+          uom: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          category?: string | null;
+          cost_per_base_unit?: number;
+          created_at?: string | null;
+          id?: string;
+          is_active?: boolean;
+          is_prep?: boolean;
+          name: string;
+          purchase_to_base_factor?: number;
+          purchase_uom?: string | null;
+          quantity_on_hand?: number;
+          reorder_point?: number | null;
+          uom: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          category?: string | null;
+          cost_per_base_unit?: number;
+          created_at?: string | null;
+          id?: string;
+          is_active?: boolean;
+          is_prep?: boolean;
+          name?: string;
+          purchase_to_base_factor?: number;
+          purchase_uom?: string | null;
+          quantity_on_hand?: number;
+          reorder_point?: number | null;
+          uom?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
       inventory: {
         Row: {
           created_at: string;
@@ -215,58 +424,47 @@ export type Database = {
             foreignKeyName: 'inventory_product_id_fkey';
             columns: ['product_id'];
             isOneToOne: true;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'inventory_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: true;
             referencedRelation: 'products';
             referencedColumns: ['id'];
           },
         ];
       };
-      stock_movements: {
+      modifier_group_items: {
         Row: {
-          created_at: string;
-          id: string;
-          ingredient_id: string | null;
-          product_id: string;
-          quantity_delta: number;
-          reason: string;
-          ref_id: string | null;
-          ref_type: string | null;
-          staff_id: string;
+          group_id: string;
+          modifier_id: string;
+          sort_order: number;
         };
         Insert: {
-          created_at?: string;
-          id?: string;
-          ingredient_id?: string | null;
-          product_id: string;
-          quantity_delta: number;
-          reason: string;
-          ref_id?: string | null;
-          ref_type?: string | null;
-          staff_id: string;
+          group_id: string;
+          modifier_id: string;
+          sort_order?: number;
         };
         Update: {
-          created_at?: string;
-          id?: string;
-          ingredient_id?: string | null;
-          product_id?: string;
-          quantity_delta?: number;
-          reason?: string;
-          ref_id?: string | null;
-          ref_type?: string | null;
-          staff_id?: string;
+          group_id?: string;
+          modifier_id?: string;
+          sort_order?: number;
         };
         Relationships: [
           {
-            foreignKeyName: 'stock_movements_product_id_fkey';
-            columns: ['product_id'];
+            foreignKeyName: 'modifier_group_items_group_id_fkey';
+            columns: ['group_id'];
             isOneToOne: false;
-            referencedRelation: 'products';
+            referencedRelation: 'modifier_groups';
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'stock_movements_staff_id_fkey';
-            columns: ['staff_id'];
+            foreignKeyName: 'modifier_group_items_modifier_id_fkey';
+            columns: ['modifier_id'];
             isOneToOne: false;
-            referencedRelation: 'profiles';
+            referencedRelation: 'modifiers';
             referencedColumns: ['id'];
           },
         ];
@@ -304,72 +502,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      modifier_group_items: {
-        Row: {
-          group_id: string;
-          modifier_id: string;
-          sort_order: number;
-        };
-        Insert: {
-          group_id: string;
-          modifier_id: string;
-          sort_order?: number;
-        };
-        Update: {
-          group_id?: string;
-          modifier_id?: string;
-          sort_order?: number;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'modifier_group_items_group_id_fkey';
-            columns: ['group_id'];
-            isOneToOne: false;
-            referencedRelation: 'modifier_groups';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'modifier_group_items_modifier_id_fkey';
-            columns: ['modifier_id'];
-            isOneToOne: false;
-            referencedRelation: 'modifiers';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      product_modifier_groups: {
-        Row: {
-          group_id: string;
-          product_id: string;
-          sort_order: number | null;
-        };
-        Insert: {
-          group_id: string;
-          product_id: string;
-          sort_order?: number | null;
-        };
-        Update: {
-          group_id?: string;
-          product_id?: string;
-          sort_order?: number | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'product_modifier_groups_group_id_fkey';
-            columns: ['group_id'];
-            isOneToOne: false;
-            referencedRelation: 'modifier_groups';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'product_modifier_groups_product_id_fkey';
-            columns: ['product_id'];
-            isOneToOne: false;
-            referencedRelation: 'products';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       modifiers: {
         Row: {
           created_at: string;
@@ -399,42 +531,51 @@ export type Database = {
       };
       order_items: {
         Row: {
+          combo_slot_id: string | null;
           created_at: string;
           deleted_at: string | null;
           id: string;
           is_deleted: boolean;
+          kds_status: Database['public']['Enums']['kds_status'];
           modifier_ids: string[];
           modifier_price_delta: number;
           notes: string | null;
           order_id: string;
+          parent_order_item_id: string | null;
           product_id: string;
           quantity: number;
           unit_price: number;
           updated_at: string;
         };
         Insert: {
+          combo_slot_id?: string | null;
           created_at?: string;
           deleted_at?: string | null;
           id?: string;
           is_deleted?: boolean;
+          kds_status?: Database['public']['Enums']['kds_status'];
           modifier_ids?: string[];
           modifier_price_delta?: number;
           notes?: string | null;
           order_id: string;
+          parent_order_item_id?: string | null;
           product_id: string;
           quantity?: number;
           unit_price: number;
           updated_at?: string;
         };
         Update: {
+          combo_slot_id?: string | null;
           created_at?: string;
           deleted_at?: string | null;
           id?: string;
           is_deleted?: boolean;
+          kds_status?: Database['public']['Enums']['kds_status'];
           modifier_ids?: string[];
           modifier_price_delta?: number;
           notes?: string | null;
           order_id?: string;
+          parent_order_item_id?: string | null;
           product_id?: string;
           quantity?: number;
           unit_price?: number;
@@ -442,11 +583,39 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: 'order_items_combo_slot_id_fkey';
+            columns: ['combo_slot_id'];
+            isOneToOne: false;
+            referencedRelation: 'combo_slots';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'order_items_order_id_fkey';
             columns: ['order_id'];
             isOneToOne: false;
             referencedRelation: 'orders';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_parent_order_item_id_fkey';
+            columns: ['parent_order_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'order_items';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_parent_order_item_id_fkey';
+            columns: ['parent_order_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['parent_order_item_id'];
+          },
+          {
+            foreignKeyName: 'order_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
           },
           {
             foreignKeyName: 'order_items_product_id_fkey';
@@ -507,6 +676,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_tab_id_fkey';
+            columns: ['tab_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['tab_id'];
           },
           {
             foreignKeyName: 'orders_tab_id_fkey';
@@ -615,95 +791,15 @@ export type Database = {
           {
             foreignKeyName: 'payments_tab_id_fkey';
             columns: ['tab_id'];
-            isOneToOne: true;
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['tab_id'];
+          },
+          {
+            foreignKeyName: 'payments_tab_id_fkey';
+            columns: ['tab_id'];
+            isOneToOne: false;
             referencedRelation: 'tabs';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      refund_items: {
-        Row: {
-          amount: number;
-          created_at: string;
-          id: string;
-          order_item_id: string;
-          qty: number;
-          refund_id: string;
-          restock: boolean;
-        };
-        Insert: {
-          amount: number;
-          created_at?: string;
-          id?: string;
-          order_item_id: string;
-          qty: number;
-          refund_id: string;
-          restock?: boolean;
-        };
-        Update: {
-          amount?: number;
-          created_at?: string;
-          id?: string;
-          order_item_id?: string;
-          qty?: number;
-          refund_id?: string;
-          restock?: boolean;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'refund_items_order_item_id_fkey';
-            columns: ['order_item_id'];
-            isOneToOne: false;
-            referencedRelation: 'order_items';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'refund_items_refund_id_fkey';
-            columns: ['refund_id'];
-            isOneToOne: false;
-            referencedRelation: 'refunds';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      refunds: {
-        Row: {
-          amount: number;
-          created_at: string;
-          created_by: string;
-          id: string;
-          original_payment_id: string;
-          reason: string;
-        };
-        Insert: {
-          amount: number;
-          created_at?: string;
-          created_by: string;
-          id?: string;
-          original_payment_id: string;
-          reason: string;
-        };
-        Update: {
-          amount?: number;
-          created_at?: string;
-          created_by?: string;
-          id?: string;
-          original_payment_id?: string;
-          reason?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'refunds_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'profiles';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'refunds_original_payment_id_fkey';
-            columns: ['original_payment_id'];
-            isOneToOne: false;
-            referencedRelation: 'payments';
             referencedColumns: ['id'];
           },
         ];
@@ -715,7 +811,9 @@ export type Database = {
           deleted_at: string | null;
           id: string;
           is_deleted: boolean;
+          prepaid_minutes: number;
           previous_table_id: string | null;
+          source_order_item_id: string | null;
           started_at: string;
           stopped_at: string | null;
           tab_id: string | null;
@@ -729,7 +827,9 @@ export type Database = {
           deleted_at?: string | null;
           id?: string;
           is_deleted?: boolean;
+          prepaid_minutes?: number;
           previous_table_id?: string | null;
+          source_order_item_id?: string | null;
           started_at?: string;
           stopped_at?: string | null;
           tab_id?: string | null;
@@ -743,7 +843,9 @@ export type Database = {
           deleted_at?: string | null;
           id?: string;
           is_deleted?: boolean;
+          prepaid_minutes?: number;
           previous_table_id?: string | null;
+          source_order_item_id?: string | null;
           started_at?: string;
           stopped_at?: string | null;
           tab_id?: string | null;
@@ -758,6 +860,27 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'pool_tables';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'pool_sessions_source_order_item_id_fkey';
+            columns: ['source_order_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'order_items';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'pool_sessions_source_order_item_id_fkey';
+            columns: ['source_order_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['parent_order_item_id'];
+          },
+          {
+            foreignKeyName: 'pool_sessions_tab_id_fkey';
+            columns: ['tab_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['tab_id'];
           },
           {
             foreignKeyName: 'pool_sessions_tab_id_fkey';
@@ -845,7 +968,7 @@ export type Database = {
           number: number;
           rate_per_hour: number;
           status: Database['public']['Enums']['pool_table_status'];
-          table_type: 'pool' | 'carom' | 'consumption';
+          table_type: string;
           updated_at: string;
         };
         Insert: {
@@ -858,7 +981,7 @@ export type Database = {
           number: number;
           rate_per_hour: number;
           status?: Database['public']['Enums']['pool_table_status'];
-          table_type?: 'pool' | 'carom' | 'consumption';
+          table_type?: string;
           updated_at?: string;
         };
         Update: {
@@ -871,7 +994,7 @@ export type Database = {
           number?: number;
           rate_per_hour?: number;
           status?: Database['public']['Enums']['pool_table_status'];
-          table_type?: 'pool' | 'carom' | 'consumption';
+          table_type?: string;
           updated_at?: string;
         };
         Relationships: [
@@ -884,31 +1007,30 @@ export type Database = {
           },
         ];
       };
-      // TODO: regenerate types after Phase 5 migrations applied (Docker unavailable — manual transcription)
       prep_productions: {
         Row: {
-          id: string;
-          prep_ingredient_id: string;
-          qty_produced: number;
-          notes: string | null;
-          produced_by: string | null;
           created_at: string;
+          id: string;
+          notes: string | null;
+          prep_ingredient_id: string;
+          produced_by: string | null;
+          qty_produced: number;
         };
         Insert: {
-          id?: string;
-          prep_ingredient_id: string;
-          qty_produced: number;
-          notes?: string | null;
-          produced_by?: string | null;
           created_at?: string;
+          id?: string;
+          notes?: string | null;
+          prep_ingredient_id: string;
+          produced_by?: string | null;
+          qty_produced: number;
         };
         Update: {
-          id?: string;
-          prep_ingredient_id?: string;
-          qty_produced?: number;
-          notes?: string | null;
-          produced_by?: string | null;
           created_at?: string;
+          id?: string;
+          notes?: string | null;
+          prep_ingredient_id?: string;
+          produced_by?: string | null;
+          qty_produced?: number;
         };
         Relationships: [
           {
@@ -923,6 +1045,46 @@ export type Database = {
             columns: ['produced_by'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      product_modifier_groups: {
+        Row: {
+          group_id: string;
+          product_id: string;
+          sort_order: number | null;
+        };
+        Insert: {
+          group_id: string;
+          product_id: string;
+          sort_order?: number | null;
+        };
+        Update: {
+          group_id?: string;
+          product_id?: string;
+          sort_order?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'product_modifier_groups_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'modifier_groups';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_modifier_groups_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'product_modifier_groups_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
             referencedColumns: ['id'];
           },
         ];
@@ -955,6 +1117,13 @@ export type Database = {
             foreignKeyName: 'product_modifiers_product_id_fkey';
             columns: ['product_id'];
             isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'product_modifiers_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
             referencedRelation: 'products';
             referencedColumns: ['id'];
           },
@@ -966,6 +1135,7 @@ export type Database = {
           base_price: number;
           category_id: string;
           combo_eligible: boolean;
+          combo_price_override: number | null;
           created_at: string;
           deleted_at: string | null;
           happy_hour_price: number | null;
@@ -983,6 +1153,7 @@ export type Database = {
           base_price: number;
           category_id: string;
           combo_eligible?: boolean;
+          combo_price_override?: number | null;
           created_at?: string;
           deleted_at?: string | null;
           happy_hour_price?: number | null;
@@ -1000,6 +1171,7 @@ export type Database = {
           base_price?: number;
           category_id?: string;
           combo_eligible?: boolean;
+          combo_price_override?: number | null;
           created_at?: string;
           deleted_at?: string | null;
           happy_hour_price?: number | null;
@@ -1115,7 +1287,196 @@ export type Database = {
             foreignKeyName: 'rappi_orders_tab_id_fkey';
             columns: ['tab_id'];
             isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['tab_id'];
+          },
+          {
+            foreignKeyName: 'rappi_orders_tab_id_fkey';
+            columns: ['tab_id'];
+            isOneToOne: false;
             referencedRelation: 'tabs';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      recipe_items: {
+        Row: {
+          id: string;
+          ingredient_id: string;
+          qty: number;
+          recipe_id: string;
+        };
+        Insert: {
+          id?: string;
+          ingredient_id: string;
+          qty: number;
+          recipe_id: string;
+        };
+        Update: {
+          id?: string;
+          ingredient_id?: string;
+          qty?: number;
+          recipe_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recipe_items_ingredient_id_fkey';
+            columns: ['ingredient_id'];
+            isOneToOne: false;
+            referencedRelation: 'ingredients';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipe_items_recipe_id_fkey';
+            columns: ['recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      recipes: {
+        Row: {
+          created_at: string;
+          id: string;
+          notes: string | null;
+          prep_ingredient_id: string | null;
+          product_id: string | null;
+          updated_at: string;
+          yield_qty: number;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          notes?: string | null;
+          prep_ingredient_id?: string | null;
+          product_id?: string | null;
+          updated_at?: string;
+          yield_qty?: number;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          notes?: string | null;
+          prep_ingredient_id?: string | null;
+          product_id?: string | null;
+          updated_at?: string;
+          yield_qty?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recipes_prep_ingredient_id_fkey';
+            columns: ['prep_ingredient_id'];
+            isOneToOne: false;
+            referencedRelation: 'ingredients';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipes_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'recipes_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      refund_items: {
+        Row: {
+          amount: number;
+          created_at: string;
+          id: string;
+          order_item_id: string;
+          qty: number;
+          refund_id: string;
+          restock: boolean;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          id?: string;
+          order_item_id: string;
+          qty: number;
+          refund_id: string;
+          restock?: boolean;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          order_item_id?: string;
+          qty?: number;
+          refund_id?: string;
+          restock?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'refund_items_order_item_id_fkey';
+            columns: ['order_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'order_items';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'refund_items_order_item_id_fkey';
+            columns: ['order_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['parent_order_item_id'];
+          },
+          {
+            foreignKeyName: 'refund_items_refund_id_fkey';
+            columns: ['refund_id'];
+            isOneToOne: false;
+            referencedRelation: 'refunds';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      refunds: {
+        Row: {
+          amount: number;
+          created_at: string;
+          created_by: string;
+          id: string;
+          original_payment_id: string;
+          reason: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          original_payment_id: string;
+          reason: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          original_payment_id?: string;
+          reason?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'refunds_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'refunds_original_payment_id_fkey';
+            columns: ['original_payment_id'];
+            isOneToOne: false;
+            referencedRelation: 'payments';
             referencedColumns: ['id'];
           },
         ];
@@ -1238,6 +1599,67 @@ export type Database = {
           },
         ];
       };
+      stock_movements: {
+        Row: {
+          created_at: string;
+          id: string;
+          ingredient_id: string | null;
+          notes: string | null;
+          product_id: string | null;
+          quantity_delta: number;
+          reason: string;
+          ref_id: string | null;
+          ref_type: string | null;
+          staff_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          ingredient_id?: string | null;
+          notes?: string | null;
+          product_id?: string | null;
+          quantity_delta: number;
+          reason: string;
+          ref_id?: string | null;
+          ref_type?: string | null;
+          staff_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          ingredient_id?: string | null;
+          notes?: string | null;
+          product_id?: string | null;
+          quantity_delta?: number;
+          reason?: string;
+          ref_id?: string | null;
+          ref_type?: string | null;
+          staff_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'inventory_log_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'inventory_log_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'inventory_log_staff_id_fkey';
+            columns: ['staff_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       tab_transfers: {
         Row: {
           from_staff_id: string | null;
@@ -1282,6 +1704,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tab_transfers_tab_id_fkey';
+            columns: ['tab_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['tab_id'];
           },
           {
             foreignKeyName: 'tab_transfers_tab_id_fkey';
@@ -1379,6 +1808,13 @@ export type Database = {
             foreignKeyName: 'tabs_parent_tab_id_fkey';
             columns: ['parent_tab_id'];
             isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['tab_id'];
+          },
+          {
+            foreignKeyName: 'tabs_parent_tab_id_fkey';
+            columns: ['parent_tab_id'];
+            isOneToOne: false;
             referencedRelation: 'tabs';
             referencedColumns: ['id'];
           },
@@ -1398,136 +1834,162 @@ export type Database = {
           },
         ];
       };
-      recipes: {
+      waitlist_entries: {
         Row: {
-          id: string;
-          product_id: string | null;
-          prep_ingredient_id: string | null;
-          yield_qty: number;
-          notes: string | null;
           created_at: string;
-          updated_at: string;
+          id: string;
+          name: string;
+          notified_at: string | null;
+          party_size: number;
+          phone_e164: string | null;
+          seated_at: string | null;
+          status: string;
+          table_id: string | null;
         };
         Insert: {
-          id?: string;
-          product_id?: string | null;
-          prep_ingredient_id?: string | null;
-          yield_qty?: number;
-          notes?: string | null;
           created_at?: string;
-          updated_at?: string;
+          id?: string;
+          name: string;
+          notified_at?: string | null;
+          party_size: number;
+          phone_e164?: string | null;
+          seated_at?: string | null;
+          status?: string;
+          table_id?: string | null;
         };
         Update: {
+          created_at?: string;
           id?: string;
-          product_id?: string | null;
-          prep_ingredient_id?: string | null;
-          yield_qty?: number;
-          notes?: string | null;
-          updated_at?: string;
+          name?: string;
+          notified_at?: string | null;
+          party_size?: number;
+          phone_e164?: string | null;
+          seated_at?: string | null;
+          status?: string;
+          table_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: 'recipes_product_id_fkey';
-            columns: ['product_id'];
+            foreignKeyName: 'waitlist_entries_table_id_fkey';
+            columns: ['table_id'];
+            isOneToOne: false;
+            referencedRelation: 'pool_tables';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      waitlist_notifications: {
+        Row: {
+          channel: string;
+          created_at: string;
+          error: string | null;
+          id: string;
+          provider_message_id: string | null;
+          status: string;
+          waitlist_entry_id: string;
+        };
+        Insert: {
+          channel: string;
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          provider_message_id?: string | null;
+          status: string;
+          waitlist_entry_id: string;
+        };
+        Update: {
+          channel?: string;
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          provider_message_id?: string | null;
+          status?: string;
+          waitlist_entry_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'waitlist_notifications_waitlist_entry_id_fkey';
+            columns: ['waitlist_entry_id'];
+            isOneToOne: false;
+            referencedRelation: 'waitlist_entries';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+    };
+    Views: {
+      combo_mix_daily: {
+        Row: {
+          avg_price: number | null;
+          combo_name: string | null;
+          combo_product_id: string | null;
+          date: string | null;
+          net_revenue: number | null;
+          override_count: number | null;
+          qty_sold: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'order_items_product_id_fkey';
+            columns: ['combo_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_combo_usage';
+            referencedColumns: ['product_id'];
+          },
+          {
+            foreignKeyName: 'order_items_product_id_fkey';
+            columns: ['combo_product_id'];
             isOneToOne: false;
             referencedRelation: 'products';
             referencedColumns: ['id'];
           },
-          {
-            foreignKeyName: 'recipes_prep_ingredient_id_fkey';
-            columns: ['prep_ingredient_id'];
-            isOneToOne: false;
-            referencedRelation: 'ingredients';
-            referencedColumns: ['id'];
-          },
         ];
       };
-      recipe_items: {
+      product_combo_usage: {
         Row: {
-          id: string;
-          recipe_id: string;
-          ingredient_id: string;
-          qty: number;
+          child_item_count: number | null;
+          ordered_at: string | null;
+          parent_order_item_id: string | null;
+          product_id: string | null;
+          product_name: string | null;
+          tab_id: string | null;
+          tab_name: string | null;
         };
-        Insert: {
-          id?: string;
-          recipe_id: string;
-          ingredient_id: string;
-          qty: number;
-        };
-        Update: {
-          id?: string;
-          recipe_id?: string;
-          ingredient_id?: string;
-          qty?: number;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'recipe_items_recipe_id_fkey';
-            columns: ['recipe_id'];
-            isOneToOne: false;
-            referencedRelation: 'recipes';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      audit_log: {
-        Row: {
-          id: string;
-          action: string;
-          actor_id: string | null;
-          entity_type: string | null;
-          entity_id: string | null;
-          details: Json | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          action: string;
-          actor_id?: string | null;
-          entity_type?: string | null;
-          entity_id?: string | null;
-          details?: Json | null;
-          created_at?: string;
-        };
-        Update: never;
         Relationships: [];
-      };
-    };
-    Views: {
-      // Report views — Phase 8 S6-01 (pre-regen manual transcription)
-      combo_mix_daily: {
-        Row: {
-          date: string | null;
-          combo_product_id: string | null;
-          combo_name: string | null;
-          qty_sold: number | null;
-          net_revenue: number | null;
-          avg_price: number | null;
-          override_count: number | null;
-        };
       };
       recipe_variance_daily: {
         Row: {
           date: string | null;
           ingredient_id: string | null;
           ingredient_name: string | null;
-          theoretical_used: number | null;
           physical_delta: number | null;
+          theoretical_used: number | null;
           variance_pct: number | null;
         };
+        Relationships: [];
       };
       waitlist_metrics_daily: {
         Row: {
-          date: string | null;
-          parties_seated: number | null;
-          avg_quoted_wait: number | null;
           avg_actual_wait: number | null;
+          avg_quoted_wait: number | null;
+          date: string | null;
           no_show_rate: number | null;
+          parties_seated: number | null;
         };
+        Relationships: [];
       };
     };
     Functions: {
+      add_combo_to_tab: {
+        Args: {
+          p_combo_product_id: string;
+          p_override_availability?: boolean;
+          p_override_reason?: string;
+          p_slot_selections: Json;
+          p_tab_id: string;
+        };
+        Returns: string;
+      };
       close_caja_session: {
         Args: {
           p_caja_id: string;
@@ -1537,20 +1999,49 @@ export type Database = {
         };
         Returns: Json;
       };
-      create_order_with_items: {
-        Args: {
-          p_items: Json;
-          p_notes: string;
-          p_staff_id: string;
-          p_status: Database['public']['Enums']['order_status'];
-          p_tab_id: string;
-        };
-        Returns: Json;
-      };
+      create_order_with_items:
+        | {
+            Args: {
+              p_items: Json;
+              p_notes: string;
+              p_staff_id: string;
+              p_status: Database['public']['Enums']['order_status'];
+              p_tab_id: string;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_items: Json;
+              p_notes: string;
+              p_skip_depletion?: boolean;
+              p_staff_id: string;
+              p_status: Database['public']['Enums']['order_status'];
+              p_tab_id: string;
+            };
+            Returns: Json;
+          };
+      deplete_for_order_item:
+        | {
+            Args: { p_direction: number; p_order_item_id: string };
+            Returns: undefined;
+          }
+        | {
+            Args: {
+              p_allow_negative?: boolean;
+              p_direction: number;
+              p_order_item_id: string;
+            };
+            Returns: undefined;
+          };
       get_caja_report: { Args: { p_caja_id: string }; Returns: Json };
       get_user_role: {
         Args: never;
         Returns: Database['public']['Enums']['user_role'];
+      };
+      is_combo_available: {
+        Args: { p_combo_id: string; p_ts: string };
+        Returns: boolean;
       };
       list_caja_sessions: { Args: { p_limit?: number }; Returns: Json };
       process_payment_atomic: {
@@ -1573,40 +2064,55 @@ export type Database = {
       };
       process_refund: {
         Args: {
-          p_original_payment_id: string;
           p_items: Json;
-          p_reason: string;
           p_manager_pin: string;
+          p_original_payment_id: string;
+          p_reason: string;
         };
         Returns: string;
       };
-      split_tab_by_amount: {
+      record_stock_movement: {
         Args: {
-          p_parent_tab_id: string;
-          p_amounts: Json;
+          p_delta: number;
+          p_ingredient_id: string;
+          p_notes?: string;
+          p_reason: string;
+          p_ref_id: string;
+          p_ref_type: string;
         };
+        Returns: {
+          created_at: string;
+          id: string;
+          ingredient_id: string | null;
+          notes: string | null;
+          product_id: string | null;
+          quantity_delta: number;
+          reason: string;
+          ref_id: string | null;
+          ref_type: string | null;
+          staff_id: string;
+        };
+        SetofOptions: {
+          from: '*';
+          to: 'stock_movements';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      split_tab_by_amount: {
+        Args: { p_amounts: Json; p_parent_tab_id: string };
         Returns: string[];
       };
       split_tab_by_item: {
-        Args: {
-          p_parent_tab_id: string;
-          p_assignments: Json;
-        };
+        Args: { p_assignments: Json; p_parent_tab_id: string };
         Returns: string[];
       };
       split_tab_by_person: {
-        Args: {
-          p_parent_tab_id: string;
-          p_n: number;
-          p_assignments: Json;
-        };
+        Args: { p_assignments: Json; p_n: number; p_parent_tab_id: string };
         Returns: string[];
       };
       split_tab_evenly: {
-        Args: {
-          p_parent_tab_id: string;
-          p_n: number;
-        };
+        Args: { p_n: number; p_parent_tab_id: string };
         Returns: Json;
       };
       transfer_pool_session: {
@@ -1629,16 +2135,9 @@ export type Database = {
         };
         Returns: Json;
       };
-      deplete_for_order_item: {
-        Args: {
-          p_order_item_id: string;
-          p_direction: number;
-          p_allow_negative?: boolean;
-        };
-        Returns: undefined;
-      };
     };
     Enums: {
+      kds_status: 'pending' | 'in_progress' | 'done';
       order_status: 'pending' | 'served' | 'voided';
       payment_method: 'cash' | 'card' | 'tab_transfer' | 'rappi';
       pool_table_status: 'available' | 'occupied' | 'reserved' | 'maintenance';
@@ -1774,11 +2273,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
+      kds_status: ['pending', 'in_progress', 'done'],
       order_status: ['pending', 'served', 'voided'],
       payment_method: ['cash', 'card', 'tab_transfer', 'rappi'],
       pool_table_status: ['available', 'occupied', 'reserved', 'maintenance'],

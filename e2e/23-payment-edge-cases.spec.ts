@@ -6,7 +6,7 @@
  * pool-only tab payment, and pool-session payment block.
  */
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { getServiceClient, openCaja, resetTestState } from './helpers/supabase';

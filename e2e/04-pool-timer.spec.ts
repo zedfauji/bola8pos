@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { getLatestStoppedPoolChargeForTab, getOpenTabIdByCustomerName, getServiceClient, openCaja, resetTestState } from './helpers/supabase';

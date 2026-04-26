@@ -6,7 +6,7 @@
  * UI is not integrated (empty state is acceptable for RO1/RO2 display tests).
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { getServiceClient, openCaja, resetTestState, seedRappiOrder } from './helpers/supabase';

@@ -7,9 +7,8 @@
  *  T5:    REFUND_EXCEEDS_ORIGINAL blocks double-refund of fully-refunded payment
  *  T6:    Refund remaining items with restock=false succeeds (no ledger change)
  *
- * NOTE (autonomous: false): These tests require a running dev server + Supabase
- * with migrations 20260427000000–20260427000004 applied. Run with:
- *   cd bar-pos && npx playwright test e2e/35-refund.spec.ts --headed
+ * NOTE (autonomous: false): Requires `bar-pos/.env.local` + remote Supabase with
+ * migrations 20260427000000–20260427000004 applied. Browser console is tailed via `e2e/fixtures.ts`.
  *
  * Manager PIN: The ManagerPinDialog uses a PINKeypad (button-based, no text input).
  * Tests enter the admin PIN by pressing the numeric keypad buttons. The PIN length
@@ -17,7 +16,7 @@
  * E2E_ADMIN_PIN is shorter than 6 digits, pad with zeros or adjust PINKeypad maxLength.
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { getServiceClient, openCaja, resetTestState } from './helpers/supabase';
@@ -117,8 +116,8 @@ async function seedPaidTab(
     .update({ status: 'paid', closed_at: new Date().toISOString() })
     .eq('id', tab.id);
 
-  // Insert payment row
-  const { data: payment } = await db
+  // Insert payment row (idempotency_key + processed_by are NOT NULL in schema)
+  const { data: payment, error: payErr } = await db
     .from('payments')
     .insert({
       tab_id: tab.id,
@@ -126,9 +125,17 @@ async function seedPaidTab(
       tip_amount: 0,
       method: 'cash',
       is_refund: false,
+      processed_by: profile.id,
+      idempotency_key: `e2e-seed-refund-${(tab.id as string).slice(0, 8)}-${String(itemCount)}-${String(unitPrice)}`,
     })
     .select('id')
     .single();
+  if (payErr) {
+    throw new Error(`seedPaidTab: payments insert failed: ${payErr.message}`);
+  }
+  if (!payment) {
+    throw new Error('seedPaidTab: payment row missing after insert');
+  }
 
   return {
     tabId: tab.id as string,
@@ -166,13 +173,6 @@ async function enterManagerPin(
 // ---------------------------------------------------------------------------
 
 test.beforeEach(async ({ page }) => {
-  page.on('console', msg => {
-    console.log(`[browser:${msg.type()}] ${msg.text()}`);
-  });
-  page.on('pageerror', err => {
-    console.error(`[browser:pageerror] ${err.message}`);
-  });
-
   requireIntegrationEnv();
   await resetTestState();
   await openCaja(570);

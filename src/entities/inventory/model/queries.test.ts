@@ -39,10 +39,13 @@ function makeWrapper(queryClient: QueryClient) {
  * `.not()` must be thenable so the hook can await the query result.
  */
 function mockInventoryAlertsChain(resolvedValue: { data: unknown; error: unknown }) {
-  mockedFrom.mockImplementation(() => ({
-    select: vi.fn().mockReturnThis(),
-    not: vi.fn().mockResolvedValue(resolvedValue),
-  }));
+  mockedFrom.mockImplementation(
+    () =>
+      ({
+        select: vi.fn().mockReturnThis(),
+        not: vi.fn().mockResolvedValue(resolvedValue),
+      }) as unknown as ReturnType<typeof supabase.from>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -172,13 +175,16 @@ describe('useInventoryAlerts', () => {
   // -------------------------------------------------------------------------
 
   it('returns Result with ok:false when Supabase returns an error', async () => {
-    mockedFrom.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      not: vi.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'connection refused', code: '500' },
-      }),
-    }));
+    mockedFrom.mockImplementation(
+      () =>
+        ({
+          select: vi.fn().mockReturnThis(),
+          not: vi.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'connection refused', code: '500' },
+          }),
+        }) as unknown as ReturnType<typeof supabase.from>
+    );
 
     const qc = createTestQueryClient();
     const { result } = renderHook(() => useInventoryAlerts(), {

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { loginAs, loginAsNamed, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { openCaja, resetTestState } from './helpers/supabase';

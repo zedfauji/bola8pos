@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from './fixtures';
 
 test.describe('Manual verification stubs (7-day plan)', () => {
   test('Day 1 — Tauri window + physical PIN + Supabase console', () => {

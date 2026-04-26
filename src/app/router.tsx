@@ -30,7 +30,7 @@ function LoadingFallback() {
 
 export function Router() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <HelpSheet />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
