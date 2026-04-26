@@ -220,7 +220,7 @@ Plans:
 - [x] 08-01-PLAN.md — Wave 0 lint fixes + Wave 0 test stubs + Wave 1 DB migrations (3 views + 2 indexes) + S6-15 DOWN scripts + [BLOCKING] supabase db push (S6-01, S6-02, S6-15)
 - [x] 08-02-PLAN.md — Wave 2 domain types (5 Zod schemas + supabase.types.ts extension) + Wave 3 query hooks (5 hooks + 365-day guard) (S6-01, S6-03, S6-04, S6-05, S6-06, S6-09)
 - [x] 08-03-PLAN.md — Wave 4 report widgets: ComboMixReport + RecipeVarianceReport + WaitlistAnalyticsReport + RefundsRegister + ComboOverrideReport (S6-03, S6-04, S6-05, S6-06, S6-09)
-- [ ] 08-04-PLAN.md — Wave 5 export infrastructure extension + ReportsPage 5 new tabs wired (S6-07, S6-08)
+- [x] 08-04-PLAN.md — Wave 5 export infrastructure extension + ReportsPage 5 new tabs wired (S6-07, S6-08)
 - [ ] 08-05-PLAN.md — Wave 6+7: seed-reports.ts + 37-analytics-reports.spec.ts + 21-prep T5 fix + CLAUDE.md update + human E2E sign-off (S6-10, S6-11, S6-13, S6-14, S6-15)
 - [ ] 08-06-PLAN.md — Wave 4 (parallel with 08-03): S6-12 paper-cuts — touch targets + focus traps + toast copy + import-order lint fixes for waitlist flow (S6-12)
 

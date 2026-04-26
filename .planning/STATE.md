@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: milestone
 current_phase: 08
 current_plan: 4
-status: in_progress
-stopped_at: "08-03 complete — 5 widgets (ComboMixReport, RecipeVarianceReport, WaitlistAnalyticsReport, RefundsRegister, ComboOverrideReport) + 18 RTL tests; advancing to 08-04"
-last_updated: "2026-04-26T13:50:00Z"
+status: executing
+stopped_at: "Completed 08-04-PLAN.md — ExportType +9 variants, ExportButtons +5 branches, 5 Excel builders, 4 PDF builders, ReportsPage 12 tabs, as-never casts removed"
+last_updated: "2026-04-26T19:58:31.508Z"
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 59
-  completed_plans: 55
-  percent: 93
+  completed_plans: 56
+  percent: 95
 ---
 
 # Session State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 08
 **Current plan:** 3
 **Status:** In Progress Phase 08
-**Progress:** [█████████░] 93%
+**Progress:** [██████████] 95%
 
 ## Session Log
 
@@ -59,6 +59,7 @@ See: .planning/PROJECT.md
 - 2026-04-25: Plan 08-01 complete — 6 lint fixes (d631c50), Wave 0 stubs (65f5ed0), S6-01 views + S6-02 indexes + S6-15 DOWN scripts (8133117); supabase db push confirmed (3 views + 2 indexes live); typecheck + lint + 105 tests green
 - 2026-04-25: Plan 08-02 complete — 5 Zod report row schemas (67e01db), 3 supabase.types.ts view shapes, 5 TanStack Query hooks + assertDateRangeValid 365-day guard + 4 unit tests (8370e48); 105 test files, 1058 tests pass
 - 2026-04-26: Plan 08-03 complete — 5 report widgets (c5d5743, a8e71a4): ComboMixReport + RecipeVarianceReport + WaitlistAnalyticsReport + RefundsRegister + ComboOverrideReport; 4 RTL test files (18 new tests); 109 test files, 1076 tests pass
+- 2026-04-26: Plan 08-04 complete — ExportType +9 variants (9dbfe0e), ReportsPage 12 tabs (40f8480): 5 Excel builders + 4 PDF builders + ExportButtons Props +5 + as-never casts removed; 109 test files, 1076 tests pass
 
 ## Decisions
 
@@ -134,6 +135,7 @@ See: .planning/PROJECT.md
 - [Phase 04-recipes-sale-depletion 04-06]: integration tests use anon client (signInWithPassword) for RPC calls — auth.uid() NULL with service-role JWT
 - [Phase 04-recipes-sale-depletion 04-06]: one order_item per integration test due to UNIQUE index on (ref_type, ref_id, ingredient_id)
 - [Phase 04-recipes-sale-depletion 04-06]: E2E spec named 36-recipes.spec.ts to avoid collision with existing 20-*.spec.ts files
+- [Phase ?]: combo-overrides has no PDF builder — Excel only per plan spec (audit log does not benefit from PDF format)
 
 ## Performance Metrics
 
@@ -161,6 +163,8 @@ See: .planning/PROJECT.md
 | 04-recipes-sale-depletion | 05 | 10min | 3 | 5 |
 | 04-recipes-sale-depletion | 06 | ~30min | 2 | 3 |
 | 08-polish-reports-e2e-hardening | 03 | 25min | 2 | 14 |
+| 08-polish-reports-e2e-hardening | 04 | 20min | 2 | 10 |
+| Phase 08 P04 | 20min | 2 tasks | 10 files |
 
 ## Last Session
 
