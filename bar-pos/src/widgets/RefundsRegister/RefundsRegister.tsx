@@ -32,8 +32,8 @@ export function RefundsRegister({ dateRange }: Props) {
       <div className="flex flex-wrap items-center gap-2">
         <div className="ml-auto">
           <ExportButtons
-            reportType={'refunds-register' as never} // temporary until ExportButtons extended in Plan 08-04
-            data={{ rows, dateRange } as never}
+            reportType="refunds-register"
+            data={{ rows, dateRange }}
           />
         </div>
       </div>

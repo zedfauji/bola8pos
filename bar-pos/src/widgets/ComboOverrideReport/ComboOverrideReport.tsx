@@ -28,8 +28,8 @@ export function ComboOverrideReport({ dateRange }: Props) {
     <div className="space-y-4">
       <div className="flex justify-end">
         <ExportButtons
-          reportType={'combo-overrides' as never} // temporary until ExportButtons extended in Plan 08-04
-          data={{ rows, dateRange } as never}
+          reportType="combo-overrides"
+          data={{ rows, dateRange }}
         />
       </div>
       <div className="rounded-md border">

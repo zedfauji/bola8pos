@@ -65,8 +65,8 @@ export function ComboMixReport({ dateRange }: Props) {
     <div className="space-y-4">
       <div className="flex justify-end">
         <ExportButtons
-          reportType={"combo-mix" as never} // temporary until ExportButtons extended in Plan 08-04
-          data={{ rows, dateRange } as never}
+          reportType="combo-mix"
+          data={{ rows, dateRange }}
         />
       </div>
       <div className="rounded-lg border p-4">

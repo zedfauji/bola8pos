@@ -111,8 +111,8 @@ export function WaitlistAnalyticsReport({ dateRange }: Props) {
       </div>
       <div className="flex justify-end">
         <ExportButtons
-          reportType={'waitlist-analytics' as never} // temporary until ExportButtons extended in Plan 08-04
-          data={{ rows, dateRange } as never}
+          reportType="waitlist-analytics"
+          data={{ rows, dateRange }}
         />
       </div>
     </div>
