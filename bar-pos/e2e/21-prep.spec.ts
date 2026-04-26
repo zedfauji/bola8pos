@@ -15,8 +15,15 @@
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
+import { resetPrepIngredientStock } from './helpers/supabase';
 
 test.describe('Kitchen Prep', () => {
+  test.beforeAll(async () => {
+    // Reset Tomato raw ingredient stock to 0 so T5 "insufficient stock" is deterministic in isolation.
+    // Without this, T5 may pass or fail depending on prior cumulative state from T2 + T4.
+    await resetPrepIngredientStock();
+  });
+
   test.beforeEach(async ({ page }) => {
     // MANDATORY: capture browser console for all tests
     page.on('console', msg => console.log(`[browser] ${msg.type()}: ${msg.text()}`));
