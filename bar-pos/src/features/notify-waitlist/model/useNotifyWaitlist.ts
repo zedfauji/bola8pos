@@ -38,10 +38,7 @@ export function useNotifyWaitlist() {
 
       // Tauri desktop notification fallback when no phone (manager sees queue, but gets native alert too)
       if (!input.hasPhone) {
-        await sendManagerNotification(
-          'Party ready',
-          `${input.entryName} is ready to be seated.`,
-        );
+        await sendManagerNotification('Party ready', `${input.entryName} is ready to be seated.`);
       }
 
       logger.info('waitlist.notify.succeeded', { entryId: input.entryId });
@@ -50,7 +47,7 @@ export function useNotifyWaitlist() {
     onSuccess: (result, input) => {
       if (!result.ok) {
         toast.error(
-          `Could not send notification for ${input.entryName}. Check notification history.`,
+          `Could not send notification for ${input.entryName}. Check notification history.`
         );
         return;
       }

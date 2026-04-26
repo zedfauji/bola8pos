@@ -73,7 +73,9 @@ function isPhoneInvalid(state: State): boolean {
 }
 
 function isValid(state: State): boolean {
-  return state.name.trim().length >= 1 && (state.phoneRaw === '' || toE164(state.phoneRaw) !== null);
+  return (
+    state.name.trim().length >= 1 && (state.phoneRaw === '' || toE164(state.phoneRaw) !== null)
+  );
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -110,7 +112,12 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
   const phoneError = isPhoneInvalid(state);
 
   return (
-    <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
+    <Sheet
+      open={open}
+      onOpenChange={isOpen => {
+        if (!isOpen) handleClose();
+      }}
+    >
       <SheetContent side="right" className="max-w-md w-full flex flex-col gap-0 p-0">
         <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle>Add to waitlist</SheetTitle>
@@ -124,24 +131,31 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
               placeholder="e.g. García"
               maxLength={100}
               value={state.name}
-              onChange={(e) => { dispatch({ type: 'SET_NAME', name: e.target.value }); }}
+              onChange={e => {
+                dispatch({ type: 'SET_NAME', name: e.target.value });
+              }}
             />
           </FormField>
 
           {/* Party size */}
           <div className="flex flex-col gap-1.5">
             <Label>
-              Party size <span aria-hidden="true" className="text-destructive">*</span>
+              Party size{' '}
+              <span aria-hidden="true" className="text-destructive">
+                *
+              </span>
             </Label>
             <Select
               value={String(state.partySize)}
-              onValueChange={(val) => { dispatch({ type: 'SET_PARTY_SIZE', size: Number(val) }); }}
+              onValueChange={val => {
+                dispatch({ type: 'SET_PARTY_SIZE', size: Number(val) });
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
+                {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
                   <SelectItem key={n} value={String(n)}>
                     {n}
                   </SelectItem>
@@ -160,18 +174,18 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
               placeholder="e.g. 55 1234 5678"
               value={state.phoneRaw}
               aria-describedby={phoneError ? 'waitlist-phone-error' : undefined}
-              onChange={(e) => { dispatch({ type: 'SET_PHONE', raw: e.target.value }); }}
-              onBlur={() => { dispatch({ type: 'PHONE_BLUR' }); }}
+              onChange={e => {
+                dispatch({ type: 'SET_PHONE', raw: e.target.value });
+              }}
+              onBlur={() => {
+                dispatch({ type: 'PHONE_BLUR' });
+              }}
             />
             <span className="text-sm text-muted-foreground">
               MX/US number. Used to send WhatsApp notification.
             </span>
             {phoneError && (
-              <span
-                id="waitlist-phone-error"
-                role="alert"
-                className="text-sm text-destructive"
-              >
+              <span id="waitlist-phone-error" role="alert" className="text-sm text-destructive">
                 Not a valid MX or US phone number.
               </span>
             )}
@@ -185,7 +199,9 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
           <Button
             className="flex-1"
             disabled={!isValid(state) || isPending}
-            onClick={() => { void handleSubmit(); }}
+            onClick={() => {
+              void handleSubmit();
+            }}
           >
             {isPending ? <LoadingSpinner size={16} className="p-0" /> : 'Add to waitlist'}
           </Button>
