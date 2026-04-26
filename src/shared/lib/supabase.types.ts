@@ -536,10 +536,12 @@ export type Database = {
           id: string;
           idempotency_key: string;
           is_deleted: boolean;
+          is_refund: boolean;
           method: Database['public']['Enums']['payment_method'];
           processed_at: string;
           processed_by: string;
           reference_number: string | null;
+          refund_id: string | null;
           square_payment_id: string | null;
           square_receipt_url: string | null;
           tab_id: string;
@@ -558,10 +560,12 @@ export type Database = {
           id?: string;
           idempotency_key: string;
           is_deleted?: boolean;
+          is_refund?: boolean;
           method: Database['public']['Enums']['payment_method'];
           processed_at?: string;
           processed_by: string;
           reference_number?: string | null;
+          refund_id?: string | null;
           square_payment_id?: string | null;
           square_receipt_url?: string | null;
           tab_id: string;
@@ -580,10 +584,12 @@ export type Database = {
           id?: string;
           idempotency_key?: string;
           is_deleted?: boolean;
+          is_refund?: boolean;
           method?: Database['public']['Enums']['payment_method'];
           processed_at?: string;
           processed_by?: string;
           reference_number?: string | null;
+          refund_id?: string | null;
           square_payment_id?: string | null;
           square_receipt_url?: string | null;
           tab_id?: string;
@@ -600,10 +606,104 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'payments_refund_id_fkey';
+            columns: ['refund_id'];
+            isOneToOne: false;
+            referencedRelation: 'refunds';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'payments_tab_id_fkey';
             columns: ['tab_id'];
             isOneToOne: true;
             referencedRelation: 'tabs';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      refund_items: {
+        Row: {
+          amount: number;
+          created_at: string;
+          id: string;
+          order_item_id: string;
+          qty: number;
+          refund_id: string;
+          restock: boolean;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          id?: string;
+          order_item_id: string;
+          qty: number;
+          refund_id: string;
+          restock?: boolean;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          order_item_id?: string;
+          qty?: number;
+          refund_id?: string;
+          restock?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'refund_items_order_item_id_fkey';
+            columns: ['order_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'order_items';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'refund_items_refund_id_fkey';
+            columns: ['refund_id'];
+            isOneToOne: false;
+            referencedRelation: 'refunds';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      refunds: {
+        Row: {
+          amount: number;
+          created_at: string;
+          created_by: string;
+          id: string;
+          original_payment_id: string;
+          reason: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          original_payment_id: string;
+          reason: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          original_payment_id?: string;
+          reason?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'refunds_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'refunds_original_payment_id_fkey';
+            columns: ['original_payment_id'];
+            isOneToOne: false;
+            referencedRelation: 'payments';
             referencedColumns: ['id'];
           },
         ];
@@ -780,6 +880,49 @@ export type Database = {
             columns: ['current_session_id'];
             isOneToOne: false;
             referencedRelation: 'pool_sessions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      // TODO: regenerate types after Phase 5 migrations applied (Docker unavailable — manual transcription)
+      prep_productions: {
+        Row: {
+          id: string;
+          prep_ingredient_id: string;
+          qty_produced: number;
+          notes: string | null;
+          produced_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          prep_ingredient_id: string;
+          qty_produced: number;
+          notes?: string | null;
+          produced_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          prep_ingredient_id?: string;
+          qty_produced?: number;
+          notes?: string | null;
+          produced_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'prep_productions_prep_ingredient_id_fkey';
+            columns: ['prep_ingredient_id'];
+            isOneToOne: false;
+            referencedRelation: 'ingredients';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prep_productions_produced_by_fkey';
+            columns: ['produced_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
             referencedColumns: ['id'];
           },
         ];
@@ -1174,8 +1317,11 @@ export type Database = {
           is_deleted: boolean;
           notes: string | null;
           opened_at: string;
+          parent_tab_id: string | null;
           rappi_order_id: string | null;
           shift_id: string;
+          split_label: string | null;
+          split_mode: string | null;
           staff_id: string;
           status: Database['public']['Enums']['tab_status'];
           table_number: number | null;
@@ -1191,8 +1337,11 @@ export type Database = {
           is_deleted?: boolean;
           notes?: string | null;
           opened_at?: string;
+          parent_tab_id?: string | null;
           rappi_order_id?: string | null;
           shift_id: string;
+          split_label?: string | null;
+          split_mode?: string | null;
           staff_id: string;
           status?: Database['public']['Enums']['tab_status'];
           table_number?: number | null;
@@ -1208,8 +1357,11 @@ export type Database = {
           is_deleted?: boolean;
           notes?: string | null;
           opened_at?: string;
+          parent_tab_id?: string | null;
           rappi_order_id?: string | null;
           shift_id?: string;
+          split_label?: string | null;
+          split_mode?: string | null;
           staff_id?: string;
           status?: Database['public']['Enums']['tab_status'];
           table_number?: number | null;
@@ -1221,6 +1373,13 @@ export type Database = {
             columns: ['caja_session_id'];
             isOneToOne: false;
             referencedRelation: 'caja_sessions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tabs_parent_tab_id_fkey';
+            columns: ['parent_tab_id'];
+            isOneToOne: false;
+            referencedRelation: 'tabs';
             referencedColumns: ['id'];
           },
           {
@@ -1239,9 +1398,134 @@ export type Database = {
           },
         ];
       };
+      recipes: {
+        Row: {
+          id: string;
+          product_id: string | null;
+          prep_ingredient_id: string | null;
+          yield_qty: number;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id?: string | null;
+          prep_ingredient_id?: string | null;
+          yield_qty?: number;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string | null;
+          prep_ingredient_id?: string | null;
+          yield_qty?: number;
+          notes?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recipes_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipes_prep_ingredient_id_fkey';
+            columns: ['prep_ingredient_id'];
+            isOneToOne: false;
+            referencedRelation: 'ingredients';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      recipe_items: {
+        Row: {
+          id: string;
+          recipe_id: string;
+          ingredient_id: string;
+          qty: number;
+        };
+        Insert: {
+          id?: string;
+          recipe_id: string;
+          ingredient_id: string;
+          qty: number;
+        };
+        Update: {
+          id?: string;
+          recipe_id?: string;
+          ingredient_id?: string;
+          qty?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recipe_items_recipe_id_fkey';
+            columns: ['recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      audit_log: {
+        Row: {
+          id: string;
+          action: string;
+          actor_id: string | null;
+          entity_type: string | null;
+          entity_id: string | null;
+          details: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          action: string;
+          actor_id?: string | null;
+          entity_type?: string | null;
+          entity_id?: string | null;
+          details?: Json | null;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: {
-      [_ in never]: never;
+      // Report views — Phase 8 S6-01 (pre-regen manual transcription)
+      combo_mix_daily: {
+        Row: {
+          date: string | null;
+          combo_product_id: string | null;
+          combo_name: string | null;
+          qty_sold: number | null;
+          net_revenue: number | null;
+          avg_price: number | null;
+          override_count: number | null;
+        };
+      };
+      recipe_variance_daily: {
+        Row: {
+          date: string | null;
+          ingredient_id: string | null;
+          ingredient_name: string | null;
+          theoretical_used: number | null;
+          physical_delta: number | null;
+          variance_pct: number | null;
+        };
+      };
+      waitlist_metrics_daily: {
+        Row: {
+          date: string | null;
+          parties_seated: number | null;
+          avg_quoted_wait: number | null;
+          avg_actual_wait: number | null;
+          no_show_rate: number | null;
+        };
+      };
     };
     Functions: {
       close_caja_session: {
@@ -1287,6 +1571,44 @@ export type Database = {
         };
         Returns: Json;
       };
+      process_refund: {
+        Args: {
+          p_original_payment_id: string;
+          p_items: Json;
+          p_reason: string;
+          p_manager_pin: string;
+        };
+        Returns: string;
+      };
+      split_tab_by_amount: {
+        Args: {
+          p_parent_tab_id: string;
+          p_amounts: Json;
+        };
+        Returns: string[];
+      };
+      split_tab_by_item: {
+        Args: {
+          p_parent_tab_id: string;
+          p_assignments: Json;
+        };
+        Returns: string[];
+      };
+      split_tab_by_person: {
+        Args: {
+          p_parent_tab_id: string;
+          p_n: number;
+          p_assignments: Json;
+        };
+        Returns: string[];
+      };
+      split_tab_evenly: {
+        Args: {
+          p_parent_tab_id: string;
+          p_n: number;
+        };
+        Returns: Json;
+      };
       transfer_pool_session: {
         Args: {
           p_reason?: string;
@@ -1307,6 +1629,14 @@ export type Database = {
         };
         Returns: Json;
       };
+      deplete_for_order_item: {
+        Args: {
+          p_order_item_id: string;
+          p_direction: number;
+          p_allow_negative?: boolean;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       order_status: 'pending' | 'served' | 'voided';
@@ -1319,7 +1649,7 @@ export type Database = {
         | 'ready_for_pickup'
         | 'completed'
         | 'rejected';
-      tab_status: 'open' | 'closed' | 'paid' | 'voided';
+      tab_status: 'open' | 'closed' | 'paid' | 'voided' | 'split';
       user_role: 'bartender' | 'manager' | 'admin' | 'kitchen';
     };
     CompositeTypes: {
@@ -1460,7 +1790,7 @@ export const Constants = {
         'completed',
         'rejected',
       ],
-      tab_status: ['open', 'closed', 'paid', 'voided'],
+      tab_status: ['open', 'closed', 'paid', 'voided', 'split'],
       user_role: ['bartender', 'manager', 'admin', 'kitchen'],
     },
   },

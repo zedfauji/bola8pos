@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { CajaReportPanel } from '@widgets/CajaReportPanel';
 import { CategoryRevenuePanel } from '@widgets/CategoryRevenuePanel';
+import { ComboMixReport } from '@widgets/ComboMixReport';
+import { ComboOverrideReport } from '@widgets/ComboOverrideReport';
 import { HourlyBreakdownPanel } from '@widgets/HourlyBreakdownPanel';
 import { ProductSalesPanel } from '@widgets/ProductSalesPanel';
+import { RecipeVarianceReport } from '@widgets/RecipeVarianceReport';
+import { RefundsRegister } from '@widgets/RefundsRegister';
 import { StaffSalesPanel } from '@widgets/StaffSalesPanel';
 import { TipDistributionPanel } from '@widgets/TipDistributionPanel';
 import { VoidRefundPanel } from '@widgets/VoidRefundPanel';
+import { WaitlistAnalyticsReport } from '@widgets/WaitlistAnalyticsReport';
 import { BackToHomeButton, DateRangePicker } from '@shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 
@@ -43,7 +48,7 @@ export default function ReportsPage() {
       <BackToHomeButton />
       <main className="flex-1 overflow-auto p-6 md:p-8">
         <Tabs defaultValue="session">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex flex-wrap">
             <TabsTrigger value="session">Session View</TabsTrigger>
             <TabsTrigger value="products">Product Sales</TabsTrigger>
             <TabsTrigger value="hourly">Hourly Breakdown</TabsTrigger>
@@ -51,6 +56,11 @@ export default function ReportsPage() {
             <TabsTrigger value="categories">Revenue by Category</TabsTrigger>
             <TabsTrigger value="staff">Staff Performance</TabsTrigger>
             <TabsTrigger value="tips">Tip Distribution</TabsTrigger>
+            <TabsTrigger value="combos">Combo Mix</TabsTrigger>
+            <TabsTrigger value="variance">Recipe Variance</TabsTrigger>
+            <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
+            <TabsTrigger value="refunds-reg">Refunds Register</TabsTrigger>
+            <TabsTrigger value="overrides">Overrides</TabsTrigger>
           </TabsList>
 
           <TabsContent value="session">
@@ -96,6 +106,41 @@ export default function ReportsPage() {
             <div className="space-y-4">
               <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
               <TipDistributionPanel dateRange={dateRange} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="combos">
+            <div className="space-y-4">
+              <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+              <ComboMixReport dateRange={dateRange} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="variance">
+            <div className="space-y-4">
+              <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+              <RecipeVarianceReport dateRange={dateRange} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="waitlist">
+            <div className="space-y-4">
+              <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+              <WaitlistAnalyticsReport dateRange={dateRange} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="refunds-reg">
+            <div className="space-y-4">
+              <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+              <RefundsRegister dateRange={dateRange} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="overrides">
+            <div className="space-y-4">
+              <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+              <ComboOverrideReport dateRange={dateRange} />
             </div>
           </TabsContent>
         </Tabs>

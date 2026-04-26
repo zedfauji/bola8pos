@@ -1719,3 +1719,58 @@ export const WaitlistNotificationSchema = z.object({
 export type WaitlistEntry = z.infer<typeof WaitlistEntrySchema>;
 export type WaitlistEntryCreate = z.infer<typeof WaitlistEntryCreateSchema>;
 export type WaitlistNotification = z.infer<typeof WaitlistNotificationSchema>;
+
+// ============================================================================
+// Phase 8 S6-01: Report row schemas for analytics widgets
+// ============================================================================
+
+export const ComboMixRowSchema = z.object({
+  date: z.string(),
+  comboProductId: UuidSchema,
+  comboName: z.string(),
+  qtySold: z.number().int(),
+  netRevenue: z.number(),
+  avgPrice: z.number(),
+  overrideCount: z.number().int(),
+});
+export type ComboMixRow = z.infer<typeof ComboMixRowSchema>;
+
+export const RecipeVarianceRowSchema = z.object({
+  date: z.string(),
+  ingredientId: UuidSchema,
+  ingredientName: z.string(),
+  theoreticalUsed: z.number(),
+  physicalDelta: z.number(),
+  variancePct: z.number(),
+});
+export type RecipeVarianceRow = z.infer<typeof RecipeVarianceRowSchema>;
+
+export const WaitlistMetricsRowSchema = z.object({
+  date: z.string(),
+  partiesSeated: z.number().int(),
+  avgQuotedWait: z.number().nullable(),
+  avgActualWait: z.number().nullable(),
+  noShowRate: z.number().nullable(),
+});
+export type WaitlistMetricsRow = z.infer<typeof WaitlistMetricsRowSchema>;
+
+export const RefundRegisterRowSchema = z.object({
+  id: UuidSchema,
+  date: TimestampSchema,
+  operatorName: z.string(),
+  originalPaymentId: UuidSchema,
+  amount: z.number().positive(),
+  reason: RefundReasonSchema,
+  restockCount: z.number().int(),
+  items: z.array(RefundItemSchema).default([]),
+});
+export type RefundRegisterRow = z.infer<typeof RefundRegisterRowSchema>;
+
+export const ComboOverrideRowSchema = z.object({
+  id: UuidSchema,
+  ts: TimestampSchema,
+  actorName: z.string(),
+  comboName: z.string(),
+  reason: z.string().nullable(),
+});
+export type ComboOverrideRow = z.infer<typeof ComboOverrideRowSchema>;

@@ -1,12 +1,17 @@
 import * as XLSX from 'xlsx';
 import type {
   CajaReport,
+  ComboMixRow,
+  ComboOverrideRow,
+  CategoryRevenueRow,
   HourlyRow,
   ProductSalesRow,
-  VoidRefundRow,
-  CategoryRevenueRow,
+  RecipeVarianceRow,
+  RefundRegisterRow,
   StaffMetric,
   StaffTips,
+  VoidRefundRow,
+  WaitlistMetricsRow,
 } from '@shared/lib/domain';
 
 const MONEY_FMT = '"$"#,##0.00';
@@ -219,4 +224,127 @@ export function staffTipsToWorkbook(
 export function workbookToBytes(wb: XLSX.WorkBook): Uint8Array {
   const buf: ArrayBuffer = XLSX.write(wb, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer;
   return new Uint8Array(buf);
+}
+
+// Phase 8 S6-08 workbook builders
+
+export function comboMixToWorkbook(
+  rows: ComboMixRow[],
+  dateRange: { from: Date; to: Date }
+): XLSX.WorkBook {
+  const title = `Combo Mix ${dateRange.from.toLocaleDateString('es-MX')} – ${dateRange.to.toLocaleDateString('es-MX')}`;
+  const header = ['Date', 'Combo', 'Units Sold', 'Gross Revenue', 'Avg Price', 'Overrides'];
+  const data = [
+    [title],
+    [],
+    header,
+    ...rows.map(r => [
+      r.date,
+      r.comboName,
+      r.qtySold,
+      moneyCell(r.netRevenue),
+      moneyCell(r.avgPrice),
+      r.overrideCount,
+    ]),
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Combo Mix');
+  return wb;
+}
+
+export function recipeVarianceToWorkbook(
+  rows: RecipeVarianceRow[],
+  dateRange: { from: Date; to: Date }
+): XLSX.WorkBook {
+  const title = `Recipe Variance ${dateRange.from.toLocaleDateString('es-MX')} – ${dateRange.to.toLocaleDateString('es-MX')}`;
+  const header = ['Date', 'Ingredient', 'Theoretical Used', 'Physical Delta', 'Variance %'];
+  const data = [
+    [title],
+    [],
+    header,
+    ...rows.map(r => [r.date, r.ingredientName, r.theoreticalUsed, r.physicalDelta, r.variancePct]),
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Recipe Variance');
+  return wb;
+}
+
+export function waitlistMetricsToWorkbook(
+  rows: WaitlistMetricsRow[],
+  dateRange: { from: Date; to: Date }
+): XLSX.WorkBook {
+  const title = `Waitlist Analytics ${dateRange.from.toLocaleDateString('es-MX')} – ${dateRange.to.toLocaleDateString('es-MX')}`;
+  const header = [
+    'Date',
+    'Parties Seated',
+    'Avg Quoted Wait (min)',
+    'Avg Actual Wait (min)',
+    'No-Show Rate (%)',
+  ];
+  const data = [
+    [title],
+    [],
+    header,
+    ...rows.map(r => [
+      r.date,
+      r.partiesSeated,
+      r.avgQuotedWait ?? '',
+      r.avgActualWait ?? '',
+      r.noShowRate ?? '',
+    ]),
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Waitlist Analytics');
+  return wb;
+}
+
+export function refundsRegisterToWorkbook(
+  rows: RefundRegisterRow[],
+  dateRange: { from: Date; to: Date }
+): XLSX.WorkBook {
+  const title = `Refunds Register ${dateRange.from.toLocaleDateString('es-MX')} – ${dateRange.to.toLocaleDateString('es-MX')}`;
+  const header = ['Date', 'Operator', 'Payment ID', 'Amount', 'Reason', 'Restock Count'];
+  const data = [
+    [title],
+    [],
+    header,
+    ...rows.map(r => [
+      new Date(r.date).toLocaleDateString('es-MX'),
+      r.operatorName,
+      r.originalPaymentId,
+      moneyCell(r.amount),
+      r.reason,
+      r.restockCount,
+    ]),
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Refunds Register');
+  return wb;
+}
+
+export function comboOverridesToWorkbook(
+  rows: ComboOverrideRow[],
+  dateRange: { from: Date; to: Date }
+): XLSX.WorkBook {
+  const title = `Combo Overrides ${dateRange.from.toLocaleDateString('es-MX')} – ${dateRange.to.toLocaleDateString('es-MX')}`;
+  const header = ['Timestamp', 'Actor', 'Combo', 'Reason'];
+  const data = [
+    [title],
+    [],
+    header,
+    ...rows.map(r => [
+      new Date(r.ts).toLocaleString('es-MX'),
+      r.actorName,
+      r.comboName,
+      r.reason ?? '',
+    ]),
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Combo Overrides');
+  return wb;
 }

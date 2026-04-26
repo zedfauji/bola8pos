@@ -3,11 +3,16 @@ import { useStaffStore } from '@entities/staff/model/store';
 import type {
   CajaReport,
   CategoryRevenueRow,
+  ComboMixRow,
+  ComboOverrideRow,
   HourlyRow,
   ProductSalesRow,
+  RecipeVarianceRow,
+  RefundRegisterRow,
   StaffMetric,
   StaffTips,
   VoidRefundRow,
+  WaitlistMetricsRow,
 } from '@shared/lib/domain';
 import { canAccess } from '@shared/lib/rbac';
 import { Button } from '@shared/ui/button';
@@ -56,6 +61,31 @@ type TipsProps = {
   data: { rows: StaffTips[]; dateRange: { from: Date; to: Date } };
 };
 
+type ComboMixProps = {
+  reportType: 'combo-mix';
+  data: { rows: ComboMixRow[]; dateRange: { from: Date; to: Date } };
+};
+
+type RecipeVarianceProps = {
+  reportType: 'recipe-variance';
+  data: { rows: RecipeVarianceRow[]; dateRange: { from: Date; to: Date } };
+};
+
+type WaitlistAnalyticsProps = {
+  reportType: 'waitlist-analytics';
+  data: { rows: WaitlistMetricsRow[]; dateRange: { from: Date; to: Date } };
+};
+
+type RefundsRegisterProps = {
+  reportType: 'refunds-register';
+  data: { rows: RefundRegisterRow[]; dateRange: { from: Date; to: Date } };
+};
+
+type ComboOverridesProps = {
+  reportType: 'combo-overrides';
+  data: { rows: ComboOverrideRow[]; dateRange: { from: Date; to: Date } };
+};
+
 type Props =
   | CajaProps
   | ProductsProps
@@ -63,7 +93,12 @@ type Props =
   | VoidsProps
   | CategoriesProps
   | StaffProps
-  | TipsProps;
+  | TipsProps
+  | ComboMixProps
+  | RecipeVarianceProps
+  | WaitlistAnalyticsProps
+  | RefundsRegisterProps
+  | ComboOverridesProps;
 
 export function ExportButtons(props: Props) {
   const role = useStaffStore(s => s.currentStaff?.role);
@@ -93,6 +128,21 @@ export function ExportButtons(props: Props) {
       } else if (props.reportType === 'tips') {
         const type = format === 'excel' ? 'tips-excel' : 'tips-pdf';
         await exportReport(type, props.data);
+      } else if (props.reportType === 'combo-mix') {
+        const type = format === 'excel' ? 'combo-mix-excel' : 'combo-mix-pdf';
+        await exportReport(type, props.data);
+      } else if (props.reportType === 'recipe-variance') {
+        const type = format === 'excel' ? 'recipe-variance-excel' : 'recipe-variance-pdf';
+        await exportReport(type, props.data);
+      } else if (props.reportType === 'waitlist-analytics') {
+        const type = format === 'excel' ? 'waitlist-analytics-excel' : 'waitlist-analytics-pdf';
+        await exportReport(type, props.data);
+      } else if (props.reportType === 'refunds-register') {
+        const type = format === 'excel' ? 'refunds-register-excel' : 'refunds-register-pdf';
+        await exportReport(type, props.data);
+      } else if (props.reportType === 'combo-overrides') {
+        // PDF not supported for overrides — Excel only
+        await exportReport('combo-overrides-excel', props.data);
       } else {
         const type = format === 'excel' ? 'categories-excel' : 'categories-pdf';
         await exportReport(type, props.data);

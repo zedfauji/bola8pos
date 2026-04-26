@@ -5,30 +5,44 @@ import { toast } from 'sonner';
 import type {
   CajaReport,
   CategoryRevenueRow,
+  ComboMixRow,
+  ComboOverrideRow,
   HourlyRow,
   ProductSalesRow,
+  RecipeVarianceRow,
+  RefundRegisterRow,
   StaffMetric,
   StaffTips,
   VoidRefundRow,
+  WaitlistMetricsRow,
 } from '@shared/lib/domain';
 import {
   cajaReportToWorkbook,
-  productSalesToWorkbook,
-  hourlySalesToWorkbook,
-  voidRefundToWorkbook,
+  comboMixToWorkbook,
+  comboOverridesToWorkbook,
   categoryRevenueToWorkbook,
+  hourlySalesToWorkbook,
+  productSalesToWorkbook,
+  recipeVarianceToWorkbook,
+  refundsRegisterToWorkbook,
   staffMetricsToWorkbook,
   staffTipsToWorkbook,
+  voidRefundToWorkbook,
+  waitlistMetricsToWorkbook,
   workbookToBytes,
 } from '@shared/lib/exporters/excel';
 import {
   cajaReportToPdfBytes,
-  productSalesToPdfBytes,
-  hourlySalesToPdfBytes,
-  voidRefundToPdfBytes,
+  comboMixToPdfBytes,
   categoryRevenueToPdfBytes,
+  hourlySalesToPdfBytes,
+  productSalesToPdfBytes,
+  recipeVarianceToPdfBytes,
+  refundsRegisterToPdfBytes,
   staffMetricsToPdfBytes,
   staffTipsToPdfBytes,
+  voidRefundToPdfBytes,
+  waitlistMetricsToPdfBytes,
 } from '@shared/lib/exporters/pdf.tsx';
 import { logger } from '@shared/lib/logger-instance';
 import { ok, err, exportCancelledError, exportFailedError, type Result } from '@shared/lib/result';
@@ -47,7 +61,16 @@ export type ExportType =
   | 'staff-excel'
   | 'staff-pdf'
   | 'tips-excel'
-  | 'tips-pdf';
+  | 'tips-pdf'
+  | 'combo-mix-excel'
+  | 'combo-mix-pdf'
+  | 'recipe-variance-excel'
+  | 'recipe-variance-pdf'
+  | 'waitlist-analytics-excel'
+  | 'waitlist-analytics-pdf'
+  | 'refunds-register-excel'
+  | 'refunds-register-pdf'
+  | 'combo-overrides-excel';
 
 type ProductsContext = {
   rows: ProductSalesRow[];
@@ -71,6 +94,31 @@ type StaffContext = {
 
 type TipsContext = {
   rows: StaffTips[];
+  dateRange: { from: Date; to: Date };
+};
+
+type ComboMixContext = {
+  rows: ComboMixRow[];
+  dateRange: { from: Date; to: Date };
+};
+
+type RecipeVarianceContext = {
+  rows: RecipeVarianceRow[];
+  dateRange: { from: Date; to: Date };
+};
+
+type WaitlistMetricsContext = {
+  rows: WaitlistMetricsRow[];
+  dateRange: { from: Date; to: Date };
+};
+
+type RefundRegisterContext = {
+  rows: RefundRegisterRow[];
+  dateRange: { from: Date; to: Date };
+};
+
+type ComboOverridesContext = {
+  rows: ComboOverrideRow[];
   dateRange: { from: Date; to: Date };
 };
 
@@ -104,6 +152,26 @@ export function useExportReport() {
   async function exportReport(
     type: 'tips-excel' | 'tips-pdf',
     data: TipsContext
+  ): Promise<Result<void>>;
+  async function exportReport(
+    type: 'combo-mix-excel' | 'combo-mix-pdf',
+    data: ComboMixContext
+  ): Promise<Result<void>>;
+  async function exportReport(
+    type: 'recipe-variance-excel' | 'recipe-variance-pdf',
+    data: RecipeVarianceContext
+  ): Promise<Result<void>>;
+  async function exportReport(
+    type: 'waitlist-analytics-excel' | 'waitlist-analytics-pdf',
+    data: WaitlistMetricsContext
+  ): Promise<Result<void>>;
+  async function exportReport(
+    type: 'refunds-register-excel' | 'refunds-register-pdf',
+    data: RefundRegisterContext
+  ): Promise<Result<void>>;
+  async function exportReport(
+    type: 'combo-overrides-excel',
+    data: ComboOverridesContext
   ): Promise<Result<void>>;
   async function exportReport(type: ExportType, data: unknown): Promise<Result<void>> {
     setIsExporting(true);
@@ -187,6 +255,56 @@ export function useExportReport() {
         case 'tips-pdf': {
           const ctx = data as TipsContext;
           bytes = await staffTipsToPdfBytes(ctx.rows, ctx.dateRange);
+          break;
+        }
+        case 'combo-mix-excel': {
+          const ctx = data as ComboMixContext;
+          const wb = comboMixToWorkbook(ctx.rows, ctx.dateRange);
+          bytes = workbookToBytes(wb);
+          break;
+        }
+        case 'combo-mix-pdf': {
+          const ctx = data as ComboMixContext;
+          bytes = await comboMixToPdfBytes(ctx.rows, ctx.dateRange);
+          break;
+        }
+        case 'recipe-variance-excel': {
+          const ctx = data as RecipeVarianceContext;
+          const wb = recipeVarianceToWorkbook(ctx.rows, ctx.dateRange);
+          bytes = workbookToBytes(wb);
+          break;
+        }
+        case 'recipe-variance-pdf': {
+          const ctx = data as RecipeVarianceContext;
+          bytes = await recipeVarianceToPdfBytes(ctx.rows, ctx.dateRange);
+          break;
+        }
+        case 'waitlist-analytics-excel': {
+          const ctx = data as WaitlistMetricsContext;
+          const wb = waitlistMetricsToWorkbook(ctx.rows, ctx.dateRange);
+          bytes = workbookToBytes(wb);
+          break;
+        }
+        case 'waitlist-analytics-pdf': {
+          const ctx = data as WaitlistMetricsContext;
+          bytes = await waitlistMetricsToPdfBytes(ctx.rows, ctx.dateRange);
+          break;
+        }
+        case 'refunds-register-excel': {
+          const ctx = data as RefundRegisterContext;
+          const wb = refundsRegisterToWorkbook(ctx.rows, ctx.dateRange);
+          bytes = workbookToBytes(wb);
+          break;
+        }
+        case 'refunds-register-pdf': {
+          const ctx = data as RefundRegisterContext;
+          bytes = await refundsRegisterToPdfBytes(ctx.rows, ctx.dateRange);
+          break;
+        }
+        case 'combo-overrides-excel': {
+          const ctx = data as ComboOverridesContext;
+          const wb = comboOverridesToWorkbook(ctx.rows, ctx.dateRange);
+          bytes = workbookToBytes(wb);
           break;
         }
         default: {

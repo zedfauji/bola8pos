@@ -10,12 +10,17 @@ import type {
   ProductSalesRow,
   VoidRefundRow,
   CategoryRevenueRow,
+  ComboMixRow,
+  RecipeVarianceRow,
+  WaitlistMetricsRow,
+  RefundRegisterRow,
+  ComboOverrideRow,
 } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, unknownError, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 
-export type { HourlyRow, ProductSalesRow, VoidRefundRow, CategoryRevenueRow };
+export type { HourlyRow, ProductSalesRow, VoidRefundRow, CategoryRevenueRow, ComboMixRow, RecipeVarianceRow, WaitlistMetricsRow, RefundRegisterRow, ComboOverrideRow };
 
 // Intermediate type used during aggregation before pctTotal is computed
 type CategoryRevenueAggregate = Omit<CategoryRevenueRow, 'pctTotal'>;
@@ -444,5 +449,185 @@ export function useCategoryRevenueReport(from: Date, to: Date) {
       return ok(result);
     },
     staleTime: 60_000,
+  });
+}
+
+// ============================================================================
+// Phase 8 S6-01/03-09: Date-range guard + new report hooks
+// ============================================================================
+
+export function assertDateRangeValid(from: Date, to: Date): void {
+  const daysDiff = Math.abs((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysDiff > 365) {
+    throw new Error('Date range exceeds 365 days. Please select a shorter range.');
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Phase 8 S6-01/S6-03: ComboMixReport hook
+// ----------------------------------------------------------------------------
+export function useComboMixReport(from: Date, to: Date) {
+  return useQuery({
+    queryKey: ['reports', 'combo-mix', from.toISOString(), to.toISOString()],
+    queryFn: async (): Promise<Result<ComboMixRow[]>> => {
+      assertDateRangeValid(from, to);
+      const { data, error } = await db
+        .from('combo_mix_daily')
+        .select('*')
+        .gte('date', from.toISOString().split('T')[0])
+        .lte('date', to.toISOString().split('T')[0])
+        .order('date', { ascending: false });
+      if (error) return err(unknownError(error));
+      return ok(
+        (data as Array<Record<string, unknown>>).map(r => ({
+          date: r['date'] as string,
+          comboProductId: r['combo_product_id'] as string,
+          comboName: r['combo_name'] as string,
+          qtySold: r['qty_sold'] as number,
+          netRevenue: r['net_revenue'] as number,
+          avgPrice: r['avg_price'] as number,
+          overrideCount: r['override_count'] as number,
+        }))
+      );
+    },
+  });
+}
+
+// ----------------------------------------------------------------------------
+// Phase 8 S6-01/S6-04: RecipeVarianceReport hook
+// ----------------------------------------------------------------------------
+export function useRecipeVarianceReport(from: Date, to: Date) {
+  return useQuery({
+    queryKey: ['reports', 'recipe-variance', from.toISOString(), to.toISOString()],
+    queryFn: async (): Promise<Result<RecipeVarianceRow[]>> => {
+      assertDateRangeValid(from, to);
+      const { data, error } = await db
+        .from('recipe_variance_daily')
+        .select('*')
+        .gte('date', from.toISOString().split('T')[0])
+        .lte('date', to.toISOString().split('T')[0])
+        .order('date', { ascending: false });
+      if (error) return err(unknownError(error));
+      return ok(
+        (data as Array<Record<string, unknown>>).map(r => ({
+          date: r['date'] as string,
+          ingredientId: r['ingredient_id'] as string,
+          ingredientName: r['ingredient_name'] as string,
+          theoreticalUsed: r['theoretical_used'] as number,
+          physicalDelta: r['physical_delta'] as number,
+          variancePct: r['variance_pct'] as number,
+        }))
+      );
+    },
+  });
+}
+
+// ----------------------------------------------------------------------------
+// Phase 8 S6-01/S6-05: WaitlistAnalyticsReport hook
+// ----------------------------------------------------------------------------
+export function useWaitlistAnalyticsReport(from: Date, to: Date) {
+  return useQuery({
+    queryKey: ['reports', 'waitlist-analytics', from.toISOString(), to.toISOString()],
+    queryFn: async (): Promise<Result<WaitlistMetricsRow[]>> => {
+      assertDateRangeValid(from, to);
+      const { data, error } = await db
+        .from('waitlist_metrics_daily')
+        .select('*')
+        .gte('date', from.toISOString().split('T')[0])
+        .lte('date', to.toISOString().split('T')[0])
+        .order('date', { ascending: false });
+      if (error) return err(unknownError(error));
+      return ok(
+        (data as Array<Record<string, unknown>>).map(r => ({
+          date: r['date'] as string,
+          partiesSeated: (r['parties_seated'] as number | null) ?? 0,
+          avgQuotedWait: r['avg_quoted_wait'] as number | null,
+          avgActualWait: r['avg_actual_wait'] as number | null,
+          noShowRate: r['no_show_rate'] as number | null,
+        }))
+      );
+    },
+  });
+}
+
+// ----------------------------------------------------------------------------
+// Phase 8 S6-01/S6-06: RefundsRegister hook
+// ----------------------------------------------------------------------------
+export function useRefundsRegister(from: Date, to: Date) {
+  return useQuery({
+    queryKey: ['reports', 'refunds-register', from.toISOString(), to.toISOString()],
+    queryFn: async (): Promise<Result<RefundRegisterRow[]>> => {
+      assertDateRangeValid(from, to);
+      const { data, error } = await db
+        .from('refunds')
+        .select(`
+          id,
+          created_at,
+          original_payment_id,
+          amount,
+          reason,
+          profiles!created_by ( full_name ),
+          refund_items ( id, restock )
+        `)
+        .gte('created_at', from.toISOString())
+        .lte('created_at', to.toISOString())
+        .order('created_at', { ascending: false });
+      if (error) return err(unknownError(error));
+      return ok(
+        (data as Array<Record<string, unknown>>).map(r => {
+          const profile = r['profiles'] as Record<string, unknown> | null;
+          const items = (r['refund_items'] as Array<{ id: string; restock: boolean }> | null) ?? [];
+          return {
+            id: r['id'] as string,
+            date: r['created_at'] as string,
+            operatorName: (profile?.['full_name'] as string | undefined) ?? '—',
+            originalPaymentId: r['original_payment_id'] as string,
+            amount: r['amount'] as number,
+            reason: r['reason'] as string,
+            restockCount: items.filter(i => i.restock).length,
+            items: [],
+          };
+        })
+      );
+    },
+  });
+}
+
+// ----------------------------------------------------------------------------
+// Phase 8 S6-09: ComboOverride hook — reads audit_log
+// ----------------------------------------------------------------------------
+export function useComboOverrides(from: Date, to: Date) {
+  return useQuery({
+    queryKey: ['reports', 'combo-overrides', from.toISOString(), to.toISOString()],
+    queryFn: async (): Promise<Result<ComboOverrideRow[]>> => {
+      assertDateRangeValid(from, to);
+      const { data, error } = await db
+        .from('audit_log')
+        .select(`
+          id,
+          ts,
+          action,
+          details,
+          profiles!actor_id ( full_name )
+        `)
+        .eq('action', 'combo_availability_override')
+        .gte('ts', from.toISOString())
+        .lte('ts', to.toISOString())
+        .order('ts', { ascending: false });
+      if (error) return err(unknownError(error));
+      return ok(
+        (data as Array<Record<string, unknown>>).map(r => {
+          const profile = r['profiles'] as Record<string, unknown> | null;
+          const details = r['details'] as Record<string, unknown> | null;
+          return {
+            id: r['id'] as string,
+            ts: r['ts'] as string,
+            actorName: (profile?.['full_name'] as string | undefined) ?? '—',
+            comboName: (details?.['combo_name'] as string | undefined) ?? '—',
+            reason: (details?.['reason'] as string | null | undefined) ?? null,
+          };
+        })
+      );
+    },
   });
 }

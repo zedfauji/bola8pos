@@ -13,6 +13,7 @@ import type {
   Product,
   DiscountScope,
   DiscountType,
+  RecipeWithItems,
 } from './domain';
 import { computePoolSessionBilling } from './pool-billing';
 
@@ -379,4 +380,23 @@ export function calculateDiscountAmount(base: number, type: DiscountType, value:
   if (value <= 0 || base <= 0) return 0;
   const raw = type === 'percent' ? (value / 100) * base : Math.min(value, base);
   return Math.round(Math.min(raw, base) * 100) / 100;
+}
+
+/**
+ * computeDepletion — pure function for property test P6.
+ * Returns a Map of ingredientId → stock delta (negative = subtract, positive = add back).
+ * direction: +1 = sale (subtract), -1 = refund (add back).
+ * Formula: delta = -(direction × orderQty × item.qty / recipe.yieldQty)
+ */
+export function computeDepletion(
+  recipe: RecipeWithItems,
+  orderQty: number,
+  direction: 1 | -1,
+): Map<string, number> {
+  const deltas = new Map<string, number>();
+  for (const item of recipe.items) {
+    const delta = -direction * orderQty * item.qty / recipe.yieldQty;
+    deltas.set(item.ingredientId, delta);
+  }
+  return deltas;
 }

@@ -51,6 +51,7 @@ vi.mock('@shared/lib/supabase', () => ({
       subscribe: vi.fn(),
     })),
     removeChannel: vi.fn(),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
   },
 }));
 

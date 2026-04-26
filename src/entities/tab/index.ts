@@ -10,6 +10,7 @@ export {
   tabKeys,
   useTabs,
   useTab,
+  useSubTabs,
   useMutationOpenTab,
   useMutationAddOrder,
   useMutationUpdateTabStatus,

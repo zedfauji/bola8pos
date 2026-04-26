@@ -7,6 +7,7 @@
  */
 
 // Display
+export { ChefHatBadge } from './ChefHatBadge';
 export { ClockDriftBanner } from './ClockDriftBanner';
 export { MoneyDisplay } from './MoneyDisplay';
 export type { MoneyDisplayProps } from './MoneyDisplay';
@@ -122,3 +123,28 @@ export {
 } from './sheet';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 export { ScrollAreaRoot, ScrollBar } from './scroll-area';
+export {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from './select';
+export {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from './command';
+export { Popover, PopoverAnchor, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from './popover';
+export { IngredientAutocomplete } from './IngredientAutocomplete/IngredientAutocomplete';

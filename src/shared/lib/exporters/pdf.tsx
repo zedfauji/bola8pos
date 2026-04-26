@@ -3,12 +3,16 @@ import { Document, Page, View, Text, StyleSheet, pdf } from '@react-pdf/renderer
 import React from 'react';
 import type {
   CajaReport,
+  ComboMixRow,
+  CategoryRevenueRow,
   HourlyRow,
   ProductSalesRow,
-  VoidRefundRow,
-  CategoryRevenueRow,
+  RecipeVarianceRow,
+  RefundRegisterRow,
   StaffMetric,
   StaffTips,
+  VoidRefundRow,
+  WaitlistMetricsRow,
 } from '@shared/lib/domain';
 
 const DARK_HEADER = '#1e293b';
@@ -360,4 +364,168 @@ export async function staffTipsToPdfBytes(
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
   return docToBytes(React.createElement(StaffTipsDoc, { rows, dateRange }));
+}
+
+// Phase 8 S6-08 PDF builders
+
+function ComboMixDoc({
+  rows,
+  dateRange,
+}: {
+  rows: ComboMixRow[];
+  dateRange: { from: Date; to: Date };
+}) {
+  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <ReportHeader title="Combo Mix Report" date={dateLabel} />
+        <View style={styles.tableHeader}>
+          <Text style={styles.cell}>Date</Text>
+          <Text style={styles.cell}>Combo</Text>
+          <Text style={styles.cellRight}>Units</Text>
+          <Text style={styles.cellRight}>Revenue</Text>
+          <Text style={styles.cellRight}>Avg Price</Text>
+          <Text style={styles.cellRight}>Overrides</Text>
+        </View>
+        {rows.map((r, i) => (
+          <View key={`${r.date}-${r.comboProductId}`} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+            <Text style={styles.cell}>{r.date}</Text>
+            <Text style={styles.cell}>{r.comboName}</Text>
+            <Text style={styles.cellRight}>{String(r.qtySold)}</Text>
+            <Text style={styles.cellRight}>{fmt(r.netRevenue)}</Text>
+            <Text style={styles.cellRight}>{fmt(r.avgPrice)}</Text>
+            <Text style={styles.cellRight}>{String(r.overrideCount)}</Text>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  );
+}
+
+export async function comboMixToPdfBytes(
+  rows: ComboMixRow[],
+  dateRange: { from: Date; to: Date }
+): Promise<Uint8Array> {
+  return docToBytes(React.createElement(ComboMixDoc, { rows, dateRange }));
+}
+
+function RecipeVarianceDoc({
+  rows,
+  dateRange,
+}: {
+  rows: RecipeVarianceRow[];
+  dateRange: { from: Date; to: Date };
+}) {
+  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <ReportHeader title="Recipe Variance Report" date={dateLabel} />
+        <View style={styles.tableHeader}>
+          <Text style={styles.cell}>Date</Text>
+          <Text style={styles.cell}>Ingredient</Text>
+          <Text style={styles.cellRight}>Theoretical</Text>
+          <Text style={styles.cellRight}>Delta</Text>
+          <Text style={styles.cellRight}>Variance %</Text>
+        </View>
+        {rows.map((r, i) => (
+          <View key={`${r.date}-${r.ingredientId}`} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+            <Text style={styles.cell}>{r.date}</Text>
+            <Text style={styles.cell}>{r.ingredientName}</Text>
+            <Text style={styles.cellRight}>{String(r.theoreticalUsed)}</Text>
+            <Text style={styles.cellRight}>{String(r.physicalDelta)}</Text>
+            <Text style={styles.cellRight}>{String(r.variancePct)}%</Text>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  );
+}
+
+export async function recipeVarianceToPdfBytes(
+  rows: RecipeVarianceRow[],
+  dateRange: { from: Date; to: Date }
+): Promise<Uint8Array> {
+  return docToBytes(React.createElement(RecipeVarianceDoc, { rows, dateRange }));
+}
+
+function WaitlistMetricsDoc({
+  rows,
+  dateRange,
+}: {
+  rows: WaitlistMetricsRow[];
+  dateRange: { from: Date; to: Date };
+}) {
+  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <ReportHeader title="Waitlist Analytics Report" date={dateLabel} />
+        <View style={styles.tableHeader}>
+          <Text style={styles.cell}>Date</Text>
+          <Text style={styles.cellRight}>Parties Seated</Text>
+          <Text style={styles.cellRight}>Avg Quoted (min)</Text>
+          <Text style={styles.cellRight}>Avg Actual (min)</Text>
+          <Text style={styles.cellRight}>No-Show %</Text>
+        </View>
+        {rows.map((r, i) => (
+          <View key={r.date} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+            <Text style={styles.cell}>{r.date}</Text>
+            <Text style={styles.cellRight}>{String(r.partiesSeated)}</Text>
+            <Text style={styles.cellRight}>{r.avgQuotedWait !== null ? String(r.avgQuotedWait) : '—'}</Text>
+            <Text style={styles.cellRight}>{r.avgActualWait !== null ? String(r.avgActualWait) : '—'}</Text>
+            <Text style={styles.cellRight}>{r.noShowRate !== null ? String(r.noShowRate) : '—'}</Text>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  );
+}
+
+export async function waitlistMetricsToPdfBytes(
+  rows: WaitlistMetricsRow[],
+  dateRange: { from: Date; to: Date }
+): Promise<Uint8Array> {
+  return docToBytes(React.createElement(WaitlistMetricsDoc, { rows, dateRange }));
+}
+
+function RefundsRegisterDoc({
+  rows,
+  dateRange,
+}: {
+  rows: RefundRegisterRow[];
+  dateRange: { from: Date; to: Date };
+}) {
+  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <ReportHeader title="Refunds Register" date={dateLabel} />
+        <View style={styles.tableHeader}>
+          <Text style={styles.cell}>Date</Text>
+          <Text style={styles.cell}>Operator</Text>
+          <Text style={styles.cellRight}>Amount</Text>
+          <Text style={styles.cell}>Reason</Text>
+          <Text style={styles.cellRight}>Restock</Text>
+        </View>
+        {rows.map((r, i) => (
+          <View key={r.id} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+            <Text style={styles.cell}>{new Date(r.date).toLocaleDateString()}</Text>
+            <Text style={styles.cell}>{r.operatorName}</Text>
+            <Text style={styles.cellRight}>{fmt(r.amount)}</Text>
+            <Text style={styles.cell}>{r.reason}</Text>
+            <Text style={styles.cellRight}>{String(r.restockCount)}</Text>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  );
+}
+
+export async function refundsRegisterToPdfBytes(
+  rows: RefundRegisterRow[],
+  dateRange: { from: Date; to: Date }
+): Promise<Uint8Array> {
+  return docToBytes(React.createElement(RefundsRegisterDoc, { rows, dateRange }));
 }

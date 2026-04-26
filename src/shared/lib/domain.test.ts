@@ -285,9 +285,9 @@ describe('StockMovementSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects non-integer quantityDelta', () => {
+  it('accepts decimal quantityDelta (S3a: ingredient deltas may be fractional)', () => {
     const result = StockMovementSchema.safeParse({ ...baseValid, quantityDelta: 1.5 });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it('rejects missing productId', () => {

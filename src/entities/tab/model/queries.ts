@@ -46,6 +46,7 @@ export const tabKeys = {
     [...tabKeys.lists(), filters ?? {}] as const,
   details: () => [...tabKeys.all, 'detail'] as const,
   detail: (id: string) => [...tabKeys.details(), id] as const,
+  subTabs: (parentTabId: string) => [...tabKeys.all, 'sub-tabs', parentTabId] as const,
 };
 
 interface CategoryEmbed {
@@ -287,6 +288,7 @@ export function useTabs() {
           .select(tabListSelect)
           .eq('status', 'open')
           .eq('shift_id', shiftId)
+          .is('parent_tab_id', null) // sub-tabs must NOT appear in the main POS list (S4, Pitfall 4)
           .order('opened_at', { ascending: false })
       );
 
@@ -370,6 +372,35 @@ export function useTab(id: string) {
     isEmpty: query.isSuccess && !!r?.ok && r.data.orders.length === 0 && r.data.items.length === 0,
     isIdleOrLoading: query.isPending || query.isLoading,
   };
+}
+
+/** Sub-tabs for a given parent tab (split-bill). Returns [] when parentTabId is null. */
+export function useSubTabs(parentTabId: string | null) {
+  return useQuery({
+    queryKey: tabKeys.subTabs(parentTabId ?? ''),
+    enabled: parentTabId != null && parentTabId.length > 0,
+    queryFn: async (): Promise<Result<Tab[]>> => {
+      if (!parentTabId) return ok([]);
+      const res = await supabaseQuery(() =>
+        supabase
+          .from('tabs')
+          .select(tabListSelect)
+          .eq('parent_tab_id', parentTabId)
+          .order('created_at', { ascending: true })
+      );
+      if (!res.ok) {
+        logger.error('tabs.subtabs.fetch_failed', { code: res.error.code });
+        return res;
+      }
+      const tabs: Tab[] = [];
+      for (const row of res.data as TabRow[]) {
+        const m = mapTabRow(row);
+        if (!m.ok) return m;
+        tabs.push(m.data);
+      }
+      return ok(tabs);
+    },
+  });
 }
 
 type OpenTabMutationContext = {
