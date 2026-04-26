@@ -71,6 +71,22 @@ export async function resetTestState(): Promise<void> {
 
   await admin.from('shifts').update({ clock_out: new Date().toISOString() }).is('clock_out', null);
 
+  // Prep productions reference ingredients — remove them before deleting E2E ingredients.
+  const { data: e2eIngredientRows } = await (admin as any)
+    .from('ingredients')
+    .select('id')
+    .like('name', '%E2E%');
+  for (const row of (e2eIngredientRows ?? []) as { id: string }[]) {
+    await (admin as any).from('prep_productions').delete().eq('prep_ingredient_id', row.id);
+  }
+
+  // Clean up E2E test ingredients to prevent strict-mode violations in ingredient tests.
+  // Pattern covers both "E2E Foo" (starts with) and "Test Tomato E2E" (contains).
+  await (admin as any)
+    .from('ingredients')
+    .delete()
+    .like('name', '%E2E%');
+
   const { data: bud } = await admin.from('products').select('id').eq('name', 'Budweiser').maybeSingle();
   if (bud?.id) {
     await admin.from('inventory').update({ quantity_on_hand: 100 }).eq('product_id', bud.id);
@@ -617,6 +633,110 @@ export async function getKdsItemStatus(itemId: string): Promise<string> {
 /**
  * Delete a staff member from profiles and Supabase Auth by name.
  */
+/** Prep ingredient name used by kitchen-prep E2E (resetTestState removes `%E2E%` names). */
+export const E2E_PREP_INGREDIENT_NAME = 'E2E Salsa Prep';
+
+const E2E_PREP_RAW_INGREDIENT_NAME = 'E2E Prep Raw Tomato';
+
+/**
+ * Inserts a prep ingredient, raw ingredient, and a prep-owned recipe for kitchen-prep tests.
+ * Requires service role (same as {@link getServiceClient}).
+ */
+export async function seedE2ePrepKitchenFixture(): Promise<void> {
+  const admin = getServiceClient() as any;
+
+  async function ensureIngredient(row: Record<string, unknown>): Promise<string> {
+    const { data: existing } = await admin.from('ingredients').select('id').eq('name', row['name']).maybeSingle();
+    if (existing?.id) return existing.id as string;
+    const { data, error } = await admin.from('ingredients').insert(row).select('id').single();
+    if (error || !data) {
+      throw new Error(`seedE2ePrepKitchenFixture: insert ingredient failed – ${error?.message ?? 'no row'}`);
+    }
+    return data.id as string;
+  }
+
+  const rawId = await ensureIngredient({
+    name: E2E_PREP_RAW_INGREDIENT_NAME,
+    uom: 'kg',
+    purchase_uom: null,
+    purchase_to_base_factor: 1,
+    cost_per_base_unit: 1,
+    reorder_point: null,
+    is_prep: false,
+    is_active: true,
+    category: 'e2e-prep',
+    quantity_on_hand: 50,
+  });
+
+  const prepId = await ensureIngredient({
+    name: E2E_PREP_INGREDIENT_NAME,
+    uom: 'L',
+    purchase_uom: null,
+    purchase_to_base_factor: 1,
+    cost_per_base_unit: 0.5,
+    reorder_point: 5,
+    is_prep: true,
+    is_active: true,
+    category: 'e2e-prep',
+    quantity_on_hand: 2,
+  });
+
+  const { data: existingRecipe } = await admin
+    .from('recipes')
+    .select('id')
+    .eq('prep_ingredient_id', prepId)
+    .maybeSingle();
+
+  if (existingRecipe?.id) {
+    await admin.from('recipe_items').delete().eq('recipe_id', existingRecipe.id);
+    await admin.from('recipes').delete().eq('id', existingRecipe.id);
+  }
+
+  const { data: recipe, error: rErr } = await admin
+    .from('recipes')
+    .insert({
+      product_id: null,
+      prep_ingredient_id: prepId,
+      yield_qty: 1,
+      notes: 'e2e prep fixture',
+    })
+    .select('id')
+    .single();
+
+  if (rErr || !recipe) {
+    throw new Error(`seedE2ePrepKitchenFixture: recipe insert failed – ${rErr?.message ?? 'no row'}`);
+  }
+
+  const { error: riErr } = await admin.from('recipe_items').insert({
+    recipe_id: recipe.id,
+    ingredient_id: rawId,
+    qty: 0.5,
+  });
+  if (riErr) {
+    throw new Error(`seedE2ePrepKitchenFixture: recipe_items insert failed – ${riErr.message}`);
+  }
+}
+
+/**
+ * Resets the Tomato raw ingredient stock to 0 so 21-prep.spec.ts T5
+ * ("insufficient stock" path) is deterministic in isolation.
+ * Tomato is the raw ingredient consumed by the Salsa Mexicana prep recipe (100g per batch).
+ * Call from test.beforeAll in 21-prep.spec.ts.
+ */
+export async function resetPrepIngredientStock(): Promise<void> {
+  const admin = getServiceClient() as unknown as {
+    from: (table: string) => {
+      select: (cols: string) => { ilike: (col: string, val: string) => { limit: (n: number) => Promise<{ data: { id: string }[] | null }> } };
+      update: (vals: Record<string, unknown>) => { eq: (col: string, val: string) => Promise<unknown> };
+    };
+  };
+  const { data: ing } = await admin.from('ingredients').select('id').ilike('name', '%tomato%').limit(1);
+  const ingRow = ing?.[0];
+  if (ingRow) {
+    await admin.from('ingredients').update({ quantity_on_hand: 0 }).eq('id', ingRow.id);
+  }
+}
+
 export async function deleteTestStaff(name: string): Promise<void> {
   const admin = getServiceClient();
 
