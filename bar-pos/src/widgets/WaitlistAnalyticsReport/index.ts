@@ -1,0 +1,1 @@
+export { WaitlistAnalyticsReport } from './WaitlistAnalyticsReport';
