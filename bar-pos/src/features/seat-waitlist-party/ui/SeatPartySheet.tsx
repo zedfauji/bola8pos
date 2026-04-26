@@ -98,6 +98,7 @@ export function SeatPartySheet({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
+      {/* Focus is trapped by Radix UI SheetContent — no explicit autoFocus needed */}
       <SheetContent side="right" className="max-w-md w-full flex flex-col gap-0 p-0">
         <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle>Seat party</SheetTitle>
@@ -157,10 +158,11 @@ export function SeatPartySheet({
         </div>
 
         <SheetFooter className="px-6 pb-6 flex gap-3">
-          <Button variant="outline" className="flex-1" onClick={handleClose}>
+          <Button size="lg" variant="outline" className="flex-1" onClick={handleClose}>
             Close
           </Button>
           <Button
+            size="lg"
             className="flex-1"
             disabled={!selectedTableId || isPending}
             onClick={() => { void handleSeat(); }}

@@ -118,6 +118,7 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
         if (!isOpen) handleClose();
       }}
     >
+      {/* Focus is trapped by Radix UI SheetContent — no explicit autoFocus needed */}
       <SheetContent side="right" className="max-w-md w-full flex flex-col gap-0 p-0">
         <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle>Add to waitlist</SheetTitle>
@@ -193,10 +194,11 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
         </div>
 
         <SheetFooter className="px-6 pb-6 flex gap-3">
-          <Button variant="outline" className="flex-1" onClick={handleClose}>
+          <Button size="lg" variant="outline" className="flex-1" onClick={handleClose}>
             Discard
           </Button>
           <Button
+            size="lg"
             className="flex-1"
             disabled={!isValid(state) || isPending}
             onClick={() => {

@@ -40,7 +40,7 @@ export function useSeatWaitlistParty() {
     },
     onSuccess: (result, input) => {
       if (!result.ok) {
-        toast.error('Something went wrong. Check your connection and try again.');
+        toast.error('Could not seat party. Try again or refresh the waitlist.');
         return;
       }
       toast.success(`${input.entryName} seated at ${input.tableName}.`);

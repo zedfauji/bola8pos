@@ -19,7 +19,7 @@ export function NotifyButton({ entryId, entryName, hasPhone }: NotifyButtonProps
   return (
     <Button
       variant="outline"
-      size="sm"
+      size="lg"
       disabled={isPending}
       onClick={() => { void handleNotify(); }}
       aria-label={hasPhone ? 'Send WhatsApp notification' : 'Send manager notification'}
