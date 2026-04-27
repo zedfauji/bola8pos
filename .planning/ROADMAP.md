@@ -241,11 +241,11 @@ Plans:
 **Goal:** Ship Tauri-native in-app update detection and one-click install from GitHub Releases. User sees a dialog (version + changelog) at startup and every 4 hours; clicking Install downloads, applies, and restarts without destructive manual steps.
 **Requirements:** UPD-01..UPD-08 (see `.planning/PROJECT.md`)
 **Depends on:** Phase 8 complete; GitHub Actions release pipeline already working
-**Plans:** 5 plans
+**Plans:** 2/5 plans executed
 
 Plans:
-- [ ] 09-01-PLAN.md — Signing setup: `tauri signer generate` key pair + add pubkey to `tauri.conf.json` + `TAURI_SIGNING_PRIVATE_KEY` secret to GitHub Actions + sign step in existing release workflow (UPD-06)
-- [ ] 09-02-PLAN.md — Plugin integration: `tauri-plugin-updater` in `Cargo.toml` + `src-tauri/lib.rs` plugin registration + updater endpoint config in `tauri.conf.json` pointing to GitHub Releases JSON (UPD-01, UPD-07)
+- [x] 09-01-PLAN.md — Signing setup: `tauri signer generate` key pair + add pubkey to `tauri.conf.json` + `TAURI_SIGNING_PRIVATE_KEY` secret to GitHub Actions + sign step in existing release workflow (UPD-06)
+- [x] 09-02-PLAN.md — Plugin integration: `tauri-plugin-updater` in `Cargo.toml` + `src-tauri/lib.rs` plugin registration + updater endpoint config in `tauri.conf.json` pointing to GitHub Releases JSON (UPD-01, UPD-07)
 - [ ] 09-03-PLAN.md — Frontend hook: `useAppUpdater` wrapping `@tauri-apps/plugin-updater` — startup check + 4-hour `setInterval` + state shape `{ updateAvailable, version, body, isDownloading, progress, install, dismiss }` + `UpdaterProvider` context (UPD-01, UPD-02, UPD-05, UPD-07, UPD-08)
 - [ ] 09-04-PLAN.md — Update dialog UI: `UpdateAvailableDialog` (version badge + changelog markdown render + Install Now / Remind Later + download progress bar + restart prompt after install complete) + Storybook stories (UPD-03, UPD-04, UPD-05, UPD-08)
 - [ ] 09-05-PLAN.md — App wiring + tests: wire `UpdaterProvider` into `app/providers.tsx` + mount `UpdateAvailableDialog` in `AppShell` + unit tests for `useAppUpdater` (mock plugin) + E2E smoke test (UPD-01..UPD-08)

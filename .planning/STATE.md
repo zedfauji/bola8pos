@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 09
-current_plan: 1
-status: in_progress
-stopped_at: ""
-last_updated: "2026-04-26T20:30:00.000Z"
+current_phase: 08
+current_plan: 3
+status: executing
+stopped_at: Completed 09-01-PLAN.md — Ed25519 pubkey + release.yml wired
+last_updated: "2026-04-27T19:41:34.185Z"
 progress:
   total_phases: 9
   completed_phases: 7
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 **Current phase:** 08
 **Current plan:** 3
 **Status:** In Progress Phase 08
-**Progress:** [██████████] 95%
+**Progress:** [█████████░] 94%
 
 ## Session Log
 
@@ -139,6 +139,8 @@ See: .planning/PROJECT.md
 - [Phase 04-recipes-sale-depletion 04-06]: one order_item per integration test due to UNIQUE index on (ref_type, ref_id, ingredient_id)
 - [Phase 04-recipes-sale-depletion 04-06]: E2E spec named 36-recipes.spec.ts to avoid collision with existing 20-*.spec.ts files
 - [Phase ?]: combo-overrides has no PDF builder — Excel only per plan spec (audit log does not benefit from PDF format)
+- [Phase ?]: [Phase 09-auto-updater 09-02]: tauri_plugin_process uses builder chain; tauri_plugin_updater uses app.handle().plugin() with #[cfg(desktop)] guard
+- [Phase ?]: [Phase 09-auto-updater 09-02]: installMode passive — no UAC escalation, no silent install (T-9-02-05 mitigated)
 
 ## Performance Metrics
 
@@ -169,6 +171,7 @@ See: .planning/PROJECT.md
 | 08-polish-reports-e2e-hardening | 04 | 20min | 2 | 10 |
 | Phase 08 P04 | 20min | 2 tasks | 10 files |
 | 08-polish-reports-e2e-hardening | 06 | 8min | 1 | 6 |
+| Phase 09-auto-updater P02 | 2min | 2 tasks | 7 files |
 
 ## Last Session
 
