@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: milestone
 current_phase: 09
 current_plan: 5
-status: executing
-stopped_at: Completed 09-04-PLAN.md — UpdateAvailableDialog with 7/7 tests GREEN
-last_updated: "2026-04-27T20:01:00Z"
+status: checkpoint
+stopped_at: Completed 09-05-PLAN.md — UpdaterProvider wired, E2E smoke spec created; awaiting human verify checkpoint
+last_updated: "2026-04-27T20:10:00Z"
 progress:
   total_phases: 10
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 65
-  completed_plans: 63
-  percent: 97
+  completed_plans: 64
+  percent: 98
 ---
 
 # Session State
@@ -31,6 +31,7 @@ See: .planning/PROJECT.md
 
 ## Session Log
 
+- 2026-04-27: Plan 09-05 complete — UpdaterProvider wired into providers.tsx (063c8f3); E2E smoke spec 18-updater.spec.ts (abb10e3); Phase 9 14/14 unit tests GREEN; typecheck PASS; lint clean on plan files (agent/ pre-existing errors out of scope); CHECKPOINT awaiting human verify
 - 2026-04-27: **Phase 10 execute complete** — `10-01-PLAN.md` waves 0–3+4 (peer review optional); artifacts: `10-EVIDENCE.md`, `10-FINDINGS.md`, `10-CHECKLIST.md` (36 open items, scoring table); **lint+test not green** in bar-pos at commit `1b5ef62` (documented, not fixed per audit scope)
 - 2026-04-27: Phase 10 `/gsd-plan-phase` — `10-01-PLAN.md` + `10-CONTEXT.md` + `10-FINDINGS.md` template in `.planning/phases/10-ai-slob-technical-debt-checklist/`; ROADMAP Phase 10 planning artifacts line
 - 2026-04-27: Phase 10 added — AI Slob & Technical Debt Audit; artifact `.planning/phases/10-ai-slob-technical-debt-checklist/10-CHECKLIST.md`; ROADMAP.md updated; `total_phases: 10`
@@ -181,8 +182,9 @@ See: .planning/PROJECT.md
 | Phase 09-auto-updater P02 | 2min | 2 tasks | 7 files |
 | 09-auto-updater | 03 | 3min | 2 | 2 |
 | 09-auto-updater | 04 | 8min | 2 | 7 |
+| 09-auto-updater | 05 | 12min | 2 | 4 |
 
 ## Last Session
 
-- **Stopped at:** Completed 09-04-PLAN.md — UpdateAvailableDialog with 7/7 tests GREEN
-- **Timestamp:** 2026-04-27T20:01:00Z
+- **Stopped at:** Completed 09-05-PLAN.md — UpdaterProvider wired, E2E smoke spec; CHECKPOINT awaiting human verify
+- **Timestamp:** 2026-04-27T20:10:00Z
