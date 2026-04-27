@@ -1,0 +1,214 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\playwright.config.ts",
+    "rootDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e-results/12-infrastructure",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "blob",
+        {
+          "outputDir": "e2e-blob-reports"
+        }
+      ],
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:1420",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "12-infrastructure.spec.ts",
+      "file": "12-infrastructure.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Infrastructure",
+          "file": "12-infrastructure.spec.ts",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "All migrations applied (or CLI lists them)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Supabase CLI did not report applied migrations (link project or run locally).",
+                      "location": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\12-infrastructure.spec.ts",
+                        "line": 21,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 6536,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:09:19.795Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Supabase CLI did not report applied migrations (link project or run locally).",
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\12-infrastructure.spec.ts",
+                            "line": 21,
+                            "column": 12
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\12-infrastructure\\12-infrastructure-Infrastr-1deba--applied-or-CLI-lists-them--chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\12-infrastructure\\12-infrastructure-Infrastr-1deba--applied-or-CLI-lists-them--chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\12-infrastructure\\12-infrastructure-Infrastr-1deba--applied-or-CLI-lists-them--chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "22cda06f317159d23dbd-d142a9d798c0fd545406",
+              "file": "12-infrastructure.spec.ts",
+              "line": 16,
+              "column": 3
+            },
+            {
+              "title": "Edge functions list includes process-payment",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2883,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:09:27.327Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\12-infrastructure\\12-infrastructure-Infrastr-9799d-st-includes-process-payment-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\12-infrastructure\\12-infrastructure-Infrastr-9799d-st-includes-process-payment-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\12-infrastructure\\12-infrastructure-Infrastr-9799d-st-includes-process-payment-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "22cda06f317159d23dbd-85807ef737374611b403",
+              "file": "12-infrastructure.spec.ts",
+              "line": 28,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-19T00:09:18.467Z",
+    "duration": 12886.858,
+    "expected": 1,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

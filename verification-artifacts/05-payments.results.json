@@ -1,0 +1,642 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\playwright.config.ts",
+    "rootDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e-results/05-payments",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "blob",
+        {
+          "outputDir": "e2e-blob-reports"
+        }
+      ],
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:1420",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "05-payments.spec.ts",
+      "file": "05-payments.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Payments",
+          "file": "05-payments.spec.ts",
+          "line": 10,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Cash payment — change calculation",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1906,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:04:18.128Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1839,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:04:21.709Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-change-calculation-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "985a4fdae62938933b88-76c6573255f0e982c4f3",
+              "file": "05-payments.spec.ts",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "Cash payment — completes",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2044,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:04:25.292Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1874,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:04:29.448Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Cash-payment-—-completes-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "985a4fdae62938933b88-097bf4c3152e53cc29df",
+              "file": "05-payments.spec.ts",
+              "line": 42,
+              "column": 3
+            },
+            {
+              "title": "Card payment button label",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1781,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:04:32.817Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1911,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:04:36.112Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card-payment-button-label-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "985a4fdae62938933b88-a01d5299b246675e70a1",
+              "file": "05-payments.spec.ts",
+              "line": 64,
+              "column": 3
+            },
+            {
+              "title": "Card payment — no cash drawer in console",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1825,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-19T00:04:39.797Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1860,
+                      "error": {
+                        "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache",
+                        "stack": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5",
+                        "location": {
+                          "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                          "column": 28,
+                          "line": 104
+                        },
+                        "snippet": "   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                            "column": 28,
+                            "line": 104
+                          },
+                          "message": "Error: openCaja failed: Could not find the table 'public.caja_sessions' in the schema cache\n\n   at helpers\\supabase.ts:104\n\n  102 |     .single();\n  103 |\n> 104 |   if (error || !row) throw new Error(`openCaja failed: ${error?.message ?? 'no row'}`);\n      |                            ^\n  105 |   return row.id as string;\n  106 | }\n  107 |\n    at openCaja (C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts:104:28)\n    at C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\05-payments.spec.ts:14:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-19T00:04:42.990Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\05-payments\\05-payments-Payments-Card--1a424-—-no-cash-drawer-in-console-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\helpers\\supabase.ts",
+                        "column": 28,
+                        "line": 104
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "985a4fdae62938933b88-d426e633c36300cc88bf",
+              "file": "05-payments.spec.ts",
+              "line": 86,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-19T00:04:16.828Z",
+    "duration": 28800.252,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

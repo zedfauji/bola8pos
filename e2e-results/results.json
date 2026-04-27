@@ -1,0 +1,858 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\playwright.config.ts",
+    "rootDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/giris/Documents/Code/Redesign-POS/More POS/bola8pos-kiro/bar-pos/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "blob",
+        {
+          "outputDir": "e2e-blob-reports"
+        }
+      ],
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:1420",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "16-table-status.spec.ts",
+      "file": "16-table-status.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Table Status Page",
+          "file": "16-table-status.spec.ts",
+          "line": 183,
+          "column": 6,
+          "specs": [
+            {
+              "title": "T1: navigate from pool grid to status page via View Status button",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14870,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:33:01.447Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-54bb3-page-via-View-Status-button-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-54bb3-page-via-View-Status-button-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-54bb3-page-via-View-Status-button-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-6ae800bb4ed7a95eeef7",
+              "file": "16-table-status.spec.ts",
+              "line": 192,
+              "column": 3
+            },
+            {
+              "title": "T2: \"Moved from\" badge visible when session has previous_table_id",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 10306,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:33:16.746Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-2ec0b-ssion-has-previous-table-id-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-2ec0b-ssion-has-previous-table-id-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-2ec0b-ssion-has-previous-table-id-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-4079bae8a4e2063762cd",
+              "file": "16-table-status.spec.ts",
+              "line": 225,
+              "column": 3
+            },
+            {
+              "title": "T3: Happy Hour badge visible when current time is within happy hour window",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11029,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:33:27.172Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-8cf6d-is-within-happy-hour-window-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-8cf6d-is-within-happy-hour-window-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-8cf6d-is-within-happy-hour-window-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-39023c8e6b41017c8763",
+              "file": "16-table-status.spec.ts",
+              "line": 262,
+              "column": 3
+            },
+            {
+              "title": "T4: Stop Timer opens confirmation dialog, confirm redirects to /pool-tables",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14339,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:33:38.314Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-a38b8-rm-redirects-to-pool-tables-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-a38b8-rm-redirects-to-pool-tables-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-a38b8-rm-redirects-to-pool-tables-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-7a61d177a7c98a84a116",
+              "file": "16-table-status.spec.ts",
+              "line": 349,
+              "column": 3
+            },
+            {
+              "title": "T5: Stop & Move to Table stops session and moves tab to new table number",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 15753,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:33:52.942Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-05b2c-ves-tab-to-new-table-number-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-05b2c-ves-tab-to-new-table-number-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-05b2c-ves-tab-to-new-table-number-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-48bfc3b09ce8dad479d2",
+              "file": "16-table-status.spec.ts",
+              "line": 378,
+              "column": 3
+            },
+            {
+              "title": "T6: Print Pre-cheque button triggers print flow without error dialog",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 16790,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:34:08.988Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-9ad1c-t-flow-without-error-dialog-chromium\\test-finished-2.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-9ad1c-t-flow-without-error-dialog-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-9ad1c-t-flow-without-error-dialog-chromium\\video.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-9ad1c-t-flow-without-error-dialog-chromium\\video-1.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-9ad1c-t-flow-without-error-dialog-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-c23fd3b019a34268894f",
+              "file": "16-table-status.spec.ts",
+              "line": 408,
+              "column": 3
+            },
+            {
+              "title": "T7: Bartender removing an item requires manager PIN (wrong PIN → error, correct PIN → confirm)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 17685,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:34:26.100Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-e0bcf-rror-correct-PIN-→-confirm--chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-e0bcf-rror-correct-PIN-→-confirm--chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-e0bcf-rror-correct-PIN-→-confirm--chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-367d5176bf2eaed9ea19",
+              "file": "16-table-status.spec.ts",
+              "line": 436,
+              "column": 3
+            },
+            {
+              "title": "T8: Admin removing an item also requires manager PIN",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 15378,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:34:43.992Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-6439a-m-also-requires-manager-PIN-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-6439a-m-also-requires-manager-PIN-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-6439a-m-also-requires-manager-PIN-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-59a9953660703bcbccd4",
+              "file": "16-table-status.spec.ts",
+              "line": 517,
+              "column": 3
+            },
+            {
+              "title": "T9: Removing the last item in an order removes the entire order section",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 16365,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:34:59.553Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-5b790-es-the-entire-order-section-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-5b790-es-the-entire-order-section-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-5b790-es-the-entire-order-section-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-f26961c8e31df8f28435",
+              "file": "16-table-status.spec.ts",
+              "line": 583,
+              "column": 3
+            },
+            {
+              "title": "T10: \"Add More Items\" navigates to /pos with the tab active",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 15211,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:35:16.099Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-d6032--to-pos-with-the-tab-active-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-d6032--to-pos-with-the-tab-active-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-d6032--to-pos-with-the-tab-active-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-ecec1a4f2184a9f6e633",
+              "file": "16-table-status.spec.ts",
+              "line": 646,
+              "column": 3
+            },
+            {
+              "title": "T11: \"Close & Pay\" shows confirmation then navigates to /pos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 16071,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:35:31.603Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-d40d7-ation-then-navigates-to-pos-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-d40d7-ation-then-navigates-to-pos-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-d40d7-ation-then-navigates-to-pos-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-66b084a929472b934c2b",
+              "file": "16-table-status.spec.ts",
+              "line": 669,
+              "column": 3
+            },
+            {
+              "title": "T12: Navigating to status page of available table shows \"No active session\"",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 19853,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:35:47.977Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-51dde-le-shows-No-active-session--chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-51dde-le-shows-No-active-session--chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-51dde-le-shows-No-active-session--chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-bfe8f0eb18ec8cb8bb32",
+              "file": "16-table-status.spec.ts",
+              "line": 692,
+              "column": 3
+            },
+            {
+              "title": "T13: Real-time — session stopped externally updates the UI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\16-table-status.spec.ts",
+                        "line": 728,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:36:07.959Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\16-table-status.spec.ts",
+                            "line": 728,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-70a92b7a961b12aeada7",
+              "file": "16-table-status.spec.ts",
+              "line": 728,
+              "column": 8
+            },
+            {
+              "title": "T14: Offline resilience — mutations are blocked when device is offline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\16-table-status.spec.ts",
+                        "line": 737,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:36:07.960Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e\\16-table-status.spec.ts",
+                            "line": 737,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-be8c4427cfcdd27e5774",
+              "file": "16-table-status.spec.ts",
+              "line": 737,
+              "column": 8
+            },
+            {
+              "title": "T15: Back button navigates to /pool-tables",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12776,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-20T17:36:07.960Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-c1826-on-navigates-to-pool-tables-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-c1826-on-navigates-to-pool-tables-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\giris\\Documents\\Code\\Redesign-POS\\More POS\\bola8pos-kiro\\bar-pos\\e2e-results\\16-table-status-Table-Stat-c1826-on-navigates-to-pool-tables-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "eb140301fc7fece949cc-b09f1a265feedde23a72",
+              "file": "16-table-status.spec.ts",
+              "line": 746,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-20T17:33:00.805Z",
+    "duration": 201074.879,
+    "expected": 13,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
