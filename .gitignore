@@ -3,7 +3,29 @@
 *.key.pub
 *.pem
 
-# Planning / AI agent scratch files
+# AI / IDE tool configs and runtimes
 .agents/
+.claude/
 .claude-flow/
+.cursor/
+.kiro/
+.paperclip/
 .swarm/
+.vscode/
+
+# Agent runtime files
+agentdb.rvf*
+skills-lock.json
+
+# Binary / archive files
+*.pdf
+*.zip
+
+# Design exports and one-off project folders
+bar_pos_design_extracted/
+design_handoff_pool_table_card/
+installer/
+tickets/
+
+# Markdown docs at repo root (CLAUDE.md lives inside bar-pos/, not here)
+*.md

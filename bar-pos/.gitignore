@@ -46,3 +46,20 @@ lint_report*.json
 lint-results-clean*.json
 lint_output*.txt
 tsc_errors.txt
+
+# AI / IDE tool configs
+.claude/
+.storybook/
+.husky/
+.vscode/*
+!.vscode/extensions.json
+
+# Dev scratch / one-off files
+fix_lint.cjs
+docs/
+tickets/
+.planning/
+
+# Markdown docs (CLAUDE.md is the exception — it's project instructions)
+*.md
+!CLAUDE.md
