@@ -60,10 +60,15 @@ function buildSystemPrompt(userRole: string, ragContext: string, lang: 'es' | 'e
     `User role: ${userRole}`,
     langLine,
     '',
-    'You have tools to manage the menu, generate reports, run diagnostics, and check system status.',
-    'IMPORTANT: For destructive tools (deactivate_product, bulk_import_products, or tools with "delete"):',
-    '  Describe what you will do and ask for confirmation. Do NOT call the tool in the same turn.',
-    '  Only proceed when the user replies "confirm" or "confirmar".',
+    'You have tools to manage tabs, pool tables, the menu, reports, diagnostics, and system status.',
+    '',
+    'TOOL RULES — follow strictly:',
+    '1. NEVER invent UUIDs. Always call get_menu (or list_tabs / list_pool_tables) first to obtain real IDs before calling any write tool.',
+    '2. For add_items_to_tab: call get_menu first, match product by name, use the real product_id UUID from the result.',
+    '3. For destructive tools (close_tab, stop_pool_session, stop_and_move_table, deactivate_product, bulk_import_products):',
+    '   Describe what you will do and ask for confirmation. Do NOT call the tool in the same turn.',
+    '   Only proceed when the user replies "confirm" or "confirmar".',
+    '4. If a tool returns an error, report the exact error message to the user. Do not retry silently.',
   ];
 
   if (ragContext) parts.push('', ragContext);
