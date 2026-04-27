@@ -10,11 +10,18 @@ export interface Message {
   content: string;
 }
 
+export interface PendingConfirmation {
+  token: string;
+  toolName: string;
+  preview: unknown;
+}
+
 export interface AgentResult {
   text: string;
   toolsExecuted: string[];
   usedFallback: boolean;
   awaitingConfirmation: boolean;
+  pendingConfirmation: PendingConfirmation | null;
 }
 
 // ─── Config (lazy reads — vi.stubEnv works in tests) ─────────────────────────
@@ -148,6 +155,8 @@ export async function runAgent(
       });
 
       let loopCount = 0;
+      let capturedPending: PendingConfirmation | null = null;
+
       while (response.stop_reason === 'tool_use' && loopCount < MAX_TOOL_LOOPS) {
         loopCount++;
 
@@ -168,6 +177,18 @@ export async function runAgent(
             ctx
           );
           toolsExecuted.push(block.name);
+
+          // Capture the first pending destructive action for UI confirmation dialog
+          if (result.ok && capturedPending === null) {
+            const d = result.data as Record<string, unknown> | null;
+            if (d?.['pending'] === true) {
+              capturedPending = {
+                token: d['confirm_token'] as string,
+                toolName: block.name,
+                preview: d['preview'],
+              };
+            }
+          }
 
           toolResults.push({
             type: 'tool_result',
@@ -192,7 +213,8 @@ export async function runAgent(
         text: textBlock?.text ?? '',
         toolsExecuted,
         usedFallback: false,
-        awaitingConfirmation: false,
+        awaitingConfirmation: capturedPending !== null,
+        pendingConfirmation: capturedPending,
       };
     } catch (e) {
       attempt++;
@@ -205,13 +227,13 @@ export async function runAgent(
   logger.warn('brain.runAgent.ollama_fallback', { userRole });
   try {
     const text = await runOllamaFallback(userMessage, conversationHistory, userRole);
-    return { text, toolsExecuted, usedFallback: true, awaitingConfirmation: false };
+    return { text, toolsExecuted, usedFallback: true, awaitingConfirmation: false, pendingConfirmation: null };
   } catch (fallbackErr) {
     logger.warn('brain.runAgent.fallback_failed', { detail: String(fallbackErr) });
     const text =
       lang === 'es'
         ? 'El asistente no está disponible en este momento. Intenta de nuevo más tarde.'
         : 'The assistant is currently unavailable. Please try again later.';
-    return { text, toolsExecuted, usedFallback: true, awaitingConfirmation: false };
+    return { text, toolsExecuted, usedFallback: true, awaitingConfirmation: false, pendingConfirmation: null };
   }
 }

@@ -44,6 +44,7 @@ export function useAgent() {
       const result = await runAgent(text, userRole, conversationHistory, userId);
 
       state.setAwaitingConfirmation(result.awaitingConfirmation);
+      state.setPendingConfirmation(result.pendingConfirmation);
 
       const assistantMessage: Message = { role: 'assistant', content: result.text };
       state.addMessage(assistantMessage);
@@ -127,6 +128,33 @@ export function useAgent() {
     }
   };
 
+  const confirmAction = async (token: string): Promise<void> => {
+    state.setTyping(true);
+    state.setPendingConfirmation(null);
+    try {
+      const ctx = { userId, userRole, durationMs: undefined };
+      const result = await executeTool('confirm_action', { token }, ctx);
+      state.addMessage({
+        role: 'assistant',
+        content: result.ok
+          ? '✅ Acción ejecutada correctamente.'
+          : `❌ Error: ${result.error.message}`,
+      });
+    } catch (e) {
+      logger.error('agent.confirmAction.failed', {}, e);
+      state.addMessage({ role: 'assistant', content: `❌ Error al confirmar: ${String(e)}` });
+    } finally {
+      state.setTyping(false);
+    }
+  };
+
+  const cancelAction = async (token: string): Promise<void> => {
+    state.setPendingConfirmation(null);
+    const ctx = { userId, userRole, durationMs: undefined };
+    await executeTool('cancel_action', { token }, ctx);
+    state.addMessage({ role: 'assistant', content: 'Acción cancelada.' });
+  };
+
   const confirmImport = async (): Promise<void> => {
     const products = useAgentStore.getState().pendingImportProducts;
     if (!products) return;
@@ -170,6 +198,7 @@ export function useAgent() {
     awaitingConfirmation: state.awaitingConfirmation,
     hasUnread: state.hasUnread,
     pendingImportProducts: state.pendingImportProducts,
+    pendingConfirmation: state.pendingConfirmation,
     open: state.open,
     close: state.close,
     toggle: state.toggle,
@@ -179,5 +208,7 @@ export function useAgent() {
     sendMessage,
     handleFileImport,
     confirmImport,
+    confirmAction,
+    cancelAction,
   };
 }

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Message } from '@shared/lib/agent/brain';
+import type { Message, PendingConfirmation } from '@shared/lib/agent/brain';
 
 interface AgentState {
   isOpen: boolean;
@@ -8,6 +8,7 @@ interface AgentState {
   awaitingConfirmation: boolean;
   hasUnread: boolean;
   pendingImportProducts: Array<{ name: string; price: number }> | null;
+  pendingConfirmation: PendingConfirmation | null;
 }
 
 interface AgentActions {
@@ -20,6 +21,7 @@ interface AgentActions {
   markRead: () => void;
   clearMessages: () => void;
   setPendingImportProducts: (products: Array<{ name: string; price: number }> | null) => void;
+  setPendingConfirmation: (pending: PendingConfirmation | null) => void;
 }
 
 type AgentStore = AgentState & AgentActions;
@@ -31,6 +33,7 @@ export const useAgentStore = create<AgentStore>()((set) => ({
   awaitingConfirmation: false,
   hasUnread: false,
   pendingImportProducts: null,
+  pendingConfirmation: null,
 
   open: () => { set({ isOpen: true, hasUnread: false }); },
   close: () => { set({ isOpen: false }); },
@@ -46,4 +49,5 @@ export const useAgentStore = create<AgentStore>()((set) => ({
   markRead: () => { set({ hasUnread: false }); },
   clearMessages: () => { set({ messages: [] }); },
   setPendingImportProducts: (products) => { set({ pendingImportProducts: products }); },
+  setPendingConfirmation: (pending) => { set({ pendingConfirmation: pending }); },
 }));

@@ -6,6 +6,7 @@ import { Button } from '@shared/ui/button';
 import { useAgentStore } from '../model/agentStore';
 import { useAgent } from '../model/useAgent';
 import { CommandChips } from './CommandChips';
+import { ConfirmActionCard } from './ConfirmActionCard';
 import { FileDropZone } from './FileDropZone';
 import { ImportPreviewTable } from './ImportPreviewTable';
 import { MessageBubble } from './MessageBubble';
@@ -21,6 +22,9 @@ export function AgentPanel() {
     handleFileImport,
     pendingImportProducts,
     confirmImport,
+    pendingConfirmation,
+    confirmAction,
+    cancelAction,
   } = useAgent();
   const setPendingImportProducts = useAgentStore((s) => s.setPendingImportProducts);
 
@@ -86,6 +90,18 @@ export function AgentPanel() {
         )}
         <div ref={bottomRef} />
       </div>
+
+      {/* Destructive action confirmation */}
+      {pendingConfirmation !== null && (
+        <div className="shrink-0 px-3 pb-2">
+          <ConfirmActionCard
+            pending={pendingConfirmation}
+            onConfirm={() => { void confirmAction(pendingConfirmation.token); }}
+            onCancel={() => { void cancelAction(pendingConfirmation.token); }}
+            isLoading={isTyping}
+          />
+        </div>
+      )}
 
       {/* Import preview */}
       {pendingImportProducts !== null && pendingImportProducts.length > 0 && (
