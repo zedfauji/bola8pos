@@ -103,7 +103,7 @@ export const posToolDefinitions = [
   // ── Pool table writes ──
   {
     name: 'start_pool_session',
-    description: 'Starts a pool timer on a table, optionally linking to an existing tab.',
+    description: 'Starts a pool timer on a table. Auto-creates a new tab named "Pool <label>" if tab_id is omitted (matches UI behaviour). Requires open caja session and active shift.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -406,9 +406,50 @@ export async function startPoolSession(
 ): Promise<Result<unknown>> {
   const t0 = Date.now();
 
+  // Resolve tab — auto-create one (matching UI behaviour) if none provided
+  let resolvedTabId: string | null = args.tab_id ?? null;
+  if (!resolvedTabId) {
+    const staff = await resolveStaffContext(ctx.userId);
+    if (!staff) {
+      return err({ code: 'AGENT_ERROR' as const, message: 'No active shift found. Clock in first.' });
+    }
+    const cajaId = await resolveOpenCajaId();
+    if (!cajaId) {
+      return err({ code: 'CAJA_CLOSED' as const, message: 'No open caja session. Open caja first.' });
+    }
+
+    // Fetch table label for tab name
+    const { data: tableRow } = await supabase
+      .from('pool_tables')
+      .select('label')
+      .eq('id', args.table_id)
+      .single();
+    const label = (tableRow as { label?: string } | null)?.label?.trim() ?? args.table_id;
+
+    const { data: newTab, error: tabErr } = await supabase
+      .from('tabs')
+      .insert({
+        customer_name:   `Pool ${label}`,
+        table_number:    null,
+        staff_id:        staff.staffId,
+        shift_id:        staff.shiftId,
+        status:          'open',
+        notes:           null,
+        caja_session_id: cajaId,
+      })
+      .select('id')
+      .single();
+
+    if (tabErr || !newTab) {
+      void logAgentAction('start_pool_session', args as Record<string, unknown>, null, { ...ctx, durationMs: Date.now() - t0 });
+      return err({ code: 'AGENT_ERROR' as const, message: tabErr?.message ?? 'Failed to create tab' });
+    }
+    resolvedTabId = newTab.id;
+  }
+
   const { data: session, error: insertErr } = await supabase
     .from('pool_sessions')
-    .insert({ table_id: args.table_id, tab_id: args.tab_id ?? null })
+    .insert({ table_id: args.table_id, tab_id: resolvedTabId })
     .select()
     .single();
 
@@ -427,8 +468,9 @@ export async function startPoolSession(
     return err({ code: 'AGENT_ERROR' as const, message: tableErr.message });
   }
 
-  void logAgentAction('start_pool_session', args as Record<string, unknown>, session, { ...ctx, durationMs: Date.now() - t0 });
-  return ok(session);
+  const result = { ...session, tab_id: resolvedTabId };
+  void logAgentAction('start_pool_session', args as Record<string, unknown>, result, { ...ctx, durationMs: Date.now() - t0 });
+  return ok(result);
 }
 
 export async function stopPoolSession(
