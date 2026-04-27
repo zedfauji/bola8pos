@@ -2,6 +2,11 @@ import { getMenu, addProduct, updateProduct, deactivateProduct, bulkImportProduc
 import { generateSalesReport, getDailySummary, getTopProducts, reportToolDefinitions } from './reportTools';
 import { checkDbConnection, getRecentErrors, getAgentAuditLog, runDiagnostic, generateDiagnosticReport, diagnosticToolDefinitions } from './diagnosticTools';
 import { getPosStatus, getCurrentShift, systemToolDefinitions } from './systemTools';
+import {
+  listTabs, getTab, openTab, closeTab, addItemsToTab, transferTab,
+  listPoolTables, startPoolSession, stopPoolSession, assignSessionToTab, stopAndMoveTable,
+  posToolDefinitions,
+} from './posTools';
 import type { AgentActionContext } from '@shared/lib/telemetry';
 import type { Result } from '@shared/lib/result';
 import { err } from '@shared/lib/result';
@@ -11,10 +16,17 @@ export const allToolDefinitions = [
   ...reportToolDefinitions,
   ...diagnosticToolDefinitions,
   ...systemToolDefinitions,
+  ...posToolDefinitions,
 ];
 
 // Tools that require user confirmation before execution
-export const DESTRUCTIVE_TOOLS = new Set(['deactivate_product', 'bulk_import_products', 'delete_tab']);
+export const DESTRUCTIVE_TOOLS = new Set([
+  'deactivate_product',
+  'bulk_import_products',
+  'close_tab',
+  'stop_pool_session',
+  'stop_and_move_table',
+]);
 
 export async function executeTool(
   name: string,
@@ -22,21 +34,38 @@ export async function executeTool(
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
   switch (name) {
+    // ── Menu ──
     case 'get_menu':              return getMenu(args as { category_id?: string }, ctx);
-    case 'add_product':           return addProduct(args as { name: string; price: number; category_id?: string; description?: string }, ctx);
-    case 'update_product':        return updateProduct(args as { id: string; name?: string; price?: number; description?: string }, ctx);
+    case 'add_product':           return addProduct(args as { name: string; price: number; category_id?: string }, ctx);
+    case 'update_product':        return updateProduct(args as { id: string; name?: string; price?: number }, ctx);
     case 'deactivate_product':    return deactivateProduct(args as { id: string }, ctx);
     case 'bulk_import_products':  return bulkImportProducts(args as { products: Array<{ name: string; price: number; category_id?: string }> }, ctx);
+    // ── Reports ──
     case 'generate_sales_report': return generateSalesReport(args as { from: string; to: string }, ctx);
     case 'get_daily_summary':     return getDailySummary({} as Record<string, never>, ctx);
     case 'get_top_products':      return getTopProducts(args as { limit?: number; days?: number }, ctx);
-    case 'check_db_connection':   return checkDbConnection({} as Record<string, never>, ctx);
-    case 'get_recent_errors':     return getRecentErrors(args as { days?: number; limit?: number }, ctx);
-    case 'get_agent_audit_log':   return getAgentAuditLog(args as { days?: number; limit?: number }, ctx);
-    case 'run_diagnostic':               return runDiagnostic({} as Record<string, never>, ctx);
-    case 'generate_diagnostic_report':   return generateDiagnosticReport({} as Record<string, never>, ctx);
-    case 'get_pos_status':        return getPosStatus({} as Record<string, never>, ctx);
-    case 'get_current_shift':     return getCurrentShift({} as Record<string, never>, ctx);
+    // ── Diagnostics ──
+    case 'check_db_connection':        return checkDbConnection({} as Record<string, never>, ctx);
+    case 'get_recent_errors':          return getRecentErrors(args as { days?: number; limit?: number }, ctx);
+    case 'get_agent_audit_log':        return getAgentAuditLog(args as { days?: number; limit?: number }, ctx);
+    case 'run_diagnostic':             return runDiagnostic({} as Record<string, never>, ctx);
+    case 'generate_diagnostic_report': return generateDiagnosticReport({} as Record<string, never>, ctx);
+    // ── System ──
+    case 'get_pos_status':    return getPosStatus({} as Record<string, never>, ctx);
+    case 'get_current_shift': return getCurrentShift({} as Record<string, never>, ctx);
+    // ── Tabs ──
+    case 'list_tabs':       return listTabs({} as Record<string, never>, ctx);
+    case 'get_tab':         return getTab(args as { tab_id: string }, ctx);
+    case 'open_tab':        return openTab(args as { customer_name: string; table_number?: number; notes?: string }, ctx);
+    case 'close_tab':       return closeTab(args as { tab_id: string }, ctx);
+    case 'add_items_to_tab': return addItemsToTab(args as { tab_id: string; items: Array<{ product_id: string; quantity: number; unit_price: number; notes?: string }>; notes?: string }, ctx);
+    case 'transfer_tab':    return transferTab(args as { tab_id: string; new_staff_id?: string; new_table_number?: number }, ctx);
+    // ── Pool tables ──
+    case 'list_pool_tables':      return listPoolTables({} as Record<string, never>, ctx);
+    case 'start_pool_session':    return startPoolSession(args as { table_id: string; tab_id?: string }, ctx);
+    case 'stop_pool_session':     return stopPoolSession(args as { session_id: string; table_id: string; rate_per_hour: number }, ctx);
+    case 'assign_session_to_tab': return assignSessionToTab(args as { session_id: string; tab_id: string }, ctx);
+    case 'stop_and_move_table':   return stopAndMoveTable(args as { session_id: string; table_id: string; tab_id: string; rate_per_hour: number; new_table_number: number }, ctx);
     default:
       return err({ code: 'TOOL_EXECUTION_ERROR' as const, message: `Unknown tool: ${name}` });
   }

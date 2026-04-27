@@ -31,6 +31,7 @@ function readFileAsText(file: File): Promise<string> {
 export function useAgent() {
   const state = useAgentStore();
   const userRole = useStaffStore((s) => s.currentStaff?.role ?? 'bartender');
+  const userId = useStaffStore((s) => s.currentStaff?.id);
 
   const sendMessage = async (text: string): Promise<void> => {
     const conversationHistory: Message[] = useAgentStore.getState().messages;
@@ -40,7 +41,7 @@ export function useAgent() {
     state.setTyping(true);
 
     try {
-      const result = await runAgent(text, userRole, conversationHistory);
+      const result = await runAgent(text, userRole, conversationHistory, userId);
 
       state.setAwaitingConfirmation(result.awaitingConfirmation);
 

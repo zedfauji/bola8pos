@@ -109,7 +109,8 @@ async function runOllamaFallback(
 export async function runAgent(
   userMessage: string,
   userRole: string,
-  conversationHistory: Message[]
+  conversationHistory: Message[],
+  userId?: string
 ): Promise<AgentResult> {
   const lang = detectLanguage(userMessage);
   const toolsExecuted: string[] = [];
@@ -167,7 +168,7 @@ export async function runAgent(
             return { text: prompt, toolsExecuted, usedFallback: false, awaitingConfirmation: true };
           }
 
-          const ctx = { userId: undefined, userRole, durationMs: undefined };
+          const ctx = { userId, userRole, durationMs: undefined };
           const result = await executeTool(
             block.name,
             block.input as Record<string, unknown>,
