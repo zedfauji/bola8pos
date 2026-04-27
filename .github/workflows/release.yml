@@ -9,7 +9,7 @@ jobs:
   publish-tauri:
     permissions:
       contents: write
-    runs-on: windows-latest
+    runs-on: [self-hosted, windows]
     defaults:
       run:
         working-directory: bar-pos
@@ -25,12 +25,11 @@ jobs:
           cache-dependency-path: bar-pos/package-lock.json
 
       - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: 'bar-pos/src-tauri -> target'
+        shell: pwsh
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup show
 
       - name: install frontend dependencies
         run: npm ci
@@ -47,4 +46,4 @@ jobs:
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
-          projectPath: .
+          projectPath: bar-pos
