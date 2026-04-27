@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { supabase } from '@shared/lib/supabase';
 import { logger } from '@shared/lib/logger';
+import { supabase } from '@shared/lib/supabase';
 
 
 interface CodeChunk {

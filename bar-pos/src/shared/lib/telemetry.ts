@@ -1,6 +1,6 @@
-import { supabase } from '@shared/lib/supabase';
 import { logger } from '@shared/lib/logger';
 import type { AppError } from '@shared/lib/result';
+import { supabase } from '@shared/lib/supabase';
 import type { Json } from '@shared/lib/supabase.types';
 
 

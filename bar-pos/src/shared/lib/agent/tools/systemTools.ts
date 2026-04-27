@@ -1,7 +1,7 @@
-import { supabase } from '@shared/lib/supabase';
-import { logAgentAction } from '@shared/lib/telemetry';
 import { ok, err } from '@shared/lib/result';
 import type { Result } from '@shared/lib/result';
+import { supabase } from '@shared/lib/supabase';
+import { logAgentAction } from '@shared/lib/telemetry';
 import type { AgentActionContext } from '@shared/lib/telemetry';
 
 export const systemToolDefinitions = [

@@ -1,19 +1,19 @@
-import { getMenu, addProduct, updateProduct, deactivateProduct, bulkImportProducts, menuToolDefinitions } from './menuTools';
-import { generateSalesReport, getDailySummary, getTopProducts, reportToolDefinitions } from './reportTools';
+import type { Result } from '@shared/lib/result';
+import { err } from '@shared/lib/result';
+import type { AgentActionContext } from '@shared/lib/telemetry';
 import { checkDbConnection, getRecentErrors, getAgentAuditLog, runDiagnostic, generateDiagnosticReport, diagnosticToolDefinitions } from './diagnosticTools';
-import { getPosStatus, getCurrentShift, systemToolDefinitions } from './systemTools';
+import {
+  findProduct, findTab, findPoolTable, confirmAction, cancelAction,
+  guardToolDefinitions, checkWriteRateGuard,
+} from './guardTools';
+import { getMenu, addProduct, updateProduct, deactivateProduct, bulkImportProducts, menuToolDefinitions } from './menuTools';
 import {
   listTabs, getTab, openTab, closeTab, addItemsToTab, transferTab,
   listPoolTables, startPoolSession, stopPoolSession, assignSessionToTab, stopAndMoveTable,
   posToolDefinitions,
 } from './posTools';
-import {
-  findProduct, findTab, findPoolTable, confirmAction, cancelAction,
-  guardToolDefinitions, checkWriteRateGuard,
-} from './guardTools';
-import type { AgentActionContext } from '@shared/lib/telemetry';
-import type { Result } from '@shared/lib/result';
-import { err } from '@shared/lib/result';
+import { generateSalesReport, getDailySummary, getTopProducts, reportToolDefinitions } from './reportTools';
+import { getPosStatus, getCurrentShift, systemToolDefinitions } from './systemTools';
 
 export const allToolDefinitions = [
   ...guardToolDefinitions,   // lookup tools first — Claude should reach for these

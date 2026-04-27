@@ -1,5 +1,5 @@
-import type { AgentActionContext } from '@shared/lib/telemetry';
 import type { Result } from '@shared/lib/result';
+import type { AgentActionContext } from '@shared/lib/telemetry';
 
 export type ExecutorFn = (
   args: Record<string, unknown>,

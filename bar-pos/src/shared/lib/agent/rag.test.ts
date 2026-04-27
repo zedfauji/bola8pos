@@ -24,8 +24,8 @@ vi.mock('@shared/lib/logger', () => ({
   logger: { warn: vi.fn() },
 }));
 
-import { retrieveContext } from './rag';
 import { logger } from '@shared/lib/logger';
+import { retrieveContext } from './rag';
 
 const logWarnMock = vi.mocked(logger.warn);
 

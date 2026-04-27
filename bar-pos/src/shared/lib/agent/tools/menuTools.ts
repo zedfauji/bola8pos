@@ -1,14 +1,10 @@
-import { supabase } from '@shared/lib/supabase';
-import { logAgentAction } from '@shared/lib/telemetry';
 import { ok, err } from '@shared/lib/result';
 import type { Result } from '@shared/lib/result';
+import { supabase } from '@shared/lib/supabase';
+import type { TablesInsert, TablesUpdate } from '@shared/lib/supabase.types';
+import { logAgentAction } from '@shared/lib/telemetry';
 import type { AgentActionContext } from '@shared/lib/telemetry';
 import { createPendingAction } from '../pendingActions';
-
-// Agent mutations use runtime-provided fields — cast to bypass strict Supabase generated types
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const db = supabase as any;
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // ─── Tool Definitions (Claude API format) ────────────────────────────────────
 
@@ -107,7 +103,7 @@ export async function addProduct(
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
   const t0 = Date.now();
-  const { data, error } = await db.from('products').insert({ name: args.name, base_price: args.price, category_id: args.category_id ?? null }).select().single();
+  const { data, error } = await supabase.from('products').insert({ name: args.name, base_price: args.price, category_id: args.category_id ?? null } as TablesInsert<'products'>).select().single();
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
   void logAgentAction('add_product', args as Record<string, unknown>, data, { ...ctx, durationMs: Date.now() - t0 });
   return result;
@@ -121,7 +117,7 @@ export async function updateProduct(
   const patch: Record<string, unknown> = {};
   if (args.name !== undefined) patch['name'] = args.name;
   if (args.price !== undefined) patch['base_price'] = args.price;
-  const { data, error } = await db.from('products').update(patch).eq('id', args.id).select().single();
+  const { data, error } = await supabase.from('products').update(patch as TablesUpdate<'products'>).eq('id', args.id).select().single();
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
   void logAgentAction('update_product', args as Record<string, unknown>, data, { ...ctx, durationMs: Date.now() - t0 });
   return result;
@@ -133,7 +129,7 @@ export async function _executeDeactivateProduct(
 ): Promise<Result<unknown>> {
   const { id } = args as { id: string };
   const t0 = Date.now();
-  const { data, error } = await db.from('products').update({ deleted_at: new Date().toISOString() }).eq('id', id).select().single();
+  const { data, error } = await supabase.from('products').update({ deleted_at: new Date().toISOString() } as TablesUpdate<'products'>).eq('id', id).select().single();
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
   void logAgentAction('deactivate_product', args, data, { ...ctx, durationMs: Date.now() - t0 });
   return result;
@@ -157,7 +153,7 @@ export async function _executeBulkImportProducts(
   const { products } = args as { products: Array<{ name: string; price: number; category_id?: string }> };
   const t0 = Date.now();
   const rows = products.map((p) => ({ name: p.name, base_price: p.price, category_id: p.category_id ?? null }));
-  const { data, error } = await db.from('products').insert(rows).select();
+  const { data, error } = await supabase.from('products').insert(rows as TablesInsert<'products'>[]).select();
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
   void logAgentAction('bulk_import_products', args, { count: rows.length }, { ...ctx, durationMs: Date.now() - t0 });
   return result;

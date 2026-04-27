@@ -1,14 +1,11 @@
-import { supabase } from '@shared/lib/supabase';
 import { computePoolSessionBilling } from '@shared/lib/pool-billing';
-import { logAgentAction } from '@shared/lib/telemetry';
 import { ok, err } from '@shared/lib/result';
 import type { Result } from '@shared/lib/result';
+import { supabase } from '@shared/lib/supabase';
+import { logAgentAction } from '@shared/lib/telemetry';
 import type { AgentActionContext } from '@shared/lib/telemetry';
 import { createPendingAction } from '../pendingActions';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const db = supabase as any;
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // ─── Tool Definitions ─────────────────────────────────────────────────────────
 
@@ -189,18 +186,18 @@ async function resolveOpenCajaId(): Promise<string | null> {
   return data?.id ?? null;
 }
 
-// Returns error message string if row not found, null if OK
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// db is already cast to any above
+// Returns error message string if row not found, null if OK.
+// Dynamic table name requires a local any cast — caller validates table names.
 async function assertExists(
   table: string,
   id: string
 ): Promise<string | null> {
-  const { count } = await db
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count } = await (supabase as any) // dynamic table name cannot be statically typed
     .from(table)
     .select('id', { count: 'exact', head: true })
     .eq('id', id);
-  return (count ?? 0) > 0 ? null : `No ${table} row with id ${id}`;
+  return ((count as number | null) ?? 0) > 0 ? null : `No ${table} row with id ${id}`;
 }
 
 // ─── Tab implementations ──────────────────────────────────────────────────────
@@ -387,7 +384,7 @@ export async function addItemsToTab(
   // Build price map — DB price always wins over any Claude-supplied value
   const priceMap = Object.fromEntries((products ?? []).map((p) => [p.id, p.base_price]));
 
-  const { data, error } = await db.rpc('create_order_with_items', {
+  const { data, error } = await supabase.rpc('create_order_with_items', {
     p_tab_id:         args.tab_id,
     p_staff_id:       staff.staffId,
     p_status:         'pending',
@@ -428,11 +425,11 @@ export async function transferTab(
 
   const staff = await resolveStaffContext(ctx.userId);
 
-  const { data, error } = await db.rpc('transfer_tab', {
+  const { data, error } = await supabase.rpc('transfer_tab', {
     p_tab_id:         args.tab_id,
-    p_to_staff_id:    args.new_staff_id ?? null,
-    p_to_table:       args.new_table_number ?? null,
-    p_transferred_by: staff?.staffId ?? null,
+    p_transferred_by: staff?.staffId ?? '',
+    ...(args.new_staff_id !== undefined ? { p_to_staff_id: args.new_staff_id } : {}),
+    ...(args.new_table_number !== undefined ? { p_to_table: args.new_table_number } : {}),
   });
 
   if (error) {

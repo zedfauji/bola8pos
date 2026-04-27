@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { logger } from '@shared/lib/logger';
 import { retrieveContext } from './rag';
 import { allToolDefinitions, executeTool } from './tools/index';
-import { logger } from '@shared/lib/logger';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -135,7 +135,7 @@ export async function runAgent(
 
   const messages: Anthropic.MessageParam[] = [
     ...conversationHistory.map((m) => ({
-      role: m.role as 'user' | 'assistant',
+      role: m.role,
       content: m.content,
     })),
     { role: 'user', content: userMessage },
