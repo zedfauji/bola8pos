@@ -16,6 +16,8 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [x] **Phase 7: Waitlist + WhatsApp** — FIFO queue + WasenderAPI notifications (completed 2026-04-25)
 - [ ] **Phase 8: Polish + Reports + E2E Hardening** — Operator analytics + flake cleanup
 - [ ] **Phase 9: Auto-Update Service** — GitHub Releases updater with user confirm dialog (v2.1)
+- [ ] **Phase 10: AI Slob Technical Debt Audit** — Audit lint/test/typecheck/E2E findings
+- [x] **Phase 11: AI Slob Technical Debt Remediation** — Typed agent queries, lint+test green, CI pipeline, CVE docs (completed 2026-04-27)
 
 ---
 
