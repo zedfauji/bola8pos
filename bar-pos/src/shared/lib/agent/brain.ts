@@ -107,7 +107,7 @@ async function runOllamaFallback(
     signal: AbortSignal.timeout(20_000),
   });
 
-  if (!resp.ok) throw new Error(`Ollama HTTP ${resp.status}`);
+  if (!resp.ok) throw new Error(`Ollama HTTP ${String(resp.status)}`);
 
   const json = (await resp.json()) as { message?: { content?: string } };
   return json.message?.content ?? '(no response from fallback model)';

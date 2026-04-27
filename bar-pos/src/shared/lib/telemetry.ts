@@ -37,7 +37,7 @@ export async function logError(
         isAppError && error.raw != null
           ? typeof error.raw === 'object'
             ? (error.raw as Json)
-            : ({ value: String(error.raw) } as Json)
+            : ({ value: JSON.stringify(error.raw) } as Json)
           : null,
     };
 
@@ -68,7 +68,7 @@ export async function logAgentAction(
         result != null
           ? typeof result === 'object'
             ? (result as Json)
-            : ({ value: String(result) } as Json)
+            : ({ value: JSON.stringify(result) } as Json)
           : null,
       user_id: context.userId ?? null,
       user_role: context.userRole,

@@ -80,9 +80,9 @@ export async function getRecentErrors(
 
   if (error) {
     void logAgentAction('get_recent_errors', args as Record<string, unknown>, null, { ...ctx, durationMs: Date.now() - t0 });
-    return err({ code: 'AGENT_ERROR' as const, message: String(error.message) });
+    return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  void logAgentAction('get_recent_errors', args as Record<string, unknown>, { count: data?.length }, { ...ctx, durationMs: Date.now() - t0 });
+  void logAgentAction('get_recent_errors', args as Record<string, unknown>, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
   return ok(data);
 }
 
@@ -104,9 +104,9 @@ export async function getAgentAuditLog(
 
   if (error) {
     void logAgentAction('get_agent_audit_log', args as Record<string, unknown>, null, { ...ctx, durationMs: Date.now() - t0 });
-    return err({ code: 'AGENT_ERROR' as const, message: String(error.message) });
+    return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  void logAgentAction('get_agent_audit_log', args as Record<string, unknown>, { count: data?.length }, { ...ctx, durationMs: Date.now() - t0 });
+  void logAgentAction('get_agent_audit_log', args as Record<string, unknown>, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
   return ok(data);
 }
 
@@ -199,13 +199,13 @@ export async function generateDiagnosticReport(
 
   const errorBreakdown = Object.entries(errorCodeCounts)
     .sort((a, b) => b[1] - a[1])
-    .map(([code, n]) => `  - \`${code}\`: ${n}`)
+    .map(([code, n]) => `  - \`${code}\`: ${String(n)}`)
     .join('\n');
 
   const toolSummary = Object.entries(toolUsageCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-    .map(([name, n]) => `  - ${name}: ${n} llamadas`)
+    .map(([name, n]) => `  - ${name}: ${String(n)} llamadas`)
     .join('\n');
 
   const recommendations: string[] = [];
@@ -219,7 +219,7 @@ export async function generateDiagnosticReport(
   const sections: string[] = [
     `## Reporte de Diagnóstico POS — ${date}`,
     `### Estado del sistema: ${statusLabel}`,
-    `### Errores recientes (últimos 7 días): ${errors.length}`,
+    `### Errores recientes (últimos 7 días): ${String(errors.length)}`,
     `### Componentes afectados: ${affectedComponents.length > 0 ? affectedComponents.join(', ') : 'ninguno'}`,
   ];
 
@@ -229,7 +229,7 @@ export async function generateDiagnosticReport(
 
   sections.push(
     '',
-    `### Acciones recomendadas\n${recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}`
+    `### Acciones recomendadas\n${recommendations.map((r, i) => `${String(i + 1)}. ${r}`).join('\n')}`
   );
 
   const report = sections.join('\n');

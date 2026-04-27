@@ -192,11 +192,13 @@ async function assertExists(
   table: string,
   id: string
 ): Promise<string | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count } = await (supabase as any) // dynamic table name cannot be statically typed
+  // Dynamic table name cannot be statically typed — justified cast (caller validates table names)
+  /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+  const { count } = await (supabase as any)
     .from(table)
     .select('id', { count: 'exact', head: true })
     .eq('id', id);
+  /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   return ((count as number | null) ?? 0) > 0 ? null : `No ${table} row with id ${id}`;
 }
 
@@ -218,7 +220,7 @@ export async function listTabs(
     void logAgentAction('list_tabs', {}, null, { ...ctx, durationMs: Date.now() - t0 });
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  void logAgentAction('list_tabs', {}, { count: data?.length }, { ...ctx, durationMs: Date.now() - t0 });
+  void logAgentAction('list_tabs', {}, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
   return ok(data);
 }
 
@@ -372,7 +374,7 @@ export async function addItemsToTab(
 
   if (prodErr) return err({ code: 'AGENT_ERROR' as const, message: prodErr.message });
 
-  const foundIds = new Set((products ?? []).map((p) => p.id));
+  const foundIds = new Set(products.map((p) => p.id));
   const missing = productIds.filter((id) => !foundIds.has(id));
   if (missing.length > 0) {
     return err({ code: 'NOT_FOUND' as const, message: `Products not found: ${missing.join(', ')}. Use find_product to get real IDs.` });
@@ -382,7 +384,7 @@ export async function addItemsToTab(
   if (!staff) return err({ code: 'AGENT_ERROR' as const, message: 'No active shift. Clock in first.' });
 
   // Build price map — DB price always wins over any Claude-supplied value
-  const priceMap = Object.fromEntries((products ?? []).map((p) => [p.id, p.base_price]));
+  const priceMap = Object.fromEntries(products.map((p) => [p.id, p.base_price]));
 
   const { data, error } = await supabase.rpc('create_order_with_items', {
     p_tab_id:         args.tab_id,
@@ -459,7 +461,7 @@ export async function listPoolTables(
     void logAgentAction('list_pool_tables', {}, null, { ...ctx, durationMs: Date.now() - t0 });
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  void logAgentAction('list_pool_tables', {}, { count: data?.length }, { ...ctx, durationMs: Date.now() - t0 });
+  void logAgentAction('list_pool_tables', {}, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
   return ok(data);
 }
 
@@ -507,9 +509,9 @@ export async function startPoolSession(
       .select('id')
       .single();
 
-    if (tabErr || !newTab) {
+    if (tabErr) {
       void logAgentAction('start_pool_session', args as Record<string, unknown>, null, { ...ctx, durationMs: Date.now() - t0 });
-      return err({ code: 'AGENT_ERROR' as const, message: tabErr?.message ?? 'Failed to create tab' });
+      return err({ code: 'AGENT_ERROR' as const, message: tabErr.message });
     }
     resolvedTabId = newTab.id;
   }
@@ -554,8 +556,8 @@ export async function _executeStopPoolSession(
     .eq('id', session_id)
     .single();
 
-  if (fetchErr || !session) {
-    return err({ code: 'NOT_FOUND' as const, message: `Session not found: ${fetchErr?.message ?? 'null'}` });
+  if (fetchErr) {
+    return err({ code: 'NOT_FOUND' as const, message: `Session not found: ${fetchErr.message}` });
   }
 
   const { data: billingSettings } = await supabase

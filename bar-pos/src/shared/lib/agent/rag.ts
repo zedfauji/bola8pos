@@ -67,7 +67,7 @@ export async function retrieveContext(query: string, topK = 5): Promise<string> 
       return '';
     }
 
-    const chunks: CodeChunk[] = (data as CodeChunk[]) ?? [];
+    const chunks: CodeChunk[] = data as CodeChunk[];
     if (chunks.length === 0) return '';
 
     return formatChunks(chunks);
@@ -83,7 +83,7 @@ function formatChunks(chunks: CodeChunk[]): string {
     const symbol = typeof meta['symbol'] === 'string' ? ` — ${meta['symbol']}` : '';
     const score = c.similarity.toFixed(3);
     return (
-      `### [${i + 1}] ${c.file_path}${symbol} (similarity: ${score})\n` +
+      `### [${String(i + 1)}] ${c.file_path}${symbol} (similarity: ${score})\n` +
       `\`\`\`typescript\n${c.chunk_text}\n\`\`\``
     );
   });

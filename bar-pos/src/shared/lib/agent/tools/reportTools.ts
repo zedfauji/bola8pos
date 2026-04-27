@@ -52,8 +52,8 @@ export async function generateSalesReport(
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
 
-  const total = (data ?? []).reduce((sum, p) => sum + (p.amount ?? 0), 0);
-  const result = { from: args.from, to: args.to, total_revenue: total, order_count: data?.length ?? 0 };
+  const total = data.reduce((sum, p) => sum + p.amount, 0);
+  const result = { from: args.from, to: args.to, total_revenue: total, order_count: data.length };
   void logAgentAction('generate_sales_report', args as Record<string, unknown>, result, { ...ctx, durationMs: Date.now() - t0 });
   return ok(result);
 }
@@ -63,7 +63,7 @@ export async function getDailySummary(
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
   const t0 = Date.now();
-  const today = new Date().toISOString().split('T')[0]!;
+  const today = new Date().toISOString().split('T')[0] ?? new Date().toISOString().slice(0, 10);
 
   const { data, error } = await supabase
     .from('payments')
@@ -76,8 +76,8 @@ export async function getDailySummary(
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
 
-  const total = (data ?? []).reduce((sum, p) => sum + (p.amount ?? 0), 0);
-  const result = { date: today, total_revenue: total, order_count: data?.length ?? 0 };
+  const total = data.reduce((sum, p) => sum + p.amount, 0);
+  const result = { date: today, total_revenue: total, order_count: data.length };
   void logAgentAction('get_daily_summary', {}, result, { ...ctx, durationMs: Date.now() - t0 });
   return ok(result);
 }
@@ -102,14 +102,14 @@ export async function getTopProducts(
   }
 
   const totals: Record<string, { name: string; qty: number }> = {};
-  for (const item of data ?? []) {
-    const pid = item.product_id ?? 'unknown';
+  for (const item of data) {
+    const pid = item.product_id;
     const name = (item.products as { name?: string } | null)?.name ?? pid;
     const existing = totals[pid];
     if (existing) {
-      existing.qty += item.quantity ?? 1;
+      existing.qty += item.quantity;
     } else {
-      totals[pid] = { name, qty: item.quantity ?? 1 };
+      totals[pid] = { name, qty: item.quantity };
     }
   }
 

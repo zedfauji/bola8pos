@@ -59,6 +59,6 @@ export async function getCurrentShift(
     void logAgentAction('get_current_shift', {}, null, { ...ctx, durationMs: Date.now() - t0 });
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  void logAgentAction('get_current_shift', {}, { count: data?.length }, { ...ctx, durationMs: Date.now() - t0 });
+  void logAgentAction('get_current_shift', {}, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
   return ok(data);
 }

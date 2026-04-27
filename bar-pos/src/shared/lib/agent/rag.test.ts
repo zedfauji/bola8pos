@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // vi.mock is hoisted above all imports — use vi.hoisted() for shared mock refs
-const { mockRpc, mockEmbeddingCreate } = vi.hoisted(() => ({
+const { mockRpc, mockEmbeddingCreate, mockLogWarn } = vi.hoisted(() => ({
   mockRpc: vi.fn(),
   mockEmbeddingCreate: vi.fn().mockResolvedValue({
     data: [{ embedding: Array.from({ length: 1536 }, () => 0.1) }],
   }),
+  mockLogWarn: vi.fn(),
 }));
 
 vi.mock('openai', () => {
@@ -21,13 +22,12 @@ vi.mock('@shared/lib/supabase', () => ({
 }));
 
 vi.mock('@shared/lib/logger', () => ({
-  logger: { warn: vi.fn() },
+  logger: { warn: mockLogWarn },
 }));
 
-import { logger } from '@shared/lib/logger';
 import { retrieveContext } from './rag';
 
-const logWarnMock = vi.mocked(logger.warn);
+const logWarnMock = mockLogWarn;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

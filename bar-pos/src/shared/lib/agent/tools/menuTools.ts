@@ -159,10 +159,10 @@ export async function _executeBulkImportProducts(
   return result;
 }
 
-export async function bulkImportProducts(
+export function bulkImportProducts(
   args: { products: Array<{ name: string; price: number; category_id?: string }> },
   _ctx: AgentActionContext
-): Promise<Result<unknown>> {
+): Result<unknown> {
   const preview = { action: 'bulk_import_products', count: args.products.length, products: args.products.slice(0, 5) };
   const token = createPendingAction('bulk_import_products', args as Record<string, unknown>, preview, _executeBulkImportProducts);
   return ok({ pending: true, confirm_token: token, preview });

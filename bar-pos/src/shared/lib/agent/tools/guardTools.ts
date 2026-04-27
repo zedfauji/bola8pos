@@ -22,7 +22,7 @@ export function checkWriteRateGuard(): Result<never> | null {
   if (writeLog.length >= WRITE_LIMIT) {
     return err({
       code: 'VALIDATION_ERROR' as const,
-      message: `Too many write operations (${writeLog.length} in last 60s, limit ${WRITE_LIMIT}). Wait before retrying.`,
+      message: `Too many write operations (${String(writeLog.length)} in last 60s, limit ${String(WRITE_LIMIT)}). Wait before retrying.`,
     });
   }
   writeLog.push(now);
@@ -110,7 +110,7 @@ export async function findProduct(
     void logAgentAction('find_product', args as Record<string, unknown>, null, { ...ctx, durationMs: Date.now() - t0 });
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  if (!data || data.length === 0) {
+  if (data.length === 0) {
     return err({ code: 'NOT_FOUND' as const, message: `No active products matching "${args.name}". Try a different name or call get_menu.` });
   }
   void logAgentAction('find_product', args as Record<string, unknown>, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
@@ -142,7 +142,7 @@ export async function findTab(
     void logAgentAction('find_tab', args as Record<string, unknown>, null, { ...ctx, durationMs: Date.now() - t0 });
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  if (!data || data.length === 0) {
+  if (data.length === 0) {
     return err({ code: 'NOT_FOUND' as const, message: `No open tab found matching the given criteria.` });
   }
   void logAgentAction('find_tab', args as Record<string, unknown>, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
@@ -167,7 +167,7 @@ export async function findPoolTable(
     void logAgentAction('find_pool_table', args as Record<string, unknown>, null, { ...ctx, durationMs: Date.now() - t0 });
     return err({ code: 'AGENT_ERROR' as const, message: error.message });
   }
-  if (!data || data.length === 0) {
+  if (data.length === 0) {
     return err({ code: 'NOT_FOUND' as const, message: `No pool table found matching label "${args.label ?? '*'}"` });
   }
   void logAgentAction('find_pool_table', args as Record<string, unknown>, { count: data.length }, { ...ctx, durationMs: Date.now() - t0 });
@@ -193,10 +193,10 @@ export async function confirmAction(
   return pending.executor(pending.args, ctx);
 }
 
-export async function cancelAction(
+export function cancelAction(
   args: { token: string },
   _ctx: AgentActionContext
-): Promise<Result<unknown>> {
+): Result<unknown> {
   const cancelled = cancelPendingAction(args.token);
   if (!cancelled) {
     return err({ code: 'NOT_FOUND' as const, message: `No pending action for token "${args.token}".` });
