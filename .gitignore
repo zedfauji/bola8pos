@@ -1,0 +1,9 @@
+# Tauri signing keys — NEVER commit private keys
+*.key
+*.key.pub
+*.pem
+
+# Planning / AI agent scratch files
+.agents/
+.claude-flow/
+.swarm/

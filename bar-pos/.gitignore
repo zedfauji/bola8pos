@@ -1,0 +1,48 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Tauri signing keys — NEVER commit private keys
+*.key
+*.key.pub
+*.pem
+
+*storybook.log
+storybook-static
+
+# Test / CI outputs (keep clones lean)
+coverage/
+artifacts/
+e2e-results/
+e2e-blob-reports/
+playwright-report/
+verification-artifacts/
+
+# Local lint/type dumps (regenerate anytime)
+eslint-report.json
+lint-results*.json
+lint_report*.json
+lint-results-clean*.json
+lint_output*.txt
+tsc_errors.txt
