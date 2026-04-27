@@ -70,16 +70,21 @@ describe('useIngredients', () => {
   });
 
   it('returns mapped ingredients when query succeeds', async () => {
-    mockedFrom.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: [makeMockIngredientRow()], error: null }),
-    }));
+    mockedFrom.mockImplementation(
+      () =>
+        ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({ data: [makeMockIngredientRow()], error: null }),
+        }) as unknown as ReturnType<typeof supabase.from>
+    );
 
     const qc = createTestQueryClient();
     const { result } = renderHook(() => useIngredients(), { wrapper: makeWrapper(qc) });
 
-    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
 
     expect(result.current.data).toHaveLength(1);
     const parsed = IngredientSchema.safeParse(result.current.data?.[0]);
@@ -87,16 +92,21 @@ describe('useIngredients', () => {
   });
 
   it('enters error state when supabase returns an error', async () => {
-    mockedFrom.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
-    }));
+    mockedFrom.mockImplementation(
+      () =>
+        ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
+        }) as unknown as ReturnType<typeof supabase.from>
+    );
 
     const qc = createTestQueryClient();
     const { result } = renderHook(() => useIngredients(), { wrapper: makeWrapper(qc) });
 
-    await waitFor(() => { expect(result.current.isError).toBe(true); });
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
   });
 });
 
@@ -118,19 +128,23 @@ describe('useIngredient', () => {
   });
 
   it('returns a mapped Ingredient when id is provided and row exists', async () => {
-    mockedFrom.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: makeMockIngredientRow(), error: null }),
-    }));
-
-    const qc = createTestQueryClient();
-    const { result } = renderHook(
-      () => useIngredient('aaaaaaaa-0000-0000-0000-000000000001'),
-      { wrapper: makeWrapper(qc) },
+    mockedFrom.mockImplementation(
+      () =>
+        ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: makeMockIngredientRow(), error: null }),
+        }) as unknown as ReturnType<typeof supabase.from>
     );
 
-    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+    const qc = createTestQueryClient();
+    const { result } = renderHook(() => useIngredient('aaaaaaaa-0000-0000-0000-000000000001'), {
+      wrapper: makeWrapper(qc),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
 
     const parsed = IngredientSchema.safeParse(result.current.data);
     expect(parsed.success).toBe(true);

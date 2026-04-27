@@ -21,21 +21,21 @@ vi.mock('@features/export-report', () => ({
 const dateRange = { from: new Date('2026-01-01'), to: new Date('2026-01-31') };
 
 const ROW_A: RefundRegisterRow = {
-  id: 'aaa-111',
-  date: '2026-01-10T12:00:00Z',
+  id: 'aaa-111-aaa-111-aaa1',
+  date: new Date('2026-01-10T12:00:00Z'),
   operatorName: 'Ana García',
-  originalPaymentId: 'pay-aaa-111',
+  originalPaymentId: 'pay-aaa1-aaa1-aaa1-aaa111111111',
   amount: 150.0,
-  reason: 'wrong_item',
+  reason: 'wrong_order',
   restockCount: 1,
   items: [],
 };
 
 const ROW_B: RefundRegisterRow = {
-  id: 'bbb-222',
-  date: '2026-01-15T14:30:00Z',
+  id: 'bbb-222-bbb-222-bbb2',
+  date: new Date('2026-01-15T14:30:00Z'),
   operatorName: 'Luis López',
-  originalPaymentId: 'pay-bbb-222',
+  originalPaymentId: 'pay-bbb2-bbb2-bbb2-bbb222222222',
   amount: 75.5,
   reason: 'customer_complaint',
   restockCount: 0,

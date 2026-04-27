@@ -15,6 +15,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [ ] **Phase 6: Split Bill + Refund** — Four split modes + PIN-gated refunds
 - [x] **Phase 7: Waitlist + WhatsApp** — FIFO queue + WasenderAPI notifications (completed 2026-04-25)
 - [ ] **Phase 8: Polish + Reports + E2E Hardening** — Operator analytics + flake cleanup
+- [ ] **Phase 9: Auto-Update Service** — GitHub Releases updater with user confirm dialog (v2.1)
 
 ---
 
@@ -234,4 +235,31 @@ Plans:
 
 ---
 
+### Phase 9: Auto-Update Service
+
+**Milestone:** v2.1 — Auto-Update Service
+**Goal:** Ship Tauri-native in-app update detection and one-click install from GitHub Releases. User sees a dialog (version + changelog) at startup and every 4 hours; clicking Install downloads, applies, and restarts without destructive manual steps.
+**Requirements:** UPD-01..UPD-08 (see `.planning/PROJECT.md`)
+**Depends on:** Phase 8 complete; GitHub Actions release pipeline already working
+**Plans:** 5 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Signing setup: `tauri signer generate` key pair + add pubkey to `tauri.conf.json` + `TAURI_SIGNING_PRIVATE_KEY` secret to GitHub Actions + sign step in existing release workflow (UPD-06)
+- [ ] 09-02-PLAN.md — Plugin integration: `tauri-plugin-updater` in `Cargo.toml` + `src-tauri/lib.rs` plugin registration + updater endpoint config in `tauri.conf.json` pointing to GitHub Releases JSON (UPD-01, UPD-07)
+- [ ] 09-03-PLAN.md — Frontend hook: `useAppUpdater` wrapping `@tauri-apps/plugin-updater` — startup check + 4-hour `setInterval` + state shape `{ updateAvailable, version, body, isDownloading, progress, install, dismiss }` + `UpdaterProvider` context (UPD-01, UPD-02, UPD-05, UPD-07, UPD-08)
+- [ ] 09-04-PLAN.md — Update dialog UI: `UpdateAvailableDialog` (version badge + changelog markdown render + Install Now / Remind Later + download progress bar + restart prompt after install complete) + Storybook stories (UPD-03, UPD-04, UPD-05, UPD-08)
+- [ ] 09-05-PLAN.md — App wiring + tests: wire `UpdaterProvider` into `app/providers.tsx` + mount `UpdateAvailableDialog` in `AppShell` + unit tests for `useAppUpdater` (mock plugin) + E2E smoke test (UPD-01..UPD-08)
+
+**Success Criteria**:
+1. `tauri signer generate` key pair committed (pubkey in `tauri.conf.json`; private key in GitHub Actions secret only)
+2. `tauri-plugin-updater` loaded — app starts without panic on Windows
+3. `useAppUpdater` returns `updateAvailable: true` when a newer tag exists on GitHub Releases
+4. `UpdateAvailableDialog` renders version + parsed changelog; Install triggers download + restart
+5. 4-hour periodic check fires without blocking UI thread
+6. Graceful no-op when offline or on latest version (no error toast)
+7. Unit tests pass with mocked `@tauri-apps/plugin-updater`; E2E smoke passes
+
+---
+
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
+*Phase 9 added: 2026-04-26 — v2.1 Auto-Update Service milestone.*

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelpSheet } from '@widgets/HelpSheet';
+import { AgentButton, AgentPanel } from '@features/agent-chat';
 import { ProtectedRoute } from './ProtectedRoute';
 import { KdsRoute } from './kds-route';
 import { ReportsRoute } from './reports-route';
@@ -30,8 +31,10 @@ function LoadingFallback() {
 
 export function Router() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <HelpSheet />
+      <AgentButton />
+      <AgentPanel />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
