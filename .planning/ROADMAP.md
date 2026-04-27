@@ -276,12 +276,12 @@ Plans:
 ### Phase 11: AI Slob Technical Debt Remediation
 
 **Goal:** Drive lint to 0 errors, tests to 100% passing, establish CI green baseline.
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans executed
 
 Plans:
 - [x] 11-01-PLAN.md — supabase.types.ts extension with agent tables + as-any cast removal (prerequisite, executed inline with 11-02) ✓ 2026-04-27
 - [x] 11-02-PLAN.md — Lint green + test green baseline: eslint --fix + manual typed-lint fixes + brain.test.ts mock contract fix (1107 tests pass, 0 lint errors) ✓ 2026-04-27
-- [ ] 11-03-PLAN.md — CI pipeline green gate
+- [x] 11-03-PLAN.md — CI pipeline: .github/workflows/ci.yml created; typecheck/lint/test gate GREEN; audit blocks on xlsx CVE (documented for Plan 04 risk acceptance) ✓ 2026-04-27
 
 ---
 
