@@ -53,6 +53,9 @@ export { SearchInput } from './SearchInput';
 export type { SearchInputProps } from './SearchInput';
 export { ConfirmDialog } from './ConfirmDialog';
 export type { ConfirmDialogProps } from './ConfirmDialog';
+export { UpdateAvailableDialog } from './UpdateAvailableDialog';
+export type { UpdateAvailableDialogProps } from './UpdateAvailableDialog';
+export { Progress } from './progress';
 export { DataTable } from './DataTable';
 export type { DataTableProps } from './DataTable';
 
