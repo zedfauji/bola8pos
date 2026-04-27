@@ -9,9 +9,9 @@
  * - Dismiss / remind-later (UPD-05)
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { check } from '@tauri-apps/plugin-updater';
 import { relaunch as tauriRelaunch } from '@tauri-apps/plugin-process';
+import { check } from '@tauri-apps/plugin-updater';
+import { useEffect, useRef, useState } from 'react';
 import { logger } from '@shared/lib/logger-instance';
 
 const FOUR_HOURS_MS = 4 * 60 * 60 * 1000; // 14_400_000 ms
@@ -53,12 +53,15 @@ export function useAppUpdater(): UseAppUpdaterReturn {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- runCheck is async; setState fires after await resolution, not synchronously
     void runCheck();
     const interval = setInterval(() => {
       void runCheck();
     }, FOUR_HOURS_MS);
-    return () => clearInterval(interval);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   const startInstall = async (): Promise<void> => {
     const currentState = state;

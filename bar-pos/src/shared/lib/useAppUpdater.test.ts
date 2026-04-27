@@ -8,11 +8,10 @@
  * UPD-08: progress state updates during download
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 // Import the module references AFTER vi.mock — test-setup.ts has global mocks
 import { check } from '@tauri-apps/plugin-updater';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAppUpdater } from '@shared/lib/useAppUpdater';
 
 const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
@@ -48,7 +47,7 @@ describe('useAppUpdater', () => {
   });
 
   it('calls check() on mount (UPD-01)', async () => {
-    const { result: _result } = renderHook(() => useAppUpdater());
+    renderHook(() => useAppUpdater());
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
     });
@@ -56,7 +55,7 @@ describe('useAppUpdater', () => {
   });
 
   it('calls check() again after 4 hours (UPD-02)', async () => {
-    const { result: _result } = renderHook(() => useAppUpdater());
+    renderHook(() => useAppUpdater());
     // Flush initial mount check
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
