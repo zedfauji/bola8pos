@@ -5,9 +5,6 @@ import type { Result } from '@shared/lib/result';
 import type { AgentActionContext } from '@shared/lib/telemetry';
 import { retrieveContext } from '../rag';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const db = supabase as any; // pos_error_log + agent_audit_log not yet in generated types
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export const diagnosticToolDefinitions = [
   {
@@ -74,7 +71,7 @@ export async function getRecentErrors(
   const limit = args.limit ?? 20;
   const since = new Date(Date.now() - days * 86400000).toISOString();
 
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('pos_error_log')
     .select('id, created_at, error_code, message, component')
     .gte('created_at', since)
@@ -98,7 +95,7 @@ export async function getAgentAuditLog(
   const limit = args.limit ?? 20;
   const since = new Date(Date.now() - days * 86400000).toISOString();
 
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('agent_audit_log')
     .select('id, created_at, tool_name, user_role, duration_ms')
     .gte('created_at', since)
@@ -120,7 +117,7 @@ export async function runDiagnostic(
   const t0 = Date.now();
   const [dbCheck, errorCount, productCount] = await Promise.all([
     supabase.from('products').select('id').limit(1),
-    db.from('pos_error_log').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 86400000 * 7).toISOString()),
+    supabase.from('pos_error_log').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 86400000 * 7).toISOString()),
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true),
   ]);
 
@@ -156,12 +153,12 @@ export async function generateDiagnosticReport(
 
   const [dbCheck, errorRes, auditRes] = await Promise.all([
     supabase.from('products').select('id').limit(1),
-    db.from('pos_error_log')
+    supabase.from('pos_error_log')
       .select('error_code, message, component, created_at')
       .gte('created_at', since)
       .order('created_at', { ascending: false })
       .limit(50),
-    db.from('agent_audit_log')
+    supabase.from('agent_audit_log')
       .select('tool_name, duration_ms')
       .gte('created_at', since)
       .order('created_at', { ascending: false })

@@ -2,10 +2,6 @@ import OpenAI from 'openai';
 import { supabase } from '@shared/lib/supabase';
 import { logger } from '@shared/lib/logger';
 
-// pos_codebase_index not yet in generated types — uses dynamic schema
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const db = supabase as any;
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 interface CodeChunk {
   id: string;
@@ -60,7 +56,7 @@ export async function retrieveContext(query: string, topK = 5): Promise<string> 
   try {
     const embedding = await generateEmbedding(query);
 
-    const { data, error } = await db.rpc('match_codebase_chunks', {
+    const { data, error } = await supabase.rpc('match_codebase_chunks', {
       query_embedding: embedding,
       match_count: topK,
       similarity_threshold: 0.5,

@@ -46,6 +46,47 @@ export type Database = {
           },
         ];
       };
+      agent_audit_log: {
+        Row: {
+          id: string;
+          created_at: string;
+          tool_name: string;
+          args: Json | null;
+          result: Json | null;
+          user_id: string | null;
+          user_role: string | null;
+          duration_ms: number | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          tool_name: string;
+          args?: Json | null;
+          result?: Json | null;
+          user_id?: string | null;
+          user_role?: string | null;
+          duration_ms?: number | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          tool_name?: string;
+          args?: Json | null;
+          result?: Json | null;
+          user_id?: string | null;
+          user_role?: string | null;
+          duration_ms?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'agent_audit_log_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       caja_entries: {
         Row: {
           amount: number;
@@ -1003,6 +1044,77 @@ export type Database = {
             columns: ['current_session_id'];
             isOneToOne: false;
             referencedRelation: 'pool_sessions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      pos_codebase_index: {
+        Row: {
+          id: string;
+          file_path: string;
+          chunk_text: string;
+          embedding: string | null;
+          metadata: Json | null;
+          indexed_at: string;
+        };
+        Insert: {
+          id?: string;
+          file_path: string;
+          chunk_text: string;
+          embedding?: string | null;
+          metadata?: Json | null;
+          indexed_at?: string;
+        };
+        Update: {
+          id?: string;
+          file_path?: string;
+          chunk_text?: string;
+          embedding?: string | null;
+          metadata?: Json | null;
+          indexed_at?: string;
+        };
+        Relationships: [];
+      };
+      pos_error_log: {
+        Row: {
+          id: string;
+          created_at: string;
+          error_code: string;
+          message: string;
+          detail: string | null;
+          component: string | null;
+          user_id: string | null;
+          session_id: string | null;
+          raw: Json | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          error_code: string;
+          message: string;
+          detail?: string | null;
+          component?: string | null;
+          user_id?: string | null;
+          session_id?: string | null;
+          raw?: Json | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          error_code?: string;
+          message?: string;
+          detail?: string | null;
+          component?: string | null;
+          user_id?: string | null;
+          session_id?: string | null;
+          raw?: Json | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'pos_error_log_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
             referencedColumns: ['id'];
           },
         ];
@@ -2044,6 +2156,20 @@ export type Database = {
         Returns: boolean;
       };
       list_caja_sessions: { Args: { p_limit?: number }; Returns: Json };
+      match_codebase_chunks: {
+        Args: {
+          query_embedding: number[];
+          match_count?: number;
+          similarity_threshold?: number;
+        };
+        Returns: {
+          id: string;
+          file_path: string;
+          chunk_text: string;
+          metadata: Json | null;
+          similarity: number;
+        }[];
+      };
       process_payment_atomic: {
         Args: {
           p_amount: number;

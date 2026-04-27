@@ -1,11 +1,8 @@
 import { supabase } from '@shared/lib/supabase';
 import { logger } from '@shared/lib/logger';
 import type { AppError } from '@shared/lib/result';
+import type { Json } from '@shared/lib/supabase.types';
 
-// pos_error_log and agent_audit_log not yet in supabase.types.ts — regenerate after migration
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const db = supabase as any;
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export interface TelemetryErrorContext {
   component: string | undefined;
@@ -39,12 +36,12 @@ export async function logError(
       raw:
         isAppError && error.raw != null
           ? typeof error.raw === 'object'
-            ? error.raw
-            : { value: String(error.raw) }
+            ? (error.raw as Json)
+            : ({ value: String(error.raw) } as Json)
           : null,
     };
 
-    const { error: sbError } = await db.from('pos_error_log').insert(row);
+    const { error: sbError } = await supabase.from('pos_error_log').insert(row);
     if (sbError) {
       logger.warn('telemetry.logError.insert_failed', { detail: sbError.message });
     }
@@ -66,19 +63,19 @@ export async function logAgentAction(
   try {
     const row = {
       tool_name: toolName,
-      args,
+      args: args as Json,
       result:
         result != null
           ? typeof result === 'object'
-            ? result
-            : { value: String(result) }
+            ? (result as Json)
+            : ({ value: String(result) } as Json)
           : null,
       user_id: context.userId ?? null,
       user_role: context.userRole,
       duration_ms: context.durationMs ?? null,
     };
 
-    const { error: sbError } = await db.from('agent_audit_log').insert(row);
+    const { error: sbError } = await supabase.from('agent_audit_log').insert(row);
     if (sbError) {
       logger.warn('telemetry.logAgentAction.insert_failed', { detail: sbError.message });
     }
