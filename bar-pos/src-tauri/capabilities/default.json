@@ -10,6 +10,8 @@
     "opener:default",
     "dialog:allow-save",
     "fs:allow-write-file",
-    "notification:default"
+    "notification:default",
+    "updater:default",
+    "process:allow-relaunch"
   ]
 }
