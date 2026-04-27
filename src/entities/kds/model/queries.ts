@@ -45,6 +45,12 @@ export function useKdsItems() {
               id,
               is_food
             )
+          ),
+          order_item_modifiers(
+            modifiers(
+              id,
+              name
+            )
           )
         `
         )
@@ -66,6 +72,12 @@ export function useKdsItems() {
         const isFood = row.products?.categories?.is_food as boolean | undefined;
         if (!isFood) continue;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const modifierRows = (row['order_item_modifiers'] ?? []) as any[];
+        const modifierNames: string[] = modifierRows
+          .map((m: { modifiers?: { name?: string } }) => m.modifiers?.name)
+          .filter((n): n is string => typeof n === 'string');
+
         items.push({
           id: row.id as string,
           orderId: row.order_id as string,
@@ -79,6 +91,7 @@ export function useKdsItems() {
           createdAt: new Date(row.created_at as string),
           tabCustomerName: (row.orders?.tabs?.customer_name as string | undefined) ?? null,
           tableNumber: null,
+          modifierNames,
           parentOrderItemId: (row['parent_order_item_id'] as string | null | undefined) ?? null,
           comboSlotId: (row['combo_slot_id'] as string | null | undefined) ?? null,
         });

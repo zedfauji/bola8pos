@@ -17,6 +17,9 @@ interface CartActions {
   /** Removes a cart line by its tempId. */
   removeItem: (tempId: string) => void;
 
+  /** Updates the notes field on a cart line. */
+  setItemNotes: (tempId: string, notes: string) => void;
+
   /**
    * Adjusts the quantity of a cart line by delta (+1 or -1).
    * Removes the line if quantity would drop to zero.
@@ -99,6 +102,14 @@ export const useCartStore = create<CartStore>((set, get) => ({
   removeItem: tempId => {
     logger.debug('cart.item.removed', { tempId });
     set(state => ({ items: state.items.filter(item => item.tempId !== tempId) }));
+  },
+
+  setItemNotes: (tempId, notes) => {
+    const clamped = notes.slice(0, 200);
+    set(state => ({
+      items: state.items.map(item => (item.tempId === tempId ? { ...item, notes: clamped } : item)),
+    }));
+    logger.debug('cart.item.notes_set', { tempId });
   },
 
   updateQuantity: (tempId, delta) => {

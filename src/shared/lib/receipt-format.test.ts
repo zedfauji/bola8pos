@@ -125,7 +125,14 @@ function basePreCheque(overrides: Partial<PreChequeData> = {}): PreChequeData {
     cashierName: 'Maria',
     happyHourActive: false,
     items: [
-      { name: 'Cerveza', quantity: 2, lineTotal: 90, orderedAt: new Date('2026-04-17T18:00:00Z') },
+      {
+        name: 'Cerveza',
+        quantity: 2,
+        lineTotal: 90,
+        orderedAt: new Date('2026-04-17T18:00:00Z'),
+        modifierNames: [],
+        notes: null,
+      },
     ],
     poolCharge: null,
     subtotal: 90,
@@ -194,7 +201,16 @@ describe('buildPreChequeText', () => {
         barName: 'A very long bar name that might overflow the line',
         cashierName: 'A very long cashier name',
         customerName: 'A very long customer name',
-        items: [{ name: 'X'.repeat(40), quantity: 10, lineTotal: 999.99, orderedAt: new Date() }],
+        items: [
+          {
+            name: 'X'.repeat(40),
+            quantity: 10,
+            lineTotal: 999.99,
+            orderedAt: new Date(),
+            modifierNames: [],
+            notes: null,
+          },
+        ],
       })
     );
     const lines = text.split('\n');
@@ -221,7 +237,16 @@ describe('buildPreChequeText', () => {
   it('renders item name and quantity in output', () => {
     const text = buildPreChequeText(
       basePreCheque({
-        items: [{ name: 'Tequila', quantity: 3, lineTotal: 150, orderedAt: new Date() }],
+        items: [
+          {
+            name: 'Tequila',
+            quantity: 3,
+            lineTotal: 150,
+            orderedAt: new Date(),
+            modifierNames: [],
+            notes: null,
+          },
+        ],
       })
     );
     expect(text).toContain('Tequila');

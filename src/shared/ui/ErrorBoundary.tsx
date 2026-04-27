@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { logError } from '@shared/lib/telemetry';
 import { POSButton } from '@shared/ui/POSButton';
 
 interface Props {
@@ -22,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    void logError(error, { component: errorInfo.componentStack?.split('\n')[1]?.trim() });
   }
 
   public render() {

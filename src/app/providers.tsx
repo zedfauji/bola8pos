@@ -9,10 +9,25 @@ import { useRappiOrdersRealtimeBridge } from '@entities/rappi-order';
 import { useStaffStore } from '@entities/staff/model/store';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
+import { useAppUpdater } from '@shared/lib/useAppUpdater';
+import { UpdateAvailableDialog } from '@shared/ui';
 
 function RappiRealtimeBridge() {
   useRappiOrdersRealtimeBridge();
   return null;
+}
+
+function UpdaterProvider() {
+  const { state, startInstall, dismissUpdate, relaunch } = useAppUpdater();
+  return (
+    <UpdateAvailableDialog
+      state={state}
+      onInstall={startInstall}
+      onRemindLater={dismissUpdate}
+      onDismiss={dismissUpdate}
+      onRestart={relaunch}
+    />
+  );
 }
 
 const queryClient = new QueryClient({
@@ -88,6 +103,7 @@ export function Providers({ children }: ProvidersProps) {
       <PoolRealtimeListener />
       <WaitlistRealtimeListener />
       <RappiRealtimeBridge />
+      <UpdaterProvider />
       {children}
     </QueryClientProvider>
   );

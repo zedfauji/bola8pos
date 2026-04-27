@@ -1,5 +1,6 @@
 mod commands;
 
+use commands::agent::agent_index_status;
 use commands::printer::{open_cash_drawer, print_receipt, test_print};
 use tauri::Manager;
 
@@ -52,7 +53,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
+            #[cfg(desktop)]
+            app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
             app.manage(config);
             Ok(())
         })
@@ -60,7 +64,8 @@ pub fn run() {
             print_receipt,
             open_cash_drawer,
             test_print,
-            get_runtime_config
+            get_runtime_config,
+            agent_index_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

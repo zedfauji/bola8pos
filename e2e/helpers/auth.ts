@@ -58,7 +58,10 @@ export async function loginAsNamed(page: Page, name: string, pin: string): Promi
     await page.getByRole('button', { name: 'Start shift' }).click();
   }
 
-  await expect(page).toHaveURL(/\/home(?:\/)?$/, { timeout: fastE2e ? 12_000 : 45_000 });
+  // LoginPage has <Navigate to="/pos"> when isAuthenticated becomes true, which can
+  // race with navigate('/home') in PINLoginForm. Accept either landing URL — callers
+  // that need a specific page will navigate explicitly afterwards.
+  await expect(page).toHaveURL(/\/(home|pos)/, { timeout: fastE2e ? 12_000 : 45_000 });
 }
 
 /**

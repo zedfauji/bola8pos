@@ -59,6 +59,7 @@ const meta = {
   args: {
     onQuantitySet: () => {},
     onRemove: () => {},
+    onNotesChange: () => {},
   },
 } satisfies Meta<typeof CartItem>;
 

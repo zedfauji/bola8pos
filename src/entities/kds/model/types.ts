@@ -14,6 +14,7 @@ export const KdsOrderItemSchema = z.object({
   createdAt: TimestampSchema,
   tabCustomerName: z.string().nullable(),
   tableNumber: z.number().int().nullable(),
+  modifierNames: z.array(z.string()).default([]),
   // Combo grouping fields — null when item is not part of a combo bundle
   parentOrderItemId: z.string().nullable(),
   comboSlotId: z.string().nullable(),

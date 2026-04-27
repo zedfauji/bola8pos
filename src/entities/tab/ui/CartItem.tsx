@@ -4,14 +4,16 @@ import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { QuantityControl } from '@shared/ui/QuantityControl';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
+import { Input } from '@shared/ui/input';
 
 export interface CartItemProps {
   item: CartItemType;
   onQuantitySet: (quantity: number) => void;
   onRemove: () => void;
+  onNotesChange: (notes: string) => void;
 }
 
-export function CartItem({ item, onQuantitySet, onRemove }: CartItemProps) {
+export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartItemProps) {
   return (
     <div className="flex gap-3 rounded-lg border bg-card p-3">
       <div className="min-w-0 flex-1">
@@ -49,6 +51,19 @@ export function CartItem({ item, onQuantitySet, onRemove }: CartItemProps) {
             <MoneyDisplay amount={item.lineTotal} size="lg" />
           </div>
         </div>
+
+        <Input
+          data-testid={`cart-item-notes-${item.product.id}`}
+          type="text"
+          placeholder="Note (e.g. no celery)"
+          value={item.notes}
+          maxLength={200}
+          className="mt-2 h-7 text-xs"
+          onChange={e => {
+            onNotesChange(e.target.value);
+          }}
+          aria-label={`Note for ${item.product.name}`}
+        />
       </div>
     </div>
   );

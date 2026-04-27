@@ -46,6 +46,8 @@ export type PreChequeData = {
     quantity: number;
     lineTotal: number;
     orderedAt: Date;
+    modifierNames: string[];
+    notes: string | null;
   }>;
   poolCharge: {
     tableLabel: string;
@@ -77,6 +79,12 @@ export function buildPreChequeText(data: PreChequeData): string {
   for (const item of data.items) {
     const left = `${String(item.quantity)}\u00d7 ${item.name}`;
     lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
+    for (const mod of item.modifierNames) {
+      lines.push(`  + ${mod}`);
+    }
+    if (item.notes) {
+      lines.push(`  Nota: ${item.notes}`);
+    }
   }
 
   if (data.poolCharge !== null) {

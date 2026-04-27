@@ -44,6 +44,8 @@ export function usePrintPreCheque() {
               quantity: item.quantity,
               lineTotal: item.lineTotal ?? item.quantity * item.unitPrice,
               orderedAt: o.createdAt,
+              modifierNames: item.modifiers.map(m => m.name),
+              notes: item.notes,
             }))
         );
 

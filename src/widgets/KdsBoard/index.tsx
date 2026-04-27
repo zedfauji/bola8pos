@@ -46,6 +46,11 @@ function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
           )}
           <p className="truncate text-lg font-bold">{item.productName}</p>
           <p className="text-sm opacity-80">Qty: {item.quantity}</p>
+          {item.modifierNames.length > 0 && (
+            <p data-testid="kds-item-modifiers" className="mt-1 text-sm opacity-80">
+              {item.modifierNames.join(' / ')}
+            </p>
+          )}
           {item.notes && (
             <p className="mt-1 text-sm italic opacity-70">&ldquo;{item.notes}&rdquo;</p>
           )}

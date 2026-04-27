@@ -18,7 +18,8 @@ import { ScrollArea } from '@shared/ui/ScrollArea';
 export function CartPanel() {
   const queryClient = useQueryClient();
   const activeTabId = useTabStore(s => s.activeTabId);
-  const { items, setLineQuantity, removeItem, clearCart, totalAmount, itemCount } = useCartStore();
+  const { items, setLineQuantity, removeItem, setItemNotes, clearCart, totalAmount, itemCount } =
+    useCartStore();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const addOrderMutation = useMutationAddOrder();
   const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
@@ -90,7 +91,9 @@ export function CartPanel() {
           duration: 6000,
           action: {
             label: 'Allow override',
-            onClick: () => { setIsPinDialogOpen(true); },
+            onClick: () => {
+              setIsPinDialogOpen(true);
+            },
           },
         });
         return;
@@ -146,6 +149,9 @@ export function CartPanel() {
                   }}
                   onRemove={() => {
                     removeItem(item.tempId);
+                  }}
+                  onNotesChange={notes => {
+                    setItemNotes(item.tempId, notes);
                   }}
                 />
               </li>
