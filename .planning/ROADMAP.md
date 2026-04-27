@@ -261,5 +261,31 @@ Plans:
 
 ---
 
+---
+
+### Phase 10: AI Slob Technical Debt Checklist
+
+**Goal:** Audit and document all technical debt accumulated across phases 1–9.
+**Plans:** 1/1 plans executed
+
+Plans:
+- [x] 10-01-PLAN.md — AI Slob audit: lint/test/typecheck/E2E findings + CHECKLIST.md (36 open items) ✓ 2026-04-27
+
+---
+
+### Phase 11: AI Slob Technical Debt Remediation
+
+**Goal:** Drive lint to 0 errors, tests to 100% passing, establish CI green baseline.
+**Plans:** 2/3 plans executed
+
+Plans:
+- [x] 11-01-PLAN.md — supabase.types.ts extension with agent tables + as-any cast removal (prerequisite, executed inline with 11-02) ✓ 2026-04-27
+- [x] 11-02-PLAN.md — Lint green + test green baseline: eslint --fix + manual typed-lint fixes + brain.test.ts mock contract fix (1107 tests pass, 0 lint errors) ✓ 2026-04-27
+- [ ] 11-03-PLAN.md — CI pipeline green gate
+
+---
+
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
 *Phase 9 added: 2026-04-26 — v2.1 Auto-Update Service milestone.*
+*Phase 10 added: 2026-04-27 — AI Slob Technical Debt Audit.*
+*Phase 11 added: 2026-04-27 — AI Slob Technical Debt Remediation.*

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 09
-current_plan: 5
-status: checkpoint
-stopped_at: Completed 09-05-PLAN.md — UpdaterProvider wired, E2E smoke spec created; awaiting human verify checkpoint
-last_updated: "2026-04-27T20:10:00Z"
+current_phase: 08
+current_plan: 3
+status: executing
+stopped_at: Completed 09-05-PLAN.md — UpdaterProvider wired, E2E smoke spec; CHECKPOINT awaiting human verify
+last_updated: "2026-04-27T21:42:13.168Z"
 progress:
-  total_phases: 10
+  total_phases: 9
   completed_phases: 8
-  total_plans: 65
-  completed_plans: 64
+  total_plans: 64
+  completed_plans: 63
   percent: 98
 ---
 
@@ -66,6 +66,7 @@ See: .planning/PROJECT.md
 - 2026-04-26: Plan 08-04 complete — ExportType +9 variants (9dbfe0e), ReportsPage 12 tabs (40f8480): 5 Excel builders + 4 PDF builders + ExportButtons Props +5 + as-never casts removed; 109 test files, 1076 tests pass
 - 2026-04-26: Plan 08-06 complete — S6-12 waitlist UX paper-cuts (9635c17, 7e77e60): size="lg" touch targets on SeatPartySheet + AddWaitlistEntryForm + NotifyButton; focus-trap comments; specific toast copy in useMarkCancelled + useMarkNoShow + useSeatWaitlistParty; 109 test files, 1076 tests pass
 - 2026-04-27: Plan 09-04 complete — UpdateAvailableDialog (4 states) + Progress component (a902443, dbf3064); 7/7 RTL tests GREEN (UPD-03/04/05/08); XSS prevention confirmed (whitespace-pre-wrap only); UpdateAvailableDialog + Progress exported from shared/ui/index.ts
+- 2026-04-27: **Phase 11 Plan 02 complete** — lint green + test green baseline; 211 lint errors → 0; 1 test failure → 1107 passing; commits 84007dc (11-01 prereq), 031f9b6, 45e2c0b, 70be490
 
 ## Decisions
 
@@ -149,6 +150,10 @@ See: .planning/PROJECT.md
 - [Phase 09-auto-updater 09-03]: vi.advanceTimersByTimeAsync(0) used instead of vi.runAllTimersAsync() — setInterval causes infinite 10k-timer abort in fake timers mode; advance-by-zero flushes initial async runCheck() microtask without triggering the 4h interval
 - [Phase 09-auto-updater 09-04]: progress.tsx created with manual Radix UI primitive (not shadcn CLI) — ComponentRef replaces deprecated ElementRef; .toString() on number operand resolves restrict-template-expressions; import order fixed (S before a case-insensitive)
 - [Phase 09-auto-updater 09-04]: dangerouslySetInnerHTML appears only in JSX comment as prohibition reminder — actual changelog rendered as React text child inside whitespace-pre-wrap paragraph (XSS prevention, ASVS V5, T-9-04-01)
+- [Phase 11-debt-remediation 11-02]: Manual supabase.types.ts extension used (Docker WSL pipe unavailable for supabase start); agent_audit_log + pos_error_log + pos_codebase_index + match_codebase_chunks RPC added
+- [Phase 11-debt-remediation 11-02]: posTools.ts assertExists uses scoped eslint-disable block for dynamic table name — justified cast, caller validates table names
+- [Phase 11-debt-remediation 11-02]: brain.test.ts executeTool IS called for pending actions (returns {pending:true}); removed incorrect not.toHaveBeenCalled assertions
+- [Phase 11-debt-remediation 11-02]: cancelAction and bulkImportProducts made synchronous (no await expressions) to satisfy require-await ESLint rule
 
 ## Performance Metrics
 
@@ -183,8 +188,9 @@ See: .planning/PROJECT.md
 | 09-auto-updater | 03 | 3min | 2 | 2 |
 | 09-auto-updater | 04 | 8min | 2 | 7 |
 | 09-auto-updater | 05 | 12min | 2 | 4 |
+| 11-debt-remediation | 02 | 45min | 4 | 12 |
 
 ## Last Session
 
-- **Stopped at:** Completed 09-05-PLAN.md — UpdaterProvider wired, E2E smoke spec; CHECKPOINT awaiting human verify
-- **Timestamp:** 2026-04-27T20:10:00Z
+- **Stopped at:** Completed 11-02-PLAN.md — lint green (0 errors) + test green (1107 passing)
+- **Timestamp:** 2026-04-27T22:00:00Z
