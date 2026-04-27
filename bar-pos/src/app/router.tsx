@@ -19,6 +19,7 @@ const RappiOrdersPage = lazy(() => import('../pages/rappi'));
 const TableStatusPage = lazy(() => import('../pages/pool-table-status'));
 const PaymentsPage = lazy(() => import('../pages/payments'));
 const KdsPage = lazy(() => import('../pages/kds'));
+const KitchenPrepPage = lazy(() => import('../pages/kitchen-prep'));
 const WaitlistPage = lazy(() => import('../pages/waitlist'));
 
 function LoadingFallback() {
@@ -128,6 +129,14 @@ export function Router() {
                 <KdsRoute>
                   <KdsPage />
                 </KdsRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/kitchen-prep"
+            element={
+              <ProtectedRoute>
+                <KitchenPrepPage />
               </ProtectedRoute>
             }
           />
