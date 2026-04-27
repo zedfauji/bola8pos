@@ -1,6 +1,7 @@
 import {
   BarChart,
   Bike,
+  ChefHat,
   Clock,
   CreditCard,
   Home,
