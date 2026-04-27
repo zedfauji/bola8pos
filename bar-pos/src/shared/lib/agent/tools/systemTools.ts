@@ -24,7 +24,7 @@ export async function getPosStatus(
   const t0 = Date.now();
   const [tabs, sessions, caja] = await Promise.all([
     supabase.from('tabs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-    supabase.from('pool_sessions').select('id', { count: 'exact', head: true }).is('ended_at', null),
+    supabase.from('pool_sessions').select('id', { count: 'exact', head: true }).is('stopped_at', null),
     supabase.from('caja_sessions').select('id, opened_at').is('closed_at', null).limit(1).maybeSingle(),
   ]);
 
@@ -51,9 +51,9 @@ export async function getCurrentShift(
   const t0 = Date.now();
   const { data, error } = await supabase
     .from('shifts')
-    .select('id, clocked_in_at, profiles(id, name, role)')
-    .is('clocked_out_at', null)
-    .order('clocked_in_at', { ascending: false });
+    .select('id, clock_in, profiles(id, name, role)')
+    .is('clock_out', null)
+    .order('clock_in', { ascending: false });
 
   if (error) {
     void logAgentAction('get_current_shift', {}, null, { ...ctx, durationMs: Date.now() - t0 });

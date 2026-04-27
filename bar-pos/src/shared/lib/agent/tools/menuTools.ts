@@ -93,7 +93,7 @@ export async function getMenu(
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
   const t0 = Date.now();
-  let q = supabase.from('products').select('id, name, base_price, description, category_id').is('deleted_at', null);
+  let q = supabase.from('products').select('id, name, base_price, category_id').is('deleted_at', null);
   if (args.category_id) q = q.eq('category_id', args.category_id);
   const { data, error } = await q;
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
@@ -106,7 +106,7 @@ export async function addProduct(
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
   const t0 = Date.now();
-  const { data, error } = await db.from('products').insert({ name: args.name, base_price: args.price, category_id: args.category_id ?? null, ...(args.description ? { description: args.description } : {}) }).select().single();
+  const { data, error } = await db.from('products').insert({ name: args.name, base_price: args.price, category_id: args.category_id ?? null }).select().single();
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
   void logAgentAction('add_product', args as Record<string, unknown>, data, { ...ctx, durationMs: Date.now() - t0 });
   return result;
@@ -119,9 +119,7 @@ export async function updateProduct(
   const t0 = Date.now();
   const patch: Record<string, unknown> = {};
   if (args.name !== undefined) patch['name'] = args.name;
-  if (args.price !== undefined) patch['price'] = args.price;
-  if (args.description !== undefined) patch['description'] = args.description;
-  if (patch['price'] !== undefined) { patch['base_price'] = patch['price']; delete patch['price']; }
+  if (args.price !== undefined) patch['base_price'] = args.price;
   const { data, error } = await db.from('products').update(patch).eq('id', args.id).select().single();
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
   void logAgentAction('update_product', args as Record<string, unknown>, data, { ...ctx, durationMs: Date.now() - t0 });
