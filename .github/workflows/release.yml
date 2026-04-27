@@ -46,4 +46,4 @@ jobs:
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
-          projectPath: .
+          projectPath: bar-pos
