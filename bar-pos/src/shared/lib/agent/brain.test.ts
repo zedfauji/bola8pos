@@ -88,14 +88,22 @@ describe('runAgent', () => {
   });
 
   it('returns awaitingConfirmation=true for destructive tool without confirm', async () => {
-    mockMessagesCreate.mockImplementation(() =>
-      toolUseResponse('deactivate_product', 'tu-2', { id: 'abc' })
-    );
+    mockMessagesCreate
+      .mockImplementationOnce(() => toolUseResponse('deactivate_product', 'tu-2', { id: 'abc' }))
+      .mockImplementationOnce(() => textResponse('Voy a desactivar. Confirma para continuar.'));
+
+    // Return pending action shape — matches real deactivateProduct behavior in menuTools.ts
+    mockExecuteTool.mockResolvedValueOnce({
+      ok: true,
+      data: { pending: true, confirm_token: 'tok-abc', preview: { action: 'deactivate_product', id: 'abc' } },
+    });
 
     const result = await runAgent('deactivate product abc', 'admin', []);
     expect(result.awaitingConfirmation).toBe(true);
-    expect(result.toolsExecuted).toHaveLength(0);
-    expect(mockExecuteTool).not.toHaveBeenCalled();
+    expect(result.pendingConfirmation?.token).toBe('tok-abc');
+    expect(result.pendingConfirmation?.preview).toEqual({ action: 'deactivate_product', id: 'abc' });
+    // executeTool IS called — it returns the pending shape, not executes the DB write
+    expect(mockExecuteTool).toHaveBeenCalledWith('deactivate_product', { id: 'abc' }, expect.any(Object));
   });
 
   it('executes destructive tool when user message is "confirmar"', async () => {
