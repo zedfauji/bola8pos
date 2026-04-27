@@ -1,3 +1,7 @@
+// SECURITY: xlsx package has unresolved CVEs (GHSA-4r6h-8v6p-xvw6, GHSA-5pgg-2g8v-p4x9).
+// Risk is LOW in this Tauri desktop context — no untrusted file input.
+// Track replacement with exceljs in a future debt sprint.
+// See: .planning/decisions/xlsx-cve-risk-accept.md
 import * as XLSX from 'xlsx';
 import type {
   CajaReport,
