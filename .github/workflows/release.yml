@@ -9,7 +9,7 @@ jobs:
   publish-tauri:
     permissions:
       contents: write
-    runs-on: windows-latest
+    runs-on: [self-hosted, windows]
     defaults:
       run:
         working-directory: bar-pos
