@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { retrieveContext } from './rag';
-import { allToolDefinitions, executeTool, DESTRUCTIVE_TOOLS } from './tools/index';
+import { allToolDefinitions, executeTool } from './tools/index';
 import { logger } from '@shared/lib/logger';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
@@ -34,7 +34,6 @@ function getOllamaUrl(): string {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const MAX_TOOL_LOOPS = 8;
-const CONFIRM_WORDS = new Set(['confirm', 'confirmar', 'yes', 'sí', 'si']);
 
 function detectLanguage(text: string): 'es' | 'en' {
   const spanishPattern =
@@ -43,9 +42,6 @@ function detectLanguage(text: string): 'es' | 'en' {
   return matches && matches.length >= 2 ? 'es' : 'en';
 }
 
-function isConfirmation(message: string): boolean {
-  return CONFIRM_WORDS.has(message.trim().toLowerCase());
-}
 
 function buildSystemPrompt(userRole: string, ragContext: string, lang: 'es' | 'en'): string {
   const now = new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' });
@@ -63,12 +59,13 @@ function buildSystemPrompt(userRole: string, ragContext: string, lang: 'es' | 'e
     'You have tools to manage tabs, pool tables, the menu, reports, diagnostics, and system status.',
     '',
     'TOOL RULES — follow strictly:',
-    '1. NEVER invent UUIDs. Always call get_menu (or list_tabs / list_pool_tables) first to obtain real IDs before calling any write tool.',
-    '2. For add_items_to_tab: call get_menu first, match product by name, use the real product_id UUID from the result.',
-    '3. For destructive tools (close_tab, stop_pool_session, stop_and_move_table, deactivate_product, bulk_import_products):',
-    '   Describe what you will do and ask for confirmation. Do NOT call the tool in the same turn.',
-    '   Only proceed when the user replies "confirm" or "confirmar".',
-    '4. If a tool returns an error, report the exact error message to the user. Do not retry silently.',
+    '1. NEVER invent UUIDs. Use find_product / find_tab / find_pool_table to resolve real IDs before any write.',
+    '2. For add_items_to_tab: call find_product first to get real product_id. Price is set by DB — do not pass unit_price.',
+    '3. Destructive tools (close_tab, stop_pool_session, stop_and_move_table, deactivate_product, bulk_import_products) return { pending: true, confirm_token, preview }.',
+    '   Show the preview to the user and ask for confirmation. When user confirms, call confirm_action({ token }) — do NOT re-call the original tool.',
+    '   To cancel, call cancel_action({ token }).',
+    '4. If a tool returns an error, report the exact error message. Do not retry silently.',
+    '5. Never call write tools more than 10 times per minute — the system will block excess calls.',
   ];
 
   if (ragContext) parts.push('', ragContext);
@@ -164,15 +161,6 @@ export async function runAgent(
         const toolResults: Anthropic.ToolResultBlockParam[] = [];
 
         for (const block of toolBlocks) {
-          // Confirmation gate — check the current user message, not history
-          if (DESTRUCTIVE_TOOLS.has(block.name) && !isConfirmation(userMessage)) {
-            const prompt =
-              lang === 'es'
-                ? `Voy a ejecutar "${block.name}". ¿Confirmas? Responde "confirmar" para continuar.`
-                : `About to run "${block.name}". Reply "confirm" to proceed.`;
-            return { text: prompt, toolsExecuted, usedFallback: false, awaitingConfirmation: true };
-          }
-
           const ctx = { userId, userRole, durationMs: undefined };
           const result = await executeTool(
             block.name,

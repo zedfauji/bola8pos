@@ -3,6 +3,7 @@ import { logAgentAction } from '@shared/lib/telemetry';
 import { ok, err } from '@shared/lib/result';
 import type { Result } from '@shared/lib/result';
 import type { AgentActionContext } from '@shared/lib/telemetry';
+import { createPendingAction } from '../pendingActions';
 
 // Agent mutations use runtime-provided fields — cast to bypass strict Supabase generated types
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -126,25 +127,47 @@ export async function updateProduct(
   return result;
 }
 
-export async function deactivateProduct(
-  args: { id: string },
+export async function _executeDeactivateProduct(
+  args: Record<string, unknown>,
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
+  const { id } = args as { id: string };
   const t0 = Date.now();
-  const { data, error } = await db.from('products').update({ deleted_at: new Date().toISOString() }).eq('id', args.id).select().single();
+  const { data, error } = await db.from('products').update({ deleted_at: new Date().toISOString() }).eq('id', id).select().single();
   const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
-  void logAgentAction('deactivate_product', args as Record<string, unknown>, data, { ...ctx, durationMs: Date.now() - t0 });
+  void logAgentAction('deactivate_product', args, data, { ...ctx, durationMs: Date.now() - t0 });
+  return result;
+}
+
+export async function deactivateProduct(
+  args: { id: string },
+  _ctx: AgentActionContext
+): Promise<Result<unknown>> {
+  const { data: product } = await supabase.from('products').select('name, is_active').eq('id', args.id).single();
+  if (!product) return err({ code: 'NOT_FOUND' as const, message: `Product not found: ${args.id}. Use find_product to get real IDs.` });
+  const preview = { action: 'deactivate_product', id: args.id, name: (product as { name?: string }).name };
+  const token = createPendingAction('deactivate_product', args as Record<string, unknown>, preview, _executeDeactivateProduct);
+  return ok({ pending: true, confirm_token: token, preview });
+}
+
+export async function _executeBulkImportProducts(
+  args: Record<string, unknown>,
+  ctx: AgentActionContext
+): Promise<Result<unknown>> {
+  const { products } = args as { products: Array<{ name: string; price: number; category_id?: string }> };
+  const t0 = Date.now();
+  const rows = products.map((p) => ({ name: p.name, base_price: p.price, category_id: p.category_id ?? null }));
+  const { data, error } = await db.from('products').insert(rows).select();
+  const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
+  void logAgentAction('bulk_import_products', args, { count: rows.length }, { ...ctx, durationMs: Date.now() - t0 });
   return result;
 }
 
 export async function bulkImportProducts(
   args: { products: Array<{ name: string; price: number; category_id?: string }> },
-  ctx: AgentActionContext
+  _ctx: AgentActionContext
 ): Promise<Result<unknown>> {
-  const t0 = Date.now();
-  const rows = args.products.map((p) => ({ name: p.name, base_price: p.price, category_id: p.category_id ?? null }));
-  const { data, error } = await db.from('products').insert(rows).select();
-  const result = error ? err({ code: 'AGENT_ERROR' as const, message: error.message }) : ok(data);
-  void logAgentAction('bulk_import_products', args as Record<string, unknown>, { count: rows.length }, { ...ctx, durationMs: Date.now() - t0 });
-  return result;
+  const preview = { action: 'bulk_import_products', count: args.products.length, products: args.products.slice(0, 5) };
+  const token = createPendingAction('bulk_import_products', args as Record<string, unknown>, preview, _executeBulkImportProducts);
+  return ok({ pending: true, confirm_token: token, preview });
 }
