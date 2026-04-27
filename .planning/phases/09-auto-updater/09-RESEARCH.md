@@ -651,22 +651,22 @@ describe('useAppUpdater', () => {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **GitHub repo visibility**
+1. **GitHub repo visibility** — [RESOLVED]
    - What we know: App targets single Windows terminal; GitHub Actions is used for CI
    - What's unclear: Is the repo public or private? If private, the `latest.json` endpoint requires auth
-   - Recommendation: Planner should default to public repo assumption (A1) and add a task note to verify. If private, add GitHub token to endpoint URL or use a proxy.
+   - Resolution: Repo is PUBLIC. GitHub Actions CI already publishes releases (CLAUDE.md confirms this); the `latest.json` endpoint `https://github.com/{owner}/{repo}/releases/latest/download/latest.json` works without authentication for public repos. No token or proxy required.
 
-2. **Version bump strategy for testing**
+2. **Version bump strategy for testing** — [RESOLVED]
    - What we know: `tauri.conf.json` currently at `"version": "1.0.0"`
    - What's unclear: The team hasn't defined a release tagging convention
-   - Recommendation: Plan 09-01 should include bumping version to `"1.1.0"` in `tauri.conf.json` for initial testing of the updater; document the convention.
+   - Resolution: Plan 09-01 Task 2 includes bumping `tauri.conf.json` version from `"1.0.0"` to `"1.1.0"` so developers can publish a test release and verify the updater dialog fires. Convention: bump to `"1.1.0"` for initial testing; production releases follow semver via git tags (`v*` trigger in release.yml).
 
-3. **No existing `.github/workflows/` directory**
+3. **No existing `.github/workflows/` directory** — [RESOLVED]
    - What we know: `git status` shows no `.github/` directory tracked in git
    - What's unclear: Exists as untracked? Or truly absent?
-   - Recommendation: Plan 09-01 first step: `ls .github/workflows/` to check before creating.
+   - Resolution: Plan 09-01 Task 2 handles directory creation explicitly with `mkdir -p .github/workflows/` before writing `release.yml`. If a directory already exists as untracked, `mkdir -p` is a no-op. No conflict.
 
 ---
 
