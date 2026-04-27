@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 08
 current_plan: 3
 status: executing
-stopped_at: Completed 11-03-PLAN.md — CI workflow created; typecheck/lint/test GREEN; audit BLOCKED (xlsx CVE, documented for Plan 04)
-last_updated: "2026-04-27T21:49:00Z"
+stopped_at: Completed 11-04-PLAN.md — xlsx CVE risk documented; SECURITY comment in excel.ts + decision record created; lint GREEN
+last_updated: "2026-04-27T22:15:00Z"
 progress:
   total_phases: 11
   completed_phases: 8
@@ -68,6 +68,7 @@ See: .planning/PROJECT.md
 - 2026-04-27: Plan 09-04 complete — UpdateAvailableDialog (4 states) + Progress component (a902443, dbf3064); 7/7 RTL tests GREEN (UPD-03/04/05/08); XSS prevention confirmed (whitespace-pre-wrap only); UpdateAvailableDialog + Progress exported from shared/ui/index.ts
 - 2026-04-27: **Phase 11 Plan 02 complete** — lint green + test green baseline; 211 lint errors → 0; 1 test failure → 1107 passing; commits 84007dc (11-01 prereq), 031f9b6, 45e2c0b, 70be490
 - 2026-04-27: **Phase 11 Plan 03 complete** — CI workflow created (.github/workflows/ci.yml, edf4a7d); local gates: typecheck EXIT 0, lint EXIT 0, 1107 tests EXIT 0; npm audit EXIT 1 (xlsx high CVE GHSA-4r6h-8v6p-xvw6 + GHSA-5pgg-2g8v-p4x9, no fix available, documented for Plan 04)
+- 2026-04-27: **Phase 11 Plan 04 complete** — xlsx CVE risk documented (6e65b69 SECURITY comment in excel.ts, 7f78957 decision record .planning/decisions/xlsx-cve-risk-accept.md); lint EXIT 0; TECH-DEBT-CVE-DOC requirement satisfied
 
 ## Decisions
 
@@ -157,6 +158,7 @@ See: .planning/PROJECT.md
 - [Phase 11-debt-remediation 11-02]: cancelAction and bulkImportProducts made synchronous (no await expressions) to satisfy require-await ESLint rule
 - [Phase 11-debt-remediation 11-03]: xlsx high-severity CVEs (GHSA-4r6h-8v6p-xvw6, GHSA-5pgg-2g8v-p4x9) block CI at --audit-level=high; no upstream fix available; risk acceptance deferred to Plan 04
 - [Phase 11-debt-remediation 11-03]: npm audit --audit-level=high kept (not lowered to critical) until explicit Plan 04 risk-acceptance decision
+- [Phase 11-debt-remediation 11-04]: xlsx CVEs GHSA-4r6h-8v6p-xvw6 + GHSA-5pgg-2g8v-p4x9 risk accepted — outbound write-only path, no XLSX.read() on untrusted input; residual supply-chain vector mitigated by lockfile + CI audit gate; exceljs replacement deferred to future sprint
 
 ## Performance Metrics
 
@@ -193,6 +195,7 @@ See: .planning/PROJECT.md
 | 09-auto-updater | 05 | 12min | 2 | 4 |
 | 11-debt-remediation | 02 | 45min | 4 | 12 |
 | 11-debt-remediation | 03 | 5min | 2 | 1 |
+| 11-debt-remediation | 04 | 8min | 2 | 2 |
 
 ## Last Session
 
