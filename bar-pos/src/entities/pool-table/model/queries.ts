@@ -8,6 +8,7 @@ import { computePoolSessionBilling } from '@shared/lib/pool-billing';
 import {
   err,
   ok,
+  staleVersionError,
   supabaseMutation,
   supabaseQuery,
   unknownError,
@@ -16,6 +17,7 @@ import {
 import { supabase } from '@shared/lib/supabase';
 import type { Json } from '@shared/lib/supabase.types';
 import type { Tables, TablesInsert, TablesUpdate } from '@shared/lib/supabase.types';
+import { handleVersionError } from '@shared/lib/version-error';
 import { usePoolTableStore } from './store';
 import { PoolTableSchema, PoolSessionSchema } from './types';
 
@@ -31,6 +33,9 @@ type PoolSessionRowWithPrevious = Tables<'pool_sessions'> & {
 type PoolTableRow = Tables<'pool_tables'> & {
   current_session: PoolSessionRowWithPrevious | null;
 };
+
+const TERMINAL_ID =
+  (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
 
 function mapPoolSessionRow(
   row: Tables<'pool_sessions'> | PoolSessionRowWithPrevious
@@ -48,6 +53,10 @@ function mapPoolSessionRow(
         totalCharge: row.total_charge,
         previousTableId: row.previous_table_id,
         previousTableNumber: previousTable?.number ?? null,
+        // Phase 15: optimistic-concurrency version (column added 20260512000001)
+        ...(typeof (row as { version?: number }).version === 'number'
+          ? { version: (row as { version?: number }).version }
+          : {}),
       })
     );
   } catch (e) {
@@ -336,30 +345,61 @@ export function useMutationStopSession() {
         firstHourMode,
       });
 
-      const sessionRes = await supabaseMutation<Tables<'pool_sessions'>>(() =>
-        supabase
+      // Phase 15 Group B: optimistic-concurrency UPDATE on pool_sessions.
+      // Use cached session.version when available; otherwise fall back to legacy.
+      const cachedVersion =
+        typeof (session as { version?: number }).version === 'number'
+          ? (session as { version?: number }).version
+          : undefined;
+
+      let updatedSession: Tables<'pool_sessions'>;
+      if (cachedVersion !== undefined) {
+        const expected = cachedVersion;
+        const { data, error } = await supabase
           .from('pool_sessions')
           .update({
             stopped_at: stoppedAt.toISOString(),
             billed_minutes: billedMinutes,
             total_charge: totalCharge,
+            version: expected + 1,
           })
           .eq('id', sessionId)
+          .eq('version', expected)
           .select()
-          .single()
-      );
+          .single();
+        if (error?.code === 'PGRST116') {
+          return err(staleVersionError(error));
+        }
+        if (error) {
+          logger.error('pool_tables.session.stop_update_failed', { message: error.message });
+          return err(unknownError(error));
+        }
+        updatedSession = data;
+      } else {
+        const sessionRes = await supabaseMutation<Tables<'pool_sessions'>>(() =>
+          supabase
+            .from('pool_sessions')
+            .update({
+              stopped_at: stoppedAt.toISOString(),
+              billed_minutes: billedMinutes,
+              total_charge: totalCharge,
+            })
+            .eq('id', sessionId)
+            .select()
+            .single()
+        );
 
-      if (!sessionRes.ok) {
-        logger.error('pool_tables.session.stop_update_failed', {
-          message: sessionRes.error.message,
-        });
-        return sessionRes;
+        if (!sessionRes.ok) {
+          logger.error('pool_tables.session.stop_update_failed', {
+            message: sessionRes.error.message,
+          });
+          return sessionRes;
+        }
+        if (sessionRes.data === null) {
+          return err(unknownError('no_row'));
+        }
+        updatedSession = sessionRes.data;
       }
-      if (sessionRes.data === null) {
-        return err(unknownError('no_row'));
-      }
-
-      const updatedSession = sessionRes.data;
 
       const tableRes = await supabaseMutation(() =>
         supabase
@@ -413,6 +453,16 @@ export function useMutationStopSession() {
           // Keep the optimistic 'available' status; sync will confirm it.
           return;
         }
+        // Phase 15: STALE_VERSION on pool_sessions stop UPDATE
+        handleVersionError(result.error, {
+          queryClient,
+          queryKey: poolTableKeys.all,
+          entity: 'pool_sessions',
+          entityId: variables.sessionId,
+          expectedVersion: 0,
+          supabase,
+          terminalId: TERMINAL_ID,
+        });
         const prev = (ctx as { previous?: PoolTablesSnapshot } | undefined)?.previous;
         if (prev !== undefined) {
           queryClient.setQueryData(poolTableKeys.all, prev);

@@ -7,6 +7,7 @@ import { logger } from '@shared/lib/logger-instance';
 import {
   ok,
   err,
+  staleVersionError,
   supabaseQuery,
   supabaseMutation,
   unknownError,
@@ -14,7 +15,11 @@ import {
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
+import { handleVersionError } from '@shared/lib/version-error';
 import { useCajaStore } from './store';
+
+const TERMINAL_ID =
+  (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
 
 const db = supabase as any;
 
@@ -40,6 +45,8 @@ function mapCajaRow(row: Record<string, unknown>): Result<CajaSession> {
         status: row.status,
         openedByName: row.opened_by_name as string | undefined,
         closedByName: row.closed_by_name as string | null | undefined,
+        // Phase 15: optimistic-concurrency version (column added 20260512000001)
+        ...(typeof row.version === 'number' ? { version: row.version } : {}),
       })
     );
   } catch (e) {
@@ -192,6 +199,35 @@ export function useMutationCloseCaja() {
 
   return useMutation<Result<undefined>, Error, CloseCajaInput>({
     mutationFn: async ({ cajaId, closedBy, closingCash, notes }) => {
+      // Phase 15 Group B: pre-RPC version-guard via direct UPDATE.
+      // The close_caja_session RPC owns the actual close transition; we use a
+      // best-effort optimistic-concurrency probe on caja_sessions.version to
+      // detect concurrent edits BEFORE invoking the RPC. If the row has been
+      // touched by another terminal (.eq('version', expected) returns 0 rows),
+      // surface STALE_VERSION via handleVersionError.
+      const cached = queryClient.getQueryData<Result<CajaSession | null>>(cajaKeys.current());
+      const expected =
+        cached?.ok && cached.data && typeof cached.data.version === 'number'
+          ? cached.data.version
+          : undefined;
+      if (expected !== undefined) {
+        // Touch updated_at while asserting version. Trigger bumps version → expected+2.
+        const { data: probe, error: probeErr } = await db
+          .from('caja_sessions')
+          .update({ notes: notes ?? null, version: expected + 1 })
+          .eq('id', cajaId)
+          .eq('version', expected)
+          .select('id')
+          .maybeSingle();
+        if (probeErr?.code === 'PGRST116' || (!probe && !probeErr)) {
+          return err(staleVersionError(probeErr));
+        }
+        if (probeErr) {
+          logger.warn('caja.close.version_probe_failed', { message: probeErr.message as string });
+          // Fall through to RPC — non-fatal
+        }
+      }
+
       const { data, error } = await db.rpc('close_caja_session', {
         p_caja_id: cajaId,
         p_closed_by: closedBy,
@@ -218,8 +254,25 @@ export function useMutationCloseCaja() {
       return ok(undefined);
     },
 
-    onSuccess: result => {
-      if (!result.ok) return;
+    onSuccess: (result, variables) => {
+      if (!result.ok) {
+        // Phase 15: surface STALE_VERSION conflict
+        const cached = queryClient.getQueryData<Result<CajaSession | null>>(cajaKeys.current());
+        const expectedVersion =
+          cached?.ok && cached.data && typeof cached.data.version === 'number'
+            ? cached.data.version
+            : 0;
+        handleVersionError(result.error, {
+          queryClient,
+          queryKey: cajaKeys.all,
+          entity: 'caja_sessions',
+          entityId: variables.cajaId,
+          expectedVersion,
+          supabase,
+          terminalId: TERMINAL_ID,
+        });
+        return;
+      }
       clearCaja();
       void queryClient.invalidateQueries({ queryKey: cajaKeys.all });
       logger.info('caja.closed');
