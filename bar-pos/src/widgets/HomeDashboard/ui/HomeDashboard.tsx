@@ -2,6 +2,7 @@ import {
   BarChart,
   Bike,
   ChefHat,
+  ClipboardList,
   Clock,
   CreditCard,
   Home,
@@ -84,6 +85,12 @@ const ITEMS: DashboardItem[] = [
     managerLabel: 'Admin',
   },
   {
+    path: '/audit',
+    label: 'Audit Log',
+    icon: ClipboardList,
+    visibleToRoles: ['manager', 'admin'],
+  },
+  {
     path: '/kds',
     label: 'Kitchen Display',
     icon: UtensilsCrossed,
@@ -145,6 +152,7 @@ export function HomeDashboard() {
               }}
               className="relative flex min-h-[160px] min-w-[160px] flex-col items-center justify-center gap-3 rounded-2xl border bg-card p-6 shadow transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label={item.label}
+              data-testid={item.path === '/audit' ? 'home-tile-audit' : undefined}
             >
               {isGated && (
                 <Lock
