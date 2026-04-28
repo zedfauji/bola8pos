@@ -294,10 +294,10 @@ Plans:
 **Goal:** Create a dedicated `/rbac` route with a full RBAC management page (admin-only via `manage_staff`). Remove role-editing fragments from StaffDashboard. Single source of truth for role management. Follow project navigation patterns (route guard + lazy page + HomeDashboard tile).
 **Requirements:** RBAC-01, RBAC-02, RBAC-03, RBAC-04, RBAC-05, RBAC-06
 **Depends on:** Phase 11
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 12-01-PLAN.md — Core scaffolding: rbac-route.tsx + pages/rbac/index.tsx + widgets/RBACDashboard/ (DataTable + per-row Edit Role) + EditRoleDialog preSelectedStaffId prop + StaffDashboard Administration section removal (Wave 1) (RBAC-01, RBAC-02, RBAC-03, RBAC-04)
+- [x] 12-01-PLAN.md — Core scaffolding: rbac-route.tsx + pages/rbac/index.tsx + widgets/RBACDashboard/ (DataTable + per-row Edit Role) + EditRoleDialog preSelectedStaffId prop + StaffDashboard Administration section removal (Wave 1) (RBAC-01, RBAC-02, RBAC-03, RBAC-04)
 - [ ] 12-02-PLAN.md — Wiring: router.tsx /rbac route + HomeDashboard ShieldCheck tile + CLAUDE.md routes table update + E2E tests T-RBAC-page + T-RBAC-redirect in 09-rbac.spec.ts (Wave 2) (RBAC-01, RBAC-05, RBAC-06)
 
 **Success Criteria**:

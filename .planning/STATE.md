@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 11
-current_plan: 4
-status: phase_complete
-stopped_at: Phase 11 complete — 4/4 plans, 10/10 must-haves verified (2026-04-27)
-last_updated: "2026-04-27T22:30:00Z"
+current_phase: 12
+current_plan: 1
+status: executing
+stopped_at: Completed 12-01-PLAN.md — RbacRoute guard + RbacPage + RBACDashboard widget + EditRoleDialog preSelectedStaffId; typecheck/lint/test GREEN
+last_updated: "2026-04-27T22:36:00Z"
 progress:
-  total_phases: 11
-  completed_phases: 9
-  total_plans: 69
-  completed_plans: 67
-  percent: 97
+  total_phases: 12
+  completed_phases: 10
+  total_plans: 71
+  completed_plans: 68
+  percent: 96
 ---
 
 # Session State
@@ -24,13 +24,14 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** Feature Expansion 2026 Q2
-**Current phase:** 08
-**Current plan:** 3
-**Status:** In Progress Phase 08
-**Progress:** [█████████░] 94%
+**Current phase:** 12
+**Current plan:** 1
+**Status:** In Progress Phase 12
+**Progress:** [██████████] 96%
 
 ## Session Log
 
+- 2026-04-27: **Phase 12 Plan 01 complete** — RbacRoute guard (501c036) + EditRoleDialog preSelectedStaffId + StaffDashboard Administration removed (3ce2029) + RBACDashboard widget + RbacPage + barrel (5c97c9a); 3 tasks, 10 files; typecheck/lint/test GREEN (1104 pass, 15 todo)
 - 2026-04-27: Plan 09-05 complete — UpdaterProvider wired into providers.tsx (063c8f3); E2E smoke spec 18-updater.spec.ts (abb10e3); Phase 9 14/14 unit tests GREEN; typecheck PASS; lint clean on plan files (agent/ pre-existing errors out of scope); CHECKPOINT awaiting human verify
 - 2026-04-27: **Phase 10 execute complete** — `10-01-PLAN.md` waves 0–3+4 (peer review optional); artifacts: `10-EVIDENCE.md`, `10-FINDINGS.md`, `10-CHECKLIST.md` (36 open items, scoring table); **lint+test not green** in bar-pos at commit `1b5ef62` (documented, not fixed per audit scope)
 - 2026-04-27: Phase 10 `/gsd-plan-phase` — `10-01-PLAN.md` + `10-CONTEXT.md` + `10-FINDINGS.md` template in `.planning/phases/10-ai-slob-technical-debt-checklist/`; ROADMAP Phase 10 planning artifacts line
@@ -69,6 +70,12 @@ See: .planning/PROJECT.md
 - 2026-04-27: **Phase 11 Plan 02 complete** — lint green + test green baseline; 211 lint errors → 0; 1 test failure → 1107 passing; commits 84007dc (11-01 prereq), 031f9b6, 45e2c0b, 70be490
 - 2026-04-27: **Phase 11 Plan 03 complete** — CI workflow created (.github/workflows/ci.yml, edf4a7d); local gates: typecheck EXIT 0, lint EXIT 0, 1107 tests EXIT 0; npm audit EXIT 1 (xlsx high CVE GHSA-4r6h-8v6p-xvw6 + GHSA-5pgg-2g8v-p4x9, no fix available, documented for Plan 04)
 - 2026-04-27: **Phase 11 Plan 04 complete** — xlsx CVE risk documented (6e65b69 SECURITY comment in excel.ts, 7f78957 decision record .planning/decisions/xlsx-cve-risk-accept.md); lint EXIT 0; TECH-DEBT-CVE-DOC requirement satisfied
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 12 added: Full RBAC page, Remove the breadcrumbs of RBAC from other page, There should be only one page to manage RBAC and it should be Protected. Follow the project Navigation rule.
 
 ## Decisions
 
@@ -159,6 +166,8 @@ See: .planning/PROJECT.md
 - [Phase 11-debt-remediation 11-03]: xlsx high-severity CVEs (GHSA-4r6h-8v6p-xvw6, GHSA-5pgg-2g8v-p4x9) block CI at --audit-level=high; no upstream fix available; risk acceptance deferred to Plan 04
 - [Phase 11-debt-remediation 11-03]: npm audit --audit-level=high kept (not lowered to critical) until explicit Plan 04 risk-acceptance decision
 - [Phase 11-debt-remediation 11-04]: xlsx CVEs GHSA-4r6h-8v6p-xvw6 + GHSA-5pgg-2g8v-p4x9 risk accepted — outbound write-only path, no XLSX.read() on untrusted input; residual supply-chain vector mitigated by lockfile + CI audit gate; exceljs replacement deferred to future sprint
+- [Phase 12-full-rbac-page 12-01]: key-based remount pattern used for preSelectedStaffId in EditRoleDialog — react-hooks/set-state-in-effect blocks useEffect+setState; RBACDashboard passes key={selectedStaffId ?? 'no-selection'} to force remount with fresh useState(preSelectedStaffId ?? '') on each row selection
+- [Phase 12-full-rbac-page 12-01]: StaffDashboard Administration section fully removed; usePermissions/can/toast/Button/EditRoleDialog/editRoleOpen all cleaned up; StaffDashboard.test.tsx 3 Administration tests replaced with it.todo stubs
 
 ## Performance Metrics
 
@@ -196,8 +205,9 @@ See: .planning/PROJECT.md
 | 11-debt-remediation | 02 | 45min | 4 | 12 |
 | 11-debt-remediation | 03 | 5min | 2 | 1 |
 | 11-debt-remediation | 04 | 8min | 2 | 2 |
+| 12-full-rbac-page | 01 | 6min | 3 | 10 |
 
 ## Last Session
 
-- **Stopped at:** Completed 11-03-PLAN.md — CI workflow created; typecheck/lint/test GREEN; audit BLOCKED (xlsx CVE, documented for Plan 04)
-- **Timestamp:** 2026-04-27T22:05:00Z
+- **Stopped at:** Completed 12-01-PLAN.md — RbacRoute guard + RbacPage + RBACDashboard widget + EditRoleDialog preSelectedStaffId; typecheck/lint/test GREEN
+- **Timestamp:** 2026-04-27T22:36:00Z
