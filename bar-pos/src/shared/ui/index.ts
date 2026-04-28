@@ -125,6 +125,7 @@ export {
   SheetDescription,
 } from './sheet';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
+export { Switch } from './switch';
 export { ScrollAreaRoot, ScrollBar } from './scroll-area';
 export {
   Select,
@@ -149,5 +150,13 @@ export {
   CommandSeparator,
   CommandShortcut,
 } from './command';
-export { Popover, PopoverAnchor, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from './popover';
+export {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from './popover';
 export { IngredientAutocomplete } from './IngredientAutocomplete/IngredientAutocomplete';
