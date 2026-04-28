@@ -199,6 +199,8 @@ export type AppErrorCode =
   | 'AUDIT_WRITE_FAILED'
   | 'RAG_ERROR'
   | 'TOOL_EXECUTION_ERROR'
+  | 'STALE_VERSION' // row was updated by another terminal since last read
+  | 'NOT_FOUND_VERSIONED' // row missing under FOR UPDATE in versioned RPC
   | 'UNKNOWN_ERROR';
 
 /**
@@ -382,6 +384,27 @@ export const unknownError = (raw?: unknown): AppError => ({
   ...(raw !== undefined && { raw }),
 });
 
+/**
+ * Creates a stale-version conflict error.
+ * Raised when a versioned RPC detects expected_version mismatch (SQLSTATE P0V01),
+ * OR when a Group-B hook UPDATE with .eq('version', expected) returns 0 rows (PGRST116).
+ */
+export const staleVersionError = (raw?: unknown): AppError => ({
+  code: 'STALE_VERSION',
+  message: 'Updated by another terminal — please retry',
+  ...(raw !== undefined && { raw }),
+});
+
+/**
+ * Creates a not-found-under-FOR-UPDATE error (SQLSTATE P0V02).
+ * Toast copy approved verbatim 2026-04-28.
+ */
+export const notFoundVersionedError = (raw?: unknown): AppError => ({
+  code: 'NOT_FOUND_VERSIONED',
+  message: 'Record was deleted by another terminal.',
+  ...(raw !== undefined && { raw }),
+});
+
 // ============================================================================
 // SUPABASE ERROR PARSING
 // ============================================================================
@@ -420,6 +443,14 @@ export const parseSupabaseError = (error: PostgrestError): AppError => {
   // Row-level security violation
   if (code === '42501') {
     return authForbiddenError('appropriate');
+  }
+
+  // Optimistic concurrency conflict (Phase 15)
+  if (code === 'P0V01') {
+    return staleVersionError(error);
+  }
+  if (code === 'P0V02') {
+    return notFoundVersionedError(error);
   }
 
   // Check constraint violation
