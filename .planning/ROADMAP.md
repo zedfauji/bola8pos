@@ -19,7 +19,35 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [ ] **Phase 10: AI Slob Technical Debt Audit** — Audit lint/test/typecheck/E2E findings
 - [x] **Phase 11: AI Slob Technical Debt Remediation** — Typed agent queries, lint+test green, CI pipeline, CVE docs (completed 2026-04-27)
 - [x] **Phase 12: Full RBAC Management Page** — Dedicated admin-only /rbac page; remove role-editing from StaffDashboard; single source of truth for role management *(Complete 2026-04-27)*
-- [ ] **Phase 13: Full RBAC From Scratch** — Supabase RLS policies aligned with frontend role hierarchy; DB-level enforcement matching rbac.ts; hardened access control
+- [x] **Phase 13: Full RBAC From Scratch** — Supabase RLS policies aligned with frontend role hierarchy; DB-level enforcement matching rbac.ts; hardened access control *(Complete 2026-04-28)*
+
+### v2.1 — Cross-Pollination from billar-pos (planned 2026-04-28)
+
+Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-pollination list. Each phase has a populated CONTEXT.md ready for `/gsd-plan-phase`.
+
+- [ ] **Phase 14: Audit Logs Table** — Central `audit_logs(action, entity, before, after, user_id, terminal_id, ip, source)` + `record_audit` SECURITY DEFINER helper + manager+ `/audit` page w/ JSON-diff viewer
+- [ ] **Phase 15: Tabs Version (Optimistic Concurrency)** — `version` column on tabs/pool_sessions/caja_sessions + `expected_version` RPC param + `STALE_VERSION` error path + offline-queue conflict handling
+- [ ] **Phase 16: Kitchen/Bar Split Routing** — `category.routing` enum (KITCHEN|BAR|NONE) + new `/kds-bar` page (bartender+) + `RoutingBadge` widget
+- [ ] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups`
+- [ ] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI
+- [ ] **Phase 19: Tip Distribution Config** — Singleton `tip_distribution_config` (floor/bar/kitchen %) + `tip_distribution_entries` + close-caja allocation + Settings panel
+- [ ] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin
+- [ ] **Phase 21: i18n Multi-Language** — `react-i18next` + `es-MX`/`en-US` catalogs + `profiles.locale` + ESLint rule banning hard-coded strings
+- [ ] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)*
+- [ ] **Phase 23: Reopen Closed Ticket** — `reopen_tab` RPC + payment status `reopened_void` + caja offsetting entries + 24h/2x cap *(depends Phases 14, 15)*
+- [ ] **Phase 24: Operational Reports Suite + CSV** — 6 new RPCs (peak-hours, voids, deletions×2, modifier popularity, payment methods, charts-data) + generic CSV export action + Recharts widgets *(depends Phase 14)*
+- [ ] **Phase 25: Receipt Item Grouping (2-Level)** — Extend `receipt-format.ts` + Tauri Rust printer payload + PDF + KDS card all share `groupOrderItemsForReceipt`
+- [ ] **Phase 26: Floating Tables (`is_temp`)** — Generalize pool_tables → `resources` w/ FLOATING type + auto-deactivate trigger + waitlist auto-create flow
+- [ ] **Phase 27: One-Shot Inventory (Cigarette-Box Pattern)** — `open_units` table + `consume_open_unit` SQL fn + admin Open-Units tab + reportable lifecycle *(depends Phases 14, 17)*
+- [ ] **Phase 28: Money Formatter Utility** — Single `shared/lib/format.ts` (formatMoney/parseMoneyInput/formatPercent) backed by `Intl.NumberFormat` + codemod + ESLint rule `no-raw-money-format` *(depends Phase 21)*
+
+**Suggested execution order** (respecting deps; foundations first):
+1. **Foundations**: 14 → 15
+2. **Schema-touch parallel batch**: 16, 17, 18, 19, 20 (independent of each other, all depend on 14)
+3. **Audit-using parallel batch**: 22, 23 (depend on 14, 15)
+4. **Reports + UI**: 24 (depends 14), 25, 26
+5. **Cross-cutting**: 21 → 28 (28 depends 21)
+6. **Niche**: 27 (depends 14, 17)
 
 ---
 
@@ -322,12 +350,12 @@ Plans:
 **Plans:** 6 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Two SQL migrations: (1) DROP all existing RLS + CREATE role_permissions table + 52-row seed + all new policies; (2) RPC role guards for process_payment_atomic/process_refund/deplete_for_order_item/add_combo_to_tab (Wave 1) (RBAC13-01, RBAC13-02, RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06)
-- [ ] 13-02-PLAN.md — [BLOCKING] supabase db push + manual supabase.types.ts transcription for role_permissions (Wave 2) (RBAC13-01, RBAC13-02)
+- [x] 13-01-PLAN.md — Two SQL migrations: (1) DROP all existing RLS + CREATE role_permissions table + 52-row seed + all new policies; (2) RPC role guards for process_payment_atomic/process_refund/deplete_for_order_item/add_combo_to_tab (Wave 1) (RBAC13-01, RBAC13-02, RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06) — completed 2026-04-28
+- [x] 13-02-PLAN.md — [BLOCKING] supabase db push + manual supabase.types.ts transcription for role_permissions (Wave 2) (RBAC13-01, RBAC13-02) — completed 2026-04-28
 - [x] 13-03-PLAN.md — domain.ts RolePermissionSchema + entities/rbac/ FSD slice (types.ts, queries.ts with useRolePermissions Map hook, model/index.ts, index.ts) + 3 unit tests (Wave 3) (RBAC13-02, RBAC13-08) — completed 2026-04-28
 - [x] 13-04-PLAN.md — features/toggle-permission/ useMutationTogglePermission (INSERT/DELETE on role_permissions, invalidates rbacKeys) (Wave 4) (RBAC13-07) — completed 2026-04-28
 - [x] 13-05-PLAN.md — widgets/RBACDashboard/ PermissionMatrix component (22×4 Switch grid) + RBACDashboard.tsx extended with two-panel layout (Wave 5) (RBAC13-07, RBAC13-08) — completed 2026-04-28
-- [ ] 13-06-PLAN.md — E2E T-RP-01 through T-RP-05 in 09-rbac.spec.ts + unit test suite green + human sign-off checkpoint (Wave 6) (RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06, RBAC13-07, RBAC13-08, RBAC13-09)
+- [x] 13-06-PLAN.md — E2E T-RP-01 through T-RP-06 in 09-rbac.spec.ts + unit test suite green + human sign-off checkpoint (Wave 6) (RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06, RBAC13-07, RBAC13-08, RBAC13-09) — completed 2026-04-28
 
 **Success Criteria**:
 1. role_permissions table created with 52-row seed (bartender=9, manager=17, admin=22, kitchen=4)
@@ -339,6 +367,25 @@ Plans:
 7. /rbac page shows Permission Matrix (22×4 grid); admin can toggle rows
 8. E2E T-RP-01 through T-RP-03 pass in 09-rbac.spec.ts
 9. npm run test passes (no regressions)
+
+---
+
+### Phase 14: Audit Logs Table
+
+**Goal:** Add a first-class `audit_logs` table capturing every domain mutation with before/after JSON snapshots, actor, action label, entity type/id, terminal id, source, and timestamp. Wire it into all sensitive Supabase Edge Functions and SECURITY DEFINER RPCs via a single `record_audit` helper. Surface a manager+ `/audit` page with filters, pagination, and JSON-diff viewer. Replace logger-only forensics path with a durable, append-only compliance source.
+**Requirements:** TBD (POS-COMPARISON.md §15)
+**Depends on:** Phase 13
+
+**Success Criteria:**
+1. `audit_logs` table + `record_audit` SECURITY DEFINER helper migrated to remote Supabase
+2. Append-only RLS: INSERT via record_audit only; SELECT manager+; no UPDATE/DELETE
+3. All sensitive RPCs (process_payment, process_refund, void_order, close_tab, transfer_tab, caja_open/close, produce_prep_batch, update_role_permission, force_pin_change, manual_stock_movement, etc.) call `record_audit` post-mutation
+4. Sensitive Edge Functions call recordAudit via `_shared/audit.ts`
+5. Action-label enum in `shared/lib/audit-actions.ts` (Zod literal union); CI grep test asserts every record_audit call uses an enumerated action
+6. `/audit` page (manager+) with filters (action, entity_type, actor, date range, free text) + infinite scroll (page size 50) + JSON-diff viewer (custom `shared/lib/json-diff.ts`)
+7. `entities/audit-log/` FSD slice + `widgets/AuditLogTable/` + `pages/audit/index.tsx` + `AuditRoute` guard
+8. E2E `38-audit-logs.spec.ts` covers payment/refund/void → entry visible; bartender RBAC redirect from /audit
+9. `AUDIT_WRITE_FAILED` added to AppError union; payload >64KB truncated with `_truncated: true`
 
 ---
 
