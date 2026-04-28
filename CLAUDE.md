@@ -173,7 +173,7 @@ Realtime subscriptions are initialized in Zustand stores, not React components. 
 17 spec files — all must pass before release:
 `01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`
 
-Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')` — admin PIN is `0000`.
+Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin' | 'manager' | 'bartender' | 'kitchen')` — PINs are 6 digits, sourced from `.env.local` (`E2E_ADMIN_PIN`, `E2E_MANAGER_PIN`, `E2E_BARTENDER_PIN`, `E2E_KITCHEN_PIN`). PIN format is enforced by `PinSchema` in `domain.ts` (regex `^\d{6}$`).
 
 ## TypeScript Gotchas
 
