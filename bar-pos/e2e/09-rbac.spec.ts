@@ -197,4 +197,44 @@ test.describe('Role-Based Access', () => {
     // Button absent for bartender is also acceptable
     await logout(page);
   });
+
+  test('T-RBAC-page: admin can access /rbac page and open per-row edit role dialog', async ({ page }) => {
+    test.setTimeout(60_000);
+    await loginAs(page, 'admin');
+    await page.goto('/rbac');
+    await expect(page.getByRole('heading', { name: /roles & permissions/i })).toBeVisible({ timeout: 20_000 });
+
+    // Staff table should render with Edit Role buttons
+    const firstEditBtn = page.getByRole('button', { name: /edit role/i }).first();
+    await expect(firstEditBtn).toBeVisible({ timeout: 10_000 });
+
+    // Click first Edit Role button — dialog should open
+    await firstEditBtn.click();
+    await expect(page.getByRole('dialog', { name: /edit staff role/i })).toBeVisible({ timeout: 5_000 });
+
+    await logout(page);
+  });
+
+  test('T-RBAC-redirect: non-admin (bartender) visiting /rbac is redirected to /home', async ({ page }) => {
+    await loginAs(page, 'bartender');
+    await page.goto('/rbac');
+    await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
+    await logout(page);
+  });
+
+  test('T12: non-admin (manager) visiting /rbac is redirected to /home', async ({ page }) => {
+    await loginAs(page, 'manager');
+    await page.goto('/rbac');
+    await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
+    await logout(page);
+  });
+
+  test('T14: admin sees Roles & Permissions tile on home dashboard', async ({ page }) => {
+    await loginAs(page, 'admin');
+    await page.goto('/home');
+    await expect(
+      page.getByRole('button', { name: /roles.*permissions/i })
+    ).toBeVisible({ timeout: 15_000 });
+    await logout(page);
+  });
 });
