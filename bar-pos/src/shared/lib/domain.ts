@@ -49,6 +49,23 @@ export const UserRole = {
 
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
+// Phase 13: role_permissions table — DB-backed RBAC matrix.
+// One row per (role, action) pair that grants the permission.
+export const RolePermissionSchema = z.object({
+  id: UuidSchema,
+  role: UserRoleSchema,
+  action: z.string(),
+  createdAt: TimestampSchema,
+});
+
+export const RolePermissionCreateSchema = RolePermissionSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type RolePermission = z.infer<typeof RolePermissionSchema>;
+export type RolePermissionCreate = z.infer<typeof RolePermissionCreateSchema>;
+
 export const TabStatusSchema = z.enum(['open', 'closed', 'paid', 'voided', 'split']);
 export const TabStatus = {
   OPEN: 'open',
