@@ -387,6 +387,31 @@ Plans:
 8. E2E `38-audit-logs.spec.ts` covers payment/refund/void → entry visible; bartender RBAC redirect from /audit
 9. `AUDIT_WRITE_FAILED` added to AppError union; payload >64KB truncated with `_truncated: true`
 
+### Phase 15: Tabs Version (Optimistic Concurrency)
+
+**Goal:** Add `version int` column to `tabs`, `pool_sessions`, `caja_sessions`. Every mutation RPC accepts `p_expected_version` and bumps version on success; mismatch raises `STALE_VERSION` (SQLSTATE `P0V01`). Frontend mutation hooks read cached version, surface 'Updated by another terminal — please retry' toast on conflict, invalidate the entity query, and write `conflict.stale_version` to audit_logs. Offline queue replay drops stale actions with summary toast + audit row.
+**Requirements:** TBD (POS-COMPARISON.md §15) — phase scope locked in 15-CONTEXT.md (D-01..D-19)
+**Depends on:** Phase 14
+**Plans:** 1/6 plans complete
+
+Plans:
+- [x] 15-01-PLAN.md — Migration (version columns + bump_version_on_update trigger on 3 tables) + result.ts STALE_VERSION/NOT_FOUND_VERSIONED + SQLSTATE P0V01/P0V02 mapping (Wave 1) (D-01, D-02, D-06, D-13, D-18) ✓ 2026-04-28
+- [ ] 15-02-PLAN.md — 11 RPCs migrated with p_expected_version + guard block (close_tab, transfer_tab, void_order, process_payment, process_refund, add_combo_to_tab, assign_pool_session_to_tab, caja_open/close, register_caja_entry, start/stop_pool_timer) split across 2 SQL files (Wave 2) (D-04, D-05, D-14)
+- [ ] 15-03-PLAN.md — TanStack Query mutation hooks: tab + pool-table + caja queries.ts read cached version, pass to RPC, on STALE_VERSION invalidate + toast + record_audit best-effort (Wave 3) (D-07, D-08, D-09, D-15, D-17)
+- [ ] 15-04-PLAN.md — OfflineAction.expectedVersion + OfflineQueueProcessor STALE_VERSION drop + summary toast + offline.discarded_stale audit (Wave 4) (D-11, D-12, D-16)
+- [ ] 15-05-PLAN.md — [BLOCKING] supabase db push (Wave 5)
+- [ ] 15-06-PLAN.md — Tests: fast-check property test + per-RPC integration test (11 RPCs) + Playwright 39-concurrent-edits.spec.ts + verification gate (Wave 6) (D-19)
+
+**Success Criteria:**
+1. `version` column on tabs/pool_sessions/caja_sessions; `bump_version_on_update` trigger enforces +1 delta
+2. Custom SQLSTATE `P0V01`=STALE_VERSION + `P0V02`=NOT_FOUND_VERSIONED reserved (D-18)
+3. All 11 mutation RPCs accept `p_expected_version` and bump version on success
+4. Frontend hooks read cached version; STALE_VERSION → invalidate + toast + record_audit
+5. Offline queue drops stale actions with summary toast + audit row
+6. fast-check property + per-RPC integration + Playwright 39-concurrent-edits.spec.ts all green
+
+---
+
 ---
 
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
@@ -395,4 +420,5 @@ Plans:
 *Phase 11 added: 2026-04-27 — AI Slob Technical Debt Remediation.*
 *Phase 12 added: 2026-04-27 — Full RBAC Management Page.*
 *Phase 13 added: 2026-04-27 — Full RBAC From Scratch.*
+*Phase 15 planned: 2026-04-28 — 6 plans in 6 waves.*
 *Phase 13 planned: 2026-04-27 — 6 plans in 6 waves.*

@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination
-current_phase: 14
-current_plan: 6
-status: complete
-stopped_at: Phase 14 COMPLETE — all 6 plans executed, both migrations applied to remote DB, E2E spec parses 6 tests
-last_updated: "2026-04-28T19:30:00.000Z"
+current_phase: 15
+current_plan: 2
+status: executing
+stopped_at: Phase 15 Plan 01 complete (versioned rows foundation)
+last_updated: "2026-04-28T21:30:00.000Z"
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 83
-  completed_plans: 80
-  percent: 96
+  total_phases: 15
+  completed_phases: 10
+  total_plans: 90
+  completed_plans: 81
+  percent: 90
 ---
 
 # Session State
@@ -24,13 +24,14 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** Feature Expansion 2026 Q2 / v2.1
-**Current phase:** 14
-**Current plan:** 0 (planning complete, execution not started)
-**Status:** Phase 14 PLANNED
-**Progress:** [█████████░] 89%
+**Current phase:** 15
+**Current plan:** 2
+**Status:** Executing Phase 15
+**Progress:** [█████████░] 90%
 
 ## Session Log
 
+- 2026-04-28: **Phase 15 Plan 01 complete (45e110d, 3e1d29b)** — versioned_rows migration (version cols + bump_version_on_update trigger on tabs/pool_sessions/caja_sessions raising P0V01) + result.ts STALE_VERSION/NOT_FOUND_VERSIONED codes + parseSupabaseError P0V01/P0V02 mapping; typecheck pass; migration not pushed (deferred to plan 15-05 BLOCKING)
 - 2026-04-28: **Phase 14 PLAN.md complete** — 6-plan wave diagram: 14-01 (audit_logs migration), 14-02 (BLOCKING db push + types + domain + audit-actions), 14-03 (RPC wiring), 14-04 (json-diff + JsonDiffViewer + entities/audit-log + CI test), 14-05 (audit page + AuditRoute + router + HomeDashboard tile), 14-06 (E2E + verification gate); 19 new files, 6 modified files
 - 2026-04-28: **Phase 13 Plan 05 complete (f61501a)** — RBACDashboard composes Staff Roles + Permission Matrix two-panel layout
 - 2026-04-28: **Phase 13 Plan 05 Task 1 complete (bcc8536)** — shared/ui/switch.tsx (Radix umbrella import) + PermissionMatrix.tsx 22×4 grid + 4 RTL tests (88 switches, admin gate)
@@ -213,8 +214,9 @@ See: .planning/PROJECT.md
 | 11-debt-remediation | 04 | 8min | 2 | 2 |
 | 12-full-rbac-page | 01 | 6min | 3 | 10 |
 | 12-full-rbac-page | 02 | 4min | 2 | 5 |
+| 15-tabs-version-optimistic-concurrency | 01 | 5min | 2 | 2 |
 
 ## Last Session
 
-- **Stopped at:** Phase 14 UI-SPEC approved
-- **Timestamp:** 2026-04-28T15:25:00Z
+- **Stopped at:** Phase 15 Plan 01 complete (versioned rows foundation)
+- **Timestamp:** 2026-04-28T21:30:00Z
