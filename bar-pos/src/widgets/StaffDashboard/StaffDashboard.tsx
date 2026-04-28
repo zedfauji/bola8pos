@@ -1,9 +1,8 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 import { ClockInModal } from '@features/clock-in-staff';
 import { ClockOutDialog } from '@features/clock-out-staff';
-import { useOpenShifts, usePermissions, useStaffList } from '@entities/staff';
+import { useOpenShifts, useStaffList } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Shift, Staff } from '@shared/lib/domain';
 import { DataTable } from '@shared/ui/DataTable';
@@ -11,7 +10,6 @@ import { POSButton } from '@shared/ui/POSButton';
 import { ProtectedAction } from '@shared/ui/ProtectedAction';
 import { SectionHeader } from '@shared/ui/SectionHeader';
 import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 
 export type StaffShiftRow = {
   staff: Staff;
@@ -32,7 +30,6 @@ export function StaffDashboard() {
   const { data: staffList, isIdleOrLoading: staffLoading } = useStaffList();
   const { data: openShifts, isIdleOrLoading: shiftsLoading } = useOpenShifts();
   const currentRole = useStaffStore(s => s.currentStaff?.role);
-  const { can } = usePermissions();
 
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -156,47 +153,6 @@ export function StaffDashboard() {
         searchPlaceholder="Search staff…"
       />
 
-      {can('manage_staff') && (
-        <section className="space-y-3 rounded-lg border p-4">
-          <h2 className="text-lg font-semibold">Administration</h2>
-          <p className="text-sm text-muted-foreground">Manage staff accounts and roles.</p>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                toast.message('Add Staff', {
-                  description: 'Connect create-staff flow when ready.',
-                });
-              }}
-            >
-              Add Staff
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                toast.message('Edit Role', { description: 'Profile role editor coming soon.' });
-              }}
-            >
-              Edit Role
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                toast.message('Deactivate', { description: 'Deactivate staff flow coming soon.' });
-              }}
-            >
-              Deactivate
-            </Button>
-          </div>
-        </section>
-      )}
-
       <ClockInModal
         open={clockInStaff !== null}
         onOpenChange={next => {
@@ -218,6 +174,7 @@ export function StaffDashboard() {
         staff={clockOutTarget?.staff ?? null}
         shift={clockOutTarget?.shift ?? null}
       />
+
     </div>
   );
 }
