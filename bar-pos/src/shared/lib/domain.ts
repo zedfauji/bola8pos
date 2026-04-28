@@ -1831,3 +1831,27 @@ export const AuditLogFiltersSchema = z.object({
 });
 
 export type AuditLogFilters = z.infer<typeof AuditLogFiltersSchema>;
+
+// ============================================================================
+// OFFLINE ACTION QUEUE — Phase 15 Plan 04
+// Locked enum: 4 literals only. Pre-Phase-15 queues may contain other types
+// (e.g. 'close-tab') — store rehydration filters those out.
+// ============================================================================
+
+export const OfflineActionTypeSchema = z.enum([
+  'open-tab',
+  'place-order',
+  'start-pool-timer',
+  'stop-pool-timer',
+] as const);
+export type OfflineActionType = z.infer<typeof OfflineActionTypeSchema>;
+
+export const OfflineActionSchema = z.object({
+  id: UuidSchema,
+  type: OfflineActionTypeSchema,
+  payload: z.unknown(),
+  expectedVersion: z.number().int().min(0),
+  timestamp: z.number().int().nonnegative(),
+  retryCount: z.number().int().min(0),
+});
+export type OfflineAction = z.infer<typeof OfflineActionSchema>;

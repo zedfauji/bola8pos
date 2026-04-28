@@ -1,22 +1,24 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Tab } from '@shared/lib/domain';
+import {
+  OfflineActionTypeSchema,
+  type OfflineAction,
+  type OfflineActionType,
+  type Tab,
+} from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { ok, err, type Result } from '@shared/lib/result';
 
 // ============================================================================
 // OFFLINE ACTION QUEUE
+//
+// Phase 15 Plan 04: OfflineAction is now sourced from domain.ts (Zod single
+// source of truth). Locked enum: open-tab | place-order | start-pool-timer |
+// stop-pool-timer. Each entry carries an `expectedVersion` captured at enqueue
+// time so the OfflineQueueProcessor can drop stale actions on replay.
 // ============================================================================
 
-export type OfflineActionType = 'place-order' | 'open-tab' | 'start-pool-timer' | 'stop-pool-timer';
-
-export interface OfflineAction {
-  id: string;
-  type: OfflineActionType;
-  payload: unknown;
-  timestamp: number;
-  retryCount: number;
-}
+export type { OfflineAction, OfflineActionType };
 
 // ============================================================================
 // STATE & ACTIONS
@@ -201,6 +203,42 @@ export const useTabStore = create<TabsStore>()(
         selectedTabId: state.selectedTabId,
         offlineQueue: state.offlineQueue,
       }),
+      version: 2,
+      // Phase 15 Plan 04: legacy offlineQueue entries (pre-Phase-15) lack
+      // expectedVersion and may carry action types outside the locked enum
+      // (e.g. 'close-tab'). Default version to 0 and drop unknown types.
+      migrate: (persisted, _persistedVersion) => {
+        if (persisted == null || typeof persisted !== 'object') return persisted;
+        const p = persisted as { offlineQueue?: unknown };
+        if (!Array.isArray(p.offlineQueue)) return persisted;
+        const validTypes = new Set<string>(OfflineActionTypeSchema.options);
+        const upgraded: OfflineAction[] = [];
+        for (const raw of p.offlineQueue) {
+          if (raw == null || typeof raw !== 'object') continue;
+          const entry = raw as Partial<OfflineAction> & { type?: unknown };
+          if (typeof entry.type !== 'string' || !validTypes.has(entry.type)) {
+            logger.warn('offline_queue.legacy_entry_dropped_unknown_type', { type: entry.type });
+            continue;
+          }
+          if (typeof entry.expectedVersion !== 'number') {
+            logger.warn('offline_queue.legacy_entry', {
+              type: entry.type,
+              id: entry.id,
+            });
+            upgraded.push({
+              id: typeof entry.id === 'string' ? entry.id : crypto.randomUUID(),
+              type: entry.type,
+              payload: entry.payload,
+              expectedVersion: 0,
+              timestamp: typeof entry.timestamp === 'number' ? entry.timestamp : Date.now(),
+              retryCount: typeof entry.retryCount === 'number' ? entry.retryCount : 0,
+            });
+            continue;
+          }
+          upgraded.push(entry as OfflineAction);
+        }
+        return { ...p, offlineQueue: upgraded };
+      },
     }
   )
 );

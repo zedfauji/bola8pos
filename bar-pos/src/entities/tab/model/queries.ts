@@ -511,7 +511,13 @@ export function useMutationOpenTab() {
       if (!result.ok) {
         logger.error('tabs.open.mutation_failed', { message: result.error.message });
         if (result.error.code === 'NETWORK_OFFLINE') {
-          useTabStore.getState().enqueueOfflineAction({ type: 'open-tab', payload: input });
+          // Phase 15 Plan 04: open-tab creates a row — no prior version exists,
+          // so capture expectedVersion: 0.
+          useTabStore.getState().enqueueOfflineAction({
+            type: 'open-tab',
+            payload: input,
+            expectedVersion: 0,
+          });
           // Keep the optimistic tab in place so the UI stays usable offline.
           return;
         }
@@ -699,10 +705,22 @@ export function useMutationAddOrder() {
       const c = ctx as AddOrderContext | undefined;
       if (!result.ok) {
         if (result.error.code === 'NETWORK_OFFLINE') {
-          useTabStore.getState().enqueueOfflineAction({
-            type: 'place-order',
-            payload: variables,
-          });
+          // Phase 15 Plan 04: capture cached tab.version at enqueue time so the
+          // OfflineQueueProcessor can drop the action on STALE_VERSION.
+          {
+            const cachedTab = queryClient.getQueryData<Result<Tab>>(
+              tabKeys.detail(variables.tabId)
+            );
+            const expectedVersion =
+              cachedTab?.ok && typeof cachedTab.data.version === 'number'
+                ? cachedTab.data.version
+                : 0;
+            useTabStore.getState().enqueueOfflineAction({
+              type: 'place-order',
+              payload: variables,
+              expectedVersion,
+            });
+          }
           // Leave the optimistic order visible — the cache already has it.
           return;
         }

@@ -271,9 +271,12 @@ export function useMutationStartSession() {
     onSuccess: (result, variables, ctx) => {
       if (!result.ok) {
         if (result.error.code === 'NETWORK_OFFLINE') {
+          // Phase 15 Plan 04: start-pool-timer creates a new pool_session row
+          // (no prior version) — capture expectedVersion: 0.
           useTabStore.getState().enqueueOfflineAction({
             type: 'start-pool-timer',
             payload: variables,
+            expectedVersion: 0,
           });
           // Keep the optimistic 'occupied' status; sync will confirm it.
           return;
@@ -446,10 +449,25 @@ export function useMutationStopSession() {
     onSuccess: (result, variables, ctx) => {
       if (!result.ok) {
         if (result.error.code === 'NETWORK_OFFLINE') {
-          useTabStore.getState().enqueueOfflineAction({
-            type: 'stop-pool-timer',
-            payload: variables,
-          });
+          // Phase 15 Plan 04: capture cached pool_session.version at enqueue
+          // time. Look up the session via the pool_tables list cache (each
+          // table embeds its current session including version).
+          {
+            const tablesCache = queryClient.getQueryData<Result<PoolTable[]>>(poolTableKeys.all);
+            let expectedVersion = 0;
+            if (tablesCache?.ok) {
+              const t = tablesCache.data.find(
+                pt => pt.currentSession?.id === variables.sessionId
+              );
+              const v = t?.currentSession?.version;
+              if (typeof v === 'number') expectedVersion = v;
+            }
+            useTabStore.getState().enqueueOfflineAction({
+              type: 'stop-pool-timer',
+              payload: variables,
+              expectedVersion,
+            });
+          }
           // Keep the optimistic 'available' status; sync will confirm it.
           return;
         }
