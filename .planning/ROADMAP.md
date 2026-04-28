@@ -26,7 +26,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-pollination list. Each phase has a populated CONTEXT.md ready for `/gsd-plan-phase`.
 
 - [ ] **Phase 14: Audit Logs Table** — Central `audit_logs(action, entity, before, after, user_id, terminal_id, ip, source)` + `record_audit` SECURITY DEFINER helper + manager+ `/audit` page w/ JSON-diff viewer
-- [ ] **Phase 15: Tabs Version (Optimistic Concurrency)** — `version` column on tabs/pool_sessions/caja_sessions + `expected_version` RPC param + `STALE_VERSION` error path + offline-queue conflict handling
+- [x] **Phase 15: Tabs Version (Optimistic Concurrency)** — `version` column on tabs/pool_sessions/caja_sessions + `expected_version` RPC param + `STALE_VERSION` error path + offline-queue conflict handling (completed 2026-04-28)
 - [ ] **Phase 16: Kitchen/Bar Split Routing** — `category.routing` enum (KITCHEN|BAR|NONE) + new `/kds-bar` page (bartender+) + `RoutingBadge` widget
 - [ ] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups`
 - [ ] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI
@@ -392,15 +392,15 @@ Plans:
 **Goal:** Add `version int` column to `tabs`, `pool_sessions`, `caja_sessions`. Every mutation RPC accepts `p_expected_version` and bumps version on success; mismatch raises `STALE_VERSION` (SQLSTATE `P0V01`). Frontend mutation hooks read cached version, surface 'Updated by another terminal — please retry' toast on conflict, invalidate the entity query, and write `conflict.stale_version` to audit_logs. Offline queue replay drops stale actions with summary toast + audit row.
 **Requirements:** TBD (POS-COMPARISON.md §15) — phase scope locked in 15-CONTEXT.md (D-01..D-19)
 **Depends on:** Phase 14
-**Plans:** 4/6 plans complete
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 15-01-PLAN.md — Migration (version columns + bump_version_on_update trigger on 3 tables) + result.ts STALE_VERSION/NOT_FOUND_VERSIONED + SQLSTATE P0V01/P0V02 mapping (Wave 1) (D-01, D-02, D-06, D-13, D-18) ✓ 2026-04-28
 - [x] 15-02-PLAN.md — Group A RPC version guards (process_payment_atomic + create_order_with_items): p_expected_version int LAST + FOR UPDATE guard raising P0V01/P0V02 + version=version+1 on every successful UPDATE branch; Group B (9 hook-side paths) deferred to 15-03 per D-04/D-05/D-14 revised (Wave 2) ✓ 2026-04-28
 - [x] 15-03-PLAN.md — TanStack Query mutation hooks: handleVersionError helper @shared/lib + VersionConflictToast Storybook + version-aware useMutationAddOrder (Group A p_expected_version) + Group B `.eq('version', expected)` on tabs/pool_sessions/caja_sessions for useMutationUpdateTabStatus, useMutationRecordTabPayment(close), useMutationStopSession, useMutationCloseCaja(pre-RPC probe); 1123/1123 tests green; feature-layer hooks (close-tab, transfer-tab, void-order, refund, combo, assign-pool) + process_payment edge envelope deferred to follow-up (Rule 4) (Wave 3) (D-07, D-08, D-09, D-15, D-17) ✓ 2026-04-28
 - [x] 15-04-PLAN.md — OfflineAction.expectedVersion + OfflineQueueProcessor STALE_VERSION/NOT_FOUND_VERSIONED drop + summary toast + offline.discarded_stale audit; OfflineActionSchema (Zod) + locked 4-literal enum in domain.ts; persist v2 migrate (legacy queues default expectedVersion=0, drop unknown types); 4 enqueue call sites updated; 8 new tests (3 offline-summary + 5 OfflineQueueProcessor); 1131/1131 tests pass (Wave 4) (D-11, D-12, D-16) ✓ 2026-04-28
-- [ ] 15-05-PLAN.md — [BLOCKING] supabase db push (Wave 5)
-- [ ] 15-06-PLAN.md — Tests: fast-check property test + per-RPC integration test (11 RPCs) + Playwright 39-concurrent-edits.spec.ts + verification gate (Wave 6) (D-19)
+- [x] 15-05-PLAN.md — [BLOCKING] supabase db push (Wave 5)
+- [x] 15-06-PLAN.md — Tests: fast-check property test + per-RPC integration test (11 RPCs) + Playwright 39-concurrent-edits.spec.ts + verification gate (Wave 6) (D-19)
 
 **Success Criteria:**
 1. `version` column on tabs/pool_sessions/caja_sessions; `bump_version_on_update` trigger enforces +1 delta

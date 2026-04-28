@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination
 current_phase: 15
-current_plan: 5
+current_plan: 6
 status: executing
-stopped_at: Phase 15 Plan 04 complete (offline queue conflict-aware replay)
-last_updated: "2026-04-28T23:55:00.000Z"
+stopped_at: Phase 15 Plan 06 complete (concurrent-edits test layers)
+last_updated: "2026-04-28T23:21:13.137Z"
 progress:
   total_phases: 15
-  completed_phases: 10
+  completed_phases: 11
   total_plans: 90
-  completed_plans: 85
-  percent: 94
+  completed_plans: 86
+  percent: 96
 ---
 
 # Session State
@@ -25,12 +25,13 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2 / v2.1
 **Current phase:** 15
-**Current plan:** 5
+**Current plan:** 6
 **Status:** Executing Phase 15
-**Progress:** [█████████░] 94%
+**Progress:** [██████████] 96%
 
 ## Session Log
 
+- 2026-04-28: **Phase 15 Plan 06 complete (6e875ad, ca8deb0, c9e7884, e6b97ef)** — concurrent-edits test layers (D-19): fast-check property test queries.concurrent.test.ts (3 properties × 200 numRuns: Group A RPC pattern, Group B hook-optimistic pattern, retry-after-refetch edge — all green); Group A integration version-rpc-guard.test.ts (6/6 pass live remote: process_payment_atomic + create_order_with_items each P0V01 stale + happy + P0V02 missing); Group B integration version-hook-optimistic.test.ts (8/8 pass live remote: 4 entity-layer Group B paths × stale+fresh — tabs status, tabs close-on-payment, pool_sessions stop, caja_sessions close-probe; 5 feature-layer paths deferred per 15-03 Rule 4); Playwright e2e/39-concurrent-edits.spec.ts (T1 two-context stale-cache → 'Updated by another terminal — please retry' toast + refetch + retry — body correct, run blocked at loginAs by seed/env mismatch documented); CLAUDE.md spec list +39-concurrent-edits; typecheck + lint exit 0; full suite 1147/1163 pass + 15 todo + 2 skip + 1 PRE-EXISTING failure in useCloseTab.test.ts:95 confirmed unrelated by stash test
 - 2026-04-28: **Phase 15 Plan 04 complete (3737c72, ad4af3f)** — offline queue conflict-aware replay: OfflineActionSchema (Zod) + OfflineActionTypeSchema locked 4-literal enum (open-tab, place-order, start-pool-timer, stop-pool-timer) in domain.ts; OfflineAction.expectedVersion required; persist v2 migrate defaults expectedVersion=0 + drops unknown action types from legacy queues; 4 enqueueOfflineAction call sites pass expectedVersion (open-tab/start-pool-timer=0 for creation; place-order/stop-pool-timer captured from cached entity version); formatDiscardedSummary helper @shared/lib/offline-summary.ts (3 tests pass incl. fast-check property); OfflineQueueProcessor STALE_VERSION + NOT_FOUND_VERSIONED → drop (no retry) + writeDiscardAuditAsync(record_audit p_action='offline.discarded_stale') + post-batch summary toast 'Discarded N queued action(s) — data changed: <types>'; existing transient-error (NETWORK_OFFLINE) requeue behaviour preserved; 5 OfflineQueueProcessor tests pass; full suite 120 files / 1131 tests pass; typecheck + lint exit 0
 - 2026-04-28: **Phase 15 Plan 03 complete (ee487b3, 48f43e7, 91424d8)** — version-aware mutation hooks: handleVersionError helper @shared/lib/version-error.ts (invalidate + sonner toast 'Updated by another terminal — please retry' + best-effort record_audit fire-and-forget; NOT_FOUND_VERSIONED → 'Record was deleted by another terminal.'); VersionConflictToast wrapper + 2 Storybook stories (StaleVersion, NotFoundVersioned); 7/7 unit tests pass; TabSchema/PoolSessionBaseSchema/CajaSessionSchema gain optional version; supabase.types.ts manually extended (Docker unavailable) for tabs/pool_sessions/caja_sessions Row.version + p_expected_version on Group A RPCs; useMutationAddOrder passes p_expected_version (Group A); useMutationUpdateTabStatus + useMutationRecordTabPayment(close) + useMutationStopSession + useMutationCloseCaja(pre-RPC probe) use .eq('version', expected) + version: expected+1 (Group B); PGRST116 → staleVersionError; onError → handleVersionError; full suite 1123/1123 green, typecheck + lint clean; Rule 4 deviation: process_payment_atomic edge function envelope + 5 feature-layer hooks (close-tab, transfer-tab, void-order, process-refund, add-combo, assign-pool-session) deferred (documented in 15-03-SUMMARY.md)
 - 2026-04-28: **Phase 15 Plan 02 complete (4c6ca9d)** — Group A RPC version guards: process_payment_atomic + create_order_with_items now accept `p_expected_version int` (LAST positional, DEFAULT NULL) with canonical FOR UPDATE guard raising P0V01 (STALE_VERSION) / P0V02 (NOT_FOUND_VERSIONED); version=version+1 on every successful UPDATE branch (close, partial-pay, create_order); Rule 3 fix: re-raise P0V01/P0V02 in process_payment_atomic EXCEPTION block to bypass WHEN OTHERS swallow into ok=false; Rule 2 fix: bump version on partial-pay branch (concurrent partial-pay race); existing 14-03 success-path record_audit preserved; Group B (9 hook-side paths) deferred to 15-03; migration not pushed (deferred to 15-05 BLOCKING)
@@ -221,6 +222,7 @@ See: .planning/PROJECT.md
 | 15-tabs-version-optimistic-concurrency | 02 | ~10min | 1 | 1 |
 | 15-tabs-version-optimistic-concurrency | 03 | ~30min | 3 | 9 |
 | 15-tabs-version-optimistic-concurrency | 04 | ~25min | 2 | 9 |
+| Phase 15-tabs-version-optimistic-concurrency P06 | 50min | 4 tasks | 5 files |
 
 ## Last Session
 

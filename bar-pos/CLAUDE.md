@@ -50,11 +50,13 @@ npm run setup:dev    # Create dev users + seed data
 The codebase follows strict FSD with enforced import boundaries. ESLint (`eslint-plugin-boundaries`) will fail if you violate the layer hierarchy.
 
 **Import direction — each layer may only import from layers below it:**
+
 ```
 app → pages → widgets → features → entities → shared
 ```
 
 **Layer responsibilities:**
+
 - `app/` — Providers, router, Tauri initialization, global CSS
 - `pages/` — Thin route containers only; no logic, just layout + widgets
 - `widgets/` — Composite UI panels composing features + entities (e.g., `OrderPanel`, `ProductGrid`)
@@ -67,12 +69,14 @@ app → pages → widgets → features → entities → shared
 **Types:** Single source of truth is `src/shared/lib/domain.ts` (Zod schemas). Never manually write entity types — infer from Zod: `type Tab = z.infer<typeof TabSchema>`.
 
 **Generated files — never edit manually:**
+
 - `src/shared/lib/supabase.types.ts` — regenerate with `npx supabase gen types typescript`
 - `src/shared/ui/` — shadcn components, add new ones via `npx shadcn@latest add <component>`
 
 **Error handling:** All async operations return `Result<T>` from `src/shared/lib/result.ts` (`Ok(value)` / `Err(error)`). Use the logger from `src/shared/lib/logger.ts` for structured logging.
 
 **State:**
+
 - Zustand stores (`entities/*/model/store.ts`) — UI/local state and Supabase Realtime subscriptions
 - TanStack Query hooks (`entities/*/model/queries.ts`) — all server state, use optimistic updates for mutations
 
@@ -81,6 +85,7 @@ app → pages → widgets → features → entities → shared
 **Styling:** Tailwind CSS with CSS variables for theming. Dark mode is default. Use shadcn/ui components from `shared/ui/` before building custom ones.
 
 **Testing:**
+
 - Unit: Vitest + React Testing Library. Co-locate `.test.ts` files with source. Property-based tests via `fast-check` for pure utilities.
 - E2E: Playwright (`e2e/` directory). Config at `bar-pos/playwright.config.ts`. Videos + traces always recorded to `e2e-results/`. Tests require `.env.local` E2E credentials — see `CURSOR_VERIFICATION_PROMPT.md`.
 - Storybook: Required for every new `shared/ui/` component.
@@ -89,6 +94,7 @@ app → pages → widgets → features → entities → shared
 ## Adding a New Feature
 
 Follow the pattern in existing features (e.g., `src/features/add-item-to-tab/`):
+
 1. Define/extend Zod types in `src/shared/lib/domain.ts`
 2. Add entity model in `src/entities/<entity>/model/`
 3. Create feature folder in `src/features/<action-name>/` with mutation hook + UI
@@ -100,21 +106,21 @@ Refer to `bar-pos/FSD-STRUCTURE.md` and `bar-pos/DOMAIN-CONTRACTS.md` for detail
 
 All routes are registered in `src/app/router.tsx`. Protected by `<ProtectedRoute>`.
 
-| Path | Page | Notes |
-|------|------|-------|
-| `/home` | HomePage | Big-box nav dashboard |
-| `/pos` | PosPage | Tab order entry |
-| `/pool-tables` | PoolTablesPage | Pool table grid |
-| `/pool-tables/:tableId` | TableStatusPage | Single table detail |
-| `/inventory` | InventoryPage | Stock management (admin/manager) |
-| `/staff` | StaffPage | Staff management |
-| `/reports` | ReportsPage | Caja reports (gated by `ReportsRoute`) |
-| `/settings` | SettingsPage | Hardware + receipt settings (admin only) |
-| `/rappi` | RappiOrdersPage | Delivery orders |
-| `/payments` | PaymentsPage | Payments history |
-| `/login` | LoginPage | PIN login |
-| `/waitlist` | WaitlistPage | Walk-in queue management (manager+) |
-| `/rbac` | RbacPage | Role & permission management (admin only) |
+| Path                    | Page            | Notes                                     |
+| ----------------------- | --------------- | ----------------------------------------- |
+| `/home`                 | HomePage        | Big-box nav dashboard                     |
+| `/pos`                  | PosPage         | Tab order entry                           |
+| `/pool-tables`          | PoolTablesPage  | Pool table grid                           |
+| `/pool-tables/:tableId` | TableStatusPage | Single table detail                       |
+| `/inventory`            | InventoryPage   | Stock management (admin/manager)          |
+| `/staff`                | StaffPage       | Staff management                          |
+| `/reports`              | ReportsPage     | Caja reports (gated by `ReportsRoute`)    |
+| `/settings`             | SettingsPage    | Hardware + receipt settings (admin only)  |
+| `/rappi`                | RappiOrdersPage | Delivery orders                           |
+| `/payments`             | PaymentsPage    | Payments history                          |
+| `/login`                | LoginPage       | PIN login                                 |
+| `/waitlist`             | WaitlistPage    | Walk-in queue management (manager+)       |
+| `/rbac`                 | RbacPage        | Role & permission management (admin only) |
 
 ## Implemented Features (as of 2026-04-20)
 
@@ -136,18 +142,18 @@ All routes are registered in `src/app/router.tsx`. Protected by `<ProtectedRoute
 
 ## Key DB Tables (Remote Supabase)
 
-| Table | Description |
-|-------|-------------|
-| `profiles` | Staff accounts + roles |
-| `shifts` | Clock-in/out records |
-| `products` / `categories` | Menu catalog |
-| `tabs` / `order_items` | Orders |
-| `pool_tables` / `pool_sessions` | Pool table tracking |
-| `payments` | Payment records |
-| `inventory` | Stock levels (linked to `products` via `product_id`) |
-| `caja_sessions` | Daily cash register sessions |
-| `receipt_settings` | Per-terminal receipt config |
-| `rappi_orders` | Delivery order integration |
+| Table                           | Description                                          |
+| ------------------------------- | ---------------------------------------------------- |
+| `profiles`                      | Staff accounts + roles                               |
+| `shifts`                        | Clock-in/out records                                 |
+| `products` / `categories`       | Menu catalog                                         |
+| `tabs` / `order_items`          | Orders                                               |
+| `pool_tables` / `pool_sessions` | Pool table tracking                                  |
+| `payments`                      | Payment records                                      |
+| `inventory`                     | Stock levels (linked to `products` via `product_id`) |
+| `caja_sessions`                 | Daily cash register sessions                         |
+| `receipt_settings`              | Per-terminal receipt config                          |
+| `rappi_orders`                  | Delivery order integration                           |
 
 ## RBAC Actions
 
@@ -172,7 +178,7 @@ Realtime subscriptions are initialized in Zustand stores, not React components. 
 ## E2E Test Suite (`bar-pos/e2e/`)
 
 17 spec files — all must pass before release:
-`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`
+`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `39-concurrent-edits`
 
 Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')` — admin PIN is `0000`.
 
@@ -194,20 +200,20 @@ Current codes: `NETWORK_OFFLINE | AUTH_REQUIRED | AUTH_FORBIDDEN | NOT_FOUND | V
 
 ### Actual Stack (from package.json / tsconfig.json)
 
-| Technology | Version | Notes |
-|-----------|---------|-------|
-| React | 19.1.0 | Function components only; hooks-only |
-| TypeScript | 5.8.3 | strict mode; `exactOptionalPropertyTypes: true` |
-| Desktop runtime | Tauri 2 (`@tauri-apps/api ^2`) | **NOT Electron** — IPC via `invoke()` from `@tauri-apps/api/core` |
-| Build tool | Vite 7 | |
-| Server state | TanStack Query v5 (`@tanstack/react-query ^5`) | All server state via TanStack Query |
-| Local/UI state | Zustand v5 | Realtime subscriptions initialized in stores |
-| Validation | Zod v4 | Single source of truth for domain types in `src/shared/lib/domain.ts` |
-| Styling | Tailwind CSS v3 + shadcn/ui | Do not introduce new CSS systems |
-| Unit tests | Vitest v4 + React Testing Library v16 | `npm run test` |
-| Property-based | fast-check v4 | Use for billing math, boundary conditions |
-| E2E | Playwright v1.59 | `npm run test:e2e`; specs in `bar-pos/e2e/` |
-| Storybook | v10 | Required for new `shared/ui/` components |
+| Technology      | Version                                        | Notes                                                                 |
+| --------------- | ---------------------------------------------- | --------------------------------------------------------------------- |
+| React           | 19.1.0                                         | Function components only; hooks-only                                  |
+| TypeScript      | 5.8.3                                          | strict mode; `exactOptionalPropertyTypes: true`                       |
+| Desktop runtime | Tauri 2 (`@tauri-apps/api ^2`)                 | **NOT Electron** — IPC via `invoke()` from `@tauri-apps/api/core`     |
+| Build tool      | Vite 7                                         |                                                                       |
+| Server state    | TanStack Query v5 (`@tanstack/react-query ^5`) | All server state via TanStack Query                                   |
+| Local/UI state  | Zustand v5                                     | Realtime subscriptions initialized in stores                          |
+| Validation      | Zod v4                                         | Single source of truth for domain types in `src/shared/lib/domain.ts` |
+| Styling         | Tailwind CSS v3 + shadcn/ui                    | Do not introduce new CSS systems                                      |
+| Unit tests      | Vitest v4 + React Testing Library v16          | `npm run test`                                                        |
+| Property-based  | fast-check v4                                  | Use for billing math, boundary conditions                             |
+| E2E             | Playwright v1.59                               | `npm run test:e2e`; specs in `bar-pos/e2e/`                           |
+| Storybook       | v10                                            | Required for new `shared/ui/` components                              |
 
 ### Architecture
 
