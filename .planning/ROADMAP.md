@@ -18,6 +18,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [ ] **Phase 9: Auto-Update Service** — GitHub Releases updater with user confirm dialog (v2.1)
 - [ ] **Phase 10: AI Slob Technical Debt Audit** — Audit lint/test/typecheck/E2E findings
 - [x] **Phase 11: AI Slob Technical Debt Remediation** — Typed agent queries, lint+test green, CI pipeline, CVE docs (completed 2026-04-27)
+- [ ] **Phase 12: Full RBAC Management Page** — Dedicated admin-only /rbac page; remove role-editing from StaffDashboard; single source of truth for role management
 
 ---
 
@@ -288,7 +289,30 @@ Plans:
 
 ---
 
+### Phase 12: Full RBAC Management Page
+
+**Goal:** Create a dedicated `/rbac` route with a full RBAC management page (admin-only via `manage_staff`). Remove role-editing fragments from StaffDashboard. Single source of truth for role management. Follow project navigation patterns (route guard + lazy page + HomeDashboard tile).
+**Requirements:** RBAC-01, RBAC-02, RBAC-03, RBAC-04, RBAC-05, RBAC-06
+**Depends on:** Phase 11
+**Plans:** 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Core scaffolding: rbac-route.tsx + pages/rbac/index.tsx + widgets/RBACDashboard/ (DataTable + per-row Edit Role) + EditRoleDialog preSelectedStaffId prop + StaffDashboard Administration section removal (Wave 1) (RBAC-01, RBAC-02, RBAC-03, RBAC-04)
+- [ ] 12-02-PLAN.md — Wiring: router.tsx /rbac route + HomeDashboard ShieldCheck tile + CLAUDE.md routes table update + E2E tests T-RBAC-page + T-RBAC-redirect in 09-rbac.spec.ts (Wave 2) (RBAC-01, RBAC-05, RBAC-06)
+
+**Success Criteria**:
+1. `/rbac` route registered, admin-only via `RbacRoute` guard (redirects non-admin to /home)
+2. `RBACDashboard` widget shows DataTable of staff with Name, Role badge, and per-row "Edit Role" button
+3. Per-row Edit Role opens `EditRoleDialog` pre-seeded with that staff member's ID
+4. `StaffDashboard` has zero traces of Administration section or `EditRoleDialog` mount
+5. HomeDashboard shows "Roles & Permissions" tile with `ShieldCheck` icon, gated to admin
+6. E2E T-RBAC-page + T-RBAC-redirect pass in `09-rbac.spec.ts`
+7. typecheck + lint pass (0 errors/warnings)
+
+---
+
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
 *Phase 9 added: 2026-04-26 — v2.1 Auto-Update Service milestone.*
 *Phase 10 added: 2026-04-27 — AI Slob Technical Debt Audit.*
 *Phase 11 added: 2026-04-27 — AI Slob Technical Debt Remediation.*
+*Phase 12 added: 2026-04-27 — Full RBAC Management Page.*
