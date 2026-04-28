@@ -21,9 +21,31 @@
 BEGIN;
 
 -- =============================================================================
--- BLOCK 1: DROP ALL EXISTING POLICIES
+-- BLOCK 1: DROP ALL EXISTING POLICIES (dynamic — survives missing tables)
 -- =============================================================================
+-- Iterates pg_policies and drops every policy in the public schema. This avoids
+-- "relation does not exist" errors for tables removed/renamed in prior migrations
+-- (e.g. inventory_log → stock_movements, receipt_settings never created on this DB).
 
+DO $rls_drop$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN
+    SELECT schemaname, tablename, policyname
+    FROM pg_policies
+    WHERE schemaname = 'public'
+  LOOP
+    EXECUTE format('DROP POLICY %I ON %I.%I', r.policyname, r.schemaname, r.tablename);
+  END LOOP;
+END
+$rls_drop$;
+
+-- Original explicit DROP list preserved below as documentation (commented out).
+-- These would have been redundant after the dynamic drop above, and several reference
+-- relations that no longer exist (inventory_log, receipt_settings on some envs).
+
+/*
 -- profiles (20260414000009_rls_policies.sql)
 DROP POLICY IF EXISTS "profiles_select_all" ON profiles;
 DROP POLICY IF EXISTS "profiles_insert_admin" ON profiles;
@@ -113,10 +135,7 @@ DROP POLICY IF EXISTS "inventory_insert_manager_admin" ON inventory;
 DROP POLICY IF EXISTS "inventory_update_manager_admin" ON inventory;
 DROP POLICY IF EXISTS "inventory_delete_admin" ON inventory;
 
--- inventory_log (20260414000009_rls_policies.sql — table was renamed to stock_movements)
-DROP POLICY IF EXISTS "inventory_log_select_manager_admin" ON inventory_log;
-DROP POLICY IF EXISTS "inventory_log_insert_manager_admin" ON inventory_log;
-DROP POLICY IF EXISTS "inventory_log_delete_admin" ON inventory_log;
+-- inventory_log: table renamed to stock_movements — no DROPs needed (relation does not exist)
 
 -- Patchwork policies from 20260420000006_rls_updates.sql
 DROP POLICY IF EXISTS "tabs_update_bartender" ON tabs;
@@ -232,6 +251,7 @@ DROP POLICY IF EXISTS "receipt_settings_select_all" ON receipt_settings;
 DROP POLICY IF EXISTS "receipt_settings_insert_manager_admin" ON receipt_settings;
 DROP POLICY IF EXISTS "receipt_settings_update_manager_admin" ON receipt_settings;
 DROP POLICY IF EXISTS "receipt_settings_delete_admin" ON receipt_settings;
+*/
 
 -- =============================================================================
 -- BLOCK 2: CREATE role_permissions table + RLS
@@ -952,23 +972,19 @@ CREATE POLICY "settings_backups_update_admin" ON settings_backups
   WITH CHECK (get_user_role() = 'admin');
 
 -- ---------------------------------------------------------------------------
--- receipt_settings (all authenticated SELECT; manager+ write)
+-- receipt_settings (all authenticated SELECT; manager+ write) — guarded
 -- ---------------------------------------------------------------------------
-CREATE POLICY "receipt_settings_select_authenticated" ON receipt_settings
-  FOR SELECT TO authenticated USING (true);
-
-CREATE POLICY "receipt_settings_insert_admin" ON receipt_settings
-  FOR INSERT TO authenticated
-  WITH CHECK (get_user_role() IN ('manager', 'admin'));
-
-CREATE POLICY "receipt_settings_update_admin" ON receipt_settings
-  FOR UPDATE TO authenticated
-  USING (get_user_role() IN ('manager', 'admin'))
-  WITH CHECK (get_user_role() IN ('manager', 'admin'));
-
-CREATE POLICY "receipt_settings_delete_admin" ON receipt_settings
-  FOR DELETE TO authenticated
-  USING (get_user_role() = 'admin');
+-- Table may not exist on all environments. Skip block if missing.
+DO $rs$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'receipt_settings') THEN
+    EXECUTE $cp$CREATE POLICY "receipt_settings_select_authenticated" ON receipt_settings FOR SELECT TO authenticated USING (true)$cp$;
+    EXECUTE $cp$CREATE POLICY "receipt_settings_insert_admin" ON receipt_settings FOR INSERT TO authenticated WITH CHECK (get_user_role() IN ('manager', 'admin'))$cp$;
+    EXECUTE $cp$CREATE POLICY "receipt_settings_update_admin" ON receipt_settings FOR UPDATE TO authenticated USING (get_user_role() IN ('manager', 'admin')) WITH CHECK (get_user_role() IN ('manager', 'admin'))$cp$;
+    EXECUTE $cp$CREATE POLICY "receipt_settings_delete_admin" ON receipt_settings FOR DELETE TO authenticated USING (get_user_role() = 'admin')$cp$;
+  END IF;
+END
+$rs$;
 
 -- ---------------------------------------------------------------------------
 -- caja_sessions, caja_entries

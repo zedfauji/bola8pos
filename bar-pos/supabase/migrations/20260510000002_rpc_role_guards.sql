@@ -1,18 +1,20 @@
 -- =============================================================================
 -- Phase 13: RPC role guards for 4 SECURITY DEFINER functions
 --
--- Purpose: Patch 4 sensitive RPCs to enforce role-based access at function
--- entry, eliminating any path where the kitchen role (or unauthenticated
--- callers) can execute privileged operations.
---
--- Functions patched:
+-- Patches 4 sensitive RPCs to enforce role-based access at function entry.
 --   1. process_payment_atomic — uses p_staff_id lookup (NOT auth.uid()) because
 --      this RPC is called via service_role key from an edge function where
---      auth.uid() returns NULL. v_caller_role checked against profiles table.
---   2. process_refund — replaces broken SELECT...WHERE id = auth.uid() pattern
---      with standardized get_user_role() NOT IN ('manager', 'admin') guard.
+--      auth.uid() returns NULL.
+--   2. process_refund — replaces broken auth.uid() pattern with get_user_role()
+--      NOT IN ('manager', 'admin') guard.
 --   3. deplete_for_order_item (v2) — adds kitchen block at BEGIN entry.
 --   4. add_combo_to_tab — adds kitchen block at BEGIN entry.
+--
+-- Applied 2026-04-28 via Supabase Management API (apply_migration MCP) due to
+-- supabase CLI v2.90.0 splitter bug rejecting multi-statement function migrations
+-- with SQLSTATE 42601 "cannot insert multiple commands into a prepared statement".
+-- Functions 1-4 were applied as 4 separate statements; this file is the
+-- canonical single-source artifact.
 --
 -- Sources:
 --   process_payment_atomic: 20260429000000_process_payment_close_when_fully_paid.sql
@@ -21,15 +23,7 @@
 --   add_combo_to_tab:        20260428000005_add_combo_to_tab_depletion.sql
 -- =============================================================================
 
-BEGIN;
-
--- =============================================================================
--- 1. process_payment_atomic — role guard via p_staff_id (not auth.uid())
---
--- CRITICAL: This RPC is granted to service_role only. The Supabase edge function
--- calls it with a service_role key and passes p_staff_id as the acting user.
--- auth.uid() returns NULL in service_role context, so we query profiles directly
--- using p_staff_id to determine the caller's role.
+-- 1. process_payment_atomic
 -- =============================================================================
 CREATE OR REPLACE FUNCTION public.process_payment_atomic(
   p_tab_id UUID,
@@ -139,39 +133,19 @@ BEGIN
   END IF;
 
   INSERT INTO payments (
-    tab_id,
-    amount,
-    tip_amount,
-    method,
-    processed_by,
-    square_payment_id,
-    square_receipt_url,
-    tendered_amount,
-    reference_number,
-    idempotency_key,
-    discount_scope,
-    discount_type,
-    discount_value,
-    discount_amount
+    tab_id, amount, tip_amount, method, processed_by,
+    square_payment_id, square_receipt_url, tendered_amount,
+    reference_number, idempotency_key,
+    discount_scope, discount_type, discount_value, discount_amount
   ) VALUES (
-    p_tab_id,
-    ROUND(p_amount, 2),
-    ROUND(p_tip_amount, 2),
-    v_method,
-    p_staff_id,
-    NULL,
-    NULL,
+    p_tab_id, ROUND(p_amount, 2), ROUND(p_tip_amount, 2), v_method, p_staff_id,
+    NULL, NULL,
     CASE WHEN p_method = 'cash' THEN ROUND(p_tendered_amount, 2) ELSE NULL END,
-    NULLIF(TRIM(p_reference_number), ''),
-    p_idempotency_key,
-    p_discount_scope,
-    p_discount_type,
-    p_discount_value,
-    p_discount_amount
+    NULLIF(TRIM(p_reference_number), ''), p_idempotency_key,
+    p_discount_scope, p_discount_type, p_discount_value, p_discount_amount
   )
   RETURNING id INTO v_payment_id;
 
-  -- Subtotal from line items (excludes priced combo children) — same basis as split_tab_evenly
   SELECT COALESCE(ROUND(SUM(oi.unit_price * oi.quantity), 2), 0) INTO v_owed
   FROM order_items oi
   JOIN orders o ON o.id = oi.order_id
@@ -183,13 +157,9 @@ BEGIN
   WHERE p.tab_id = p_tab_id
     AND p.is_refund = false;
 
-  -- Close only when the tab's item subtotal is fully covered (multi-pay / split)
   IF v_paid_line + 0.0001 >= v_owed THEN
     UPDATE tabs
-    SET
-      status = 'paid'::tab_status,
-      closed_at = NOW(),
-      updated_at = NOW()
+    SET status = 'paid'::tab_status, closed_at = NOW(), updated_at = NOW()
     WHERE id = p_tab_id AND status = 'open'::tab_status;
 
     GET DIAGNOSTICS v_tab_updated = ROW_COUNT;
@@ -200,18 +170,13 @@ BEGIN
     END IF;
   END IF;
 
-  RETURN jsonb_build_object(
-    'ok', true,
-    'idempotent', false,
-    'paymentId', v_payment_id
-  );
+  RETURN jsonb_build_object('ok', true, 'idempotent', false, 'paymentId', v_payment_id);
 EXCEPTION
   WHEN unique_violation THEN
     SELECT id INTO v_existing_id FROM payments WHERE idempotency_key = p_idempotency_key LIMIT 1;
     IF v_existing_id IS NOT NULL THEN
       RETURN jsonb_build_object('ok', true, 'idempotent', true, 'paymentId', v_existing_id);
     END IF;
-    -- Multiple payments per tab are allowed: do not treat tab_id as idempotent
     RETURN jsonb_build_object('ok', false, 'code', 'DUPLICATE', 'message', 'Duplicate payment');
   WHEN OTHERS THEN
     RETURN jsonb_build_object('ok', false, 'code', 'INTERNAL', 'message', 'Payment failed');
@@ -221,13 +186,9 @@ $$;
 REVOKE ALL ON FUNCTION public.process_payment_atomic(UUID, UUID, NUMERIC, NUMERIC, TEXT, TEXT, NUMERIC, TEXT, TEXT, TEXT, TEXT, NUMERIC, NUMERIC) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.process_payment_atomic(UUID, UUID, NUMERIC, NUMERIC, TEXT, TEXT, NUMERIC, TEXT, TEXT, TEXT, TEXT, NUMERIC, NUMERIC) TO service_role;
 
+
 -- =============================================================================
--- 2. process_refund — standardize role guard to get_user_role() pattern
---
--- CHANGE: Replaces the broken "SELECT id INTO v_staff_id FROM profiles WHERE
--- id = auth.uid() AND role IN ('manager', 'admin')" pattern with the canonical
--- get_user_role() check. The v_staff_id variable is retained for audit_log
--- and refunds.created_by — still populated via auth.uid() later.
+-- 2. process_refund
 -- =============================================================================
 CREATE OR REPLACE FUNCTION process_refund(
   p_original_payment_id uuid,
@@ -353,13 +314,9 @@ $$;
 
 GRANT EXECUTE ON FUNCTION process_refund(uuid, jsonb, text, text) TO authenticated;
 
+
 -- =============================================================================
--- 3. deplete_for_order_item (v2) — add kitchen block at BEGIN entry
---
--- Source: 20260428000004_deplete_for_order_item_v2.sql
--- Change: adds role guard at the top of BEGIN block (before any logic).
--- Both overloads (v1 2-arg, v2 3-arg) remain — only v2 is patched here.
--- v1 overload was dropped in 20260506000003_fix_deplete_overload_ambiguity.sql.
+-- 3. deplete_for_order_item (v2)
 -- =============================================================================
 CREATE OR REPLACE FUNCTION deplete_for_order_item(
   p_order_item_id  uuid,
@@ -457,11 +414,9 @@ $$;
 
 GRANT EXECUTE ON FUNCTION deplete_for_order_item(uuid, smallint, boolean) TO authenticated;
 
+
 -- =============================================================================
--- 4. add_combo_to_tab — add kitchen block at BEGIN entry
---
--- Source: 20260428000005_add_combo_to_tab_depletion.sql
--- Change: adds role guard at the top of BEGIN block (before any logic).
+-- 4. add_combo_to_tab
 -- =============================================================================
 CREATE OR REPLACE FUNCTION add_combo_to_tab(
   p_combo_product_id      uuid,
@@ -717,14 +672,3 @@ $$;
 
 -- Grant execute to authenticated role (SECURITY DEFINER runs as function owner)
 GRANT EXECUTE ON FUNCTION add_combo_to_tab(uuid, uuid, jsonb, boolean, text) TO authenticated;
-
--- =============================================================================
--- DOWN:
--- Re-apply the original RPC migrations to restore:
--- 20260429000000_process_payment_close_when_fully_paid.sql
--- 20260427000005_fix_process_refund_idempotency.sql
--- 20260428000004_deplete_for_order_item_v2.sql
--- 20260428000005_add_combo_to_tab_depletion.sql
--- =============================================================================
-
-COMMIT;
