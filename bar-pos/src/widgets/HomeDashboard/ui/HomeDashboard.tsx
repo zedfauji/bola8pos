@@ -10,6 +10,7 @@ import {
   LogOut,
   Package,
   Settings,
+  ShieldCheck,
   Users,
   UtensilsCrossed,
 } from 'lucide-react';
@@ -76,6 +77,13 @@ const ITEMS: DashboardItem[] = [
     managerLabel: 'Manager',
   },
   {
+    path: '/rbac',
+    label: 'Roles & Permissions',
+    icon: ShieldCheck,
+    requiredAction: 'manage_staff',
+    managerLabel: 'Admin',
+  },
+  {
     path: '/kds',
     label: 'Kitchen Display',
     icon: UtensilsCrossed,
@@ -108,7 +116,7 @@ export function HomeDashboard() {
   }
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center gap-8 p-8">
+    <div className="flex w-full flex-col items-center justify-center gap-8 p-8">
       {/* Staff context */}
       {currentStaff && (
         <div className="flex items-center gap-3">

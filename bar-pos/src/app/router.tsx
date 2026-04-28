@@ -4,6 +4,7 @@ import { HelpSheet } from '@widgets/HelpSheet';
 import { AgentButton, AgentPanel } from '@features/agent-chat';
 import { ProtectedRoute } from './ProtectedRoute';
 import { KdsRoute } from './kds-route';
+import { RbacRoute } from './rbac-route';
 import { ReportsRoute } from './reports-route';
 import { WaitlistRoute } from './waitlist-route';
 
@@ -21,6 +22,7 @@ const PaymentsPage = lazy(() => import('../pages/payments'));
 const KdsPage = lazy(() => import('../pages/kds'));
 const KitchenPrepPage = lazy(() => import('../pages/kitchen-prep'));
 const WaitlistPage = lazy(() => import('../pages/waitlist'));
+const RbacPage = lazy(() => import('../pages/rbac'));
 
 function LoadingFallback() {
   return (
@@ -147,6 +149,16 @@ export function Router() {
                 <WaitlistRoute>
                   <WaitlistPage />
                 </WaitlistRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rbac"
+            element={
+              <ProtectedRoute>
+                <RbacRoute>
+                  <RbacPage />
+                </RbacRoute>
               </ProtectedRoute>
             }
           />
