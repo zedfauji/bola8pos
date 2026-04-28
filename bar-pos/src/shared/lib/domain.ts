@@ -425,6 +425,8 @@ export const TabSchema = z.object({
   splitMode: z.enum(['item', 'evenly', 'by_person', 'by_amount']).nullable().optional(),
   /** Display label for split sub-tabs (e.g. "Table 3 – Part 1") */
   splitLabel: z.string().max(50).nullable().optional(),
+  /** Phase 15: optimistic-concurrency version. Server bumps on every UPDATE. */
+  version: z.number().int().nonnegative().optional(),
 });
 
 export const TabCreateSchema = TabSchema.omit({
@@ -522,6 +524,8 @@ const PoolSessionBaseSchema = z.object({
   totalCharge: MoneySchema.nullable(),
   previousTableId: UuidSchema.nullable().optional(),
   previousTableNumber: z.number().int().nullable().optional(),
+  /** Phase 15: optimistic-concurrency version. Server bumps on every UPDATE. */
+  version: z.number().int().nonnegative().optional(),
 });
 
 // ============================================================================
@@ -870,6 +874,8 @@ export const CajaSessionSchema = z.object({
   status: CajaStatusSchema,
   openedByName: z.string().optional(),
   closedByName: z.string().nullable().optional(),
+  /** Phase 15: optimistic-concurrency version. Server bumps on every UPDATE. */
+  version: z.number().int().nonnegative().optional(),
 });
 
 export const CajaSessionCreateSchema = CajaSessionSchema.omit({

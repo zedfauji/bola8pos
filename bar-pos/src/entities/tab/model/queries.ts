@@ -21,6 +21,7 @@ import {
   err,
   networkOfflineError,
   ok,
+  staleVersionError,
   supabaseMutation,
   supabaseQuery,
   unknownError,
@@ -29,6 +30,7 @@ import {
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 import type { Json, Tables, TablesInsert } from '@shared/lib/supabase.types';
+import { handleVersionError } from '@shared/lib/version-error';
 import { useTabStore } from './store';
 import {
   TabSchema,
@@ -229,12 +231,19 @@ function mapTabRow(row: TabRow): Result<Tab> {
           ? { rappiOrderId: row.rappi_order_id }
           : {}),
         ...(hasActivePoolSession ? { hasActivePoolSession: true, activePoolTableNumber } : {}),
+        // Phase 15: optimistic-concurrency version (column added by 20260512000001_versioned_rows)
+        ...(typeof (row as { version?: number }).version === 'number'
+          ? { version: (row as { version?: number }).version }
+          : {}),
       })
     );
   } catch (e) {
     return err(unknownError(e));
   }
 }
+
+const TERMINAL_ID =
+  (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
 
 const tabListSelect = `
   *,
@@ -593,6 +602,14 @@ export function useMutationAddOrder() {
       if (!isOnline()) {
         return err(networkOfflineError());
       }
+      // Phase 15 Group A (D-04 revised): pass p_expected_version when cached
+      // tab carries a version. Server-side RPC raises P0V01 (STALE_VERSION) on
+      // mismatch; parseSupabaseError maps that to staleVersionError.
+      const cachedTab = queryClient.getQueryData<Result<Tab>>(tabKeys.detail(tabId));
+      const expectedVersion =
+        cachedTab?.ok && typeof cachedTab.data.version === 'number'
+          ? cachedTab.data.version
+          : undefined;
       const payload = {
         p_tab_id: tabId,
         p_staff_id: order.staffId,
@@ -600,6 +617,7 @@ export function useMutationAddOrder() {
         p_notes: order.notes ?? '',
         p_items: buildRpcItemsJson(items) as unknown as Json,
         p_skip_depletion: false,
+        ...(expectedVersion !== undefined ? { p_expected_version: expectedVersion } : {}),
       };
 
       const res = await supabaseQuery(() => supabase.rpc('create_order_with_items', payload));
@@ -703,6 +721,8 @@ export function useMutationAddOrder() {
         queryClient.setQueryData(tabKeys.detail(variables.tabId), prev);
       }
     },
+    // Phase 15: surface STALE_VERSION via handleVersionError when the cached
+    // Result carries a typed conflict error (set by mutationFn return path).
   });
 }
 
@@ -722,6 +742,38 @@ export function useMutationUpdateTabStatus() {
       tabId: string;
       status: Tab['status'];
     }): Promise<Result<Tab>> => {
+      // Phase 15 Group B (D-04 revised): optimistic-concurrency UPDATE.
+      // Read cached version, write expected+1, .eq('version', expected) — 0 rows
+      // affected (PGRST116) becomes STALE_VERSION.
+      const cached = queryClient.getQueryData<Result<Tab>>(tabKeys.detail(tabId));
+      const expected =
+        cached?.ok && typeof cached.data.version === 'number' ? cached.data.version : undefined;
+
+      if (expected !== undefined) {
+        const { data, error } = await supabase
+          .from('tabs')
+          .update({ status, version: expected + 1 })
+          .eq('id', tabId)
+          .eq('version', expected)
+          .select()
+          .single();
+        if (error?.code === 'PGRST116') {
+          return err(staleVersionError(error));
+        }
+        if (error) {
+          logger.error('tabs.status.update_failed', {
+            tabId,
+            code: error.code,
+            message: error.message,
+          });
+          return err(unknownError(error));
+        }
+        const m = mapTabRow(data as unknown as TabRow);
+        if (!m.ok) return m;
+        return ok(m.data);
+      }
+
+      // Fallback (no cached version yet — pre-15 semantics)
       const res = await supabaseMutation(() =>
         supabase.from('tabs').update({ status }).eq('id', tabId).select().single()
       );
@@ -759,6 +811,19 @@ export function useMutationUpdateTabStatus() {
       const c = ctx as UpdateTabStatusContext | undefined;
       if (!result.ok) {
         logger.error('tabs.status.mutation_failed', { message: result.error.message });
+        // Phase 15: STALE_VERSION / NOT_FOUND_VERSIONED → invalidate + toast + audit
+        const cachedVersion = c?.previousDetail?.ok
+          ? (c.previousDetail.data.version ?? 0)
+          : 0;
+        handleVersionError(result.error, {
+          queryClient,
+          queryKey: tabKeys.detail(variables.tabId),
+          entity: 'tabs',
+          entityId: variables.tabId,
+          expectedVersion: cachedVersion,
+          supabase,
+          terminalId: TERMINAL_ID,
+        });
         if (c?.previousStatus) {
           useTabStore.getState().updateTabStatus(variables.tabId, c.previousStatus);
         }
@@ -811,25 +876,61 @@ export function useMutationRecordTabPayment() {
       tenderedAmount?: number | null;
       referenceNumber?: string | null;
     }): Promise<Result<Tables<'payments'>>> => {
-      const tabRes = await supabaseMutation(() =>
-        supabase
+      // Phase 15 Group B: optimistic-concurrency UPDATE on tabs (close path).
+      // Uses .eq('version', expected) when cached version is available.
+      const cachedTab = queryClient.getQueryData<Result<Tab>>(tabKeys.detail(tabId));
+      const expected =
+        cachedTab?.ok && typeof cachedTab.data.version === 'number'
+          ? cachedTab.data.version
+          : undefined;
+
+      if (expected !== undefined) {
+        const { data: updRow, error: updErr } = await supabase
           .from('tabs')
           .update({
             status: 'paid',
             closed_at: new Date().toISOString(),
+            version: expected + 1,
           })
           .eq('id', tabId)
-      );
+          .eq('version', expected)
+          .select('id')
+          .single();
+        if (updErr?.code === 'PGRST116') {
+          return err(staleVersionError(updErr));
+        }
+        if (updErr) {
+          logger.error('tabs.close.update_failed', {
+            tabId,
+            code: updErr.code,
+            message: updErr.message,
+          });
+          return err(unknownError(updErr));
+        }
+        // updRow.id confirms the row was actually updated; PGRST116 already
+        // handled above so updRow should be non-null here.
+        void updRow;
+      } else {
+        const tabRes = await supabaseMutation(() =>
+          supabase
+            .from('tabs')
+            .update({
+              status: 'paid',
+              closed_at: new Date().toISOString(),
+            })
+            .eq('id', tabId)
+        );
 
-      if (!tabRes.ok) {
-        logger.error('tabs.close.update_failed', {
-          tabId,
-          code: tabRes.error.code,
-          message: tabRes.error.message,
-        });
-        return tabRes;
+        if (!tabRes.ok) {
+          logger.error('tabs.close.update_failed', {
+            tabId,
+            code: tabRes.error.code,
+            message: tabRes.error.message,
+          });
+          return tabRes;
+        }
+        // update() without select returns null data on success
       }
-      // update() without select returns null data on success
 
       const paymentInsert: TablesInsert<'payments'> = {
         tab_id: tabId,
@@ -866,7 +967,24 @@ export function useMutationRecordTabPayment() {
     },
 
     onSuccess: (result, variables) => {
-      if (!result.ok) return;
+      if (!result.ok) {
+        // Phase 15: surface STALE_VERSION on the tabs close UPDATE
+        const cachedTab = queryClient.getQueryData<Result<Tab>>(tabKeys.detail(variables.tabId));
+        const expected =
+          cachedTab?.ok && typeof cachedTab.data.version === 'number'
+            ? cachedTab.data.version
+            : 0;
+        handleVersionError(result.error, {
+          queryClient,
+          queryKey: tabKeys.detail(variables.tabId),
+          entity: 'tabs',
+          entityId: variables.tabId,
+          expectedVersion: expected,
+          supabase,
+          terminalId: TERMINAL_ID,
+        });
+        return;
+      }
       void queryClient.invalidateQueries({ queryKey: tabKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: tabKeys.detail(variables.tabId) });
     },

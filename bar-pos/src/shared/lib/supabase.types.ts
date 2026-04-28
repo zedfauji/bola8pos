@@ -191,6 +191,7 @@ export type Database = {
           opened_by: string;
           opening_cash: number;
           status: string;
+          version: number;
         };
         Insert: {
           closed_at?: string | null;
@@ -203,6 +204,7 @@ export type Database = {
           opened_by: string;
           opening_cash?: number;
           status?: string;
+          version?: number;
         };
         Update: {
           closed_at?: string | null;
@@ -215,6 +217,7 @@ export type Database = {
           opened_by?: string;
           opening_cash?: number;
           status?: string;
+          version?: number;
         };
         Relationships: [
           {
@@ -908,6 +911,7 @@ export type Database = {
           table_id: string;
           total_charge: number | null;
           updated_at: string;
+          version: number;
         };
         Insert: {
           billed_minutes?: number | null;
@@ -924,6 +928,7 @@ export type Database = {
           table_id: string;
           total_charge?: number | null;
           updated_at?: string;
+          version?: number;
         };
         Update: {
           billed_minutes?: number | null;
@@ -940,6 +945,7 @@ export type Database = {
           table_id?: string;
           total_charge?: number | null;
           updated_at?: string;
+          version?: number;
         };
         Relationships: [
           {
@@ -1938,6 +1944,7 @@ export type Database = {
           status: Database['public']['Enums']['tab_status'];
           table_number: number | null;
           updated_at: string;
+          version: number;
         };
         Insert: {
           caja_session_id?: string | null;
@@ -1958,6 +1965,7 @@ export type Database = {
           status?: Database['public']['Enums']['tab_status'];
           table_number?: number | null;
           updated_at?: string;
+          version?: number;
         };
         Update: {
           caja_session_id?: string | null;
@@ -1978,6 +1986,7 @@ export type Database = {
           status?: Database['public']['Enums']['tab_status'];
           table_number?: number | null;
           updated_at?: string;
+          version?: number;
         };
         Relationships: [
           {
@@ -2201,6 +2210,7 @@ export type Database = {
               p_staff_id: string;
               p_status: Database['public']['Enums']['order_status'];
               p_tab_id: string;
+              p_expected_version?: number;
             };
             Returns: Json;
           };
@@ -2256,6 +2266,7 @@ export type Database = {
           p_tab_id: string;
           p_tendered_amount?: number;
           p_tip_amount: number;
+          p_expected_version?: number;
         };
         Returns: Json;
       };
