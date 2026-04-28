@@ -160,3 +160,5 @@ export {
   PopoverTrigger,
 } from './popover';
 export { IngredientAutocomplete } from './IngredientAutocomplete/IngredientAutocomplete';
+export { JsonDiffViewer } from './JsonDiffViewer/JsonDiffViewer';
+export type { JsonDiffViewerProps } from './JsonDiffViewer/JsonDiffViewer';

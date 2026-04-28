@@ -1,0 +1,78 @@
+// src/entities/audit-log/model/queries.ts
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment,
+   @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+// Pre-regen cast: audit_logs table added in Phase 14; supabase.types.ts extended manually.
+import { useInfiniteQuery } from '@tanstack/react-query';
+
+import { AuditLogSchema } from '@shared/lib/domain';
+import type { AuditLog, AuditLogFilters } from '@shared/lib/domain';
+import { supabase } from '@shared/lib/supabase';
+
+const db = supabase as any;
+
+export const PAGE_SIZE = 50;
+
+export const auditKeys = {
+  all: ['audit-logs'] as const,
+  list: (filters: AuditLogFilters) => [...auditKeys.all, 'list', filters] as const,
+};
+
+function mapAuditRow(row: Record<string, unknown>): AuditLog {
+  return AuditLogSchema.parse({
+    id: row['id'],
+    actorId: row['actor_id'] ?? null,
+    action: row['action'],
+    entityType: row['entity_type'],
+    entityId: row['entity_id'] ?? null,
+    before: row['before'] ?? null,
+    after: row['after'] ?? null,
+    terminalId: row['terminal_id'] ?? null,
+    source: row['source'],
+    createdAt: new Date(row['created_at'] as string),
+  });
+}
+
+/**
+ * Infinite query for audit logs with filters.
+ * Page size: 50. Ordered by created_at DESC.
+ */
+export function useAuditLogs(filters: AuditLogFilters) {
+  return useInfiniteQuery({
+    queryKey: auditKeys.list(filters),
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }): Promise<AuditLog[]> => {
+      let query = db
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(pageParam, pageParam + PAGE_SIZE - 1);
+
+      if (filters.action) {
+        query = query.eq('action', filters.action);
+      }
+      if (filters.entityType) {
+        query = query.eq('entity_type', filters.entityType);
+      }
+      if (filters.actorId) {
+        query = query.eq('actor_id', filters.actorId);
+      }
+      if (filters.dateFrom) {
+        query = query.gte('created_at', filters.dateFrom.toISOString());
+      }
+      if (filters.dateTo) {
+        query = query.lte('created_at', filters.dateTo.toISOString());
+      }
+      if (filters.search) {
+        query = query.or(
+          `entity_id::text.ilike.%${filters.search}%,action.ilike.%${filters.search}%`,
+        );
+      }
+
+      const { data, error } = await query;
+      if (error) throw error as Error;
+      return ((data ?? []) as Record<string, unknown>[]).map(mapAuditRow);
+    },
+    getNextPageParam: (lastPage: AuditLog[], allPages: AuditLog[][]) =>
+      lastPage.length < PAGE_SIZE ? undefined : allPages.length * PAGE_SIZE,
+  });
+}
