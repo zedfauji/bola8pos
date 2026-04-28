@@ -18,7 +18,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [ ] **Phase 9: Auto-Update Service** — GitHub Releases updater with user confirm dialog (v2.1)
 - [ ] **Phase 10: AI Slob Technical Debt Audit** — Audit lint/test/typecheck/E2E findings
 - [x] **Phase 11: AI Slob Technical Debt Remediation** — Typed agent queries, lint+test green, CI pipeline, CVE docs (completed 2026-04-27)
-- [ ] **Phase 12: Full RBAC Management Page** — Dedicated admin-only /rbac page; remove role-editing from StaffDashboard; single source of truth for role management
+- [x] **Phase 12: Full RBAC Management Page** — Dedicated admin-only /rbac page; remove role-editing from StaffDashboard; single source of truth for role management *(Complete 2026-04-27)*
 
 ---
 
