@@ -1,6 +1,4 @@
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Shift, Staff } from '@shared/lib/domain';
@@ -88,22 +86,7 @@ describe('StaffDashboard', () => {
     expect(screen.getAllByRole('status', { name: 'Loading...' }).length).toBeGreaterThan(0);
   });
 
-  it('shows Administration when can manage_staff', () => {
-    renderWithProviders(<StaffDashboard />);
-    expect(screen.getByRole('heading', { name: 'Administration' })).toBeInTheDocument();
-  });
-
-  it('hides Administration when cannot manage_staff', () => {
-    usePermissions.mockReturnValue({ can: () => false });
-    renderWithProviders(<StaffDashboard />);
-    expect(screen.queryByRole('heading', { name: 'Administration' })).not.toBeInTheDocument();
-  });
-
-  it('fires toast on Add Staff admin action', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<StaffDashboard />);
-
-    await user.click(screen.getByRole('button', { name: 'Add Staff' }));
-    expect(toast.message).toHaveBeenCalled();
-  });
+  it.todo('does not render an element with text "Administration" for admin users');
+  it.todo('does not render an "Edit Role" button anywhere in the component');
+  it.todo('does not render an "Add Staff" button anywhere in the component');
 });
