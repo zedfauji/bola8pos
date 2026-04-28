@@ -269,6 +269,7 @@ export const StaffSchema = z.object({
   role: UserRoleSchema,
   pin: PinSchema,
   isActive: z.boolean(),
+  mustChangePin: z.boolean(),
 });
 
 export const StaffCreateSchema = StaffSchema.omit({ id: true });
@@ -1791,3 +1792,36 @@ export const ComboOverrideRowSchema = z.object({
   reason: z.string().nullable(),
 });
 export type ComboOverrideRow = z.infer<typeof ComboOverrideRowSchema>;
+
+// ============================================================================
+// AUDIT LOG (Phase 14)
+// ============================================================================
+
+export const AuditSourceSchema = z.enum(['rpc', 'edge', 'client', 'trigger']);
+export type AuditSource = z.infer<typeof AuditSourceSchema>;
+
+export const AuditLogSchema = z.object({
+  id: UuidSchema,
+  actorId: UuidSchema.nullable(),
+  action: z.string().min(1),
+  entityType: z.string().min(1),
+  entityId: UuidSchema.nullable(),
+  before: z.unknown().nullable(),
+  after: z.unknown().nullable(),
+  terminalId: z.string().nullable(),
+  source: AuditSourceSchema,
+  createdAt: TimestampSchema,
+});
+
+export type AuditLog = z.infer<typeof AuditLogSchema>;
+
+export const AuditLogFiltersSchema = z.object({
+  action: z.string().optional(),
+  entityType: z.string().optional(),
+  actorId: UuidSchema.optional(),
+  dateFrom: TimestampSchema.optional(),
+  dateTo: TimestampSchema.optional(),
+  search: z.string().optional(),
+});
+
+export type AuditLogFilters = z.infer<typeof AuditLogFiltersSchema>;

@@ -46,6 +46,53 @@ export type Database = {
           },
         ];
       };
+      audit_logs: {
+        Row: {
+          id: string;
+          actor_id: string | null;
+          action: string;
+          entity_type: string;
+          entity_id: string | null;
+          before: Json | null;
+          after: Json | null;
+          terminal_id: string | null;
+          source: 'rpc' | 'edge' | 'client' | 'trigger';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          actor_id?: string | null;
+          action: string;
+          entity_type: string;
+          entity_id?: string | null;
+          before?: Json | null;
+          after?: Json | null;
+          terminal_id?: string | null;
+          source?: 'rpc' | 'edge' | 'client' | 'trigger';
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          actor_id?: string | null;
+          action?: string;
+          entity_type?: string;
+          entity_id?: string | null;
+          before?: Json | null;
+          after?: Json | null;
+          terminal_id?: string | null;
+          source?: 'rpc' | 'edge' | 'client' | 'trigger';
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'audit_logs_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       agent_audit_log: {
         Row: {
           id: string;
@@ -1313,6 +1360,7 @@ export type Database = {
           email: string | null;
           id: string;
           is_active: boolean;
+          must_change_pin: boolean;
           name: string;
           pin: string;
           role: Database['public']['Enums']['user_role'];
@@ -1324,6 +1372,7 @@ export type Database = {
           email?: string | null;
           id: string;
           is_active?: boolean;
+          must_change_pin?: boolean;
           name: string;
           pin: string;
           role?: Database['public']['Enums']['user_role'];
@@ -1335,6 +1384,7 @@ export type Database = {
           email?: string | null;
           id?: string;
           is_active?: boolean;
+          must_change_pin?: boolean;
           name?: string;
           pin?: string;
           role?: Database['public']['Enums']['user_role'];
@@ -2217,6 +2267,17 @@ export type Database = {
           p_reason: string;
         };
         Returns: string;
+      };
+      record_audit: {
+        Args: {
+          p_action: string;
+          p_entity_type: string;
+          p_entity_id?: string | null;
+          p_before?: Json | null;
+          p_after?: Json | null;
+          p_source?: string;
+        };
+        Returns: string | null;
       };
       record_stock_movement: {
         Args: {
