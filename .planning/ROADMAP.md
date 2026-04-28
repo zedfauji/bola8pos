@@ -392,11 +392,11 @@ Plans:
 **Goal:** Add `version int` column to `tabs`, `pool_sessions`, `caja_sessions`. Every mutation RPC accepts `p_expected_version` and bumps version on success; mismatch raises `STALE_VERSION` (SQLSTATE `P0V01`). Frontend mutation hooks read cached version, surface 'Updated by another terminal — please retry' toast on conflict, invalidate the entity query, and write `conflict.stale_version` to audit_logs. Offline queue replay drops stale actions with summary toast + audit row.
 **Requirements:** TBD (POS-COMPARISON.md §15) — phase scope locked in 15-CONTEXT.md (D-01..D-19)
 **Depends on:** Phase 14
-**Plans:** 1/6 plans complete
+**Plans:** 2/6 plans complete
 
 Plans:
 - [x] 15-01-PLAN.md — Migration (version columns + bump_version_on_update trigger on 3 tables) + result.ts STALE_VERSION/NOT_FOUND_VERSIONED + SQLSTATE P0V01/P0V02 mapping (Wave 1) (D-01, D-02, D-06, D-13, D-18) ✓ 2026-04-28
-- [ ] 15-02-PLAN.md — 11 RPCs migrated with p_expected_version + guard block (close_tab, transfer_tab, void_order, process_payment, process_refund, add_combo_to_tab, assign_pool_session_to_tab, caja_open/close, register_caja_entry, start/stop_pool_timer) split across 2 SQL files (Wave 2) (D-04, D-05, D-14)
+- [x] 15-02-PLAN.md — Group A RPC version guards (process_payment_atomic + create_order_with_items): p_expected_version int LAST + FOR UPDATE guard raising P0V01/P0V02 + version=version+1 on every successful UPDATE branch; Group B (9 hook-side paths) deferred to 15-03 per D-04/D-05/D-14 revised (Wave 2) ✓ 2026-04-28
 - [ ] 15-03-PLAN.md — TanStack Query mutation hooks: tab + pool-table + caja queries.ts read cached version, pass to RPC, on STALE_VERSION invalidate + toast + record_audit best-effort (Wave 3) (D-07, D-08, D-09, D-15, D-17)
 - [ ] 15-04-PLAN.md — OfflineAction.expectedVersion + OfflineQueueProcessor STALE_VERSION drop + summary toast + offline.discarded_stale audit (Wave 4) (D-11, D-12, D-16)
 - [ ] 15-05-PLAN.md — [BLOCKING] supabase db push (Wave 5)

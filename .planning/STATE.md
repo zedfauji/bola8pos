@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination
 current_phase: 15
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Phase 15 Plan 01 complete (versioned rows foundation)
-last_updated: "2026-04-28T21:30:00.000Z"
+stopped_at: Phase 15 Plan 02 complete (Group A RPC version guards)
+last_updated: "2026-04-28T22:00:00.000Z"
 progress:
   total_phases: 15
   completed_phases: 10
   total_plans: 90
-  completed_plans: 81
-  percent: 90
+  completed_plans: 82
+  percent: 91
 ---
 
 # Session State
@@ -25,12 +25,13 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2 / v2.1
 **Current phase:** 15
-**Current plan:** 2
+**Current plan:** 3
 **Status:** Executing Phase 15
-**Progress:** [█████████░] 90%
+**Progress:** [█████████░] 91%
 
 ## Session Log
 
+- 2026-04-28: **Phase 15 Plan 02 complete (4c6ca9d)** — Group A RPC version guards: process_payment_atomic + create_order_with_items now accept `p_expected_version int` (LAST positional, DEFAULT NULL) with canonical FOR UPDATE guard raising P0V01 (STALE_VERSION) / P0V02 (NOT_FOUND_VERSIONED); version=version+1 on every successful UPDATE branch (close, partial-pay, create_order); Rule 3 fix: re-raise P0V01/P0V02 in process_payment_atomic EXCEPTION block to bypass WHEN OTHERS swallow into ok=false; Rule 2 fix: bump version on partial-pay branch (concurrent partial-pay race); existing 14-03 success-path record_audit preserved; Group B (9 hook-side paths) deferred to 15-03; migration not pushed (deferred to 15-05 BLOCKING)
 - 2026-04-28: **Phase 15 Plan 01 complete (45e110d, 3e1d29b)** — versioned_rows migration (version cols + bump_version_on_update trigger on tabs/pool_sessions/caja_sessions raising P0V01) + result.ts STALE_VERSION/NOT_FOUND_VERSIONED codes + parseSupabaseError P0V01/P0V02 mapping; typecheck pass; migration not pushed (deferred to plan 15-05 BLOCKING)
 - 2026-04-28: **Phase 14 PLAN.md complete** — 6-plan wave diagram: 14-01 (audit_logs migration), 14-02 (BLOCKING db push + types + domain + audit-actions), 14-03 (RPC wiring), 14-04 (json-diff + JsonDiffViewer + entities/audit-log + CI test), 14-05 (audit page + AuditRoute + router + HomeDashboard tile), 14-06 (E2E + verification gate); 19 new files, 6 modified files
 - 2026-04-28: **Phase 13 Plan 05 complete (f61501a)** — RBACDashboard composes Staff Roles + Permission Matrix two-panel layout
@@ -215,8 +216,9 @@ See: .planning/PROJECT.md
 | 12-full-rbac-page | 01 | 6min | 3 | 10 |
 | 12-full-rbac-page | 02 | 4min | 2 | 5 |
 | 15-tabs-version-optimistic-concurrency | 01 | 5min | 2 | 2 |
+| 15-tabs-version-optimistic-concurrency | 02 | ~10min | 1 | 1 |
 
 ## Last Session
 
-- **Stopped at:** Phase 15 Plan 01 complete (versioned rows foundation)
-- **Timestamp:** 2026-04-28T21:30:00Z
+- **Stopped at:** Phase 15 Plan 02 complete (Group A RPC version guards)
+- **Timestamp:** 2026-04-28T22:00:00Z
