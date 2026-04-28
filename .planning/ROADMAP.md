@@ -19,6 +19,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [ ] **Phase 10: AI Slob Technical Debt Audit** — Audit lint/test/typecheck/E2E findings
 - [x] **Phase 11: AI Slob Technical Debt Remediation** — Typed agent queries, lint+test green, CI pipeline, CVE docs (completed 2026-04-27)
 - [x] **Phase 12: Full RBAC Management Page** — Dedicated admin-only /rbac page; remove role-editing from StaffDashboard; single source of truth for role management *(Complete 2026-04-27)*
+- [ ] **Phase 13: Full RBAC From Scratch** — Supabase RLS policies aligned with frontend role hierarchy; DB-level enforcement matching rbac.ts; hardened access control
 
 ---
 
@@ -311,8 +312,40 @@ Plans:
 
 ---
 
+---
+
+### Phase 13: Full RBAC From Scratch
+
+**Goal:** Implement full RBAC enforcement from scratch — Supabase RLS policies aligned with frontend role hierarchy, dynamic permission management, and hardened DB-level access control. The frontend `rbac.ts` role map is the source of truth; RLS must enforce the same rules server-side.
+**Requirements:** RBAC13-01, RBAC13-02, RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06, RBAC13-07, RBAC13-08, RBAC13-09
+**Depends on:** Phase 12
+**Plans:** 6 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Two SQL migrations: (1) DROP all existing RLS + CREATE role_permissions table + 52-row seed + all new policies; (2) RPC role guards for process_payment_atomic/process_refund/deplete_for_order_item/add_combo_to_tab (Wave 1) (RBAC13-01, RBAC13-02, RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06)
+- [ ] 13-02-PLAN.md — [BLOCKING] supabase db push + manual supabase.types.ts transcription for role_permissions (Wave 2) (RBAC13-01, RBAC13-02)
+- [ ] 13-03-PLAN.md — domain.ts RolePermissionSchema + entities/rbac/ FSD slice (types.ts, queries.ts with useRolePermissions Map hook, model/index.ts, index.ts) + 3 unit tests (Wave 3) (RBAC13-02, RBAC13-08)
+- [ ] 13-04-PLAN.md — features/toggle-permission/ useMutationTogglePermission (INSERT/DELETE on role_permissions, invalidates rbacKeys) (Wave 4) (RBAC13-07)
+- [ ] 13-05-PLAN.md — widgets/RBACDashboard/ PermissionMatrix component (22×4 Switch grid) + RBACDashboard.tsx extended with two-panel layout (Wave 5) (RBAC13-07, RBAC13-08)
+- [ ] 13-06-PLAN.md — E2E T-RP-01 through T-RP-05 in 09-rbac.spec.ts + unit test suite green + human sign-off checkpoint (Wave 6) (RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06, RBAC13-07, RBAC13-08, RBAC13-09)
+
+**Success Criteria**:
+1. role_permissions table created with 52-row seed (bartender=9, manager=17, admin=22, kitchen=4)
+2. All existing RLS policies replaced with get_user_role() + EXISTS subquery variants
+3. Kitchen role correctly scoped: SELECT on tabs/orders/order_items/ingredients/stock_movements/shifts (own only); INSERT/UPDATE on shifts + prep_productions
+4. rappi_orders scoped to bartender+ (replaces broken tenant_id check)
+5. process_payment_atomic blocked for kitchen via p_staff_id role check
+6. process_refund uses get_user_role() guard (manager+ only, standardized)
+7. /rbac page shows Permission Matrix (22×4 grid); admin can toggle rows
+8. E2E T-RP-01 through T-RP-03 pass in 09-rbac.spec.ts
+9. npm run test passes (no regressions)
+
+---
+
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
 *Phase 9 added: 2026-04-26 — v2.1 Auto-Update Service milestone.*
 *Phase 10 added: 2026-04-27 — AI Slob Technical Debt Audit.*
 *Phase 11 added: 2026-04-27 — AI Slob Technical Debt Remediation.*
 *Phase 12 added: 2026-04-27 — Full RBAC Management Page.*
+*Phase 13 added: 2026-04-27 — Full RBAC From Scratch.*
+*Phase 13 planned: 2026-04-27 — 6 plans in 6 waves.*
