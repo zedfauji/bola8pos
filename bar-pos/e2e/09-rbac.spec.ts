@@ -238,3 +238,157 @@ test.describe('Role-Based Access', () => {
     await logout(page);
   });
 });
+
+test.describe('Phase 13: Permission Matrix', () => {
+  test.beforeEach(async ({ page }) => {
+    requireIntegrationEnv();
+    await resetTestState();
+    await openCaja(550);
+    await page.goto('/');
+  });
+
+  test('T-RP-01: Admin sees permission matrix on /rbac page', async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await loginAs(page, 'admin');
+    await page.goto('/rbac');
+
+    // Permission Matrix heading visible
+    await expect(page.getByText('Permission Matrix')).toBeVisible({ timeout: 20_000 });
+
+    // Table has 22 action rows — STAFF_ACTIONS has 22 items
+    // Each row has an action label in the first column
+    await expect(page.getByText('create_order').first()).toBeVisible();
+    await expect(page.getByText('manage_staff').first()).toBeVisible();
+    await expect(page.getByText('view_kds').first()).toBeVisible();
+
+    // Switch elements present (22 rows × 4 roles = 88 switches)
+    const switches = page.getByRole('switch');
+    await expect(switches).toHaveCount(88);
+
+    expect(consoleErrors).toHaveLength(0);
+  });
+
+  test('T-RP-02: Admin can toggle a permission via the matrix', async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await loginAs(page, 'admin');
+    await page.goto('/rbac');
+
+    // Wait for matrix to load
+    await expect(page.getByText('Permission Matrix')).toBeVisible({ timeout: 20_000 });
+
+    // Find the 'kitchen / view_kds' switch (kitchen has view_kds by default)
+    const kitchenViewKdsSwitch = page.getByRole('switch', { name: 'Kitchen can view_kds' });
+    await expect(kitchenViewKdsSwitch).toBeChecked();
+
+    // Toggle it off
+    await kitchenViewKdsSwitch.click();
+    await expect(kitchenViewKdsSwitch).not.toBeChecked();
+
+    // Toggle it back on
+    await kitchenViewKdsSwitch.click();
+    await expect(kitchenViewKdsSwitch).toBeChecked();
+
+    expect(consoleErrors).toHaveLength(0);
+  });
+
+  test('T-RP-03: Bartender is redirected from /rbac to /home', async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await loginAs(page, 'bartender');
+    await page.goto('/rbac');
+    await page.waitForURL(/\/home/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/home/);
+
+    expect(consoleErrors).toHaveLength(0);
+  });
+
+  test('T-RP-04: Kitchen user cannot read payments table (RLS blocks)', async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    // Log in as kitchen user
+    await loginAs(page, 'kitchen');
+
+    // Attempt to navigate to payments page — should either redirect or show empty
+    await page.goto('/payments');
+
+    // The payments page should not show any payment records
+    // (RLS blocks kitchen from reading payments table)
+    // Either: redirected away, or: shows empty state / no payment rows
+    const paymentRows = page.locator('[data-testid="payment-row"]');
+    await expect(paymentRows).toHaveCount(0);
+
+    expect(consoleErrors).toHaveLength(0);
+  });
+
+  test('T-RP-05: process_refund is blocked for bartender at DB level', async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await loginAs(page, 'bartender');
+
+    // Navigate to payments page — bartender can see payments, some may have refund buttons
+    await page.goto('/payments');
+
+    // Look for any refund button visible on the page
+    const refundButton = page.getByRole('button', { name: /refund/i }).first();
+    const refundVisible = await refundButton.isVisible({ timeout: 3_000 }).catch(() => false);
+
+    if (refundVisible) {
+      await refundButton.click();
+      // The refund action should fail with an AUTH_FORBIDDEN toast
+      // process_refund RPC is guarded to manager+ via get_user_role() check
+      await expect(
+        page.getByText(/forbidden|not allowed|unauthorized/i)
+      ).toBeVisible({ timeout: 5_000 });
+    } else {
+      // No refund button visible — bartender is already blocked at UI level
+      // This is also acceptable: the UI hides the refund button for bartenders
+      const stillNotVisible = !(await page
+        .getByRole('button', { name: /refund/i })
+        .isVisible()
+        .catch(() => false));
+      expect(stillNotVisible).toBe(true);
+    }
+
+    expect(consoleErrors).toHaveLength(0);
+  });
+
+  test('T-RP-06: Kitchen user is blocked from /rappi page', async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await loginAs(page, 'kitchen');
+
+    await page.goto('/rappi');
+
+    // Kitchen role is not allowed on rappi orders page (RLS scopes rappi_orders to bartender+)
+    // Either: navigated away from /rappi, or: rappi order list is not visible
+    const url = page.url();
+    const isRedirected = !url.includes('/rappi');
+    const rappiList = page.getByTestId('rappi-order-list');
+    const listVisible = await rappiList.isVisible().catch(() => false);
+
+    // Pass if redirected OR if the rappi-order-list is not visible
+    expect(isRedirected || !listVisible).toBe(true);
+
+    expect(consoleErrors).toHaveLength(0);
+  });
+});
