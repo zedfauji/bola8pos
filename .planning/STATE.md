@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 12
-current_plan: 2
-status: complete
-stopped_at: Completed 12-02-PLAN.md — /rbac route wired + Roles & Permissions HomeDashboard tile + T-RBAC-page/T-RBAC-redirect/T12/T14 E2E tests; typecheck/lint/test GREEN
-last_updated: "2026-04-28T04:01:00Z"
+current_phase: 13
+current_plan: 5
+status: in_progress
+stopped_at: Completed 13-03/04/05 sequentially — entities/rbac/ slice + features/toggle-permission + widgets PermissionMatrix; 5 atomic commits; 10 unit tests pass; only 13-06 (E2E) remaining
+last_updated: "2026-04-28T15:25:00Z"
 progress:
-  total_phases: 12
-  completed_phases: 12
-  total_plans: 71
-  completed_plans: 71
-  percent: 100
+  total_phases: 13
+  completed_phases: 9
+  total_plans: 77
+  completed_plans: 73
+  percent: 95
 ---
 
 # Session State
@@ -31,6 +31,10 @@ See: .planning/PROJECT.md
 
 ## Session Log
 
+- 2026-04-28: **Phase 13 Plan 05 complete (f61501a)** — RBACDashboard composes Staff Roles + Permission Matrix two-panel layout
+- 2026-04-28: **Phase 13 Plan 05 Task 1 complete (bcc8536)** — shared/ui/switch.tsx (Radix umbrella import) + PermissionMatrix.tsx 22×4 grid + 4 RTL tests (88 switches, admin gate)
+- 2026-04-28: **Phase 13 Plan 04 complete (eebc92d)** — features/toggle-permission/ useMutationTogglePermission INSERT/DELETE; 3 unit tests; invalidates rbacKeys.list() onSuccess
+- 2026-04-28: **Phase 13 Plan 03 complete (5087d42, a60815a)** — RolePermissionSchema in domain.ts + entities/rbac/ FSD slice; useRolePermissions returns Result<Map<StaffRole, Set<StaffAction>>>; 3 unit tests
 - 2026-04-28: **Phase 12 Plan 02 complete** — /rbac route wired (8051884) + Roles & Permissions HomeDashboard tile + CLAUDE.md routes table updated; T-RBAC-page/T-RBAC-redirect/T12/T14 E2E tests (5fdba18); HomeDashboard lock icon count fix (a8b1332); 2 tasks, 5 files; typecheck/lint/test GREEN (1104 pass, 15 todo)
 - 2026-04-27: **Phase 12 Plan 01 complete** — RbacRoute guard (501c036) + EditRoleDialog preSelectedStaffId + StaffDashboard Administration removed (3ce2029) + RBACDashboard widget + RbacPage + barrel (5c97c9a); 3 tasks, 10 files; typecheck/lint/test GREEN (1104 pass, 15 todo)
 - 2026-04-27: Plan 09-05 complete — UpdaterProvider wired into providers.tsx (063c8f3); E2E smoke spec 18-updater.spec.ts (abb10e3); Phase 9 14/14 unit tests GREEN; typecheck PASS; lint clean on plan files (agent/ pre-existing errors out of scope); CHECKPOINT awaiting human verify
@@ -211,5 +215,5 @@ See: .planning/PROJECT.md
 
 ## Last Session
 
-- **Stopped at:** Completed 12-02-PLAN.md — /rbac route wired + Roles & Permissions HomeDashboard tile + T-RBAC-page/T-RBAC-redirect/T12/T14 E2E tests; typecheck/lint/test GREEN
-- **Timestamp:** 2026-04-28T04:01:00Z
+- **Stopped at:** Completed 13-03/04/05 sequentially — entities/rbac/ + features/toggle-permission/ + widgets/RBACDashboard/PermissionMatrix two-panel layout; 5 commits; 10 unit tests pass; typecheck + lint clean; only 13-06 (E2E suite + human sign-off) remaining in Phase 13
+- **Timestamp:** 2026-04-28T15:25:00Z

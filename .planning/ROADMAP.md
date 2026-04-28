@@ -324,9 +324,9 @@ Plans:
 Plans:
 - [ ] 13-01-PLAN.md — Two SQL migrations: (1) DROP all existing RLS + CREATE role_permissions table + 52-row seed + all new policies; (2) RPC role guards for process_payment_atomic/process_refund/deplete_for_order_item/add_combo_to_tab (Wave 1) (RBAC13-01, RBAC13-02, RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06)
 - [ ] 13-02-PLAN.md — [BLOCKING] supabase db push + manual supabase.types.ts transcription for role_permissions (Wave 2) (RBAC13-01, RBAC13-02)
-- [ ] 13-03-PLAN.md — domain.ts RolePermissionSchema + entities/rbac/ FSD slice (types.ts, queries.ts with useRolePermissions Map hook, model/index.ts, index.ts) + 3 unit tests (Wave 3) (RBAC13-02, RBAC13-08)
-- [ ] 13-04-PLAN.md — features/toggle-permission/ useMutationTogglePermission (INSERT/DELETE on role_permissions, invalidates rbacKeys) (Wave 4) (RBAC13-07)
-- [ ] 13-05-PLAN.md — widgets/RBACDashboard/ PermissionMatrix component (22×4 Switch grid) + RBACDashboard.tsx extended with two-panel layout (Wave 5) (RBAC13-07, RBAC13-08)
+- [x] 13-03-PLAN.md — domain.ts RolePermissionSchema + entities/rbac/ FSD slice (types.ts, queries.ts with useRolePermissions Map hook, model/index.ts, index.ts) + 3 unit tests (Wave 3) (RBAC13-02, RBAC13-08) — completed 2026-04-28
+- [x] 13-04-PLAN.md — features/toggle-permission/ useMutationTogglePermission (INSERT/DELETE on role_permissions, invalidates rbacKeys) (Wave 4) (RBAC13-07) — completed 2026-04-28
+- [x] 13-05-PLAN.md — widgets/RBACDashboard/ PermissionMatrix component (22×4 Switch grid) + RBACDashboard.tsx extended with two-panel layout (Wave 5) (RBAC13-07, RBAC13-08) — completed 2026-04-28
 - [ ] 13-06-PLAN.md — E2E T-RP-01 through T-RP-05 in 09-rbac.spec.ts + unit test suite green + human sign-off checkpoint (Wave 6) (RBAC13-03, RBAC13-04, RBAC13-05, RBAC13-06, RBAC13-07, RBAC13-08, RBAC13-09)
 
 **Success Criteria**:
