@@ -55,6 +55,7 @@ fix_lint.cjs
 docs/
 .planning/
 
-# Markdown docs (CLAUDE.md is the exception — it's project instructions)
+# Markdown docs (CLAUDE.md and AGENTS.md are exceptions — project instructions)
 *.md
 !CLAUDE.md
+!AGENTS.md
