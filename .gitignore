@@ -7,7 +7,8 @@
 .agents/
 .claude/
 .claude-flow/
-.cursor/
+.cursor/*
+!.cursor/environment.json
 .kiro/
 .paperclip/
 .swarm/
