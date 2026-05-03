@@ -103,6 +103,7 @@ describe('TabDetail', () => {
     role: 'bartender',
     pin: '123456',
     isActive: true,
+    mustChangePin: false,
   };
 
   const mockManager: Staff = {
@@ -112,6 +113,7 @@ describe('TabDetail', () => {
     role: 'manager',
     pin: '654321',
     isActive: true,
+    mustChangePin: false,
   };
 
   beforeEach(() => {
@@ -412,6 +414,7 @@ describe('TabDetail', () => {
         role: 'admin',
         pin: '901234',
         isActive: true,
+        mustChangePin: false,
       };
 
       vi.mocked(useTab).mockReturnValue({

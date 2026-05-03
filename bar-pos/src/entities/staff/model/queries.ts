@@ -438,6 +438,35 @@ export function useMutationClockOut() {
   });
 }
 
+export function useMutationUpdateStaffRole() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Result<Staff>, Error, { staffId: string; role: Staff['role'] }>({
+    mutationFn: async ({ staffId, role }): Promise<Result<Staff>> => {
+      const res = await supabaseMutation(() =>
+        supabase.from('profiles').update({ role }).eq('id', staffId).select().single()
+      );
+
+      if (!res.ok) {
+        logger.error('staff.update_role.failed', { message: res.error.message });
+        return res;
+      }
+
+      // res.data is guaranteed to be the single updated profile row
+      const m = mapStaffRow(res.data as unknown as Tables<'profiles'>);
+      if (!m.ok) {
+        logger.error('staff.update_role.map_failed', { message: m.error.message });
+        return m;
+      }
+
+      return m;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: staffKeys.list() });
+    },
+  });
+}
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 // db is typed as any because order_items/payments columns may not be in supabase.types.ts yet.
 // Regenerate types and remove this cast when the generated types are up to date.

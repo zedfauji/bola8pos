@@ -70,6 +70,7 @@ const mockBartender: Staff = {
   role: 'bartender',
   pin: '123456',
   isActive: true,
+  mustChangePin: false,
 };
 
 const mockManager: Staff = {
@@ -79,6 +80,7 @@ const mockManager: Staff = {
   role: 'manager',
   pin: '654321',
   isActive: true,
+  mustChangePin: false,
 };
 
 const singleOrderTab: Tab = {

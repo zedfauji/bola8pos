@@ -115,6 +115,7 @@ const mockStaff = {
   role: 'manager' as const,
   pin: '789012',
   isActive: true,
+  mustChangePin: false,
 };
 
 function makeTab(overrides: Partial<Tab> & { id: string; customerName: string }): Tab {

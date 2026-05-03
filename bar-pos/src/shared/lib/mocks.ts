@@ -117,26 +117,39 @@ type Scenario = {
   lowStockItems: Inventory[];
 };
 
-type StaffRole = 'bartender' | 'manager' | 'admin';
+type StaffRole = 'bartender' | 'manager' | 'admin' | 'kitchen';
 
-const staffRoleDefaults: Record<StaffRole, Pick<Staff, 'name' | 'email' | 'pin' | 'role'>> = {
+const staffRoleDefaults: Record<
+  StaffRole,
+  Pick<Staff, 'name' | 'email' | 'pin' | 'role' | 'mustChangePin'>
+> = {
   bartender: {
     name: 'Alex Rivera',
     email: 'alex.rivera@ball8.bar',
     pin: '123456',
     role: 'bartender',
+    mustChangePin: false,
   },
   manager: {
     name: 'Jordan Kim',
     email: 'jordan.kim@ball8.bar',
     pin: '234567',
     role: 'manager',
+    mustChangePin: false,
   },
   admin: {
     name: 'Sam Patel',
     email: 'sam.patel@ball8.bar',
     pin: '345678',
     role: 'admin',
+    mustChangePin: false,
+  },
+  kitchen: {
+    name: 'Chef Maria',
+    email: 'maria.kitchen@ball8.bar',
+    pin: '456789',
+    role: 'kitchen',
+    mustChangePin: false,
   },
 };
 

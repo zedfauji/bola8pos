@@ -14,6 +14,7 @@ const staff: Staff = {
   role: 'bartender',
   pin: '123456',
   isActive: true,
+  mustChangePin: false,
 };
 
 const shift: Shift = {

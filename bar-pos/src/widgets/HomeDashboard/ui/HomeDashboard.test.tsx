@@ -41,6 +41,7 @@ const mockBartender = {
   role: 'bartender' as const,
   pin: '123456',
   isActive: true,
+  mustChangePin: false,
 };
 
 const mockManager = {
@@ -50,6 +51,7 @@ const mockManager = {
   role: 'manager' as const,
   pin: '789012',
   isActive: true,
+  mustChangePin: false,
 };
 
 const mockLogout = vi.fn();

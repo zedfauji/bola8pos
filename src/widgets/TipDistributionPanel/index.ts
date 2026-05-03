@@ -1,1 +1,0 @@
-export { TipDistributionPanel } from './TipDistributionPanel';

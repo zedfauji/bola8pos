@@ -149,6 +149,7 @@ beforeEach(() => {
       role: 'manager',
       pin: '123456',
       isActive: true,
+      mustChangePin: false,
     },
     currentShift: null,
     staffList: [],

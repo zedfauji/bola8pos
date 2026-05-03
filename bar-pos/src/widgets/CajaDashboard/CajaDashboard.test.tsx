@@ -122,6 +122,7 @@ const testStaff = {
   role: 'admin' as const,
   pin: '0000',
   isActive: true,
+  mustChangePin: false,
 };
 
 // ---------------------------------------------------------------------------

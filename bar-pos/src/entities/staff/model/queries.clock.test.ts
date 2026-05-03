@@ -147,6 +147,7 @@ describe('useMutationClockIn', () => {
         role: 'bartender',
         pin: '123456',
         isActive: true,
+        mustChangePin: false,
       },
       currentShift: null,
       staffList: [],
@@ -208,6 +209,7 @@ describe('useMutationClockIn', () => {
         role: 'bartender',
         pin: '123456',
         isActive: true,
+        mustChangePin: false,
       },
       currentShift: null,
       staffList: [],
@@ -272,6 +274,7 @@ describe('useMutationClockOut', () => {
         role: 'bartender',
         pin: '123456',
         isActive: true,
+        mustChangePin: false,
       },
       currentShift: {
         id: openShiftId,

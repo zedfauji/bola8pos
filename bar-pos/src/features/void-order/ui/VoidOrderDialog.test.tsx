@@ -33,6 +33,7 @@ const mockStaff = {
   role: 'bartender' as const,
   pin: '123456',
   isActive: true,
+  mustChangePin: false,
 };
 
 const mockOrder: Order = {

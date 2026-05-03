@@ -1,1 +1,0 @@
-export { ProductSalesPanel } from './ProductSalesPanel';
