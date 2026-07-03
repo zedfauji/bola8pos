@@ -55,8 +55,8 @@ test.describe('Kitchen Prep', () => {
     // Open the form
     await page.getByRole('button', { name: /new prep batch/i }).click();
 
-    // Dialog should appear
-    await expect(page.getByRole('dialog')).toBeVisible();
+    // Dialog should appear (scoped by name — the AI assistant side panel is also role="dialog")
+    await expect(page.getByRole('dialog', { name: 'Record prep batch' })).toBeVisible();
     await expect(page.getByText('Record prep batch')).toBeVisible();
 
     // Search for Salsa Mexicana in autocomplete
@@ -77,8 +77,8 @@ test.describe('Kitchen Prep', () => {
     // Success toast
     await expect(page.getByText(/Batch recorded/i)).toBeVisible({ timeout: 10_000 });
 
-    // Dialog closes
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5_000 });
+    // Dialog closes (scoped by name — the AI assistant side panel is also role="dialog")
+    await expect(page.getByRole('dialog', { name: 'Record prep batch' })).not.toBeVisible({ timeout: 5_000 });
 
     // Salsa Mexicana PrepOnHandCard shows updated qty (10.00)
     // (The card updates via TanStack Query cache invalidation)

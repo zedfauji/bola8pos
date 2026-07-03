@@ -122,7 +122,11 @@ export function DataTable<T>({
             </TableHeader>
             <TableBody>
               {Array.from({ length: 5 }).map((_, i) => (
-                <TableRowSkeleton key={i} columns={columns.length} />
+                <TableRow key={i}>
+                  <TableCell colSpan={columns.length} className="p-0">
+                    <TableRowSkeleton columns={columns.length} className="border-b-0 px-4" />
+                  </TableCell>
+                </TableRow>
               ))}
             </TableBody>
           </Table>

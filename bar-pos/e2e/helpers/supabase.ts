@@ -718,22 +718,30 @@ export async function seedE2ePrepKitchenFixture(): Promise<void> {
 }
 
 /**
- * Resets the Tomato raw ingredient stock to 0 so 21-prep.spec.ts T5
- * ("insufficient stock" path) is deterministic in isolation.
- * Tomato is the raw ingredient consumed by the Salsa Mexicana prep recipe (100g per batch).
+ * Resets raw ingredients consumed by the Salsa Mexicana prep recipe to their
+ * seed-prep.ts baselines (Tomato 2000g, Onion 300g) so 21-prep.spec.ts's
+ * T2 → T4 → T5 sequence is deterministic regardless of leftover state from
+ * prior runs: T2 consumes 1000g Tomato + 100g Onion, T4 consumes the
+ * remaining 1000g Tomato + another 100g Onion, then T5's "insufficient
+ * stock" assertion is correctly reached once Tomato hits 0.
+ * Matches on exact names (not ilike) to avoid colliding with fixture
+ * ingredients like "E2E Prep Raw Tomato".
  * Call from test.beforeAll in 21-prep.spec.ts.
  */
 export async function resetPrepIngredientStock(): Promise<void> {
   const admin = getServiceClient() as unknown as {
     from: (table: string) => {
-      select: (cols: string) => { ilike: (col: string, val: string) => { limit: (n: number) => Promise<{ data: { id: string }[] | null }> } };
+      select: (cols: string) => { eq: (col: string, val: string) => { limit: (n: number) => Promise<{ data: { id: string }[] | null }> } };
       update: (vals: Record<string, unknown>) => { eq: (col: string, val: string) => Promise<unknown> };
     };
   };
-  const { data: ing } = await admin.from('ingredients').select('id').ilike('name', '%tomato%').limit(1);
-  const ingRow = ing?.[0];
-  if (ingRow) {
-    await admin.from('ingredients').update({ quantity_on_hand: 0 }).eq('id', ingRow.id);
+  const baselines: Record<string, number> = { Tomato: 2000, Onion: 300 };
+  for (const [name, qty] of Object.entries(baselines)) {
+    const { data: ing } = await admin.from('ingredients').select('id').eq('name', name).limit(1);
+    const ingRow = ing?.[0];
+    if (ingRow) {
+      await admin.from('ingredients').update({ quantity_on_hand: qty }).eq('id', ingRow.id);
+    }
   }
 }
 
