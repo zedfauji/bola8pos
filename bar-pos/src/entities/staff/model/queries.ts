@@ -42,6 +42,7 @@ function mapStaffRow(row: Tables<'profiles'>): Result<Staff> {
         role: row.role,
         pin: row.pin,
         isActive: row.is_active,
+        mustChangePin: row.must_change_pin,
       })
     );
   } catch (e) {
