@@ -8,6 +8,8 @@ import { supabase } from '@shared/lib/supabase';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
+const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
+
 export type TransferTabInput = {
   tabId: string;
   /** New staff to own the tab (undefined = keep current owner) */
@@ -33,6 +35,7 @@ export function useTransferTab() {
         p_to_staff_id: newStaffId ?? null,
         p_to_table: Number.isNaN(parsedTable ?? NaN) ? null : parsedTable,
         p_transferred_by: transferredBy,
+        p_terminal_id: TERMINAL_ID,
       });
 
       if (error) {
