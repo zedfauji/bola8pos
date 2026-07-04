@@ -1,6 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { z } from 'https://deno.land/x/zod@v3.23.8/mod.ts';
 
+import { recordAudit } from '../_shared/audit.ts';
+
 const BodySchema = z.object({
   backupId: z.string().uuid(),
 });
@@ -146,6 +148,20 @@ Deno.serve(async req => {
       restored_by: user.id,
     })
     .eq('id', parsed.data.backupId);
+
+  await recordAudit(serviceClient, {
+    action: 'settings.update',
+    entityType: 'settings',
+    entityId: null,
+    before: null,
+    after: {
+      categories: categories.length,
+      products: products.length,
+      settings: settingsRows.length,
+    },
+    source: 'edge',
+    actorId: user.id,
+  });
 
   return json({ ok: true });
 });
