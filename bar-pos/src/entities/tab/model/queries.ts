@@ -760,54 +760,42 @@ export function useMutationUpdateTabStatus() {
       tabId: string;
       status: Tab['status'];
     }): Promise<Result<Tab>> => {
-      // Phase 15 Group B (D-04 revised): optimistic-concurrency UPDATE.
-      // Read cached version, write expected+1, .eq('version', expected) — 0 rows
-      // affected (PGRST116) becomes STALE_VERSION.
+      // Phase 14-05: status transitions now go through the close_tab
+      // SECURITY DEFINER RPC (audits 'tab.close') which preserves the
+      // Phase 15 optimistic-concurrency contract server-side — the RPC
+      // raises P0V01/P0V02 exactly like the prior .eq('version', expected)
+      // UPDATE did (via PGRST116), and supabaseMutation's parseSupabaseError
+      // maps those SQLSTATEs to the same staleVersionError/notFoundVersioned
+      // AppErrors the hook already handles below.
       const cached = queryClient.getQueryData<Result<Tab>>(tabKeys.detail(tabId));
       const expected =
         cached?.ok && typeof cached.data.version === 'number' ? cached.data.version : undefined;
 
-      if (expected !== undefined) {
-        const { data, error } = await supabase
-          .from('tabs')
-          .update({ status, version: expected + 1 })
-          .eq('id', tabId)
-          .eq('version', expected)
-          .select()
-          .single();
-        if (error?.code === 'PGRST116') {
-          return err(staleVersionError(error));
-        }
-        if (error) {
-          logger.error('tabs.status.update_failed', {
-            tabId,
-            code: error.code,
-            message: error.message,
-          });
-          return err(unknownError(error));
-        }
-        const m = mapTabRow(data as unknown as TabRow);
-        if (!m.ok) return m;
-        return ok(m.data);
-      }
-
-      // Fallback (no cached version yet — pre-15 semantics)
-      const res = await supabaseMutation(() =>
-        supabase.from('tabs').update({ status }).eq('id', tabId).select().single()
+      const rpcRes = await supabaseMutation(() =>
+        supabase.rpc('close_tab', {
+          p_tab_id: tabId,
+          p_status: status,
+          p_expected_version: expected ?? null,
+          p_terminal_id: TERMINAL_ID,
+        })
       );
 
-      if (!res.ok) {
+      if (!rpcRes.ok) {
         logger.error('tabs.status.update_failed', {
           tabId,
-          code: res.error.code,
-          message: res.error.message,
+          code: rpcRes.error.code,
+          message: rpcRes.error.message,
         });
-        return res;
+        return rpcRes;
       }
 
-      const m = mapTabRow(res.data as unknown as TabRow);
-      if (!m.ok) return m;
-      return ok(m.data);
+      // close_tab returns {ok:true} only (no row) — re-fetch the authoritative
+      // row so callers get the canonical mapped Tab.
+      const tabRes = await supabaseQuery(() =>
+        supabase.from('tabs').select(tabListSelect).eq('id', tabId).single()
+      );
+      if (!tabRes.ok) return tabRes;
+      return mapTabRow(tabRes.data as unknown as TabRow);
     },
 
     onMutate: async ({ tabId, status }): Promise<UpdateTabStatusContext> => {
