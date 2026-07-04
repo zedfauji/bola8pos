@@ -148,8 +148,9 @@ describe('HomeDashboard', () => {
   it('gated buttons show lock icon for bartender', () => {
     renderWithProviders(<HomeDashboard />);
     const lockIcons = screen.getAllByTestId('lock-icon');
-    // Reports, Inventory, Settings, Kitchen Prep, Waitlist, Roles & Permissions are gated for bartender
-    expect(lockIcons.length).toBe(6);
+    // Reports, Inventory, Settings, Kitchen Prep, Waitlist, Roles & Permissions,
+    // Audit Log are gated for bartender
+    expect(lockIcons.length).toBe(7);
   });
 
   it('logout button calls logout and navigates to /login', async () => {
