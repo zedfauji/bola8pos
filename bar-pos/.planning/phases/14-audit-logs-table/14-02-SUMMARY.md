@@ -95,6 +95,17 @@ None - no external service configuration required. The migration created in Task
 - 14-14's push gate must include `20260703000001_record_audit_terminal_id.sql` alongside all other Phase 14 migrations.
 - The `it.each` coverage scaffold in `audit-actions.test.ts` will only reach a fully green `npm run test` run once 14-03 through 14-09 have all landed their respective `PERFORM record_audit(...)` calls — until then, `npm run test` will report these 6 specific sub-test failures by design; this is documented so no future session mistakes it for a regression.
 
+## Self-Check: PASSED
+
+- FOUND: `supabase/migrations/20260703000001_record_audit_terminal_id.sql`
+- FOUND: `supabase/functions/_shared/audit.ts`
+- FOUND: `src/shared/lib/__tests__/audit-actions.test.ts`
+- FOUND: `.planning/phases/14-audit-logs-table/14-02-SUMMARY.md`
+- FOUND commit `0b497ce` (Task 1)
+- FOUND commit `189992a` (Task 2)
+- FOUND commit `014becf` (Task 3)
+- FOUND commit `99d2da0` (SUMMARY.md)
+
 ---
 *Phase: 14-audit-logs-table*
 *Completed: 2026-07-04*
