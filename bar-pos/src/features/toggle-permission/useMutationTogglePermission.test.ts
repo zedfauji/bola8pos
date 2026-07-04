@@ -15,6 +15,9 @@ import { supabase } from '@shared/lib/supabase';
 
 import { useMutationTogglePermission } from './useMutationTogglePermission';
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const mockedRpc = vi.mocked(supabase).rpc;
+
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
@@ -125,5 +128,71 @@ describe('useMutationTogglePermission', () => {
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
+  });
+
+  it('records a permission.toggle audit call after a successful enable', async () => {
+    mockChain({});
+
+    const { result } = renderHook(() => useMutationTogglePermission(), {
+      wrapper: createWrapper(),
+    });
+
+    await result.current.mutateAsync({
+      role: 'bartender',
+      action: 'create_order',
+      enabled: true,
+    });
+
+    expect(mockedRpc).toHaveBeenCalledWith(
+      'record_audit',
+      expect.objectContaining({
+        p_action: 'permission.toggle',
+        p_source: 'client',
+      })
+    );
+  });
+
+  it('records a permission.toggle audit call after a successful disable', async () => {
+    mockChain({});
+
+    const { result } = renderHook(() => useMutationTogglePermission(), {
+      wrapper: createWrapper(),
+    });
+
+    await result.current.mutateAsync({
+      role: 'kitchen',
+      action: 'view_kds',
+      enabled: false,
+    });
+
+    expect(mockedRpc).toHaveBeenCalledWith(
+      'record_audit',
+      expect.objectContaining({
+        p_action: 'permission.toggle',
+        p_source: 'client',
+      })
+    );
+  });
+
+  it('still resolves ok(null) when the audit rpc call fails (non-fatal)', async () => {
+    mockChain({});
+    mockedRpc.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'audit insert failed' },
+    } as never);
+
+    const { result } = renderHook(() => useMutationTogglePermission(), {
+      wrapper: createWrapper(),
+    });
+
+    const res = await result.current.mutateAsync({
+      role: 'bartender',
+      action: 'create_order',
+      enabled: true,
+    });
+
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.data).toBeNull();
   });
 });
