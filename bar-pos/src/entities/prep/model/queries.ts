@@ -9,6 +9,9 @@ import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 
+const TERMINAL_ID =
+  (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
+
 const db = supabase as any;
 
 export const prepKeys = {
@@ -72,16 +75,13 @@ export function useMutationCreatePrepProduction() {
 
   return useMutation({
     mutationFn: async (input: PrepProductionCreate): Promise<Result<PrepProduction>> => {
-      const { data, error } = await db
-        .from('prep_productions')
-        .insert({
-          prep_ingredient_id: input.prepIngredientId,
-          qty_produced: input.qtyProduced,
-          notes: input.notes ?? null,
-          produced_by: input.producedBy ?? null,
-        })
-        .select()
-        .single();
+      const { data, error } = await db.rpc('produce_prep_batch', {
+        p_prep_ingredient_id: input.prepIngredientId,
+        p_qty_produced: input.qtyProduced,
+        p_notes: input.notes ?? null,
+        p_produced_by: input.producedBy ?? null,
+        p_terminal_id: TERMINAL_ID,
+      });
 
       if (error) {
         const msg: string = (error as { message?: string }).message ?? '';
