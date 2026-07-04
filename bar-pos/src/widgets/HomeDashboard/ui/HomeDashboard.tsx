@@ -88,7 +88,8 @@ const ITEMS: DashboardItem[] = [
     path: '/audit',
     label: 'Audit Log',
     icon: ClipboardList,
-    visibleToRoles: ['manager', 'admin'],
+    requiredAction: 'view_audit_log',
+    managerLabel: 'Manager',
   },
   {
     path: '/kds',
