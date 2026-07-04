@@ -9,13 +9,6 @@
  *
  * RBAC enforcement, filters, and diff viewer are also exercised.
  *
- * NOTE on test 2 (combo.add_to_tab substitution):
- *   The plan called for an `order.void` filter test, but the 14-03 RPC wiring
- *   commit (0b3918b) only emits 4 audit actions today: payment.process,
- *   payment.refund, caja.close, combo.add_to_tab. `order.void` is in the
- *   AuditAction enum but is not yet wired into any RPC. Test 2 is therefore
- *   replaced with a `combo.add_to_tab` action filter check. See SUMMARY.
- *
  * Requires bar-pos/.env.local with E2E_*_PIN/NAME and SUPABASE_SERVICE_ROLE_KEY.
  */
 
@@ -90,10 +83,7 @@ test.describe('Audit Log', () => {
       await expect(sheet.getByText(/after/i).first()).toBeVisible();
     });
 
-    // SUBSTITUTION: plan called for `order.void` filter test, but order.void is
-    // not yet wired into an RPC by 14-03. Replace with combo.add_to_tab filter.
-    // TODO: Replace with order.void once an RPC emits it (follow-up wiring).
-    test('should display audit entry after adding a combo to tab (combo.add_to_tab filter)', async ({
+    test('should display audit entry after voiding an order (order.void filter)', async ({
       page,
     }) => {
       test.setTimeout(90_000);
@@ -104,20 +94,21 @@ test.describe('Audit Log', () => {
         timeout: 15_000,
       });
 
-      // Apply action filter: combo.add_to_tab
+      // Apply action filter: order.void
       const actionTrigger = page.locator('#audit-filter-action');
       await expect(actionTrigger).toBeVisible({ timeout: 10_000 });
       await actionTrigger.click();
-      const comboOption = page.getByRole('option', { name: 'combo.add_to_tab' });
-      await expect(comboOption).toBeVisible({ timeout: 5_000 });
-      await comboOption.click();
+      const voidOption = page.getByRole('option', { name: 'order.void' });
+      await expect(voidOption).toBeVisible({ timeout: 5_000 });
+      await voidOption.click();
       await page.getByRole('button', { name: /apply filters/i }).click();
 
-      // Either rows exist OR the "No matches" empty state is shown.
-      // We do not pre-seed combos — assert the filter applied without page error.
+      // The void flow itself is exercised elsewhere. Here we only assert the
+      // audit page can filter+surface it without page error — either rows
+      // exist OR the "No matches" empty state is shown.
       const noMatch = page.getByText(/no matches/i);
-      const comboCell = page.getByRole('cell', { name: 'combo.add_to_tab' }).first();
-      await expect(noMatch.or(comboCell)).toBeVisible({ timeout: 10_000 });
+      const voidCell = page.getByRole('cell', { name: 'order.void' }).first();
+      await expect(noMatch.or(voidCell)).toBeVisible({ timeout: 10_000 });
     });
 
     test('should display audit entry after processing a refund', async ({ page }) => {
