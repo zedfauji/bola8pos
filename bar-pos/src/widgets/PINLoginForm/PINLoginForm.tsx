@@ -10,7 +10,9 @@ import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { MoneyInput } from '@shared/ui/MoneyInput';
 import { PINKeypad } from '@shared/ui/PINKeypad';
 
-type Phase = 'pin' | 'opening_cash';
+type Phase = 'pin' | 'forced_pin_change' | 'opening_cash';
+
+const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
 
 export function PINLoginForm() {
   const selectedStaff = useLoginUiStore(s => s.selectedStaff);
@@ -20,29 +22,19 @@ export function PINLoginForm() {
   const [phase, setPhase] = useState<Phase>('pin');
   const [openingCash, setOpeningCash] = useState(0);
   const [isClockingIn, setIsClockingIn] = useState(false);
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [pinChangeError, setPinChangeError] = useState('');
+  const [isSubmittingNewPin, setIsSubmittingNewPin] = useState(false);
   const navigate = useNavigate();
   const clockInMutation = useMutationClockIn();
 
   if (!selectedStaff) return null;
 
-  const handlePinComplete = async (enteredPin: string): Promise<void> => {
-    if (enteredPin !== selectedStaff.pin) {
-      setError('Incorrect PIN. Try again.');
-      setPin('');
-      return;
-    }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: selectedStaff.email,
-      password: enteredPin,
-    });
-    if (signInError) {
-      logger.error('login.supabase_sign_in_failed', { message: signInError.message });
-      setError('Sign-in failed. Please try again or contact your manager.');
-      setPin('');
-      return;
-    }
-
+  // Runs immediately after a successful auth (either the normal 'pin' phase or
+  // after the forced-PIN-change flow clears the mustChangePin flag): looks for an
+  // existing open shift to resume, otherwise prompts for an opening-cash amount.
+  const proceedAfterAuth = async (): Promise<void> => {
     // Check for an existing open shift — if found, resume it instead of starting a new one.
     // supabase.types.ts may lag behind schema; cast to any until types are regenerated.
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
@@ -74,6 +66,83 @@ export function PINLoginForm() {
     // No open shift — ask for opening cash to start a new one.
     setPhase('opening_cash');
     setOpeningCash(0);
+  };
+
+  const handlePinComplete = async (enteredPin: string): Promise<void> => {
+    if (enteredPin !== selectedStaff.pin) {
+      setError('Incorrect PIN. Try again.');
+      setPin('');
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: selectedStaff.email,
+      password: enteredPin,
+    });
+    if (signInError) {
+      logger.error('login.supabase_sign_in_failed', { message: signInError.message });
+      setError('Sign-in failed. Please try again or contact your manager.');
+      setPin('');
+      return;
+    }
+
+    if (selectedStaff.mustChangePin) {
+      setPhase('forced_pin_change');
+      return;
+    }
+
+    await proceedAfterAuth();
+  };
+
+  const resetForcedPinChangeFields = (): void => {
+    setNewPin('');
+    setConfirmPin('');
+  };
+
+  const handleConfirmPinComplete = async (enteredConfirmPin: string): Promise<void> => {
+    if (newPin !== enteredConfirmPin) {
+      setPinChangeError("PINs don't match. Try again.");
+      resetForcedPinChangeFields();
+      return;
+    }
+
+    if (newPin === selectedStaff.pin) {
+      setPinChangeError('Choose a PIN different from your current one.');
+      resetForcedPinChangeFields();
+      return;
+    }
+
+    setIsSubmittingNewPin(true);
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPin });
+      if (updateError) {
+        logger.error('login.forced_pin_change.update_user_failed', {
+          message: updateError.message,
+        });
+        setPinChangeError('Could not set your new PIN. Please try again.');
+        resetForcedPinChangeFields();
+        return;
+      }
+
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+      const db = supabase as any;
+      const { error: clearError } = (await db.rpc('clear_must_change_pin', {
+        p_terminal_id: TERMINAL_ID,
+      })) as { error: { message: string } | null };
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+      if (clearError) {
+        logger.error('login.forced_pin_change.clear_flag_failed', {
+          message: clearError.message,
+        });
+        setPinChangeError('Could not finish setting your new PIN. Please try again.');
+        resetForcedPinChangeFields();
+        return;
+      }
+
+      await proceedAfterAuth();
+    } finally {
+      setIsSubmittingNewPin(false);
+    }
   };
 
   const handleOpeningCashCancel = () => {
@@ -131,19 +200,65 @@ export function PINLoginForm() {
         />
       )}
 
+      {phase === 'forced_pin_change' && (
+        <div className="flex flex-col gap-4">
+          <div className="text-center">
+            <h3 className="text-xl font-semibold">Set a new PIN</h3>
+            <p className="text-sm text-muted-foreground">
+              A manager has required you to change your PIN before continuing. Enter a new 4–6
+              digit PIN, then confirm it.
+            </p>
+          </div>
+
+          {newPin.length < 6 ? (
+            <PINKeypad
+              key="new-pin"
+              value={newPin}
+              onChange={value => {
+                setNewPin(value);
+                if (pinChangeError) setPinChangeError('');
+              }}
+              onComplete={pin => {
+                setNewPin(pin);
+              }}
+              label="New PIN"
+              error={pinChangeError}
+              isLoading={isSubmittingNewPin}
+            />
+          ) : (
+            <PINKeypad
+              key="confirm-pin"
+              value={confirmPin}
+              onChange={value => {
+                setConfirmPin(value);
+                if (pinChangeError) setPinChangeError('');
+              }}
+              onComplete={pin => {
+                void handleConfirmPinComplete(pin);
+              }}
+              label="Confirm new PIN"
+              error={pinChangeError}
+              isLoading={isSubmittingNewPin}
+            />
+          )}
+        </div>
+      )}
+
       {phase === 'opening_cash' && (
         <p className="text-center text-sm text-muted-foreground">
           Enter opening cash float, then confirm.
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={clearSelection}
-        className="text-sm text-muted-foreground underline-offset-2 hover:underline"
-      >
-        Not you? Go back
-      </button>
+      {phase !== 'forced_pin_change' && (
+        <button
+          type="button"
+          onClick={clearSelection}
+          className="text-sm text-muted-foreground underline-offset-2 hover:underline"
+        >
+          Not you? Go back
+        </button>
+      )}
 
       <ConfirmDialog
         open={phase === 'opening_cash'}
