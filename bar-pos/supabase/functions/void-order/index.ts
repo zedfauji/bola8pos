@@ -10,6 +10,7 @@
 // { success: true }. This function only flips the order's status.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { z } from 'https://deno.land/x/zod@v3.23.8/mod.ts';
+import { recordAudit } from '../_shared/audit.ts';
 
 const BodySchema = z.object({
   orderId: z.string().uuid(),
@@ -100,8 +101,16 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ success: false, error: 'Void failed' }, 500);
   }
 
-  // TODO(Task 2): await recordAudit(supabase, { action: 'order.void', entityType: 'order',
-  // entityId: orderId, before: beforeRow, after: { reason, voidedAt }, source: 'edge', actorId: staffId });
+  // Fire-and-forget: audit failure must never fail the void.
+  await recordAudit(supabase, {
+    action: 'order.void',
+    entityType: 'order',
+    entityId: orderId,
+    before: beforeRow,
+    after: { reason, voidedAt },
+    source: 'edge',
+    actorId: staffId,
+  });
 
   return jsonResponse({ success: true, voidedAt });
 });
