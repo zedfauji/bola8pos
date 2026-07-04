@@ -101,15 +101,31 @@ export async function openCaja(openingCash: number): Promise<string> {
   const { data: mgr, error: mErr } = await admin.from('profiles').select('id').eq('role', 'manager').limit(1).maybeSingle();
   if (mErr || !mgr) throw new Error('openCaja: no manager profile found');
 
-  await admin
+  // Close any leftover open sessions from prior runs. caja_sessions has a
+  // bump_version_on_update trigger (Phase 15, D-02) that rejects any UPDATE
+  // that doesn't advance version by exactly +1 — so each open row must be
+  // closed individually with its current version read first, rather than a
+  // single blind UPDATE ... WHERE status = 'open' (which the trigger silently
+  // rejects, leaving the stale row open and the INSERT below failing on the
+  // caja_sessions_one_open unique constraint).
+  const { data: openRows, error: openErr } = await admin
     .from('caja_sessions')
-    .update({
-      status: 'closed',
-      closed_at: new Date().toISOString(),
-      closed_by: mgr.id,
-      closing_cash: openingCash,
-    })
+    .select('id, version')
     .eq('status', 'open');
+  if (openErr) throw new Error(`openCaja: failed to read open sessions - ${openErr.message}`);
+  for (const openRow of openRows ?? []) {
+    const { error: closeErr } = await admin
+      .from('caja_sessions')
+      .update({
+        status: 'closed',
+        closed_at: new Date().toISOString(),
+        closed_by: mgr.id,
+        closing_cash: openingCash,
+        version: ((openRow as { version: number | null }).version ?? 0) + 1,
+      })
+      .eq('id', (openRow as { id: string }).id);
+    if (closeErr) throw new Error(`openCaja: failed to close stale session - ${closeErr.message}`);
+  }
 
   const { data: row, error } = await admin
     .from('caja_sessions')
@@ -718,12 +734,16 @@ export async function seedE2ePrepKitchenFixture(): Promise<void> {
 }
 
 /**
- * Resets raw ingredients consumed by the Salsa Mexicana prep recipe to their
- * seed-prep.ts baselines (Tomato 2000g, Onion 300g) so 21-prep.spec.ts's
- * T2 → T4 → T5 sequence is deterministic regardless of leftover state from
- * prior runs: T2 consumes 1000g Tomato + 100g Onion, T4 consumes the
- * remaining 1000g Tomato + another 100g Onion, then T5's "insufficient
- * stock" assertion is correctly reached once Tomato hits 0.
+ * Resets Salsa Mexicana's on-hand quantity and the raw ingredients its prep
+ * recipe consumes to their seed-prep.ts baselines (Salsa Mexicana 0,
+ * Tomato 2000g, Onion 300g) so 21-prep.spec.ts's T2 → T4 → T5 sequence is
+ * deterministic regardless of leftover state from prior runs: T2 produces
+ * 10 portions (0→10.00, consuming 1000g Tomato + 100g Onion), T4 produces
+ * 10 more (consuming the remaining 1000g Tomato + another 100g Onion),
+ * then T5's "insufficient stock" assertion is correctly reached once
+ * Tomato hits 0. Without resetting Salsa Mexicana itself, its balance
+ * accumulates across repeated local runs and T2's exact "10.00" qty
+ * assertion becomes flaky.
  * Matches on exact names (not ilike) to avoid colliding with fixture
  * ingredients like "E2E Prep Raw Tomato".
  * Call from test.beforeAll in 21-prep.spec.ts.
@@ -735,7 +755,7 @@ export async function resetPrepIngredientStock(): Promise<void> {
       update: (vals: Record<string, unknown>) => { eq: (col: string, val: string) => Promise<unknown> };
     };
   };
-  const baselines: Record<string, number> = { Tomato: 2000, Onion: 300 };
+  const baselines: Record<string, number> = { Tomato: 2000, Onion: 300, 'Salsa Mexicana': 0 };
   for (const [name, qty] of Object.entries(baselines)) {
     const { data: ing } = await admin.from('ingredients').select('id').eq('name', name).limit(1);
     const ingRow = ing?.[0];
