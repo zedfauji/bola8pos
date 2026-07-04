@@ -78,6 +78,21 @@ export default defineConfig(async () => {
             hookTimeout: 20000,
           },
         },
+        {
+          extends: true,
+          test: {
+            name: 'integration',
+            globals: true,
+            environment: 'node',
+            // Real-Supabase integration tests only. Not part of `npm run test`
+            // (unit project excludes these) — run explicitly via `npm run
+            // test:integration` or `npx vitest run <path>.integration.test.ts`.
+            include: ['src/**/*.integration.test.ts'],
+            exclude: ['e2e/**', 'node_modules/**'],
+            testTimeout: 30000,
+            hookTimeout: 30000,
+          },
+        },
         ...storybookProjects,
       ],
     },
