@@ -17,6 +17,16 @@ export const auditKeys = {
   list: (filters: AuditLogFilters) => [...auditKeys.all, 'list', filters] as const,
 };
 
+/**
+ * Strips PostgREST `.or()` filter-string metacharacters (`,` `.` `(` `)`) from a
+ * raw search term before it is interpolated into a `.or('col.ilike.%term%,...')`
+ * expression. Without this, a user-entered comma/period/parenthesis can
+ * restructure the filter's grouping (Phase 14 RESEARCH.md Security Domain V5).
+ */
+export function sanitizeSearch(raw: string): string {
+  return raw.replace(/[,.()]/g, '');
+}
+
 function mapAuditRow(row: Record<string, unknown>): AuditLog {
   return AuditLogSchema.parse({
     id: row['id'],
@@ -62,10 +72,9 @@ export function useAuditLogs(filters: AuditLogFilters) {
       if (filters.dateTo) {
         query = query.lte('created_at', filters.dateTo.toISOString());
       }
-      if (filters.search) {
-        query = query.or(
-          `entity_id::text.ilike.%${filters.search}%,action.ilike.%${filters.search}%`,
-        );
+      const term = filters.search ? sanitizeSearch(filters.search) : '';
+      if (term) {
+        query = query.or(`entity_id::text.ilike.%${term}%,action.ilike.%${term}%`);
       }
 
       const { data, error } = await query;
