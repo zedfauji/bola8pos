@@ -15,8 +15,9 @@
 --   2. Creates `force_pin_change(p_staff_id uuid, p_terminal_id text)` — a
 --      manager+-gated SECURITY DEFINER RPC that flags a target staff
 --      member's must_change_pin=true and audits the action.
---
--- Task 2 of this plan appends `clear_must_change_pin` to this same file.
+--   3. Creates `clear_must_change_pin(p_terminal_id text)` — a self-service
+--      SECURITY DEFINER RPC that clears the CALLER's own must_change_pin
+--      flag (never a caller-supplied target id) and audits the action.
 --
 -- Both RPCs use the manager+ auth-check guard shape and pre-RETURN
 -- PERFORM record_audit(...) pattern established in
@@ -89,11 +90,60 @@ $$;
 
 GRANT EXECUTE ON FUNCTION force_pin_change(uuid, text) TO authenticated;
 
+-- -----------------------------------------------------------------------
+-- 3. clear_must_change_pin — self-service only; clears the CALLER's own
+--    flag. Deliberately accepts no target-staff-id parameter (T-14-12:
+--    prevents one staff member clearing another's forced-change flag).
+--    The actual PIN value change (Supabase auth password update) happens
+--    client-side in 14-12; this RPC only clears the domain flag.
+-- -----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION clear_must_change_pin(
+  p_terminal_id text DEFAULT NULL
+) RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid    uuid;
+  v_before jsonb;
+  v_after  jsonb;
+BEGIN
+  v_uid := auth.uid();
+
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED: authentication required';
+  END IF;
+
+  SELECT to_jsonb(p) INTO v_before FROM profiles p WHERE p.id = v_uid;
+
+  UPDATE profiles SET must_change_pin = false WHERE id = v_uid;
+
+  SELECT to_jsonb(p) INTO v_after FROM profiles p WHERE p.id = v_uid;
+
+  PERFORM record_audit(
+    'permission.force_pin_change',
+    'staff',
+    v_uid,
+    v_before,
+    v_after,
+    'rpc',
+    p_terminal_id
+  );
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION clear_must_change_pin(text) TO authenticated;
+
 COMMIT;
 
 -- =============================================================================
 -- DOWN:
 -- BEGIN;
+-- REVOKE EXECUTE ON FUNCTION clear_must_change_pin(text) FROM authenticated;
+-- DROP FUNCTION IF EXISTS clear_must_change_pin(text);
 -- REVOKE EXECUTE ON FUNCTION force_pin_change(uuid, text) FROM authenticated;
 -- DROP FUNCTION IF EXISTS force_pin_change(uuid, text);
 -- -- must_change_pin column is NOT dropped: it predates this migration (live
