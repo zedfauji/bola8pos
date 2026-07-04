@@ -79,6 +79,11 @@ describe('StaffDashboard', () => {
     expect(screen.getByRole('button', { name: 'Clock In' })).toBeInTheDocument();
   });
 
+  it('renders a "Force PIN Change" action per staff row', () => {
+    renderWithProviders(<StaffDashboard />);
+    expect(screen.getAllByRole('button', { name: 'Force PIN Change' }).length).toBe(2);
+  });
+
   it('shows loading state when queries pending', () => {
     useStaffList.mockReturnValue({ data: undefined, isIdleOrLoading: true });
     useOpenShifts.mockReturnValue({ data: undefined, isIdleOrLoading: true });

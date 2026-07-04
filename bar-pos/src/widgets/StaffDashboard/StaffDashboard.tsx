@@ -2,6 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useMemo, useState } from 'react';
 import { ClockInModal } from '@features/clock-in-staff';
 import { ClockOutDialog } from '@features/clock-out-staff';
+import { ForcePinChangeDialog } from '@features/force-pin-change';
 import { useOpenShifts, useStaffList } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Shift, Staff } from '@shared/lib/domain';
@@ -43,6 +44,7 @@ export function StaffDashboard() {
 
   const [clockInStaff, setClockInStaff] = useState<Staff | null>(null);
   const [clockOutTarget, setClockOutTarget] = useState<{ staff: Staff; shift: Shift } | null>(null);
+  const [forcePinTarget, setForcePinTarget] = useState<Staff | null>(null);
 
   const rows: StaffShiftRow[] = useMemo(() => {
     const staff = staffList ?? [];
@@ -131,6 +133,18 @@ export function StaffDashboard() {
                   </POSButton>
                 </ProtectedAction>
               )}
+              <ProtectedAction action="manage_staff" currentRole={currentRole}>
+                <POSButton
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setForcePinTarget(staff);
+                  }}
+                >
+                  Force PIN Change
+                </POSButton>
+              </ProtectedAction>
             </div>
           );
         },
@@ -173,6 +187,14 @@ export function StaffDashboard() {
         }}
         staff={clockOutTarget?.staff ?? null}
         shift={clockOutTarget?.shift ?? null}
+      />
+
+      <ForcePinChangeDialog
+        staff={forcePinTarget}
+        open={forcePinTarget !== null}
+        onOpenChange={next => {
+          if (!next) setForcePinTarget(null);
+        }}
       />
 
     </div>
