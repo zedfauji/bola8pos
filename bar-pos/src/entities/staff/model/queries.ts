@@ -18,6 +18,8 @@ import type { Tables } from '@shared/lib/supabase.types';
 import { useStaffStore } from './store';
 import { ShiftSchema, StaffSchema } from './types';
 
+const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
+
 export const staffKeys = {
   all: ['staff'] as const,
   list: () => [...staffKeys.all, 'list'] as const,
@@ -458,6 +460,24 @@ export function useMutationUpdateStaffRole() {
       if (!m.ok) {
         logger.error('staff.update_role.map_failed', { message: m.error.message });
         return m;
+      }
+
+      // p_terminal_id/p_user_id not yet in generated supabase.types.ts (14-02 gap) — cast as never like OfflineQueueProcessor's record_audit call.
+      const auditRes = await supabase.rpc('record_audit', {
+        p_action: 'staff.role_change',
+        p_entity_type: 'staff',
+        p_entity_id: staffId,
+        p_before: null,
+        p_after: { role },
+        p_source: 'client',
+        p_terminal_id: TERMINAL_ID,
+        p_user_id: null,
+      } as never);
+      if (auditRes.error) {
+        logger.warn('staff.role_change.audit_failed', {
+          staffId,
+          message: auditRes.error.message,
+        });
       }
 
       return m;
