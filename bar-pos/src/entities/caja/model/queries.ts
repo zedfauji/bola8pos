@@ -151,11 +151,11 @@ export function useMutationOpenCaja() {
   return useMutation<Result<CajaSession>, Error, { openingCash: number; openedBy: string }>({
     mutationFn: async ({ openingCash, openedBy }) => {
       const res = await supabaseMutation(() =>
-        db
-          .from('caja_sessions')
-          .insert({ opening_cash: openingCash, opened_by: openedBy })
-          .select()
-          .single()
+        db.rpc('caja_open', {
+          p_opening_cash: openingCash,
+          p_opened_by: openedBy,
+          p_terminal_id: TERMINAL_ID,
+        })
       );
 
       if (!res.ok) {
