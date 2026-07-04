@@ -14,6 +14,24 @@ import { AuditActionSchema } from '../audit-actions';
 const MIGRATIONS_DIR = join(process.cwd(), 'supabase', 'migrations');
 const VALID_ACTIONS = new Set<string>(AuditActionSchema.options);
 
+// Phase 14-02: RPC-coverage scaffold (VALIDATION.md Wave 0 requirement).
+// SCAFFOLD — expected RED for transfer_tab/record_stock_movement/caja_open/
+// close_tab/produce_prep_batch/force_pin_change until their Wave-2/Wave-3
+// migration lands (14-03..14-09); driven GREEN incrementally; final GREEN
+// enforced at 14-14 gate.
+const TARGET_RPCS: { fn: string; action: string }[] = [
+  { fn: 'process_payment_atomic', action: 'payment.process' },
+  { fn: 'process_refund', action: 'payment.refund' },
+  { fn: 'close_caja_session', action: 'caja.close' },
+  { fn: 'add_combo_to_tab', action: 'combo.add_to_tab' },
+  { fn: 'transfer_tab', action: 'tab.transfer' },
+  { fn: 'record_stock_movement', action: 'inventory.manual_adjust' },
+  { fn: 'caja_open', action: 'caja.open' },
+  { fn: 'close_tab', action: 'tab.close' },
+  { fn: 'produce_prep_batch', action: 'prep.produce' },
+  { fn: 'force_pin_change', action: 'permission.force_pin_change' },
+];
+
 describe('audit-actions enforcement', () => {
   it('AuditActionSchema has at least 20 enumerated actions', () => {
     expect(AuditActionSchema.options.length).toBeGreaterThanOrEqual(20);
@@ -40,4 +58,41 @@ describe('audit-actions enforcement', () => {
 
     expect(violations).toEqual([]);
   });
+
+  // Per-RPC coverage assertions. 4 already-wired RPCs (process_payment_atomic,
+  // process_refund, close_caja_session, add_combo_to_tab) PASS immediately.
+  // The remaining 6 (transfer_tab, record_stock_movement, caja_open,
+  // close_tab, produce_prep_batch, force_pin_change) are expected RED until
+  // their Wave-2/Wave-3 migration lands — see the SCAFFOLD comment above
+  // TARGET_RPCS.
+  it.each(TARGET_RPCS)(
+    'every migration-wired target RPC calls record_audit: $fn -> $action',
+    ({ fn, action }) => {
+      const migrationFiles = readdirSync(MIGRATIONS_DIR)
+        .filter(f => f.endsWith('.sql'))
+        .map(f => join(MIGRATIONS_DIR, f));
+
+      // Concatenate all migration SQL, stripping `-- ...` comment lines first
+      // so header prose (e.g. a docstring mentioning a target action) cannot
+      // self-satisfy the grep.
+      const concatenatedSql = migrationFiles
+        .map(file => readFileSync(file, 'utf-8').replace(/^\s*--.*$/gm, ''))
+        .join('\n');
+
+      const definesFn = new RegExp(
+        `CREATE\\s+(OR\\s+REPLACE\\s+)?FUNCTION\\s+(public\\.)?${fn}\\s*\\(`,
+        'i'
+      ).test(concatenatedSql);
+
+      const callsRecordAudit = new RegExp(
+        `PERFORM\\s+record_audit\\s*\\(\\s*'${action.replace(/\./g, '\\.')}'`
+      ).test(concatenatedSql);
+
+      expect(definesFn, `${fn}: function not defined in any migration`).toBe(true);
+      expect(
+        callsRecordAudit,
+        `${fn}: no PERFORM record_audit('${action}', ...) found`
+      ).toBe(true);
+    }
+  );
 });
