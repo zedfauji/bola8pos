@@ -43,6 +43,7 @@ export const AuditActionSchema = z.enum([
   'permission.force_pin_change',
   // Staff
   'staff.role_change',
+  'staff.create',
   // Settings
   'settings.update',
 ]);
@@ -69,5 +70,6 @@ export const AuditAction = {
   PERMISSION_TOGGLE: 'permission.toggle',
   PERMISSION_FORCE_PIN_CHANGE: 'permission.force_pin_change',
   STAFF_ROLE_CHANGE: 'staff.role_change',
+  STAFF_CREATE: 'staff.create',
   SETTINGS_UPDATE: 'settings.update',
 } as const satisfies Record<string, AuditAction>;

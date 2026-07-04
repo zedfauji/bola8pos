@@ -1,5 +1,6 @@
 // Deno runtime
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { recordAudit } from '../_shared/audit.ts'
 
 Deno.serve(async (req) => {
   const { name, role, pin } = await req.json()
@@ -38,6 +39,16 @@ Deno.serve(async (req) => {
       headers: { 'Content-Type': 'application/json' },
     })
   }
+
+  await recordAudit(supabaseAdmin, {
+    action: 'staff.create',
+    entityType: 'staff',
+    entityId: staffId,
+    before: null,
+    after: { name, role, email },
+    source: 'edge',
+    actorId: null,
+  })
 
   return new Response(JSON.stringify({ id: staffId, email, name, role }), {
     headers: { 'Content-Type': 'application/json' },
