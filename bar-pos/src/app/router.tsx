@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelpSheet } from '@widgets/HelpSheet';
 import { AgentButton, AgentPanel } from '@features/agent-chat';
 import { ProtectedRoute } from './ProtectedRoute';
+import { AuditRoute } from './audit-route';
 import { KdsRoute } from './kds-route';
 import { RbacRoute } from './rbac-route';
 import { ReportsRoute } from './reports-route';
@@ -23,6 +24,7 @@ const KdsPage = lazy(() => import('../pages/kds'));
 const KitchenPrepPage = lazy(() => import('../pages/kitchen-prep'));
 const WaitlistPage = lazy(() => import('../pages/waitlist'));
 const RbacPage = lazy(() => import('../pages/rbac'));
+const AuditPage = lazy(() => import('../pages/audit'));
 
 function LoadingFallback() {
   return (
@@ -159,6 +161,16 @@ export function Router() {
                 <RbacRoute>
                   <RbacPage />
                 </RbacRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audit"
+            element={
+              <ProtectedRoute>
+                <AuditRoute>
+                  <AuditPage />
+                </AuditRoute>
               </ProtectedRoute>
             }
           />
