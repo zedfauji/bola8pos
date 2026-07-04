@@ -2191,6 +2191,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      close_tab: {
+        Args: {
+          p_tab_id: string;
+          p_status: Database['public']['Enums']['tab_status'];
+          p_expected_version?: number | null;
+          p_terminal_id?: string | null;
+        };
+        Returns: Json;
+      };
       create_order_with_items:
         | {
             Args: {
