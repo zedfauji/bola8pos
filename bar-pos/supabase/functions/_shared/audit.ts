@@ -24,6 +24,8 @@ export interface AuditParams {
   before?: unknown;
   after?: unknown;
   source?: 'rpc' | 'edge' | 'client' | 'trigger';
+  actorId?: string | null;
+  terminalId?: string | null;
 }
 
 export async function recordAudit(
@@ -38,6 +40,8 @@ export async function recordAudit(
       before: params.before ?? null,
       after: params.after ?? null,
       source: params.source ?? 'edge',
+      actor_id: params.actorId ?? null,
+      terminal_id: params.terminalId ?? null,
     });
 
     if (error) {
