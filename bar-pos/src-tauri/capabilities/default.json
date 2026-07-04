@@ -12,6 +12,6 @@
     "fs:allow-write-file",
     "notification:default",
     "updater:default",
-    "process:allow-relaunch"
+    "process:allow-restart"
   ]
 }
