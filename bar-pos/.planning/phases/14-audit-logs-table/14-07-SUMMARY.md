@@ -92,6 +92,14 @@ None - no external service configuration required. Deployment (`supabase functio
 - 14-14's E2E `order.void` filter test restoration is unblocked — the edge function exists and emits the expected audit action label.
 - 14-14's deploy gate must include `supabase functions deploy void-order` (new function, never deployed before).
 
+## Self-Check: PASSED
+
+- FOUND: `supabase/functions/void-order/index.ts`
+- FOUND: `.planning/phases/14-audit-logs-table/14-07-SUMMARY.md`
+- FOUND commit `9277d14` (Task 1)
+- FOUND commit `8270c13` (Task 2)
+- FOUND commit `bd8e93d` (SUMMARY.md, pre-append)
+
 ---
 *Phase: 14-audit-logs-table*
 *Completed: 2026-07-04*
