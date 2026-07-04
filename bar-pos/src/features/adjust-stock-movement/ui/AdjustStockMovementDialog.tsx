@@ -24,6 +24,8 @@ import {
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 
+const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
+
 const REASON_LABELS: Record<ManualAdjustReason, string> = {
   waste: 'Waste',
   delivery: 'Delivery',
@@ -62,6 +64,7 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
         p_ref_type: 'manual',
         p_ref_id: null,
         p_notes: notes.trim().length > 0 ? notes.trim() : null,
+        p_terminal_id: TERMINAL_ID,
       });
 
       if (error) {
