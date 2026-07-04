@@ -4,7 +4,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('@shared/lib/supabase', () => ({
-  supabase: { from: vi.fn() },
+  supabase: { from: vi.fn(), rpc: vi.fn().mockResolvedValue({ data: 'uuid', error: null }) },
 }));
 
 vi.mock('@shared/lib/logger-instance', () => ({

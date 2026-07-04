@@ -11,6 +11,8 @@ import { supabase } from '@shared/lib/supabase';
 
 const db = supabase as any;
 
+const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
+
 export interface TogglePermissionInput {
   role: StaffRole;
   action: StaffAction;
@@ -40,6 +42,25 @@ export function useMutationTogglePermission() {
               (error as { message?: string }).message ?? 'Failed to enable permission',
           });
         }
+
+        const auditRes = await db.rpc('record_audit', {
+          p_action: 'permission.toggle',
+          p_entity_type: 'permission',
+          p_entity_id: null,
+          p_before: null,
+          p_after: { role, action },
+          p_source: 'client',
+          p_terminal_id: TERMINAL_ID,
+          p_user_id: null,
+        });
+        if (auditRes?.error) {
+          logger.warn('permission.toggle.audit_failed', {
+            role,
+            action,
+            message: auditRes.error.message,
+          });
+        }
+
         return ok(null);
       }
 
@@ -56,6 +77,25 @@ export function useMutationTogglePermission() {
             (error as { message?: string }).message ?? 'Failed to disable permission',
         });
       }
+
+      const auditRes = await db.rpc('record_audit', {
+        p_action: 'permission.toggle',
+        p_entity_type: 'permission',
+        p_entity_id: null,
+        p_before: { role, action },
+        p_after: null,
+        p_source: 'client',
+        p_terminal_id: TERMINAL_ID,
+        p_user_id: null,
+      });
+      if (auditRes?.error) {
+        logger.warn('permission.toggle.audit_failed', {
+          role,
+          action,
+          message: auditRes.error.message,
+        });
+      }
+
       return ok(null);
     },
     onSuccess: result => {
