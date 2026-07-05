@@ -1,7 +1,7 @@
 import { Toaster } from 'sonner';
 import { ClockDriftBanner } from '@shared/ui/ClockDriftBanner';
-import { OfflineBanner } from '@shared/ui/OfflineBanner';
 import { ErrorBoundary } from '@shared/ui/ErrorBoundary';
+import { OfflineBanner } from '@shared/ui/OfflineBanner';
 import { AppConfigProvider } from './AppConfigProvider';
 import { Providers } from './providers';
 import { Router } from './router';

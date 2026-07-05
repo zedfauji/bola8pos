@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { POSButton } from '@shared/ui/POSButton';
 import { logError } from '@shared/lib/telemetry';
+import { POSButton } from '@shared/ui/POSButton';
 
 interface Props {
   children: ReactNode;

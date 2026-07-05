@@ -23,7 +23,6 @@ import {
   parseSupabaseError,
   staleVersionError,
   type Result,
-  type AppError,
 } from '@shared/lib/result';
 
 // ---------------------------------------------------------------------------
@@ -112,8 +111,8 @@ async function callCloseTabUpdate(
 // ---------------------------------------------------------------------------
 
 type OutcomePair = [
-  Result<{ id: string; version: number }, AppError>,
-  Result<{ id: string; version: number }, AppError>,
+  Result<{ id: string; version: number }>,
+  Result<{ id: string; version: number }>,
 ];
 
 function assertExactlyOneStale(pair: OutcomePair): void {
@@ -123,7 +122,7 @@ function assertExactlyOneStale(pair: OutcomePair): void {
   expect(losers).toHaveLength(1);
   const loser = losers[0];
   expect(loser).toBeDefined();
-  if (loser && !loser.ok) {
+  if (loser) {
     expect(loser.error.code).toBe('STALE_VERSION');
   }
 }
