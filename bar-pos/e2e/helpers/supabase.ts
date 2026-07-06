@@ -572,34 +572,36 @@ export async function getLatestInventoryLog(
 }
 
 /**
- * Seed a pending food order item into an existing open tab.
- * Finds (or creates) a product in a food category (is_food = true),
- * creates an order for the tab, and inserts an order_item with kds_status = 'pending'.
+ * Seed a pending KDS order item into an existing open tab.
+ * Finds (or creates) a product in a category routed to the given station
+ * (`categories.routing`, default 'KITCHEN'), creates an order for the tab,
+ * and inserts an order_item with kds_status = 'pending'.
  * Returns the orderId and itemId.
  */
 export async function seedKdsFoodOrder(
-  tabId: string
+  tabId: string,
+  routing: 'KITCHEN' | 'BAR' = 'KITCHEN'
 ): Promise<{ orderId: string; itemId: string }> {
   const admin = getServiceClient();
 
-  // Find a food category
-  const { data: foodCat, error: catErr } = await admin
+  // Find a category routed to the requested station
+  const { data: routedCat, error: catErr } = await admin
     .from('categories')
     .select('id')
-    .eq('is_food', true)
+    .eq('routing', routing)
     .limit(1)
     .maybeSingle();
-  if (catErr || !foodCat) throw new Error(`seedKdsFoodOrder: no food category found – ${catErr?.message}`);
+  if (catErr || !routedCat) throw new Error(`seedKdsFoodOrder: no ${routing}-routed category found – ${catErr?.message}`);
 
-  // Find a product in that food category
+  // Find a product in that routed category
   const { data: product, error: prodErr } = await admin
     .from('products')
     .select('id, base_price')
-    .eq('category_id', foodCat.id)
+    .eq('category_id', routedCat.id)
     .eq('is_active', true)
     .limit(1)
     .maybeSingle();
-  if (prodErr || !product) throw new Error(`seedKdsFoodOrder: no food product found – ${prodErr?.message}`);
+  if (prodErr || !product) throw new Error(`seedKdsFoodOrder: no ${routing}-routed product found – ${prodErr?.message}`);
 
   // Find a staff member
   const { data: staff } = await admin.from('profiles').select('id').limit(1).single();
