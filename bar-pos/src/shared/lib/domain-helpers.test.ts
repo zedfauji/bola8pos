@@ -89,7 +89,7 @@ describe('resolveProductPrice', () => {
     sortOrder: 0,
     happyHourStart: '16:00',
     happyHourEnd: '18:00',
-    isFood: false,
+    routing: 'NONE',
     createdAt: new Date(),
   };
 
@@ -571,7 +571,7 @@ describe('isHappyHourActive', () => {
     sortOrder: 0,
     happyHourStart: '16:00',
     happyHourEnd: '18:00',
-    isFood: false,
+    routing: 'NONE',
     createdAt: new Date(),
   };
 
@@ -757,7 +757,7 @@ describe('isHappyHourActive — boundary tests (Sprint 2)', () => {
     sortOrder: 0,
     happyHourStart: '16:00',
     happyHourEnd: '18:00',
-    isFood: false,
+    routing: 'NONE',
     createdAt: new Date(),
   };
 

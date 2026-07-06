@@ -41,7 +41,7 @@ describe('CategorySchema', () => {
     sortOrder: 0,
     happyHourStart: null,
     happyHourEnd: null,
-    isFood: false,
+    routing: 'NONE',
     createdAt: NOW,
   };
 
@@ -91,7 +91,7 @@ describe('CategorySchema', () => {
       sortOrder: baseValid.sortOrder,
       happyHourStart: baseValid.happyHourStart,
       happyHourEnd: baseValid.happyHourEnd,
-      isFood: baseValid.isFood,
+      routing: baseValid.routing,
       createdAt: baseValid.createdAt,
     };
     const result = CategorySchema.safeParse(rest);
