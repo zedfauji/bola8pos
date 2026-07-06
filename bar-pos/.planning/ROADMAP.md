@@ -463,7 +463,16 @@ Plans:
 **Goal:** Add a `category.routing` enum (`KITCHEN | BAR | NONE`) so order items route to the correct prep station. Ship a new `/kds-bar` page (bartender+) mirroring the existing kitchen KDS, and a `RoutingBadge` widget so staff can see at a glance where an item is prepped.
 **Requirements:** TBD (POS-COMPARISON.md §16 — source doc no longer present; scope locked in 16-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** Not yet planned
+**Plans:** 7 plans
+
+Plans:
+- [ ] 16-01-PLAN.md — Schema + type contract: CategoryRouting enum, CategorySchema.routing, migration file, supabase.types.ts
+- [ ] 16-02-PLAN.md — [BLOCKING] supabase db push (apply routing migration to live DB) + confirm types
+- [ ] 16-03-PLAN.md — RBAC view_kds_bar action + RoutingBadge shared/ui primitive + story
+- [ ] 16-04-PLAN.md — Data-layer sweep: category queries + ModifierSheet fallback + pre-cheque filter → routing
+- [ ] 16-05-PLAN.md — KDS routing end-to-end: useKdsItems(routing), KdsBoard prop + RoutingBadge cards, /kds-bar route + page
+- [ ] 16-06-PLAN.md — Category routing selector + tree badge + persistence + HomeDashboard /kds-bar tile
+- [ ] 16-07-PLAN.md — E2E 40-kds-bar spec + seed helper migration + regression gate (typecheck/lint/unit) + CLAUDE.md docs
 
 **Success Criteria:**
 
