@@ -1,5 +1,6 @@
 import {
   BarChart,
+  Beer,
   Bike,
   ChefHat,
   ClipboardList,
@@ -96,6 +97,13 @@ const ITEMS: DashboardItem[] = [
     label: 'Kitchen Display',
     icon: UtensilsCrossed,
     visibleToRoles: ['admin', 'kitchen'],
+  },
+  {
+    path: '/kds-bar',
+    label: 'Bar Display',
+    icon: Beer,
+    requiredAction: 'view_kds_bar',
+    managerLabel: 'Bartender',
   },
 ];
 

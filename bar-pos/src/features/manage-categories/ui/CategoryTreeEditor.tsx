@@ -12,7 +12,7 @@
  *   - Writes via useMutationCreateCategory, useMutationUpdateCategory
  */
 
-import { ChevronDown, ChevronRight, Pencil, Plus } from 'lucide-react';
+import { Beer, ChevronDown, ChevronRight, Pencil, Plus, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -22,11 +22,19 @@ import {
 } from '@entities/category';
 import type { Category } from '@entities/category';
 import { MAX_DEPTH, wouldViolateDepth } from '@shared/lib/category-tree';
-import type { CategoryCreate, CategoryUpdate } from '@shared/lib/domain';
+import type { CategoryCreate, CategoryRouting, CategoryUpdate } from '@shared/lib/domain';
 import { FormField } from '@shared/ui/FormField';
 import { POSButton } from '@shared/ui/POSButton';
+import { RoutingBadge } from '@shared/ui/RoutingBadge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/ui/select';
 
 // ============================================================================
 // CATEGORY FORM
@@ -35,6 +43,7 @@ import { Input } from '@shared/ui/input';
 interface CategoryFormData {
   name: string;
   color: string;
+  routing: CategoryRouting;
 }
 
 interface CategoryFormProps {
@@ -47,12 +56,13 @@ interface CategoryFormProps {
 function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormProps) {
   const [name, setName] = useState(initial.name);
   const [color, setColor] = useState(initial.color);
+  const [routing, setRouting] = useState<CategoryRouting>(initial.routing);
 
   function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
-    onSubmit({ name: trimmed, color });
+    onSubmit({ name: trimmed, color, routing });
   }
 
   return (
@@ -82,6 +92,31 @@ function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormP
           />
           <span className="text-sm text-muted-foreground">{color}</span>
         </div>
+      </FormField>
+      <FormField label="Routing station">
+        <Select
+          value={routing}
+          onValueChange={value => {
+            setRouting(value as CategoryRouting);
+          }}
+        >
+          <SelectTrigger id="cat-routing">
+            <SelectValue placeholder="Select routing" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="KITCHEN">
+              <UtensilsCrossed className="h-3.5 w-3.5" aria-hidden /> Kitchen
+            </SelectItem>
+            <SelectItem value="BAR">
+              <Beer className="h-3.5 w-3.5" aria-hidden /> Bar
+            </SelectItem>
+            <SelectItem value="NONE">None</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Controls which KDS board this category&apos;s items appear on. Choose &ldquo;None&rdquo;
+          for items that aren&rsquo;t prepped (e.g. merch).
+        </p>
       </FormField>
       <div className="flex justify-end gap-2">
         <POSButton type="button" variant="outline" touchSize="default" onClick={onCancel}>
@@ -158,6 +193,13 @@ function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChil
 
         {/* Name */}
         <span className="flex-1 text-sm font-medium">{category.name}</span>
+
+        {/* Routing */}
+        {category.routing === 'NONE' ? (
+          <span className="text-xs text-muted-foreground">Not routed</span>
+        ) : (
+          <RoutingBadge routing={category.routing} />
+        )}
 
         {/* Depth badge */}
         <span className="text-xs text-muted-foreground">L{depth + 1}</span>
@@ -308,7 +350,7 @@ export function CategoryTreeEditor() {
       sortOrder: allCats.filter(c => (c.parentId ?? null) === parentId).length,
       happyHourStart: null,
       happyHourEnd: null,
-      isFood: false,
+      routing: data.routing,
       parentId: parentId ?? undefined,
     };
 
@@ -322,7 +364,12 @@ export function CategoryTreeEditor() {
   }
 
   async function handleUpdate(id: string, data: CategoryFormData) {
-    const payload: CategoryUpdate = { id, name: data.name, color: data.color };
+    const payload: CategoryUpdate = {
+      id,
+      name: data.name,
+      color: data.color,
+      routing: data.routing,
+    };
     const r = await updateMutation.mutateAsync(payload);
     if (!r.ok) {
       toast.error(r.error.message);
@@ -410,8 +457,12 @@ export function CategoryTreeEditor() {
               key={dialog.kind === 'edit' ? dialog.category.id : dialog.kind}
               initial={
                 dialog.kind === 'edit'
-                  ? { name: dialog.category.name, color: dialog.category.color }
-                  : { name: '', color: '#6366f1' }
+                  ? {
+                      name: dialog.category.name,
+                      color: dialog.category.color,
+                      routing: dialog.category.routing,
+                    }
+                  : { name: '', color: '#6366f1', routing: 'NONE' }
               }
               submitting={createMutation.isPending || updateMutation.isPending}
               onCancel={() => {
