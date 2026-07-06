@@ -244,9 +244,9 @@ export type Database = {
           happy_hour_end: string | null;
           happy_hour_start: string | null;
           id: string;
-          is_food: boolean;
           name: string;
           parent_id: string | null;
+          routing: 'KITCHEN' | 'BAR' | 'NONE';
           sort_order: number;
           updated_at: string;
         };
@@ -257,9 +257,9 @@ export type Database = {
           happy_hour_end?: string | null;
           happy_hour_start?: string | null;
           id?: string;
-          is_food?: boolean;
           name: string;
           parent_id?: string | null;
+          routing?: 'KITCHEN' | 'BAR' | 'NONE';
           sort_order?: number;
           updated_at?: string;
         };
@@ -270,9 +270,9 @@ export type Database = {
           happy_hour_end?: string | null;
           happy_hour_start?: string | null;
           id?: string;
-          is_food?: boolean;
           name?: string;
           parent_id?: string | null;
+          routing?: 'KITCHEN' | 'BAR' | 'NONE';
           sort_order?: number;
           updated_at?: string;
         };

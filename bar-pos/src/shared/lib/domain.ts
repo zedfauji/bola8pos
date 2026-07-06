@@ -169,6 +169,9 @@ export const DiscountType = {
 } as const;
 export type DiscountType = z.infer<typeof DiscountTypeSchema>;
 
+export const CategoryRoutingSchema = z.enum(['KITCHEN', 'BAR', 'NONE']);
+export type CategoryRouting = z.infer<typeof CategoryRoutingSchema>;
+
 // ============================================================================
 // CATEGORY
 // ============================================================================
@@ -180,7 +183,7 @@ export const CategorySchema = z.object({
   sortOrder: z.number().int().nonnegative(),
   happyHourStart: TimeStringSchema.nullable(),
   happyHourEnd: TimeStringSchema.nullable(),
-  isFood: z.boolean().default(false),
+  routing: CategoryRoutingSchema.default('NONE'),
   /** Parent category id for hierarchical nesting (max depth 3). Null = root category. */
   parentId: UuidSchema.nullable().optional(),
   createdAt: TimestampSchema,
