@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { KdsStatusSchema, UuidSchema, TimestampSchema } from '@shared/lib/domain';
+import { CategoryRoutingSchema, KdsStatusSchema, UuidSchema, TimestampSchema } from '@shared/lib/domain';
 
 export const KdsOrderItemSchema = z.object({
   id: UuidSchema,
@@ -7,7 +7,7 @@ export const KdsOrderItemSchema = z.object({
   productId: UuidSchema,
   productName: z.string(),
   categoryId: UuidSchema,
-  isFood: z.boolean(),
+  routing: CategoryRoutingSchema,
   quantity: z.number().int().positive(),
   notes: z.string().nullable(),
   kdsStatus: KdsStatusSchema,

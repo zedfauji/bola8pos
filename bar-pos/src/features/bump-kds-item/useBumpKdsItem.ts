@@ -13,7 +13,7 @@ export function useBumpKdsItem() {
         toast.error(result.error.message);
         return;
       }
-      void queryClient.invalidateQueries({ queryKey: kdsKeys.items() });
+      void queryClient.invalidateQueries({ queryKey: kdsKeys.all });
     },
     onError: () => toast.error('Failed to update item status.'),
   });

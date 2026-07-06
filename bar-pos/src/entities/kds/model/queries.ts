@@ -9,12 +9,12 @@ import type { KdsOrderItem } from './types';
 
 export const kdsKeys = {
   all: ['kds'] as const,
-  items: () => [...kdsKeys.all, 'items'] as const,
+  items: (routing: 'KITCHEN' | 'BAR') => [...kdsKeys.all, 'items', routing] as const,
 };
 
-export function useKdsItems() {
+export function useKdsItems(routing: 'KITCHEN' | 'BAR') {
   return useQuery({
-    queryKey: kdsKeys.items(),
+    queryKey: kdsKeys.items(routing),
     queryFn: async (): Promise<Result<KdsOrderItem[]>> => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any;
@@ -41,10 +41,7 @@ export function useKdsItems() {
           products!inner(
             id,
             name,
-            categories!inner(
-              id,
-              is_food
-            )
+            categories!inner(id, routing)
           ),
           order_item_modifiers(
             modifiers(
@@ -69,8 +66,8 @@ export function useKdsItems() {
       const rows = (data ?? []) as any[];
       const items: KdsOrderItem[] = [];
       for (const row of rows) {
-        const isFood = row.products?.categories?.is_food as boolean | undefined;
-        if (!isFood) continue;
+        const categoryRouting = row.products?.categories?.routing as string | undefined;
+        if (categoryRouting !== routing) continue;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const modifierRows = (row['order_item_modifiers'] ?? []) as any[];
@@ -84,7 +81,7 @@ export function useKdsItems() {
           productId: row.product_id as string,
           productName: (row.products?.name as string | undefined) ?? 'Unknown',
           categoryId: (row.products?.categories?.id as string | undefined) ?? '',
-          isFood: true,
+          routing: categoryRouting,
           quantity: row.quantity as number,
           notes: row.notes as string | null,
           kdsStatus: row.kds_status as KdsOrderItem['kdsStatus'],
@@ -116,7 +113,7 @@ export function useKdsRealtimeBridge(): void {
           new: payload.new as Record<string, unknown>,
           old: payload.old as Record<string, unknown>,
         });
-        void queryClient.invalidateQueries({ queryKey: kdsKeys.items() });
+        void queryClient.invalidateQueries({ queryKey: kdsKeys.all });
       })
       .subscribe();
 
