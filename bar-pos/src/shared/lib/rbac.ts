@@ -30,6 +30,7 @@ export const STAFF_ACTIONS = [
   'manage_caja',
   'transfer_tab',
   'view_kds',
+  'view_kds_bar',
   'process_refund',
   'produce_prep_batch',
   'manage_waitlist',
@@ -48,6 +49,7 @@ const BARTENDER_ACTIONS: ReadonlySet<StaffAction> = new Set([
   'clock_out',
   'transfer_tab', // bartenders can transfer tabs between tables
   'close_tab', // bartenders can process payments via PIN verification
+  'view_kds_bar', // bartenders can view the bar KDS board (D-04)
 ]);
 
 const MANAGER_EXTRA: ReadonlySet<StaffAction> = new Set([
