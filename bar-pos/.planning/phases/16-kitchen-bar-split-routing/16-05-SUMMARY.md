@@ -147,3 +147,7 @@ None.
 ---
 *Phase: 16-kitchen-bar-split-routing*
 *Completed: 2026-07-06*
+
+## Self-Check: PASSED
+
+All created/modified files verified present on disk (`src/app/kds-bar-route.tsx`, `src/pages/kds-bar/index.tsx`, `src/entities/kds/model/types.ts`, `src/entities/kds/model/queries.ts`, `src/widgets/KdsBoard/index.tsx`, `src/pages/kds/index.tsx`, `src/app/router.tsx`, `src/features/bump-kds-item/useBumpKdsItem.ts`, this SUMMARY.md). All 4 commits (`4effcab`, `54535d6`, `36a69b3`, `4896467`) verified present via `git cat-file -e` (note: `git log --oneline --all` errors on this repo due to an unrelated broken ref `refs/heads/worktree-agent-a2b390553ea68f417` from a stale sibling worktree — not caused by this plan; per-hash lookup was used instead).
