@@ -31,7 +31,7 @@ ALTER TABLE categories
 -- -----------------------------------------------------------------------
 -- 3. Backfill from is_food (T-16-01: must happen before the DROP, same txn)
 -- -----------------------------------------------------------------------
-UPDATE categories SET routing = CASE WHEN is_food THEN 'KITCHEN' ELSE 'BAR' END;
+UPDATE categories SET routing = CASE WHEN is_food THEN 'KITCHEN' ELSE 'BAR' END::category_routing;
 
 -- -----------------------------------------------------------------------
 -- 4. Drop the old column
