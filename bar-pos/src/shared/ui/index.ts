@@ -8,6 +8,7 @@
 
 // Display
 export { ChefHatBadge } from './ChefHatBadge';
+export { RoutingBadge } from './RoutingBadge';
 export { ClockDriftBanner } from './ClockDriftBanner';
 export { MoneyDisplay } from './MoneyDisplay';
 export type { MoneyDisplayProps } from './MoneyDisplay';
