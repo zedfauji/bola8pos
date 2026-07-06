@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import type { Category, CategoryCreate, CategoryUpdate } from '@shared/lib/domain';
+import type { Category, CategoryCreate, CategoryRouting, CategoryUpdate } from '@shared/lib/domain';
 import { CategorySchema } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import {
@@ -35,7 +35,7 @@ function mapCategoryRow(row: Tables<'categories'>): Result<Category> {
         sortOrder: row.sort_order,
         happyHourStart: row.happy_hour_start,
         happyHourEnd: row.happy_hour_end,
-        isFood: (row as { is_food?: boolean }).is_food ?? false,
+        routing: (row as { routing?: CategoryRouting }).routing ?? 'NONE',
         parentId: (row as { parent_id?: string | null }).parent_id ?? null,
         createdAt: new Date(row.created_at),
       })
@@ -155,7 +155,7 @@ export function useMutationCreateCategory() {
         sort_order: input.sortOrder,
         happy_hour_start: categoryTimeForDb(input.happyHourStart),
         happy_hour_end: categoryTimeForDb(input.happyHourEnd),
-        is_food: input.isFood,
+        routing: input.routing,
         parent_id: input.parentId ?? null,
       };
 
@@ -189,7 +189,7 @@ export function useMutationUpdateCategory() {
         row.happy_hour_start = categoryTimeForDb(rest.happyHourStart);
       if (rest.happyHourEnd !== undefined)
         row.happy_hour_end = categoryTimeForDb(rest.happyHourEnd);
-      if (rest.isFood !== undefined) row.is_food = rest.isFood;
+      if (rest.routing !== undefined) row.routing = rest.routing;
       if (rest.parentId !== undefined) row.parent_id = rest.parentId;
 
       if (Object.keys(row).length === 0) return ok(null);

@@ -30,7 +30,7 @@ export function usePrintPreCheque() {
       const barName = settings?.general.barName ?? 'Bar';
       const cashierName = currentStaff?.name ?? tab.staff?.name ?? 'Staff';
 
-      // When kdsEnabled, food items are handled by the kitchen display and excluded from the pre-cheque.
+      // When kdsEnabled, KITCHEN- and BAR-routed items are handled by their KDS boards and excluded from the pre-cheque.
       const kdsEnabled = settings?.receipt.kdsEnabled ?? false;
 
       // Flatten non-voided order items into pre-cheque line items
@@ -38,7 +38,7 @@ export function usePrintPreCheque() {
         .filter(o => o.status !== 'voided')
         .flatMap(o =>
           o.items
-            .filter(item => !kdsEnabled || item.product?.category?.isFood !== true)
+            .filter(item => !kdsEnabled || item.product?.category?.routing === 'NONE')
             .map(item => ({
               name: item.product?.name ?? 'Item',
               quantity: item.quantity,

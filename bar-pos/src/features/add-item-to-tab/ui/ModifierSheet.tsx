@@ -23,7 +23,7 @@ function categoryForPricing(product: Product): Category {
     sortOrder: 0,
     happyHourStart: null,
     happyHourEnd: null,
-    isFood: false,
+    routing: 'NONE',
     createdAt: new Date(),
   };
 }
