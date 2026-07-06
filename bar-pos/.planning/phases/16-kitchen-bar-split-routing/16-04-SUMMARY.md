@@ -105,3 +105,7 @@ None - no external service configuration required. This plan only edits applicat
 ---
 *Phase: 16-kitchen-bar-split-routing*
 *Completed: 2026-07-06*
+
+## Self-Check: PASSED
+
+All modified files verified present on disk (`src/entities/category/model/queries.ts`, `src/features/add-item-to-tab/ui/ModifierSheet.tsx`, `src/features/print-precheque/usePrintPreCheque.ts`) and task commits (`0611dc2`, `74f4c2d`) plus SUMMARY commit (`60c4416`) verified present in git history via `git cat-file -e`.
