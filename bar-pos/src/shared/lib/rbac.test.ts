@@ -20,6 +20,7 @@ const ALLOWED: Record<StaffRole, ReadonlySet<string>> = {
     'clock_out',
     'transfer_tab',
     'close_tab', // bartenders can process payments via PIN verification
+    'view_kds_bar',
   ]),
   manager: new Set([
     'create_order',
@@ -40,6 +41,7 @@ const ALLOWED: Record<StaffRole, ReadonlySet<string>> = {
     'produce_prep_batch',
     'manage_waitlist',
     'view_audit_log',
+    'view_kds_bar',
   ]),
   admin: new Set(STAFF_ACTIONS),
   kitchen: new Set(['view_kds', 'clock_in', 'clock_out', 'produce_prep_batch']),
