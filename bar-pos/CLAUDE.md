@@ -121,6 +121,7 @@ All routes are registered in `src/app/router.tsx`. Protected by `<ProtectedRoute
 | `/login`                | LoginPage       | PIN login                                 |
 | `/waitlist`             | WaitlistPage    | Walk-in queue management (manager+)       |
 | `/rbac`                 | RbacPage        | Role & permission management (admin only) |
+| `/kds-bar`              | KdsBarPage      | Bar KDS board (bartender+)                |
 
 ## Implemented Features (as of 2026-04-20)
 
@@ -177,8 +178,8 @@ Realtime subscriptions are initialized in Zustand stores, not React components. 
 
 ## E2E Test Suite (`bar-pos/e2e/`)
 
-18 spec files — all must pass before release:
-`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`
+19 spec files — all must pass before release:
+`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`
 
 Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')` — admin PIN is `0000`.
 
