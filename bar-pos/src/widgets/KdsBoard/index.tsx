@@ -4,6 +4,7 @@ import { useBumpKdsItem } from '@features/bump-kds-item';
 import { useKdsItems, useKdsRealtimeBridge } from '@entities/kds';
 import type { KdsOrderItem } from '@entities/kds';
 import { ComboBadge } from '@shared/ui/ComboBadge';
+import { RoutingBadge } from '@shared/ui/RoutingBadge';
 import { Button } from '@shared/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@shared/ui/collapsible';
 
@@ -44,7 +45,10 @@ function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
           {item.tabCustomerName && (
             <p className="truncate text-sm font-semibold opacity-80">{item.tabCustomerName}</p>
           )}
-          <p className="truncate text-lg font-bold">{item.productName}</p>
+          <div className="flex items-center gap-2">
+            <p className="truncate text-lg font-bold">{item.productName}</p>
+            <RoutingBadge routing={item.routing} />
+          </div>
           <p className="text-sm opacity-80">Qty: {item.quantity}</p>
           {item.modifierNames.length > 0 && (
             <p data-testid="kds-item-modifiers" className="mt-1 text-sm opacity-80">
@@ -105,6 +109,7 @@ function ComboKdsCard({
           )}
           <div className="flex items-center gap-2">
             <p className="truncate text-lg font-bold">{item.productName}</p>
+            <RoutingBadge routing={item.routing} />
             <ComboBadge />
           </div>
           <p className="text-sm opacity-80">Qty: {item.quantity}</p>
@@ -151,10 +156,11 @@ function ComboKdsCard({
   );
 }
 
-export function KdsBoard() {
+export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
   useKdsRealtimeBridge();
-  const { data: result, isLoading, isError, refetch } = useKdsItems();
+  const { data: result, isLoading, isError, refetch } = useKdsItems(routing);
   const bump = useBumpKdsItem();
+  const stationLabel = routing === 'KITCHEN' ? 'kitchen' : 'bar';
 
   const handleBump = (id: string, next: 'in_progress' | 'done') => {
     bump.mutate({ itemId: id, nextStatus: next });
@@ -163,13 +169,13 @@ export function KdsBoard() {
   const bumpingItemId = bump.isPending ? bump.variables.itemId : null;
 
   if (isLoading) {
-    return <p className="text-muted-foreground p-6">Loading kitchen queue...</p>;
+    return <p className="text-muted-foreground p-6">Loading {stationLabel} queue...</p>;
   }
 
   if (isError || !result?.ok) {
     return (
       <div className="p-6">
-        <p className="text-destructive mb-2">Could not load kitchen queue.</p>
+        <p className="text-destructive mb-2">Could not load {stationLabel} queue.</p>
         <Button variant="outline" onClick={() => void refetch()}>
           Retry
         </Button>
@@ -200,7 +206,7 @@ export function KdsBoard() {
   if (topLevelItems.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center text-muted-foreground">
-        No active food orders
+        No active {stationLabel} orders
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { HelpSheet } from '@widgets/HelpSheet';
 import { AgentButton, AgentPanel } from '@features/agent-chat';
 import { ProtectedRoute } from './ProtectedRoute';
 import { AuditRoute } from './audit-route';
+import { KdsBarRoute } from './kds-bar-route';
 import { KdsRoute } from './kds-route';
 import { RbacRoute } from './rbac-route';
 import { ReportsRoute } from './reports-route';
@@ -21,6 +22,7 @@ const RappiOrdersPage = lazy(() => import('../pages/rappi'));
 const TableStatusPage = lazy(() => import('../pages/pool-table-status'));
 const PaymentsPage = lazy(() => import('../pages/payments'));
 const KdsPage = lazy(() => import('../pages/kds'));
+const KdsBarPage = lazy(() => import('../pages/kds-bar'));
 const KitchenPrepPage = lazy(() => import('../pages/kitchen-prep'));
 const WaitlistPage = lazy(() => import('../pages/waitlist'));
 const RbacPage = lazy(() => import('../pages/rbac'));
@@ -133,6 +135,16 @@ export function Router() {
                 <KdsRoute>
                   <KdsPage />
                 </KdsRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/kds-bar"
+            element={
+              <ProtectedRoute>
+                <KdsBarRoute>
+                  <KdsBarPage />
+                </KdsBarRoute>
               </ProtectedRoute>
             }
           />
