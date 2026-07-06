@@ -7,7 +7,7 @@ export default function KdsPage() {
       <BackToHomeButton />
       <main className="flex-1 overflow-auto">
         <PageContainer title="Kitchen Display" actions={<LiveTimeDisplay />}>
-          <KdsBoard />
+          <KdsBoard routing="KITCHEN" />
         </PageContainer>
       </main>
     </div>
