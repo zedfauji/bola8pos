@@ -119,3 +119,7 @@ None - no external service configuration required. This plan only edits applicat
 ---
 *Phase: 16-kitchen-bar-split-routing*
 *Completed: 2026-07-06*
+
+## Self-Check: PASSED
+
+All modified files verified present on disk (`src/features/manage-categories/ui/CategoryTreeEditor.tsx`, `src/widgets/HomeDashboard/ui/HomeDashboard.tsx`, this SUMMARY.md); all three commits (`e06b589`, `ffd77af`, `ff04ffc`) verified present via `git cat-file -e`.
