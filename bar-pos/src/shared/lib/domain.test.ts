@@ -23,6 +23,8 @@ import {
   ModifierGroupSchema,
   ModifierGroupItemSchema,
   ProductModifierGroupSchema,
+  ModifierInventoryRuleSchema,
+  ModifierInventoryRuleCreateSchema,
 } from './domain';
 
 // ─── Shared test fixtures ────────────────────────────────────────────────────
@@ -442,5 +444,70 @@ describe('ProductModifierGroupSchema', () => {
       sortOrder: baseValid.sortOrder,
     });
     expect(result.success).toBe(false);
+  });
+});
+
+// ─── ModifierInventoryRuleSchema ──────────────────────────────────────────────
+
+describe('ModifierInventoryRuleSchema', () => {
+  const baseValid = {
+    id: UUID,
+    modifierId: UUID2,
+    ingredientId: UUID,
+    delta: 2,
+  };
+
+  it('parses a valid rule with a positive delta', () => {
+    const result = ModifierInventoryRuleSchema.safeParse(baseValid);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.modifierId).toBe(UUID2);
+      expect(result.data.ingredientId).toBe(UUID);
+      expect(result.data.delta).toBe(2);
+    }
+  });
+
+  it('parses a valid rule with a negative delta', () => {
+    const result = ModifierInventoryRuleSchema.safeParse({ ...baseValid, delta: -1 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.delta).toBe(-1);
+    }
+  });
+
+  it('rejects a zero delta', () => {
+    const result = ModifierInventoryRuleSchema.safeParse({ ...baseValid, delta: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a non-numeric delta', () => {
+    const result = ModifierInventoryRuleSchema.safeParse({ ...baseValid, delta: 'x' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a missing modifierId', () => {
+    const result = ModifierInventoryRuleSchema.safeParse({
+      id: baseValid.id,
+      ingredientId: baseValid.ingredientId,
+      delta: baseValid.delta,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a non-UUID ingredientId', () => {
+    const result = ModifierInventoryRuleSchema.safeParse({ ...baseValid, ingredientId: 'not-uuid' });
+    expect(result.success).toBe(false);
+  });
+
+  it('ModifierInventoryRuleCreateSchema parses without an id', () => {
+    const result = ModifierInventoryRuleCreateSchema.safeParse({
+      modifierId: baseValid.modifierId,
+      ingredientId: baseValid.ingredientId,
+      delta: baseValid.delta,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty('id');
+    }
   });
 });
