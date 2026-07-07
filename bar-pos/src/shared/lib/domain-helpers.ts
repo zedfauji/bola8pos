@@ -14,6 +14,7 @@ import type {
   DiscountScope,
   DiscountType,
   RecipeWithItems,
+  ModifierInventoryRule,
 } from './domain';
 import { computePoolSessionBilling } from './pool-billing';
 
@@ -397,6 +398,26 @@ export function computeDepletion(
   for (const item of recipe.items) {
     const delta = -direction * orderQty * item.qty / recipe.yieldQty;
     deltas.set(item.ingredientId, delta);
+  }
+  return deltas;
+}
+
+/**
+ * computeModifierDepletion — pure function mirroring computeDepletion for modifier-driven rules.
+ * Returns a Map of ingredientId → stock delta (negative = subtract, positive = add back).
+ * direction: +1 = sale (subtract), -1 = refund (add back).
+ * Formula: delta = -(direction × orderQty × rule.delta) — NO yieldQty divisor (D-01: modifier
+ * deltas are absolute-per-line, unlike recipe qty which is yield-scaled).
+ */
+export function computeModifierDepletion(
+  rules: ModifierInventoryRule[],
+  orderQty: number,
+  direction: 1 | -1,
+): Map<string, number> {
+  const deltas = new Map<string, number>();
+  for (const rule of rules) {
+    const delta = -direction * orderQty * rule.delta;
+    deltas.set(rule.ingredientId, delta);
   }
   return deltas;
 }
