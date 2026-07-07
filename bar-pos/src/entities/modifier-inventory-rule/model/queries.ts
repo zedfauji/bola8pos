@@ -8,7 +8,8 @@
  * yet regenerated.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ModifierInventoryRuleSchema } from '@shared/lib/domain';
+import type { z } from 'zod';
+import { ModifierInventoryRuleCreateSchema, ModifierInventoryRuleSchema } from '@shared/lib/domain';
 import type { ModifierInventoryRule, ModifierInventoryRuleCreate } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
@@ -88,6 +89,18 @@ export function useMutationSaveModifierInventoryRules() {
     mutationFn: async (
       input: SaveModifierInventoryRulesInput,
     ): Promise<Result<ModifierInventoryRule[]>> => {
+      // Re-validate against the Zod contract at the write boundary — the UI's
+      // number input allows precision the schema's multipleOf(0.001) rejects.
+      const invalidRule = input.rules
+        .map(rule => ModifierInventoryRuleCreateSchema.safeParse(rule))
+        .find((v): v is z.ZodSafeParseError<ModifierInventoryRuleCreate> => !v.success);
+      if (invalidRule) {
+        logger.error('useMutationSaveModifierInventoryRules: rule validation failed', {
+          error: invalidRule.error,
+        });
+        return err({ code: 'VALIDATION_ERROR', message: invalidRule.error.message });
+      }
+
       // 1. Delete existing rules for this modifier (replace strategy)
       const { error: deleteError } = await db
         .from('modifier_inventory_rules')
