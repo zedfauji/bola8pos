@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Cross-Pollination from billar-pos
 current_phase: 17
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 17-03-PLAN.md -- modifier_inventory_rules table + deplete_for_order_item v3 live in remote Supabase
-last_updated: "2026-07-07T18:49:34.074Z"
+stopped_at: Completed 17-05-PLAN.md -- manage-modifier-inventory-rules dialog shipped, wired into CatalogModifiersTab, UAT proven via e2e/24-modifier-inventory-rules.spec.ts. Phase 17 (modifier-inventory-rules) complete, 5/5 plans.
+last_updated: "2026-07-07T20:30:42.593Z"
 progress:
   total_phases: 28
-  completed_phases: 13
+  completed_phases: 14
   total_plans: 97
-  completed_plans: 105
-  percent: 46
+  completed_plans: 107
+  percent: 50
 ---
 
 # Session State
@@ -25,12 +25,13 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2 / v2.1
 **Current phase:** 17
-**Current plan:** 4
+**Current plan:** 5 (Phase 17 complete — 5/5 plans)
 **Status:** Executing Phase 17
 **Progress:** [██████████] 100%
 
 ## Session Log
 
+- 2026-07-07: **Phase 17 Plan 05 complete (ad9098a, ed03b83, b3279c7) — Phase 17 (modifier-inventory-rules) COMPLETE, 5/5 plans** — `features/manage-modifier-inventory-rules/` slice shipped: `ModifierIngredientRulesDialog` (row-list editor cloned from `RecipeEditorTab`'s `useReducer` pattern, dropped `yieldQty`, renamed `qty`→`delta`) + `useManageModifierInventoryRules` toast-wrapping save hook + explicit-export barrel; signed delta `Input` uses `type="number" step="0.001"` with **no `min` attribute** — MoneyInput forbidden here (Pitfall 3, clamps negatives to 0). `CatalogModifiersTab.tsx` gains a per-row `FlaskConical` "Ingredient rules" button, mirroring the existing Edit/Delete cluster and the `CatalogProductsTab`→`RecipeEditorTab` cross-feature import precedent. `npm run typecheck`/`lint` clean (only the 2 pre-existing 17-03-documented errors remain); full unit suite 1187 passed / 1 pre-existing failure (`useCloseTab.test.ts:95`, since Phase 15) / 15 todo — no regressions. Task 3's blocking `checkpoint:human-verify` was satisfied via an orchestrator-authored Playwright spec `e2e/24-modifier-inventory-rules.spec.ts` (course-corrected mid-execution in place of manual click-through) covering the full UAT flow — add positive + negative delta rows, save, reopen, assert exact round-trip (`-1`, not clamped to `0`), Save-button dirty/clean gating, row-remove — 1 passed (40.6s), stable across 2 runs. SC-3 satisfied. **Phase 17 is now complete.**
 - 2026-07-07: **Phase 17 Plan 03 complete (64a19d1)** — modifier_inventory_rules type block transcribed into supabase.types.ts (Row/Insert/Update/Relationships, delta:number, two FKs to modifiers/ingredients, alphabetically placed between modifier_groups and modifiers); BLOCKING checkpoint executed and approved: both migrations (`20260706000002_modifier_inventory_rules_table.sql`, `20260706000003_deplete_for_order_item_v3.sql`) applied to remote Supabase via a single `npx supabase db push` (no CLI splitter workaround needed this time); 4 verification queries all PASS — table live (`to_regclass`), RLS policies present (`modifier_inventory_rules_select_authenticated`, `modifier_inventory_rules_write_manager`), v3 function body confirmed via `pg_get_functiondef` (contains `order_item_modifier` loop + preserved kitchen role guard). `npm ci` run first (node_modules was empty); typecheck surfaced 2 pre-existing unrelated errors (tab/model/queries.ts, agent/rag.ts, both predate this plan) logged to `.planning/phases/17-modifier-inventory-rules/deferred-items.md`, not fixed (out of scope). SC-1 + SC-2 satisfied — 17-04 (entity queries + integration test) and 17-05 (admin UI) unblocked.
 - 2026-07-03: **Phase 13 Plans 13-01 + 13-06 backfilled/completed (a692e3f)** — 13-01 (RLS rewrite + RPC role guards) had real committed work (98fa463, 8cfd6c5) from 2026-04-27 but no SUMMARY.md; backfilled from commit history, no re-execution needed. 13-06 (Task 1: T-RP-01..06 E2E tests, committed 5d6c97b 2026-04-28) was missing its Task 2 (blocking human-verify checkpoint) and Task 3 (unit regression gate) — both completed this session. All 6 Phase 13 E2E tests (T-RP-01..06) pass; role_permissions seed counts match exactly (bartender=9/manager=17/admin=22/kitchen=4); action-set diff 0 rows; unit suite 1133/1134 (same pre-existing failure); human sign-off received on manual /rbac click-through. Found + fixed a real regression while running the checkpoint: `openCaja()` E2E helper silently broken since Phase 15 shipped (2026-04-28) — its cleanup UPDATE never bumped `version`, so the `bump_version_on_update` trigger rejected it and the error was unchecked, leaving stale open `caja_sessions` rows that broke ~39 E2E specs via `caja_sessions_one_open` violations whenever a prior session was left open. Fixed by closing each open row individually with `version+1`. RBAC spec went from 20/20 failing to 6/20 (all 6 remaining confirmed pre-existing/unrelated — missing "Budweiser" seed product, not an RBAC issue). **Phase 13 (scopes-full-rbac-from-scratch) is now complete — 6/6 plans.**
 - 2026-07-03: **Phase 05 Plan 05-05 COMPLETE (562ea65, 27da4a1)** — Kitchen Prep E2E suite (21-prep.spec.ts T1/T2/T4/T5) green twice in a row against live remote Supabase, T3 intentionally skipped (covered by integration I5/I6). Blocker from earlier this session (DNS NXDOMAIN) resolved by user; follow-up Cloudflare 521 + PostgREST PGRST205 "table not in schema cache" resolved via `NOTIFY pgrst, 'reload schema'` (project woke from pause with a stale schema cache, migrations were actually already applied). Found + fixed 2 real app bugs surfaced by attempting genuine E2E verification: (1) `mapStaffRow` never passed `mustChangePin` to `StaffSchema.parse()`, throwing a ZodError on every profiles row and breaking `/login` app-wide with "Failed to load staff" — fixed in `src/entities/staff/model/queries.ts`; (2) `DataTable.tsx`'s loading skeleton rendered a bare `<div>` directly inside `<TableBody>` (invalid HTML, React hydration warning on every loading DataTable app-wide) — wrapped in TableRow/TableCell. Also fixed 2 E2E-test-only bugs: `resetPrepIngredientStock` only reset Tomato (not Onion, not Salsa Mexicana itself), causing cross-run state drift; and an unscoped `getByRole('dialog')` in T2 matched the always-mounted AI-assistant side panel. Full unit suite 1133/1134 pass (same pre-existing unrelated `useCloseTab.test.ts:95` failure documented since Phase 15). Non-blocking, left untouched: 5 pre-existing lint errors from Phase 15 commit 761cacb; migration-history drift between local `.sql` files and 4 already-applied remote migrations (`rpc_versioned_group_a`, `drop_orphan_rpc_overloads_15_02`, `fix_combo_rls`, `force_pin_change`). **Phase 05 (kitchen-prep-cocktails) is now complete — 5/5 plans.**
@@ -184,6 +185,8 @@ See: .planning/PROJECT.md
 - [Phase 12-full-rbac-page 12-01]: StaffDashboard Administration section fully removed; usePermissions/can/toast/Button/EditRoleDialog/editRoleOpen all cleaned up; StaffDashboard.test.tsx 3 Administration tests replaced with it.todo stubs
 - [Phase 17-modifier-inventory-rules 17-03]: modifier_inventory_rules type block inserted alphabetically between modifier_groups and modifiers in supabase.types.ts, matching recipe_items structure
 - [Phase 17-modifier-inventory-rules 17-03]: Both Phase-17 migrations (modifier_inventory_rules table + deplete_for_order_item v3) applied to remote Supabase in a single npx supabase db push, no CLI splitter workaround needed
+- [Phase ?]: [Phase 17-modifier-inventory-rules 17-05]: Task 3's blocking checkpoint:human-verify was satisfied via an orchestrator-authored Playwright e2e spec (e2e/24-modifier-inventory-rules.spec.ts, 1 passed/40.6s, stable across 2 runs) rather than manual browser click-through, covering the full UAT flow including the Pitfall 3 negative-delta round-trip regression guard
+- [Phase ?]: [Phase 17-modifier-inventory-rules 17-05]: Delta hint/label rendered once above the row list (not per-row via FormField) to avoid clutter across N rows while still surfacing the load-bearing signed-delta explanation from 17-UI-SPEC.md
 
 ## Performance Metrics
 
@@ -229,8 +232,9 @@ See: .planning/PROJECT.md
 | 15-tabs-version-optimistic-concurrency | 04 | ~25min | 2 | 9 |
 | Phase 15-tabs-version-optimistic-concurrency P06 | 50min | 4 tasks | 5 files |
 | Phase 17-modifier-inventory-rules P03 | ~20min | 2 tasks | 1 files |
+| Phase 17-modifier-inventory-rules P05 | 30min | 2 tasks | 5 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 17-03-PLAN.md -- modifier_inventory_rules table + deplete_for_order_item v3 live in remote Supabase
+- **Stopped at:** Completed 17-05-PLAN.md -- manage-modifier-inventory-rules dialog shipped, wired into CatalogModifiersTab, UAT proven via e2e/24-modifier-inventory-rules.spec.ts. Phase 17 (modifier-inventory-rules) complete, 5/5 plans.
 - **Timestamp:** 2026-07-07T18:49:33Z

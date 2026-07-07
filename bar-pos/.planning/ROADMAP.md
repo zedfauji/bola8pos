@@ -32,7 +32,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
  (completed 2026-04-28)
 
 - [x] **Phase 16: Kitchen/Bar Split Routing** — `category.routing` enum (KITCHEN|BAR|NONE) + new `/kds-bar` page (bartender+) + `RoutingBadge` widget (completed 2026-07-07)
-- [ ] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups`
+- [x] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups` (completed 2026-07-07)
 - [ ] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI
 - [ ] **Phase 19: Tip Distribution Config** — Singleton `tip_distribution_config` (floor/bar/kitchen %) + `tip_distribution_entries` + close-caja allocation + Settings panel
 - [ ] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin
@@ -493,7 +493,7 @@ Plans:
 **Goal:** Let modifiers (e.g. "extra cheese", "no ice") drive inventory depletion. Add a `modifier_inventory_rules` join table, extend the `deplete_for_order_item` RPC to account for selected modifiers, and add an admin UI inside `manage-modifier-groups` to configure the rules.
 **Requirements:** TBD (POS-COMPARISON.md §17 — source doc no longer present; scope locked in 17-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 
@@ -501,7 +501,7 @@ Plans:
 - [x] 17-02-PLAN.md — DB migrations: modifier_inventory_rules table + RLS + deplete_for_order_item v3 modifier loop (Wave 1)
 - [x] 17-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension (Wave 2)
 - [x] 17-04-PLAN.md — entities/modifier-inventory-rule slice + depletion integration cases I5/I6 (Wave 3)
-- [ ] 17-05-PLAN.md — features/manage-modifier-inventory-rules dialog + CatalogModifiersTab wiring + UAT (Wave 4)
+- [x] 17-05-PLAN.md — features/manage-modifier-inventory-rules dialog + CatalogModifiersTab wiring + UAT (Wave 4)
 
 **Success Criteria:**
 
