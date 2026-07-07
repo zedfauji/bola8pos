@@ -17,6 +17,8 @@ created: 2026-07-06
 
 This phase is a **small admin-CRUD extension**, not a new screen. It adds an "Ingredient rules" editor per modifier row inside the existing `CatalogModifiersTab.tsx` (`src/features/manage-products/ui/CatalogModifiersTab.tsx`), modeled directly on `RecipeEditorTab.tsx`'s ingredient-row-list pattern. All visual tokens below are **inherited from the existing codebase design system** (already in production, verified by direct file read) — nothing net-new is introduced. Source: `17-RESEARCH.md` Architecture Patterns / Recommended Project Structure; `components.json`; `tailwind.config.ts`; `src/app/globals.css`.
 
+**Focal point:** the ingredient row list is the primary content of the dialog; the "Save rules" button is the secondary action anchor at the bottom-right, matching the existing `RecipeEditorTab.tsx` / `ModifierDialog` footer-action pattern.
+
 ---
 
 ## Design System
@@ -59,10 +61,10 @@ Inherited — no new type roles introduced. This phase reuses body text, labels,
 |------|------|--------|-------------|
 | Body | 14px (`text-sm`) | 400 (regular) | 1.5 |
 | Label | 14px (`text-sm`, `font-medium`) | 500 (medium — matches `FormField` label + `p.font-medium` row titles) | 1.5 |
-| Heading (dialog title) | 18px (`DialogTitle` default, `text-lg`) | 600 (semibold, shadcn `DialogTitle` default) | 1.2 |
+| Heading (dialog title) | 16px (`text-base`) | 500 (medium — `font-medium`, matches the actual `DialogTitle` implementation at `src/shared/ui/dialog.tsx:110`: `font-heading text-base leading-none font-medium`) | 1.2 |
 | Muted/helper text | 12px (`text-xs`, `text-pos-muted` / `text-muted-foreground`) | 400 (regular) | 1.5 |
 
-Note: project convention uses 4 distinct weight/size roles already in the file being extended (`font-medium` row titles, `text-sm text-muted-foreground` helper copy, `text-lg` dialog titles, `text-xs` micro-copy) — this satisfies the "3-4 sizes, 2 weights" ceiling since only regular (400) and medium/semibold (500/600) appear.
+Note: this collapses to exactly 2 font weights across the 4 declared roles/3 declared sizes (12/14/16px): regular (400) for Body/Muted, medium (500) for Label/Heading — satisfying the "3-4 sizes, max 2 weights" ceiling. The Heading row was corrected against the actual `DialogTitle` source (`src/shared/ui/dialog.tsx:110`) rather than shadcn's un-customized default; no file in this phase's scope (`CatalogModifiersTab.tsx`, `RecipeEditorTab.tsx`) uses `text-lg` or `font-semibold`.
 
 ---
 
