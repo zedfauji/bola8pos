@@ -624,6 +624,42 @@ export type Database = {
         }
         Relationships: []
       }
+      modifier_inventory_rules: {
+        Row: {
+          delta: number
+          id: string
+          ingredient_id: string
+          modifier_id: string
+        }
+        Insert: {
+          delta: number
+          id?: string
+          ingredient_id: string
+          modifier_id: string
+        }
+        Update: {
+          delta?: number
+          id?: string
+          ingredient_id?: string
+          modifier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modifier_inventory_rules_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            isOneToOne: false
+            referencedRelation: "ingredients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modifier_inventory_rules_modifier_id_fkey"
+            columns: ["modifier_id"]
+            isOneToOne: false
+            referencedRelation: "modifiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modifiers: {
         Row: {
           created_at: string
