@@ -410,15 +410,17 @@ export function computeDepletion(
 
 ## Open Questions
 
-1. **Should `modifier_inventory_rules` support a `notes` column like `recipes.notes`?**
+1. **(RESOLVED) Should `modifier_inventory_rules` support a `notes` column like `recipes.notes`?**
    - What we know: `recipe_items` itself has no `notes` column (only the parent `recipes` table does); `modifier_inventory_rules` has no parent table to hang notes off.
    - What's unclear: Whether admins will want a free-text explanation per rule (e.g., "double-shot rule assumes 2oz pour").
    - Recommendation: Omit for now — not requested in any D-0x decision; can be added in a follow-up migration if requested.
+   - **Resolution:** Adopted — omitted. No `notes` column in the planned schema (17-02-PLAN.md).
 
-2. **Should the `CHECK (delta <> 0)` constraint (A1 above) be included?**
+2. **(RESOLVED) Should the `CHECK (delta <> 0)` constraint (A1 above) be included?**
    - What we know: `recipe_items.qty` has `CHECK (qty > 0)` (positive-only, makes sense since qty can't be zero-or-negative there); the modifier case is signed, so the equivalent guard is `<> 0` not `> 0`.
    - What's unclear: Whether this is a "Claude's Discretion" naming/shape item covered by CONTEXT.md's "column/table naming" discretion bullet, or requires explicit sign-off.
    - Recommendation: Include it — it's a strict improvement (rejects meaningless rows) with no behavioral downside, consistent with the `recipe_items` precedent of enforcing sane data at the DB level.
+   - **Resolution:** Adopted — `CHECK (delta <> 0)` appears verbatim in 17-02-PLAN.md's table-creation task.
 
 ## Environment Availability
 
