@@ -34,12 +34,16 @@ describe.skipIf(skip)('Depletion integration', () => {
   let tabId: string;
   let orderId: string;
   let testUserId: string;
+  let modifierId: string;
+  let recipelessProductId: string;
 
   // Fresh order_item IDs per test (idempotency UNIQUE index requires distinct refs)
   let saleItemId: string;
   let voidItemId: string;
   let negativeItemId: string;
   let overrideItemId: string;
+  let modifierItemId: string;
+  let recipelessModifierItemId: string;
 
   beforeAll(async () => {
     // 0. Create a temporary test user and sign in to get auth.uid() for RPC calls
@@ -155,15 +159,16 @@ describe.skipIf(skip)('Depletion integration', () => {
     orderId = (order as { id: string }).id;
 
     // 6. Insert 4 distinct order_items — one per test (idempotency constraint)
-    const insertItem = async () => {
+    const insertItem = async (opts?: { productId?: string; modifierIds?: string[] }) => {
       const { data, error } = await db
         .from('order_items')
         .insert({
           order_id: orderId,
-          product_id: productId,
+          product_id: opts?.productId ?? productId,
           quantity: 1,
           unit_price: 5.0,
           modifier_price_delta: 0,
+          ...(opts?.modifierIds != null ? { modifier_ids: opts.modifierIds } : {}),
         })
         .select('id')
         .single();
@@ -175,6 +180,37 @@ describe.skipIf(skip)('Depletion integration', () => {
     voidItemId = await insertItem();
     negativeItemId = await insertItem();
     overrideItemId = await insertItem();
+
+    // 7. Modifier fixtures (Phase 17: modifier-driven depletion) — I5/I6
+    const { data: mod, error: modErr } = await db
+      .from('modifiers')
+      .insert({ name: '__test_extra_lime__', price_delta: 0, sort_order: 0 })
+      .select('id')
+      .single();
+    if (modErr) throw new Error(`modifier insert: ${modErr.message}`);
+    modifierId = (mod as { id: string }).id;
+
+    const { error: modRuleErr } = await db
+      .from('modifier_inventory_rules')
+      .insert({ modifier_id: modifierId, ingredient_id: ingredientBId, delta: 3 });
+    if (modRuleErr) throw new Error(`modifier_inventory_rules insert: ${modRuleErr.message}`);
+
+    // 8. Recipe-less product (D-04: modifier depletion must fire even without a recipe)
+    const { data: recipelessProd, error: recipelessProdErr } = await db
+      .from('products')
+      .insert({ name: '__test_bottle__', base_price: 3.0, category_id: categoryId, is_active: true })
+      .select('id')
+      .single();
+    if (recipelessProdErr) {
+      throw new Error(`recipeless product insert: ${recipelessProdErr.message}`);
+    }
+    recipelessProductId = (recipelessProd as { id: string }).id;
+
+    modifierItemId = await insertItem({ modifierIds: [modifierId] });
+    recipelessModifierItemId = await insertItem({
+      productId: recipelessProductId,
+      modifierIds: [modifierId],
+    });
   });
 
   afterAll(async () => {
@@ -187,7 +223,14 @@ describe.skipIf(skip)('Depletion integration', () => {
     }
 
     // Cleanup audit_log
-    const allItemIds = [saleItemId, voidItemId, negativeItemId, overrideItemId].filter(Boolean);
+    const allItemIds = [
+      saleItemId,
+      voidItemId,
+      negativeItemId,
+      overrideItemId,
+      modifierItemId,
+      recipelessModifierItemId,
+    ].filter(Boolean);
     if (allItemIds.length > 0) {
       await db.from('audit_log').delete().in('entity_id', allItemIds);
       await db.from('order_items').delete().in('id', allItemIds);
@@ -198,6 +241,13 @@ describe.skipIf(skip)('Depletion integration', () => {
     if (recipeId) {
       await db.from('recipe_items').delete().eq('recipe_id', recipeId);
       await db.from('recipes').delete().eq('id', recipeId);
+    }
+    if (modifierId) {
+      await db.from('modifier_inventory_rules').delete().eq('modifier_id', modifierId);
+      await db.from('modifiers').delete().eq('id', modifierId);
+    }
+    if (recipelessProductId) {
+      await db.from('products').delete().eq('id', recipelessProductId);
     }
     if (ingredientAId || ingredientBId) {
       const ingIds = [ingredientAId, ingredientBId].filter(Boolean);
@@ -298,5 +348,73 @@ describe.skipIf(skip)('Depletion integration', () => {
 
     expect(auditErr).toBeNull();
     expect((auditRows as unknown[]).length).toBeGreaterThanOrEqual(1);
+  });
+
+  // Phase 17: I1-I4 above (recipe-only, no modifiers) MUST still pass unchanged —
+  // this is the SC-4 regression proof that the v3 RPC's new modifier loop does
+  // not disturb existing recipe-driven depletion.
+
+  it('I5: modifier rule writes an order_item_modifier stock_movement alongside recipe rows', async () => {
+    // I4 (above) intentionally leaves ingredient stock at 0 after its override test —
+    // restore sufficient stock before exercising I5/I6's non-override depletion path.
+    await db.from('ingredients').update({ quantity_on_hand: 100 }).eq('id', ingredientAId);
+    await db.from('ingredients').update({ quantity_on_hand: 500 }).eq('id', ingredientBId);
+
+    const { error } = await anonClient.rpc('deplete_for_order_item', {
+      p_order_item_id: modifierItemId,
+      p_direction: 1,
+      p_allow_negative: false,
+    });
+    expect(error).toBeNull();
+
+    const { data: modRows, error: modQueryErr } = await db
+      .from('stock_movements')
+      .select('ingredient_id, quantity_delta')
+      .eq('ref_type', 'order_item_modifier')
+      .eq('ref_id', modifierItemId);
+
+    expect(modQueryErr).toBeNull();
+    expect(modRows).toHaveLength(1);
+    // -(direction(1) × qty(1) × delta(3)) = -3
+    expect((modRows as { quantity_delta: number }[])[0]?.quantity_delta).toBeCloseTo(-3);
+
+    // No collision with the recipe loop — the same order_item still writes its 2 recipe rows
+    const { data: recipeRows, error: recipeQueryErr } = await db
+      .from('stock_movements')
+      .select('ingredient_id, quantity_delta')
+      .eq('ref_type', 'order_item')
+      .eq('ref_id', modifierItemId);
+
+    expect(recipeQueryErr).toBeNull();
+    expect(recipeRows).toHaveLength(2);
+  });
+
+  it('I6: recipe-less product with a modifier still depletes (D-04)', async () => {
+    const { error } = await anonClient.rpc('deplete_for_order_item', {
+      p_order_item_id: recipelessModifierItemId,
+      p_direction: 1,
+      p_allow_negative: false,
+    });
+    expect(error).toBeNull();
+
+    const { data: modRows, error: modQueryErr } = await db
+      .from('stock_movements')
+      .select('ingredient_id, quantity_delta')
+      .eq('ref_type', 'order_item_modifier')
+      .eq('ref_id', recipelessModifierItemId);
+
+    expect(modQueryErr).toBeNull();
+    expect(modRows).toHaveLength(1);
+    expect((modRows as { quantity_delta: number }[])[0]?.quantity_delta).toBeCloseTo(-3);
+
+    // The recipe-less product has no recipe — zero 'order_item' rows must be written
+    const { data: recipeRows, error: recipeQueryErr } = await db
+      .from('stock_movements')
+      .select('ingredient_id')
+      .eq('ref_type', 'order_item')
+      .eq('ref_id', recipelessModifierItemId);
+
+    expect(recipeQueryErr).toBeNull();
+    expect(recipeRows).toHaveLength(0);
   });
 });
