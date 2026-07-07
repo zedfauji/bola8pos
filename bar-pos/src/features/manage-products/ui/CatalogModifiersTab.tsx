@@ -1,6 +1,7 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { FlaskConical, Pencil, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { ModifierIngredientRulesDialog } from '@features/manage-modifier-inventory-rules';
 import {
   useModifiers,
   useMutationCreateModifier,
@@ -25,6 +26,7 @@ export function CatalogModifiersTab() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editModifier, setEditModifier] = useState<Modifier | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [rulesModifier, setRulesModifier] = useState<Modifier | null>(null);
 
   const sorted = useMemo(
     () =>
@@ -98,6 +100,17 @@ export function CatalogModifiersTab() {
                 <Trash2 className="size-4" />
                 <span className="sr-only">Delete</span>
               </POSButton>
+              <POSButton
+                type="button"
+                variant="outline"
+                touchSize="default"
+                onClick={() => {
+                  setRulesModifier(m);
+                }}
+              >
+                <FlaskConical className="size-4" />
+                <span className="sr-only">Ingredient rules</span>
+              </POSButton>
             </div>
           </li>
         ))}
@@ -162,6 +175,15 @@ export function CatalogModifiersTab() {
         }}
         onCancel={() => {
           setDeleteId(null);
+        }}
+      />
+
+      <ModifierIngredientRulesDialog
+        modifierId={rulesModifier?.id ?? null}
+        modifierName={rulesModifier?.name ?? ''}
+        open={rulesModifier != null}
+        onOpenChange={o => {
+          if (!o) setRulesModifier(null);
         }}
       />
     </div>
