@@ -626,18 +626,21 @@ export type Database = {
       }
       modifier_inventory_rules: {
         Row: {
+          created_at: string
           delta: number
           id: string
           ingredient_id: string
           modifier_id: string
         }
         Insert: {
+          created_at?: string
           delta: number
           id?: string
           ingredient_id: string
           modifier_id: string
         }
         Update: {
+          created_at?: string
           delta?: number
           id?: string
           ingredient_id?: string

@@ -61,14 +61,30 @@ test.describe('Phase 17 — Modifier ingredient rules (admin UI)', () => {
     await expect(page.getByText('Ingredient rules saved')).toBeVisible({ timeout: 10_000 });
     await expect(dialog).not.toBeVisible({ timeout: 5_000 });
 
-    // Reopen — confirm both rows persisted, negative value round-tripped (not 0)
+    // Reopen — confirm both rows persisted, negative value round-tripped (not 0).
+    // Rows are located by which ingredient they hold, not by index — the DB row
+    // order returned by the entity query is not guaranteed to match insertion
+    // order (both rows can share a created_at timestamp within one batch insert),
+    // so asserting on position would be flaky.
     await row.getByRole('button', { name: 'Ingredient rules' }).click();
     const reopened = page.getByRole('dialog', { name: `Ingredient rules — ${MODIFIER_NAME}` });
     await expect(reopened).toBeVisible();
     const deltaInputs = reopened.getByLabel('Delta');
     await expect(deltaInputs).toHaveCount(2, { timeout: 10_000 });
-    await expect(deltaInputs.nth(0)).toHaveValue('2');
-    await expect(deltaInputs.nth(1)).toHaveValue('-1');
+
+    // Combobox[i] and Delta[i] are always siblings within the same row (repeated
+    // block), so positional pairing across the two lists is safe even though the
+    // row order itself (relative to insertion) is not guaranteed.
+    const comboboxes = reopened.getByRole('combobox');
+    const rowCount = await deltaInputs.count();
+    const byIngredient: Record<string, string> = {};
+    for (let i = 0; i < rowCount; i++) {
+      const ariaLabel = await comboboxes.nth(i).getAttribute('aria-label');
+      const value = await deltaInputs.nth(i).inputValue();
+      byIngredient[ariaLabel ?? ''] = value;
+    }
+    expect(byIngredient['Selected: Lime']).toBe('2');
+    expect(byIngredient['Selected: Salsa Mexicana']).toBe('-1');
 
     // Save button gating: unmodified reopened state is clean → disabled
     await expect(reopened.getByRole('button', { name: 'Save rules' })).toBeDisabled();

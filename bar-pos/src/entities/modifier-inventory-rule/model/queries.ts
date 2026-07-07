@@ -54,7 +54,8 @@ export function useModifierInventoryRules(modifierId: string | null) {
       const { data, error } = await db
         .from('modifier_inventory_rules')
         .select('*')
-        .eq('modifier_id', modifierId);
+        .eq('modifier_id', modifierId)
+        .order('created_at');
       if (error) {
         logger.error('useModifierInventoryRules: query failed', { modifierId, error });
         throw error;
@@ -119,7 +120,8 @@ export function useMutationSaveModifierInventoryRules() {
       const { data: freshData, error: fetchError } = await db
         .from('modifier_inventory_rules')
         .select('*')
-        .eq('modifier_id', input.modifierId);
+        .eq('modifier_id', input.modifierId)
+        .order('created_at');
       if (fetchError) {
         logger.error('useMutationSaveModifierInventoryRules: re-select failed', {
           error: fetchError,
