@@ -35,6 +35,7 @@ describe.skipIf(skip)('Depletion integration', () => {
   let orderId: string;
   let testUserId: string;
   let modifierId: string;
+  let modifierTwoId: string;
   let recipelessProductId: string;
 
   // Fresh order_item IDs per test (idempotency UNIQUE index requires distinct refs)
@@ -44,6 +45,7 @@ describe.skipIf(skip)('Depletion integration', () => {
   let overrideItemId: string;
   let modifierItemId: string;
   let recipelessModifierItemId: string;
+  let collisionItemId: string;
 
   beforeAll(async () => {
     // 0. Create a temporary test user and sign in to get auth.uid() for RPC calls
@@ -211,6 +213,25 @@ describe.skipIf(skip)('Depletion integration', () => {
       productId: recipelessProductId,
       modifierIds: [modifierId],
     });
+
+    // 9. Second modifier targeting the SAME ingredient as `modifierId` (CR-01 regression
+    // fixture, Phase 17 code review): two different modifiers on one order_item both
+    // mapping to ingredientBId must aggregate into a single stock_movements row, not
+    // collide on the (ref_type, ref_id, ingredient_id) unique index.
+    const { data: modTwo, error: modTwoErr } = await db
+      .from('modifiers')
+      .insert({ name: '__test_heavy_garnish__', price_delta: 0, sort_order: 1 })
+      .select('id')
+      .single();
+    if (modTwoErr) throw new Error(`modifier two insert: ${modTwoErr.message}`);
+    modifierTwoId = (modTwo as { id: string }).id;
+
+    const { error: modRuleTwoErr } = await db
+      .from('modifier_inventory_rules')
+      .insert({ modifier_id: modifierTwoId, ingredient_id: ingredientBId, delta: 1 });
+    if (modRuleTwoErr) throw new Error(`modifier_inventory_rules two insert: ${modRuleTwoErr.message}`);
+
+    collisionItemId = await insertItem({ modifierIds: [modifierId, modifierTwoId] });
   });
 
   afterAll(async () => {
@@ -230,6 +251,7 @@ describe.skipIf(skip)('Depletion integration', () => {
       overrideItemId,
       modifierItemId,
       recipelessModifierItemId,
+      collisionItemId,
     ].filter(Boolean);
     if (allItemIds.length > 0) {
       await db.from('audit_log').delete().in('entity_id', allItemIds);
@@ -245,6 +267,10 @@ describe.skipIf(skip)('Depletion integration', () => {
     if (modifierId) {
       await db.from('modifier_inventory_rules').delete().eq('modifier_id', modifierId);
       await db.from('modifiers').delete().eq('id', modifierId);
+    }
+    if (modifierTwoId) {
+      await db.from('modifier_inventory_rules').delete().eq('modifier_id', modifierTwoId);
+      await db.from('modifiers').delete().eq('id', modifierTwoId);
     }
     if (recipelessProductId) {
       await db.from('products').delete().eq('id', recipelessProductId);
@@ -416,5 +442,39 @@ describe.skipIf(skip)('Depletion integration', () => {
 
     expect(recipeQueryErr).toBeNull();
     expect(recipeRows).toHaveLength(0);
+  });
+
+  it('I7: two modifiers on one order_item targeting the same ingredient aggregate into a single row (CR-01 regression)', async () => {
+    // Prior to the v4 fix, this raised a unique_violation on
+    // idx_stock_movements_idempotency and aborted the whole RPC call.
+    const { error } = await anonClient.rpc('deplete_for_order_item', {
+      p_order_item_id: collisionItemId,
+      p_direction: 1,
+      p_allow_negative: false,
+    });
+    expect(error).toBeNull();
+
+    const { data: modRows, error: modQueryErr } = await db
+      .from('stock_movements')
+      .select('ingredient_id, quantity_delta')
+      .eq('ref_type', 'order_item_modifier')
+      .eq('ref_id', collisionItemId);
+
+    expect(modQueryErr).toBeNull();
+    // modifierId's rule (delta=3) + modifierTwoId's rule (delta=1) both target
+    // ingredientBId — must aggregate into exactly ONE row, not two.
+    expect(modRows).toHaveLength(1);
+    // -(direction(1) × qty(1) × (3 + 1)) = -4
+    expect((modRows as { quantity_delta: number }[])[0]?.quantity_delta).toBeCloseTo(-4);
+
+    // Recipe loop for this order_item's (shared) product still writes its 2 rows unaffected.
+    const { data: recipeRows, error: recipeQueryErr } = await db
+      .from('stock_movements')
+      .select('ingredient_id')
+      .eq('ref_type', 'order_item')
+      .eq('ref_id', collisionItemId);
+
+    expect(recipeQueryErr).toBeNull();
+    expect(recipeRows).toHaveLength(2);
   });
 });

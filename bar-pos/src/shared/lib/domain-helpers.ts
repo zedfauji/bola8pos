@@ -417,7 +417,7 @@ export function computeModifierDepletion(
   const deltas = new Map<string, number>();
   for (const rule of rules) {
     const delta = -direction * orderQty * rule.delta;
-    deltas.set(rule.ingredientId, delta);
+    deltas.set(rule.ingredientId, (deltas.get(rule.ingredientId) ?? 0) + delta);
   }
   return deltas;
 }
