@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Cross-Pollination from billar-pos
 current_phase: 17
-current_plan: 1
+current_plan: 4
 status: executing
-stopped_at: Phase 17 UI-SPEC approved
-last_updated: "2026-07-07T04:26:49.171Z"
+stopped_at: Completed 17-03-PLAN.md -- modifier_inventory_rules table + deplete_for_order_item v3 live in remote Supabase
+last_updated: "2026-07-07T18:49:34.074Z"
 progress:
   total_phases: 28
   completed_phases: 13
   total_plans: 97
-  completed_plans: 102
+  completed_plans: 105
   percent: 46
 ---
 
@@ -25,12 +25,13 @@ See: .planning/PROJECT.md
 
 **Milestone:** Feature Expansion 2026 Q2 / v2.1
 **Current phase:** 17
-**Current plan:** 1
+**Current plan:** 4
 **Status:** Executing Phase 17
-**Progress:** [██████████] 96%
+**Progress:** [██████████] 100%
 
 ## Session Log
 
+- 2026-07-07: **Phase 17 Plan 03 complete (64a19d1)** — modifier_inventory_rules type block transcribed into supabase.types.ts (Row/Insert/Update/Relationships, delta:number, two FKs to modifiers/ingredients, alphabetically placed between modifier_groups and modifiers); BLOCKING checkpoint executed and approved: both migrations (`20260706000002_modifier_inventory_rules_table.sql`, `20260706000003_deplete_for_order_item_v3.sql`) applied to remote Supabase via a single `npx supabase db push` (no CLI splitter workaround needed this time); 4 verification queries all PASS — table live (`to_regclass`), RLS policies present (`modifier_inventory_rules_select_authenticated`, `modifier_inventory_rules_write_manager`), v3 function body confirmed via `pg_get_functiondef` (contains `order_item_modifier` loop + preserved kitchen role guard). `npm ci` run first (node_modules was empty); typecheck surfaced 2 pre-existing unrelated errors (tab/model/queries.ts, agent/rag.ts, both predate this plan) logged to `.planning/phases/17-modifier-inventory-rules/deferred-items.md`, not fixed (out of scope). SC-1 + SC-2 satisfied — 17-04 (entity queries + integration test) and 17-05 (admin UI) unblocked.
 - 2026-07-03: **Phase 13 Plans 13-01 + 13-06 backfilled/completed (a692e3f)** — 13-01 (RLS rewrite + RPC role guards) had real committed work (98fa463, 8cfd6c5) from 2026-04-27 but no SUMMARY.md; backfilled from commit history, no re-execution needed. 13-06 (Task 1: T-RP-01..06 E2E tests, committed 5d6c97b 2026-04-28) was missing its Task 2 (blocking human-verify checkpoint) and Task 3 (unit regression gate) — both completed this session. All 6 Phase 13 E2E tests (T-RP-01..06) pass; role_permissions seed counts match exactly (bartender=9/manager=17/admin=22/kitchen=4); action-set diff 0 rows; unit suite 1133/1134 (same pre-existing failure); human sign-off received on manual /rbac click-through. Found + fixed a real regression while running the checkpoint: `openCaja()` E2E helper silently broken since Phase 15 shipped (2026-04-28) — its cleanup UPDATE never bumped `version`, so the `bump_version_on_update` trigger rejected it and the error was unchecked, leaving stale open `caja_sessions` rows that broke ~39 E2E specs via `caja_sessions_one_open` violations whenever a prior session was left open. Fixed by closing each open row individually with `version+1`. RBAC spec went from 20/20 failing to 6/20 (all 6 remaining confirmed pre-existing/unrelated — missing "Budweiser" seed product, not an RBAC issue). **Phase 13 (scopes-full-rbac-from-scratch) is now complete — 6/6 plans.**
 - 2026-07-03: **Phase 05 Plan 05-05 COMPLETE (562ea65, 27da4a1)** — Kitchen Prep E2E suite (21-prep.spec.ts T1/T2/T4/T5) green twice in a row against live remote Supabase, T3 intentionally skipped (covered by integration I5/I6). Blocker from earlier this session (DNS NXDOMAIN) resolved by user; follow-up Cloudflare 521 + PostgREST PGRST205 "table not in schema cache" resolved via `NOTIFY pgrst, 'reload schema'` (project woke from pause with a stale schema cache, migrations were actually already applied). Found + fixed 2 real app bugs surfaced by attempting genuine E2E verification: (1) `mapStaffRow` never passed `mustChangePin` to `StaffSchema.parse()`, throwing a ZodError on every profiles row and breaking `/login` app-wide with "Failed to load staff" — fixed in `src/entities/staff/model/queries.ts`; (2) `DataTable.tsx`'s loading skeleton rendered a bare `<div>` directly inside `<TableBody>` (invalid HTML, React hydration warning on every loading DataTable app-wide) — wrapped in TableRow/TableCell. Also fixed 2 E2E-test-only bugs: `resetPrepIngredientStock` only reset Tomato (not Onion, not Salsa Mexicana itself), causing cross-run state drift; and an unscoped `getByRole('dialog')` in T2 matched the always-mounted AI-assistant side panel. Full unit suite 1133/1134 pass (same pre-existing unrelated `useCloseTab.test.ts:95` failure documented since Phase 15). Non-blocking, left untouched: 5 pre-existing lint errors from Phase 15 commit 761cacb; migration-history drift between local `.sql` files and 4 already-applied remote migrations (`rpc_versioned_group_a`, `drop_orphan_rpc_overloads_15_02`, `fix_combo_rls`, `force_pin_change`). **Phase 05 (kitchen-prep-cocktails) is now complete — 5/5 plans.**
 - 2026-04-28: **Phase 15 Plan 06 complete (6e875ad, ca8deb0, c9e7884, e6b97ef)** — concurrent-edits test layers (D-19): fast-check property test queries.concurrent.test.ts (3 properties × 200 numRuns: Group A RPC pattern, Group B hook-optimistic pattern, retry-after-refetch edge — all green); Group A integration version-rpc-guard.test.ts (6/6 pass live remote: process_payment_atomic + create_order_with_items each P0V01 stale + happy + P0V02 missing); Group B integration version-hook-optimistic.test.ts (8/8 pass live remote: 4 entity-layer Group B paths × stale+fresh — tabs status, tabs close-on-payment, pool_sessions stop, caja_sessions close-probe; 5 feature-layer paths deferred per 15-03 Rule 4); Playwright e2e/39-concurrent-edits.spec.ts (T1 two-context stale-cache → 'Updated by another terminal — please retry' toast + refetch + retry — body correct, run blocked at loginAs by seed/env mismatch documented); CLAUDE.md spec list +39-concurrent-edits; typecheck + lint exit 0; full suite 1147/1163 pass + 15 todo + 2 skip + 1 PRE-EXISTING failure in useCloseTab.test.ts:95 confirmed unrelated by stash test
@@ -181,6 +182,8 @@ See: .planning/PROJECT.md
 - [Phase 11-debt-remediation 11-04]: xlsx CVEs GHSA-4r6h-8v6p-xvw6 + GHSA-5pgg-2g8v-p4x9 risk accepted — outbound write-only path, no XLSX.read() on untrusted input; residual supply-chain vector mitigated by lockfile + CI audit gate; exceljs replacement deferred to future sprint
 - [Phase 12-full-rbac-page 12-01]: key-based remount pattern used for preSelectedStaffId in EditRoleDialog — react-hooks/set-state-in-effect blocks useEffect+setState; RBACDashboard passes key={selectedStaffId ?? 'no-selection'} to force remount with fresh useState(preSelectedStaffId ?? '') on each row selection
 - [Phase 12-full-rbac-page 12-01]: StaffDashboard Administration section fully removed; usePermissions/can/toast/Button/EditRoleDialog/editRoleOpen all cleaned up; StaffDashboard.test.tsx 3 Administration tests replaced with it.todo stubs
+- [Phase 17-modifier-inventory-rules 17-03]: modifier_inventory_rules type block inserted alphabetically between modifier_groups and modifiers in supabase.types.ts, matching recipe_items structure
+- [Phase 17-modifier-inventory-rules 17-03]: Both Phase-17 migrations (modifier_inventory_rules table + deplete_for_order_item v3) applied to remote Supabase in a single npx supabase db push, no CLI splitter workaround needed
 
 ## Performance Metrics
 
@@ -225,8 +228,9 @@ See: .planning/PROJECT.md
 | 15-tabs-version-optimistic-concurrency | 03 | ~30min | 3 | 9 |
 | 15-tabs-version-optimistic-concurrency | 04 | ~25min | 2 | 9 |
 | Phase 15-tabs-version-optimistic-concurrency P06 | 50min | 4 tasks | 5 files |
+| Phase 17-modifier-inventory-rules P03 | ~20min | 2 tasks | 1 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 17 UI-SPEC approved
-- **Timestamp:** 2026-04-28T23:55:00Z
+- **Stopped at:** Completed 17-03-PLAN.md -- modifier_inventory_rules table + deplete_for_order_item v3 live in remote Supabase
+- **Timestamp:** 2026-07-07T18:49:33Z
