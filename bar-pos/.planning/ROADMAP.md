@@ -13,6 +13,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 - [x] **Phase 4: Recipes & Sale Depletion** — Recipes + atomic ingredient depletion on sale (completed 2026-04-24)
 - [x] **Phase 5: Kitchen Prep + Cocktails** — Chef prep batches and Michelada extension
  (completed 2026-07-03)
+
 - [ ] **Phase 6: Split Bill + Refund** — Four split modes + PIN-gated refunds
 - [x] **Phase 7: Waitlist + WhatsApp** — FIFO queue + WasenderAPI notifications (completed 2026-04-25)
 - [ ] **Phase 8: Polish + Reports + E2E Hardening** — Operator analytics + flake cleanup
@@ -29,6 +30,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 14: Audit Logs Table** — Central `audit_logs(action, entity, before, after, user_id, terminal_id, ip, source)` + `record_audit` SECURITY DEFINER helper + manager+ `/audit` page w/ JSON-diff viewer (completed 2026-07-05)
 - [x] **Phase 15: Tabs Version (Optimistic Concurrency)** — `version` column on tabs/pool_sessions/caja_sessions + `expected_version` RPC param + `STALE_VERSION` error path + offline-queue conflict handling
  (completed 2026-04-28)
+
 - [x] **Phase 16: Kitchen/Bar Split Routing** — `category.routing` enum (KITCHEN|BAR|NONE) + new `/kds-bar` page (bartender+) + `RoutingBadge` widget (completed 2026-07-07)
 - [ ] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups`
 - [ ] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI
@@ -491,12 +493,12 @@ Plans:
 **Goal:** Let modifiers (e.g. "extra cheese", "no ice") drive inventory depletion. Add a `modifier_inventory_rules` join table, extend the `deplete_for_order_item` RPC to account for selected modifiers, and add an admin UI inside `manage-modifier-groups` to configure the rules.
 **Requirements:** TBD (POS-COMPARISON.md §17 — source doc no longer present; scope locked in 17-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 5 plans
+**Plans:** 2/5 plans executed
 
 Plans:
 
-- [ ] 17-01-PLAN.md — Zod schema (ModifierInventoryRuleSchema) + computeModifierDepletion helper + Wave-0 tests (Wave 1)
-- [ ] 17-02-PLAN.md — DB migrations: modifier_inventory_rules table + RLS + deplete_for_order_item v3 modifier loop (Wave 1)
+- [x] 17-01-PLAN.md — Zod schema (ModifierInventoryRuleSchema) + computeModifierDepletion helper + Wave-0 tests (Wave 1)
+- [x] 17-02-PLAN.md — DB migrations: modifier_inventory_rules table + RLS + deplete_for_order_item v3 modifier loop (Wave 1)
 - [ ] 17-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension (Wave 2)
 - [ ] 17-04-PLAN.md — entities/modifier-inventory-rule slice + depletion integration cases I5/I6 (Wave 3)
 - [ ] 17-05-PLAN.md — features/manage-modifier-inventory-rules dialog + CatalogModifiersTab wiring + UAT (Wave 4)
