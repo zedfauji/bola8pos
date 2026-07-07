@@ -31,6 +31,7 @@ export function useKdsItems(routing: 'KITCHEN' | 'BAR') {
           created_at,
           parent_order_item_id,
           combo_slot_id,
+          modifier_ids,
           orders!inner(
             id,
             tabs!inner(
@@ -42,12 +43,6 @@ export function useKdsItems(routing: 'KITCHEN' | 'BAR') {
             id,
             name,
             categories!inner(id, routing)
-          ),
-          order_item_modifiers(
-            modifiers(
-              id,
-              name
-            )
           )
         `
         )
@@ -64,15 +59,35 @@ export function useKdsItems(routing: 'KITCHEN' | 'BAR') {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rows = (data ?? []) as any[];
+
+      // Modifiers are stored as order_items.modifier_ids (uuid[]), not a junction
+      // table — batch-resolve names in one query rather than per-row.
+      const allModifierIds = Array.from(
+        new Set(rows.flatMap(row => (row['modifier_ids'] ?? []) as string[]))
+      );
+      const modifierNameById = new Map<string, string>();
+      if (allModifierIds.length > 0) {
+        const { data: modifierRows, error: modifierErr } = await db
+          .from('modifiers')
+          .select('id, name')
+          .in('id', allModifierIds);
+        if (modifierErr) {
+          logger.error('kds.useKdsItems.modifiers', { error: modifierErr });
+        } else {
+          for (const m of (modifierRows ?? []) as { id: string; name: string }[]) {
+            modifierNameById.set(m.id, m.name);
+          }
+        }
+      }
+
       const items: KdsOrderItem[] = [];
       for (const row of rows) {
         const categoryRouting = row.products?.categories?.routing as string | undefined;
         if (categoryRouting !== routing) continue;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const modifierRows = (row['order_item_modifiers'] ?? []) as any[];
-        const modifierNames: string[] = modifierRows
-          .map((m: { modifiers?: { name?: string } }) => m.modifiers?.name)
+        const rowModifierIds = (row['modifier_ids'] ?? []) as string[];
+        const modifierNames: string[] = rowModifierIds
+          .map(id => modifierNameById.get(id))
           .filter((n): n is string => typeof n === 'string');
 
         items.push({
