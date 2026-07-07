@@ -493,14 +493,14 @@ Plans:
 **Goal:** Let modifiers (e.g. "extra cheese", "no ice") drive inventory depletion. Add a `modifier_inventory_rules` join table, extend the `deplete_for_order_item` RPC to account for selected modifiers, and add an admin UI inside `manage-modifier-groups` to configure the rules.
 **Requirements:** TBD (POS-COMPARISON.md §17 — source doc no longer present; scope locked in 17-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 
 - [x] 17-01-PLAN.md — Zod schema (ModifierInventoryRuleSchema) + computeModifierDepletion helper + Wave-0 tests (Wave 1)
 - [x] 17-02-PLAN.md — DB migrations: modifier_inventory_rules table + RLS + deplete_for_order_item v3 modifier loop (Wave 1)
 - [x] 17-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension (Wave 2)
-- [ ] 17-04-PLAN.md — entities/modifier-inventory-rule slice + depletion integration cases I5/I6 (Wave 3)
+- [x] 17-04-PLAN.md — entities/modifier-inventory-rule slice + depletion integration cases I5/I6 (Wave 3)
 - [ ] 17-05-PLAN.md — features/manage-modifier-inventory-rules dialog + CatalogModifiersTab wiring + UAT (Wave 4)
 
 **Success Criteria:**
