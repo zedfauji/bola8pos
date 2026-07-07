@@ -1667,6 +1667,22 @@ export type RecipeItemCreate = z.infer<typeof RecipeItemCreateSchema>;
 export type RecipeWithItems = z.infer<typeof RecipeWithItemsSchema>;
 
 // ============================================================================
+// MODIFIER INVENTORY RULES (Phase 17)
+// ============================================================================
+
+export const ModifierInventoryRuleSchema = z.object({
+  id: UuidSchema,
+  modifierId: UuidSchema,
+  ingredientId: UuidSchema,
+  delta: z.number().multipleOf(0.001).refine(v => v !== 0, 'delta must be nonzero'),
+});
+
+export const ModifierInventoryRuleCreateSchema = ModifierInventoryRuleSchema.omit({ id: true });
+
+export type ModifierInventoryRule = z.infer<typeof ModifierInventoryRuleSchema>;
+export type ModifierInventoryRuleCreate = z.infer<typeof ModifierInventoryRuleCreateSchema>;
+
+// ============================================================================
 // PREP PRODUCTION (Phase 5)
 // ============================================================================
 
