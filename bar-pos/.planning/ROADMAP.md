@@ -517,7 +517,7 @@ Plans:
 **Goal:** Allow closing a single tab with up to 4 different payment methods in one checkout (e.g. half cash, half card). Add `payment_group_id` + `split_index` to `payments`, and extend `PaymentPane` with a multi-row UI.
 **Requirements:** SC-1, SC-2, SC-3, SC-4 (ROADMAP §Phase 18 success criteria; scope locked in 18-CONTEXT.md, source doc POS-COMPARISON.md §18 no longer present)
 **Depends on:** Phase 14
-**Plans:** 4/6 plans executed
+**Plans:** 5/6 plans executed
 Plans:
 **Wave 1**
 
@@ -531,7 +531,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 18-04-PLAN.md — process-split-payment edge function (mirror process-payment) + deploy + integration green gate (Wave 3) (SC-2)
+- [x] 18-04-PLAN.md — process-split-payment edge function (mirror process-payment) + deploy + integration green gate (Wave 3) (SC-2)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
