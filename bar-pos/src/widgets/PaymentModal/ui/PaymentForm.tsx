@@ -3,8 +3,8 @@
  * Can be embedded inline (PaymentPane) or wrapped in a Dialog (PaymentModal).
  */
 
-import { AlertCircle, Loader2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Loader2, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import { toast } from 'sonner';
 import { ReceiptPreview } from '@features/process-payment/ui/ReceiptPreview';
 import { useSettings } from '@entities/settings';
@@ -19,15 +19,77 @@ import {
   processCardPayment,
   processCashPayment,
   processRappiPayment,
+  processSplitPayment,
 } from '@shared/lib/payment-processor';
 import { openCashDrawer, printReceipt } from '@shared/lib/pos-printer';
 import type { Result } from '@shared/lib/result';
-import { MoneyDisplay, MoneyInput, POSButton, ProtectedAction, ScrollArea } from '@shared/ui';
+import { MoneyDisplay, MoneyInput, POSButton, ProtectedAction, ScrollArea, Switch } from '@shared/ui';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 
 type PayMethod = 'cash' | 'card' | 'rappi';
 type TipMode = 'preset' | 'custom';
+
+type SplitRow = {
+  id: string;
+  method: PayMethod;
+  amount: number;
+  tip: number;
+  tenderedAmount: number;
+  cardReference: string;
+};
+
+type SplitRowAction =
+  | { type: 'RESET_ROWS'; rows: SplitRow[] }
+  | { type: 'ADD_ROW'; defaultMethod: PayMethod }
+  | { type: 'REMOVE_ROW'; rowId: string }
+  | { type: 'SET_METHOD'; rowId: string; method: PayMethod }
+  | { type: 'SET_AMOUNT'; rowId: string; value: number }
+  | { type: 'SET_TIP'; rowId: string; value: number }
+  | { type: 'SET_TENDERED'; rowId: string; value: number }
+  | { type: 'SET_CARD_REF'; rowId: string; value: string };
+
+let splitRowCounter = 0;
+function nextSplitRowId(): string {
+  splitRowCounter += 1;
+  return `split-row-${String(splitRowCounter)}`;
+}
+
+function makeDefaultSplitRow(method: PayMethod): SplitRow {
+  return {
+    id: nextSplitRowId(),
+    method,
+    amount: 0,
+    tip: 0,
+    tenderedAmount: 0,
+    cardReference: '',
+  };
+}
+
+function splitRowsReducer(state: SplitRow[], action: SplitRowAction): SplitRow[] {
+  switch (action.type) {
+    case 'RESET_ROWS':
+      return action.rows;
+    case 'ADD_ROW':
+      if (state.length >= 4) return state;
+      return [...state, makeDefaultSplitRow(action.defaultMethod)];
+    case 'REMOVE_ROW':
+      if (state.length <= 2) return state;
+      return state.filter(r => r.id !== action.rowId);
+    case 'SET_METHOD':
+      return state.map(r => (r.id === action.rowId ? { ...r, method: action.method } : r));
+    case 'SET_AMOUNT':
+      return state.map(r => (r.id === action.rowId ? { ...r, amount: action.value } : r));
+    case 'SET_TIP':
+      return state.map(r => (r.id === action.rowId ? { ...r, tip: action.value } : r));
+    case 'SET_TENDERED':
+      return state.map(r => (r.id === action.rowId ? { ...r, tenderedAmount: action.value } : r));
+    case 'SET_CARD_REF':
+      return state.map(r => (r.id === action.rowId ? { ...r, cardReference: action.value } : r));
+    default:
+      return state;
+  }
+}
 
 const DEFAULT_TIP_PRESETS = [10, 15, 18, 20] as const;
 const DEFAULT_ENABLED_METHODS = {
@@ -41,12 +103,14 @@ export type PaymentProcessors = {
   processCashPayment: typeof processCashPayment;
   processCardPayment: typeof processCardPayment;
   processRappiPayment: typeof processRappiPayment;
+  processSplitPayment: typeof processSplitPayment;
 };
 
 const defaultProcessors: PaymentProcessors = {
   processCashPayment,
   processCardPayment,
   processRappiPayment,
+  processSplitPayment,
 };
 
 export interface PaymentFormProps {
@@ -99,6 +163,8 @@ export function PaymentForm({
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+  const [isSplitMode, setIsSplitMode] = useState(false);
+  const [splitRows, dispatchSplitRows] = useReducer(splitRowsReducer, []);
 
   /* Reset state when the tab being viewed changes */
   useEffect(() => {
@@ -126,6 +192,7 @@ export function PaymentForm({
     setDiscountScope('all');
     setDiscountType('percent');
     setDiscountValue(0);
+    setIsSplitMode(false);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     tab.id,
@@ -135,6 +202,23 @@ export function PaymentForm({
     enabledMethods.rappi,
     tipPresets,
   ]);
+
+  /* Split-mode rows: seed 2 default rows on toggle-ON, clear on toggle-OFF */
+  useEffect(() => {
+    if (isSplitMode) {
+      const defaultMethod: PayMethod = enabledMethods.cash
+        ? 'cash'
+        : enabledMethods.bbvaCard
+          ? 'card'
+          : 'rappi';
+      dispatchSplitRows({
+        type: 'RESET_ROWS',
+        rows: [makeDefaultSplitRow(defaultMethod), makeDefaultSplitRow(defaultMethod)],
+      });
+    } else {
+      dispatchSplitRows({ type: 'RESET_ROWS', rows: [] });
+    }
+  }, [isSplitMode, enabledMethods.cash, enabledMethods.bbvaCard]);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
@@ -190,6 +274,12 @@ export function PaymentForm({
     staffId.length > 0 &&
     (method !== 'cash' || canSubmitCash) &&
     (method !== 'card' || canSubmitCard);
+
+  const splitRowsSum = useMemo(
+    () => Math.round(splitRows.reduce((s, r) => s + r.amount, 0) * 100) / 100,
+    [splitRows]
+  );
+  const splitRemaining = Math.round((subtotalWithTax - splitRowsSum) * 100) / 100;
 
   const groupedItems = useMemo(() => groupOrderItems(tab.items), [tab.items]);
 
@@ -497,53 +587,240 @@ export function PaymentForm({
 
           <section className="space-y-2">
             <h4 className="font-medium">Payment method</h4>
-            <div className="grid gap-2 sm:grid-cols-3">
-              {enabledMethods.cash && (
-                <POSButton
-                  type="button"
-                  touchSize="xl"
-                  variant={method === 'cash' ? 'default' : 'outline'}
-                  disabled={isProcessing}
-                  data-testid="payment-btn-cash"
-                  onClick={() => {
-                    setMethod('cash');
-                  }}
-                >
-                  {paymentLabels.cash}
-                </POSButton>
-              )}
-              {enabledMethods.bbvaCard && (
-                <POSButton
-                  type="button"
-                  touchSize="xl"
-                  variant={method === 'card' ? 'default' : 'outline'}
-                  disabled={isProcessing}
-                  data-testid="payment-btn-card"
-                  onClick={() => {
-                    setMethod('card');
-                  }}
-                >
-                  {paymentLabels.card}
-                </POSButton>
-              )}
-              {isRappiTab && enabledMethods.rappi && (
-                <POSButton
-                  type="button"
-                  touchSize="xl"
-                  variant={method === 'rappi' ? 'default' : 'outline'}
-                  disabled={isProcessing}
-                  data-testid="payment-btn-rappi"
-                  onClick={() => {
-                    setMethod('rappi');
-                  }}
-                >
-                  {paymentLabels.rappi}
-                </POSButton>
-              )}
+
+            <div className="flex items-center justify-between gap-2 rounded-lg border p-3">
+              <div>
+                <Label htmlFor="split-mode-toggle" className="text-sm font-semibold">
+                  Split payment
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Divide this total across up to 4 payment methods
+                </p>
+              </div>
+              <Switch
+                id="split-mode-toggle"
+                checked={isSplitMode}
+                disabled={isProcessing}
+                onCheckedChange={setIsSplitMode}
+              />
             </div>
+
+            {isSplitMode ? (
+              <div className="space-y-3">
+                {splitRows.map((row, index) => (
+                  <div key={row.id} className="space-y-3 rounded-lg border p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">{`Payment ${String(index + 1)}`}</span>
+                      {splitRows.length > 2 && (
+                        <POSButton
+                          type="button"
+                          variant="ghost"
+                          aria-label={`Remove payment ${String(index + 1)}`}
+                          disabled={isProcessing}
+                          className="px-2 text-destructive"
+                          onClick={() => {
+                            dispatchSplitRows({ type: 'REMOVE_ROW', rowId: row.id });
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </POSButton>
+                      )}
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {enabledMethods.cash && (
+                        <POSButton
+                          type="button"
+                          touchSize="large"
+                          variant={row.method === 'cash' ? 'default' : 'outline'}
+                          disabled={isProcessing}
+                          onClick={() => {
+                            dispatchSplitRows({ type: 'SET_METHOD', rowId: row.id, method: 'cash' });
+                          }}
+                        >
+                          {paymentLabels.cash}
+                        </POSButton>
+                      )}
+                      {enabledMethods.bbvaCard && (
+                        <POSButton
+                          type="button"
+                          touchSize="large"
+                          variant={row.method === 'card' ? 'default' : 'outline'}
+                          disabled={isProcessing}
+                          onClick={() => {
+                            dispatchSplitRows({ type: 'SET_METHOD', rowId: row.id, method: 'card' });
+                          }}
+                        >
+                          {paymentLabels.card}
+                        </POSButton>
+                      )}
+                      {isRappiTab && enabledMethods.rappi && (
+                        <POSButton
+                          type="button"
+                          touchSize="large"
+                          variant={row.method === 'rappi' ? 'default' : 'outline'}
+                          disabled={isProcessing}
+                          onClick={() => {
+                            dispatchSplitRows({ type: 'SET_METHOD', rowId: row.id, method: 'rappi' });
+                          }}
+                        >
+                          {paymentLabels.rappi}
+                        </POSButton>
+                      )}
+                    </div>
+
+                    <MoneyInput
+                      label="Amount"
+                      value={row.amount}
+                      onChange={value => {
+                        dispatchSplitRows({ type: 'SET_AMOUNT', rowId: row.id, value });
+                      }}
+                      disabled={isProcessing}
+                    />
+
+                    {row.method !== 'rappi' && (
+                      <MoneyInput
+                        label="Tip"
+                        value={row.tip}
+                        onChange={value => {
+                          dispatchSplitRows({ type: 'SET_TIP', rowId: row.id, value });
+                        }}
+                        disabled={isProcessing}
+                      />
+                    )}
+
+                    {row.method === 'cash' && (
+                      <>
+                        <MoneyInput
+                          label="Amount tendered"
+                          value={row.tenderedAmount}
+                          onChange={value => {
+                            dispatchSplitRows({ type: 'SET_TENDERED', rowId: row.id, value });
+                          }}
+                          disabled={isProcessing}
+                        />
+                        <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2 text-sm font-medium">
+                          <span>Change due</span>
+                          <MoneyDisplay
+                            amount={Math.max(
+                              0,
+                              Math.round((row.tenderedAmount - (row.amount + row.tip)) * 100) / 100
+                            )}
+                            size="sm"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {row.method === 'card' && (
+                      <div className="space-y-2">
+                        <Label htmlFor={`split-card-ref-${row.id}`}>Reference # (optional)</Label>
+                        <Input
+                          id={`split-card-ref-${row.id}`}
+                          value={row.cardReference}
+                          onChange={e => {
+                            dispatchSplitRows({
+                              type: 'SET_CARD_REF',
+                              rowId: row.id,
+                              value: e.target.value,
+                            });
+                          }}
+                          placeholder="Terminal receipt / auth code"
+                          maxLength={64}
+                          disabled={isProcessing}
+                          autoComplete="off"
+                        />
+                      </div>
+                    )}
+
+                    <p className="text-xs text-muted-foreground">
+                      {`Charges: $${(row.amount + row.tip).toFixed(2)}`}
+                    </p>
+                  </div>
+                ))}
+
+                <POSButton
+                  type="button"
+                  variant="outline"
+                  disabled={isProcessing || splitRows.length >= 4}
+                  onClick={() => {
+                    const defaultMethod: PayMethod = enabledMethods.cash
+                      ? 'cash'
+                      : enabledMethods.bbvaCard
+                        ? 'card'
+                        : 'rappi';
+                    dispatchSplitRows({ type: 'ADD_ROW', defaultMethod });
+                  }}
+                >
+                  + Add payment method
+                </POSButton>
+
+                <div
+                  className={`rounded-lg border p-3 ${
+                    splitRemaining === 0 ? 'border-[var(--pos-accent)]' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-sm font-semibold">
+                    <span>
+                      {splitRemaining > 0
+                        ? 'Remaining to pay'
+                        : splitRemaining === 0
+                          ? 'Fully allocated ✓'
+                          : `Over by $${Math.abs(splitRemaining).toFixed(2)}`}
+                    </span>
+                    {splitRemaining >= 0 && <MoneyDisplay amount={splitRemaining} size="sm" />}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-3">
+                {enabledMethods.cash && (
+                  <POSButton
+                    type="button"
+                    touchSize="xl"
+                    variant={method === 'cash' ? 'default' : 'outline'}
+                    disabled={isProcessing}
+                    data-testid="payment-btn-cash"
+                    onClick={() => {
+                      setMethod('cash');
+                    }}
+                  >
+                    {paymentLabels.cash}
+                  </POSButton>
+                )}
+                {enabledMethods.bbvaCard && (
+                  <POSButton
+                    type="button"
+                    touchSize="xl"
+                    variant={method === 'card' ? 'default' : 'outline'}
+                    disabled={isProcessing}
+                    data-testid="payment-btn-card"
+                    onClick={() => {
+                      setMethod('card');
+                    }}
+                  >
+                    {paymentLabels.card}
+                  </POSButton>
+                )}
+                {isRappiTab && enabledMethods.rappi && (
+                  <POSButton
+                    type="button"
+                    touchSize="xl"
+                    variant={method === 'rappi' ? 'default' : 'outline'}
+                    disabled={isProcessing}
+                    data-testid="payment-btn-rappi"
+                    onClick={() => {
+                      setMethod('rappi');
+                    }}
+                  >
+                    {paymentLabels.rappi}
+                  </POSButton>
+                )}
+              </div>
+            )}
           </section>
 
-          {method === 'cash' && (
+          {!isSplitMode && method === 'cash' && (
             <section className="space-y-3">
               <MoneyInput
                 label="Amount tendered"
@@ -558,7 +835,7 @@ export function PaymentForm({
             </section>
           )}
 
-          {method === 'card' && (
+          {!isSplitMode && method === 'card' && (
             <section className="space-y-3 rounded-lg border p-4">
               <p className="text-sm font-medium">Process payment on BBVA Terminal</p>
               <MoneyInput

@@ -200,6 +200,11 @@ function defaultProcessorMocks(receipt: ReceiptData): PaymentProcessors {
     processRappiPayment: vi
       .fn()
       .mockResolvedValue(ok({ paymentId: 'pay-3', receiptData: receipt })),
+    processSplitPayment: vi
+      .fn()
+      .mockResolvedValue(
+        ok({ paymentGroupId: 'group-1', paymentIds: ['pay-1'], receipts: [receipt] })
+      ),
   };
 }
 
@@ -359,6 +364,7 @@ describe('PaymentModal', () => {
         .mockResolvedValue(ok({ paymentId: 'p1', changeAmount: 4.7, receiptData: receipt })),
       processCardPayment: vi.fn(),
       processRappiPayment: vi.fn(),
+      processSplitPayment: vi.fn(),
     };
     renderModal(tabNoPool, { processors, onPaymentSuccess });
 
@@ -399,6 +405,7 @@ describe('PaymentModal', () => {
       processCashPayment: vi.fn(),
       processCardPayment: vi.fn().mockResolvedValue(ok({ paymentId: 'p2', receiptData: receipt })),
       processRappiPayment: vi.fn(),
+      processSplitPayment: vi.fn(),
     };
     renderModal(tabNoPool, { processors });
 
@@ -420,6 +427,7 @@ describe('PaymentModal', () => {
         .mockResolvedValue(err({ code: 'VALIDATION_ERROR', message: 'Insufficient tender' })),
       processCardPayment: vi.fn(),
       processRappiPayment: vi.fn(),
+      processSplitPayment: vi.fn(),
     };
     const onClose = vi.fn();
     renderModal(tabNoPool, { processors, onClose });
@@ -501,6 +509,7 @@ describe('PaymentModal', () => {
       processRappiPayment: vi
         .fn()
         .mockResolvedValue(ok({ paymentId: 'pay-r', receiptData: receipt })),
+      processSplitPayment: vi.fn(),
     };
     renderModal(tabRappi, { processors });
 
@@ -529,6 +538,7 @@ describe('PaymentModal', () => {
       processCashPayment: vi.fn(),
       processCardPayment: vi.fn().mockResolvedValue(ok({ paymentId: 'p2', receiptData: receipt })),
       processRappiPayment: vi.fn(),
+      processSplitPayment: vi.fn(),
     };
     renderModal(tabNoPool, { processors });
 
@@ -562,6 +572,7 @@ describe('PaymentModal', () => {
         .mockResolvedValue(ok({ paymentId: 'p1', changeAmount: 4.7, receiptData: receipt })),
       processCardPayment: vi.fn(),
       processRappiPayment: vi.fn(),
+      processSplitPayment: vi.fn(),
     };
     vi.mocked(openCashDrawer).mockResolvedValue(
       err({ code: 'TAURI_ERROR', message: 'Drawer failed' })

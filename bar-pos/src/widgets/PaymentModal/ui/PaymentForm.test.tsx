@@ -115,6 +115,11 @@ function makeProcessors(overrides: Partial<PaymentProcessors> = {}): PaymentProc
     processRappiPayment: vi
       .fn()
       .mockResolvedValue(ok({ paymentId: 'p-rappi', receiptData: receipt })),
+    processSplitPayment: vi
+      .fn()
+      .mockResolvedValue(
+        ok({ paymentGroupId: 'group-1', paymentIds: ['p-split-1'], receipts: [receipt] })
+      ),
     ...overrides,
   };
 }
