@@ -101,14 +101,24 @@ export function useOrderItemsByPayment(paymentId: string | null) {
       if (orderIds.length === 0) return [];
 
       // Step 3: fetch top-level order_items (no parent) for those orders
+      // NOTE: the order_items table column is `quantity`, not `qty` — mapped to the
+      // `qty` field on OrderItemForRefund below to keep the existing external contract.
       const { data: items, error: itemErr } = await db
         .from('order_items')
-        .select('id, qty, unit_price, parent_order_item_id, products!inner(name)')
+        .select('id, quantity, unit_price, parent_order_item_id, products!inner(name)')
         .in('order_id', orderIds)
         .is('parent_order_item_id', null);
       if (itemErr) throw itemErr as Error;
 
-      return (items ?? []) as OrderItemForRefund[];
+      return ((items ?? []) as Array<Record<string, unknown>>).map(
+        (row): OrderItemForRefund => ({
+          id: row['id'] as string,
+          qty: row['quantity'] as number,
+          unit_price: row['unit_price'] as number,
+          parent_order_item_id: row['parent_order_item_id'] as string | null,
+          products: row['products'] as { name: string },
+        }),
+      );
     },
   });
 }
