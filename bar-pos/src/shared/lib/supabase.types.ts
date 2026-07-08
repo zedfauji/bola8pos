@@ -875,10 +875,12 @@ export type Database = {
           is_deleted: boolean
           is_refund: boolean
           method: Database["public"]["Enums"]["payment_method"]
+          payment_group_id: string | null
           processed_at: string
           processed_by: string
           reference_number: string | null
           refund_id: string | null
+          split_index: number | null
           square_payment_id: string | null
           square_receipt_url: string | null
           tab_id: string
@@ -899,10 +901,12 @@ export type Database = {
           is_deleted?: boolean
           is_refund?: boolean
           method: Database["public"]["Enums"]["payment_method"]
+          payment_group_id?: string | null
           processed_at?: string
           processed_by: string
           reference_number?: string | null
           refund_id?: string | null
+          split_index?: number | null
           square_payment_id?: string | null
           square_receipt_url?: string | null
           tab_id: string
@@ -923,10 +927,12 @@ export type Database = {
           is_deleted?: boolean
           is_refund?: boolean
           method?: Database["public"]["Enums"]["payment_method"]
+          payment_group_id?: string | null
           processed_at?: string
           processed_by?: string
           reference_number?: string | null
           refund_id?: string | null
+          split_index?: number | null
           square_payment_id?: string | null
           square_receipt_url?: string | null
           tab_id?: string
