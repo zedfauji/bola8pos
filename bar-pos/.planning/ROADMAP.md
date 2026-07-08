@@ -33,7 +33,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 
 - [x] **Phase 16: Kitchen/Bar Split Routing** — `category.routing` enum (KITCHEN|BAR|NONE) + new `/kds-bar` page (bartender+) + `RoutingBadge` widget (completed 2026-07-07)
 - [x] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups` (completed 2026-07-07)
-- [ ] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI
+- [x] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI (completed 2026-07-08)
 - [ ] **Phase 19: Tip Distribution Config** — Singleton `tip_distribution_config` (floor/bar/kitchen %) + `tip_distribution_entries` + close-caja allocation + Settings panel
 - [ ] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin
 - [ ] **Phase 21: i18n Multi-Language** — `react-i18next` + `es-MX`/`en-US` catalogs + `profiles.locale` + ESLint rule banning hard-coded strings
@@ -517,7 +517,7 @@ Plans:
 **Goal:** Allow closing a single tab with up to 4 different payment methods in one checkout (e.g. half cash, half card). Add `payment_group_id` + `split_index` to `payments`, and extend `PaymentPane` with a multi-row UI.
 **Requirements:** SC-1, SC-2, SC-3, SC-4 (ROADMAP §Phase 18 success criteria; scope locked in 18-CONTEXT.md, source doc POS-COMPARISON.md §18 no longer present)
 **Depends on:** Phase 14
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 Plans:
 **Wave 1**
 
@@ -535,7 +535,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 18-06-PLAN.md — E2E 41-split-payment.spec.ts + regression gate + CLAUDE.md docs + human UAT sign-off (Wave 4) (SC-2, SC-3, SC-4)
+- [x] 18-06-PLAN.md — E2E 41-split-payment.spec.ts + regression gate + CLAUDE.md docs + human UAT sign-off (Wave 4) (SC-2, SC-3, SC-4)
 
 **Success Criteria:**
 
