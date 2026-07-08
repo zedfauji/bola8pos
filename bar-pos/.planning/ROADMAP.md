@@ -517,7 +517,7 @@ Plans:
 **Goal:** Allow closing a single tab with up to 4 different payment methods in one checkout (e.g. half cash, half card). Add `payment_group_id` + `split_index` to `payments`, and extend `PaymentPane` with a multi-row UI.
 **Requirements:** SC-1, SC-2, SC-3, SC-4 (ROADMAP §Phase 18 success criteria; scope locked in 18-CONTEXT.md, source doc POS-COMPARISON.md §18 no longer present)
 **Depends on:** Phase 14
-**Plans:** 2/6 plans executed
+**Plans:** 4/6 plans executed
 Plans:
 **Wave 1**
 
@@ -526,8 +526,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 18-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension (Wave 2) (SC-1)
-- [ ] 18-05-PLAN.md — PaymentForm split-mode: toggle + 2-4 row list + live remaining balance + per-leg receipt queue + drawer-once + RTL tests (Wave 2) (SC-3, SC-4)
+- [x] 18-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension (Wave 2) (SC-1)
+- [x] 18-05-PLAN.md — PaymentForm split-mode: toggle + 2-4 row list + live remaining balance + per-leg receipt queue + drawer-once + RTL tests (Wave 2) (SC-3, SC-4)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
