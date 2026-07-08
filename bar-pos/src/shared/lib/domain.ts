@@ -604,6 +604,10 @@ export const PaymentSchema = z.object({
   isRefund: z.boolean().default(false),
   /** FK to the refund record when isRefund = true */
   refundId: UuidSchema.nullable().optional(),
+  /** Groups sibling payment rows created by a single split-payment submission */
+  paymentGroupId: UuidSchema.nullable().optional(),
+  /** Position (0-3) of this payment within its split-payment group */
+  splitIndex: z.number().int().min(0).max(3).nullable().optional(),
 });
 
 export const PaymentCreateSchema = PaymentSchema.omit({
@@ -616,6 +620,21 @@ export const PaymentUpdateSchema = PaymentSchema.partial().required({ id: true }
 export type Payment = z.infer<typeof PaymentSchema>;
 export type PaymentCreate = z.infer<typeof PaymentCreateSchema>;
 export type PaymentUpdate = z.infer<typeof PaymentUpdateSchema>;
+
+/**
+ * One row of a split-payment submission — any payment method per row, each
+ * with its own tip and method-specific fields (D-02/D-03).
+ */
+export const SplitPaymentLegSchema = z.object({
+  method: PaymentMethodSchema,
+  amount: MoneySchema,
+  tipAmount: MoneySchema,
+  tenderedAmount: MoneySchema.nullable().optional(),
+  referenceNumber: z.string().max(64).nullable().optional(),
+  rappiOrderId: z.string().max(128).nullable().optional(),
+});
+
+export type SplitPaymentLeg = z.infer<typeof SplitPaymentLegSchema>;
 
 // ============================================================================
 // INVENTORY

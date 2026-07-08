@@ -7,7 +7,9 @@ import type { DiscountScope, DiscountType } from '@shared/lib/domain';
 import { generateIdempotencyKey } from '@shared/lib/domain-helpers';
 import {
   callProcessPayment,
+  callProcessSplitPayment,
   type ProcessPaymentSuccess,
+  type ProcessSplitPaymentSuccess,
 } from '@shared/lib/edge-function-contracts';
 import { ok, type Result } from '@shared/lib/result';
 import type { AppError } from '@shared/lib/supabase-contracts';
@@ -98,6 +100,50 @@ export async function processCardPayment(
   return ok({
     paymentId: result.data.paymentId,
     receiptData: result.data.receiptData,
+  });
+}
+
+export type SplitPaymentLegInput = {
+  method: 'cash' | 'card' | 'rappi';
+  amount: number;
+  tipAmount: number;
+  tenderedAmount?: number;
+  referenceNumber?: string;
+  rappiOrderId?: string;
+};
+
+export type SplitPaymentResult = {
+  paymentGroupId: string;
+  paymentIds: string[];
+  receipts: ProcessSplitPaymentSuccess['receipts'];
+};
+
+export async function processSplitPayment(
+  tabId: string,
+  legs: SplitPaymentLegInput[],
+  expectedTotal: number,
+  discountInfo?: DiscountInfo
+): Promise<Result<SplitPaymentResult, AppError>> {
+  const idempotencyKey = generateIdempotencyKey('payment_split');
+  const result = await callProcessSplitPayment({
+    tabId,
+    legs,
+    expectedTotal,
+    idempotencyKey,
+    discountScope: discountInfo?.scope,
+    discountType: discountInfo?.type,
+    discountValue: discountInfo?.value,
+    discountAmount: discountInfo?.amount,
+  });
+
+  if (!result.ok) {
+    return result;
+  }
+
+  return ok({
+    paymentGroupId: result.data.paymentGroupId,
+    paymentIds: result.data.paymentIds,
+    receipts: result.data.receipts,
   });
 }
 

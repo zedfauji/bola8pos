@@ -319,6 +319,221 @@ export async function callProcessPayment(
 }
 
 // ============================================================================
+// PROCESS SPLIT PAYMENT
+// ============================================================================
+
+/**
+ * Request schema for one leg (row) of a split-payment submission.
+ * Defined locally (not reusing SplitPaymentLegSchema from domain.ts) —
+ * contracts own their wire shape, mirroring ProcessPaymentRequestSchema.
+ */
+export const SplitPaymentLegRequestSchema = z
+  .object({
+    method: PaymentMethodSchema,
+    amount: MoneySchema,
+    tipAmount: MoneySchema,
+    tenderedAmount: MoneySchema.nullable().optional(),
+    referenceNumber: z.string().max(64).nullable().optional(),
+    rappiOrderId: z.string().max(128).nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.method === 'cash' && data.tenderedAmount == null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'tenderedAmount is required for cash',
+        path: ['tenderedAmount'],
+      });
+    }
+    if (data.method !== 'cash' && data.tenderedAmount != null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'tenderedAmount is only valid for cash',
+        path: ['tenderedAmount'],
+      });
+    }
+    if (data.method === 'rappi' && (data.rappiOrderId == null || data.rappiOrderId.trim() === '')) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'rappiOrderId is required for rappi',
+        path: ['rappiOrderId'],
+      });
+    }
+  });
+
+/**
+ * Request schema for process-split-payment edge function.
+ * Max 4 legs enforces D-02. Top-level superRefine is a client-side
+ * defense-in-depth check (D-05) — the RPC re-validates authoritatively.
+ */
+export const ProcessSplitPaymentRequestSchema = z
+  .object({
+    tabId: UuidSchema,
+    legs: z.array(SplitPaymentLegRequestSchema).min(1).max(4),
+    expectedTotal: MoneySchema,
+    idempotencyKey: z.string().min(1).max(255),
+    discountScope: DiscountScopeSchema.optional(),
+    discountType: DiscountTypeSchema.optional(),
+    discountValue: z.number().nonnegative().optional(),
+    discountAmount: MoneySchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    const legsTotal = data.legs.reduce((sum, leg) => sum + leg.amount, 0);
+    if (Math.abs(legsTotal - data.expectedTotal) > 0.01) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Sum of leg amounts must equal expectedTotal',
+        path: ['legs'],
+      });
+    }
+  });
+
+export type ProcessSplitPaymentRequest = z.infer<typeof ProcessSplitPaymentRequestSchema>;
+
+/** Successful payload after {@link callProcessSplitPayment} unwraps the edge envelope. */
+export const ProcessSplitPaymentSuccessSchema = z.object({
+  paymentGroupId: UuidSchema,
+  paymentIds: z.array(UuidSchema).min(1).max(4),
+  receipts: z.array(ReceiptDataSchema).min(1).max(4),
+  idempotent: z.boolean().optional(),
+});
+
+export type ProcessSplitPaymentSuccess = z.infer<typeof ProcessSplitPaymentSuccessSchema>;
+
+export const ProcessSplitPaymentEnvelopeSchema = z.object({
+  success: z.boolean(),
+  paymentGroupId: UuidSchema.optional(),
+  paymentIds: z.array(UuidSchema).optional(),
+  receipts: z.array(ReceiptDataSchema).optional(),
+  idempotent: z.boolean().optional(),
+  error: z.object({ code: z.string(), message: z.string() }).optional(),
+});
+
+export type ProcessSplitPaymentEnvelope = z.infer<typeof ProcessSplitPaymentEnvelopeSchema>;
+
+function mapProcessSplitPaymentEdgeError(code: string | undefined, message: string): AppError {
+  switch (code) {
+    case 'POOL_SESSION_ACTIVE':
+      return { code: 'SESSION_STILL_RUNNING', message };
+    case 'TAB_NOT_OPEN':
+    case 'TAB_NOT_FOUND':
+      return { code: 'TAB_ALREADY_CLOSED', message };
+    case 'AMOUNT_MISMATCH':
+    case 'TENDERED_REQUIRED':
+    case 'INSUFFICIENT_TENDER':
+    case 'TENDERED_NOT_ALLOWED':
+    case 'RAPPI_ORDER_MISMATCH':
+    case 'INVALID_METHOD':
+    case 'VALIDATION_ERROR':
+    case 'IDEMPOTENCY_MISMATCH':
+    case 'SPLIT_TOTAL_MISMATCH':
+    case 'TOO_MANY_LEGS':
+    case 'EMPTY_LEG':
+      return { code: 'VALIDATION_ERROR', message };
+    case 'FORBIDDEN':
+      return { code: 'AUTH_FORBIDDEN', message };
+    case 'UNAUTHORIZED':
+      return { code: 'AUTH_REQUIRED', message };
+    default:
+      return { code: 'SUPABASE_ERROR', message, details: code ?? '' };
+  }
+}
+
+/**
+ * Calls the process-split-payment edge function.
+ *
+ * @returns Unwrapped success payload or structured {@link AppError}.
+ */
+export async function callProcessSplitPayment(
+  request: ProcessSplitPaymentRequest
+): Promise<Result<ProcessSplitPaymentSuccess, AppError>> {
+  try {
+    const validatedRequest = ProcessSplitPaymentRequestSchema.parse(request);
+
+    // supabase.functions getter creates a new FunctionsClient with static anon-key headers on
+    // every access — the user JWT is never injected. Use fetch() directly with the cached token.
+    const accessToken = getCachedAccessToken();
+    if (!accessToken) {
+      return err({ code: 'AUTH_REQUIRED', message: 'Not authenticated' });
+    }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/process-split-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify(validatedRequest),
+    });
+
+    const data: unknown = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      // Edge function envelope: { success: false, error: { code, message } }
+      const edgeErr =
+        data !== null && typeof data === 'object' && 'error' in data
+          ? (data as { error: { code?: unknown; message?: unknown } }).error
+          : null;
+      const edgeCode = typeof edgeErr?.code === 'string' ? edgeErr.code : undefined;
+      const edgeMsg =
+        typeof edgeErr?.message === 'string'
+          ? edgeErr.message
+          : `Payment service error (${String(response.status)})`;
+      return err(mapProcessSplitPaymentEdgeError(edgeCode, edgeMsg));
+    }
+
+    const envelope = ProcessSplitPaymentEnvelopeSchema.safeParse(data);
+    if (!envelope.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Unexpected response from payment service',
+        details: envelope.error.message,
+      });
+    }
+
+    const body = envelope.data;
+    if (!body.success || body.paymentGroupId == null) {
+      const e = body.error;
+      return err(
+        mapProcessSplitPaymentEdgeError(e?.code, e?.message ?? 'Payment could not be completed.')
+      );
+    }
+
+    const success = ProcessSplitPaymentSuccessSchema.safeParse({
+      paymentGroupId: body.paymentGroupId,
+      paymentIds: body.paymentIds,
+      receipts: body.receipts,
+      idempotent: body.idempotent,
+    });
+    if (!success.success) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid receipt payload',
+        details: success.error.message,
+      });
+    }
+
+    return ok(success.data);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return err({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid request data',
+        details: error.message,
+      });
+    }
+
+    return err({
+      code: 'UNKNOWN_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
+// ============================================================================
 // CLOSE SHIFT
 // ============================================================================
 
@@ -1076,6 +1291,11 @@ export const EDGE_FUNCTIONS = {
     requestSchema: ProcessPaymentRequestSchema,
     responseSchema: ProcessPaymentEnvelopeSchema,
     caller: callProcessPayment,
+  },
+  'process-split-payment': {
+    requestSchema: ProcessSplitPaymentRequestSchema,
+    responseSchema: ProcessSplitPaymentEnvelopeSchema,
+    caller: callProcessSplitPayment,
   },
   'send-receipt-email': {
     requestSchema: SendReceiptEmailRequestSchema,

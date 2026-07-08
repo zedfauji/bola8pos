@@ -1,6 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import * as contracts from './edge-function-contracts';
-import { processCardPayment, processCashPayment, processRappiPayment } from './payment-processor';
+import {
+  processCardPayment,
+  processCashPayment,
+  processRappiPayment,
+  processSplitPayment,
+} from './payment-processor';
 import { err, ok } from './result';
 
 describe('payment-processor', () => {
@@ -170,5 +175,100 @@ describe('payment-processor', () => {
     if (!r.ok) {
       expect(r.error.message).toBe('Rappi mismatch');
     }
+  });
+
+  describe('processSplitPayment', () => {
+    const leg1 = { method: 'cash' as const, amount: 6, tipAmount: 1, tenderedAmount: 10 };
+    const leg2 = { method: 'card' as const, amount: 5, tipAmount: 0.5 };
+
+    it('returns ok with paymentGroupId + paymentIds + receipts for 2 legs summing to expectedTotal', async () => {
+      const spy = vi.spyOn(contracts, 'callProcessSplitPayment').mockResolvedValue(
+        ok({
+          paymentGroupId: 'group-1',
+          paymentIds: ['pay-1', 'pay-2'],
+          receipts: [
+            { ...receipt, paymentMethod: 'cash' },
+            { ...receipt, paymentMethod: 'card' },
+          ],
+          idempotent: false,
+        })
+      );
+
+      const r = await processSplitPayment(
+        'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        [leg1, leg2],
+        12.5
+      );
+
+      expect(r.ok).toBe(true);
+      if (r.ok) {
+        expect(r.data.paymentGroupId).toBe('group-1');
+        expect(r.data.paymentIds).toHaveLength(2);
+        expect(r.data.receipts).toHaveLength(2);
+      }
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes a single idempotencyKey generated via generateIdempotencyKey(payment_split) to callProcessSplitPayment', async () => {
+      const spy = vi.spyOn(contracts, 'callProcessSplitPayment').mockResolvedValue(
+        ok({
+          paymentGroupId: 'group-1',
+          paymentIds: ['pay-1', 'pay-2'],
+          receipts: [receipt, receipt],
+          idempotent: false,
+        })
+      );
+
+      await processSplitPayment('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', [leg1, leg2], 12.5);
+
+      const tuple = spy.mock.calls[0];
+      if (tuple === undefined) throw new Error('expected call');
+      expect(tuple[0].idempotencyKey.startsWith('payment_split_')).toBe(true);
+    });
+
+    it('forwards discountInfo (scope/type/value/amount) when provided', async () => {
+      const spy = vi.spyOn(contracts, 'callProcessSplitPayment').mockResolvedValue(
+        ok({
+          paymentGroupId: 'group-1',
+          paymentIds: ['pay-1', 'pay-2'],
+          receipts: [receipt, receipt],
+          idempotent: false,
+        })
+      );
+
+      await processSplitPayment('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', [leg1, leg2], 12.5, {
+        scope: 'all',
+        type: 'percent',
+        value: 10,
+        amount: 1.25,
+      });
+
+      const tuple = spy.mock.calls[0];
+      if (tuple === undefined) throw new Error('expected call');
+      expect(tuple[0]).toMatchObject({
+        discountScope: 'all',
+        discountType: 'percent',
+        discountValue: 10,
+        discountAmount: 1.25,
+      });
+    });
+
+    it('returns the underlying error Result unchanged when callProcessSplitPayment returns err', async () => {
+      vi.spyOn(contracts, 'callProcessSplitPayment').mockResolvedValue(
+        err({ code: 'VALIDATION_ERROR', message: 'Sum of leg amounts must equal expectedTotal' })
+      );
+
+      const r = await processSplitPayment(
+        'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        [leg1, leg2],
+        12.5
+      );
+
+      expect(r.ok).toBe(false);
+      if (!r.ok) {
+        expect(r.error.code).toBe('VALIDATION_ERROR');
+        expect(r.error.message).toBe('Sum of leg amounts must equal expectedTotal');
+      }
+    });
   });
 });
