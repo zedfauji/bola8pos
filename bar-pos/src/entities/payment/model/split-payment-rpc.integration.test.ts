@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * Integration tests: process_split_payment_atomic RPC + payments split
  * columns (Phase 18, Plan 02 — SC-1/SC-2).
