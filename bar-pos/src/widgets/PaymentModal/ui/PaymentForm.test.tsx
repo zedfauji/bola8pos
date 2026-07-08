@@ -12,6 +12,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@entities/tab/model/types';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { openCashDrawer, printReceipt } from '@shared/lib/pos-printer';
 import { ok } from '@shared/lib/result';
 import { renderWithProviders } from '@shared/lib/test-utils';
 
@@ -115,6 +116,11 @@ function makeProcessors(overrides: Partial<PaymentProcessors> = {}): PaymentProc
     processRappiPayment: vi
       .fn()
       .mockResolvedValue(ok({ paymentId: 'p-rappi', receiptData: receipt })),
+    processSplitPayment: vi
+      .fn()
+      .mockResolvedValue(
+        ok({ paymentGroupId: 'group-1', paymentIds: ['p-split-1'], receipts: [receipt] })
+      ),
     ...overrides,
   };
 }
@@ -354,5 +360,212 @@ describe('PaymentForm — card charge override', () => {
       undefined,
       undefined
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 18 — Split payment mode
+// ---------------------------------------------------------------------------
+
+describe('PaymentForm — split mode', () => {
+  async function openSplitMode(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole('switch', { name: 'Split payment' }));
+  }
+
+  it('toggle ON reveals 2 rows + Remaining to pay box; toggle OFF restores the method grid', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    expect(screen.getByTestId('payment-btn-cash')).toBeInTheDocument();
+
+    await openSplitMode(user);
+
+    expect(screen.getByText('Payment 1')).toBeInTheDocument();
+    expect(screen.getByText('Payment 2')).toBeInTheDocument();
+    expect(screen.getByText('Remaining to pay')).toBeInTheDocument();
+    expect(screen.queryByTestId('payment-btn-cash')).not.toBeInTheDocument();
+
+    await openSplitMode(user);
+
+    expect(screen.getByTestId('payment-btn-cash')).toBeInTheDocument();
+    expect(screen.queryByText('Payment 1')).not.toBeInTheDocument();
+  });
+
+  it('add-row appends up to 4 rows then disables Add; remove-row disabled at exactly 2 rows', async () => {
+    const user = userEvent.setup();
+    renderForm();
+    await openSplitMode(user);
+
+    expect(screen.queryByRole('button', { name: 'Remove payment 1' })).not.toBeInTheDocument();
+
+    const addBtn = screen.getByRole('button', { name: '+ Add payment method' });
+    await user.click(addBtn);
+    expect(screen.getByText('Payment 3')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove payment 1' })).toBeInTheDocument();
+
+    await user.click(addBtn);
+    expect(screen.getByText('Payment 4')).toBeInTheDocument();
+    expect(addBtn).toBeDisabled();
+
+    await user.click(screen.getByRole('button', { name: 'Remove payment 4' }));
+    await user.click(screen.getByRole('button', { name: 'Remove payment 3' }));
+
+    expect(screen.queryByText('Payment 3')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove payment 1' })).not.toBeInTheDocument();
+    expect(addBtn).not.toBeDisabled();
+  });
+
+  it('live remaining shows Fully allocated when rows sum to subtotalWithTax; submit disabled until remaining=0 and every row amount>0', async () => {
+    const user = userEvent.setup();
+    renderForm();
+    await openSplitMode(user);
+
+    // Switch both rows to card to avoid the cash tendered-amount requirement.
+    const cardButtons = screen.getAllByRole('button', { name: 'Terminal BBVA' });
+    await user.click(cardButtons[0]!);
+    await user.click(cardButtons[1]!);
+
+    const submitBtn = screen.getByRole('button', { name: 'Process split payment' });
+    expect(submitBtn).toBeDisabled();
+
+    const amountInputs = screen.getAllByLabelText('Amount');
+    await user.clear(amountInputs[0]!);
+    await user.type(amountInputs[0]!, '10.00');
+    await user.tab();
+    // Row 2 still has amount=0 — submit stays disabled (Pitfall 3)
+    expect(submitBtn).toBeDisabled();
+
+    await user.clear(amountInputs[1]!);
+    await user.type(amountInputs[1]!, '10.00');
+    await user.tab();
+
+    // testTab: itemsSubtotal=$20, taxRate=0 → subtotalWithTax=$20 → 10+10=20
+    expect(screen.getByText('Fully allocated ✓')).toBeInTheDocument();
+    expect(submitBtn).not.toBeDisabled();
+  });
+
+  it('submit calls processSplitPayment with legs summing to subtotalWithTax; renders sequential receipts; Done reaches onClose', async () => {
+    const user = userEvent.setup();
+    const receipt1 = { ...makeReceipt(), paymentMethod: 'cash' as const };
+    const receipt2 = { ...makeReceipt(), paymentMethod: 'card' as const };
+    const processors = makeProcessors({
+      processSplitPayment: vi
+        .fn()
+        .mockResolvedValue(
+          ok({ paymentGroupId: 'group-x', paymentIds: ['p1', 'p2'], receipts: [receipt1, receipt2] })
+        ),
+    });
+    const onClose = vi.fn();
+    renderWithProviders(
+      <PaymentForm
+        tab={testTab}
+        staffId={staffId}
+        onPaymentSuccess={vi.fn()}
+        onClose={onClose}
+        processors={processors}
+      />
+    );
+
+    await openSplitMode(user);
+
+    // Row 1 stays cash (default); switch row 2 to card.
+    const cardButtons = screen.getAllByRole('button', { name: 'Terminal BBVA' });
+    await user.click(cardButtons[1]!);
+
+    const amountInputs = screen.getAllByLabelText('Amount');
+    await user.clear(amountInputs[0]!);
+    await user.type(amountInputs[0]!, '12.00');
+    await user.clear(amountInputs[1]!);
+    await user.type(amountInputs[1]!, '8.00');
+    await user.tab();
+
+    const tenderedInput = screen.getByLabelText('Amount tendered');
+    await user.clear(tenderedInput);
+    await user.type(tenderedInput, '12.00');
+    await user.tab();
+
+    const submitBtn = screen.getByRole('button', { name: 'Process split payment' });
+    expect(submitBtn).not.toBeDisabled();
+    await user.click(submitBtn);
+
+    await waitFor(() => {
+      expect(processors.processSplitPayment).toHaveBeenCalled();
+    });
+    const call = vi.mocked(processors.processSplitPayment).mock.calls[0]!;
+    const [tabId, legs, expectedTotal] = call;
+    expect(tabId).toBe(testTab.id);
+    expect(legs.reduce((sum, leg) => sum + leg.amount, 0)).toBe(20);
+    expect(expectedTotal).toBe(20);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Receipt 1 of 2/)).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Receipt 2 of 2/)).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('cash-drawer-once: a 2-cash-row split calls openCashDrawer exactly once and printReceipt twice', async () => {
+    const user = userEvent.setup();
+    const receipt1 = { ...makeReceipt(), paymentMethod: 'cash' as const };
+    const receipt2 = { ...makeReceipt(), paymentMethod: 'cash' as const };
+    const processors = makeProcessors({
+      processSplitPayment: vi
+        .fn()
+        .mockResolvedValue(
+          ok({ paymentGroupId: 'group-y', paymentIds: ['p1', 'p2'], receipts: [receipt1, receipt2] })
+        ),
+    });
+    renderForm(processors);
+    await openSplitMode(user);
+
+    // Both rows default to cash.
+    const amountInputs = screen.getAllByLabelText('Amount');
+    await user.clear(amountInputs[0]!);
+    await user.type(amountInputs[0]!, '12.00');
+    await user.clear(amountInputs[1]!);
+    await user.type(amountInputs[1]!, '8.00');
+    await user.tab();
+
+    const tenderedInputs = screen.getAllByLabelText('Amount tendered');
+    await user.clear(tenderedInputs[0]!);
+    await user.type(tenderedInputs[0]!, '12.00');
+    await user.clear(tenderedInputs[1]!);
+    await user.type(tenderedInputs[1]!, '8.00');
+    await user.tab();
+
+    await user.click(screen.getByRole('button', { name: 'Process split payment' }));
+
+    await waitFor(() => {
+      expect(processors.processSplitPayment).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(openCashDrawer).toHaveBeenCalledTimes(1);
+    });
+    expect(printReceipt).toHaveBeenCalledTimes(2);
+  });
+
+  it('regression: single-method (toggle OFF) cash payment still calls processCashPayment unchanged', async () => {
+    const user = userEvent.setup();
+    const processors = makeProcessors();
+    renderForm(processors);
+
+    const tendered = screen.getByLabelText('Amount tendered');
+    await user.clear(tendered);
+    await user.type(tendered, '30.00');
+    await user.tab();
+
+    await user.click(screen.getByRole('button', { name: 'Process payment' }));
+
+    await waitFor(() => {
+      expect(processors.processCashPayment).toHaveBeenCalled();
+    });
+    expect(processors.processSplitPayment).not.toHaveBeenCalled();
   });
 });

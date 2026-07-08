@@ -103,6 +103,21 @@ function mockProcessorsFor(tab: Tab): PaymentProcessors {
         },
       });
     },
+    processSplitPayment: async (_tabId, legs) => {
+      logger.info('storybook.payment.mock', { method: 'split', legCount: legs.length });
+      await new Promise(r => setTimeout(r, 400));
+      return ok({
+        paymentGroupId: '00000000-0000-4000-8000-000000000004',
+        paymentIds: legs.map((_, i) => `00000000-0000-4000-8000-00000000001${String(i)}`),
+        receipts: legs.map(leg => ({
+          ...receipt,
+          paymentMethod: leg.method,
+          subtotal: leg.amount,
+          tipAmount: leg.tipAmount,
+          total: leg.amount + leg.tipAmount,
+        })),
+      });
+    },
   };
 }
 
