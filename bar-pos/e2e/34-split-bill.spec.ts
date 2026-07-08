@@ -112,6 +112,39 @@ async function seedOpenTab(
 }
 
 /**
+ * Directly set a tab's status via the service client, respecting the
+ * `trg_tabs_version` optimistic-lock trigger (Phase 15,
+ * 20260512000001_versioned_rows.sql) — every UPDATE on `tabs` must advance
+ * `version` by exactly +1 or the trigger raises STALE_VERSION (P0V01) and the
+ * row is left unchanged. Throws if the update doesn't affect exactly one row.
+ */
+async function setTabStatusDirect(
+  db: ReturnType<typeof getServiceClient>,
+  tabId: string,
+  status: string,
+): Promise<void> {
+  const { data: current, error: readErr } = await db
+    .from('tabs')
+    .select('version')
+    .eq('id', tabId)
+    .single();
+  if (readErr || !current) {
+    throw new Error(`setTabStatusDirect: failed to read version for tab ${tabId}: ${readErr?.message ?? 'no row'}`);
+  }
+  const { error, data } = await db
+    .from('tabs')
+    .update({ status, version: (current as { version: number }).version + 1 })
+    .eq('id', tabId)
+    .select('id');
+  if (error) {
+    throw new Error(`setTabStatusDirect: update failed for tab ${tabId}: ${error.message}`);
+  }
+  if (!data || data.length !== 1) {
+    throw new Error(`setTabStatusDirect: expected 1 row updated for tab ${tabId}, got ${String(data?.length ?? 0)}`);
+  }
+}
+
+/**
  * Navigate to /pos and select a tab by customer name.
  * Handles both "no tab selected" (Select Tab button) and "tab already selected" (Switch Tab button).
  */
@@ -338,8 +371,8 @@ test('T3+T4: paying all sub-tabs auto-closes parent (status = paid)', async ({ p
     }));
     const { data: inserted } = await db.from('tabs').insert(subTabInserts).select('id');
     resolvedSubTabIds = ((inserted ?? []) as { id: string }[]).map(r => r.id);
-    // Also update parent tab status to 'split'
-    await db.from('tabs').update({ status: 'split' }).eq('id', tabId);
+    // Also update parent tab status to 'split' (version-safe — see setTabStatusDirect)
+    await setTabStatusDirect(db, tabId, 'split');
   } else {
     resolvedSubTabIds = subTabIds as string[];
   }
@@ -358,9 +391,21 @@ test('T3+T4: paying all sub-tabs auto-closes parent (status = paid)', async ({ p
     throw new Error('T3+T4: no admin profile for payments.processed_by');
   }
 
-  // Pay each sub-tab via direct DB (mark as paid + insert payment; trigger reads NEW.tab_id)
+  // Pay each sub-tab via direct DB (mark as paid + insert payment; trigger reads NEW.tab_id).
+  // Version-safe update — see setTabStatusDirect (trg_tabs_version optimistic-lock trigger);
+  // a bare `.update({ status: 'paid' })` silently fails with STALE_VERSION and leaves the
+  // sub-tab 'open', which would prevent check_parent_tab_auto_close from ever reaching zero
+  // open sub-tabs.
   for (const [idx, subId] of resolvedSubTabIds.entries()) {
-    await db.from('tabs').update({ status: 'paid', closed_at: new Date().toISOString() }).eq('id', subId);
+    const { data: subVersion } = await db.from('tabs').select('version').eq('id', subId).single();
+    await db
+      .from('tabs')
+      .update({
+        status: 'paid',
+        closed_at: new Date().toISOString(),
+        version: ((subVersion as { version: number }).version) + 1,
+      })
+      .eq('id', subId);
     const { error: insErr } = await db.from('payments').insert({
       tab_id: subId,
       amount: 10.0,
@@ -428,9 +473,17 @@ test('T5: by-person split — 3 persons, unassigned items remain in parent', asy
   }
   // Else: by-person default 2 columns is sufficient (isValid: columns.length >= 2)
 
-  // Verify at least 2 person columns are visible
-  await expect(page.getByText(/person 1/i)).toBeVisible({ timeout: 5_000 });
-  await expect(page.getByText(/person 2/i)).toBeVisible({ timeout: 5_000 });
+  // Verify at least 2 person columns are visible.
+  // PersonCard (shared/ui/PersonCard) renders the column name as an editable
+  // <Input value="Person N">, not as static text — the name lives in the
+  // input's live `.value` DOM property, not as a text node (and not even as
+  // the "value" HTML attribute, since React sets controlled values via the
+  // property setter). getByText never matches it, and a CSS `[value=...]`
+  // attribute selector wouldn't either. Assert via toHaveValue on the
+  // name inputs directly, in column order (Person 1 first, Person 2 second).
+  const personNameInputs = page.getByPlaceholder('Person name');
+  await expect(personNameInputs.nth(0)).toHaveValue(/^Person 1$/i, { timeout: 5_000 });
+  await expect(personNameInputs.nth(1)).toHaveValue(/^Person 2$/i, { timeout: 5_000 });
 
   // isValid for By Person mode: personColumns.length >= 2 (unassigned items are allowed)
   // Confirm Split should be enabled with 2+ persons even without assigning items
@@ -459,13 +512,33 @@ test('T6: split button hidden when tab status is split or paid', async ({ page }
   const db = getServiceClient();
   const { tabId } = await seedOpenTab(db, 'E2E Split Guard', 3, 10.0);
 
-  // Directly set tab to 'split' status (simulating a completed split)
-  await db.from('tabs').update({ status: 'split' }).eq('id', tabId);
+  // Directly set tab to 'split' status (simulating a completed split).
+  // Version-safe — see setTabStatusDirect (trg_tabs_version optimistic-lock trigger).
+  await setTabStatusDirect(db, tabId, 'split');
 
   await loginAs(page, 'admin');
-  await selectTabByName(page, 'E2E Split Guard');
 
-  // For a 'split' status tab, Split bill is not mounted (OrderPanel: tab?.status === 'open' only)
+  // A 'split' tab is deliberately excluded from the open-tabs drawer (useTabs()
+  // filters `.eq('status', 'open')` — sub-tabs and split parents must NOT clutter
+  // the main tab-switch list). So it can't be reached via selectTabByName's normal
+  // drawer flow. Instead, set it as the active tab directly via the persisted
+  // Zustand tab store (entities/tab/model/store.ts, persist key "tabs") and reload —
+  // ActiveTabSelector resolves the active tab by id via useTab(), independent of status.
+  await page.goto('/pos');
+  await page.evaluate(id => {
+    const raw = localStorage.getItem('tabs');
+    const parsed: { state?: Record<string, unknown>; version?: number } = raw
+      ? (JSON.parse(raw) as { state?: Record<string, unknown>; version?: number })
+      : {};
+    parsed.state = { ...(parsed.state ?? {}), activeTabId: id };
+    localStorage.setItem('tabs', JSON.stringify(parsed));
+  }, tabId);
+  await page.reload();
+
+  // Confirm the split tab actually loaded as the active tab before asserting the guard
+  await expect(page.getByText(/e2e split guard/i).first()).toBeVisible({ timeout: 15_000 });
+
+  // For a 'split' status tab, Split bill is not mounted (ActiveTabSelector: tab?.status === 'open' only)
   await expect(page.getByTestId('split-bill-button')).toHaveCount(0);
 
   // Additionally verify the tab status in DB is still 'split'
