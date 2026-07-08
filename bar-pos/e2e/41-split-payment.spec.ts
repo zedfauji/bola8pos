@@ -199,13 +199,17 @@ test.describe('Split Payment', () => {
     const row1Amount = (halfCents / 100).toFixed(2);
     const row2Amount = ((totalCents - halfCents) / 100).toFixed(2);
 
+    // Row 2 → card FIRST — both rows default to cash, so switching row 2 away from
+    // cash before touching row 1's "Amount tendered" keeps that label unambiguous
+    // (only row 1 remains cash at that point, avoiding a strict-mode locator clash).
+    await modal.getByRole('button', { name: 'Terminal BBVA' }).nth(1).click();
+
     // Row 1 stays cash (default) — Amount + Amount tendered (exact, no change due)
     const amountInputs = modal.getByLabel('Amount', { exact: true });
     await amountInputs.nth(0).fill(row1Amount);
     await modal.getByLabel('Amount tendered', { exact: true }).fill(row1Amount);
 
-    // Row 2 → card, fill Amount for the remainder
-    await modal.getByRole('button', { name: 'Terminal BBVA' }).nth(1).click();
+    // Row 2 → fill Amount for the remainder
     await amountInputs.nth(1).fill(row2Amount);
 
     await expect(modal.getByText('Fully allocated ✓')).toBeVisible({ timeout: 5_000 });
