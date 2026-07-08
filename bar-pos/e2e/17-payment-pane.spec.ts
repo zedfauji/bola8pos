@@ -11,7 +11,6 @@
  *   - src/widgets/PaymentPane/ui/TabPaymentCard.tsx
  *   - src/features/manager-pin-gate/ui/ManagerPinDialog.tsx
  *   - src/widgets/PaymentModal/ui/PaymentForm.tsx
- *   - src/widgets/AppNav/ui/AppNav.tsx
  *   - src/widgets/HomeDashboard/ui/HomeDashboard.tsx
  */
 
@@ -220,10 +219,17 @@ test.describe('Payment Pane', () => {
     await logout(page);
   });
 
-  test('T2: navigate to /payments from AppNav sidebar link', async ({ page }) => {
+  test('T2: /payments route is directly reachable via URL navigation', async ({ page }) => {
+    // Note: there is no persistent AppNav sidebar rendered anywhere in the app
+    // (src/widgets/AppNav/ui/AppNav.tsx is not imported by any page/layout — it's
+    // unused dead code). The only in-app entry point to /payments is the
+    // HomeDashboard big-box button, already covered by T1. This test instead
+    // verifies the /payments route itself is directly reachable via URL
+    // navigation (e.g. deep link, bookmark, browser back/forward), independent
+    // of which page login happens to land on (loginAsNamed can land on either
+    // /home or /pos — see e2e/helpers/auth.ts).
     await loginAs(page, 'manager');
-    // Desktop sidebar: AppNav renders a Link/Button with label "Payments"
-    await page.getByRole('button', { name: 'Payments' }).click();
+    await page.goto('/payments');
     await expect(page).toHaveURL(/\/payments/, { timeout: 15_000 });
     await expect(page.getByText(/tabs awaiting payment/i)).toBeVisible({ timeout: 10_000 });
     await logout(page);
@@ -403,10 +409,12 @@ test.describe('Payment Pane', () => {
     // Receipt step appears
     await expect(page.getByRole('heading', { name: 'Receipt' })).toBeVisible({ timeout: 90_000 });
 
-    // Click Done — selection resets, tab removed from list
+    // Click Done — selection resets, right panel falls back to payment history
+    // (PaymentPane shows <PaymentHistoryList /> when no tab is selected — see
+    // src/widgets/PaymentPane/ui/PaymentPane.tsx)
     await page.getByRole('button', { name: 'Done' }).click();
     await expect(
-      page.getByText(/select a tab from the list to process payment/i)
+      page.getByText(/recent payments|no payment records found/i)
     ).toBeVisible({ timeout: 10_000 });
 
     // The paid tab should no longer appear in the list
@@ -430,8 +438,11 @@ test.describe('Payment Pane', () => {
 
     await page.getByRole('button', { name: /back to tab list/i }).click();
 
+    // Selected tab cleared — right panel falls back to payment history
+    // (PaymentPane shows <PaymentHistoryList /> when no tab is selected — see
+    // src/widgets/PaymentPane/ui/PaymentPane.tsx)
     await expect(
-      page.getByText(/select a tab from the list to process payment/i)
+      page.getByText(/recent payments|no payment records found/i)
     ).toBeVisible({ timeout: 5_000 });
     await logout(page);
   });
