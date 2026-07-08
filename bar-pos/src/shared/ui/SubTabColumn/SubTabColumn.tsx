@@ -65,10 +65,16 @@ export function SubTabColumn({
         'flex flex-col min-w-[140px] bg-card rounded-lg border cursor-pointer transition-colors',
         isSelected ? 'border-primary ring-2 ring-primary/30' : 'border-border'
       )}
-      onClick={e => {
-        // Don't trigger column selection when clicking inside the item list area
-        const target = e.target as HTMLElement;
-        if (target.closest('[data-item-list]')) return;
+      onClick={() => {
+        // No item-list click guard here: the per-item "Remove" button already calls
+        // e.stopPropagation() (see below), so its clicks never bubble up to this
+        // handler. A guard that additionally bailed whenever the click landed inside
+        // `[data-item-list]` (previously: `target.closest('[data-item-list]')`) was
+        // redundant for that case and actively broke the primary interaction — the
+        // scrollable <ul data-item-list> fills nearly the entire card body below the
+        // header (min-h-[120px]), so almost every click on an empty or populated
+        // column landed inside it and silently no-opped instead of selecting the
+        // column as the assignment target.
         onSelect();
       }}
       onKeyDown={e => {
@@ -84,7 +90,7 @@ export function SubTabColumn({
         <MoneyDisplay amount={total / 100} size="sm" />
       </div>
 
-      {/* ItemList — data-item-list prevents outer onClick from calling onSelect */}
+      {/* ItemList — data-item-list is a test hook only (see e2e/34-split-bill.spec.ts) */}
       <ul
         data-item-list
         className="flex-1 overflow-y-auto divide-y min-h-[120px] list-none p-0 m-0"
