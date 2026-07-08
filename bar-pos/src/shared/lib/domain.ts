@@ -586,7 +586,11 @@ export type PoolSessionUpdate = z.infer<typeof PoolSessionUpdateSchema>;
 export const PaymentSchema = z.object({
   id: UuidSchema,
   tabId: UuidSchema,
-  amount: MoneySchema,
+  // Refund rows (isRefund: true) store a negative amount — the app's actual
+  // ledger convention (see process_refund RPC) — so this can't be MoneySchema
+  // (nonnegative). Keep the multipleOf(0.01) precision constraint without the
+  // sign restriction.
+  amount: z.number().multipleOf(0.01),
   tipAmount: MoneySchema,
   method: PaymentMethodSchema,
   squarePaymentId: z.string().nullable(),

@@ -25,9 +25,9 @@ describe('PaymentSchema', () => {
     expect(r.success).toBe(false);
   });
 
-  it('rejects negative amount', () => {
-    const r = PaymentSchema.safeParse({ ...validPayment, amount: -1 });
-    expect(r.success).toBe(false);
+  it('accepts negative amount (refund rows store a negative amount)', () => {
+    const r = PaymentSchema.safeParse({ ...validPayment, amount: -1, isRefund: true });
+    expect(r.success).toBe(true);
   });
 
   it('rejects invalid squareReceiptUrl when non-null', () => {

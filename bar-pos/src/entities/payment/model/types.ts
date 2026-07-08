@@ -7,7 +7,9 @@ import { z } from 'zod';
 export const PaymentSchema = z.object({
   id: z.uuid(),
   tabId: z.uuid(),
-  amount: z.number().min(0),
+  // Refund rows (isRefund: true) store a negative amount — the app's actual
+  // ledger convention (see process_refund RPC), so this must not be `.min(0)`.
+  amount: z.number(),
   tipAmount: z.number().min(0),
   method: z.enum(['cash', 'card', 'rappi']),
   squarePaymentId: z.string().nullable(),
