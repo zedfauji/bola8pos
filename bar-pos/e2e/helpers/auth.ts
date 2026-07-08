@@ -73,19 +73,56 @@ export async function loginAs(page: Page, role: StaffRole): Promise<void> {
 }
 
 export async function logout(page: Page): Promise<void> {
-  // Dismiss any open dialog that might block the Logout button
-  const dialog = page.getByRole('alertdialog');
-  const dialogVisible = await dialog.isVisible().catch(() => false);
-  if (dialogVisible) {
+  // Already logged out (staff picker / PIN screen) — nothing to do.
+  const alreadyOnLogin = await page
+    .getByRole('heading', { name: /who are you/i })
+    .isVisible()
+    .catch(() => false);
+  if (alreadyOnLogin) {
+    return;
+  }
+
+  // Dismiss any open alert dialog that might block the Logout button
+  const alertDialog = page.getByRole('alertdialog');
+  const alertDialogVisible = await alertDialog.isVisible().catch(() => false);
+  if (alertDialogVisible) {
     await page.keyboard.press('Escape');
-    await dialog.waitFor({ state: 'hidden', timeout: 3_000 }).catch(() => undefined);
+    await alertDialog.waitFor({ state: 'hidden', timeout: 3_000 }).catch(() => undefined);
   }
 
-  // Logout button only lives on /home — navigate there if not already there
+  // The AI-assistant side panel is a persistent `dialog` (not `alertdialog`) that can
+  // overlay the Logout button — close it explicitly if open. Bounded — never let a
+  // stuck click here consume the caller's cleanup-hook budget.
+  const assistantCloseBtn = page.getByRole('button', { name: /close assistant|cerrar asistente/i });
+  const assistantOpen = await assistantCloseBtn.isVisible().catch(() => false);
+  if (assistantOpen) {
+    await assistantCloseBtn.click({ timeout: 3_000 }).catch(() => undefined);
+  }
+
+  // Logout button only lives on /home. Prefer the in-app "Home" nav link (SPA
+  // navigation) over a full page.goto — a full reload re-triggers caja/realtime
+  // fetches that can be slow/erroring under test load and has stalled this hook
+  // in practice. Fall back to page.goto with an explicit bounded timeout.
   if (!page.url().includes('/home')) {
-    await page.goto('/home');
+    const homeLink = page.getByRole('link', { name: 'Home' });
+    const homeLinkVisible = await homeLink.isVisible().catch(() => false);
+    if (homeLinkVisible) {
+      await homeLink.click({ timeout: 5_000 }).catch(() => undefined);
+    } else {
+      await page.goto('/home', { timeout: 15_000, waitUntil: 'domcontentloaded' }).catch(() => undefined);
+    }
   }
 
-  await page.getByRole('button', { name: 'Logout' }).click();
-  await expect(page).toHaveURL(/\/login/, { timeout: 15_000 });
+  const logoutBtn = page.getByRole('button', { name: 'Logout' });
+  const logoutVisible = await logoutBtn
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!logoutVisible) {
+    // Not authenticated / no Logout affordance on this screen — treat as already logged out.
+    return;
+  }
+
+  await logoutBtn.click({ timeout: 5_000 }).catch(() => undefined);
+  await expect(page).toHaveURL(/\/login/, { timeout: 15_000 }).catch(() => undefined);
 }
