@@ -11,6 +11,16 @@ interface StaffState {
   staffList: Staff[];
   isAuthenticated: boolean;
   /**
+   * True once zustand's persist middleware has finished reading localStorage
+   * and applying the restored state. `persist` hydration runs in a microtask
+   * AFTER React's first paint, so any consumer that gates on `isAuthenticated`
+   * before this flag is true (e.g. ProtectedRoute) sees the pre-hydration
+   * default (false) on every fresh page load and can redirect away before the
+   * real persisted value is ever applied. Not persisted — reset to false on
+   * every load, flips true once by `onRehydrateStorage` below.
+   */
+  hasHydrated: boolean;
+  /**
    * Actions temporarily unlocked via Manager PIN dialog for the current session.
    * Cleared on logout. Not persisted — intentionally session-scoped.
    */
@@ -47,6 +57,7 @@ export const useStaffStore = create<StaffStore>()(
       currentShift: null,
       staffList: [],
       isAuthenticated: false,
+      hasHydrated: false,
       managerGrantedActions: new Set<string>(),
 
       login: (staff, shift) => {
@@ -96,6 +107,9 @@ export const useStaffStore = create<StaffStore>()(
         isAuthenticated: state.isAuthenticated,
         // managerGrantedActions intentionally NOT persisted — session-only
       }),
+      onRehydrateStorage: () => () => {
+        useStaffStore.setState({ hasHydrated: true });
+      },
     }
   )
 );

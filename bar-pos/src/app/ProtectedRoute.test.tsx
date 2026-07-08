@@ -18,6 +18,7 @@ const testShift: Shift = {
 describe('ProtectedRoute', () => {
   beforeEach(() => {
     useStaffStore.getState().logout();
+    useStaffStore.setState({ hasHydrated: true });
   });
 
   it('redirects to /login when staffStore is not authenticated', () => {
@@ -61,6 +62,29 @@ describe('ProtectedRoute', () => {
     );
 
     expect(screen.getByText('POS content')).toBeInTheDocument();
+    expect(screen.queryByText('Login page')).not.toBeInTheDocument();
+  });
+
+  it('renders neither children nor redirects while persist has not hydrated yet', () => {
+    useStaffStore.setState({ hasHydrated: false });
+
+    render(
+      <MemoryRouter initialEntries={['/pos']}>
+        <Routes>
+          <Route path="/login" element={<div>Login page</div>} />
+          <Route
+            path="/pos"
+            element={
+              <ProtectedRoute>
+                <div>POS content</div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText('POS content')).not.toBeInTheDocument();
     expect(screen.queryByText('Login page')).not.toBeInTheDocument();
   });
 });

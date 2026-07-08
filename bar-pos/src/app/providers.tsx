@@ -65,12 +65,22 @@ export function Providers({ children }: ProvidersProps) {
         return;
       }
 
-      if (event === 'SIGNED_OUT' || session === null) {
+      // Only an EXPLICIT sign-out means the session is genuinely gone. A generic
+      // `session === null` also fires on the benign `INITIAL_SESSION` snapshot
+      // event — Supabase's synchronous-read-then-async-refresh startup sequence
+      // can deliver that event with a transiently-null session on a hard reload
+      // before the persisted token finishes restoring, which force-logged-out an
+      // otherwise-valid session and stranded protected routes on /login.
+      if (event === 'SIGNED_OUT') {
         if (store.isAuthenticated) {
           logger.warn('auth.session_lost', { event });
           store.logout();
           queryClient.clear();
         }
+        return;
+      }
+
+      if (session === null) {
         return;
       }
 

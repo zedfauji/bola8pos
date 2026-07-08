@@ -53,6 +53,10 @@ vi.mock('@shared/lib/supabase', () => ({
     removeChannel: vi.fn(),
     rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
   },
+  isSupabaseSessionReady: vi.fn(() => true),
+  waitForSupabaseSessionReady: vi.fn(() => Promise.resolve()),
+  getCachedAccessToken: vi.fn(() => null),
+  initSupabaseClient: vi.fn(),
 }));
 
 // Mock window.matchMedia

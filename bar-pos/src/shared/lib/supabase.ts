@@ -6,6 +6,20 @@ type SupabaseClientType = ReturnType<typeof createClient<Database>>;
 let _client: SupabaseClientType | null = null;
 let _cachedAccessToken: string | null = null;
 
+// supabase-js restores a persisted session (localStorage -> internal state)
+// asynchronously after createClient() returns — a query fired before that
+// restore completes goes out with no auth header, hits RLS as anonymous, and
+// (via TanStack Query's default staleTime) can cache an incorrect empty
+// result for minutes even after the real session attaches. `onAuthStateChange`
+// always fires an `INITIAL_SESSION` event once that restore attempt finishes
+// (session present or not) — use it as the one authoritative "session
+// resolution is done" signal.
+let _sessionReady = false;
+let _resolveSessionReady: (() => void) | null = null;
+const _sessionReadyPromise = new Promise<void>(resolve => {
+  _resolveSessionReady = resolve;
+});
+
 export function initSupabaseClient(url: string, anonKey: string): void {
   if (_client) return; // idempotent — only init once
   _client = createClient<Database>(url, anonKey, {
@@ -13,7 +27,21 @@ export function initSupabaseClient(url: string, anonKey: string): void {
   });
   _client.auth.onAuthStateChange((_event, session) => {
     _cachedAccessToken = session?.access_token ?? null;
+    if (!_sessionReady) {
+      _sessionReady = true;
+      _resolveSessionReady?.();
+    }
   });
+}
+
+/** True once supabase-js has resolved its initial session restore attempt. */
+export function isSupabaseSessionReady(): boolean {
+  return _sessionReady;
+}
+
+/** Resolves once supabase-js's initial session restore attempt completes. */
+export function waitForSupabaseSessionReady(): Promise<void> {
+  return _sessionReadyPromise;
 }
 
 function getClient(): SupabaseClientType {
