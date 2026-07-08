@@ -111,10 +111,16 @@ async function seedPaidTab(
   const orderItemIds = (items as { id: string }[]).map(i => i.id);
 
   // Mark tab as paid
-  await db
+  // NOTE: tabs has a `bump_version_on_update` trigger (STALE_VERSION guard) requiring
+  // every UPDATE to advance `version` by exactly +1 — freshly inserted tabs start at
+  // version 1, so this update must set version: 2 or the trigger silently rejects it.
+  const { error: tabUpdateErr } = await db
     .from('tabs')
-    .update({ status: 'paid', closed_at: new Date().toISOString() })
+    .update({ status: 'paid', closed_at: new Date().toISOString(), version: 2 })
     .eq('id', tab.id);
+  if (tabUpdateErr) {
+    throw new Error(`seedPaidTab: tabs update to paid failed: ${tabUpdateErr.message}`);
+  }
 
   // Insert payment row (idempotency_key + processed_by are NOT NULL in schema)
   const { data: payment, error: payErr } = await db
@@ -202,12 +208,18 @@ test('T1-T4: process refund on 2 items with manager PIN (admin PIN from env)', a
 
   // Open RefundSheet
   await refundBtn.click();
-  const refundDialog = page.getByRole('dialog');
+  // Scoped by accessible name — the AI assistant side panel is also role="dialog"
+  const refundDialog = page.getByRole('dialog', { name: 'Process refund' });
   await expect(refundDialog).toBeVisible({ timeout: 10_000 });
   await expect(refundDialog.getByText(/process refund/i)).toBeVisible();
 
   // T3: Select first 2 items (checkboxes not disabled — items not yet refunded)
-  const checkboxes = page.getByRole('checkbox');
+  // Scoped to refundDialog — the payments list behind the sheet has many rows
+  // whose text (e.g. "$20.00") would otherwise cause strict-mode violations.
+  // Also scoped to the "Select ... for refund" accessible name — each item row grows
+  // an additional "Restock {name}" checkbox once selected, which shifts a plain
+  // getByRole('checkbox') index list mid-loop and causes miscounted selections.
+  const checkboxes = refundDialog.getByRole('checkbox', { name: /^select .* for refund$/i });
   await expect(checkboxes.first()).toBeVisible({ timeout: 10_000 });
   const totalCheckboxes = await checkboxes.count();
   expect(totalCheckboxes).toBeGreaterThanOrEqual(2);
@@ -224,7 +236,7 @@ test('T1-T4: process refund on 2 items with manager PIN (admin PIN from env)', a
   expect(selectedCount).toBe(2);
 
   // Set reason via the Select dropdown (SelectTrigger id="refund-reason")
-  const reasonTrigger = page.locator('#refund-reason');
+  const reasonTrigger = refundDialog.locator('#refund-reason');
   await expect(reasonTrigger).toBeVisible({ timeout: 5_000 });
   await reasonTrigger.click();
   // Select "Wrong order" option
@@ -233,7 +245,7 @@ test('T1-T4: process refund on 2 items with manager PIN (admin PIN from env)', a
   await wrongOrderOption.click();
 
   // Verify refund total shows ~$20 (2 items × $10)
-  await expect(page.getByText(/20/)).toBeVisible({ timeout: 5_000 });
+  await expect(refundDialog.getByText(/20/)).toBeVisible({ timeout: 5_000 });
 
   // T4: Click "Request approval" → ManagerPinDialog opens
   await page.getByRole('button', { name: /request approval/i }).click();
@@ -334,11 +346,14 @@ test('T5: REFUND_EXCEEDS_ORIGINAL blocks double-refund of fully-refunded payment
   await expect(refundBtn).toBeVisible({ timeout: 20_000 });
   await refundBtn.click();
 
-  const refundDialog = page.getByRole('dialog');
+  // Scoped by accessible name — the AI assistant side panel is also role="dialog"
+  const refundDialog = page.getByRole('dialog', { name: 'Process refund' });
   await expect(refundDialog).toBeVisible({ timeout: 10_000 });
 
   // All items are fully refunded — checkboxes should be disabled
-  const checkboxes = page.getByRole('checkbox');
+  // Scoped to refundDialog and to the item-select accessible name — avoids strict-mode
+  // collisions with the payments list and index-shift from per-item "Restock" checkboxes.
+  const checkboxes = refundDialog.getByRole('checkbox', { name: /^select .* for refund$/i });
   await expect(checkboxes.first()).toBeVisible({ timeout: 10_000 });
 
   const firstCbDisabled = await checkboxes.first().isDisabled();
@@ -350,7 +365,7 @@ test('T5: REFUND_EXCEEDS_ORIGINAL blocks double-refund of fully-refunded payment
   } else {
     // Fallback: UI allows selection — submit and expect RPC guard to block
     await checkboxes.first().check();
-    const reasonTrigger = page.locator('#refund-reason');
+    const reasonTrigger = refundDialog.locator('#refund-reason');
     await reasonTrigger.click();
     await page.getByRole('option', { name: /wrong.*order/i }).click();
     await page.getByRole('button', { name: /request approval/i }).click();
@@ -430,11 +445,14 @@ test('T6: refund remaining 3 items with restock=false — no stock ledger change
   await expect(refundBtn).toBeVisible({ timeout: 20_000 });
   await refundBtn.click();
 
-  const refundDialog = page.getByRole('dialog');
+  // Scoped by accessible name — the AI assistant side panel is also role="dialog"
+  const refundDialog = page.getByRole('dialog', { name: 'Process refund' });
   await expect(refundDialog).toBeVisible({ timeout: 10_000 });
 
   // Wait for items to load
-  const checkboxes = page.getByRole('checkbox');
+  // Scoped to refundDialog and to the item-select accessible name — avoids strict-mode
+  // collisions with the payments list and index-shift from per-item "Restock" checkboxes.
+  const checkboxes = refundDialog.getByRole('checkbox', { name: /^select .* for refund$/i });
   await expect(checkboxes.first()).toBeVisible({ timeout: 10_000 });
 
   // Select all non-disabled checkboxes (items[0] and [1] should be disabled/fully refunded)
@@ -451,7 +469,7 @@ test('T6: refund remaining 3 items with restock=false — no stock ledger change
   expect(selectedCount).toBe(3);
 
   // Set restock=false: uncheck any "Restock" checkboxes that are checked
-  const restockCheckboxes = page.getByRole('checkbox', { name: /restock/i });
+  const restockCheckboxes = refundDialog.getByRole('checkbox', { name: /^restock /i });
   const restockCount = await restockCheckboxes.count();
   for (let i = 0; i < restockCount; i++) {
     const rc = restockCheckboxes.nth(i);
@@ -461,7 +479,7 @@ test('T6: refund remaining 3 items with restock=false — no stock ledger change
   }
 
   // Set reason
-  const reasonTrigger = page.locator('#refund-reason');
+  const reasonTrigger = refundDialog.locator('#refund-reason');
   await expect(reasonTrigger).toBeVisible({ timeout: 5_000 });
   await reasonTrigger.click();
   await page.getByRole('option', { name: /wrong.*order/i }).click();
