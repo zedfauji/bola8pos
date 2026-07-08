@@ -355,17 +355,19 @@ PERFORM record_audit(
 
 **All other claims in this research were verified directly by reading the live migration files, RPC bodies, and current source in this repository session** (package name provenance is N/A — no packages introduced).
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Minimum split-row count**
    - What we know: D-02 caps the maximum at 4 rows. CONTEXT.md never states a minimum when the split toggle is ON.
    - What's unclear: Should the UI require ≥2 rows before allowing submit in split mode (since 1 row = functionally the single-payment flow), or is 1 row technically valid (just routed through the new split RPC)?
    - Recommendation: Planner should default to requiring ≥2 rows in split mode (disable submit / show a validation hint below 2 rows) since a 1-row "split" has no product meaning — but this is a 5-minute UI decision, not a schema/RPC decision, and doesn't block backend design either way (the RPC already validates `1 ≤ jsonb_array_length(p_legs) ≤ 4`, so 1-row split requests are technically safe to accept server-side even if the UI never produces them).
+   - **RESOLVED:** Plan 18-05 enforces a ≥2-row floor via `REMOVE_ROW` action (cannot remove below 2 rows in split mode).
 
 2. **New `AppErrorCode` vs. reuse `'VALIDATION_ERROR'` for split-specific failures**
    - What we know: Existing single-payment errors like `AMOUNT_MISMATCH`/`TENDERED_REQUIRED`/`INSUFFICIENT_TENDER` are all mapped to the generic `'VALIDATION_ERROR'` AppErrorCode in `mapProcessPaymentEdgeError` (`edge-function-contracts.ts` lines 200-223) — the codebase does NOT give every distinct backend error string its own `AppErrorCode`.
    - What's unclear: Whether split-specific errors (`SPLIT_TOTAL_MISMATCH`, `TOO_MANY_LEGS`, `EMPTY_LEG`) deserve dedicated codes or should fold into `'VALIDATION_ERROR'` like the single-payment errors do.
    - Recommendation: Follow the existing majority pattern — map all split-validation failures to `'VALIDATION_ERROR'` (zero new AppErrorCode entries needed), and rely on the human-readable `message` string (already the pattern for surfacing specifics to the cashier via `errorMessage` state in `PaymentForm.tsx`). This avoids Pitfall 6 entirely for the common case; only add a new code if the planner decides a split failure needs distinct client-side branching logic (unlikely — no evidence in the existing UI of branching on `AMOUNT_MISMATCH` vs `TENDERED_REQUIRED` differently).
+   - **RESOLVED:** Plan 18-01 Task 2 reuses `'VALIDATION_ERROR'` (asserts `git diff result.ts` is empty — zero new AppErrorCode entries added).
 
 ## Environment Availability
 

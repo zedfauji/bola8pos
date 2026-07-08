@@ -518,14 +518,23 @@ Plans:
 **Requirements:** SC-1, SC-2, SC-3, SC-4 (ROADMAP §Phase 18 success criteria; scope locked in 18-CONTEXT.md, source doc POS-COMPARISON.md §18 no longer present)
 **Depends on:** Phase 14
 **Plans:** 6 plans
-
 Plans:
+**Wave 1**
 
 - [ ] 18-01-PLAN.md — Domain/contract layer: SplitPaymentLegSchema + ProcessSplitPayment schemas + callProcessSplitPayment + processSplitPayment wrapper + unit tests (Wave 1) (SC-2)
 - [ ] 18-02-PLAN.md — Migration: payments +payment_group_id/split_index columns + process_split_payment_atomic atomic multi-leg RPC + live integration test scaffold (Wave 1) (SC-1, SC-2)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 18-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension (Wave 2) (SC-1)
-- [ ] 18-04-PLAN.md — process-split-payment edge function (mirror process-payment) + deploy + integration green gate (Wave 3) (SC-2)
 - [ ] 18-05-PLAN.md — PaymentForm split-mode: toggle + 2-4 row list + live remaining balance + per-leg receipt queue + drawer-once + RTL tests (Wave 2) (SC-3, SC-4)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 18-04-PLAN.md — process-split-payment edge function (mirror process-payment) + deploy + integration green gate (Wave 3) (SC-2)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 18-06-PLAN.md — E2E 41-split-payment.spec.ts + regression gate + CLAUDE.md docs + human UAT sign-off (Wave 4) (SC-2, SC-3, SC-4)
 
 **Success Criteria:**
