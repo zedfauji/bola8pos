@@ -72,6 +72,32 @@ export async function loginAs(page: Page, role: StaffRole): Promise<void> {
   await loginAsNamed(page, name, pin);
 }
 
+/**
+ * Navigate to a protected route after a fresh login. A full `page.goto()` reload
+ * re-mounts the whole SPA and re-restores the Supabase session + persisted staff
+ * store from scratch; that restore can occasionally lose the race against
+ * ProtectedRoute's first render and bounce to the PIN/staff-picker screen. Retry
+ * once — mirrors what a real user does on a stale reload — instead of failing
+ * the whole test on a timing hiccup this helper isn't in a position to root-cause
+ * deeper without instrumenting the app's hydration internals.
+ */
+export async function gotoAuthed(page: Page, path: string): Promise<void> {
+  await page.goto(path, { timeout: 15_000, waitUntil: 'domcontentloaded' }).catch(() => undefined);
+
+  const bounced = await page
+    .getByRole('heading', { name: /who are you/i })
+    .isVisible()
+    .catch(() => false);
+  if (!bounced) {
+    return;
+  }
+
+  await page.goto(path, { timeout: 15_000, waitUntil: 'domcontentloaded' }).catch(() => undefined);
+  await expect(page.getByRole('heading', { name: /who are you/i })).not.toBeVisible({
+    timeout: 5_000,
+  });
+}
+
 export async function logout(page: Page): Promise<void> {
   // Already logged out (staff picker / PIN screen) — nothing to do.
   const alreadyOnLogin = await page

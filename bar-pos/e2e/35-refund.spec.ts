@@ -17,7 +17,7 @@
  */
 
 import { expect, test } from './fixtures';
-import { loginAs, logout } from './helpers/auth';
+import { gotoAuthed, loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
 import { getServiceClient, openCaja, resetTestState } from './helpers/supabase';
 
@@ -200,7 +200,7 @@ test('T1-T4: process refund on 2 items with manager PIN (admin PIN from env)', a
   const adminPin = process.env['E2E_ADMIN_PIN'] ?? '0000';
 
   await loginAs(page, 'admin');
-  await page.goto('/payments');
+  await gotoAuthed(page, '/payments');
 
   // T2: Refund button visible on paid payment row
   const refundBtn = page.getByRole('button', { name: 'Refund' }).first();
@@ -302,7 +302,6 @@ test('T5: REFUND_EXCEEDS_ORIGINAL blocks double-refund of fully-refunded payment
 
   const db = getServiceClient();
   const { tabId, paymentId, orderItemIds } = await seedPaidTab(db, 2, 10.0);
-  const adminPin = process.env['E2E_ADMIN_PIN'] ?? '0000';
 
   // Pre-seed a full refund via DB (bypasses RPC so we can test the guard)
   const { data: profile } = await db
@@ -340,48 +339,25 @@ test('T5: REFUND_EXCEEDS_ORIGINAL blocks double-refund of fully-refunded payment
   });
 
   await loginAs(page, 'admin');
-  await page.goto('/payments');
+  await gotoAuthed(page, '/payments');
 
-  const refundBtn = page.getByRole('button', { name: 'Refund' }).first();
-  await expect(refundBtn).toBeVisible({ timeout: 20_000 });
-  await refundBtn.click();
+  // `RefundButton` (PaymentPane.tsx) returns null once a payment's refunded total
+  // reaches its amount — the app's UI-level guard for a fully-refunded payment is
+  // to never render a "Refund" affordance at all, not to render a disabled control.
+  // The server-side guard (REFUND_EXCEEDS_ORIGINAL) is covered directly at the RPC
+  // layer by src/features/process-refund/process-refund-rpc.integration.test.ts —
+  // this E2E test verifies the UI-level guard the RPC test can't see.
+  //
+  // Scoped to this test's specific seeded payment row via data-testid — the
+  // payments list accumulates real rows across the whole E2E run, many of
+  // which ARE legitimately refundable, so a page-wide Refund-button count
+  // assertion is not meaningful here.
+  const paymentsRegion = page.getByText(/recent payments/i).locator('..');
+  await expect(paymentsRegion).toBeVisible({ timeout: 20_000 });
 
-  // Scoped by accessible name — the AI assistant side panel is also role="dialog"
-  const refundDialog = page.getByRole('dialog', { name: 'Process refund' });
-  await expect(refundDialog).toBeVisible({ timeout: 10_000 });
-
-  // All items are fully refunded — checkboxes should be disabled
-  // Scoped to refundDialog and to the item-select accessible name — avoids strict-mode
-  // collisions with the payments list and index-shift from per-item "Restock" checkboxes.
-  const checkboxes = refundDialog.getByRole('checkbox', { name: /^select .* for refund$/i });
-  await expect(checkboxes.first()).toBeVisible({ timeout: 10_000 });
-
-  const firstCbDisabled = await checkboxes.first().isDisabled();
-
-  if (firstCbDisabled) {
-    // UI correctly prevents submission — Request approval should be disabled
-    const requestBtn = page.getByRole('button', { name: /request approval/i });
-    await expect(requestBtn).toBeDisabled({ timeout: 5_000 });
-  } else {
-    // Fallback: UI allows selection — submit and expect RPC guard to block
-    await checkboxes.first().check();
-    const reasonTrigger = refundDialog.locator('#refund-reason');
-    await reasonTrigger.click();
-    await page.getByRole('option', { name: /wrong.*order/i }).click();
-    await page.getByRole('button', { name: /request approval/i }).click();
-
-    const pinDialog = page.getByRole('alertdialog');
-    await expect(pinDialog).toBeVisible({ timeout: 8_000 });
-    await enterManagerPin(page, adminPin);
-
-    // Expect error toast: "exceeds remaining refundable balance" or similar
-    await expect(
-      page
-        .getByText(/exceeds.*refundable/i)
-        .or(page.getByText(/exceeds the remaining/i))
-        .or(page.getByText(/REFUND_EXCEEDS_ORIGINAL/i)),
-    ).toBeVisible({ timeout: 15_000 });
-  }
+  const seededRow = page.getByTestId(`payment-row-${paymentId}`);
+  await expect(seededRow).toBeVisible({ timeout: 10_000 });
+  await expect(seededRow.getByRole('button', { name: 'Refund' })).toHaveCount(0);
 });
 
 // ============================================================================
@@ -439,7 +415,7 @@ test('T6: refund remaining 3 items with restock=false — no stock ledger change
   });
 
   await loginAs(page, 'admin');
-  await page.goto('/payments');
+  await gotoAuthed(page, '/payments');
 
   const refundBtn = page.getByRole('button', { name: 'Refund' }).first();
   await expect(refundBtn).toBeVisible({ timeout: 20_000 });

@@ -67,7 +67,11 @@ function PaymentHistoryList({ onRefund }: { onRefund: (paymentId: string) => voi
       </div>
       <div className="divide-y">
         {payments.map(payment => (
-          <div key={payment.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30">
+          <div
+            key={payment.id}
+            data-testid={`payment-row-${payment.id}`}
+            className="flex items-center justify-between px-4 py-3 hover:bg-muted/30"
+          >
             <div className="flex flex-col gap-0.5">
               <MoneyDisplay amount={payment.amount} size="sm" />
               <span className="text-xs text-muted-foreground capitalize">
