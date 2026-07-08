@@ -331,20 +331,20 @@ test.describe('Payment Edge Cases', () => {
       return;
     }
     await tabCard.click();
-    await page.getByRole('button', { name: /verify pin to process payment/i }).click();
-    const pinDialog = page.getByRole('alertdialog', { name: /manager access required/i });
-    await expect(pinDialog).toBeVisible({ timeout: 10_000 });
-    const managerPin = process.env['E2E_MANAGER_PIN'] ?? '';
-    await enterPin(page, managerPin);
-    await expect(pinDialog).not.toBeVisible({ timeout: 10_000 });
 
-    await page.getByTestId('payment-btn-cash').click();
-    await page.getByLabel(/amount tendered/i).fill('500');
-    await page.getByRole('button', { name: /process payment/i }).click();
-
+    // PaymentPane blocks payment for a tab with an active pool session immediately
+    // on selection (see src/widgets/PaymentPane/ui/PaymentPane.tsx) — it renders the
+    // "Timer Still Running" warning instead of the PIN-gate button, so the PIN dialog
+    // and payment form are never reachable for this tab. Assert the early block
+    // rather than trying to click through to a PIN button that will never render
+    // (that was the source of the PE7 timeout: the locator waited 120s for a button
+    // that structurally cannot appear while hasActivePoolSession is true).
     await expect(
-      page.getByText(/timer is still running|pool.*session|active.*session/i)
+      page.getByRole('heading', { name: /timer still running/i })
     ).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole('button', { name: /verify pin to process payment/i })
+    ).toHaveCount(0);
     await logout(page);
   });
 });
