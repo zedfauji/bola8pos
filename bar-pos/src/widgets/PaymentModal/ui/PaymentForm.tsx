@@ -20,6 +20,7 @@ import {
   processCashPayment,
   processRappiPayment,
   processSplitPayment,
+  type SplitPaymentLegInput,
 } from '@shared/lib/payment-processor';
 import { openCashDrawer, printReceipt } from '@shared/lib/pos-printer';
 import type { Result } from '@shared/lib/result';
@@ -165,6 +166,8 @@ export function PaymentForm({
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
   const [isSplitMode, setIsSplitMode] = useState(false);
   const [splitRows, dispatchSplitRows] = useReducer(splitRowsReducer, []);
+  const [receiptQueue, setReceiptQueue] = useState<ReceiptData[]>([]);
+  const [receiptIndex, setReceiptIndex] = useState(0);
 
   /* Reset state when the tab being viewed changes */
   useEffect(() => {
@@ -193,6 +196,8 @@ export function PaymentForm({
     setDiscountType('percent');
     setDiscountValue(0);
     setIsSplitMode(false);
+    setReceiptQueue([]);
+    setReceiptIndex(0);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     tab.id,
@@ -280,6 +285,22 @@ export function PaymentForm({
     [splitRows]
   );
   const splitRemaining = Math.round((subtotalWithTax - splitRowsSum) * 100) / 100;
+
+  const perRowMethodValid = (row: SplitRow): boolean => {
+    if (row.method === 'cash') {
+      return row.tenderedAmount >= Math.round((row.amount + row.tip) * 100) / 100;
+    }
+    return true;
+  };
+
+  const canSubmitSplit =
+    staffId.length > 0 &&
+    isSplitMode &&
+    splitRows.length >= 2 &&
+    splitRows.length <= 4 &&
+    splitRows.every(r => r.amount > 0) &&
+    Math.abs(splitRowsSum - subtotalWithTax) <= 0.01 &&
+    splitRows.every(perRowMethodValid);
 
   const groupedItems = useMemo(() => groupOrderItems(tab.items), [tab.items]);
 
@@ -375,12 +396,97 @@ export function PaymentForm({
     })();
   };
 
-  const primaryLabel =
-    method === 'card'
+  const handleSplitPrimary = async () => {
+    setErrorMessage(null);
+    setIsProcessing(true);
+
+    const discountInfoArg =
+      discountAmount > 0
+        ? { scope: discountScope, type: discountType, value: discountValue, amount: discountAmount }
+        : undefined;
+
+    const legs: SplitPaymentLegInput[] = splitRows.map(row => ({
+      method: row.method,
+      amount: row.amount,
+      tipAmount: row.method === 'rappi' ? 0 : row.tip,
+      ...(row.method === 'cash' ? { tenderedAmount: row.tenderedAmount } : {}),
+      ...(row.method === 'card' && row.cardReference.trim().length > 0
+        ? { referenceNumber: row.cardReference.trim() }
+        : {}),
+      ...(row.method === 'rappi' && tab.rappiOrderId ? { rappiOrderId: tab.rappiOrderId } : {}),
+    }));
+
+    const result = await processors.processSplitPayment(
+      tab.id,
+      legs,
+      subtotalWithTax,
+      discountInfoArg
+    );
+    setIsProcessing(false);
+
+    if (!result.ok) {
+      setErrorMessage('Split payment failed — please review each row and try again.');
+      logger.warn('payment.split_failed', { tabId: tab.id, code: 'client' });
+      return;
+    }
+
+    logger.info('payment.split_succeeded', { tabId: tab.id, legCount: legs.length });
+    setReceiptQueue(result.data.receipts);
+    setReceiptIndex(0);
+    setStep('receipt');
+    onPaymentSuccess();
+
+    void (async () => {
+      const logHardwareFail = (event: string, message: string) => {
+        logger.warn(event, { tabId: tab.id, message });
+        toast.error(message);
+      };
+      try {
+        if (legs.some(l => l.method === 'cash')) {
+          const drawer = await openCashDrawer();
+          if (!drawer.ok) logHardwareFail('cash_drawer.failed', drawer.error.message);
+        }
+        for (const receipt of result.data.receipts) {
+          const printed = await printReceipt(receipt);
+          if (!printed.ok) logHardwareFail('printer.receipt.failed', printed.error.message);
+        }
+      } catch (e) {
+        logger.warn('printer.post_payment.exception', { tabId: tab.id, raw: String(e) });
+        toast.error('Print or drawer failed unexpectedly.');
+      }
+    })();
+  };
+
+  const primaryLabel = isSplitMode
+    ? 'Process split payment'
+    : method === 'card'
       ? 'Confirm card payment'
       : method === 'rappi'
         ? 'Confirm & close tab'
         : 'Process payment';
+
+  const activeSplitReceipt =
+    isSplitMode && receiptQueue.length > 0 ? (receiptQueue[receiptIndex] ?? null) : null;
+
+  if (step === 'receipt' && activeSplitReceipt) {
+    return (
+      <div className="flex flex-1 flex-col overflow-hidden px-4 py-4 sm:px-6">
+        <p className="mb-2 text-sm font-semibold">
+          {`Receipt ${String(receiptIndex + 1)} of ${String(receiptQueue.length)} — ${paymentLabels[activeSplitReceipt.paymentMethod]}`}
+        </p>
+        <ReceiptPreview
+          receipt={activeSplitReceipt}
+          onDone={() => {
+            if (receiptIndex + 1 < receiptQueue.length) {
+              setReceiptIndex(receiptIndex + 1);
+            } else {
+              onClose?.();
+            }
+          }}
+        />
+      </div>
+    );
+  }
 
   if (step === 'receipt' && receiptData) {
     return (
@@ -889,15 +995,19 @@ export function PaymentForm({
         <ProtectedAction
           action="close_tab"
           currentRole={currentRole}
-          disabled={isProcessing || !canSubmit}
+          disabled={isProcessing || (isSplitMode ? !canSubmitSplit : !canSubmit)}
         >
           <POSButton
             type="button"
             touchSize="xl"
-            disabled={isProcessing || !canSubmit}
+            disabled={isProcessing || (isSplitMode ? !canSubmitSplit : !canSubmit)}
             className="w-full bg-[var(--pos-accent)] text-black hover:bg-[var(--pos-accent)]/90"
             onClick={() => {
-              void handlePrimary();
+              if (isSplitMode) {
+                void handleSplitPrimary();
+              } else {
+                void handlePrimary();
+              }
             }}
           >
             {isProcessing ? (
