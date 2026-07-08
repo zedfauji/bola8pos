@@ -17,6 +17,7 @@ import { z } from 'zod';
 export const AuditActionSchema = z.enum([
   // Payments
   'payment.process',
+  'payment.process_split',
   'payment.refund',
   // Tabs
   'tab.close',
@@ -52,6 +53,7 @@ export type AuditAction = z.infer<typeof AuditActionSchema>;
 
 export const AuditAction = {
   PAYMENT_PROCESS: 'payment.process',
+  PAYMENT_PROCESS_SPLIT: 'payment.process_split',
   PAYMENT_REFUND: 'payment.refund',
   TAB_CLOSE: 'tab.close',
   TAB_TRANSFER: 'tab.transfer',
