@@ -34,7 +34,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 16: Kitchen/Bar Split Routing** — `category.routing` enum (KITCHEN|BAR|NONE) + new `/kds-bar` page (bartender+) + `RoutingBadge` widget (completed 2026-07-07)
 - [x] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups` (completed 2026-07-07)
 - [x] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI (completed 2026-07-08)
-- [ ] **Phase 19: Tip Distribution Config** — Singleton `tip_distribution_config` (floor/bar/kitchen %) + `tip_distribution_entries` + close-caja allocation + Settings panel
+- [x] **Phase 19: Tip Distribution Config** — Singleton `tip_distribution_config` (floor/bar/kitchen %) + `tip_distribution_entries` + close-caja allocation + Settings panel (completed 2026-07-09)
 - [ ] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin
 - [ ] **Phase 21: i18n Multi-Language** — `react-i18next` + `es-MX`/`en-US` catalogs + `profiles.locale` + ESLint rule banning hard-coded strings
 - [ ] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)*
@@ -551,7 +551,7 @@ Plans:
 **Goal:** Configure how tips are split across floor/bar/kitchen staff. Add a singleton `tip_distribution_config` (percentages) + `tip_distribution_entries` (per-caja-close allocation rows), wired into close-caja, with a Settings panel for admins.
 **Requirements:** TBD (POS-COMPARISON.md §19 — source doc no longer present; scope locked in 19-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 Plans:
 
 **Wave 1**
@@ -570,7 +570,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 19-06-PLAN.md — E2E 42-tip-distribution.spec.ts + regression gate + CLAUDE.md docs + human UAT sign-off (Wave 4) (SC-3, SC-4)
+- [x] 19-06-PLAN.md — E2E 42-tip-distribution.spec.ts + regression gate + CLAUDE.md docs + human UAT sign-off (Wave 4) (SC-3, SC-4)
 
 **Success Criteria:**
 
