@@ -12,6 +12,7 @@ import { HardwareSettingsTab } from './tabs/HardwareSettingsTab';
 import { PoolTablesSettingsTab } from './tabs/PoolTablesSettingsTab';
 import { ProductsSettingsTab } from './tabs/ProductsSettingsTab';
 import { RappiSettingsTab } from './tabs/RappiSettingsTab';
+import { TipDistributionSettingsTab } from './tabs/TipDistributionSettingsTab';
 
 type TabItem = {
   key: string;
@@ -53,6 +54,11 @@ export function SettingsTabsPanel() {
           key: 'backup',
           label: 'Backup',
           render: () => <BackupSettingsTab currentRole={currentRole} />,
+        },
+        {
+          key: 'tip-split',
+          label: 'Tip Split',
+          render: () => <TipDistributionSettingsTab currentRole={currentRole} />,
         }
       );
     }
