@@ -8,6 +8,7 @@ import { ProductSalesPanel } from '@widgets/ProductSalesPanel';
 import { RecipeVarianceReport } from '@widgets/RecipeVarianceReport';
 import { RefundsRegister } from '@widgets/RefundsRegister';
 import { StaffSalesPanel } from '@widgets/StaffSalesPanel';
+import { TipBucketDistributionPanel } from '@widgets/TipBucketDistributionPanel';
 import { TipDistributionPanel } from '@widgets/TipDistributionPanel';
 import { VoidRefundPanel } from '@widgets/VoidRefundPanel';
 import { WaitlistAnalyticsReport } from '@widgets/WaitlistAnalyticsReport';
@@ -56,6 +57,7 @@ export default function ReportsPage() {
             <TabsTrigger value="categories">Revenue by Category</TabsTrigger>
             <TabsTrigger value="staff">Staff Performance</TabsTrigger>
             <TabsTrigger value="tips">Tip Distribution</TabsTrigger>
+            <TabsTrigger value="tip-split">Tip Split</TabsTrigger>
             <TabsTrigger value="combos">Combo Mix</TabsTrigger>
             <TabsTrigger value="variance">Recipe Variance</TabsTrigger>
             <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
@@ -107,6 +109,10 @@ export default function ReportsPage() {
               <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
               <TipDistributionPanel dateRange={dateRange} />
             </div>
+          </TabsContent>
+
+          <TabsContent value="tip-split">
+            <TipBucketDistributionPanel />
           </TabsContent>
 
           <TabsContent value="combos">
