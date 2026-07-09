@@ -25,6 +25,7 @@ import {
   RappiSettingsSchema,
   ReceiptSettingsSchema,
   SettingsBackupSummarySchema,
+  TipDistributionSettingsSchema,
   type BillingSettings,
   type EmailReceiptSettings,
   type GeneralSettings,
@@ -33,6 +34,7 @@ import {
   type ReceiptSettings,
   type SettingsBackupSummary,
   type SettingsKey,
+  type TipDistributionSettings,
 } from './types';
 
 const DEFAULT_GENERAL: GeneralSettings = {
@@ -65,6 +67,12 @@ const DEFAULT_PAYMENT_LABELS: PaymentMethodLabels = {
   rappi: 'Rappi',
 };
 
+const DEFAULT_TIP_DISTRIBUTION: TipDistributionSettings = {
+  floorPct: 34,
+  barPct: 33,
+  kitchenPct: 33,
+};
+
 const DEFAULT_RECEIPT: ReceiptSettings = {
   paperWidthChars: 32,
   showCashierName: true,
@@ -86,6 +94,7 @@ export type SettingsSnapshot = {
   emailReceipts: EmailReceiptSettings;
   paymentLabels: PaymentMethodLabels;
   receipt: ReceiptSettings;
+  tipDistribution: TipDistributionSettings;
 };
 
 export const settingsKeys = {
@@ -105,6 +114,7 @@ const SETTINGS_KEYS: SettingsKey[] = [
   'pool_tables',
   'payment_labels',
   'receipt',
+  'tip_distribution',
 ];
 
 function parseGeneral(value: unknown): GeneralSettings {
@@ -137,6 +147,11 @@ function parseReceipt(value: unknown): ReceiptSettings {
   return parsed.success ? parsed.data : DEFAULT_RECEIPT;
 }
 
+function parseTipDistribution(value: unknown): TipDistributionSettings {
+  const parsed = TipDistributionSettingsSchema.safeParse(value);
+  return parsed.success ? parsed.data : DEFAULT_TIP_DISTRIBUTION;
+}
+
 function parseBackup(row: Tables<'settings_backups'>): Result<SettingsBackupSummary> {
   try {
     return ok(
@@ -163,6 +178,7 @@ function toSnapshot(rows: SettingsRow[]): SettingsSnapshot {
     emailReceipts: parseEmailReceipts(byKey.get('email_receipts')),
     paymentLabels: parsePaymentLabels(byKey.get('payment_labels')),
     receipt: parseReceipt(byKey.get('receipt')),
+    tipDistribution: parseTipDistribution(byKey.get('tip_distribution')),
   };
   return snapshot;
 }
@@ -213,6 +229,7 @@ export function useMutationUpdateSetting() {
         | EmailReceiptSettings
         | PaymentMethodLabels
         | ReceiptSettings
+        | TipDistributionSettings
         | Record<string, unknown>;
     }): Promise<Result<void>> => {
       const {

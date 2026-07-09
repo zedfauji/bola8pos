@@ -20,6 +20,7 @@ export {
   ReceiptSettingsSchema,
   SettingsBackupSummarySchema,
   SettingsKeySchema,
+  TipDistributionSettingsSchema,
 } from './types';
 
 export type {
@@ -31,4 +32,5 @@ export type {
   ReceiptSettings,
   SettingsBackupSummary,
   SettingsKey,
+  TipDistributionSettings,
 } from './types';
