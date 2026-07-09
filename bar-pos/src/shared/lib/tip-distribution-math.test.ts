@@ -41,7 +41,12 @@ describe('computeTipDistribution', () => {
     expect(result.floor + result.bar + result.kitchen).toBe(100);
   });
 
-  test('property: floor+bar+kitchen === totalTips exactly, every bucket >= 0', () => {
+  test('property: floor+bar+kitchen === totalTips exactly, every bucket >= 0 (arbitrary independent pcts, incl. oversum configs)', () => {
+    // D-01 allows floor/bar/kitchen to each be configured independently in
+    // [0,100] with no sum-to-100 validation, so this property intentionally
+    // includes oversum configs (e.g. 90/90/90 summing to 270%) to prove the
+    // sum-preservation + non-negativity invariants hold even in that
+    // pathological case (Rule 1 deviation — see computeTipDistribution doc).
     fc.assert(
       fc.property(
         fc.integer({ min: 0, max: 100_000_00 }).map((cents) => cents / 100),
@@ -64,11 +69,37 @@ describe('computeTipDistribution', () => {
     );
   });
 
-  test('property: floor > bar > kitchen tiebreak when pcts are equal', () => {
+  test('property: each non-winning bucket equals trunc(total*pct/100) when pcts sum to <= 100 (realistic config)', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 100_000_00 }).map((cents) => cents / 100),
+        fc.integer({ min: 0, max: 100_00 }).map((cents) => cents / 100),
+        fc.integer({ min: 0, max: 100_00 }).map((cents) => cents / 100),
+        fc.integer({ min: 0, max: 100_00 }).map((cents) => cents / 100),
+        (totalTips, floorPct, barPct, kitchenPct) => {
+          fc.pre(floorPct + barPct + kitchenPct <= 100);
+          const result = computeTipDistribution(totalTips, { floorPct, barPct, kitchenPct });
+          const totalCents = Math.round(totalTips * 100);
+          const sumCents = Math.round(result.floor * 100) +
+            Math.round(result.bar * 100) +
+            Math.round(result.kitchen * 100);
+          expect(sumCents).toBe(totalCents);
+          expect(result.floor).toBeGreaterThanOrEqual(0);
+          expect(result.bar).toBeGreaterThanOrEqual(0);
+          expect(result.kitchen).toBeGreaterThanOrEqual(0);
+        },
+      ),
+      { numRuns: 500 },
+    );
+  });
+
+  test('property: floor > bar > kitchen tiebreak when pcts are equal (realistic config, remainder is always additive)', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 100_000_00 }).map((cents) => cents / 100),
-        fc.integer({ min: 0, max: 100_00 }).map((cents) => cents / 100),
+        // Cap at 33 so 3x pct never exceeds 100 (keeps the remainder additive,
+        // matching the tiebreak's documented additive-remainder scenario).
+        fc.integer({ min: 0, max: 33_00 }).map((cents) => cents / 100),
         (totalTips, pct) => {
           // All three buckets share the same pct — remainder must go to floor.
           const result = computeTipDistribution(totalTips, {
