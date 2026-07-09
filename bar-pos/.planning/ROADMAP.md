@@ -551,7 +551,7 @@ Plans:
 **Goal:** Configure how tips are split across floor/bar/kitchen staff. Add a singleton `tip_distribution_config` (percentages) + `tip_distribution_entries` (per-caja-close allocation rows), wired into close-caja, with a Settings panel for admins.
 **Requirements:** TBD (POS-COMPARISON.md §19 — source doc no longer present; scope locked in 19-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 2/6 plans executed
+**Plans:** 4/6 plans executed
 Plans:
 
 **Wave 1**
@@ -561,8 +561,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 19-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension + live integration green gate (Wave 2) (SC-2, SC-4)
-- [ ] 19-04-PLAN.md — Entity layer: settings tipDistribution snapshot/write union + caja useTipDistributionEntry read hook (Wave 2) (SC-1, SC-4)
+- [x] 19-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension + live integration green gate (Wave 2) (SC-2, SC-4)
+- [x] 19-04-PLAN.md — Entity layer: settings tipDistribution snapshot/write union + caja useTipDistributionEntry read hook (Wave 2) (SC-1, SC-4)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
