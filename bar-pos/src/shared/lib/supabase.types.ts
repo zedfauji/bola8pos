@@ -2102,6 +2102,53 @@ export type Database = {
           },
         ]
       }
+      tip_distribution_entries: {
+        Row: {
+          bar_amount: number
+          bar_pct: number
+          caja_session_id: string
+          created_at: string
+          floor_amount: number
+          floor_pct: number
+          id: string
+          kitchen_amount: number
+          kitchen_pct: number
+          total_tips: number
+        }
+        Insert: {
+          bar_amount?: number
+          bar_pct: number
+          caja_session_id: string
+          created_at?: string
+          floor_amount?: number
+          floor_pct: number
+          id?: string
+          kitchen_amount?: number
+          kitchen_pct: number
+          total_tips?: number
+        }
+        Update: {
+          bar_amount?: number
+          bar_pct?: number
+          caja_session_id?: string
+          created_at?: string
+          floor_amount?: number
+          floor_pct?: number
+          id?: string
+          kitchen_amount?: number
+          kitchen_pct?: number
+          total_tips?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tip_distribution_entries_caja_session_id_fkey"
+            columns: ["caja_session_id"]
+            isOneToOne: true
+            referencedRelation: "caja_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist_entries: {
         Row: {
           created_at: string
