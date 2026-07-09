@@ -551,7 +551,7 @@ Plans:
 **Goal:** Configure how tips are split across floor/bar/kitchen staff. Add a singleton `tip_distribution_config` (percentages) + `tip_distribution_entries` (per-caja-close allocation rows), wired into close-caja, with a Settings panel for admins.
 **Requirements:** TBD (POS-COMPARISON.md §19 — source doc no longer present; scope locked in 19-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 4/6 plans executed
+**Plans:** 5/6 plans executed
 Plans:
 
 **Wave 1**
@@ -566,7 +566,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 19-05-PLAN.md — UI: 'Tip Split' admin Settings tab (warn-but-allow, D-01/D-05) + TipBucketDistributionPanel Reports tab (D-06), per-staff report untouched (D-07) (Wave 3) (SC-1, SC-3, SC-4)
+- [x] 19-05-PLAN.md — UI: 'Tip Split' admin Settings tab (warn-but-allow, D-01/D-05) + TipBucketDistributionPanel Reports tab (D-06), per-staff report untouched (D-07) (Wave 3) (SC-1, SC-3, SC-4)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
