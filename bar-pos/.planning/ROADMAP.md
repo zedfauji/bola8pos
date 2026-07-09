@@ -551,7 +551,26 @@ Plans:
 **Goal:** Configure how tips are split across floor/bar/kitchen staff. Add a singleton `tip_distribution_config` (percentages) + `tip_distribution_entries` (per-caja-close allocation rows), wired into close-caja, with a Settings panel for admins.
 **Requirements:** TBD (POS-COMPARISON.md §19 — source doc no longer present; scope locked in 19-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** Not yet planned
+**Plans:** 2/6 plans executed
+Plans:
+
+**Wave 1**
+
+- [x] 19-01-PLAN.md — Contract: SettingsKey 'tip_distribution' literal + TipDistribution Zod schemas + computeTipDistribution pure largest-remainder split (property-tested) (Wave 1) (SC-1, SC-2)
+- [x] 19-02-PLAN.md — Migrations: tip_distribution_entries append-only table + close_caja_session extension (tip computation + bundled version-bump fix) + 'tip_distribution.compute' audit action + live integration scaffold (Wave 1) (SC-2, SC-4)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 19-03-PLAN.md — [BLOCKING] supabase db push + supabase.types.ts extension + live integration green gate (Wave 2) (SC-2, SC-4)
+- [ ] 19-04-PLAN.md — Entity layer: settings tipDistribution snapshot/write union + caja useTipDistributionEntry read hook (Wave 2) (SC-1, SC-4)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 19-05-PLAN.md — UI: 'Tip Split' admin Settings tab (warn-but-allow, D-01/D-05) + TipBucketDistributionPanel Reports tab (D-06), per-staff report untouched (D-07) (Wave 3) (SC-1, SC-3, SC-4)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 19-06-PLAN.md — E2E 42-tip-distribution.spec.ts + regression gate + CLAUDE.md docs + human UAT sign-off (Wave 4) (SC-3, SC-4)
 
 **Success Criteria:**
 

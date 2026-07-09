@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Cross-Pollination from billar-pos
-current_phase: 18
+current_phase: 19
 current_plan: 1
 status: executing
-stopped_at: Phase 18 context gathered
-last_updated: "2026-07-08T01:44:30.025Z"
+stopped_at: Phase 19 context gathered
+last_updated: "2026-07-09T15:21:14.312Z"
 progress:
   total_phases: 28
-  completed_phases: 14
-  total_plans: 103
-  completed_plans: 107
-  percent: 50
+  completed_phases: 15
+  total_plans: 109
+  completed_plans: 113
+  percent: 54
 ---
 
 # Session State
@@ -24,13 +24,14 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** Feature Expansion 2026 Q2 / v2.1
-**Current phase:** 18
+**Current phase:** 19
 **Current plan:** 1
-**Status:** Executing Phase 18
+**Status:** Executing Phase 19
 **Progress:** [██████████] 100%
 
 ## Session Log
 
+- 2026-07-08: **Phase 19 (tip-distribution-config) planned** — RESEARCH.md + VALIDATION.md + 6 PLAN.md files (4 waves) written; plan-checker PASS. Key decisions: `tip_distribution` config reuses the existing generic `settings(key,value jsonb)` table (no new config table); `tip_distribution_entries` is a new append-only table (audit_logs-style RLS, no update/delete policy); `close_caja_session` RPC extended to compute the 3-way split via largest-remainder rounding in the same transaction, bundling a fix for a pre-existing missed `version+1` bump bug (would have raised STALE_VERSION on every caja close once Phase 15's trigger fires); new Settings/Reports tab labeled "Tip Split" to avoid colliding with the existing per-staff "Tip Distribution" tab; default split 34/33/33. Plan 19-03 has a BLOCKING db-push checkpoint, 19-06 has a BLOCKING human-UAT checkpoint. Ready for /gsd-execute-phase 19.
 - 2026-07-07: **Phase 17 Plan 05 complete (ad9098a, ed03b83, b3279c7) — Phase 17 (modifier-inventory-rules) COMPLETE, 5/5 plans** — `features/manage-modifier-inventory-rules/` slice shipped: `ModifierIngredientRulesDialog` (row-list editor cloned from `RecipeEditorTab`'s `useReducer` pattern, dropped `yieldQty`, renamed `qty`→`delta`) + `useManageModifierInventoryRules` toast-wrapping save hook + explicit-export barrel; signed delta `Input` uses `type="number" step="0.001"` with **no `min` attribute** — MoneyInput forbidden here (Pitfall 3, clamps negatives to 0). `CatalogModifiersTab.tsx` gains a per-row `FlaskConical` "Ingredient rules" button, mirroring the existing Edit/Delete cluster and the `CatalogProductsTab`→`RecipeEditorTab` cross-feature import precedent. `npm run typecheck`/`lint` clean (only the 2 pre-existing 17-03-documented errors remain); full unit suite 1187 passed / 1 pre-existing failure (`useCloseTab.test.ts:95`, since Phase 15) / 15 todo — no regressions. Task 3's blocking `checkpoint:human-verify` was satisfied via an orchestrator-authored Playwright spec `e2e/24-modifier-inventory-rules.spec.ts` (course-corrected mid-execution in place of manual click-through) covering the full UAT flow — add positive + negative delta rows, save, reopen, assert exact round-trip (`-1`, not clamped to `0`), Save-button dirty/clean gating, row-remove — 1 passed (40.6s), stable across 2 runs. SC-3 satisfied. **Phase 17 is now complete.**
 - 2026-07-07: **Phase 17 Plan 03 complete (64a19d1)** — modifier_inventory_rules type block transcribed into supabase.types.ts (Row/Insert/Update/Relationships, delta:number, two FKs to modifiers/ingredients, alphabetically placed between modifier_groups and modifiers); BLOCKING checkpoint executed and approved: both migrations (`20260706000002_modifier_inventory_rules_table.sql`, `20260706000003_deplete_for_order_item_v3.sql`) applied to remote Supabase via a single `npx supabase db push` (no CLI splitter workaround needed this time); 4 verification queries all PASS — table live (`to_regclass`), RLS policies present (`modifier_inventory_rules_select_authenticated`, `modifier_inventory_rules_write_manager`), v3 function body confirmed via `pg_get_functiondef` (contains `order_item_modifier` loop + preserved kitchen role guard). `npm ci` run first (node_modules was empty); typecheck surfaced 2 pre-existing unrelated errors (tab/model/queries.ts, agent/rag.ts, both predate this plan) logged to `.planning/phases/17-modifier-inventory-rules/deferred-items.md`, not fixed (out of scope). SC-1 + SC-2 satisfied — 17-04 (entity queries + integration test) and 17-05 (admin UI) unblocked.
 - 2026-07-03: **Phase 13 Plans 13-01 + 13-06 backfilled/completed (a692e3f)** — 13-01 (RLS rewrite + RPC role guards) had real committed work (98fa463, 8cfd6c5) from 2026-04-27 but no SUMMARY.md; backfilled from commit history, no re-execution needed. 13-06 (Task 1: T-RP-01..06 E2E tests, committed 5d6c97b 2026-04-28) was missing its Task 2 (blocking human-verify checkpoint) and Task 3 (unit regression gate) — both completed this session. All 6 Phase 13 E2E tests (T-RP-01..06) pass; role_permissions seed counts match exactly (bartender=9/manager=17/admin=22/kitchen=4); action-set diff 0 rows; unit suite 1133/1134 (same pre-existing failure); human sign-off received on manual /rbac click-through. Found + fixed a real regression while running the checkpoint: `openCaja()` E2E helper silently broken since Phase 15 shipped (2026-04-28) — its cleanup UPDATE never bumped `version`, so the `bump_version_on_update` trigger rejected it and the error was unchecked, leaving stale open `caja_sessions` rows that broke ~39 E2E specs via `caja_sessions_one_open` violations whenever a prior session was left open. Fixed by closing each open row individually with `version+1`. RBAC spec went from 20/20 failing to 6/20 (all 6 remaining confirmed pre-existing/unrelated — missing "Budweiser" seed product, not an RBAC issue). **Phase 13 (scopes-full-rbac-from-scratch) is now complete — 6/6 plans.**
@@ -236,5 +237,5 @@ See: .planning/PROJECT.md
 
 ## Last Session
 
-- **Stopped at:** Phase 18 context gathered
+- **Stopped at:** Phase 19 context gathered
 - **Timestamp:** 2026-07-07T18:49:33Z
