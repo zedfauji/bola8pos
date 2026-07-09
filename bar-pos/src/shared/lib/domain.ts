@@ -802,6 +802,7 @@ export const SettingsKeySchema = z.enum([
   'pool_tables',
   'receipt',
   'payment_labels',
+  'tip_distribution',
 ]);
 export type SettingsKey = z.infer<typeof SettingsKeySchema>;
 
@@ -858,6 +859,14 @@ export const EmailReceiptSettingsSchema = z.object({
 });
 
 export type EmailReceiptSettings = z.infer<typeof EmailReceiptSettingsSchema>;
+
+export const TipDistributionSettingsSchema = z.object({
+  floorPct: z.number().min(0).max(100),
+  barPct: z.number().min(0).max(100),
+  kitchenPct: z.number().min(0).max(100),
+});
+
+export type TipDistributionSettings = z.infer<typeof TipDistributionSettingsSchema>;
 
 // ============================================================================
 // RECEIPT SETTINGS
@@ -935,6 +944,24 @@ export const CajaEntrySchema = z.object({
   staffName: z.string().optional(),
 });
 export type CajaEntry = z.infer<typeof CajaEntrySchema>;
+
+// ============================================================================
+// TIP DISTRIBUTION ENTRY (immutable per-caja-close 3-way split snapshot)
+// ============================================================================
+
+export const TipDistributionEntrySchema = z.object({
+  id: UuidSchema,
+  cajaSessionId: UuidSchema,
+  floorPct: z.number().min(0).max(100),
+  barPct: z.number().min(0).max(100),
+  kitchenPct: z.number().min(0).max(100),
+  totalTips: MoneySchema,
+  floorAmount: MoneySchema,
+  barAmount: MoneySchema,
+  kitchenAmount: MoneySchema,
+  createdAt: TimestampSchema,
+});
+export type TipDistributionEntry = z.infer<typeof TipDistributionEntrySchema>;
 
 export const CajaEntryCreateSchema = z.object({
   cajaSessionId: UuidSchema,
@@ -1255,6 +1282,7 @@ export const domain = {
     EmailReceiptSettings: EmailReceiptSettingsSchema,
     ReceiptSettings: ReceiptSettingsSchema,
     SettingsBackupSummary: SettingsBackupSummarySchema,
+    TipDistributionSettings: TipDistributionSettingsSchema,
 
     CajaStatus: CajaStatusSchema,
     CajaSession: CajaSessionSchema,
@@ -1262,6 +1290,7 @@ export const domain = {
     CajaEntryType: CajaEntryTypeSchema,
     CajaEntry: CajaEntrySchema,
     CajaEntryCreate: CajaEntryCreateSchema,
+    TipDistributionEntry: TipDistributionEntrySchema,
     CajaReport: CajaReportSchema,
     CajaReportSummary: CajaReportSummarySchema,
     CashReconciliation: CashReconciliationSchema,
