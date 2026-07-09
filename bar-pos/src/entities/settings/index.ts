@@ -8,6 +8,7 @@ export {
   useEmailSettingsStatus,
   useMutationSendSettingsTestEmail,
   settingsKeys,
+  TipDistributionSettingsSchema,
   type SettingsSnapshot,
 } from './model';
 
@@ -20,4 +21,5 @@ export type {
   ReceiptSettings,
   SettingsBackupSummary,
   SettingsKey,
+  TipDistributionSettings,
 } from './model';
