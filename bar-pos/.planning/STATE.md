@@ -1,16 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.2
-milestone_name: UI Standardization
-status: roadmapped
-last_updated: "2026-07-10T15:26:12.705Z"
-last_activity: 2026-07-10
+milestone_name: — UI Standardization
+status: executing
+stopped_at: Phase 29 context gathered
+last_updated: "2026-07-10T18:58:13.903Z"
+last_activity: 2026-07-10 -- Phase 29 execution started
 progress:
-  total_phases: 7
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 35
+  completed_phases: 16
+  total_plans: 110
+  completed_plans: 119
+  percent: 46
 ---
 
 # Session State
@@ -21,13 +22,14 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 29 (UI Drift Audit) — not yet planned
-Plan: —
-Status: Roadmapped, awaiting /gsd-plan-phase 29
-Last activity: 2026-07-10 — Roadmap created for v2.2 (7 phases, 29-35; v2.1 phases 20-28 remain pending, untouched)
+Phase: 29 (ui-drift-audit) — EXECUTING
+Plan: 1 of 1
+Status: Executing Phase 29
+Last activity: 2026-07-10 -- Phase 29 execution started
 
 ## Session Log
 
+- 2026-07-10: **Phase 29 (ui-drift-audit) planned** — RESEARCH.md (verified live-repo counts: 20 raw-button files, 8 raw-input files, 3 hex-color files, 0 arbitrary-spacing files, 17 real routes vs 14 CLAUDE.md table rows, corrects CONTEXT.md's stale "28 button files" scouting note) + VALIDATION.md (Nyquist, manual-only baseline-diff verification, `nyquist_compliant: true`) + `29-01-PLAN.md` (1 wave, 2 tasks: build `scripts/audit-ui-drift.ts` filtered fs-walk+regex scanner citing RESEARCH's verified baseline, then generate/commit `.planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md` checklist). plan-checker PASS (1 non-blocking cosmetic warning: RESEARCH.md Open Questions section missing `(RESOLVED)` suffix). Ready for `/gsd-execute-phase 29`.
 - 2026-07-10: **v2.2 ROADMAP.md created** — 7 phases (29-35) derived from REQUIREMENTS.md (22 requirement IDs, categories Audit/Shell/Token/Component/Touch/Focus/Visual/Docs/Lint), following the risk-tiered rollout order from research/SUMMARY.md: 29 UI Drift Audit (read-only) -> 30 Shared Shell & Primitive Extension (isolated, all 17 routes) -> 31 Component/Token/Spacing Sweep (non-payment pages) -> 32 Touch Target & Focus-Visible Sweep (operational/realtime pages) -> 33 Payment-Critical Page Sweep (isolated, gated by 05-payments/41-split-payment/42-tip-distribution/06-transfer/09-rbac) -> 34 Visual Regression Baseline (post-fix only) -> 35 Guardrails (tokens doc + drift-lint, post-conformance). 100% requirement coverage validated, no orphans. Appended after existing Phase 28 in ROADMAP.md; v2.1 phases 20-28 untouched. REQUIREMENTS.md traceability section populated. Ready for /gsd-plan-phase 29.
 - 2026-07-08: **Phase 19 (tip-distribution-config) planned** — RESEARCH.md + VALIDATION.md + 6 PLAN.md files (4 waves) written; plan-checker PASS. Key decisions: `tip_distribution` config reuses the existing generic `settings(key,value jsonb)` table (no new config table); `tip_distribution_entries` is a new append-only table (audit_logs-style RLS, no update/delete policy); `close_caja_session` RPC extended to compute the 3-way split via largest-remainder rounding in the same transaction, bundling a fix for a pre-existing missed `version+1` bump bug (would have raised STALE_VERSION on every caja close once Phase 15's trigger fires); new Settings/Reports tab labeled "Tip Split" to avoid colliding with the existing per-staff "Tip Distribution" tab; default split 34/33/33. Plan 19-03 has a BLOCKING db-push checkpoint, 19-06 has a BLOCKING human-UAT checkpoint. Ready for /gsd-execute-phase 19.
 - 2026-07-07: **Phase 17 Plan 05 complete (ad9098a, ed03b83, b3279c7) — Phase 17 (modifier-inventory-rules) COMPLETE, 5/5 plans** — `features/manage-modifier-inventory-rules/` slice shipped: `ModifierIngredientRulesDialog` (row-list editor cloned from `RecipeEditorTab`'s `useReducer` pattern, dropped `yieldQty`, renamed `qty`→`delta`) + `useManageModifierInventoryRules` toast-wrapping save hook + explicit-export barrel; signed delta `Input` uses `type="number" step="0.001"` with **no `min` attribute** — MoneyInput forbidden here (Pitfall 3, clamps negatives to 0). `CatalogModifiersTab.tsx` gains a per-row `FlaskConical` "Ingredient rules" button, mirroring the existing Edit/Delete cluster and the `CatalogProductsTab`→`RecipeEditorTab` cross-feature import precedent. `npm run typecheck`/`lint` clean (only the 2 pre-existing 17-03-documented errors remain); full unit suite 1187 passed / 1 pre-existing failure (`useCloseTab.test.ts:95`, since Phase 15) / 15 todo — no regressions. Task 3's blocking `checkpoint:human-verify` was satisfied via an orchestrator-authored Playwright spec `e2e/24-modifier-inventory-rules.spec.ts` (course-corrected mid-execution in place of manual click-through) covering the full UAT flow — add positive + negative delta rows, save, reopen, assert exact round-trip (`-1`, not clamped to `0`), Save-button dirty/clean gating, row-remove — 1 passed (40.6s), stable across 2 runs. SC-3 satisfied. **Phase 17 is now complete.**
@@ -235,7 +237,7 @@ Last activity: 2026-07-10 — Roadmap created for v2.2 (7 phases, 29-35; v2.1 ph
 
 ## Last Session
 
-- **Stopped at:** v2.2 ROADMAP.md created (7 phases, 29-35)
+- **Stopped at:** Phase 29 context gathered
 - **Timestamp:** 2026-07-10T15:26:12.705Z
 
 ## Current Position

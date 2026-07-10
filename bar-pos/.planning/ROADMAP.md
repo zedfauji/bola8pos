@@ -54,12 +54,11 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 5. **Cross-cutting**: 21 → 28 (28 depends 21)
 6. **Niche**: 27 (depends 14, 17)
 
-
 ### v2.2 — UI Standardization (planned 2026-07-10)
 
 App-wide UI consistency pass enforcing existing shadcn/Tailwind conventions across all 17 routes — no new design system, no visual redesign, no UX flow changes. Requirements scoped from `.planning/research/SUMMARY.md`; phases follow a strict risk-tiered rollout (audit → shell/primitives → low-risk sweep → operational sweep → payment-critical sweep → visual baseline → guardrails).
 
-- [ ] **Phase 29: UI Drift Audit** — File-mapped inventory of raw buttons/inputs, hardcoded colors, arbitrary-value spacing across all 17 routes
+- [x] **Phase 29: UI Drift Audit** — File-mapped inventory of raw buttons/inputs, hardcoded colors, arbitrary-value spacing across all 17 routes (completed 2026-07-10)
 - [ ] **Phase 30: Shared Shell & Primitive Extension** — Every route on one `PageContainer` shell; dead `AppShell`/`AppNav` removed; `CLAUDE.md` routes table corrected
 - [ ] **Phase 31: Component, Token & Spacing Consistency Sweep** — Non-payment pages use `shared/ui` primitives + Tailwind tokens + spacing scale
 - [ ] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings
@@ -746,11 +745,11 @@ Plans:
 **Goal:** Produce a complete, file-mapped inventory of every design-system violation (raw `<button>`/`<input>` elements, hardcoded hex/rgb colors, arbitrary-value Tailwind spacing classes) across all 17 routes in `pages/`, `widgets/`, `features/`, so every subsequent fix phase has a concrete backlog to work from. Read-only — no application code is modified in this phase.
 **Requirements:** AUDIT-01, AUDIT-02
 **Depends on:** — (first phase of v2.2, independent of v2.1 phases 20-28)
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 
-- [ ] 29-01-PLAN.md — audit-ui-drift.ts scanner (filtered fs walk + 4 violation regex scans + router/CLAUDE.md route cross-check) + committed DRIFT-AUDIT.md backlog (Wave 1) (AUDIT-01, AUDIT-02)
+- [x] 29-01-PLAN.md — audit-ui-drift.ts scanner (filtered fs walk + 4 violation regex scans + router/CLAUDE.md route cross-check) + committed DRIFT-AUDIT.md backlog (Wave 1) (AUDIT-01, AUDIT-02)
 
 **Success Criteria:**
 
