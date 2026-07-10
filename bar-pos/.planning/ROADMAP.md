@@ -765,12 +765,12 @@ Plans:
 **Goal:** Every one of the 17 routes uses a single canonical layout shell instead of ad-hoc per-page wrappers; dead navigation code is deleted rather than resurrected; `CLAUDE.md` matches the router's actual routes. This is the lowest-blast-radius change in the milestone (isolated layout-wrapper swap, not a deep component change) so it lands before the risk-tiered page sweeps and everything downstream builds on it.
 **Requirements:** SHELL-01, SHELL-02, SHELL-03
 **Depends on:** Phase 29
-**Plans:** 5 plans in 3 waves
+**Plans:** 1/5 plans executed
 **UI hint**: yes
 
 Plans:
 
-- [ ] 30-01-PLAN.md — Extend PageContainer/SectionHeader with backTo/backLabel + Wave-0 PageContainer.test.tsx (Wave 1) (SHELL-01)
+- [x] 30-01-PLAN.md — Extend PageContainer/SectionHeader with backTo/backLabel + Wave-0 PageContainer.test.tsx (Wave 1) (SHELL-01)
 - [ ] 30-02-PLAN.md — Pattern B: swap BackToHomeButton -> backTo on the 7 existing-PageContainer pages (kds, kds-bar, kitchen-prep, pool-tables, rappi, rbac, waitlist) (Wave 2) (SHELL-01)
 - [ ] 30-03-PLAN.md — Pattern A: first-time PageContainer adoption for audit, settings, staff, inventory, reports (Wave 2) (SHELL-01)
 - [ ] 30-04-PLAN.md — Pattern C+D: full-bleed className override for pos/payments + corrected backTo=/pool-tables for pool-table-status (Wave 2) (SHELL-01)
