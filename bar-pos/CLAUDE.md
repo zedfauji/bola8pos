@@ -121,7 +121,10 @@ All routes are registered in `src/app/router.tsx`. Protected by `<ProtectedRoute
 | `/login`                | LoginPage       | PIN login                                 |
 | `/waitlist`             | WaitlistPage    | Walk-in queue management (manager+)       |
 | `/rbac`                 | RbacPage        | Role & permission management (admin only) |
+| `/kds`                  | KdsPage         | Kitchen KDS board (gated by `KdsRoute`)   |
 | `/kds-bar`              | KdsBarPage      | Bar KDS board (bartender+)                |
+| `/kitchen-prep`         | KitchenPrepPage | Batch chef prep production                |
+| `/audit`                | AuditPage       | Audit log (gated by `AuditRoute`)         |
 
 ## Implemented Features (as of 2026-04-20)
 
