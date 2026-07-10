@@ -1,16 +1,13 @@
 import { AuditLogTable } from '@widgets/AuditLogTable';
-import { BackToHomeButton } from '@shared/ui';
-import { SectionHeader } from '@shared/ui/SectionHeader';
+import { PageContainer } from '@shared/ui';
 
 export default function AuditPage() {
   return (
     <div className="flex h-screen flex-col">
-      <BackToHomeButton />
-      <main className="flex-1 overflow-auto p-6 md:p-8">
-        <div className="mx-auto max-w-6xl space-y-8">
-          <SectionHeader title="Audit Log" />
+      <main className="flex-1 overflow-auto">
+        <PageContainer title="Audit Log" backTo="/home">
           <AuditLogTable />
-        </div>
+        </PageContainer>
       </main>
     </div>
   );
