@@ -78,3 +78,47 @@ integration test files (`evaluate-promotions-rpc.integration.test.ts`,
 `override-negative-stock` production order path. Task 3's acceptance criterion "All live
 promotion integration tests pass against the live DB" is currently **NOT met** for this reason —
 surfaced explicitly at the blocking checkpoint rather than silently reported as green.
+
+---
+
+## STATUS: FIXED (Plan 20-09, Task 3 gap-closure session)
+
+**Fix migration:** `supabase/migrations/20260710000008_fix_promotion_skip_depletion_gate.sql`
+(commit `bd8f1d1`), pushed live via `npx supabase db push --yes`, confirmed applied
+(`npx supabase db push --dry-run` reports "Remote database is up to date").
+
+**What changed:** `create_order_with_items` v4 (`CREATE OR REPLACE`, same 7-arg signature,
+same `SECURITY INVOKER`, same `p_expected_version FOR UPDATE` guard) splits the single
+per-item loop into two: ingredient depletion stays gated on `NOT p_skip_depletion`
+(unchanged behavior), and `evaluate_promotions_for_item` now runs in its own loop,
+unconditionally, for every inserted order item regardless of `p_skip_depletion`.
+Depletion and promotion pricing are independent concerns and are no longer coupled to the
+same conditional.
+
+**Verification after the fix:**
+- `evaluate-promotions-rpc.integration.test.ts` and `pool-promotions-rpc.integration.test.ts`
+  (both files, targeted re-run): **4/4 tests PASS** (previously 2 failures).
+- Full live promotion integration suite (`npx vitest run src/entities/promotion/model/`),
+  re-run twice: first pass showed 1 unrelated cross-file flake
+  (`pool_billing percentage promotion...`, `54` vs expected `60`) that did NOT reproduce on
+  an immediate second full-suite run (**6/6 files, 20/20 tests PASS**) and also passed in
+  file-isolation on its own — consistent with the same category of live-DB
+  cross-file/shared-state test-isolation flake already documented for
+  `src/entities/staff/model/queries.clock.test.ts` in Plan 20-09's original session. Not a
+  regression introduced by this fix.
+- `npm run typecheck`: same 2 pre-existing errors only (`tab/model/queries.ts:778`,
+  `agent/rag.ts:60` — both predate Phase 20, documented since Plan 20-06). No new errors.
+- `npm run lint`: exit 0 (same pre-existing informational `eslint-plugin-boundaries` warning).
+- `npm run test` (full unit suite): 1247/1248 pass — only the pre-existing, documented
+  `useCloseTab.test.ts:95` failure (documented since Phase 15, unrelated to Phase 20). No new
+  regressions.
+
+**Production impact resolved:** `src/features/override-negative-stock/model/useOverrideNegativeStock.ts`'s
+order-placement call (`p_skip_depletion: true`) now correctly receives promotion evaluation —
+the manager-PIN "override negative stock" flow no longer silently skips eligible discounts.
+
+**Remaining gap (not a blocker for this fix):** the full `npx playwright test
+e2e/43-promotions.spec.ts` browser run was not re-attempted in this gap-closure session — port
+1420 was still occupied by a sibling parallel worktree agent's dev server. `--list` had already
+confirmed both tests load/enumerate cleanly in the prior session; a full browser run remains a
+recommended follow-up once a port is free, but does not block this correctness fix.
