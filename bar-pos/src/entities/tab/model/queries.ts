@@ -56,8 +56,6 @@ interface CategoryEmbed {
   name: string;
   color: string;
   sort_order: number;
-  happy_hour_start: string | null;
-  happy_hour_end: string | null;
   created_at: string;
 }
 
@@ -99,7 +97,9 @@ function mapProductRow(
       name: p.name,
       categoryId: p.category_id,
       basePrice: p.base_price,
-      happyHourPrice: p.happy_hour_price,
+      // legacy HH price column retired (Phase 20, D-01) — superseded by the
+      // promotions engine; always null (vestigial nullable field).
+      happyHourPrice: null,
       sku: p.sku,
       isActive: p.is_active,
       imageUrl: p.image_url,
@@ -112,8 +112,10 @@ function mapProductRow(
               name: catEmbed.name,
               color: catEmbed.color,
               sortOrder: catEmbed.sort_order,
-              happyHourStart: catEmbed.happy_hour_start,
-              happyHourEnd: catEmbed.happy_hour_end,
+              // legacy HH start/end columns retired (Phase 20, D-01) — superseded
+              // by the promotions engine; always null.
+              happyHourStart: null,
+              happyHourEnd: null,
               createdAt: new Date(catEmbed.created_at),
             },
           }
@@ -253,7 +255,7 @@ const tabListSelect = `
       *,
       product:products(
         *,
-        category:categories(id, name, color, sort_order, happy_hour_start, happy_hour_end, created_at)
+        category:categories(id, name, color, sort_order, created_at)
       )
     )
   ),

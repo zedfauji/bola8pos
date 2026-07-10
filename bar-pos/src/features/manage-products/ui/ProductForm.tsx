@@ -42,9 +42,6 @@ export function ProductForm({
     initialProduct?.categoryId ?? categories[0]?.id ?? ''
   );
   const [basePrice, setBasePrice] = useState(initialProduct?.basePrice ?? 0);
-  const [happyHourPrice, setHappyHourPrice] = useState<number | null>(
-    initialProduct?.happyHourPrice ?? null
-  );
   const [sku, setSku] = useState(initialProduct?.sku ?? '');
   const [barcode, setBarcode] = useState(initialProduct?.barcode ?? '');
   const [isActive, setIsActive] = useState(initialProduct?.isActive ?? true);
@@ -78,16 +75,16 @@ export function ProductForm({
     const imageVal = imageUrl.trim() === '' ? null : imageUrl.trim();
     const barcodeVal = barcode.trim() === '' ? null : barcode.trim();
 
-    const happyHourNormalized =
-      happyHourPrice === null || happyHourPrice === 0 ? null : happyHourPrice;
-
+    // happyHourPrice is always null — happy-hour pricing is now managed in
+    // Settings → Promotions (D-01); this vestigial nullable Zod field must
+    // still be present in the parsed payload.
     if (initialProduct != null) {
       const parsed = ProductUpdateSchema.safeParse({
         id: initialProduct.id,
         name,
         categoryId,
         basePrice,
-        happyHourPrice: happyHourNormalized,
+        happyHourPrice: null,
         sku: skuVal,
         isActive,
         imageUrl: imageVal,
@@ -114,7 +111,7 @@ export function ProductForm({
       name,
       categoryId,
       basePrice,
-      happyHourPrice: happyHourNormalized,
+      happyHourPrice: null,
       sku: skuVal,
       isActive,
       imageUrl: imageVal,
@@ -173,19 +170,7 @@ export function ProductForm({
         <MoneyInput value={basePrice} onChange={setBasePrice} disabled={submitting} />
       </FormField>
 
-      <FormField
-        label="Happy hour price"
-        hint="Optional — leave at 0.00 and clear to use base price during happy hour."
-        error={fieldErrors.happyHourPrice ?? ''}
-      >
-        <MoneyInput
-          value={happyHourPrice ?? 0}
-          onChange={v => {
-            setHappyHourPrice(v === 0 ? null : v);
-          }}
-          disabled={submitting}
-        />
-      </FormField>
+      {/* Happy-hour pricing is now managed in Settings → Promotions (D-01). */}
 
       <FormField label="SKU" error={fieldErrors.sku ?? ''}>
         <Input
