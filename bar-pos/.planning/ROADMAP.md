@@ -586,7 +586,7 @@ Plans:
 **Goal:** Ship a promotions engine — `promotions` + `applied_promotions` tables and an `evaluate_promotions` RPC supporting happy-hour time windows, item/category/pool-time targeting, and auto-apply at order time. Settings → Promotions admin UI to manage them.
 **Requirements:** TBD (POS-COMPARISON.md §20 — source doc no longer present; scope locked in 20-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 8/11 plans executed
+**Plans:** 9/11 plans executed
 
 Plans:
 
@@ -598,7 +598,7 @@ Plans:
 - [x] 20-06-PLAN.md — HH→promotions data migration (D-07) + BLOCKING schema push + types
 - [x] 20-07-PLAN.md — client pricing rewire (send basePrice) + Active Promotions banner
 - [x] 20-08-PLAN.md — pool client rewire (useMutationStopSession → stop_pool_session)
-- [ ] 20-09-PLAN.md — D-07 parity gate + e2e/43-promotions + BLOCKING UAT
+- [x] 20-09-PLAN.md — D-07 parity gate + e2e/43-promotions + BLOCKING UAT
 - [ ] 20-10-PLAN.md — drop happy_hour columns + retire HH admin editing
 - [ ] 20-11-PLAN.md — retire client HH calc path (resolveProductPrice/isHappyHourActive)
 
