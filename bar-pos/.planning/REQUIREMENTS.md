@@ -68,4 +68,29 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 
 ## Traceability
 
-_Filled in by roadmapper during Phase Creation._
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| AUDIT-01 | Phase 29 | Pending |
+| AUDIT-02 | Phase 29 | Pending |
+| SHELL-01 | Phase 30 | Pending |
+| SHELL-02 | Phase 30 | Pending |
+| SHELL-03 | Phase 30 | Pending |
+| TOKEN-01 | Phase 31 | Pending |
+| TOKEN-02 | Phase 31 | Pending |
+| COMPONENT-01 | Phase 31 | Pending |
+| COMPONENT-02 | Phase 31 | Pending |
+| COMPONENT-03 | Phase 31 | Pending |
+| TOUCH-01 | Phase 32 | Pending |
+| TOUCH-02 | Phase 32 | Pending |
+| TOUCH-03 | Phase 32 | Pending |
+| FOCUS-01 | Phase 32 | Pending |
+| FOCUS-02 | Phase 32 | Pending |
+| FOCUS-03 | Phase 32 | Pending |
+| COMPONENT-04 | Phase 33 | Pending |
+| VISUAL-01 | Phase 34 | Pending |
+| VISUAL-02 | Phase 34 | Pending |
+| VISUAL-03 | Phase 34 | Pending |
+| DOCS-01 | Phase 35 | Pending |
+| LINT-01 | Phase 35 | Pending |
+
+**Coverage:** 22/22 v2.2 requirements mapped. No orphans, no duplicates.

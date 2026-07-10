@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: UI Standardization
-status: planning
+status: roadmapped
 last_updated: "2026-07-10T15:26:12.705Z"
 last_activity: 2026-07-10
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,13 +21,14 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 29 (UI Drift Audit) — not yet planned
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-10 — Milestone v2.2 started (v2.1 phases 20-28 remain pending, untouched)
+Status: Roadmapped, awaiting /gsd-plan-phase 29
+Last activity: 2026-07-10 — Roadmap created for v2.2 (7 phases, 29-35; v2.1 phases 20-28 remain pending, untouched)
 
 ## Session Log
 
+- 2026-07-10: **v2.2 ROADMAP.md created** — 7 phases (29-35) derived from REQUIREMENTS.md (22 requirement IDs, categories Audit/Shell/Token/Component/Touch/Focus/Visual/Docs/Lint), following the risk-tiered rollout order from research/SUMMARY.md: 29 UI Drift Audit (read-only) -> 30 Shared Shell & Primitive Extension (isolated, all 17 routes) -> 31 Component/Token/Spacing Sweep (non-payment pages) -> 32 Touch Target & Focus-Visible Sweep (operational/realtime pages) -> 33 Payment-Critical Page Sweep (isolated, gated by 05-payments/41-split-payment/42-tip-distribution/06-transfer/09-rbac) -> 34 Visual Regression Baseline (post-fix only) -> 35 Guardrails (tokens doc + drift-lint, post-conformance). 100% requirement coverage validated, no orphans. Appended after existing Phase 28 in ROADMAP.md; v2.1 phases 20-28 untouched. REQUIREMENTS.md traceability section populated. Ready for /gsd-plan-phase 29.
 - 2026-07-08: **Phase 19 (tip-distribution-config) planned** — RESEARCH.md + VALIDATION.md + 6 PLAN.md files (4 waves) written; plan-checker PASS. Key decisions: `tip_distribution` config reuses the existing generic `settings(key,value jsonb)` table (no new config table); `tip_distribution_entries` is a new append-only table (audit_logs-style RLS, no update/delete policy); `close_caja_session` RPC extended to compute the 3-way split via largest-remainder rounding in the same transaction, bundling a fix for a pre-existing missed `version+1` bump bug (would have raised STALE_VERSION on every caja close once Phase 15's trigger fires); new Settings/Reports tab labeled "Tip Split" to avoid colliding with the existing per-staff "Tip Distribution" tab; default split 34/33/33. Plan 19-03 has a BLOCKING db-push checkpoint, 19-06 has a BLOCKING human-UAT checkpoint. Ready for /gsd-execute-phase 19.
 - 2026-07-07: **Phase 17 Plan 05 complete (ad9098a, ed03b83, b3279c7) — Phase 17 (modifier-inventory-rules) COMPLETE, 5/5 plans** — `features/manage-modifier-inventory-rules/` slice shipped: `ModifierIngredientRulesDialog` (row-list editor cloned from `RecipeEditorTab`'s `useReducer` pattern, dropped `yieldQty`, renamed `qty`→`delta`) + `useManageModifierInventoryRules` toast-wrapping save hook + explicit-export barrel; signed delta `Input` uses `type="number" step="0.001"` with **no `min` attribute** — MoneyInput forbidden here (Pitfall 3, clamps negatives to 0). `CatalogModifiersTab.tsx` gains a per-row `FlaskConical` "Ingredient rules" button, mirroring the existing Edit/Delete cluster and the `CatalogProductsTab`→`RecipeEditorTab` cross-feature import precedent. `npm run typecheck`/`lint` clean (only the 2 pre-existing 17-03-documented errors remain); full unit suite 1187 passed / 1 pre-existing failure (`useCloseTab.test.ts:95`, since Phase 15) / 15 todo — no regressions. Task 3's blocking `checkpoint:human-verify` was satisfied via an orchestrator-authored Playwright spec `e2e/24-modifier-inventory-rules.spec.ts` (course-corrected mid-execution in place of manual click-through) covering the full UAT flow — add positive + negative delta rows, save, reopen, assert exact round-trip (`-1`, not clamped to `0`), Save-button dirty/clean gating, row-remove — 1 passed (40.6s), stable across 2 runs. SC-3 satisfied. **Phase 17 is now complete.**
 - 2026-07-07: **Phase 17 Plan 03 complete (64a19d1)** — modifier_inventory_rules type block transcribed into supabase.types.ts (Row/Insert/Update/Relationships, delta:number, two FKs to modifiers/ingredients, alphabetically placed between modifier_groups and modifiers); BLOCKING checkpoint executed and approved: both migrations (`20260706000002_modifier_inventory_rules_table.sql`, `20260706000003_deplete_for_order_item_v3.sql`) applied to remote Supabase via a single `npx supabase db push` (no CLI splitter workaround needed this time); 4 verification queries all PASS — table live (`to_regclass`), RLS policies present (`modifier_inventory_rules_select_authenticated`, `modifier_inventory_rules_write_manager`), v3 function body confirmed via `pg_get_functiondef` (contains `order_item_modifier` loop + preserved kitchen role guard). `npm ci` run first (node_modules was empty); typecheck surfaced 2 pre-existing unrelated errors (tab/model/queries.ts, agent/rag.ts, both predate this plan) logged to `.planning/phases/17-modifier-inventory-rules/deferred-items.md`, not fixed (out of scope). SC-1 + SC-2 satisfied — 17-04 (entity queries + integration test) and 17-05 (admin UI) unblocked.
@@ -234,12 +235,12 @@ Last activity: 2026-07-10 — Milestone v2.2 started (v2.1 phases 20-28 remain p
 
 ## Last Session
 
-- **Stopped at:** Phase 20 context gathered
-- **Timestamp:** 2026-07-07T18:49:33Z
+- **Stopped at:** v2.2 ROADMAP.md created (7 phases, 29-35)
+- **Timestamp:** 2026-07-10T15:26:12.705Z
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 29 (UI Drift Audit) — not yet planned
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-10 — Milestone v2.2 started
+Status: Roadmapped, awaiting /gsd-plan-phase 29
+Last activity: 2026-07-10 — Roadmap created for v2.2 (7 phases, 29-35; v2.1 phases 20-28 remain pending, untouched)

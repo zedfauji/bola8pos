@@ -54,6 +54,22 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 5. **Cross-cutting**: 21 → 28 (28 depends 21)
 6. **Niche**: 27 (depends 14, 17)
 
+
+### v2.2 — UI Standardization (planned 2026-07-10)
+
+App-wide UI consistency pass enforcing existing shadcn/Tailwind conventions across all 17 routes — no new design system, no visual redesign, no UX flow changes. Requirements scoped from `.planning/research/SUMMARY.md`; phases follow a strict risk-tiered rollout (audit → shell/primitives → low-risk sweep → operational sweep → payment-critical sweep → visual baseline → guardrails).
+
+- [ ] **Phase 29: UI Drift Audit** — File-mapped inventory of raw buttons/inputs, hardcoded colors, arbitrary-value spacing across all 17 routes
+- [ ] **Phase 30: Shared Shell & Primitive Extension** — Every route on one `PageContainer` shell; dead `AppShell`/`AppNav` removed; `CLAUDE.md` routes table corrected
+- [ ] **Phase 31: Component, Token & Spacing Consistency Sweep** — Non-payment pages use `shared/ui` primitives + Tailwind tokens + spacing scale
+- [ ] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings
+- [ ] **Phase 33: Payment-Critical Page Sweep (Isolated)** — POS/payments/split/refund/tip surfaces standardized, zero behavior change, gated by existing E2E specs
+- [ ] **Phase 34: Visual Regression Baseline** — Isolated Playwright visual-diff config + post-fix screenshot baselines for all 17 routes
+- [ ] **Phase 35: Guardrails — Tokens Doc & Drift Lint** — Design tokens reference doc + drift-detection lint rule, added only after conformance
+
+**Execution order** (strict — respects blast-radius tiering from `research/SUMMARY.md`; each phase depends on the previous):
+
+29 → 30 → 31 → 32 → 33 → 34 → 35
 ---
 
 ### Phase 1: Foundation
@@ -725,6 +741,120 @@ Plans:
 
 ---
 
+### Phase 29: UI Drift Audit
+
+**Goal:** Produce a complete, file-mapped inventory of every design-system violation (raw `<button>`/`<input>` elements, hardcoded hex/rgb colors, arbitrary-value Tailwind spacing classes) across all 17 routes in `pages/`, `widgets/`, `features/`, so every subsequent fix phase has a concrete backlog to work from. Read-only — no application code is modified in this phase.
+**Requirements:** AUDIT-01, AUDIT-02
+**Depends on:** — (first phase of v2.2, independent of v2.1 phases 20-28)
+**Plans:** Not yet planned
+
+**Success Criteria:**
+
+1. A drift-audit script scans `pages/`, `widgets/`, `features/` and reports every raw `<button>`/`<input>` element, hardcoded hex/rgb color value, and arbitrary-value Tailwind class (e.g. `p-[13px]`), each attributed to a specific file
+2. Audit output is a checklist/backlog usable to scope Phases 30-33 without further investigation
+3. The audit's route count (17) is cross-checked against `CLAUDE.md`'s routes table, confirming the staleness that `SHELL-03` fixes in Phase 30
+4. No application code under `src/` is modified — the audit is read-only tooling only (e.g. lives in `scripts/`)
+
+---
+
+### Phase 30: Shared Shell & Primitive Extension
+
+**Goal:** Every one of the 17 routes uses a single canonical layout shell instead of ad-hoc per-page wrappers; dead navigation code is deleted rather than resurrected; `CLAUDE.md` matches the router's actual routes. This is the lowest-blast-radius change in the milestone (isolated layout-wrapper swap, not a deep component change) so it lands before the risk-tiered page sweeps and everything downstream builds on it.
+**Requirements:** SHELL-01, SHELL-02, SHELL-03
+**Depends on:** Phase 29
+**Plans:** Not yet planned
+**UI hint**: yes
+
+**Success Criteria:**
+
+1. `PageContainer` is extended with `backTo`/`backLabel` props and wraps all 17 routes; zero ad-hoc per-page layout wrappers remain
+2. `AppShell` and `AppNav` (zero real consumers) are deleted from the codebase, not resurrected
+3. `CLAUDE.md`'s routes table lists all 17 actually-registered routes, matching `router.tsx`
+4. Full-repo `npm run typecheck` and `npm run lint` pass after the shell swap, landed as an isolated commit
+
+---
+
+### Phase 31: Component, Token & Spacing Consistency Sweep
+
+**Goal:** Non-payment pages (login, home, settings, staff, rbac, audit, waitlist, rappi, reports, pool-tables, inventory, kitchen-prep, kds, kds-bar) use the correct `shared/ui` primitives instead of raw markup, and existing Tailwind color/spacing tokens instead of hardcoded values — proving the fix pattern on lower-risk surfaces before it's applied to payment-critical pages in Phase 33.
+**Requirements:** TOKEN-01, TOKEN-02, COMPONENT-01, COMPONENT-02, COMPONENT-03
+**Depends on:** Phase 30
+**Plans:** Not yet planned
+**UI hint**: yes
+
+**Success Criteria:**
+
+1. Raw `<button>` elements outside `shared/ui` are replaced with `POSButton` (or the correct shared primitive)
+2. Raw `<input>` elements outside `shared/ui` are replaced with the correct shared form primitive (`FormField`, `MoneyInput`, etc.), except documented signed-delta opt-outs
+3. Duplicate one-off components shadowing an existing `shared/ui` primitive (e.g. the `pool-table-status` hand-rolled back button) are removed
+4. No hardcoded hex/rgb color values remain in swept files — all use existing Tailwind CSS-variable tokens (`--background`, `--primary`, `--pos-accent`, `--pos-danger`, etc.)
+5. No arbitrary-value spacing classes (e.g. `p-[13px]`) remain in swept files — all use the existing Tailwind spacing scale
+
+---
+
+### Phase 32: Touch Target & Focus-Visible Sweep
+
+**Goal:** Every interactive element on operational and realtime pages (pool-tables, pool-table-status, inventory, kitchen-prep, kds, kds-bar) meets the app's touch-target floor and shows a visible, keyboard-navigable focus state — sizing/contrast-only changes, no control reordering that would break muscle memory.
+**Requirements:** TOUCH-01, TOUCH-02, TOUCH-03, FOCUS-01, FOCUS-02, FOCUS-03
+**Depends on:** Phase 31
+**Plans:** Not yet planned
+**UI hint**: yes
+
+**Success Criteria:**
+
+1. All interactive elements meet a 44px minimum touch target (app floor, above WCAG's 24px legal minimum)
+2. Frequent-action controls (add item, confirm) use the 56px `POSButton` size; critical/rare high-stakes actions (process payment, void order, close tab) use the 72px size
+3. Adjacent touch targets in grids (product grid, quantity steppers) maintain adequate spacing to avoid mis-taps
+4. Every interactive element has a visible `focus-visible` state using the `--ring` token; primary action buttons use a higher-contrast/thicker ring than the shadcn default
+5. Tab order across forms and keypad/search inputs (`PINKeypad`, `SearchInput`) is verified sane for keyboard/barcode-scanner input
+
+---
+
+### Phase 33: Payment-Critical Page Sweep (Isolated)
+
+**Goal:** Standardize POS, payments, split-payment, refund, and tip-distribution surfaces to the shell/token/component/touch/focus conventions established in Phases 30-32 — markup/class-level swaps only, zero prop/handler/validation behavior change, one page/widget per PR, verified against the existing E2E suite.
+**Requirements:** COMPONENT-04
+**Depends on:** Phase 32
+**Plans:** Not yet planned
+**UI hint**: yes
+
+**Success Criteria:**
+
+1. POS, payments, `PaymentModal`, `PaymentPane`, `TabDrawer`, and refund/tip-distribution surfaces are visually standardized (shell/token/component/touch/focus) with zero prop/handler/validation changes
+2. Each payment-critical surface lands as its own isolated commit/PR, never combined with a shared-primitive change
+3. `05-payments`, `41-split-payment`, `42-tip-distribution`, `06-transfer`, and `09-rbac` E2E specs pass unchanged after every payment-surface commit
+
+---
+
+### Phase 34: Visual Regression Baseline
+
+**Goal:** Stand up a Playwright visual-regression suite, isolated from the functional E2E config, and capture screenshot baselines for all 17 routes only now that the audit/shell/token/component/touch/focus fixes (Phases 29-33) are complete — a pre-fix baseline would have frozen the current inconsistencies.
+**Requirements:** VISUAL-01, VISUAL-02, VISUAL-03
+**Depends on:** Phase 33
+**Plans:** Not yet planned
+
+**Success Criteria:**
+
+1. A second Playwright config exists (headless, bundled Chromium, no `slowMo`), isolated from the existing functional `e2e/` config
+2. Screenshot baselines are captured for all 17 routes, only after Phases 30-33's fixes are complete
+3. Dynamic/live regions (timers, realtime KDS boards, toasts) are masked or excluded from diffing
+4. Two consecutive local runs of the visual suite produce zero unintended diffs
+
+---
+
+### Phase 35: Guardrails — Tokens Doc & Drift Lint
+
+**Goal:** Document the existing design tokens and add drift-detection lint, both deferred to last because a strict rule only makes sense once the codebase already conforms — adding it earlier would fail against every pre-existing violation Phase 29 catalogued.
+**Requirements:** DOCS-01, LINT-01
+**Depends on:** Phase 34
+**Plans:** Not yet planned
+
+**Success Criteria:**
+
+1. A design tokens reference doc documents the existing color/spacing/typography tokens already defined in `tailwind.config.ts` and `index.css` — no new tokens invented
+2. A drift-detection lint rule (via `eslint-plugin-tailwindcss` and/or `no-restricted-syntax`) is added to the ESLint config
+3. `npm run lint` passes with zero warnings against the now-conformant codebase
+
 ---
 
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
@@ -735,3 +865,5 @@ Plans:
 *Phase 13 added: 2026-04-27 — Full RBAC From Scratch.*
 *Phase 15 planned: 2026-04-28 — 6 plans in 6 waves.*
 *Phase 13 planned: 2026-04-27 — 6 plans in 6 waves.*
+
+*Phase 29-35 added: 2026-07-10 — v2.2 UI Standardization milestone (risk-tiered rollout: audit -> shell/primitives -> low-risk sweep -> operational sweep -> payment-critical sweep -> visual baseline -> guardrails).*
