@@ -18,8 +18,10 @@ export type PrintPreChequeInput = {
  * Mutation hook that builds a pre-cheque receipt text from the current tab,
  * pool session, and table, then sends it to the thermal printer.
  *
- * happyHourActive is always false for now.
- * TODO: compute happyHourActive once an isHappyHourActive(categories, now) helper exists at the tab level.
+ * happyHourActive is always false — happy hour was retired in favor of the
+ * server-side promotions engine (Phase 20). Promotions are applied atomically
+ * at order time, so the pre-cheque's item line totals already reflect any
+ * discount; there is no separate client-side "happy hour" state to compute.
  */
 export function usePrintPreCheque() {
   const { data: settings } = useSettings();
@@ -91,7 +93,8 @@ export function usePrintPreCheque() {
         tableLabel: table.label,
         customerName: tab.customerName,
         cashierName,
-        // TODO: compute happyHourActive once an isHappyHourActive helper is wired to tab categories
+        // Always false — happy hour retired (Phase 20); promotions are server-applied
+        // and already reflected in each item's lineTotal above.
         happyHourActive: false,
         items,
         poolCharge,

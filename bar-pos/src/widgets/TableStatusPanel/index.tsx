@@ -24,7 +24,6 @@ import {
   PoolTableGridSkeleton,
 } from '@shared/ui';
 import { Badge } from '@shared/ui/badge';
-import { isHappyHourActive } from './isHappyHourActive';
 
 // ---------------------------------------------------------------------------
 // Pure helpers
@@ -88,8 +87,6 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const activeOrders = useMemo(() => (tab?.orders ?? []).filter(o => o.status !== 'voided'), [tab]);
-
-  const happyHour = useMemo(() => isHappyHourActive(activeOrders), [activeOrders]);
 
   const itemsTotal = useMemo(
     () =>
@@ -212,11 +209,6 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
           {session.previousTableId && (
             <Badge variant="outline" className="text-xs">
               Moved from Table {session.previousTableNumber ?? '?'}
-            </Badge>
-          )}
-          {happyHour && (
-            <Badge variant="secondary" className="text-xs">
-              Happy Hour Active
             </Badge>
           )}
         </div>
