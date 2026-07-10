@@ -80,6 +80,100 @@ export type Database = {
           },
         ]
       }
+      applied_promotions: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          discount_type: string | null
+          discount_value: number | null
+          discounted_amount: number | null
+          id: string
+          order_item_id: string | null
+          original_amount: number | null
+          pool_minutes_granted: number | null
+          pool_session_id: string | null
+          promotion_id: string | null
+          promotion_name_snapshot: string
+          tab_id: string | null
+          target_type: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          discount_type?: string | null
+          discount_value?: number | null
+          discounted_amount?: number | null
+          id?: string
+          order_item_id?: string | null
+          original_amount?: number | null
+          pool_minutes_granted?: number | null
+          pool_session_id?: string | null
+          promotion_id?: string | null
+          promotion_name_snapshot: string
+          tab_id?: string | null
+          target_type: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          discount_type?: string | null
+          discount_value?: number | null
+          discounted_amount?: number | null
+          id?: string
+          order_item_id?: string | null
+          original_amount?: number | null
+          pool_minutes_granted?: number | null
+          pool_session_id?: string | null
+          promotion_id?: string | null
+          promotion_name_snapshot?: string
+          tab_id?: string | null
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applied_promotions_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applied_promotions_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "product_combo_usage"
+            referencedColumns: ["parent_order_item_id"]
+          },
+          {
+            foreignKeyName: "applied_promotions_pool_session_id_fkey"
+            columns: ["pool_session_id"]
+            isOneToOne: false
+            referencedRelation: "pool_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applied_promotions_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applied_promotions_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "product_combo_usage"
+            referencedColumns: ["tab_id"]
+          },
+          {
+            foreignKeyName: "applied_promotions_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "tabs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -1474,6 +1568,108 @@ export type Database = {
         }
         Relationships: []
       }
+      promotion_availability: {
+        Row: {
+          created_at: string
+          days_of_week: number[]
+          end_date: string | null
+          end_time: string | null
+          id: string
+          promotion_id: string
+          start_date: string | null
+          start_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          days_of_week?: number[]
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          promotion_id: string
+          start_date?: string | null
+          start_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[]
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          promotion_id?: string
+          start_date?: string | null
+          start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_availability_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotions: {
+        Row: {
+          created_at: string
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          name: string
+          priority: number
+          target_category_id: string | null
+          target_product_id: string | null
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean
+          name: string
+          priority?: number
+          target_category_id?: string | null
+          target_product_id?: string | null
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority?: number
+          target_category_id?: string | null
+          target_product_id?: string | null
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_target_category_id_fkey"
+            columns: ["target_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_target_product_id_fkey"
+            columns: ["target_product_id"]
+            isOneToOne: false
+            referencedRelation: "product_combo_usage"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "promotions_target_product_id_fkey"
+            columns: ["target_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rappi_orders: {
         Row: {
           accepted_at: string | null
@@ -2370,17 +2566,33 @@ export type Database = {
         }
         Returns: undefined
       }
+      evaluate_promotions_for_item: {
+        Args: { p_order_item_id: string }
+        Returns: undefined
+      }
       force_pin_change: {
         Args: { p_staff_id: string; p_terminal_id?: string }
         Returns: Json
       }
       get_caja_report: { Args: { p_caja_id: string }; Returns: Json }
+      get_payments_split_columns: {
+        Args: never
+        Returns: {
+          column_name: string
+          data_type: string
+          is_nullable: string
+        }[]
+      }
       get_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
       is_combo_available: {
         Args: { p_combo_id: string; p_ts: string }
+        Returns: boolean
+      }
+      is_promotion_available: {
+        Args: { p_promotion_id: string; p_ts: string }
         Returns: boolean
       }
       list_caja_sessions: { Args: { p_limit?: number }; Returns: Json }
@@ -2425,6 +2637,21 @@ export type Database = {
           p_reason: string
         }
         Returns: string
+      }
+      process_split_payment_atomic: {
+        Args: {
+          p_discount_amount?: number
+          p_discount_scope?: string
+          p_discount_type?: string
+          p_discount_value?: number
+          p_expected_total: number
+          p_expected_version?: number
+          p_idempotency_key: string
+          p_legs: Json
+          p_staff_id: string
+          p_tab_id: string
+        }
+        Returns: Json
       }
       produce_prep_batch: {
         Args: {
@@ -2505,6 +2732,10 @@ export type Database = {
       }
       split_tab_evenly: {
         Args: { p_n: number; p_parent_tab_id: string }
+        Returns: Json
+      }
+      stop_pool_session: {
+        Args: { p_expected_version?: number; p_session_id: string }
         Returns: Json
       }
       transfer_pool_session: {
