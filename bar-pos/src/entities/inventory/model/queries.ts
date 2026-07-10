@@ -50,8 +50,10 @@ function mapInventoryRow(row: InventoryRow): Result<Inventory> {
               name: row.product.category.name,
               color: row.product.category.color,
               sortOrder: row.product.category.sort_order,
-              happyHourStart: row.product.category.happy_hour_start,
-              happyHourEnd: row.product.category.happy_hour_end,
+              // legacy HH start/end columns retired (Phase 20, D-01) — superseded
+              // by the promotions engine; always null.
+              happyHourStart: null,
+              happyHourEnd: null,
               createdAt: new Date(row.product.category.created_at),
             })
           : undefined;
@@ -60,7 +62,9 @@ function mapInventoryRow(row: InventoryRow): Result<Inventory> {
         name: row.product.name,
         categoryId: row.product.category_id,
         basePrice: row.product.base_price,
-        happyHourPrice: row.product.happy_hour_price,
+        // legacy HH price column retired (Phase 20, D-01) — superseded by the
+        // promotions engine; always null.
+        happyHourPrice: null,
         sku: row.product.sku,
         isActive: row.product.is_active,
         imageUrl: row.product.image_url,

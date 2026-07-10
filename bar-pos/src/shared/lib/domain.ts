@@ -181,7 +181,18 @@ export const CategorySchema = z.object({
   name: z.string().min(1).max(50),
   color: HexColorSchema,
   sortOrder: z.number().int().nonnegative(),
+  /**
+   * DEPRECATED — superseded by the promotions engine (Phase 20, D-01).
+   * Always null now; kept nullable (not a JSDoc `@deprecated` tag — that
+   * trips `@typescript-eslint/no-deprecated` across the remaining client
+   * display consumers, which Plan 20-11 removes) to bound blast radius
+   * pending that housekeeping removal.
+   */
   happyHourStart: TimeStringSchema.nullable(),
+  /**
+   * DEPRECATED — superseded by the promotions engine (Phase 20, D-01).
+   * Always null now; see {@link happyHourStart} for the full rationale.
+   */
   happyHourEnd: TimeStringSchema.nullable(),
   routing: CategoryRoutingSchema.default('NONE'),
   /** Parent category id for hierarchical nesting (max depth 3). Null = root category. */
@@ -228,6 +239,13 @@ export const ProductSchema = z.object({
   name: z.string().min(1).max(100),
   categoryId: UuidSchema,
   basePrice: MoneySchema,
+  /**
+   * DEPRECATED — superseded by the promotions engine (Phase 20, D-01).
+   * Always null now; kept nullable (not a JSDoc `@deprecated` tag — that
+   * trips `@typescript-eslint/no-deprecated` across the remaining client
+   * display consumers, which Plan 20-11 removes) to bound blast radius
+   * pending that housekeeping removal.
+   */
   happyHourPrice: MoneySchema.nullable(),
   sku: z.string().nullable(),
   isActive: z.boolean(),
