@@ -549,8 +549,7 @@ describe('PromotionTargetTypeSchema', () => {
 });
 
 describe('PromotionSchema / PromotionCreateSchema', () => {
-  const validPromotion = {
-    id: UUID,
+  const draft = {
     name: 'Happy Hour Beer',
     discountType: 'percentage' as const,
     discountValue: 20,
@@ -559,8 +558,8 @@ describe('PromotionSchema / PromotionCreateSchema', () => {
     targetCategoryId: UUID2,
     priority: 1,
     isActive: true,
-    createdAt: NOW,
   };
+  const validPromotion = { ...draft, id: UUID, createdAt: NOW };
 
   it('round-trips a well-formed promotion object', () => {
     const result = PromotionSchema.safeParse(validPromotion);
@@ -573,19 +572,16 @@ describe('PromotionSchema / PromotionCreateSchema', () => {
   });
 
   it('PromotionCreateSchema rejects a negative discountValue', () => {
-    const { id: _id, createdAt: _createdAt, ...draft } = validPromotion;
     const result = PromotionCreateSchema.safeParse({ ...draft, discountValue: -5 });
     expect(result.success).toBe(false);
   });
 
   it('PromotionCreateSchema rejects a percentage discountValue over 100', () => {
-    const { id: _id, createdAt: _createdAt, ...draft } = validPromotion;
     const result = PromotionCreateSchema.safeParse({ ...draft, discountValue: 150 });
     expect(result.success).toBe(false);
   });
 
   it('PromotionCreateSchema accepts a fixed_amount discountValue over 100 (unbounded)', () => {
-    const { id: _id, createdAt: _createdAt, ...draft } = validPromotion;
     const result = PromotionCreateSchema.safeParse({
       ...draft,
       discountType: 'fixed_amount',
