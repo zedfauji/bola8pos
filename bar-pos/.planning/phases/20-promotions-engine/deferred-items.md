@@ -122,3 +122,55 @@ e2e/43-promotions.spec.ts` browser run was not re-attempted in this gap-closure 
 1420 was still occupied by a sibling parallel worktree agent's dev server. `--list` had already
 confirmed both tests load/enumerate cleanly in the prior session; a full browser run remains a
 recommended follow-up once a port is free, but does not block this correctness fix.
+
+## Plan 20-10, Task 1
+
+**Scope expansion beyond the plan's `files_modified` list (Rule 1/3 — bug/blocking, not
+architectural):** `src/entities/tab/model/queries.ts` and `src/entities/inventory/model/queries.ts`
+were NOT in this plan's stated file list, but both directly read the raw `happy_hour_start`,
+`happy_hour_end`, and `happy_hour_price` DB columns (a `CategoryEmbed` interface + an explicit
+column list inside `tabListSelect`'s nested `category:categories(...)` select in
+`tab/model/queries.ts`; row-mapper reads off fully-typed `Tables<'products'>`/`Tables<'categories'>`
+joins in `inventory/model/queries.ts`). Left unfixed, Plan 20-10 Task 2's own acceptance criterion
+("`npm run typecheck` exits 0" after the column drop) would fail (TS2339 — property does not
+exist on the regenerated `Tables<'categories'>`/`Tables<'products'>` types), AND the live
+`tabListSelect` query (used by `useTabs`/`useTab`/`useSubTabs` — the core order-taking read path)
+would break at runtime with a PostgREST "column does not exist" error the moment the columns are
+dropped, since it explicitly lists `happy_hour_start, happy_hour_end` in its embedded category
+select. Both files were updated in Task 1's commit using the same "supply `null`" pattern as the
+plan's originally-listed files. Verified: `npm run typecheck` green (only the 2 pre-existing
+documented errors remain), `npm run lint` exit 0, full unit suite 1247/1248 pass (only the
+pre-existing `useCloseTab.test.ts:95` failure).
+
+**`@deprecated` JSDoc tag reverted to a plain "DEPRECATED" comment (Rule 1 — bug):** The plan's
+Task 1 action said to annotate `happyHourStart`/`happyHourEnd`/`happyHourPrice` in `domain.ts`
+with a JSDoc `@deprecated` tag. Doing so literally trips the project's
+`@typescript-eslint/no-deprecated` ESLint rule (`max-warnings 0`) at every remaining consumer of
+those fields — `ProductCard.tsx`, `CatalogProductsTab.tsx`, and `domain-helpers.ts`
+(`resolveProductPrice`/`isHappyHourActive`) — none of which are in Plan 20-10's scope; their
+removal is explicitly Plan 20-11's job. A literal `@deprecated` tag would break `npm run lint`
+project-wide from this plan's own commit until Plan 20-11 lands. Fixed by using a plain
+"DEPRECATED — ..." doc comment (not the JSDoc `@deprecated` tag syntax) that documents the same
+intent without invoking the linter rule. `npm run lint` confirmed exit 0 after the change.
+
+**Runtime-only gap flagged for awareness (NOT fixed, out of scope for Task 1 — a Plan 20-09 test
+file):** `src/entities/promotion/model/hh-parity.integration.test.ts` (created by Plan 20-09,
+not in Plan 20-10's `files_modified`) directly `.insert()`s and `.select()`s the raw
+`happy_hour_start`/`happy_hour_end`/`happy_hour_price` columns against a `createClient(...) as any`
+client. Because the client is cast to `any`, this does NOT break `npm run typecheck` (confirmed —
+typecheck is green with this file unmodified). It WILL break at runtime the moment Task 2's
+column drop is pushed live: its `beforeAll` fixture inserts a category/product row with those
+columns, which will fail once the columns no longer exist. The test file's own comment already
+acknowledges this ("columns still present — this plan runs BEFORE Plan 20-10's column drop").
+This is expected obsolescence documented by its own author (Plan 20-09), not a new defect
+introduced here — flagged so whoever runs Task 2 / a subsequent full `npm run test` is not
+surprised by a new failure in this specific file. No fix applied (out of scope for Task 1;
+retiring/updating this test is not listed in either Plan 20-10 or Plan 20-11's `files_modified`
+and should be tracked as its own follow-up).
+
+**Non-blocking drift noted, not fixed:** `src/shared/lib/supabase-contracts.ts` also contains
+`happy_hour_start`/`happy_hour_end`/`happy_hour_price` field entries, but this file is an
+explicitly-labeled "Placeholder for Supabase generated types" documentation file (see its own
+header comment) that is not imported for its `Database.public.Tables` shape by any real query
+code (verified via `grep -rln "supabase-contracts"` — the only 3 importers use unrelated exports).
+Left untouched; does not affect typecheck or runtime.
