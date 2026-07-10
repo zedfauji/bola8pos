@@ -8,6 +8,7 @@ import { useProducts, useCategories } from '@entities/product/model/queries';
 import type { Product, Modifier } from '@entities/product/model/types';
 import { CategoryTabs } from '@entities/product/ui/CategoryTabs';
 import { ProductCard } from '@entities/product/ui/ProductCard';
+import { useActivePromotions } from '@entities/promotion';
 import { useCartStore } from '@entities/tab/model/cartStore';
 import { useTabStore } from '@entities/tab/model/store';
 import { getCurrentTime } from '@shared/lib/domain-helpers';
@@ -112,6 +113,7 @@ export function ProductGrid({ className }: ProductGridProps) {
     isLoading: categoriesLoading,
     error: categoriesError,
   } = useCategories();
+  const { data: activePromotions } = useActivePromotions();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -168,7 +170,7 @@ export function ProductGrid({ className }: ProductGridProps) {
 
   return (
     <div className={className}>
-      <HappyHourBanner categories={categories ?? []} now={catalogNow} />
+      <HappyHourBanner activePromotions={activePromotions ?? []} />
       {categories && Array.isArray(categories) && categories.length > 0 && (
         <CategoryTabs
           categories={categories}
