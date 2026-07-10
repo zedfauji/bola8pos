@@ -404,27 +404,31 @@ Note the `fixed_price` case does not compound against the prior running price �
 
 **If this table is empty:** N/A — assumptions listed above need confirmation during discuss-phase/planning, particularly A1 (RBAC action) and A4 (combo exclusion), which affect schema/RLS decisions made early.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `promotions` admin writes gate on `manage_products` (reusing the Combos precedent) or a new `manage_promotions` action?**
    - What we know: Combos/Products/Pool Tables/Billing all gate on `manage_products` in `SettingsTabsPanel.tsx`; `role_permissions` is a fixed seed table (bartender=9, manager=17, admin=22, kitchen=4 rows per STATE.md) that would need new seed rows for a new action.
    - What's unclear: Whether product owners consider "promotions" a distinct enough capability to warrant separate RBAC (e.g., a manager who can edit products but shouldn't create discounts).
    - Recommendation: Default to `manage_products` (Assumption A1) unless the user specifies otherwise during planning — lower implementation risk, matches Combos precedent exactly.
+   - **RESOLVED:** 20-01 Task 1 and 20-04 Task 2 adopted `manage_products` gating, per the recommendation.
 
 2. **Does the pool-time billing discount (D-05a) require a new `stop_pool_session` RPC, or can it stay a two-step client-orchestrated write?**
    - What we know: No RPC wraps the current `pool_sessions` stop-write; introducing atomic discount+audit-row writing without an RPC is not safely possible (Pitfall 3).
    - What's unclear: Whether the user considers introducing a new RPC in-scope for this phase, given it touches a currently-client-owned write path that Phase 15 already added optimistic-concurrency handling to.
    - Recommendation: Introduce `stop_pool_session(p_session_id, p_expected_version)` SECURITY DEFINER RPC, following the `close_tab` precedent (Phase 14) of wrapping a previously-raw client write. Flag as a larger task than D-05a's phrasing implies.
+   - **RESOLVED:** 20-05 Task 2 introduces the `stop_pool_session` RPC per the recommendation.
 
 3. **Is the combo prepaid-minutes deduction actually live anywhere in the current stop-session flow?**
    - What we know: `computePoolSessionBilling()` supports `prepaidMinutes`; the only caller found (`useMutationStopSession`) does not pass it.
    - What's unclear: Whether a different, unfound code path wires this (this research's search was not exhaustive of every file).
    - Recommendation: Planner/executor should re-verify with a targeted search before assuming D-05b can "reuse the existing hook" — treat as new wiring work unless proven otherwise.
+   - **RESOLVED:** 20-05 treats D-05b's prepaid-minutes/pool-grant path as new wiring work, per the recommendation — no existing live hook was assumed.
 
 4. **Should `applied_promotions.promotion_id` be `ON DELETE SET NULL` (with a `promotion_name_snapshot` for durability) or `ON DELETE RESTRICT` (never allow deleting a promotion with history)?**
    - What we know: `is_active` (not deletion) is the intended "disable" mechanism (Open Discretion in CONTEXT.md), so deletion should be rare; `tip_distribution_entries` doesn't need this decision (no equivalent "delete the config" flow exists for it).
    - What's unclear: Whether the admin UI will expose a hard-delete action at all for promotions (combos do support delete per `ManageCombosTab.tsx`'s delete button).
    - Recommendation: `ON DELETE SET NULL` + snapshot columns (`promotion_name_snapshot`, `discount_type`, `discount_value` already captured per applied row) preserves audit fidelity even if a promotion is later hard-deleted — matches the "audit rows must survive" spirit of `record_audit`'s design.
+   - **RESOLVED:** 20-03 Task 1 adopted `ON DELETE SET NULL` + snapshot columns, per the recommendation.
 
 ## Environment Availability
 
