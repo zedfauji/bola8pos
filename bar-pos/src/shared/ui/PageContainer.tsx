@@ -21,6 +21,10 @@ export interface PageContainerProps {
   actions?: React.ReactNode;
   /** Additional CSS classes */
   className?: string;
+  /** Optional back-navigation target. Omit to render no back link. */
+  backTo?: string;
+  /** Optional back-link label. Defaults to "Home" when backTo is provided. */
+  backLabel?: string;
 }
 
 /**
@@ -49,6 +53,8 @@ export function PageContainer({
   description,
   actions,
   className,
+  backTo,
+  backLabel,
 }: PageContainerProps) {
   return (
     <div className={cn('mx-auto w-full max-w-[1400px] space-y-6 p-6', className)}>
@@ -57,6 +63,8 @@ export function PageContainer({
         title={title}
         {...(description && { description })}
         {...(actions && { action: actions })}
+        {...(backTo && { backTo })}
+        {...(backLabel && { backLabel })}
       />
 
       {/* Page Content */}

@@ -4,8 +4,12 @@
  * Consistent page/section headers with optional action and badge.
  */
 
+import { ChevronLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 import { cn } from '@shared/lib/utils';
 import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
 
 export type SectionHeaderProps = {
   /** Section title */
@@ -18,6 +22,10 @@ export type SectionHeaderProps = {
   badge?: string | number;
   /** Additional CSS classes */
   className?: string;
+  /** Optional back-navigation target. Omit to render no back link. */
+  backTo?: string;
+  /** Optional back-link label. Defaults to "Home" when backTo is provided. */
+  backLabel?: string;
 };
 
 /**
@@ -39,10 +47,20 @@ export function SectionHeader({
   action,
   badge,
   className,
+  backTo,
+  backLabel,
 }: SectionHeaderProps) {
   return (
     <div className={cn('flex items-start justify-between gap-4 border-b pb-4', className)}>
       <div className="space-y-1">
+        {backTo && (
+          <Button variant="ghost" size="sm" asChild className="-ml-2.5 h-6 px-2 text-xs">
+            <Link to={backTo}>
+              <ChevronLeft className="mr-1 h-3.5 w-3.5" />
+              {backLabel ?? 'Home'}
+            </Link>
+          </Button>
+        )}
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
           {badge !== undefined && (
