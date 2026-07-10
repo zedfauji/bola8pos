@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
-status: executing
-stopped_at: Phase 29 context gathered
-last_updated: "2026-07-10T18:58:13.903Z"
-last_activity: 2026-07-10 -- Phase 29 execution started
+status: Phase 29 complete, awaiting /gsd-plan-phase 30
+stopped_at: Phase 29 verified passed
+last_updated: "2026-07-10T00:00:00.000Z"
+last_activity: 2026-07-10 -- Phase 29 (ui-drift-audit) complete and verified
 progress:
   total_phases: 35
-  completed_phases: 16
+  completed_phases: 17
   total_plans: 110
-  completed_plans: 119
-  percent: 46
+  completed_plans: 120
+  percent: 49
 ---
 
 # Session State
@@ -22,13 +22,14 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 29 (ui-drift-audit) — EXECUTING
-Plan: 1 of 1
-Status: Executing Phase 29
-Last activity: 2026-07-10 -- Phase 29 execution started
+Phase: 30 (shared-shell-primitive-extension) — not yet planned
+Plan: —
+Status: Phase 29 complete, ready for /gsd-plan-phase 30
+Last activity: 2026-07-10 -- Phase 29 (ui-drift-audit) complete and verified
 
 ## Session Log
 
+- 2026-07-10: **Phase 29 (ui-drift-audit) COMPLETE — verified passed** — `scripts/audit-ui-drift.ts` scanner + `.planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md` backlog committed (20 button / 8 input / 3 hex / 0 spacing files; 17 real routes vs 14 CLAUDE.md rows, missing `/kds`, `/kitchen-prep`, `/audit`). First verifier pass found a real bug: per-line regex missed `<button>`/`<input>` tags whose attributes wrap to a new line (Prettier's default JSX formatting) — undercounted 10/3 instead of 20/8, missing `src/pages/pos/index.tsx`. Fixed by scanning whole-file content instead of per-line (`\s` then matches the newline itself) — commits `ce8c38c` + regenerated `DRIFT-AUDIT.md`. Re-verification PASS, 5/5 must-haves, zero `src/` files modified, typecheck limited to the 2 pre-existing unrelated errors. Ready for `/gsd-plan-phase 30`.
 - 2026-07-10: **Phase 29 (ui-drift-audit) planned** — RESEARCH.md (verified live-repo counts: 20 raw-button files, 8 raw-input files, 3 hex-color files, 0 arbitrary-spacing files, 17 real routes vs 14 CLAUDE.md table rows, corrects CONTEXT.md's stale "28 button files" scouting note) + VALIDATION.md (Nyquist, manual-only baseline-diff verification, `nyquist_compliant: true`) + `29-01-PLAN.md` (1 wave, 2 tasks: build `scripts/audit-ui-drift.ts` filtered fs-walk+regex scanner citing RESEARCH's verified baseline, then generate/commit `.planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md` checklist). plan-checker PASS (1 non-blocking cosmetic warning: RESEARCH.md Open Questions section missing `(RESOLVED)` suffix). Ready for `/gsd-execute-phase 29`.
 - 2026-07-10: **v2.2 ROADMAP.md created** — 7 phases (29-35) derived from REQUIREMENTS.md (22 requirement IDs, categories Audit/Shell/Token/Component/Touch/Focus/Visual/Docs/Lint), following the risk-tiered rollout order from research/SUMMARY.md: 29 UI Drift Audit (read-only) -> 30 Shared Shell & Primitive Extension (isolated, all 17 routes) -> 31 Component/Token/Spacing Sweep (non-payment pages) -> 32 Touch Target & Focus-Visible Sweep (operational/realtime pages) -> 33 Payment-Critical Page Sweep (isolated, gated by 05-payments/41-split-payment/42-tip-distribution/06-transfer/09-rbac) -> 34 Visual Regression Baseline (post-fix only) -> 35 Guardrails (tokens doc + drift-lint, post-conformance). 100% requirement coverage validated, no orphans. Appended after existing Phase 28 in ROADMAP.md; v2.1 phases 20-28 untouched. REQUIREMENTS.md traceability section populated. Ready for /gsd-plan-phase 29.
 - 2026-07-08: **Phase 19 (tip-distribution-config) planned** — RESEARCH.md + VALIDATION.md + 6 PLAN.md files (4 waves) written; plan-checker PASS. Key decisions: `tip_distribution` config reuses the existing generic `settings(key,value jsonb)` table (no new config table); `tip_distribution_entries` is a new append-only table (audit_logs-style RLS, no update/delete policy); `close_caja_session` RPC extended to compute the 3-way split via largest-remainder rounding in the same transaction, bundling a fix for a pre-existing missed `version+1` bump bug (would have raised STALE_VERSION on every caja close once Phase 15's trigger fires); new Settings/Reports tab labeled "Tip Split" to avoid colliding with the existing per-staff "Tip Distribution" tab; default split 34/33/33. Plan 19-03 has a BLOCKING db-push checkpoint, 19-06 has a BLOCKING human-UAT checkpoint. Ready for /gsd-execute-phase 19.
