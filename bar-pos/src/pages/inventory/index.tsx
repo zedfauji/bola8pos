@@ -5,7 +5,7 @@ import { PhysicalCountForm } from '@features/physical-count';
 import { LowStockBadge, useInventoryAlerts, useInventoryRealtimeBridge } from '@entities/inventory';
 import { useStaffStore } from '@entities/staff/model/store';
 import { canAccess } from '@shared/lib/rbac';
-import { BackToHomeButton, Button } from '@shared/ui';
+import { Button, PageContainer } from '@shared/ui';
 
 /**
  * Fires a Sonner toast whenever a new low-stock alert arrives.
@@ -52,29 +52,32 @@ function InventoryPageInner() {
 
   return (
     <div className="flex h-screen flex-col">
-      <BackToHomeButton />
-      <main className="flex-1 overflow-auto p-6 md:p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="flex items-center text-3xl font-bold">
-            Inventory
-            <LowStockBadge />
-          </h1>
+      <main className="flex-1 overflow-auto">
+        <PageContainer
+          title="Inventory"
+          backTo="/home"
+          actions={
+            <>
+              <LowStockBadge />
+              {canPhysicalCount && (
+                <Button
+                  variant="outline"
+                  data-testid="physical-count-btn"
+                  onClick={() => {
+                    setPhysicalCountOpen(true);
+                  }}
+                >
+                  Physical Count
+                </Button>
+              )}
+            </>
+          }
+        >
+          <InventoryPagePanel />
           {canPhysicalCount && (
-            <Button
-              variant="outline"
-              data-testid="physical-count-btn"
-              onClick={() => {
-                setPhysicalCountOpen(true);
-              }}
-            >
-              Physical Count
-            </Button>
+            <PhysicalCountForm open={physicalCountOpen} onOpenChange={setPhysicalCountOpen} />
           )}
-        </div>
-        <InventoryPagePanel />
-        {canPhysicalCount && (
-          <PhysicalCountForm open={physicalCountOpen} onOpenChange={setPhysicalCountOpen} />
-        )}
+        </PageContainer>
       </main>
     </div>
   );
