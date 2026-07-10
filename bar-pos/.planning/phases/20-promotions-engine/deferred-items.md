@@ -64,3 +64,17 @@ inline. **Flagged explicitly in the Task 3 UAT checkpoint** for human awareness 
 authorizing Plan 20-10's column drop — recommend a follow-up plan/migration
 (`evaluate_promotions_for_item`'s PERFORM call moved outside the `p_skip_depletion` guard in
 `create_order_with_items`) before or shortly after the drop.
+
+**Corroboration during Task 3's automation-first run:** re-running the FULL live promotion
+integration suite (`npx vitest run src/entities/promotion/model/`) as required by Task 3
+reproduces this same bug in a SECOND, independent test file:
+`pool-promotions-rpc.integration.test.ts`'s `pool_grant` case (Plan 20-05) also passes
+`p_skip_depletion: true` and fails identically (`expected [] to have a length of 1 but got +0` —
+zero unconsumed `pool_minutes_granted` rows, because the pool_grant loop inside
+`evaluate_promotions_for_item` never ran). This confirms the bug is not test-authoring error
+specific to this plan — it is a real, live defect affecting TWO of the six Phase-20 promotion
+integration test files (`evaluate-promotions-rpc.integration.test.ts`,
+`pool-promotions-rpc.integration.test.ts`), and by extension the
+`override-negative-stock` production order path. Task 3's acceptance criterion "All live
+promotion integration tests pass against the live DB" is currently **NOT met** for this reason —
+surfaced explicitly at the blocking checkpoint rather than silently reported as green.
