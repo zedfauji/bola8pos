@@ -1,6 +1,14 @@
 import fc from 'fast-check';
 import { describe, it, expect } from 'vitest';
-import type { Category, CartItem, Order, PoolSessionSummary, Product } from './domain';
+import type {
+  Category,
+  CartItem,
+  Order,
+  PoolSessionSummary,
+  Product,
+  Promotion,
+  PromotionAvailability,
+} from './domain';
 import {
   calculatePoolCharge,
   resolveProductPrice,
@@ -10,6 +18,7 @@ import {
   formatMoney,
   formatElapsed,
   isHappyHourActive,
+  isPromotionActive,
   generateIdempotencyKey,
   getDiscountBase,
   calculateDiscountAmount,
@@ -796,5 +805,59 @@ describe('isHappyHourActive — boundary tests (Sprint 2)', () => {
       happyHourEnd: '02:00',
     };
     expect(isHappyHourActive(midnightCategory, new Date('2024-01-01T02:00:00'))).toBe(false);
+  });
+});
+
+describe('isPromotionActive', () => {
+  // COSMETIC / DISPLAY-ONLY — never feeds a mutation payload (Pitfall 1).
+  const basePromotion: Promotion = {
+    id: '00000000-0000-0000-0000-000000000010',
+    name: 'Test Promotion',
+    discountType: 'percentage',
+    discountValue: 20,
+    targetType: 'item',
+    targetProductId: null,
+    targetCategoryId: null,
+    priority: 0,
+    isActive: true,
+    createdAt: new Date('2024-01-01T00:00:00'),
+  };
+
+  function makeWindow(overrides?: Partial<PromotionAvailability>): PromotionAvailability {
+    return {
+      id: '00000000-0000-0000-0000-000000000011',
+      promotionId: basePromotion.id,
+      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+      startTime: null,
+      endTime: null,
+      startDate: null,
+      endDate: null,
+      createdAt: new Date('2024-01-01T00:00:00'),
+      ...overrides,
+    };
+  }
+
+  it('no windows → always active (true)', () => {
+    // 2024-01-08 is a Monday
+    expect(isPromotionActive(basePromotion, [], new Date('2024-01-08T20:00:00'))).toBe(true);
+  });
+
+  it('inside window → true', () => {
+    const window = makeWindow({ daysOfWeek: [1], startTime: '16:00', endTime: '18:00' });
+    // 2024-01-08 is a Monday, 17:00 is inside 16:00-18:00
+    expect(isPromotionActive(basePromotion, [window], new Date('2024-01-08T17:00:00'))).toBe(true);
+  });
+
+  it('outside window → false', () => {
+    const window = makeWindow({ daysOfWeek: [1], startTime: '16:00', endTime: '18:00' });
+    // 2024-01-08 is a Monday, 20:00 is outside 16:00-18:00
+    expect(isPromotionActive(basePromotion, [window], new Date('2024-01-08T20:00:00'))).toBe(
+      false
+    );
+  });
+
+  it('inactive promotion (isActive false) → false, even with no windows', () => {
+    const inactivePromotion: Promotion = { ...basePromotion, isActive: false };
+    expect(isPromotionActive(inactivePromotion, [], new Date('2024-01-08T17:00:00'))).toBe(false);
   });
 });

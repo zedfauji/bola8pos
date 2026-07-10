@@ -32,4 +32,6 @@ export {
   useMutationDeletePromotion,
   usePromotionAvailabilityWindows,
   usePromotionActive,
+  useActivePromotions,
 } from './queries';
+export type { ActivePromotionEntry } from './queries';

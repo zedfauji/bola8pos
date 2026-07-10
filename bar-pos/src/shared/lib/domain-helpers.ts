@@ -15,6 +15,8 @@ import type {
   DiscountType,
   RecipeWithItems,
   ModifierInventoryRule,
+  Promotion,
+  PromotionAvailability,
 } from './domain';
 import { computePoolSessionBilling } from './pool-billing';
 
@@ -420,4 +422,67 @@ export function computeModifierDepletion(
     deltas.set(rule.ingredientId, (deltas.get(rule.ingredientId) ?? 0) + delta);
   }
   return deltas;
+}
+
+/**
+ * Checks if a promotion is currently active — COSMETIC / DISPLAY-ONLY.
+ *
+ * Mirrors the server-side `is_promotion_available()` PL/pgSQL evaluator (see
+ * 20-RESEARCH.md Pattern 1): `promotion.isActive === false` is always inactive;
+ * zero availability windows means always-active; otherwise the current day
+ * (ISO day-of-week, 1=Mon..7=Sun) and time (and optional date range) must fall
+ * inside at least one window.
+ *
+ * THIS HELPER MUST NEVER BE USED TO COMPUTE A CHARGED PRICE. It exists only for
+ * read-only UI affordances (e.g. the "Active Promotions" banner) — the value it
+ * returns must never feed a mutation payload sent to `create_order_with_items`.
+ * `evaluate_promotions_for_item` (server) is the sole authority for the charged
+ * `unit_price` (see 20-RESEARCH.md Pitfall 1).
+ *
+ * @param promotion - The promotion to check
+ * @param windows - The promotion's availability windows (empty = always available)
+ * @param currentTime - Optional time to check (defaults to now)
+ * @returns True if the promotion is active right now
+ *
+ * @example
+ * // No windows configured — always active (while isActive is true)
+ * isPromotionActive(promotion, [])
+ * // Returns: true
+ *
+ * @example
+ * // Outside every configured window — inactive
+ * isPromotionActive(promotion, [{ daysOfWeek: [1], startTime: '16:00', endTime: '18:00', ... }], new Date('2024-01-08T20:00:00'))
+ * // Returns: false (2024-01-08 is a Monday, but 20:00 is outside 16:00-18:00)
+ */
+export function isPromotionActive(
+  promotion: Promotion,
+  windows: PromotionAvailability[],
+  currentTime: Date = new Date()
+): boolean {
+  if (!promotion.isActive) return false;
+  if (windows.length === 0) return true;
+
+  // Convert JS day (0=Sun) to ISO day (1=Mon..7=Sun), matching is_promotion_available's EXTRACT(ISODOW).
+  const jsDay = currentTime.getDay();
+  const isoDay = jsDay === 0 ? 7 : jsDay;
+
+  const hh = String(currentTime.getHours()).padStart(2, '0');
+  const mm = String(currentTime.getMinutes()).padStart(2, '0');
+  const timeStr = `${hh}:${mm}`;
+
+  const year = currentTime.getFullYear();
+  const month = String(currentTime.getMonth() + 1).padStart(2, '0');
+  const day = String(currentTime.getDate()).padStart(2, '0');
+  const dateStr = `${String(year)}-${month}-${day}`;
+
+  for (const window of windows) {
+    if (!window.daysOfWeek.includes(isoDay)) continue;
+    if (window.startTime != null && timeStr < window.startTime.slice(0, 5)) continue;
+    if (window.endTime != null && timeStr > window.endTime.slice(0, 5)) continue;
+    if (window.startDate != null && dateStr < window.startDate) continue;
+    if (window.endDate != null && dateStr > window.endDate) continue;
+    return true;
+  }
+
+  return false;
 }
