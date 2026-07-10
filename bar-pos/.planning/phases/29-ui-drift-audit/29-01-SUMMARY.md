@@ -110,3 +110,12 @@ None beyond the deviations documented above.
 ---
 *Phase: 29-ui-drift-audit*
 *Completed: 2026-07-10*
+
+## Self-Check: PASSED
+
+- FOUND: scripts/audit-ui-drift.ts
+- FOUND: .planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md
+- FOUND: .planning/phases/29-ui-drift-audit/29-01-SUMMARY.md
+- FOUND commit: 6227dbb (feat: add UI drift audit scanner script)
+- FOUND commit: 85365d9 (chore: commit DRIFT-AUDIT.md backlog)
+- FOUND commit: bec02f6 (docs: complete UI drift audit plan)
