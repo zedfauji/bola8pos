@@ -12,8 +12,8 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 ### Shell
 
 - [x] **SHELL-01**: Every route uses a single shared layout shell (`PageContainer` extended with `backTo`/`backLabel`) instead of ad-hoc per-page wrappers
-- [ ] **SHELL-02**: Dead `AppShell`/`AppNav` components (zero real consumers) are removed, not resurrected
-- [ ] **SHELL-03**: `CLAUDE.md` routes table is corrected to match the router's actual 17 registered routes
+- [x] **SHELL-02**: Dead `AppShell`/`AppNav` components (zero real consumers) are removed, not resurrected
+- [x] **SHELL-03**: `CLAUDE.md` routes table is corrected to match the router's actual 17 registered routes
 
 ### Token
 
@@ -73,8 +73,8 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 | AUDIT-01 | Phase 29 | Pending |
 | AUDIT-02 | Phase 29 | Pending |
 | SHELL-01 | Phase 30 | Complete |
-| SHELL-02 | Phase 30 | Pending |
-| SHELL-03 | Phase 30 | Pending |
+| SHELL-02 | Phase 30 | Complete |
+| SHELL-03 | Phase 30 | Complete |
 | TOKEN-01 | Phase 31 | Pending |
 | TOKEN-02 | Phase 31 | Pending |
 | COMPONENT-01 | Phase 31 | Pending |

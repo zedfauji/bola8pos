@@ -59,7 +59,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 App-wide UI consistency pass enforcing existing shadcn/Tailwind conventions across all 17 routes — no new design system, no visual redesign, no UX flow changes. Requirements scoped from `.planning/research/SUMMARY.md`; phases follow a strict risk-tiered rollout (audit → shell/primitives → low-risk sweep → operational sweep → payment-critical sweep → visual baseline → guardrails).
 
 - [x] **Phase 29: UI Drift Audit** — File-mapped inventory of raw buttons/inputs, hardcoded colors, arbitrary-value spacing across all 17 routes (completed 2026-07-10)
-- [ ] **Phase 30: Shared Shell & Primitive Extension** — Every route on one `PageContainer` shell; dead `AppShell`/`AppNav` removed; `CLAUDE.md` routes table corrected
+- [x] **Phase 30: Shared Shell & Primitive Extension** — Every route on one `PageContainer` shell; dead `AppShell`/`AppNav` removed; `CLAUDE.md` routes table corrected (completed 2026-07-10)
 - [ ] **Phase 31: Component, Token & Spacing Consistency Sweep** — Non-payment pages use `shared/ui` primitives + Tailwind tokens + spacing scale
 - [ ] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings
 - [ ] **Phase 33: Payment-Critical Page Sweep (Isolated)** — POS/payments/split/refund/tip surfaces standardized, zero behavior change, gated by existing E2E specs
@@ -765,16 +765,16 @@ Plans:
 **Goal:** Every one of the 17 routes uses a single canonical layout shell instead of ad-hoc per-page wrappers; dead navigation code is deleted rather than resurrected; `CLAUDE.md` matches the router's actual routes. This is the lowest-blast-radius change in the milestone (isolated layout-wrapper swap, not a deep component change) so it lands before the risk-tiered page sweeps and everything downstream builds on it.
 **Requirements:** SHELL-01, SHELL-02, SHELL-03
 **Depends on:** Phase 29
-**Plans:** 1/5 plans executed
+**Plans:** 5/5 plans complete
 **UI hint**: yes
 
 Plans:
 
 - [x] 30-01-PLAN.md — Extend PageContainer/SectionHeader with backTo/backLabel + Wave-0 PageContainer.test.tsx (Wave 1) (SHELL-01)
-- [ ] 30-02-PLAN.md — Pattern B: swap BackToHomeButton -> backTo on the 7 existing-PageContainer pages (kds, kds-bar, kitchen-prep, pool-tables, rappi, rbac, waitlist) (Wave 2) (SHELL-01)
-- [ ] 30-03-PLAN.md — Pattern A: first-time PageContainer adoption for audit, settings, staff, inventory, reports (Wave 2) (SHELL-01)
-- [ ] 30-04-PLAN.md — Pattern C+D: full-bleed className override for pos/payments + corrected backTo=/pool-tables for pool-table-status (Wave 2) (SHELL-01)
-- [ ] 30-05-PLAN.md — Delete BackToHomeButton/AppShell/AppNav + barrel exports + CLAUDE.md routes-table fix (17 rows) + phase gate (Wave 3) (SHELL-01, SHELL-02, SHELL-03)
+- [x] 30-02-PLAN.md — Pattern B: swap BackToHomeButton -> backTo on the 7 existing-PageContainer pages (kds, kds-bar, kitchen-prep, pool-tables, rappi, rbac, waitlist) (Wave 2) (SHELL-01)
+- [x] 30-03-PLAN.md — Pattern A: first-time PageContainer adoption for audit, settings, staff, inventory, reports (Wave 2) (SHELL-01)
+- [x] 30-04-PLAN.md — Pattern C+D: full-bleed className override for pos/payments + corrected backTo=/pool-tables for pool-table-status (Wave 2) (SHELL-01)
+- [x] 30-05-PLAN.md — Delete BackToHomeButton/AppShell/AppNav + barrel exports + CLAUDE.md routes-table fix (17 rows) + phase gate (Wave 3) (SHELL-01, SHELL-02, SHELL-03)
 
 **Success Criteria:**
 

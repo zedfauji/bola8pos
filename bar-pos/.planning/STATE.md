@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
 status: executing
-stopped_at: Completed 30-01-PLAN.md
-last_updated: "2026-07-10T20:11:48.618Z"
+stopped_at: Completed 30-05-PLAN.md (Phase 30 complete)
+last_updated: "2026-07-10T20:36:52.758Z"
 last_activity: 2026-07-10 -- Phase 30 execution started
 progress:
   total_phases: 35
   completed_phases: 17
   total_plans: 116
-  completed_plans: 121
+  completed_plans: 125
   percent: 49
 ---
 
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 30 (shared-shell-primitive-extension) — EXECUTING
-Plan: 2 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-07-10 -- Phase 30 execution started
 
@@ -190,6 +190,7 @@ Last activity: 2026-07-10 -- Phase 30 execution started
 - [Phase ?]: [Phase 17-modifier-inventory-rules 17-05]: Task 3's blocking checkpoint:human-verify was satisfied via an orchestrator-authored Playwright e2e spec (e2e/24-modifier-inventory-rules.spec.ts, 1 passed/40.6s, stable across 2 runs) rather than manual browser click-through, covering the full UAT flow including the Pitfall 3 negative-delta round-trip regression guard
 - [Phase ?]: [Phase 17-modifier-inventory-rules 17-05]: Delta hint/label rendered once above the row list (not per-row via FormField) to avoid clutter across N rows while still surfacing the load-bearing signed-delta explanation from 17-UI-SPEC.md
 - [Phase 30-shared-shell-primitive-extension-01]: PageContainer/SectionHeader backTo/backLabel absorb BackToHomeButton's markup inline above the h2 title (per 30-UI-SPEC.md classes), defaulting backLabel to literal 'Home' to preserve the E2E/unit test load-bearing accessible-name contract
+- [Phase 30-shared-shell-primitive-extension 30-05]: Deleted BackToHomeButton/AppShell/AppNav outright with no re-export shim (D-03); CLAUDE.md routes table Notes sourced from KdsRoute/AuditRoute guard checks; targeted E2E (15/16/17) deferred as manual follow-up due to a stray non-Vite process occupying port 1420
 
 ## Performance Metrics
 
@@ -237,10 +238,11 @@ Last activity: 2026-07-10 -- Phase 30 execution started
 | Phase 17-modifier-inventory-rules P03 | ~20min | 2 tasks | 1 files |
 | Phase 17-modifier-inventory-rules P05 | 30min | 2 tasks | 5 files |
 | Phase 30-shared-shell-primitive-extension P01 | 10min | 2 tasks | 3 files |
+| Phase 30-shared-shell-primitive-extension P05 | 15min | 3 tasks | 2 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 30-01-PLAN.md
+- **Stopped at:** Completed 30-05-PLAN.md (Phase 30 complete)
 - **Timestamp:** 2026-07-10
 
 ## Current Position
@@ -249,3 +251,7 @@ Phase: 30 (shared-shell-primitive-extension) — planned
 Plan: 5 plans (30-01..30-05), 3 waves
 Status: RESEARCH.md + PATTERNS.md + VALIDATION.md + 5 PLAN.md files created; plan-checker PASS (no blockers); ready for /gsd-execute-phase 30
 Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel extension (30-01) → 7 Pattern-B pages (30-02) + 5 Pattern-A pages (30-03) + 3 special-case pages incl. pos/payments className override + pool-table-status non-default backTo (30-04) → AppShell/AppNav/BackToHomeButton deletion + CLAUDE.md 17-route table fix (30-05)
+
+### Blockers
+
+- Manual follow-up: run e2e/15-home-navigation.spec.ts, e2e/16-table-status.spec.ts, e2e/17-payment-pane.spec.ts once port 1420 is freed of the stray non-Vite process occupying it
