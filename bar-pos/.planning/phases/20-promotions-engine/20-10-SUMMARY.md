@@ -12,7 +12,7 @@ provides:
   - "Every DB-typed consumer of categories.happy_hour_start/end and products.happy_hour_price neutralized — none read or write the raw columns anymore; all supply the vestigial null Zod fields instead"
   - "CategoryForm.tsx / ProductForm.tsx: happy-hour input fields removed; admins can no longer edit HH via the Category/Product forms"
   - "domain.ts: happyHourStart/End/Price documented as deprecated-but-vestigial (Phase 20, D-01), still nullable, pending Plan 20-11 removal"
-  - "Task 2 (the DROP COLUMN migration + BLOCKING push) NOT executed — plan paused at the checkpoint per the plan's autonomous:false + gate=blocking-human contract"
+  - "Task 2 (the DROP COLUMN migration + BLOCKING push) executed and committed: categories.happy_hour_start/end and products.happy_hour_price are dropped live on the shsrhxleopmovzpzqmex project, verified via information_schema, types regenerated, typecheck/lint/test green"
 affects: [20-11]
 
 # Tech tracking
@@ -22,7 +22,8 @@ tech-stack:
     - "Non-JSDoc-tag deprecation comments (\"DEPRECATED — ...\" instead of the literal `@deprecated` JSDoc tag) used in domain.ts to document vestigial fields without tripping @typescript-eslint/no-deprecated at the remaining (Plan-20-11-scoped) client display consumers"
 
 key-files:
-  created: []
+  created:
+    - supabase/migrations/20260711000001_drop_happy_hour_columns.sql
   modified:
     - src/entities/category/model/queries.ts
     - src/entities/product/model/queries.ts
@@ -32,6 +33,7 @@ key-files:
     - src/shared/lib/domain.ts
     - src/entities/tab/model/queries.ts
     - src/entities/inventory/model/queries.ts
+    - src/shared/lib/supabase.types.ts
     - .planning/phases/20-promotions-engine/deferred-items.md
 
 key-decisions:
@@ -39,23 +41,25 @@ key-decisions:
   - "Used a plain 'DEPRECATED — ...' doc comment in domain.ts instead of the plan-specified literal JSDoc @deprecated tag — the real @deprecated tag trips @typescript-eslint/no-deprecated (max-warnings 0) at ProductCard.tsx/CatalogProductsTab.tsx/domain-helpers.ts, none of which are in this plan's scope (Plan 20-11 removes them); the literal tag would have broken npm run lint project-wide from this plan's own commit until 20-11 lands (Rule 1 — bug)"
   - "CategoryForm/ProductForm still pass happyHourStart/End/Price: null explicitly in their Zod-parsed submit payloads (not omitted) — the domain.ts fields are nullable but not optional, so the schema key must still be present even with no UI input for it"
   - "CategoryTreeEditor.tsx required no changes — it already had no HH editing affordance and already passed happyHourStart/End: null in its create payload"
+  - "Task 2: human approval ('approved') received for the resume-signal after Plan 20-09's UAT gate; executed the BLOCKING db push non-interactively via the already-authenticated supabase CLI (npx supabase link + db push --yes), matching the plan's 'pause for the human only if the push cannot run non-interactively' instruction — it ran non-interactively, so no additional pause was needed before the push itself"
+  - "supabase gen types typescript also dropped a graphql_public schema block from supabase.types.ts (unrelated to happy_hour) — a byproduct of the live remote's current API schema exposure differing from when types were last regenerated; confirmed unused anywhere in src/ (zero grep matches) so kept as-is rather than hand-reverting an unrelated part of an otherwise-required full regen"
 
-requirements-completed: []
+requirements-completed: [SC-1]
 
 # Metrics
-duration: ~70min
+duration: ~70min (Task 1) + ~25min (Task 2)
 completed: 2026-07-10
 ---
 
-# Phase 20 Plan 10: Retire Happy-Hour Storage (Prep Tasks) Summary
+# Phase 20 Plan 10: Retire Happy-Hour Storage Summary
 
-**Task 1 complete and committed: every DB-typed consumer of the legacy `happy_hour_start/end`/`happy_hour_price` columns (including two files not in the plan's original list) now supplies the vestigial null Zod field instead of reading/writing the raw column, and HH admin editing is removed from the Category/Product forms. Task 2 (the destructive `DROP COLUMN` migration + BLOCKING push) was intentionally NOT executed — the plan paused at its checkpoint exactly as instructed, awaiting explicit human approval on the irreversible step.**
+**Both tasks complete and committed. Task 1 neutralized every DB-typed consumer of the legacy `happy_hour_start/end`/`happy_hour_price` columns and removed HH admin editing from the Category/Product forms. Task 2 — the BLOCKING destructive column drop — was executed after explicit human approval ("approved"): the three legacy columns are now dropped live on the `shsrhxleopmovzpzqmex` project, verified via `information_schema`, `supabase.types.ts` regenerated, and `typecheck`/`lint`/`test` all confirmed green with only pre-existing baseline issues remaining.**
 
 ## Performance
 
-- **Duration:** ~70 min
-- **Tasks:** 1/2 completed (Task 2 is the BLOCKING checkpoint — paused, not executed)
-- **Files modified:** 9 (0 created)
+- **Duration:** ~70 min (Task 1) + ~25 min (Task 2)
+- **Tasks:** 2/2 completed
+- **Files modified:** 9 in Task 1 + 2 in Task 2 (1 created: the drop migration; 1 modified: supabase.types.ts)
 
 ## Accomplishments
 
@@ -75,10 +79,11 @@ completed: 2026-07-10
 Each completed task was committed atomically:
 
 1. **Task 1: Neutralize DB-typed HH consumers + remove HH admin editing** - `f948c8d` (feat)
-2. **Deferred-items documentation update** - `4b4f298` (docs, this session's own deviation log)
-3. **Task 2: [BLOCKING] Drop legacy happy_hour columns + push + update types** - NOT STARTED. Per the checkpoint_note and this plan's `autonomous: false` / `gate="blocking-human"` contract, execution paused here. See "Checkpoint" below.
+2. **Deferred-items documentation update** - `4b4f298` (docs, prior session's own deviation log)
+3. **Task 1 prep summary** - `b02c5a1` (docs, prior session)
+4. **Task 2: [BLOCKING] Drop legacy happy_hour columns + push + update types** - `5475a94` (feat)
 
-_Note: no plan-metadata commit in this run — per parallel-executor instructions, STATE.md/ROADMAP.md updates are owned by the orchestrator after all wave agents complete. Because Task 2 has not run/been approved, this plan is NOT being marked complete._
+_Note: no plan-metadata commit in this run — per parallel-executor instructions, STATE.md/ROADMAP.md updates are owned by the orchestrator after all wave agents complete._
 
 ## Files Created/Modified
 
@@ -91,6 +96,29 @@ _Note: no plan-metadata commit in this run — per parallel-executor instruction
 - `src/entities/tab/model/queries.ts` - (scope expansion) stopped reading happy_hour_price/start/end; removed the 2 HH columns from `tabListSelect`'s explicit category column list
 - `src/entities/inventory/model/queries.ts` - (scope expansion) stopped reading happy_hour_price/start/end off the products/categories join
 - `.planning/phases/20-promotions-engine/deferred-items.md` - logged this session's deviations + a flagged (not fixed) runtime-only gap in Plan 20-09's `hh-parity.integration.test.ts`
+- `supabase/migrations/20260711000001_drop_happy_hour_columns.sql` - (Task 2, created) the BLOCKING destructive drop: `ALTER TABLE categories DROP COLUMN IF EXISTS happy_hour_start/end`, `ALTER TABLE products DROP COLUMN IF EXISTS happy_hour_price`, wrapped in BEGIN/COMMIT + `NOTIFY pgrst, 'reload schema'`
+- `src/shared/lib/supabase.types.ts` - (Task 2) regenerated from the live post-drop schema via `npx supabase gen types typescript --project-id shsrhxleopmovzpzqmex`; zero `happy_hour` references remain
+
+## Task 2 Execution Detail — The BLOCKING Column Drop
+
+**Human approval received:** "approved" (resume-signal per the plan's checkpoint contract), authorizing execution of the irreversible push already pre-authorized in principle by Plan 20-09's UAT gate.
+
+**Steps executed, in order:**
+1. `npx supabase link --project-ref shsrhxleopmovzpzqmex` — linked using the already-authenticated CLI session (confirmed via `npx supabase projects list` before linking; no interactive login was needed).
+2. `npx supabase migration list` — confirmed local and remote migration history were fully in sync before adding the new migration (no drift, no unexpected pending migrations).
+3. Created `supabase/migrations/20260711000001_drop_happy_hour_columns.sql`.
+4. `npx supabase db push --yes` — applied non-interactively (the plan's "pause for the human only if the push cannot run non-interactively" clause did not trigger; the CLI's stored session credentials allowed a fully automated push). Output: "Finished supabase db push." with no errors.
+5. **Verification (two independent methods):**
+   - `npx supabase db query --linked "SELECT table_name, column_name FROM information_schema.columns WHERE table_name IN ('categories','products') AND column_name IN ('happy_hour_start','happy_hour_end','happy_hour_price');"` → `"rows": []` (zero rows — all three columns confirmed gone live).
+   - `npx supabase gen types typescript --project-id shsrhxleopmovzpzqmex` (which introspects the live schema via the Management API) also produced zero `happy_hour` references, corroborating the `information_schema` result via an independent code path.
+6. Replaced `src/shared/lib/supabase.types.ts` with the freshly generated output.
+7. `npm run typecheck` → green, only the 2 pre-existing unrelated errors remain (`tab/model/queries.ts:780`, `agent/rag.ts:60` — both predate Phase 20, unchanged in this session).
+8. `npm run lint` → exit 0 (only the pre-existing informational `eslint-plugin-boundaries` legacy-selector notice).
+9. Ran `npx vitest run src/entities/promotion/model/hh-parity.integration.test.ts` directly (this file is NOT part of `npm run test`'s default `--project unit` scope — confirmed via `package.json`'s `test:integration` script, which is a separate, non-default command). Result: 1 failed (as expected), 1 skipped. Both failures are `PGRST`/Postgres `42703 column does not exist` errors on `happy_hour_price`/`happy_hour_end` — exactly the runtime fallout mode documented in `deferred-items.md` ("Plan 20-10, Task 1" section) before the drop ran. This confirms the drop took effect and that this specific pre-flagged test file is the only expected casualty; it is intentionally NOT fixed here (out of scope for both 20-10 and 20-11's `files_modified`; tracked as its own follow-up).
+10. `npm run test` (full unit suite, default scope) → 1247/1248 pass, only the pre-existing documented `useCloseTab.test.ts:95` failure (unrelated, since Phase 15). No new unit-test regressions.
+11. Committed the migration + regenerated types together (`5475a94`).
+
+**Byproduct noted, not a regression:** the types regeneration also removed an unrelated `graphql_public` schema block that was present in the previously-committed `supabase.types.ts` but is no longer exposed by the live project's current API schema config. Confirmed via `grep -rln "graphql_public" src/` — zero importers — so this is inert and was kept as part of the required full regen rather than hand-patched back in (would have meant hand-editing a machine-generated file, which is worse practice than accepting an accurate regen).
 
 ## Decisions Made
 
@@ -133,27 +161,30 @@ None beyond the checkpoint itself below — no new external service configuratio
 
 ## Checkpoint: Task 2 — [BLOCKING] Drop legacy happy_hour columns + push + update types
 
-**Status: PAUSED, per plan contract (`autonomous: false`, `gate="blocking-human"`) and the explicit `<checkpoint_note>` instruction not to self-approve the destructive push.**
+**Status: RESOLVED — human approval ("approved") received, irreversible push executed and verified.**
 
-**What's ready:** Task 1's non-destructive prep is complete and committed (`f948c8d`). No code anywhere in the touched surface (including the two scope-expansion files) reads or writes the `happy_hour_start`/`happy_hour_end`/`happy_hour_price` columns anymore — `npm run typecheck`/`lint`/`test` are all green. Plan 20-09's UAT gate (human-approved 2026-07-10, "Proceed on automated gates only") already authorizes this drop.
+Plan 20-09's UAT gate (human-approved 2026-07-10, "Proceed on automated gates only") authorized this drop in principle; this session's own explicit "approved" resume-signal authorized execution. See "Task 2 Execution Detail" above for the full step-by-step record and verification evidence.
 
-**What Task 2 still requires (NOT executed by this agent):**
-1. Create `supabase/migrations/20260711000001_drop_happy_hour_columns.sql` (BEGIN/COMMIT, `ALTER TABLE categories DROP COLUMN IF EXISTS happy_hour_start/end`, `ALTER TABLE products DROP COLUMN IF EXISTS happy_hour_price`).
-2. Run `npx supabase db push` (BLOCKING, irreversible) + `NOTIFY pgrst, 'reload schema';` if needed.
-3. Verify via `information_schema.columns` that all three columns are gone live.
-4. Regenerate/edit `src/shared/lib/supabase.types.ts` to remove the three columns from `categories`/`products` Row/Insert/Update.
-5. Re-run `npm run typecheck` to confirm green post-drop.
+**Outcome:** `categories.happy_hour_start`, `categories.happy_hour_end`, `products.happy_hour_price` are dropped live on the `shsrhxleopmovzpzqmex` project. Confirmed via two independent methods (`information_schema.columns` direct query returning zero rows, and a full `supabase.types.ts` regeneration showing zero `happy_hour` references). `npm run typecheck`/`lint`/`test` all green against the same pre-existing baseline as before this plan (2 pre-existing typecheck errors, 1 pre-existing `useCloseTab.test.ts` failure, 0 lint errors).
 
-**Known pre-existing risk for whoever runs Task 2:** `src/entities/promotion/model/hh-parity.integration.test.ts` (Plan 20-09) will start failing at runtime once the columns are dropped (its `beforeAll` fixture inserts rows with `happy_hour_*` fields against a live DB) — this is expected per that test's own documentation, not a new defect, but will show up as a new `npm run test` failure if the full suite is re-run after the push. See `deferred-items.md` ("Plan 20-10, Task 1" section) for full detail.
-
-**Resume signal per the plan:** Type "approved" once the three columns are confirmed dropped live and typecheck is green — this requires a human/orchestrator decision on the irreversible push itself; this agent does not self-approve it.
+**Confirmed known fallout (not a new defect):** `src/entities/promotion/model/hh-parity.integration.test.ts` (Plan 20-09) now fails at runtime exactly as predicted in `deferred-items.md` — both its assertions hit Postgres `42703 column does not exist` errors on the now-dropped columns. This file is outside both 20-10's and 20-11's `files_modified`; retiring/updating it remains an open follow-up (not blocking this plan or Plan 20-11).
 
 ## Next Phase Readiness
 
-- Task 1's prep work is fully committed and verified; Plan 20-10's Task 2 (the destructive drop) is unblocked and ready to run, pending explicit approval on the checkpoint above.
-- Plan 20-11 (pure client calc-path removal — `resolveProductPrice`/`isHappyHourActive`/`ProductCard.tsx`/`ModifierSheet.tsx`/`TableStatusPanel`) depends on this plan (`depends_on: ["20-10"]`) and remains blocked until Task 2 completes.
-- The `hh-parity.integration.test.ts` runtime gap (flagged above) is a candidate for a small follow-up fix/retirement once Task 2 lands — not currently assigned to any plan's `files_modified`.
+- Both tasks of Plan 20-10 are complete, committed, and verified. The legacy happy-hour storage is fully retired at the DB layer; no code reads or writes the columns; the columns no longer exist live.
+- Plan 20-11 (pure client calc-path removal — `resolveProductPrice`/`isHappyHourActive`/`ProductCard.tsx`/`ModifierSheet.tsx`/`TableStatusPanel`) depends on this plan (`depends_on: ["20-10"]`) and is now unblocked.
+- Recommended follow-up (not assigned to any plan yet): retire or rewrite `hh-parity.integration.test.ts` now that its subject (the raw HH columns) no longer exists — it will remain a permanent red test in the integration suite until addressed.
 
 ---
 *Phase: 20-promotions-engine*
-*Completed: 2026-07-10 (Task 1 only; Task 2 paused at its blocking checkpoint)*
+*Completed: 2026-07-10 (both tasks complete)*
+
+## Self-Check: PASSED
+
+- FOUND: `supabase/migrations/20260711000001_drop_happy_hour_columns.sql`
+- FOUND: commit `f948c8d` (Task 1)
+- FOUND: commit `4b4f298` (deferred-items log)
+- FOUND: commit `b02c5a1` (Task 1 summary)
+- FOUND: commit `5475a94` (Task 2 — migration + types regen)
+- VERIFIED: `grep -c "happy_hour" src/shared/lib/supabase.types.ts` → 0 matches
+- VERIFIED: live `information_schema.columns` query (via `npx supabase db query --linked`) returned zero rows for `happy_hour_start`/`happy_hour_end`/`happy_hour_price` on `categories`/`products`
