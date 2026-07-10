@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { ManageIngredientsTab } from '@widgets/ManageIngredientsTab';
 import { ManageCombosTab } from '@features/manage-combos';
+import { ManagePromotionsTab } from '@features/manage-promotions';
 import { useStaffStore } from '@entities/staff/model/store';
 import { usePermissions } from '@entities/staff/model/usePermissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
@@ -83,6 +84,11 @@ export function SettingsTabsPanel() {
           key: 'combos',
           label: 'Combos',
           render: () => <ManageCombosTab />,
+        },
+        {
+          key: 'promotions',
+          label: 'Promotions',
+          render: () => <ManagePromotionsTab />,
         },
         {
           key: 'ingredients',
