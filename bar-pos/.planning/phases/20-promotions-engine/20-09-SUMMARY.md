@@ -183,6 +183,16 @@ type "approved" to authorize Plan 20-10's destructive column drop. This gap-clos
 resolves the specific defect that was blocking the automated half of that gate; it does not
 substitute for the human click-through steps above.
 
+## Human Approval (2026-07-10)
+
+The orchestrator presented the state above (all automated gates green after the fix; manual UAT
+click-through and full e2e run outstanding; e2e blocked by an unrelated orphaned process on port
+1420 from an already-merged prior worktree, left un-killed per safety default) to the human. The
+human's explicit decision: **"Proceed on automated gates only"** — approving Plan 20-10's
+destructive column drop without the manual click-through or e2e run, accepting the automated
+integration/unit/typecheck/lint coverage plus the verified fix as sufficient. Manual UAT and a
+full e2e run remain a recommended follow-up but are not blocking.
+
 ## Next Phase Readiness
 
 - All three of this plan's deliverables (`hh-parity.integration.test.ts`, `e2e/43-promotions.spec.ts`, and the gap-closure fix migration `20260710000008_fix_promotion_skip_depletion_gate.sql`) are complete, committed, and pass their own scoped verification.
