@@ -6,11 +6,9 @@
  */
 
 import type {
-  Category,
   CartItem,
   Order,
   PoolSessionSummary,
-  Product,
   DiscountScope,
   DiscountType,
   RecipeWithItems,
@@ -33,46 +31,6 @@ import { computePoolSessionBilling } from './pool-billing';
 export function calculatePoolCharge(startedAt: Date, stoppedAt: Date, ratePerHour: number): number {
   const { totalCharge } = computePoolSessionBilling({ startedAt, endTime: stoppedAt, ratePerHour });
   return Math.round(totalCharge * 100) / 100;
-}
-
-/**
- * Resolves the effective price for a product, considering happy hour.
- *
- * Returns happy hour price if:
- * - Current time is within category.happyHourStartâ€“happyHourEnd
- * - product.happyHourPrice is not null
- *
- * Falls back to product.basePrice otherwise.
- *
- * @param product - The product to price
- * @param category - The product's category (contains happy hour times)
- * @param currentTime - Optional time to check (defaults to now)
- * @returns The effective price
- *
- * @example
- * // 5pm price with happy hour 4pm-6pm â†’ returns happyHourPrice
- * resolveProductPrice(product, category, new Date('2024-01-01T17:00:00'))
- *
- * @example
- * // 8pm price â†’ returns basePrice
- * resolveProductPrice(product, category, new Date('2024-01-01T20:00:00'))
- */
-export function resolveProductPrice(
-  product: Product,
-  category: Category,
-  currentTime: Date = new Date()
-): number {
-  // If no happy hour configured or no happy hour price, return base price
-  if (!category.happyHourStart || !category.happyHourEnd || product.happyHourPrice === null) {
-    return product.basePrice;
-  }
-
-  // Check if currently in happy hour
-  if (isHappyHourActive(category, currentTime)) {
-    return product.happyHourPrice;
-  }
-
-  return product.basePrice;
 }
 
 /**
@@ -239,59 +197,6 @@ export function formatElapsed(totalSeconds: number): string {
   const mm = String(minutes).padStart(2, '0');
   const ss = String(seconds).padStart(2, '0');
   return `${mm}:${ss}`;
-}
-
-/**
- * Checks if happy hour is currently active for a category.
- *
- * Handles midnight crossing (e.g., 10pm - 2am).
- *
- * @param category - The category with happy hour times
- * @param currentTime - Optional time to check (defaults to now)
- * @returns True if happy hour is active
- *
- * @example
- * // Check if 5pm is within 4pm-6pm happy hour
- * isHappyHourActive(category, new Date('2024-01-01T17:00:00'))
- * // Returns: true
- *
- * @example
- * // Check if 8pm is within 4pm-6pm happy hour
- * isHappyHourActive(category, new Date('2024-01-01T20:00:00'))
- * // Returns: false
- *
- * @example
- * // Midnight crossing: 11pm is within 10pm-2am happy hour
- * isHappyHourActive(category, new Date('2024-01-01T23:00:00'))
- * // Returns: true
- */
-export function isHappyHourActive(category: Category, currentTime: Date = new Date()): boolean {
-  if (!category.happyHourStart || !category.happyHourEnd) {
-    return false;
-  }
-
-  // Parse time strings (HH:MM format)
-  const startParts = category.happyHourStart.split(':').map(Number);
-  const endParts = category.happyHourEnd.split(':').map(Number);
-
-  const startHour = startParts[0] ?? 0;
-  const startMin = startParts[1] ?? 0;
-  const endHour = endParts[0] ?? 0;
-  const endMin = endParts[1] ?? 0;
-
-  // Convert current time to minutes since midnight
-  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-  const startMinutes = startHour * 60 + startMin;
-  const endMinutes = endHour * 60 + endMin;
-
-  // Handle midnight crossing (e.g., 22:00 - 02:00)
-  if (endMinutes < startMinutes) {
-    // Happy hour crosses midnight
-    return currentMinutes >= startMinutes || currentMinutes < endMinutes;
-  }
-
-  // Normal case (e.g., 16:00 - 18:00)
-  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
 }
 
 /**

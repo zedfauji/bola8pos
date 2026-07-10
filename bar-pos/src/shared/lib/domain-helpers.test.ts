@@ -1,23 +1,19 @@
 import fc from 'fast-check';
 import { describe, it, expect } from 'vitest';
 import type {
-  Category,
   CartItem,
   Order,
   PoolSessionSummary,
-  Product,
   Promotion,
   PromotionAvailability,
 } from './domain';
 import {
   calculatePoolCharge,
-  resolveProductPrice,
   calculateOrderItemLineTotal,
   calculateTabSubtotal,
   calculateTipAmount,
   formatMoney,
   formatElapsed,
-  isHappyHourActive,
   isPromotionActive,
   generateIdempotencyKey,
   getDiscountBase,
@@ -72,86 +68,6 @@ describe('calculatePoolCharge', () => {
     const stop = new Date('2024-01-01T12:01:00');
     const charge = calculatePoolCharge(start, stop, 10);
     expect(charge).toBe(22.5); // 121 min â†’ 135 min (rounded to 15-min block) / 60 * $10 = $22.50
-  });
-});
-
-describe('resolveProductPrice', () => {
-  const baseProduct: Product = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Beer',
-    categoryId: '123e4567-e89b-12d3-a456-426614174001',
-    basePrice: 6.0,
-    happyHourPrice: 4.0,
-    sku: null,
-    isActive: true,
-    imageUrl: null,
-    stock_threshold: null,
-    comboEligible: true,
-    isCombo: false,
-    modifiers: [],
-  };
-
-  const happyHourCategory: Category = {
-    id: '123e4567-e89b-12d3-a456-426614174001',
-    name: 'Drinks',
-    color: '#FF0000',
-    sortOrder: 0,
-    happyHourStart: '16:00',
-    happyHourEnd: '18:00',
-    routing: 'NONE',
-    createdAt: new Date(),
-  };
-
-  it('should return happy hour price during happy hour', () => {
-    const time = new Date('2024-01-01T17:00:00'); // 5pm
-    const price = resolveProductPrice(baseProduct, happyHourCategory, time);
-    expect(price).toBe(4.0);
-  });
-
-  it('should return base price outside happy hour', () => {
-    const time = new Date('2024-01-01T20:00:00'); // 8pm
-    const price = resolveProductPrice(baseProduct, happyHourCategory, time);
-    expect(price).toBe(6.0);
-  });
-
-  it('should return base price at start of happy hour', () => {
-    const time = new Date('2024-01-01T16:00:00'); // 4pm exactly
-    const price = resolveProductPrice(baseProduct, happyHourCategory, time);
-    expect(price).toBe(4.0);
-  });
-
-  it('should return base price at end of happy hour', () => {
-    const time = new Date('2024-01-01T18:00:00'); // 6pm exactly
-    const price = resolveProductPrice(baseProduct, happyHourCategory, time);
-    expect(price).toBe(6.0);
-  });
-
-  it('should return base price if no happy hour configured', () => {
-    const noHappyHourCategory: Category = {
-      ...happyHourCategory,
-      happyHourStart: null,
-      happyHourEnd: null,
-    };
-    const time = new Date('2024-01-01T17:00:00');
-    const price = resolveProductPrice(baseProduct, noHappyHourCategory, time);
-    expect(price).toBe(6.0);
-  });
-
-  it('should return base price if product has no happy hour price', () => {
-    const noHappyHourProduct: Product = {
-      ...baseProduct,
-      happyHourPrice: null,
-    };
-    const time = new Date('2024-01-01T17:00:00');
-    const price = resolveProductPrice(noHappyHourProduct, happyHourCategory, time);
-    expect(price).toBe(6.0);
-  });
-
-  it('should use current time if not provided', () => {
-    // This test depends on current time, so we just verify it returns a valid price
-    const price = resolveProductPrice(baseProduct, happyHourCategory);
-    expect(price).toBeGreaterThan(0);
-    expect([4.0, 6.0]).toContain(price);
   });
 });
 
@@ -572,95 +488,6 @@ describe('formatElapsed', () => {
   });
 });
 
-describe('isHappyHourActive', () => {
-  const category: Category = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Drinks',
-    color: '#FF0000',
-    sortOrder: 0,
-    happyHourStart: '16:00',
-    happyHourEnd: '18:00',
-    routing: 'NONE',
-    createdAt: new Date(),
-  };
-
-  it('should return true during happy hour', () => {
-    const time = new Date('2024-01-01T17:00:00');
-    expect(isHappyHourActive(category, time)).toBe(true);
-  });
-
-  it('should return false before happy hour', () => {
-    const time = new Date('2024-01-01T15:00:00');
-    expect(isHappyHourActive(category, time)).toBe(false);
-  });
-
-  it('should return false after happy hour', () => {
-    const time = new Date('2024-01-01T19:00:00');
-    expect(isHappyHourActive(category, time)).toBe(false);
-  });
-
-  it('should return true at start of happy hour', () => {
-    const time = new Date('2024-01-01T16:00:00');
-    expect(isHappyHourActive(category, time)).toBe(true);
-  });
-
-  it('should return false at end of happy hour', () => {
-    const time = new Date('2024-01-01T18:00:00');
-    expect(isHappyHourActive(category, time)).toBe(false);
-  });
-
-  it('should return false if no happy hour configured', () => {
-    const noHappyHour: Category = {
-      ...category,
-      happyHourStart: null,
-      happyHourEnd: null,
-    };
-    const time = new Date('2024-01-01T17:00:00');
-    expect(isHappyHourActive(noHappyHour, time)).toBe(false);
-  });
-
-  it('should handle midnight crossing (10pm - 2am)', () => {
-    const midnightCategory: Category = {
-      ...category,
-      happyHourStart: '22:00',
-      happyHourEnd: '02:00',
-    };
-
-    // 11pm should be active
-    const time1 = new Date('2024-01-01T23:00:00');
-    expect(isHappyHourActive(midnightCategory, time1)).toBe(true);
-
-    // 1am should be active
-    const time2 = new Date('2024-01-01T01:00:00');
-    expect(isHappyHourActive(midnightCategory, time2)).toBe(true);
-
-    // 3am should not be active
-    const time3 = new Date('2024-01-01T03:00:00');
-    expect(isHappyHourActive(midnightCategory, time3)).toBe(false);
-
-    // 9pm should not be active
-    const time4 = new Date('2024-01-01T21:00:00');
-    expect(isHappyHourActive(midnightCategory, time4)).toBe(false);
-  });
-
-  it('should handle edge case at midnight', () => {
-    const midnightCategory: Category = {
-      ...category,
-      happyHourStart: '22:00',
-      happyHourEnd: '02:00',
-    };
-
-    const midnight = new Date('2024-01-01T00:00:00');
-    expect(isHappyHourActive(midnightCategory, midnight)).toBe(true);
-  });
-
-  it('should use current time if not provided', () => {
-    // This test just verifies it doesn't throw
-    const result = isHappyHourActive(category);
-    expect(typeof result).toBe('boolean');
-  });
-});
-
 describe('generateIdempotencyKey', () => {
   it('should generate key with correct format', () => {
     const key = generateIdempotencyKey('payment');
@@ -751,60 +578,6 @@ describe('calculateDiscountAmount', () => {
         }
       )
     );
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Sprint 2 — isHappyHourActive boundary tests
-// ---------------------------------------------------------------------------
-
-describe('isHappyHourActive — boundary tests (Sprint 2)', () => {
-  const category: Category = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Drinks',
-    color: '#FF0000',
-    sortOrder: 0,
-    happyHourStart: '16:00',
-    happyHourEnd: '18:00',
-    routing: 'NONE',
-    createdAt: new Date(),
-  };
-
-  it('time at exactly startMinutes → true', () => {
-    const time = new Date('2024-01-01T16:00:00'); // exactly 16:00
-    expect(isHappyHourActive(category, time)).toBe(true);
-  });
-
-  it('time at exactly endMinutes → false (exclusive end)', () => {
-    const time = new Date('2024-01-01T18:00:00'); // exactly 18:00
-    expect(isHappyHourActive(category, time)).toBe(false);
-  });
-
-  it('midnight crossing: 10pm-2am, time at 11pm → true', () => {
-    const midnightCategory: Category = {
-      ...category,
-      happyHourStart: '22:00',
-      happyHourEnd: '02:00',
-    };
-    expect(isHappyHourActive(midnightCategory, new Date('2024-01-01T23:00:00'))).toBe(true);
-  });
-
-  it('midnight crossing: 10pm-2am, time at 1:59am → true', () => {
-    const midnightCategory: Category = {
-      ...category,
-      happyHourStart: '22:00',
-      happyHourEnd: '02:00',
-    };
-    expect(isHappyHourActive(midnightCategory, new Date('2024-01-01T01:59:00'))).toBe(true);
-  });
-
-  it('midnight crossing: 10pm-2am, time at 2:00am → false', () => {
-    const midnightCategory: Category = {
-      ...category,
-      happyHourStart: '22:00',
-      happyHourEnd: '02:00',
-    };
-    expect(isHappyHourActive(midnightCategory, new Date('2024-01-01T02:00:00'))).toBe(false);
   });
 });
 
