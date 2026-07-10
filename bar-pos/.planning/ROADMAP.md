@@ -35,7 +35,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 17: Modifier → Inventory Rules** — `modifier_inventory_rules` join + extend `deplete_for_order_item` RPC + admin UI in `manage-modifier-groups` (completed 2026-07-07)
 - [x] **Phase 18: Split Payment (Multi-Method)** — Up to 4 payment methods on close via `payment_group_id` + `split_index`; PaymentPane multi-row UI (completed 2026-07-08)
 - [x] **Phase 19: Tip Distribution Config** — Singleton `tip_distribution_config` (floor/bar/kitchen %) + `tip_distribution_entries` + close-caja allocation + Settings panel (completed 2026-07-09)
-- [ ] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin
+- [x] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin (completed 2026-07-10)
 - [ ] **Phase 21: i18n Multi-Language** — `react-i18next` + `es-MX`/`en-US` catalogs + `profiles.locale` + ESLint rule banning hard-coded strings
 - [ ] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)*
 - [ ] **Phase 23: Reopen Closed Ticket** — `reopen_tab` RPC + payment status `reopened_void` + caja offsetting entries + 24h/2x cap *(depends Phases 14, 15)*
@@ -586,7 +586,7 @@ Plans:
 **Goal:** Ship a promotions engine — `promotions` + `applied_promotions` tables and an `evaluate_promotions` RPC supporting happy-hour time windows, item/category/pool-time targeting, and auto-apply at order time. Settings → Promotions admin UI to manage them.
 **Requirements:** TBD (POS-COMPARISON.md §20 — source doc no longer present; scope locked in 20-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 10/11 plans executed
+**Plans:** 11/11 plans complete
 
 Plans:
 
@@ -600,7 +600,7 @@ Plans:
 - [x] 20-08-PLAN.md — pool client rewire (useMutationStopSession → stop_pool_session)
 - [x] 20-09-PLAN.md — D-07 parity gate + e2e/43-promotions + BLOCKING UAT
 - [x] 20-10-PLAN.md — drop happy_hour columns + retire HH admin editing
-- [ ] 20-11-PLAN.md — retire client HH calc path (resolveProductPrice/isHappyHourActive)
+- [x] 20-11-PLAN.md — retire client HH calc path (resolveProductPrice/isHappyHourActive)
 
 **Success Criteria:**
 
