@@ -100,7 +100,7 @@ Each task was committed atomically:
 **Impact on plan:** No scope creep — no `src/` code touched, no new dependencies, no plan behavior changed. All three fixes were environment/tooling prerequisites for producing the exact artifact the plan specifies.
 
 ## Issues Encountered
-None beyond the deviations documented above.
+None beyond the deviations documented above. `npm run typecheck` reports 2 pre-existing errors unrelated to this plan's files (`src/entities/tab/model/queries.ts:778`, `src/shared/lib/agent/rag.ts:60`) — out of scope per SCOPE BOUNDARY (not touched by this plan, not caused by `scripts/audit-ui-drift.ts`, which typechecks clean on its own). Not fixed; left for whichever phase owns those files.
 
 ## Next Phase Readiness
 - `DRIFT-AUDIT.md` is the ready-to-consume backlog for Phase 30 (Shared Shell & Primitive Extension) and Phases 31-33 — file-grouped, line-attributed, forward-slash paths.
