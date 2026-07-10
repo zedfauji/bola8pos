@@ -746,7 +746,11 @@ Plans:
 **Goal:** Produce a complete, file-mapped inventory of every design-system violation (raw `<button>`/`<input>` elements, hardcoded hex/rgb colors, arbitrary-value Tailwind spacing classes) across all 17 routes in `pages/`, `widgets/`, `features/`, so every subsequent fix phase has a concrete backlog to work from. Read-only — no application code is modified in this phase.
 **Requirements:** AUDIT-01, AUDIT-02
 **Depends on:** — (first phase of v2.2, independent of v2.1 phases 20-28)
-**Plans:** Not yet planned
+**Plans:** 1 plan
+
+Plans:
+
+- [ ] 29-01-PLAN.md — audit-ui-drift.ts scanner (filtered fs walk + 4 violation regex scans + router/CLAUDE.md route cross-check) + committed DRIFT-AUDIT.md backlog (Wave 1) (AUDIT-01, AUDIT-02)
 
 **Success Criteria:**
 
