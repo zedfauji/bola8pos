@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       agent_audit_log: {
@@ -366,8 +341,6 @@ export type Database = {
           color: string
           created_at: string
           deleted_at: string | null
-          happy_hour_end: string | null
-          happy_hour_start: string | null
           id: string
           name: string
           parent_id: string | null
@@ -379,8 +352,6 @@ export type Database = {
           color?: string
           created_at?: string
           deleted_at?: string | null
-          happy_hour_end?: string | null
-          happy_hour_start?: string | null
           id?: string
           name: string
           parent_id?: string | null
@@ -392,8 +363,6 @@ export type Database = {
           color?: string
           created_at?: string
           deleted_at?: string | null
-          happy_hour_end?: string | null
-          happy_hour_start?: string | null
           id?: string
           name?: string
           parent_id?: string | null
@@ -1473,7 +1442,6 @@ export type Database = {
           combo_price_override: number | null
           created_at: string
           deleted_at: string | null
-          happy_hour_price: number | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -1491,7 +1459,6 @@ export type Database = {
           combo_price_override?: number | null
           created_at?: string
           deleted_at?: string | null
-          happy_hour_price?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -1509,7 +1476,6 @@ export type Database = {
           combo_price_override?: number | null
           created_at?: string
           deleted_at?: string | null
-          happy_hour_price?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -2900,9 +2866,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       category_routing: ["KITCHEN", "BAR", "NONE"],
