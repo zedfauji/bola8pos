@@ -14,6 +14,7 @@ export {
   useMutationDeletePromotion,
   usePromotionAvailabilityWindows,
   usePromotionActive,
+  useActivePromotions,
   promotionKeys,
 } from './model/queries';
 export type {
@@ -24,3 +25,4 @@ export type {
   PromotionAvailabilityCreate,
   AppliedPromotion,
 } from './model/types';
+export type { ActivePromotionEntry } from './model/queries';

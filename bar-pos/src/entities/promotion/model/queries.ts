@@ -162,6 +162,19 @@ export function useMutationDeletePromotion() {
   });
 }
 
+function mapPromotionAvailabilityRow(row: Record<string, unknown>): PromotionAvailability {
+  return PromotionAvailabilitySchema.parse({
+    id: row['id'],
+    promotionId: row['promotion_id'],
+    daysOfWeek: row['days_of_week'],
+    startTime: row['start_time'] ?? null,
+    endTime: row['end_time'] ?? null,
+    startDate: row['start_date'] ?? null,
+    endDate: row['end_date'] ?? null,
+    createdAt: new Date(row['created_at'] as string),
+  });
+}
+
 /** Fetch all availability windows for a promotion, ordered by created_at. */
 export function usePromotionAvailabilityWindows(promotionId: string | null) {
   return useQuery({
@@ -178,19 +191,68 @@ export function usePromotionAvailabilityWindows(promotionId: string | null) {
         logger.error('usePromotionAvailabilityWindows: query failed', { error, promotionId });
         throw error;
       }
-      return ((data ?? []) as unknown[]).map((row: unknown) => {
-        const r = row as Record<string, unknown>;
-        return PromotionAvailabilitySchema.parse({
-          id: r['id'],
-          promotionId: r['promotion_id'],
-          daysOfWeek: r['days_of_week'],
-          startTime: r['start_time'] ?? null,
-          endTime: r['end_time'] ?? null,
-          startDate: r['start_date'] ?? null,
-          endDate: r['end_date'] ?? null,
-          createdAt: new Date(r['created_at'] as string),
+      return ((data ?? []) as unknown[]).map((row: unknown) =>
+        mapPromotionAvailabilityRow(row as Record<string, unknown>)
+      );
+    },
+  });
+}
+
+/** One active promotion paired with its availability windows — feeds the "Active Promotions" banner. */
+export interface ActivePromotionEntry {
+  promotion: Promotion;
+  windows: PromotionAvailability[];
+}
+
+/**
+ * Fetch all `is_active: true` promotions with their availability windows.
+ * Cosmetic/display data only — consumers must apply `isPromotionActive()` to
+ * filter down to promotions active right now (windows may not currently match).
+ * staleTime=30s — mirrors `usePromotionActive`'s cache window.
+ */
+export function useActivePromotions() {
+  return useQuery({
+    queryKey: [...promotionKeys.all, 'active-list'],
+    staleTime: 30_000,
+    queryFn: async (): Promise<ActivePromotionEntry[]> => {
+      const { data: promoRows, error: promoError } = await db
+        .from('promotions')
+        .select('*')
+        .eq('is_active', true)
+        .order('priority', { ascending: true });
+      if (promoError) {
+        logger.error('useActivePromotions: promotions query failed', { error: promoError });
+        throw promoError;
+      }
+      const promotions = ((promoRows ?? []) as unknown[]).map((row: unknown) =>
+        mapPromotionRow(row as Record<string, unknown>)
+      );
+      if (promotions.length === 0) return [];
+
+      const ids = promotions.map(p => p.id);
+      const { data: windowRows, error: windowError } = await db
+        .from('promotion_availability')
+        .select('*')
+        .in('promotion_id', ids);
+      if (windowError) {
+        logger.error('useActivePromotions: promotion_availability query failed', {
+          error: windowError,
         });
-      });
+        throw windowError;
+      }
+
+      const windowsByPromotion = new Map<string, PromotionAvailability[]>();
+      for (const row of (windowRows ?? []) as unknown[]) {
+        const window = mapPromotionAvailabilityRow(row as Record<string, unknown>);
+        const list = windowsByPromotion.get(window.promotionId) ?? [];
+        list.push(window);
+        windowsByPromotion.set(window.promotionId, list);
+      }
+
+      return promotions.map(promotion => ({
+        promotion,
+        windows: windowsByPromotion.get(promotion.id) ?? [],
+      }));
     },
   });
 }

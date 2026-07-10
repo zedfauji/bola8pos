@@ -10,7 +10,7 @@ import { CategoryTabs } from '@entities/product/ui/CategoryTabs';
 import { ProductCard } from '@entities/product/ui/ProductCard';
 import { useCartStore } from '@entities/tab/model/cartStore';
 import { useTabStore } from '@entities/tab/model/store';
-import { resolveProductPrice, getCurrentTime } from '@shared/lib/domain-helpers';
+import { getCurrentTime } from '@shared/lib/domain-helpers';
 import { ComboBadge } from '@shared/ui/ComboBadge';
 import { ComboUnavailableBadge } from '@shared/ui/ComboUnavailableBadge';
 import { EmptyState } from '@shared/ui/EmptyState';
@@ -139,11 +139,9 @@ export function ProductGrid({ className }: ProductGridProps) {
       setModifierSheetOpen(true);
       return;
     }
-    const category = categories?.find(c => c.id === product.categoryId);
-    const resolvedPrice = category
-      ? resolveProductPrice(product, category, catalogNow)
-      : product.basePrice;
-    addItem(product, [], resolvedPrice);
+    // Intentional: send the undiscounted base price — evaluate_promotions_for_item
+    // (server) is the sole authority for the charged unit_price (Pitfall 1).
+    addItem(product, [], product.basePrice);
   };
 
   const handleUnavailableComboSelect = (product: Product) => {
@@ -153,11 +151,9 @@ export function ProductGrid({ className }: ProductGridProps) {
 
   const handleModifierConfirm = (selectedModifiers: Modifier[]) => {
     if (selectedProduct) {
-      const category = categories?.find(c => c.id === selectedProduct.categoryId);
-      const resolvedPrice = category
-        ? resolveProductPrice(selectedProduct, category, catalogNow)
-        : selectedProduct.basePrice;
-      addItem(selectedProduct, selectedModifiers, resolvedPrice);
+      // Intentional: send the undiscounted base price — evaluate_promotions_for_item
+      // (server) is the sole authority for the charged unit_price (Pitfall 1).
+      addItem(selectedProduct, selectedModifiers, selectedProduct.basePrice);
       setSelectedProduct(null);
     }
   };
