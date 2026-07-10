@@ -586,14 +586,14 @@ Plans:
 **Goal:** Ship a promotions engine — `promotions` + `applied_promotions` tables and an `evaluate_promotions` RPC supporting happy-hour time windows, item/category/pool-time targeting, and auto-apply at order time. Settings → Promotions admin UI to manage them.
 **Requirements:** TBD (POS-COMPARISON.md §20 — source doc no longer present; scope locked in 20-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 2/11 plans executed
+**Plans:** 4/11 plans executed
 
 Plans:
 
 - [x] 20-01-PLAN.md — promotions + promotion_availability schema + is_promotion_available (SC-1)
 - [x] 20-02-PLAN.md — promotion Zod schemas + promotion.apply audit action + entities/promotion slice
-- [ ] 20-03-PLAN.md — applied_promotions + evaluate_promotions_for_item + create_order_with_items v3 (SC-2/SC-3)
-- [ ] 20-04-PLAN.md — Settings → Promotions admin UI (SC-4)
+- [x] 20-03-PLAN.md — applied_promotions + evaluate_promotions_for_item + create_order_with_items v3 (SC-2/SC-3)
+- [x] 20-04-PLAN.md — Settings → Promotions admin UI (SC-4)
 - [ ] 20-05-PLAN.md — pool-time promotions: pool_grant branch + stop_pool_session RPC (D-05)
 - [ ] 20-06-PLAN.md — HH→promotions data migration (D-07) + BLOCKING schema push + types
 - [ ] 20-07-PLAN.md — client pricing rewire (send basePrice) + Active Promotions banner
