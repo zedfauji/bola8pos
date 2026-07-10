@@ -1,14 +1,15 @@
 import { PaymentPane } from '@widgets/PaymentPane';
 import { RefundsList } from '@widgets/RefundsList';
-import { BackToHomeButton } from '@shared/ui';
+import { PageContainer } from '@shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 
 export default function PaymentsPage() {
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <div className="flex shrink-0 items-center border-b px-4 py-2">
-        <BackToHomeButton />
-      </div>
+    <PageContainer
+      title="Payments"
+      backTo="/home"
+      className="mx-0 flex h-screen max-w-none flex-col space-y-0 bg-background p-0"
+    >
       <Tabs defaultValue="payments" className="flex flex-1 flex-col overflow-hidden">
         <TabsList className="mx-4 mt-2 mb-0 w-fit">
           <TabsTrigger value="payments">Payments</TabsTrigger>
@@ -21,6 +22,6 @@ export default function PaymentsPage() {
           <RefundsList />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

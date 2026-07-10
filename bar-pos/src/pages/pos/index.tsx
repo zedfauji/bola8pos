@@ -15,7 +15,7 @@ import { useTabStore } from '@entities/tab/model/store';
 import type { Tab } from '@entities/tab/model/types';
 import { useBarcodeScanner } from '@shared/lib/useBarcodeScanner';
 import { usePersistedBool } from '@shared/lib/usePersistedBool';
-import { BackToHomeButton, POSButton, ProtectedAction } from '@shared/ui';
+import { PageContainer, POSButton, ProtectedAction } from '@shared/ui';
 
 export default function POSPage() {
   const queryClient = useQueryClient();
@@ -46,8 +46,11 @@ export default function POSPage() {
   });
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <BackToHomeButton />
+    <PageContainer
+      title="POS"
+      backTo="/home"
+      className="mx-0 flex h-screen max-w-none flex-col space-y-0 bg-background p-0"
+    >
       <div className="flex min-w-0 flex-1 items-center justify-center p-4 md:p-6">
         <div className="flex h-full w-full max-w-[1600px] overflow-hidden rounded-xl border border-border shadow-lg">
           <main className="relative flex-1 overflow-y-auto p-4">
@@ -116,6 +119,6 @@ export default function POSPage() {
           }}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
