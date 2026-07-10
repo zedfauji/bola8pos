@@ -65,16 +65,32 @@ interface Match {
   snippet: string;
 }
 
+function lineNumberAt(content: string, index: number): number {
+  let line = 1;
+  for (let i = 0; i < index; i++) {
+    if (content[i] === '\n') line++;
+  }
+  return line;
+}
+
 function scanCategory(files: string[], patterns: RegExp[]): Match[] {
+  // Scan whole-file content (not per-line) — a raw `<button` split across
+  // lines by Prettier (e.g. `<button\n  onClick={...}>`) has no non-newline
+  // character after "button" on its own line, so a per-line `\s` check
+  // misses it. `\s` matches `\n` too, so scanning full content catches these.
   const matches: Match[] = [];
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf-8');
-    const lines = content.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line === undefined) continue;
-      if (patterns.some((pattern) => pattern.test(line))) {
-        matches.push({ file, line: i + 1, snippet: line.trim() });
+    const seenLines = new Set<number>();
+    for (const pattern of patterns) {
+      const global = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`);
+      for (const match of content.matchAll(global)) {
+        if (match.index === undefined) continue;
+        const line = lineNumberAt(content, match.index);
+        if (seenLines.has(line)) continue;
+        seenLines.add(line);
+        const lineText = content.split('\n')[line - 1] ?? '';
+        matches.push({ file, line, snippet: lineText.trim() });
       }
     }
   }
