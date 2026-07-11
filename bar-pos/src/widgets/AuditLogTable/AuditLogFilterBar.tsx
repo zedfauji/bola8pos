@@ -10,6 +10,7 @@
 import type { AuditLogFilters } from '@entities/audit-log';
 import { useStaffList } from '@entities/staff';
 import { AuditActionSchema } from '@shared/lib/audit-actions';
+import { FormField } from '@shared/ui/FormField';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import {
@@ -136,26 +137,26 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
         </SelectContent>
       </Select>
 
-      <input
-        type="date"
-        id="audit-filter-date-from"
-        aria-label="Date from"
-        value={toDateInputValue(staged.dateFrom)}
-        onChange={e => {
-          setDateFrom(e.target.value);
-        }}
-        className={DATE_INPUT_CLASS}
-      />
-      <input
-        type="date"
-        id="audit-filter-date-to"
-        aria-label="Date to"
-        value={toDateInputValue(staged.dateTo)}
-        onChange={e => {
-          setDateTo(e.target.value);
-        }}
-        className={DATE_INPUT_CLASS}
-      />
+      <FormField label="Date from">
+        <input
+          type="date"
+          value={toDateInputValue(staged.dateFrom)}
+          onChange={e => {
+            setDateFrom(e.target.value);
+          }}
+          className={DATE_INPUT_CLASS}
+        />
+      </FormField>
+      <FormField label="Date to">
+        <input
+          type="date"
+          value={toDateInputValue(staged.dateTo)}
+          onChange={e => {
+            setDateTo(e.target.value);
+          }}
+          className={DATE_INPUT_CLASS}
+        />
+      </FormField>
 
       <div className="flex flex-col gap-1">
         <Input
