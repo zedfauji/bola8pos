@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
-status: executing
-stopped_at: Completed 30-05-PLAN.md (Phase 30 complete)
-last_updated: "2026-07-10T20:36:52.758Z"
-last_activity: 2026-07-10 -- Phase 30 execution started
+status: idle
+stopped_at: Phase 30 (shared-shell-primitive-extension) COMPLETE — verified passed
+last_updated: "2026-07-10T22:15:00.000Z"
+last_activity: 2026-07-10 -- Phase 30 COMPLETE — verified passed with 1 accepted override (D-02)
 progress:
   total_phases: 35
-  completed_phases: 17
+  completed_phases: 18
   total_plans: 116
   completed_plans: 125
-  percent: 49
+  percent: 51
 ---
 
 # Session State
@@ -22,13 +22,14 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 30 (shared-shell-primitive-extension) — EXECUTING
+Phase: 30 (shared-shell-primitive-extension) — COMPLETE
 Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-07-10 -- Phase 30 execution started
+Status: Verified passed (1 accepted override: D-02 login/home PageContainer exemption). Ready for /gsd-plan-phase 31.
+Last activity: 2026-07-10 -- Phase 30 COMPLETE — verified passed
 
 ## Session Log
 
+- 2026-07-10: **Phase 30 (shared-shell-primitive-extension) COMPLETE — verified passed** — 5/5 plans executed across 3 waves: 30-01 extended `PageContainer`/`SectionHeader` with `backTo`/`backLabel` (Wave-0 RED→GREEN test); 30-02/30-03/30-04 ran in parallel worktrees migrating all 15 non-exempt routes off `BackToHomeButton` (7 already-`PageContainer` pages, 5 first-time adoptions incl. `inventory`'s `LowStockBadge`+gated button and `reports`' 13-tab full-height layout, 3 special cases: `pos`/`payments` full-bleed `className` override + `pool-table-status`'s deliberate `backTo="/pool-tables"` non-default); 30-05 deleted dead `BackToHomeButton`/`AppShell`/`AppNav` + fixed `CLAUDE.md`'s routes table to all 17 rows. Initial verifier pass returned `gaps_found` (2 items): (1) SC#1's literal "all 17 routes" text vs the pre-planned D-02 exemption of `login`/`home` (no sensible back target for either) — user accepted this as an override; (2) 3 targeted E2E specs couldn't run (port 1420 held by a stray process). User asked to investigate rather than defer — freed the port and found a **real pre-existing bug**, unrelated to this phase: `src/pages/login/index.tsx`'s `isAuthenticated` guard redirected to `/pos`, racing `PINLoginForm.tsx`'s `navigate('/home')` after login, so `15-home-navigation.spec.ts`'s very first test failed on landing URL. Fixed (commit `b6e1729`, separate from the phase's plan commits) by aligning the guard to `/home`. Re-verified: `15-home-navigation` now green (bar one unrelated pre-existing item); `16-table-status`/`17-payment-pane` still have failures traced to live-Supabase RPC latency (120s timeout on a "Start Session" call) — confirmed via page snapshots that the shell/`PageContainer` code itself is correct in every failure, so this is pre-existing test-infra flakiness, not a regression. Full-repo `typecheck`/`lint`/unit suite re-confirmed clean throughout (2 pre-existing typecheck errors, lint exit 0, 1212 passed/1 pre-existing `useCloseTab.test.ts` failure/15 todo — exact baseline match, zero regressions). **Note: wave-2 worktree agents' SUMMARY.md files were lost on `git worktree remove --force`** (never committed — `.planning/` is gitignored and those files were never force-added before removal) — reconstructed from the orchestrator's retained task-notification text and committed after the fact; lesson for future worktree-isolated waves: force-add+commit any gitignored `.planning/` artifacts from inside the worktree BEFORE requesting removal.
 - 2026-07-10: **Phase 29 (ui-drift-audit) COMPLETE — verified passed** — `scripts/audit-ui-drift.ts` scanner + `.planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md` backlog committed (20 button / 8 input / 3 hex / 0 spacing files; 17 real routes vs 14 CLAUDE.md rows, missing `/kds`, `/kitchen-prep`, `/audit`). First verifier pass found a real bug: per-line regex missed `<button>`/`<input>` tags whose attributes wrap to a new line (Prettier's default JSX formatting) — undercounted 10/3 instead of 20/8, missing `src/pages/pos/index.tsx`. Fixed by scanning whole-file content instead of per-line (`\s` then matches the newline itself) — commits `ce8c38c` + regenerated `DRIFT-AUDIT.md`. Re-verification PASS, 5/5 must-haves, zero `src/` files modified, typecheck limited to the 2 pre-existing unrelated errors. Ready for `/gsd-plan-phase 30`.
 - 2026-07-10: **Phase 29 (ui-drift-audit) planned** — RESEARCH.md (verified live-repo counts: 20 raw-button files, 8 raw-input files, 3 hex-color files, 0 arbitrary-spacing files, 17 real routes vs 14 CLAUDE.md table rows, corrects CONTEXT.md's stale "28 button files" scouting note) + VALIDATION.md (Nyquist, manual-only baseline-diff verification, `nyquist_compliant: true`) + `29-01-PLAN.md` (1 wave, 2 tasks: build `scripts/audit-ui-drift.ts` filtered fs-walk+regex scanner citing RESEARCH's verified baseline, then generate/commit `.planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md` checklist). plan-checker PASS (1 non-blocking cosmetic warning: RESEARCH.md Open Questions section missing `(RESOLVED)` suffix). Ready for `/gsd-execute-phase 29`.
 - 2026-07-10: **v2.2 ROADMAP.md created** — 7 phases (29-35) derived from REQUIREMENTS.md (22 requirement IDs, categories Audit/Shell/Token/Component/Touch/Focus/Visual/Docs/Lint), following the risk-tiered rollout order from research/SUMMARY.md: 29 UI Drift Audit (read-only) -> 30 Shared Shell & Primitive Extension (isolated, all 17 routes) -> 31 Component/Token/Spacing Sweep (non-payment pages) -> 32 Touch Target & Focus-Visible Sweep (operational/realtime pages) -> 33 Payment-Critical Page Sweep (isolated, gated by 05-payments/41-split-payment/42-tip-distribution/06-transfer/09-rbac) -> 34 Visual Regression Baseline (post-fix only) -> 35 Guardrails (tokens doc + drift-lint, post-conformance). 100% requirement coverage validated, no orphans. Appended after existing Phase 28 in ROADMAP.md; v2.1 phases 20-28 untouched. REQUIREMENTS.md traceability section populated. Ready for /gsd-plan-phase 29.
