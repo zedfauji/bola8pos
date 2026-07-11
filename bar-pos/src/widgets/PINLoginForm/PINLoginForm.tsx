@@ -9,6 +9,7 @@ import { supabase } from '@shared/lib/supabase';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { MoneyInput } from '@shared/ui/MoneyInput';
 import { PINKeypad } from '@shared/ui/PINKeypad';
+import { Button } from '@shared/ui/button';
 
 type Phase = 'pin' | 'forced_pin_change' | 'opening_cash';
 
@@ -251,13 +252,14 @@ export function PINLoginForm() {
       )}
 
       {phase !== 'forced_pin_change' && (
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={clearSelection}
           className="text-sm text-muted-foreground underline-offset-2 hover:underline"
         >
           Not you? Go back
-        </button>
+        </Button>
       )}
 
       <ConfirmDialog

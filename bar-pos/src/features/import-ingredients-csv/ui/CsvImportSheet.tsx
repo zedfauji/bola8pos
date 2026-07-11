@@ -213,14 +213,15 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
         <div className="mt-6 space-y-4">
           {importState.step === 'select' && (
             <>
-              <button
+              <Button
                 type="button"
+                variant="link"
                 onClick={downloadTemplate}
                 className="flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
               >
                 <Download className="size-3.5" />
                 Download template
-              </button>
+              </Button>
 
               <div className="space-y-1.5">
                 <Label htmlFor="csv-file">CSV file</Label>
