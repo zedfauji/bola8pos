@@ -594,7 +594,8 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                 })}
 
                 {/* Add check button */}
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   className="min-w-[140px] flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
                   onClick={addItemColumn}
@@ -602,7 +603,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                 >
                   <Plus className="h-5 w-5" />
                   <span className="text-sm">Add check</span>
-                </button>
+                </Button>
               </div>
 
               {unassignedItems.length > 0 && (
@@ -690,7 +691,8 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                 })}
 
                 {/* Add person button */}
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   className="min-w-[140px] flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
                   onClick={addPersonColumn}
@@ -698,7 +700,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                 >
                   <Plus className="h-5 w-5" />
                   <span className="text-sm">Add person</span>
-                </button>
+                </Button>
               </div>
             </TabsContent>
 
@@ -732,7 +734,9 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                         placeholder="0.00"
                       />
                       {amountRows.length > 2 && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           type="button"
                           onClick={() => {
                             removeAmountRow(row.id);
@@ -740,7 +744,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                           aria-label={`Remove check ${String(i + 1)}`}
                         >
                           <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ))}
