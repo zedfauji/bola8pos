@@ -11,7 +11,7 @@ export default function LoginPage() {
   const isAuthenticated = useStaffStore(s => s.isAuthenticated);
 
   if (isAuthenticated) {
-    return <Navigate to="/pos" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return (
