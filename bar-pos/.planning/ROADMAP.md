@@ -792,8 +792,8 @@ Plans:
 **Depends on:** Phase 30
 **Plans:** 7 plans (2 waves)
 **UI hint**: yes
-
-Plans:
+Plans:
+**Wave 1**
 
 - [ ] 31-01-PLAN.md — Wave 1: agent-chat FAB/chips/mic-send + 3 text-link buttons -> Button (COMPONENT-01, D-03)
 - [ ] 31-02-PLAN.md — Wave 1: card-tile selectors + HomeDashboard/PoolTableGrid load-bearing chrome + AuditLogTable sr-only + ProductSalesPanel pills -> Button (COMPONENT-01)
@@ -801,6 +801,9 @@ Plans:
 - [ ] 31-04-PLAN.md — Wave 1: TableStatusPanel row-remove + duplicate back-button deletion (COMPONENT-03/D-09) + CategoryForm/ModifierSheet hex exemption comments (COMPONENT-01/02/03, TOKEN-01)
 - [ ] 31-05-PLAN.md — Wave 1: ModifierGroupEditor + HardwareSettingsTab checkbox swaps -> Checkbox (COMPONENT-02, D-04)
 - [ ] 31-06-PLAN.md — Wave 1: AuditLogFilterBar date inputs FormField + atomic e2e/38 selector fix + InventoryPagePanel signed-number FormField (COMPONENT-02, D-05/D-06)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 31-07-PLAN.md — Wave 2: regression gate + TOKEN-02 zero-violation verification + phase-wide conformance greps
 
 **Success Criteria:**
