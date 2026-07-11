@@ -153,9 +153,10 @@ export function HomeDashboard() {
           const isGated = !!item.requiredAction && !can(item.requiredAction);
           const Icon = item.icon;
           return (
-            <button
+            <Button
               key={item.path}
               type="button"
+              variant="ghost"
               onClick={() => {
                 handleItemClick(item);
               }}
@@ -188,7 +189,7 @@ export function HomeDashboard() {
                   {item.managerLabel}
                 </Badge>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
