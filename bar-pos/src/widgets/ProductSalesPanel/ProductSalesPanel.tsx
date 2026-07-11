@@ -3,7 +3,7 @@ import { BarChart2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ExportButtons } from '@features/export-report';
 import { useProductSalesReport, type ProductSalesRow } from '@entities/tab/model/queries-reports';
-import { DataTable, EmptyState, LoadingSpinner, MoneyDisplay } from '@shared/ui';
+import { Button, DataTable, EmptyState, LoadingSpinner, MoneyDisplay } from '@shared/ui';
 
 type Props = {
   dateRange: { from: Date; to: Date };
@@ -91,8 +91,9 @@ export function ProductSalesPanel({ dateRange }: Props) {
       </select>
 
       <div className="flex gap-1">
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => {
             setSortBy('revenue');
           }}
@@ -103,9 +104,10 @@ export function ProductSalesPanel({ dateRange }: Props) {
           }`}
         >
           By Revenue
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={() => {
             setSortBy('units');
           }}
@@ -116,7 +118,7 @@ export function ProductSalesPanel({ dateRange }: Props) {
           }`}
         >
           By Units
-        </button>
+        </Button>
       </div>
 
       {rawRows.length > 0 && <ExportButtons reportType="products" data={exportData} />}
