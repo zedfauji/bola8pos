@@ -6,6 +6,7 @@ import type { ReceiptSettings } from '@entities/settings';
 import type { UserRole } from '@shared/lib/domain';
 import { openCashDrawer, testPrint } from '@shared/lib/pos-printer';
 import { POSButton, ProtectedAction } from '@shared/ui';
+import { Checkbox } from '@shared/ui/checkbox';
 import { Label } from '@shared/ui/label';
 
 type Props = {
@@ -144,14 +145,12 @@ export function HardwareSettingsTab({ currentRole }: Props) {
                 ] as const
               ).map(({ key, label }) => (
                 <div key={key} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id={`receipt-${key}`}
                     checked={receipt[key]}
-                    onChange={e => {
-                      patchReceipt({ [key]: e.target.checked });
+                    onCheckedChange={c => {
+                      patchReceipt({ [key]: c === true });
                     }}
-                    className="h-4 w-4 rounded border-input accent-primary"
                   />
                   <Label htmlFor={`receipt-${key}`}>{label}</Label>
                 </div>

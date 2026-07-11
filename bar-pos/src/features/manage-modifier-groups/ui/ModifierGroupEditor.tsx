@@ -24,6 +24,7 @@ import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { FormField } from '@shared/ui/FormField';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { POSButton } from '@shared/ui/POSButton';
+import { Checkbox } from '@shared/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
 
@@ -250,14 +251,13 @@ function GroupForm({ initial, submitting, onCancel, onSubmit }: GroupFormProps) 
           />
         </FormField>
       </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
+      <label htmlFor="group-is-required" className="flex items-center gap-2 text-sm">
+        <Checkbox
+          id="group-is-required"
           checked={isRequired}
-          onChange={e => {
-            setIsRequired(e.target.checked);
+          onCheckedChange={c => {
+            setIsRequired(c === true);
           }}
-          className="size-4 rounded border-border"
         />
         Required (customer must select)
       </label>
@@ -332,14 +332,12 @@ function ModifierSelector({ group, onClose }: ModifierSelectorProps) {
         <ul className="max-h-64 divide-y overflow-y-auto rounded-md border">
           {sorted.map((m: Modifier) => (
             <li key={m.id} className="flex items-center gap-3 px-3 py-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 id={`mod-${m.id}`}
                 checked={selected.has(m.id)}
-                onChange={() => {
+                onCheckedChange={() => {
                   toggle(m.id);
                 }}
-                className="size-4 rounded border-border"
               />
               <label htmlFor={`mod-${m.id}`} className="flex flex-1 items-center gap-2 text-sm">
                 <span className="flex-1">{m.name}</span>
