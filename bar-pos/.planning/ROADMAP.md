@@ -790,17 +790,17 @@ Plans:
 **Goal:** Non-payment pages (login, home, settings, staff, rbac, audit, waitlist, rappi, reports, pool-tables, inventory, kitchen-prep, kds, kds-bar) use the correct `shared/ui` primitives instead of raw markup, and existing Tailwind color/spacing tokens instead of hardcoded values — proving the fix pattern on lower-risk surfaces before it's applied to payment-critical pages in Phase 33.
 **Requirements:** TOKEN-01, TOKEN-02, COMPONENT-01, COMPONENT-02, COMPONENT-03
 **Depends on:** Phase 30
-**Plans:** 7 plans (2 waves)
+**Plans:** 6/7 plans executed
 **UI hint**: yes
 Plans:
 **Wave 1**
 
-- [ ] 31-01-PLAN.md — Wave 1: agent-chat FAB/chips/mic-send + 3 text-link buttons -> Button (COMPONENT-01, D-03)
-- [ ] 31-02-PLAN.md — Wave 1: card-tile selectors + HomeDashboard/PoolTableGrid load-bearing chrome + AuditLogTable sr-only + ProductSalesPanel pills -> Button (COMPONENT-01)
-- [ ] 31-03-PLAN.md — Wave 1: SplitTabSheet 3 buttons (D-02) + ComboAvailabilityEditor day-chip + time-inputs FormField + CategoryTreeEditor chevron/color/hex (COMPONENT-01/02, TOKEN-01)
-- [ ] 31-04-PLAN.md — Wave 1: TableStatusPanel row-remove + duplicate back-button deletion (COMPONENT-03/D-09) + CategoryForm/ModifierSheet hex exemption comments (COMPONENT-01/02/03, TOKEN-01)
-- [ ] 31-05-PLAN.md — Wave 1: ModifierGroupEditor + HardwareSettingsTab checkbox swaps -> Checkbox (COMPONENT-02, D-04)
-- [ ] 31-06-PLAN.md — Wave 1: AuditLogFilterBar date inputs FormField + atomic e2e/38 selector fix + InventoryPagePanel signed-number FormField (COMPONENT-02, D-05/D-06)
+- [x] 31-01-PLAN.md — Wave 1: agent-chat FAB/chips/mic-send + 3 text-link buttons -> Button (COMPONENT-01, D-03)
+- [x] 31-02-PLAN.md — Wave 1: card-tile selectors + HomeDashboard/PoolTableGrid load-bearing chrome + AuditLogTable sr-only + ProductSalesPanel pills -> Button (COMPONENT-01)
+- [x] 31-03-PLAN.md — Wave 1: SplitTabSheet 3 buttons (D-02) + ComboAvailabilityEditor day-chip + time-inputs FormField + CategoryTreeEditor chevron/color/hex (COMPONENT-01/02, TOKEN-01)
+- [x] 31-04-PLAN.md — Wave 1: TableStatusPanel row-remove + duplicate back-button deletion (COMPONENT-03/D-09) + CategoryForm/ModifierSheet hex exemption comments (COMPONENT-01/02/03, TOKEN-01)
+- [x] 31-05-PLAN.md — Wave 1: ModifierGroupEditor + HardwareSettingsTab checkbox swaps -> Checkbox (COMPONENT-02, D-04)
+- [x] 31-06-PLAN.md — Wave 1: AuditLogFilterBar date inputs FormField + atomic e2e/38 selector fix + InventoryPagePanel signed-number FormField (COMPONENT-02, D-05/D-06)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
