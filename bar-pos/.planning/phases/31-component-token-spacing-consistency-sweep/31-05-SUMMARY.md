@@ -104,3 +104,10 @@ None - no external service configuration required.
 ---
 *Phase: 31-component-token-spacing-consistency-sweep*
 *Completed: 2026-07-11*
+
+## Self-Check: PASSED
+
+- FOUND: `src/features/manage-modifier-groups/ui/ModifierGroupEditor.tsx`
+- FOUND: `src/widgets/SettingsTabsPanel/tabs/HardwareSettingsTab.tsx`
+- FOUND commit `0ff5fdc` (Task 1)
+- FOUND commit `0489981` (Task 2)
