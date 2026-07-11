@@ -60,7 +60,7 @@ App-wide UI consistency pass enforcing existing shadcn/Tailwind conventions acro
 
 - [x] **Phase 29: UI Drift Audit** — File-mapped inventory of raw buttons/inputs, hardcoded colors, arbitrary-value spacing across all 17 routes (completed 2026-07-10)
 - [x] **Phase 30: Shared Shell & Primitive Extension** — Every route on one `PageContainer` shell; dead `AppShell`/`AppNav` removed; `CLAUDE.md` routes table corrected (completed 2026-07-10)
-- [ ] **Phase 31: Component, Token & Spacing Consistency Sweep** — Non-payment pages use `shared/ui` primitives + Tailwind tokens + spacing scale
+- [x] **Phase 31: Component, Token & Spacing Consistency Sweep** — Non-payment pages use `shared/ui` primitives + Tailwind tokens + spacing scale (completed 2026-07-11)
 - [ ] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings
 - [ ] **Phase 33: Payment-Critical Page Sweep (Isolated)** — POS/payments/split/refund/tip surfaces standardized, zero behavior change, gated by existing E2E specs
 - [ ] **Phase 34: Visual Regression Baseline** — Isolated Playwright visual-diff config + post-fix screenshot baselines for all 17 routes
@@ -790,7 +790,7 @@ Plans:
 **Goal:** Non-payment pages (login, home, settings, staff, rbac, audit, waitlist, rappi, reports, pool-tables, inventory, kitchen-prep, kds, kds-bar) use the correct `shared/ui` primitives instead of raw markup, and existing Tailwind color/spacing tokens instead of hardcoded values — proving the fix pattern on lower-risk surfaces before it's applied to payment-critical pages in Phase 33.
 **Requirements:** TOKEN-01, TOKEN-02, COMPONENT-01, COMPONENT-02, COMPONENT-03
 **Depends on:** Phase 30
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans complete
 **UI hint**: yes
 Plans:
 **Wave 1**
@@ -804,7 +804,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 31-07-PLAN.md — Wave 2: regression gate + TOKEN-02 zero-violation verification + phase-wide conformance greps
+- [x] 31-07-PLAN.md — Wave 2: regression gate + TOKEN-02 zero-violation verification + phase-wide conformance greps
 
 **Success Criteria:**
 
