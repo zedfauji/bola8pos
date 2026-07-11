@@ -1,4 +1,5 @@
 import { Bot } from 'lucide-react';
+import { Button } from '@shared/ui/button';
 import { useAgentStore } from '../model/agentStore';
 
 export function AgentButton() {
@@ -9,8 +10,9 @@ export function AgentButton() {
   if (agentEnabled === 'false') return null;
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       onClick={toggle}
       aria-label="Abrir asistente IA"
       className="fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
@@ -19,6 +21,6 @@ export function AgentButton() {
         <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-75" />
       )}
       <Bot className="size-6" />
-    </button>
+    </Button>
   );
 }

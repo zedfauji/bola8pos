@@ -24,6 +24,7 @@ import type { Ingredient, IngredientCreate } from '@entities/ingredient';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
+import { Button } from '@shared/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -265,15 +266,16 @@ export function ManageIngredientsTab() {
               <div className="space-y-3 border-t pt-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold">Stock movements</h3>
-                  <button
+                  <Button
                     type="button"
+                    variant="link"
                     className="text-xs text-primary underline-offset-4 hover:underline"
                     onClick={() => {
                       setDialogState({ kind: 'adjust', ingredient: dialogState.ingredient });
                     }}
                   >
                     Record adjustment
-                  </button>
+                  </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Append-only ledger for {dialogState.ingredient.name}. All adjustments and sales
