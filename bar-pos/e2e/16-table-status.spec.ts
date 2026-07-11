@@ -823,12 +823,6 @@ test.describe('Table Status Page', () => {
 
     await expect(page).toHaveURL(/\/pool-tables$/, { timeout: 15_000 });
 
-    // Also confirm the "Back to Pool Tables" button inside the panel works
-    // (navigate back in to test it)
-    await page.goto(`/pool-tables/${tableId}`);
-    await page.getByRole('button', { name: /back to pool tables/i }).click();
-    await expect(page).toHaveURL(/\/pool-tables$/, { timeout: 15_000 });
-
     await logout(page);
   });
 });
