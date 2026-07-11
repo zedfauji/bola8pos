@@ -2,6 +2,7 @@ import { useLoginUiStore } from '@entities/staff/model/loginUiStore';
 import { useStaffList } from '@entities/staff/model/queries';
 import type { Staff } from '@entities/staff/model/types';
 import { LoadingSpinner } from '@shared/ui/LoadingSpinner';
+import { Button } from '@shared/ui/button';
 
 export function EmployeeSelector() {
   const { data: staff, isLoading, error, resultError } = useStaffList();
@@ -28,9 +29,10 @@ export function EmployeeSelector() {
       <h2 className="text-2xl font-bold text-center">Who are you?</h2>
       <div className="flex flex-col gap-2">
         {(staff ?? []).map((member: Staff) => (
-          <button
+          <Button
             key={member.id}
             type="button"
+            variant="outline"
             onClick={() => {
               setSelectedStaff(member);
             }}
@@ -43,7 +45,7 @@ export function EmployeeSelector() {
               <div className="font-semibold">{member.name}</div>
               <div className="text-sm text-muted-foreground capitalize">{member.role}</div>
             </div>
-          </button>
+          </Button>
         ))}
       </div>
     </div>

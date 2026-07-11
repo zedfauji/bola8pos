@@ -6,7 +6,8 @@
  * (click-to-open right-side diff Sheet). Satisfies the DOM/a11y contract
  * locked by e2e/38-audit-logs.spec.ts (14-UI-SPEC.md section C):
  *   - a <TableCell> containing the raw action string as plain text
- *   - an accessible sr-only <button> per row, name = "View diff for {action} on {date}"
+ *   - an accessible sr-only trigger per row (rendered via the shared Button primitive),
+ *     name = "View diff for {action} on {date}"
  */
 import type { ColumnDef } from '@tanstack/react-table';
 import { ClipboardList, Loader2 } from 'lucide-react';
@@ -66,8 +67,9 @@ export function AuditLogTable() {
         return (
           <>
             {auditLog.action}
-            <button
+            <Button
               type="button"
+              variant="link"
               className="sr-only"
               aria-label={`View diff for ${auditLog.action} on ${formatAuditDate(auditLog.createdAt)}`}
               onClick={() => {
@@ -75,7 +77,7 @@ export function AuditLogTable() {
               }}
             >
               View diff
-            </button>
+            </Button>
           </>
         );
       },

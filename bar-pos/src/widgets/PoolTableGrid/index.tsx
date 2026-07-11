@@ -17,7 +17,7 @@ import { useTabs } from '@entities/tab';
 import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
 import { rbacDenialMessage } from '@shared/lib/rbac';
 import { usePersistedBool } from '@shared/lib/usePersistedBool';
-import { EmptyState, POSButton, PoolTableGridSkeleton, ProtectedAction } from '@shared/ui';
+import { Button, EmptyState, POSButton, PoolTableGridSkeleton, ProtectedAction } from '@shared/ui';
 
 type TypeFilter = 'all' | PoolTableType;
 
@@ -117,8 +117,9 @@ export function PoolTableGrid() {
 
       {/* Type filter buttons */}
       <div className="space-y-2">
-        <button
+        <Button
           type="button"
+          variant="ghost"
           data-testid="pool-filters-toggle"
           aria-expanded={!filtersCollapsed}
           onClick={() => {
@@ -132,7 +133,7 @@ export function PoolTableGrid() {
             <ChevronDown className="h-4 w-4" />
           )}
           Filters
-        </button>
+        </Button>
         {!filtersCollapsed && (
           <div data-testid="pool-filters" className="flex flex-wrap gap-2">
             {TYPE_FILTER_LABELS.map(({ value, label }) => (
