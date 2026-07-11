@@ -1,6 +1,7 @@
 import { Mic, MicOff, Send } from 'lucide-react';
 import { useRef, useState, useCallback } from 'react';
 import { logger } from '@shared/lib/logger';
+import { Button } from '@shared/ui/button';
 
 interface FileDropZoneProps {
   onSend: (text: string) => void;
@@ -149,24 +150,28 @@ export function FileDropZone({ onSend, onFileDrop, disabled }: FileDropZoneProps
           className="min-h-[40px] flex-1 resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
           style={{ maxHeight: '120px', overflowY: 'auto' }}
         />
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={toggleVoice}
           disabled={disabled}
           aria-label={isListening ? 'Detener grabación de voz' : 'Iniciar grabación de voz'}
           className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
         >
           {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={handleSend}
           disabled={disabled || !text.trim()}
           aria-label="Enviar mensaje"
           className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           <Send className="size-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+import { Button } from '@shared/ui/button';
+
 interface CommandChipsProps {
   onSelect: (text: string) => void;
   userRole: string;
@@ -20,14 +22,15 @@ export function CommandChips({ onSelect, userRole }: CommandChipsProps) {
   return (
     <div className="flex flex-wrap gap-2 px-3 py-2">
       {chips.map((chip) => (
-        <button
+        <Button
           key={chip}
           type="button"
+          variant="outline"
           onClick={() => { onSelect(chip); }}
           className="rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           {chip}
-        </button>
+        </Button>
       ))}
     </div>
   );
