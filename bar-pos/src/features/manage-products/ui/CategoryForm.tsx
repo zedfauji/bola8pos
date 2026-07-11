@@ -30,6 +30,9 @@ export function CategoryForm({
   const isEdit = initialCategory != null;
 
   const [name, setName] = useState(initialCategory?.name ?? '');
+  // TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
+  // picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
+  // token — see 31-CONTEXT.md D-08.
   const [color, setColor] = useState(initialCategory?.color ?? '#6B7280');
   const [sortOrder, setSortOrder] = useState(String(initialCategory?.sortOrder ?? 0));
   const [happyStart, setHappyStart] = useState(() => {
@@ -132,6 +135,7 @@ export function CategoryForm({
         hint="Hex or use the picker"
       >
         <div className="flex flex-wrap items-center gap-2">
+          {/* native color input — no shared/ui color-picker primitive exists, see 31-CONTEXT.md D-05 */}
           <input
             type="color"
             aria-label="Color picker"
@@ -142,6 +146,9 @@ export function CategoryForm({
             }}
             disabled={submitting}
           />
+          {/* TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
+              picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
+              token — see 31-CONTEXT.md D-08. */}
           <Input
             className="max-w-[9rem] font-mono text-sm"
             value={color}

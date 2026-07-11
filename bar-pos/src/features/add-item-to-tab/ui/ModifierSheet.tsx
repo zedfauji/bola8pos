@@ -19,6 +19,9 @@ function categoryForPricing(product: Product): Category {
   return {
     id: product.categoryId,
     name: 'Unknown',
+    // TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
+    // picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
+    // token — see 31-CONTEXT.md D-08.
     color: '#808080',
     sortOrder: 0,
     happyHourStart: null,

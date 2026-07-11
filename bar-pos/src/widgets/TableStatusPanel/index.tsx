@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeft, Clock, DollarSign, X } from 'lucide-react';
+import { AlertCircle, Clock, DollarSign, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ import {
   PoolTableGridSkeleton,
 } from '@shared/ui';
 import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
 import { isHappyHourActive } from './isHappyHourActive';
 
 // ---------------------------------------------------------------------------
@@ -241,8 +242,10 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                           {item.quantity}× {item.product?.name ?? 'Item'}
                         </span>
                         <MoneyDisplay amount={lineTotal} size="sm" />
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-sm"
                           className="text-muted-foreground hover:text-destructive ml-1 rounded p-1 transition-colors"
                           title="Remove item"
                           onClick={() => {
@@ -251,7 +254,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                           }}
                         >
                           <X className="size-4" />
-                        </button>
+                        </Button>
                       </div>
                     );
                   })}
@@ -377,21 +380,6 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
             </POSButton>
           )}
         </div>
-      </div>
-
-      {/* Back button */}
-      <div>
-        <POSButton
-          type="button"
-          variant="ghost"
-          touchSize="default"
-          onClick={() => {
-            navigate('/pool-tables');
-          }}
-        >
-          <ArrowLeft className="mr-2 size-4" />
-          Back to Pool Tables
-        </POSButton>
       </div>
 
       {/* ── Dialogs ─────────────────────────────────────────────────────────── */}
