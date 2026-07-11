@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { useComboAvailabilityWindows, comboKeys } from '@entities/combo';
 import type { ComboAvailability } from '@entities/combo';
 import { supabase } from '@shared/lib/supabase';
+import { FormField } from '@shared/ui/FormField';
 import { Button } from '@shared/ui/button';
 
 // Pre-regen cast — remove once supabase.types.ts is regenerated after combo migrations
@@ -85,7 +86,8 @@ function WindowRow({
         {DAY_LABELS.map(({ iso, label }) => {
           const selected = draft.daysOfWeek.includes(iso);
           return (
-            <button
+            <Button
+              variant="outline"
               key={iso}
               type="button"
               aria-pressed={selected}
@@ -99,7 +101,7 @@ function WindowRow({
               }`}
             >
               {label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -107,30 +109,28 @@ function WindowRow({
       {/* Time inputs — only shown when at least 1 day selected */}
       {draft.daysOfWeek.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
-          <label htmlFor={startId} className="text-xs text-muted-foreground">
-            From
-          </label>
-          <input
-            id={startId}
-            type="time"
-            value={draft.startTime}
-            onChange={e => {
-              onSetStartTime(idx, e.target.value);
-            }}
-            className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-          <label htmlFor={endId} className="text-xs text-muted-foreground">
-            To
-          </label>
-          <input
-            id={endId}
-            type="time"
-            value={draft.endTime}
-            onChange={e => {
-              onSetEndTime(idx, e.target.value);
-            }}
-            className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
+          <FormField label="From">
+            <input
+              id={startId}
+              type="time"
+              value={draft.startTime}
+              onChange={e => {
+                onSetStartTime(idx, e.target.value);
+              }}
+              className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </FormField>
+          <FormField label="To">
+            <input
+              id={endId}
+              type="time"
+              value={draft.endTime}
+              onChange={e => {
+                onSetEndTime(idx, e.target.value);
+              }}
+              className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </FormField>
           {hasTimeError && (
             <p className="text-sm text-destructive">End time must be after start time</p>
           )}
