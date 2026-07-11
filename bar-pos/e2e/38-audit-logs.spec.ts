@@ -228,7 +228,7 @@ test.describe('Audit Log', () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
       const isoTomorrow = tomorrow.toISOString().slice(0, 10);
 
-      const dateFromInput = page.locator('#audit-filter-date-from');
+      const dateFromInput = page.getByLabel('Date from');
       await expect(dateFromInput).toBeVisible({ timeout: 5_000 });
       await dateFromInput.fill(isoTomorrow);
 
