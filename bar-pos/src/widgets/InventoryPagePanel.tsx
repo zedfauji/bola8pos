@@ -10,6 +10,7 @@ import {
 import { useStaffStore } from '@entities/staff/model/store';
 import { InventoryAdjustReason } from '@shared/lib/domain';
 import { DataTable } from '@shared/ui/DataTable';
+import { FormField } from '@shared/ui/FormField';
 import { POSButton } from '@shared/ui/POSButton';
 import { ProtectedAction } from '@shared/ui/ProtectedAction';
 import { SectionHeader } from '@shared/ui/SectionHeader';
@@ -346,12 +347,8 @@ export function InventoryPagePanel() {
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <label htmlFor="batch-delta" className="text-sm font-medium">
-                Quantity delta
-              </label>
+            <FormField label="Quantity delta" hint="Use negative numbers to remove stock.">
               <input
-                id="batch-delta"
                 type="number"
                 className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 value={batchDelta}
@@ -359,8 +356,7 @@ export function InventoryPagePanel() {
                   setBatchDelta(e.target.value);
                 }}
               />
-              <p className="text-xs text-muted-foreground">Use negative numbers to remove stock.</p>
-            </div>
+            </FormField>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <POSButton
