@@ -94,6 +94,19 @@ None - no external service configuration required.
 - `npm run typecheck` (2 pre-existing unrelated errors in `src/entities/tab/model/queries.ts` and `src/shared/lib/agent/rag.ts`, both predating this plan) and `npm run lint` (exit 0, only pre-existing non-blocking `boundaries` config warning) both pass on the touched files and the full `src/` tree.
 - No blockers for the remaining Phase 31 plans (this plan's files do not overlap with any other in-flight Phase 31 plan per the phase's Wave 1 grouping).
 
+## Self-Check: PASSED
+
+- FOUND: src/features/split-tab/ui/SplitTabSheet.tsx
+- FOUND: src/features/manage-combos/ui/ComboAvailabilityEditor.tsx
+- FOUND: src/features/manage-categories/ui/CategoryTreeEditor.tsx
+- FOUND commit: 6449f87 (Task 1)
+- FOUND commit: 55aee53 (Task 2)
+- FOUND commit: fb93393 (Task 3)
+
+## Note on .planning/ gitignore
+
+This project's `.gitignore` lists `.planning/`, but this repo has an established precedent of tracking `.planning/**/*-SUMMARY.md` files (14/16/17/etc. phase summaries are already committed), and `.planning/STATE.md`'s own accumulated context documents a prior-phase lesson: "force-add+commit any gitignored `.planning/` artifacts from inside the worktree BEFORE requesting removal." Per that project-specific precedent and the worktree-preservation requirement (uncommitted SUMMARY.md is permanently lost on `git worktree remove --force`), this SUMMARY.md was committed via `git add -f` (commit `c1b48fc`) rather than left unstaged.
+
 ---
 *Phase: 31-component-token-spacing-consistency-sweep*
 *Completed: 2026-07-11*
