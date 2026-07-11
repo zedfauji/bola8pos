@@ -26,6 +26,7 @@ import type { CategoryCreate, CategoryRouting, CategoryUpdate } from '@shared/li
 import { FormField } from '@shared/ui/FormField';
 import { POSButton } from '@shared/ui/POSButton';
 import { RoutingBadge } from '@shared/ui/RoutingBadge';
+import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
 import {
@@ -81,6 +82,7 @@ function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormP
       </FormField>
       <FormField label="Color">
         <div className="flex items-center gap-3">
+          {/* native color input — no shared/ui color-picker primitive exists, see 31-CONTEXT.md D-05 */}
           <input
             id="cat-color"
             type="color"
@@ -163,7 +165,9 @@ function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChil
         style={{ paddingLeft: `${String(indentPx + 8)}px` }}
       >
         {/* Expand toggle */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           type="button"
           aria-label={isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
           className={[
@@ -182,7 +186,7 @@ function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChil
             ) : (
               <ChevronRight className="size-3.5" />
             ))}
-        </button>
+        </Button>
 
         {/* Color swatch */}
         <span
@@ -462,7 +466,10 @@ export function CategoryTreeEditor() {
                       color: dialog.category.color,
                       routing: dialog.category.routing,
                     }
-                  : { name: '', color: '#6366f1', routing: 'NONE' }
+                  : // TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
+                    // picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
+                    // token — see 31-CONTEXT.md D-08.
+                    { name: '', color: '#6366f1', routing: 'NONE' }
               }
               submitting={createMutation.isPending || updateMutation.isPending}
               onCancel={() => {
