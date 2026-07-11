@@ -116,9 +116,10 @@ export function SeatPartySheet({
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {availableTables.map((table) => (
-                  <button
+                  <Button
                     key={table.id}
                     type="button"
+                    variant="outline"
                     aria-pressed={selectedTableId === table.id}
                     className={cn(
                       'rounded-lg border p-4 text-left transition-colors',
@@ -129,7 +130,7 @@ export function SeatPartySheet({
                     onClick={() => { setSelectedTableId(table.id); }}
                   >
                     <span className="text-base font-semibold">Table {table.number} – {table.label}</span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -141,16 +142,17 @@ export function SeatPartySheet({
               <p className="text-sm font-semibold text-muted-foreground">Occupied tables</p>
               <div className="grid grid-cols-2 gap-3">
                 {occupiedTables.map((table) => (
-                  <button
+                  <Button
                     key={table.id}
                     type="button"
+                    variant="outline"
                     disabled
                     aria-label={`Table ${String(table.number)} – ${table.label}: occupied`}
                     className="rounded-lg border p-4 text-left opacity-50 cursor-not-allowed"
                   >
                     <span className="text-base font-semibold">Table {table.number} – {table.label}</span>
                     <span className="block text-sm text-muted-foreground">Occupied</span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
