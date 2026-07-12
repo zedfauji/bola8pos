@@ -1,4 +1,3 @@
-import { computePoolSessionBilling } from '@shared/lib/pool-billing';
 import { ok, err } from '@shared/lib/result';
 import type { Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -547,47 +546,21 @@ export async function _executeStopPoolSession(
   args: Record<string, unknown>,
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
-  const { session_id, table_id, rate_per_hour } = args as { session_id: string; table_id: string; rate_per_hour: number };
+  const { session_id, table_id } = args as { session_id: string; table_id: string; rate_per_hour: number };
   const t0 = Date.now();
 
-  const { data: session, error: fetchErr } = await supabase
-    .from('pool_sessions')
-    .select('id, started_at')
-    .eq('id', session_id)
-    .single();
-
-  if (fetchErr) {
-    return err({ code: 'NOT_FOUND' as const, message: `Session not found: ${fetchErr.message}` });
-  }
-
-  const { data: billingSettings } = await supabase
-    .from('settings')
-    .select('value')
-    .eq('key', 'billing')
-    .maybeSingle();
-  const firstHourMode: 'full' | 'prorated' =
-    (billingSettings?.value as Record<string, unknown> | null)?.['firstHourMode'] === 'full'
-      ? 'full'
-      : 'prorated';
-
-  const stoppedAt = new Date();
-  const { billedMinutes, totalCharge } = computePoolSessionBilling({
-    startedAt:    new Date(session.started_at),
-    endTime:      stoppedAt,
-    ratePerHour:  rate_per_hour,
-    firstHourMode,
+  // stop_pool_session is the sole authoritative writer of pool_sessions.total_charge/
+  // billed_minutes (server reads rate_per_hour/firstHourMode itself and bumps `version`
+  // atomically — bump_version_on_update rejects any raw client update that doesn't).
+  // See useMutationStopSession in entities/pool-table/model/queries.ts for the sibling
+  // call site this mirrors.
+  const { data: rpcData, error: rpcErr } = await supabase.rpc('stop_pool_session', {
+    p_session_id: session_id,
   });
 
-  const { data: updated, error: sessionErr } = await supabase
-    .from('pool_sessions')
-    .update({ stopped_at: stoppedAt.toISOString(), billed_minutes: billedMinutes, total_charge: totalCharge })
-    .eq('id', session_id)
-    .select()
-    .single();
-
-  if (sessionErr) {
+  if (rpcErr) {
     void logAgentAction('stop_pool_session', args, null, { ...ctx, durationMs: Date.now() - t0 });
-    return err({ code: 'AGENT_ERROR' as const, message: sessionErr.message });
+    return err({ code: 'AGENT_ERROR' as const, message: rpcErr.message });
   }
 
   const { error: tableErr } = await supabase
@@ -600,9 +573,8 @@ export async function _executeStopPoolSession(
     return err({ code: 'AGENT_ERROR' as const, message: tableErr.message });
   }
 
-  const result = { ...updated, billed_minutes: billedMinutes, total_charge: totalCharge };
-  void logAgentAction('stop_pool_session', args, result, { ...ctx, durationMs: Date.now() - t0 });
-  return ok(result);
+  void logAgentAction('stop_pool_session', args, rpcData, { ...ctx, durationMs: Date.now() - t0 });
+  return ok(rpcData);
 }
 
 // Public tool — builds preview + pending action
@@ -651,10 +623,24 @@ export async function assignSessionToTab(
   const tabMissing = await assertExists('tabs', args.tab_id);
   if (tabMissing) return err({ code: 'NOT_FOUND' as const, message: tabMissing });
 
+  // pool_sessions has a bump_version_on_update trigger (Phase 15) that rejects any
+  // UPDATE not explicitly advancing `version` by 1 — fetch it first.
+  const { data: versionRow, error: versionErr } = await supabase
+    .from('pool_sessions')
+    .select('version')
+    .eq('id', args.session_id)
+    .single();
+
+  if (versionErr) {
+    void logAgentAction('assign_session_to_tab', args, null, { ...ctx, durationMs: Date.now() - t0 });
+    return err({ code: 'AGENT_ERROR' as const, message: versionErr.message });
+  }
+
   const { data, error } = await supabase
     .from('pool_sessions')
-    .update({ tab_id: args.tab_id })
+    .update({ tab_id: args.tab_id, version: versionRow.version + 1 })
     .eq('id', args.session_id)
+    .eq('version', versionRow.version)
     .is('stopped_at', null)
     .select('id, tab_id')
     .single();
@@ -682,10 +668,25 @@ export async function _executeStopAndMoveTable(
   if (!stopResult.ok) return stopResult;
 
   const t0 = Date.now();
+
+  // tabs also has a bump_version_on_update trigger (trg_tabs_version, Phase 15) —
+  // fetch the current version first, same pattern as pool_sessions above.
+  const { data: tabVersionRow, error: tabVersionErr } = await supabase
+    .from('tabs')
+    .select('version')
+    .eq('id', tab_id)
+    .single();
+
+  if (tabVersionErr) {
+    void logAgentAction('stop_and_move_table', args, null, { ...ctx, durationMs: Date.now() - t0 });
+    return err({ code: 'AGENT_ERROR' as const, message: tabVersionErr.message });
+  }
+
   const { error: tabErr } = await supabase
     .from('tabs')
-    .update({ table_number: new_table_number })
-    .eq('id', tab_id);
+    .update({ table_number: new_table_number, version: tabVersionRow.version + 1 })
+    .eq('id', tab_id)
+    .eq('version', tabVersionRow.version);
 
   if (tabErr) {
     void logAgentAction('stop_and_move_table', args, null, { ...ctx, durationMs: Date.now() - t0 });

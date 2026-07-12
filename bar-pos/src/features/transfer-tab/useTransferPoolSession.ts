@@ -52,16 +52,32 @@ export function useTransferPoolSession() {
       }
 
       // Record which table this session came from so the status page can show transfer history.
-      const { error: stampError } = await supabase
+      // pool_sessions has a bump_version_on_update trigger (Phase 15) that rejects any
+      // UPDATE not explicitly advancing `version` by 1 — fetch the current version first
+      // (transfer_pool_session already bumped it server-side, so re-read post-RPC).
+      const { data: versionRow, error: versionFetchError } = await supabase
         .from('pool_sessions')
-        .update({ previous_table_id: currentTableId })
-        .eq('id', sessionId);
+        .select('version')
+        .eq('id', sessionId)
+        .single();
 
-      if (stampError) {
-        // Non-fatal — the transfer already succeeded; log and continue.
+      if (versionFetchError) {
         logger.warn('transfer_pool_session.stamp_previous_table_error', {
-          message: stampError.message,
+          message: versionFetchError.message,
         });
+      } else {
+        const { error: stampError } = await supabase
+          .from('pool_sessions')
+          .update({ previous_table_id: currentTableId, version: versionRow.version + 1 })
+          .eq('id', sessionId)
+          .eq('version', versionRow.version);
+
+        if (stampError) {
+          // Non-fatal — the transfer already succeeded; log and continue.
+          logger.warn('transfer_pool_session.stamp_previous_table_error', {
+            message: stampError.message,
+          });
+        }
       }
 
       return ok(undefined);

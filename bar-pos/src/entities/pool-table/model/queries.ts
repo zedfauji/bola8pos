@@ -540,11 +540,25 @@ export function useMutationLinkPoolSessionToTab() {
       sessionId: string;
       tabId: string;
     }): Promise<Result<void>> => {
+      // pool_sessions has a bump_version_on_update trigger (Phase 15) that rejects
+      // any UPDATE not explicitly advancing `version` by 1 — fetch it first.
+      const versionRes = await supabaseQuery<Pick<Tables<'pool_sessions'>, 'version'>>(() =>
+        supabase.from('pool_sessions').select('version').eq('id', sessionId).single()
+      );
+      if (!versionRes.ok) {
+        logger.error('pool_sessions.link_tab_version_fetch_failed', {
+          sessionId,
+          message: versionRes.error.message,
+        });
+        return versionRes;
+      }
+
       const res = await supabaseMutation(() =>
         supabase
           .from('pool_sessions')
-          .update({ tab_id: tabId })
+          .update({ tab_id: tabId, version: versionRes.data.version + 1 })
           .eq('id', sessionId)
+          .eq('version', versionRes.data.version)
           .is('stopped_at', null)
       );
       if (!res.ok) {
