@@ -1,17 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { poolTableKeys } from '@entities/pool-table/model/queries';
 import { usePoolTableStore } from '@entities/pool-table/model/store';
-import { computePoolSessionBilling } from '@shared/lib/pool-billing';
-import {
-  err,
-  ok,
-  supabaseMutation,
-  supabaseQuery,
-  unknownError,
-  type Result,
-} from '@shared/lib/result';
+import { ok, supabaseMutation, supabaseQuery, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
-import type { Tables } from '@shared/lib/supabase.types';
 
 export interface StopAndMoveInput {
   sessionId: string;
@@ -19,6 +10,8 @@ export interface StopAndMoveInput {
   tabId: string;
   ratePerHour: number;
   newTableNumber: number;
+  /** Optimistic-concurrency version from the cached session row (Phase 15). */
+  version: number | undefined;
 }
 
 export function useStopAndMoveSession() {
@@ -26,38 +19,19 @@ export function useStopAndMoveSession() {
 
   return useMutation({
     mutationFn: async (input: StopAndMoveInput): Promise<Result<void>> => {
-      // Step 1: Fetch the current session to compute billing
-      const fetchRes = await supabaseQuery<Tables<'pool_sessions'>>(() =>
-        supabase.from('pool_sessions').select('*').eq('id', input.sessionId).single()
+      // Step 1/2: Stop the pool session via the server-authoritative RPC —
+      // it computes billing and bumps `version` atomically (bump_version_on_update
+      // trigger rejects any pool_sessions UPDATE that doesn't advance version by 1;
+      // see useMutationStopSession in entities/pool-table/model/queries.ts for the
+      // sibling call site this mirrors).
+      const rpcRes = await supabaseQuery(() =>
+        supabase.rpc('stop_pool_session', {
+          p_session_id: input.sessionId,
+          ...(input.version !== undefined ? { p_expected_version: input.version } : {}),
+        })
       );
 
-      if (!fetchRes.ok) return fetchRes;
-
-      const session = fetchRes.data;
-      const startedAt = new Date(session.started_at);
-      const stoppedAt = new Date();
-      const { billedMinutes, totalCharge } = computePoolSessionBilling({
-        startedAt,
-        endTime: stoppedAt,
-        ratePerHour: input.ratePerHour,
-      });
-
-      // Step 2: Stop the pool session
-      const sessionRes = await supabaseMutation<Tables<'pool_sessions'>>(() =>
-        supabase
-          .from('pool_sessions')
-          .update({
-            stopped_at: stoppedAt.toISOString(),
-            billed_minutes: billedMinutes,
-            total_charge: totalCharge,
-          })
-          .eq('id', input.sessionId)
-          .select()
-          .single()
-      );
-
-      if (!sessionRes.ok) return sessionRes;
-      if (sessionRes.data === null) return err(unknownError('no_row'));
+      if (!rpcRes.ok) return rpcRes;
 
       // Step 3: Mark pool table as available and clear session reference
       const tableRes = await supabaseMutation(() =>
@@ -69,9 +43,23 @@ export function useStopAndMoveSession() {
 
       if (!tableRes.ok) return tableRes;
 
-      // Step 4: Update tab's table_number to the new regular table
+      // Step 4: Update tab's table_number to the new regular table.
+      // tabs also has a bump_version_on_update trigger (trg_tabs_version) —
+      // fetch the current version first, same pattern as pool_sessions above.
+      const tabVersionRes = await supabaseQuery<{ version: number }>(() =>
+        supabase.from('tabs').select('version').eq('id', input.tabId).single()
+      );
+      if (!tabVersionRes.ok) return tabVersionRes;
+
       const tabRes = await supabaseMutation(() =>
-        supabase.from('tabs').update({ table_number: input.newTableNumber }).eq('id', input.tabId)
+        supabase
+          .from('tabs')
+          .update({
+            table_number: input.newTableNumber,
+            version: tabVersionRes.data.version + 1,
+          })
+          .eq('id', input.tabId)
+          .eq('version', tabVersionRes.data.version)
       );
 
       if (!tabRes.ok) return tabRes;

@@ -241,13 +241,23 @@ test.describe('Table Status Page', () => {
       .single();
 
     if (otherTable) {
+      // pool_sessions has a version-bump trigger (bump_version_on_update) that rejects
+      // any UPDATE not explicitly advancing version by 1 — fetch current version first.
+      const { data: currentSession } = await admin
+        .from('pool_sessions')
+        .select('version')
+        .eq('id', sessionId)
+        .single();
+
       // Only set previous_table_id — the number is resolved via a join in the UI query
-      await admin
+      const { error: updateError } = await admin
         .from('pool_sessions')
         .update({
           previous_table_id: otherTable.id,
+          version: (currentSession?.version ?? 0) + 1,
         })
         .eq('id', sessionId);
+      if (updateError) throw new Error(`Failed to set previous_table_id: ${updateError.message}`);
     }
 
     await page.goto(`/pool-tables/${tableId}`);
@@ -261,91 +271,19 @@ test.describe('Table Status Page', () => {
   });
 
   // ── Test 3 ────────────────────────────────────────────────────────────────
-  test('T3: Happy Hour badge visible when current time is within happy hour window', async ({
-    page,
-  }) => {
-    test.setTimeout(120_000);
-    await loginAs(page, 'manager');
-
-    const admin = getServiceClient();
-
-    // Set happy hour on the first available category to cover the current time
-    const now = new Date();
-    const hhmm = now.getHours() * 60 + now.getMinutes();
-    // Window: 30 min before to 30 min after current time
-    const startH = Math.floor((hhmm - 30 + 1440) % 1440 / 60);
-    const startM = Math.floor((hhmm - 30 + 1440) % 1440 % 60);
-    const endH = Math.floor((hhmm + 30) % 1440 / 60);
-    const endM = Math.floor((hhmm + 30) % 1440 % 60);
-    const startStr = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
-    const endStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
-
-    const { data: category } = await admin
-      .from('categories')
-      .select('id')
-      .limit(1)
-      .single();
-
-    if (!category) {
-      test.skip(true, 'No category found to apply happy hour — seed may be missing');
-      return;
-    }
-
-    // Apply happy hour window on this category
-    await admin
-      .from('categories')
-      .update({ happy_hour_start: startStr, happy_hour_end: endStr })
-      .eq('id', category.id);
-
-    // Find a product in this category
-    const { data: product } = await admin
-      .from('products')
-      .select('id, base_price')
-      .eq('category_id', category.id)
-      .limit(1)
-      .single();
-
-    if (!product) {
-      test.skip(true, 'No product found in happy hour category');
-      return;
-    }
-
-    // Seed occupied table and add an order with this product
-    const { tableId, tabId } = await seedOccupiedTableDirect('Happy Hour Test');
-
-    // Insert an order + order_item directly
-    const { data: staffRow } = await admin.from('profiles').select('id').limit(1).single();
-    const { data: order } = await admin
-      .from('orders')
-      .insert({
-        tab_id: tabId,
-        status: 'pending',
-        staff_id: staffRow!.id,
-      })
-      .select('id')
-      .single();
-
-    if (order) {
-      await admin.from('order_items').insert({
-        order_id: order.id,
-        product_id: product.id,
-        quantity: 1,
-        unit_price: product.base_price,
-      });
-    }
-
-    await page.goto(`/pool-tables/${tableId}`);
-
-    await expect(page.getByText(/happy hour active/i)).toBeVisible({ timeout: 20_000 });
-
-    // Cleanup: remove happy hour from category
-    await admin
-      .from('categories')
-      .update({ happy_hour_start: null, happy_hour_end: null })
-      .eq('id', category.id);
-
-    await logout(page);
-  });
+  // The category-based happy-hour feature (categories.happy_hour_start/end,
+  // isHappyHourActive.ts, the "Happy Hour Active" badge in TableStatusPanel)
+  // was retired when the DB migrated to the promotions system
+  // (20260710000007_migrate_happy_hour_data.sql /
+  // 20260711000001_drop_happy_hour_columns.sql) — the columns no longer
+  // exist and the badge component was removed. No promotions-based UI
+  // replacement has been built yet, so there is nothing for this test to
+  // exercise. Skipped rather than deleted so it's easy to find and rewrite
+  // once a promotions-driven "active discount" indicator exists.
+  test.skip(
+    'T3: Happy Hour badge visible when current time is within happy hour window',
+    async () => {}
+  );
 
   // ── Test 4 ────────────────────────────────────────────────────────────────
   test('T4: Stop Timer opens confirmation dialog, confirm redirects to /pool-tables', async ({

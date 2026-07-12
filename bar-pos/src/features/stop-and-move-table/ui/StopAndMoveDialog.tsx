@@ -44,6 +44,7 @@ export function StopAndMoveDialog({
       tabId,
       ratePerHour: table.ratePerHour,
       newTableNumber,
+      version: session.version,
     });
 
     if (!result.ok) {

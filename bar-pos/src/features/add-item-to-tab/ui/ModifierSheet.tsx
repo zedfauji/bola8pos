@@ -13,23 +13,6 @@ import {
   SheetFooter,
 } from '@shared/ui/sheet';
 
-function categoryForPricing(product: Product): Category {
-  if (product.category) return product.category;
-  return {
-    id: product.categoryId,
-    name: 'Unknown',
-    // TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
-    // picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
-    // token — see 31-CONTEXT.md D-08.
-    color: '#808080',
-    sortOrder: 0,
-    happyHourStart: null,
-    happyHourEnd: null,
-    routing: 'NONE',
-    createdAt: new Date(),
-  };
-}
-
 interface ModifierSheetProps {
   product: Product;
   open: boolean;

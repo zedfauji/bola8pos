@@ -691,11 +691,23 @@ export function useMutationUpdateSessionStartTime() {
       sessionId: string;
       startedAt: Date;
     }): Promise<Result<null>> => {
+      // pool_sessions has a bump_version_on_update trigger (Phase 15) that
+      // rejects any UPDATE not explicitly advancing `version` by 1 — fetch
+      // the current version first, same pattern as useMutationStopSession.
+      const versionRes = await supabaseQuery<Pick<Tables<'pool_sessions'>, 'version'>>(() =>
+        supabase.from('pool_sessions').select('version').eq('id', sessionId).single()
+      );
+      if (!versionRes.ok) return versionRes;
+
       return supabaseMutation<null>(async () =>
         supabase
           .from('pool_sessions')
-          .update({ started_at: startedAt.toISOString() })
+          .update({
+            started_at: startedAt.toISOString(),
+            version: versionRes.data.version + 1,
+          })
           .eq('id', sessionId)
+          .eq('version', versionRes.data.version)
       );
     },
     onSuccess: result => {
