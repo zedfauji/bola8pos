@@ -15,6 +15,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+
+import { AuditActionSchema } from './audit-actions';
 import {
   CategorySchema,
   ProductSchema,
@@ -25,6 +27,11 @@ import {
   ProductModifierGroupSchema,
   ModifierInventoryRuleSchema,
   ModifierInventoryRuleCreateSchema,
+  PromotionDiscountTypeSchema,
+  PromotionTargetTypeSchema,
+  PromotionSchema,
+  PromotionCreateSchema,
+  AppliedPromotionSchema,
 } from './domain';
 
 // ─── Shared test fixtures ────────────────────────────────────────────────────
@@ -509,5 +516,108 @@ describe('ModifierInventoryRuleSchema', () => {
     if (result.success) {
       expect(result.data).not.toHaveProperty('id');
     }
+  });
+});
+
+// ─── Promotions (Phase 20 Plan 02) ────────────────────────────────────────────
+
+describe('PromotionDiscountTypeSchema', () => {
+  it('parses the three valid discount shapes', () => {
+    expect(PromotionDiscountTypeSchema.safeParse('percentage').success).toBe(true);
+    expect(PromotionDiscountTypeSchema.safeParse('fixed_amount').success).toBe(true);
+    expect(PromotionDiscountTypeSchema.safeParse('fixed_price').success).toBe(true);
+  });
+
+  it('rejects the legacy DiscountType value "percent"', () => {
+    const result = PromotionDiscountTypeSchema.safeParse('percent');
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('PromotionTargetTypeSchema', () => {
+  it('parses the four valid target types', () => {
+    expect(PromotionTargetTypeSchema.safeParse('item').success).toBe(true);
+    expect(PromotionTargetTypeSchema.safeParse('category').success).toBe(true);
+    expect(PromotionTargetTypeSchema.safeParse('pool_billing').success).toBe(true);
+    expect(PromotionTargetTypeSchema.safeParse('pool_grant').success).toBe(true);
+  });
+
+  it('rejects an unrecognized target type', () => {
+    const result = PromotionTargetTypeSchema.safeParse('table');
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('PromotionSchema / PromotionCreateSchema', () => {
+  const draft = {
+    name: 'Happy Hour Beer',
+    discountType: 'percentage' as const,
+    discountValue: 20,
+    targetType: 'category' as const,
+    targetProductId: null,
+    targetCategoryId: UUID2,
+    priority: 1,
+    isActive: true,
+  };
+  const validPromotion = { ...draft, id: UUID, createdAt: NOW };
+
+  it('round-trips a well-formed promotion object', () => {
+    const result = PromotionSchema.safeParse(validPromotion);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBe('Happy Hour Beer');
+      expect(result.data.discountType).toBe('percentage');
+      expect(result.data.discountValue).toBe(20);
+    }
+  });
+
+  it('PromotionCreateSchema rejects a negative discountValue', () => {
+    const result = PromotionCreateSchema.safeParse({ ...draft, discountValue: -5 });
+    expect(result.success).toBe(false);
+  });
+
+  it('PromotionCreateSchema rejects a percentage discountValue over 100', () => {
+    const result = PromotionCreateSchema.safeParse({ ...draft, discountValue: 150 });
+    expect(result.success).toBe(false);
+  });
+
+  it('PromotionCreateSchema accepts a fixed_amount discountValue over 100 (unbounded)', () => {
+    const result = PromotionCreateSchema.safeParse({
+      ...draft,
+      discountType: 'fixed_amount',
+      discountValue: 150,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe('AppliedPromotionSchema', () => {
+  it('accepts a null promotionId (audit survives promotion deletion)', () => {
+    const result = AppliedPromotionSchema.safeParse({
+      id: UUID,
+      promotionId: null,
+      promotionNameSnapshot: 'Happy Hour Beer',
+      targetType: 'category',
+      discountType: 'percentage',
+      discountValue: 20,
+      tabId: UUID2,
+      orderItemId: null,
+      poolSessionId: null,
+      originalAmount: 100,
+      discountedAmount: 80,
+      poolMinutesGranted: null,
+      consumedAt: null,
+      createdAt: NOW,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.promotionId).toBeNull();
+    }
+  });
+});
+
+describe('AuditActionSchema — promotion.apply', () => {
+  it('parses the promotion.apply audit action', () => {
+    expect(() => AuditActionSchema.parse('promotion.apply')).not.toThrow();
   });
 });

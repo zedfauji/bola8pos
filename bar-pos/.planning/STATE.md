@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
 status: completed
-stopped_at: Phase 31 UI-SPEC approved
-last_updated: "2026-07-11T20:52:18.885Z"
-last_activity: 2026-07-11 -- Phase 31 marked complete
+stopped_at: Phase 31 UI-SPEC approved (merged with Phase 20 promotions-engine — both branches reconciled)
+last_updated: "2026-07-12T17:35:08.000Z"
+last_activity: 2026-07-12 -- merged Phase 19-20 (promotions engine) work with Phase 21-31 (UI standardization) work
 progress:
   total_phases: 35
-  completed_phases: 18
-  total_plans: 123
-  completed_plans: 132
-  percent: 51
+  completed_phases: 19
+  total_plans: 134
+  completed_plans: 143
+  percent: 54
 ---
 
 # Session State
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 31 — COMPLETE
+Phase: 31 — COMPLETE (Phase 20 promotions-engine also COMPLETE, merged from parallel branch)
 Plan: 1 of ?
 Status: Phase 31 complete
 Last activity: 2026-07-11 -- Phase 31 marked complete
@@ -243,8 +243,8 @@ Last activity: 2026-07-11 -- Phase 31 marked complete
 
 ## Last Session
 
-- **Stopped at:** Phase 31 UI-SPEC approved
-- **Timestamp:** 2026-07-10
+- **Stopped at:** Phase 31 UI-SPEC approved; Phase 20 (promotions-engine) COMPLETE — 11/11 plans, verification passed 4/4, post-verify cleanup fix applied. Both merged into main 2026-07-12.
+- **Timestamp:** 2026-07-12
 
 ## Current Position
 

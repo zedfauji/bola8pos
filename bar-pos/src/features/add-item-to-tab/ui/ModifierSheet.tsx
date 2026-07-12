@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { Product, Modifier, Category } from '@entities/product/model/types';
-import { resolveProductPrice } from '@shared/lib/domain-helpers';
+import type { Product, Modifier } from '@entities/product/model/types';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
@@ -41,13 +40,10 @@ interface ModifierSheetProps {
 export function ModifierSheet({ product, open, onConfirm, onClose }: ModifierSheetProps) {
   const [selectedModifiers, setSelectedModifiers] = useState<Modifier[]>([]);
 
-  const category = useMemo(() => categoryForPricing(product), [product]);
-
   const runningTotal = useMemo(() => {
-    const base = resolveProductPrice(product, category, new Date());
     const modifierSum = selectedModifiers.reduce((sum, m) => sum + m.priceDelta, 0);
-    return Math.round((base + modifierSum) * 100) / 100;
-  }, [product, category, selectedModifiers]);
+    return Math.round((product.basePrice + modifierSum) * 100) / 100;
+  }, [product, selectedModifiers]);
 
   const handleToggleModifier = (modifier: Modifier, checked: boolean) => {
     setSelectedModifiers(prev =>

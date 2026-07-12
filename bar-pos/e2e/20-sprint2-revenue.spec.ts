@@ -139,17 +139,17 @@ test.describe('Sprint 2 — Discount UI (PaymentModal)', () => {
     await logout(page);
   });
 
-  test('D5: happy hour banner present on POS or vacuously passes when no HH window active', async ({ page }) => {
+  test('D5: active promotions banner present on POS or vacuously passes when no promotion active', async ({ page }) => {
     await loginAs(page, 'manager');
     await page.goto('/pos');
     await page.waitForLoadState('networkidle');
 
-    const bannerCount = await page.getByTestId('happy-hour-banner').count();
+    const bannerCount = await page.getByTestId('active-promotions-banner').count();
     if (bannerCount > 0) {
-      await expect(page.getByTestId('happy-hour-banner')).toHaveAttribute('role', 'status');
-      await expect(page.getByTestId('happy-hour-banner')).toContainText('Happy Hour Active');
+      await expect(page.getByTestId('active-promotions-banner')).toHaveAttribute('role', 'status');
+      await expect(page.getByTestId('active-promotions-banner')).toContainText('Promotions Active');
     }
-    // No assertion needed when banner is absent — no active HH window configured
+    // No assertion needed when banner is absent — no active promotion window configured
 
     await logout(page);
   });

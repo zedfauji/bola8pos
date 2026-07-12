@@ -35,16 +35,6 @@ export function CategoryForm({
   // token — see 31-CONTEXT.md D-08.
   const [color, setColor] = useState(initialCategory?.color ?? '#6B7280');
   const [sortOrder, setSortOrder] = useState(String(initialCategory?.sortOrder ?? 0));
-  const [happyStart, setHappyStart] = useState(() => {
-    const s = initialCategory?.happyHourStart;
-    if (s == null) return '';
-    return s.length >= 5 ? s.slice(0, 5) : s;
-  });
-  const [happyEnd, setHappyEnd] = useState(() => {
-    const s = initialCategory?.happyHourEnd;
-    if (s == null) return '';
-    return s.length >= 5 ? s.slice(0, 5) : s;
-  });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -58,25 +48,19 @@ export function CategoryForm({
       return;
     }
 
-    const start = happyStart.trim() === '' ? null : happyStart.trim();
-    const end = happyEnd.trim() === '' ? null : happyEnd.trim();
-    if ((start == null) !== (end == null)) {
-      setFieldErrors({
-        happyHour: 'Set both happy hour start and end, or leave both empty.',
-      });
-      return;
-    }
-
     const hex = normalizeHex(color);
 
+    // happyHourStart/End are always null — happy-hour pricing is now managed
+    // in Settings → Promotions (D-01); these vestigial nullable Zod fields
+    // must still be present in the parsed payload.
     if (initialCategory != null) {
       const parsed = CategoryUpdateSchema.safeParse({
         id: initialCategory.id,
         name,
         color: hex,
         sortOrder: sortParsed,
-        happyHourStart: start,
-        happyHourEnd: end,
+        happyHourStart: null,
+        happyHourEnd: null,
       });
       if (!parsed.success) {
         const flat = z.flattenError(parsed.error);
@@ -96,8 +80,8 @@ export function CategoryForm({
       name,
       color: hex,
       sortOrder: sortParsed,
-      happyHourStart: start,
-      happyHourEnd: end,
+      happyHourStart: null,
+      happyHourEnd: null,
     });
     if (!parsed.success) {
       const flat = z.flattenError(parsed.error);
@@ -114,10 +98,6 @@ export function CategoryForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      {fieldErrors.happyHour ? (
-        <p className="text-sm text-destructive">{fieldErrors.happyHour}</p>
-      ) : null}
-
       <FormField label="Name" required error={fieldErrors.name ?? ''}>
         <Input
           value={name}
@@ -172,27 +152,7 @@ export function CategoryForm({
         />
       </FormField>
 
-      <FormField label="Happy hour start" error={fieldErrors.happyHourStart ?? ''}>
-        <Input
-          type="time"
-          value={happyStart}
-          onChange={e => {
-            setHappyStart(e.target.value);
-          }}
-          disabled={submitting}
-        />
-      </FormField>
-
-      <FormField label="Happy hour end" error={fieldErrors.happyHourEnd ?? ''}>
-        <Input
-          type="time"
-          value={happyEnd}
-          onChange={e => {
-            setHappyEnd(e.target.value);
-          }}
-          disabled={submitting}
-        />
-      </FormField>
+      {/* Happy-hour pricing is now managed in Settings → Promotions (D-01). */}
 
       <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
         <POSButton

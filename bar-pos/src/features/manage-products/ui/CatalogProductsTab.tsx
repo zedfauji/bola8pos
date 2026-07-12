@@ -113,47 +113,6 @@ function ProductBasePriceCell({
   );
 }
 
-function ProductHappyHourCell({
-  product,
-  onCommit,
-}: {
-  product: Product;
-  onCommit: (happyHourPrice: number | null) => void;
-}) {
-  return (
-    <ProductHappyHourEditor
-      key={`${product.id}-${String(product.happyHourPrice)}`}
-      product={product}
-      onCommit={onCommit}
-    />
-  );
-}
-
-function ProductHappyHourEditor({
-  product,
-  onCommit,
-}: {
-  product: Product;
-  onCommit: (happyHourPrice: number | null) => void;
-}) {
-  const [v, setV] = useState(() => product.happyHourPrice ?? 0);
-  return (
-    <div className="min-w-[6rem]">
-      <MoneyInput
-        value={v}
-        onChange={setV}
-        onBlurCommit={() => {
-          const next = v === 0 ? null : v;
-          const prev = product.happyHourPrice ?? null;
-          if (next !== prev) {
-            onCommit(next);
-          }
-        }}
-      />
-    </div>
-  );
-}
-
 export function CatalogProductsTab() {
   const { data: products, isLoading, resultError } = useProductsForManagement();
   const { data: categories } = useCategories();
@@ -280,24 +239,6 @@ export function CatalogProductsTab() {
                 { id: p.id, basePrice, modifierIds: modifierIdsOf(p) },
                 'Price updated',
                 p.id
-              );
-            }}
-          />
-        );
-      },
-    },
-    {
-      id: 'hh',
-      header: 'HH price',
-      cell: ({ row }) => {
-        const p = row.original;
-        return (
-          <ProductHappyHourCell
-            product={p}
-            onCommit={happyHourPrice => {
-              runUpdate(
-                { id: p.id, happyHourPrice, modifierIds: modifierIdsOf(p) },
-                'Happy hour price updated'
               );
             }}
           />

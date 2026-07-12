@@ -49,6 +49,8 @@ export const AuditActionSchema = z.enum([
   'settings.update',
   // Tip distribution
   'tip_distribution.compute',
+  // Promotions
+  'promotion.apply',
 ]);
 
 export type AuditAction = z.infer<typeof AuditActionSchema>;
@@ -77,4 +79,5 @@ export const AuditAction = {
   STAFF_CREATE: 'staff.create',
   SETTINGS_UPDATE: 'settings.update',
   TIP_DISTRIBUTION_COMPUTE: 'tip_distribution.compute',
+  PROMOTION_APPLY: 'promotion.apply',
 } as const satisfies Record<string, AuditAction>;

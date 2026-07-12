@@ -55,8 +55,10 @@ function mapProductRow(row: ProductRow): Result<Product> {
             name: row.category.name,
             color: row.category.color,
             sortOrder: row.category.sort_order,
-            happyHourStart: row.category.happy_hour_start,
-            happyHourEnd: row.category.happy_hour_end,
+            // legacy HH start/end columns retired (Phase 20, D-01) — superseded by
+            // the promotions engine; always null (vestigial nullable field).
+            happyHourStart: null,
+            happyHourEnd: null,
             createdAt: new Date(row.category.created_at),
           })
         : undefined;
@@ -67,7 +69,9 @@ function mapProductRow(row: ProductRow): Result<Product> {
         name: row.name,
         categoryId: row.category_id,
         basePrice: row.base_price,
-        happyHourPrice: row.happy_hour_price ?? null,
+        // legacy HH price column retired (Phase 20, D-01) — superseded by the
+        // promotions engine; always null (vestigial nullable field).
+        happyHourPrice: null,
         sku: row.sku,
         isActive: row.is_active,
         imageUrl: row.image_url,
@@ -90,8 +94,10 @@ function mapCategoryRow(row: Tables<'categories'>): Result<Category> {
         name: row.name,
         color: row.color,
         sortOrder: row.sort_order,
-        happyHourStart: row.happy_hour_start,
-        happyHourEnd: row.happy_hour_end,
+        // legacy HH start/end columns retired (Phase 20, D-01) — superseded by the
+        // promotions engine; always null (vestigial nullable Zod field).
+        happyHourStart: null,
+        happyHourEnd: null,
         createdAt: new Date(row.created_at),
       })
     );
@@ -341,20 +347,6 @@ function invalidateCatalogQueries(queryClient: ReturnType<typeof useQueryClient>
   void queryClient.invalidateQueries({ queryKey: ['modifiers'] });
 }
 
-/** Postgres TIME strings accept HH:MM or HH:MM:SS — normalize short forms. */
-function categoryTimeForDb(value: string | null): string | null {
-  if (value == null || value === '') return null;
-  const parts = value.split(':');
-  if (parts.length === 2) {
-    const h = parts[0] ?? '';
-    const m = parts[1] ?? '';
-    if (h !== '' && m !== '') {
-      return `${h.padStart(2, '0')}:${m}:00`;
-    }
-  }
-  return value;
-}
-
 async function syncProductModifiers(
   productId: string,
   modifierIds: readonly string[]
@@ -384,7 +376,8 @@ function productUpdateToRow(patch: Partial<Omit<ProductUpdate, 'id'>>): TablesUp
   if (patch.name !== undefined) row.name = patch.name;
   if (patch.categoryId !== undefined) row.category_id = patch.categoryId;
   if (patch.basePrice !== undefined) row.base_price = patch.basePrice;
-  if (patch.happyHourPrice !== undefined) row.happy_hour_price = patch.happyHourPrice;
+  // Legacy HH price column no longer written (Phase 20, D-01) — happy-hour pricing
+  // is now managed in Settings → Promotions.
   if (patch.sku !== undefined) row.sku = patch.sku;
   if (patch.isActive !== undefined) row.is_active = patch.isActive;
   if (patch.imageUrl !== undefined) row.image_url = patch.imageUrl;
@@ -404,11 +397,12 @@ export function useMutationCreateProduct() {
   return useMutation({
     mutationFn: async (input: CreateProductInput): Promise<Result<Product>> => {
       const { modifierIds, ...product } = input;
+      // Legacy HH price column no longer written (Phase 20, D-01) — happy-hour
+      // pricing is now managed in Settings → Promotions.
       const insertRow: TablesInsert<'products'> = {
         name: product.name,
         category_id: product.categoryId,
         base_price: product.basePrice,
-        happy_hour_price: product.happyHourPrice,
         sku: product.sku,
         is_active: product.isActive,
         image_url: product.imageUrl,
@@ -514,12 +508,12 @@ export function useMutationCreateCategory() {
 
   return useMutation({
     mutationFn: async (input: CategoryCreate): Promise<Result<Category>> => {
+      // Legacy HH start/end columns no longer written (Phase 20, D-01) — happy-hour
+      // pricing is now managed in Settings → Promotions.
       const insertRow: TablesInsert<'categories'> = {
         name: input.name,
         color: input.color,
         sort_order: input.sortOrder,
-        happy_hour_start: categoryTimeForDb(input.happyHourStart),
-        happy_hour_end: categoryTimeForDb(input.happyHourEnd),
       };
 
       const res = await supabaseMutation(() =>
@@ -548,10 +542,8 @@ export function useMutationUpdateCategory() {
       if (rest.name !== undefined) row.name = rest.name;
       if (rest.color !== undefined) row.color = rest.color;
       if (rest.sortOrder !== undefined) row.sort_order = rest.sortOrder;
-      if (rest.happyHourStart !== undefined)
-        row.happy_hour_start = categoryTimeForDb(rest.happyHourStart);
-      if (rest.happyHourEnd !== undefined)
-        row.happy_hour_end = categoryTimeForDb(rest.happyHourEnd);
+      // Legacy HH start/end columns no longer written (Phase 20, D-01) — happy-hour
+      // pricing is now managed in Settings → Promotions.
 
       if (Object.keys(row).length === 0) return ok(null);
 

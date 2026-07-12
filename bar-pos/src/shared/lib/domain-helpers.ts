@@ -6,15 +6,15 @@
  */
 
 import type {
-  Category,
   CartItem,
   Order,
   PoolSessionSummary,
-  Product,
   DiscountScope,
   DiscountType,
   RecipeWithItems,
   ModifierInventoryRule,
+  Promotion,
+  PromotionAvailability,
 } from './domain';
 import { computePoolSessionBilling } from './pool-billing';
 
@@ -31,46 +31,6 @@ import { computePoolSessionBilling } from './pool-billing';
 export function calculatePoolCharge(startedAt: Date, stoppedAt: Date, ratePerHour: number): number {
   const { totalCharge } = computePoolSessionBilling({ startedAt, endTime: stoppedAt, ratePerHour });
   return Math.round(totalCharge * 100) / 100;
-}
-
-/**
- * Resolves the effective price for a product, considering happy hour.
- *
- * Returns happy hour price if:
- * - Current time is within category.happyHourStartâ€“happyHourEnd
- * - product.happyHourPrice is not null
- *
- * Falls back to product.basePrice otherwise.
- *
- * @param product - The product to price
- * @param category - The product's category (contains happy hour times)
- * @param currentTime - Optional time to check (defaults to now)
- * @returns The effective price
- *
- * @example
- * // 5pm price with happy hour 4pm-6pm â†’ returns happyHourPrice
- * resolveProductPrice(product, category, new Date('2024-01-01T17:00:00'))
- *
- * @example
- * // 8pm price â†’ returns basePrice
- * resolveProductPrice(product, category, new Date('2024-01-01T20:00:00'))
- */
-export function resolveProductPrice(
-  product: Product,
-  category: Category,
-  currentTime: Date = new Date()
-): number {
-  // If no happy hour configured or no happy hour price, return base price
-  if (!category.happyHourStart || !category.happyHourEnd || product.happyHourPrice === null) {
-    return product.basePrice;
-  }
-
-  // Check if currently in happy hour
-  if (isHappyHourActive(category, currentTime)) {
-    return product.happyHourPrice;
-  }
-
-  return product.basePrice;
 }
 
 /**
@@ -240,59 +200,6 @@ export function formatElapsed(totalSeconds: number): string {
 }
 
 /**
- * Checks if happy hour is currently active for a category.
- *
- * Handles midnight crossing (e.g., 10pm - 2am).
- *
- * @param category - The category with happy hour times
- * @param currentTime - Optional time to check (defaults to now)
- * @returns True if happy hour is active
- *
- * @example
- * // Check if 5pm is within 4pm-6pm happy hour
- * isHappyHourActive(category, new Date('2024-01-01T17:00:00'))
- * // Returns: true
- *
- * @example
- * // Check if 8pm is within 4pm-6pm happy hour
- * isHappyHourActive(category, new Date('2024-01-01T20:00:00'))
- * // Returns: false
- *
- * @example
- * // Midnight crossing: 11pm is within 10pm-2am happy hour
- * isHappyHourActive(category, new Date('2024-01-01T23:00:00'))
- * // Returns: true
- */
-export function isHappyHourActive(category: Category, currentTime: Date = new Date()): boolean {
-  if (!category.happyHourStart || !category.happyHourEnd) {
-    return false;
-  }
-
-  // Parse time strings (HH:MM format)
-  const startParts = category.happyHourStart.split(':').map(Number);
-  const endParts = category.happyHourEnd.split(':').map(Number);
-
-  const startHour = startParts[0] ?? 0;
-  const startMin = startParts[1] ?? 0;
-  const endHour = endParts[0] ?? 0;
-  const endMin = endParts[1] ?? 0;
-
-  // Convert current time to minutes since midnight
-  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-  const startMinutes = startHour * 60 + startMin;
-  const endMinutes = endHour * 60 + endMin;
-
-  // Handle midnight crossing (e.g., 22:00 - 02:00)
-  if (endMinutes < startMinutes) {
-    // Happy hour crosses midnight
-    return currentMinutes >= startMinutes || currentMinutes < endMinutes;
-  }
-
-  // Normal case (e.g., 16:00 - 18:00)
-  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
-}
-
-/**
  * Generates an idempotency key for Square payment calls.
  *
  * Format: `${prefix}_${timestamp}_${randomId}`
@@ -420,4 +327,67 @@ export function computeModifierDepletion(
     deltas.set(rule.ingredientId, (deltas.get(rule.ingredientId) ?? 0) + delta);
   }
   return deltas;
+}
+
+/**
+ * Checks if a promotion is currently active — COSMETIC / DISPLAY-ONLY.
+ *
+ * Mirrors the server-side `is_promotion_available()` PL/pgSQL evaluator (see
+ * 20-RESEARCH.md Pattern 1): `promotion.isActive === false` is always inactive;
+ * zero availability windows means always-active; otherwise the current day
+ * (ISO day-of-week, 1=Mon..7=Sun) and time (and optional date range) must fall
+ * inside at least one window.
+ *
+ * THIS HELPER MUST NEVER BE USED TO COMPUTE A CHARGED PRICE. It exists only for
+ * read-only UI affordances (e.g. the "Active Promotions" banner) — the value it
+ * returns must never feed a mutation payload sent to `create_order_with_items`.
+ * `evaluate_promotions_for_item` (server) is the sole authority for the charged
+ * `unit_price` (see 20-RESEARCH.md Pitfall 1).
+ *
+ * @param promotion - The promotion to check
+ * @param windows - The promotion's availability windows (empty = always available)
+ * @param currentTime - Optional time to check (defaults to now)
+ * @returns True if the promotion is active right now
+ *
+ * @example
+ * // No windows configured — always active (while isActive is true)
+ * isPromotionActive(promotion, [])
+ * // Returns: true
+ *
+ * @example
+ * // Outside every configured window — inactive
+ * isPromotionActive(promotion, [{ daysOfWeek: [1], startTime: '16:00', endTime: '18:00', ... }], new Date('2024-01-08T20:00:00'))
+ * // Returns: false (2024-01-08 is a Monday, but 20:00 is outside 16:00-18:00)
+ */
+export function isPromotionActive(
+  promotion: Promotion,
+  windows: PromotionAvailability[],
+  currentTime: Date = new Date()
+): boolean {
+  if (!promotion.isActive) return false;
+  if (windows.length === 0) return true;
+
+  // Convert JS day (0=Sun) to ISO day (1=Mon..7=Sun), matching is_promotion_available's EXTRACT(ISODOW).
+  const jsDay = currentTime.getDay();
+  const isoDay = jsDay === 0 ? 7 : jsDay;
+
+  const hh = String(currentTime.getHours()).padStart(2, '0');
+  const mm = String(currentTime.getMinutes()).padStart(2, '0');
+  const timeStr = `${hh}:${mm}`;
+
+  const year = currentTime.getFullYear();
+  const month = String(currentTime.getMonth() + 1).padStart(2, '0');
+  const day = String(currentTime.getDate()).padStart(2, '0');
+  const dateStr = `${String(year)}-${month}-${day}`;
+
+  for (const window of windows) {
+    if (!window.daysOfWeek.includes(isoDay)) continue;
+    if (window.startTime != null && timeStr < window.startTime.slice(0, 5)) continue;
+    if (window.endTime != null && timeStr > window.endTime.slice(0, 5)) continue;
+    if (window.startDate != null && dateStr < window.startDate) continue;
+    if (window.endDate != null && dateStr > window.endDate) continue;
+    return true;
+  }
+
+  return false;
 }
