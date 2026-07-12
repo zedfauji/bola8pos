@@ -181,7 +181,18 @@ export const CategorySchema = z.object({
   name: z.string().min(1).max(50),
   color: HexColorSchema,
   sortOrder: z.number().int().nonnegative(),
+  /**
+   * DEPRECATED — superseded by the promotions engine (Phase 20, D-01).
+   * Always null now; kept nullable (not a JSDoc `@deprecated` tag — that
+   * trips `@typescript-eslint/no-deprecated` across the remaining client
+   * display consumers, which Plan 20-11 removes) to bound blast radius
+   * pending that housekeeping removal.
+   */
   happyHourStart: TimeStringSchema.nullable(),
+  /**
+   * DEPRECATED — superseded by the promotions engine (Phase 20, D-01).
+   * Always null now; see {@link happyHourStart} for the full rationale.
+   */
   happyHourEnd: TimeStringSchema.nullable(),
   routing: CategoryRoutingSchema.default('NONE'),
   /** Parent category id for hierarchical nesting (max depth 3). Null = root category. */
@@ -228,6 +239,13 @@ export const ProductSchema = z.object({
   name: z.string().min(1).max(100),
   categoryId: UuidSchema,
   basePrice: MoneySchema,
+  /**
+   * DEPRECATED — superseded by the promotions engine (Phase 20, D-01).
+   * Always null now; kept nullable (not a JSDoc `@deprecated` tag — that
+   * trips `@typescript-eslint/no-deprecated` across the remaining client
+   * display consumers, which Plan 20-11 removes) to bound blast radius
+   * pending that housekeeping removal.
+   */
   happyHourPrice: MoneySchema.nullable(),
   sku: z.string().nullable(),
   isActive: z.boolean(),
@@ -1926,3 +1944,104 @@ export const OfflineActionSchema = z.object({
   retryCount: z.number().int().min(0),
 });
 export type OfflineAction = z.infer<typeof OfflineActionSchema>;
+
+// ============================================================================
+// PROMOTIONS — Phase 20 Plan 02
+// Deliberately distinct enums from DiscountType/DiscountScope (the existing
+// manual-payment discount feature in PaymentForm.tsx) — see 20-RESEARCH.md
+// Pitfall 5. Do NOT reuse/extend DiscountType/DiscountScope here.
+// ============================================================================
+
+export const PromotionDiscountTypeSchema = z.enum(['percentage', 'fixed_amount', 'fixed_price']);
+export type PromotionDiscountType = z.infer<typeof PromotionDiscountTypeSchema>;
+
+export const PromotionTargetTypeSchema = z.enum(['item', 'category', 'pool_billing', 'pool_grant']);
+export type PromotionTargetType = z.infer<typeof PromotionTargetTypeSchema>;
+
+/** Percentage discounts cannot exceed 100% off; fixed_amount/fixed_price are unbounded (validated nonnegative only). */
+function promotionPercentageRefine(val: {
+  discountType?: PromotionDiscountType | undefined;
+  discountValue?: number | undefined;
+}): boolean {
+  if (val.discountType !== 'percentage') return true;
+  if (val.discountValue === undefined) return true;
+  return val.discountValue <= 100;
+}
+
+const PromotionBaseSchema = z.object({
+  id: UuidSchema,
+  name: z.string().min(1).max(100),
+  discountType: PromotionDiscountTypeSchema,
+  discountValue: z.number().nonnegative(),
+  targetType: PromotionTargetTypeSchema,
+  targetProductId: UuidSchema.nullable(),
+  targetCategoryId: UuidSchema.nullable(),
+  priority: z.number().int(),
+  isActive: z.boolean(),
+  createdAt: TimestampSchema,
+});
+
+export const PromotionSchema = PromotionBaseSchema.refine(promotionPercentageRefine, {
+  message: 'percentage discount value cannot exceed 100',
+  path: ['discountValue'],
+});
+
+export const PromotionCreateSchema = PromotionBaseSchema.omit({
+  id: true,
+  createdAt: true,
+}).refine(promotionPercentageRefine, {
+  message: 'percentage discount value cannot exceed 100',
+  path: ['discountValue'],
+});
+
+export const PromotionUpdateSchema = PromotionBaseSchema.partial()
+  .required({ id: true })
+  .refine(promotionPercentageRefine, {
+    message: 'percentage discount value cannot exceed 100',
+    path: ['discountValue'],
+  });
+
+export type Promotion = z.infer<typeof PromotionSchema>;
+export type PromotionCreate = z.infer<typeof PromotionCreateSchema>;
+export type PromotionUpdate = z.infer<typeof PromotionUpdateSchema>;
+
+export const PromotionAvailabilitySchema = z.object({
+  id: UuidSchema,
+  promotionId: UuidSchema,
+  daysOfWeek: z.array(z.number().int().min(1).max(7)).min(1),
+  startTime: TimeStringSchema.nullable(), // null = all day
+  endTime: TimeStringSchema.nullable(), // null = all day
+  startDate: z.string().nullable(), // ISO date string or null
+  endDate: z.string().nullable(), // ISO date string or null
+  createdAt: TimestampSchema,
+});
+
+export const PromotionAvailabilityCreateSchema = PromotionAvailabilitySchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type PromotionAvailability = z.infer<typeof PromotionAvailabilitySchema>;
+export type PromotionAvailabilityCreate = z.infer<typeof PromotionAvailabilityCreateSchema>;
+
+// Immutable audit row — no UpdateSchema (applied_promotions is append-only).
+// promotionId is nullable: ON DELETE SET NULL preserves the audit trail if the
+// source promotion is later hard-deleted (see 20-RESEARCH.md Open Question 4).
+export const AppliedPromotionSchema = z.object({
+  id: UuidSchema,
+  promotionId: UuidSchema.nullable(),
+  promotionNameSnapshot: z.string(),
+  targetType: PromotionTargetTypeSchema,
+  discountType: PromotionDiscountTypeSchema.nullable(),
+  discountValue: z.number().nullable(),
+  tabId: UuidSchema.nullable(),
+  orderItemId: UuidSchema.nullable(),
+  poolSessionId: UuidSchema.nullable(),
+  originalAmount: z.number().nullable(),
+  discountedAmount: z.number().nullable(),
+  poolMinutesGranted: z.number().int().nullable(),
+  consumedAt: TimestampSchema.nullable(),
+  createdAt: TimestampSchema,
+});
+
+export type AppliedPromotion = z.infer<typeof AppliedPromotionSchema>;

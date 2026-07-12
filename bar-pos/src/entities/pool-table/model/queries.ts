@@ -4,11 +4,9 @@ import { tabKeys } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
-import { computePoolSessionBilling } from '@shared/lib/pool-billing';
 import {
   err,
   ok,
-  staleVersionError,
   supabaseMutation,
   supabaseQuery,
   unknownError,
@@ -195,6 +193,29 @@ export function usePoolTable(id: string) {
 
 type PoolTablesSnapshot = Result<PoolTable[]> | undefined;
 
+// Shape of the jsonb payload returned by the `stop_pool_session` RPC
+// (supabase/migrations/20260710000006_stop_pool_session_rpc.sql, step 8).
+type StopPoolSessionRpcResult = {
+  id: string;
+  stopped_at: string | null;
+  billed_minutes: number | null;
+  total_charge: number | null;
+  version: number;
+  tab_id: string | null;
+  table_id: string;
+};
+
+function mapStopPoolSessionRpcPayload(data: Json | null): Result<StopPoolSessionRpcResult> {
+  try {
+    if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+      return err(unknownError('invalid_rpc_payload'));
+    }
+    return ok(data as unknown as StopPoolSessionRpcResult);
+  } catch (e) {
+    return err(unknownError(e));
+  }
+}
+
 export function useMutationStartSession() {
   const queryClient = useQueryClient();
 
@@ -309,15 +330,15 @@ export function useMutationStopSession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      sessionId,
-      tableId,
-      ratePerHour,
-    }: {
+    mutationFn: async (input: {
       sessionId: string;
       tableId: string;
+      // No longer used for the authoritative write (Pitfall 3 — stop_pool_session
+      // reads rate_per_hour server-side); kept in the input shape so
+      // StopSessionConfirm's pre-confirm billing preview is unaffected.
       ratePerHour: number;
     }): Promise<Result<PoolSession>> => {
+      const { sessionId, tableId } = input;
       const fetchRes = await supabaseQuery<Tables<'pool_sessions'>>(() =>
         supabase.from('pool_sessions').select('*').eq('id', sessionId).single()
       );
@@ -328,81 +349,38 @@ export function useMutationStopSession() {
       }
 
       const session = fetchRes.data;
-      const startedAt = new Date(session.started_at);
-      const stoppedAt = new Date();
 
-      // Fetch billing settings to get firstHourMode
-      const billingRes = await supabaseQuery<{ value: Json }>(() =>
-        supabase.from('settings').select('value').eq('key', 'billing').maybeSingle()
-      );
-      const billingValue = billingRes.ok
-        ? (billingRes.data.value as Record<string, unknown> | null)
-        : null;
-      const firstHourMode: 'full' | 'prorated' =
-        billingValue?.['firstHourMode'] === 'full' ? 'full' : 'prorated';
-
-      const { billedMinutes, totalCharge } = computePoolSessionBilling({
-        startedAt,
-        endTime: stoppedAt,
-        ratePerHour,
-        firstHourMode,
-      });
-
-      // Phase 15 Group B: optimistic-concurrency UPDATE on pool_sessions.
-      // Use cached session.version when available; otherwise fall back to legacy.
+      // Phase 15 Group A: pass p_expected_version when the cached row carries
+      // a version. The server-side RPC raises P0V01 (STALE_VERSION) on
+      // mismatch; supabaseQuery -> parseSupabaseError maps that automatically.
       const cachedVersion =
         typeof (session as { version?: number }).version === 'number'
           ? (session as { version?: number }).version
           : undefined;
 
-      let updatedSession: Tables<'pool_sessions'>;
-      if (cachedVersion !== undefined) {
-        const expected = cachedVersion;
-        const { data, error } = await supabase
-          .from('pool_sessions')
-          .update({
-            stopped_at: stoppedAt.toISOString(),
-            billed_minutes: billedMinutes,
-            total_charge: totalCharge,
-            version: expected + 1,
-          })
-          .eq('id', sessionId)
-          .eq('version', expected)
-          .select()
-          .single();
-        if (error?.code === 'PGRST116') {
-          return err(staleVersionError(error));
-        }
-        if (error) {
-          logger.error('pool_tables.session.stop_update_failed', { message: error.message });
-          return err(unknownError(error));
-        }
-        updatedSession = data;
-      } else {
-        const sessionRes = await supabaseMutation<Tables<'pool_sessions'>>(() =>
-          supabase
-            .from('pool_sessions')
-            .update({
-              stopped_at: stoppedAt.toISOString(),
-              billed_minutes: billedMinutes,
-              total_charge: totalCharge,
-            })
-            .eq('id', sessionId)
-            .select()
-            .single()
-        );
+      // total_charge/billed_minutes are now server-authoritative (Pitfall 3):
+      // stop_pool_session reads rate_per_hour from pool_tables and
+      // firstHourMode from settings server-side, consumes unconsumed
+      // pool_grant minutes, and compounds pool_billing discounts atomically.
+      // The client no longer computes or writes the charge itself.
+      const rpcRes = await supabaseQuery(() =>
+        supabase.rpc('stop_pool_session', {
+          p_session_id: sessionId,
+          ...(cachedVersion !== undefined ? { p_expected_version: cachedVersion } : {}),
+        })
+      );
 
-        if (!sessionRes.ok) {
-          logger.error('pool_tables.session.stop_update_failed', {
-            message: sessionRes.error.message,
-          });
-          return sessionRes;
-        }
-        if (sessionRes.data === null) {
-          return err(unknownError('no_row'));
-        }
-        updatedSession = sessionRes.data;
+      if (!rpcRes.ok) {
+        logger.error('pool_tables.session.stop_rpc_failed', {
+          code: rpcRes.error.code,
+          message: rpcRes.error.message,
+        });
+        return rpcRes;
       }
+
+      const rpcMapped = mapStopPoolSessionRpcPayload(rpcRes.data);
+      if (!rpcMapped.ok) return rpcMapped;
+      const rpcResult = rpcMapped.data;
 
       const tableRes = await supabaseMutation(() =>
         supabase
@@ -419,7 +397,15 @@ export function useMutationStopSession() {
         return tableRes;
       }
 
-      const mapped = mapPoolSessionRow(updatedSession);
+      const mapped = mapPoolSessionRow({
+        ...session,
+        stopped_at: rpcResult.stopped_at,
+        billed_minutes: rpcResult.billed_minutes,
+        total_charge: rpcResult.total_charge,
+        version: rpcResult.version,
+        tab_id: rpcResult.tab_id,
+        table_id: rpcResult.table_id,
+      });
       if (!mapped.ok) return mapped;
       return ok(mapped.data);
     },

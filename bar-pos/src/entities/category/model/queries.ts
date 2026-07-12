@@ -33,8 +33,10 @@ function mapCategoryRow(row: Tables<'categories'>): Result<Category> {
         name: row.name,
         color: row.color,
         sortOrder: row.sort_order,
-        happyHourStart: row.happy_hour_start,
-        happyHourEnd: row.happy_hour_end,
+        // Legacy HH start/end columns retired (Phase 20, D-01) — superseded
+        // by the promotions engine; always null (vestigial nullable field).
+        happyHourStart: null,
+        happyHourEnd: null,
         routing: (row as { routing?: CategoryRouting }).routing ?? 'NONE',
         parentId: (row as { parent_id?: string | null }).parent_id ?? null,
         createdAt: new Date(row.created_at),
@@ -48,20 +50,6 @@ function mapCategoryRow(row: Tables<'categories'>): Result<Category> {
 // ============================================================================
 // HELPERS
 // ============================================================================
-
-/** Normalize time strings for Postgres TIME column (HH:MM → HH:MM:SS). */
-function categoryTimeForDb(value: string | null | undefined): string | null {
-  if (value == null || value === '') return null;
-  const parts = value.split(':');
-  if (parts.length === 2) {
-    const h = parts[0] ?? '';
-    const m = parts[1] ?? '';
-    if (h !== '' && m !== '') {
-      return `${h.padStart(2, '0')}:${m}:00`;
-    }
-  }
-  return value;
-}
 
 function invalidateCategoryQueries(queryClient: ReturnType<typeof useQueryClient>): void {
   void queryClient.invalidateQueries({ queryKey: CATEGORY_QUERY_KEY });
@@ -149,12 +137,12 @@ export function useMutationCreateCategory() {
 
   return useMutation({
     mutationFn: async (input: CategoryCreate): Promise<Result<Category>> => {
+      // Legacy HH start/end columns no longer written (Phase 20, D-01) —
+      // happy-hour pricing is now managed in Settings → Promotions.
       const insertRow: TablesInsert<'categories'> = {
         name: input.name,
         color: input.color,
         sort_order: input.sortOrder,
-        happy_hour_start: categoryTimeForDb(input.happyHourStart),
-        happy_hour_end: categoryTimeForDb(input.happyHourEnd),
         routing: input.routing,
         parent_id: input.parentId ?? null,
       };
@@ -185,10 +173,8 @@ export function useMutationUpdateCategory() {
       if (rest.name !== undefined) row.name = rest.name;
       if (rest.color !== undefined) row.color = rest.color;
       if (rest.sortOrder !== undefined) row.sort_order = rest.sortOrder;
-      if (rest.happyHourStart !== undefined)
-        row.happy_hour_start = categoryTimeForDb(rest.happyHourStart);
-      if (rest.happyHourEnd !== undefined)
-        row.happy_hour_end = categoryTimeForDb(rest.happyHourEnd);
+      // Legacy HH start/end columns no longer written (Phase 20, D-01) —
+      // happy-hour pricing is now managed in Settings → Promotions.
       if (rest.routing !== undefined) row.routing = rest.routing;
       if (rest.parentId !== undefined) row.parent_id = rest.parentId;
 

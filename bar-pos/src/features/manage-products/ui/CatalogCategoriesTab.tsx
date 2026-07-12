@@ -59,7 +59,7 @@ export function CatalogCategoriesTab() {
     <div className="space-y-4">
       <div className="flex flex-wrap justify-between gap-2">
         <p className="text-muted-foreground text-sm">
-          Drag-free reorder with arrows. Happy hour windows apply to drinks in this category.
+          Drag-free reorder with arrows. Happy-hour pricing is managed in Settings → Promotions.
         </p>
         <POSButton
           type="button"
@@ -83,12 +83,7 @@ export function CatalogCategoriesTab() {
             />
             <div className="min-w-0 flex-1">
               <p className="font-medium">{c.name}</p>
-              <p className="text-muted-foreground text-xs">
-                Sort {c.sortOrder}
-                {c.happyHourStart && c.happyHourEnd
-                  ? ` · Happy hour ${c.happyHourStart.slice(0, 5)}–${c.happyHourEnd.slice(0, 5)}`
-                  : ''}
-              </p>
+              <p className="text-muted-foreground text-xs">Sort {c.sortOrder}</p>
             </div>
             <div className="flex items-center gap-1">
               <POSButton

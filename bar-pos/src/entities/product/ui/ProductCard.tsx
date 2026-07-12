@@ -1,5 +1,4 @@
 import type { Product, Category } from '@shared/lib/domain';
-import { isHappyHourActive, resolveProductPrice } from '@shared/lib/domain-helpers';
 import { cn } from '@shared/lib/utils';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { POSButton } from '@shared/ui/POSButton';
@@ -8,24 +7,14 @@ import { Badge } from '@shared/ui/badge';
 export interface ProductCardProps {
   product: Product;
   category: Category;
-  /** Catalog clock for happy hour and pricing (defaults to `new Date()`). */
+  /** Catalog clock (defaults to `new Date()`), retained for prop-compat with callers. */
   now?: Date;
   onSelect: (product: Product) => void;
   className?: string;
 }
 
-export function ProductCard({
-  product,
-  category,
-  now: nowProp,
-  onSelect,
-  className,
-}: ProductCardProps) {
-  const now = nowProp ?? new Date();
-  const inHappyHour = isHappyHourActive(category, now);
-  const displayPrice = resolveProductPrice(product, category, now);
-  const priceType =
-    inHappyHour && product.happyHourPrice !== null ? 'Happy hour price' : 'Regular price';
+export function ProductCard({ product, category, onSelect, className }: ProductCardProps) {
+  const displayPrice = product.basePrice;
   const unavailable = !product.isActive;
 
   const handleClick = () => {
@@ -46,14 +35,9 @@ export function ProductCard({
         unavailable && 'cursor-not-allowed opacity-60',
         className
       )}
-      aria-label={`Select ${product.name}, ${priceType}`}
+      aria-label={`Select ${product.name}, Regular price`}
       aria-disabled={unavailable}
     >
-      {inHappyHour && !unavailable && (
-        <Badge variant="default" className="absolute right-2 top-2">
-          HAPPY HOUR
-        </Badge>
-      )}
       {unavailable && (
         <Badge variant="secondary" className="absolute right-2 top-2">
           Out of stock
