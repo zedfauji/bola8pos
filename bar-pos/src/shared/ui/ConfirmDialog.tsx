@@ -44,6 +44,8 @@ export interface ConfirmDialogProps {
   children?: React.ReactNode;
   /** Disable confirm action until requirements are met */
   confirmDisabled?: boolean;
+  /** Optional extra classes merged onto the confirm button (opt-in only; no default changes) */
+  confirmClassName?: string;
 }
 
 /**
@@ -81,6 +83,7 @@ export function ConfirmDialog({
   isLoading = false,
   children,
   confirmDisabled = false,
+  confirmClassName,
 }: ConfirmDialogProps) {
   const handleConfirm = React.useCallback(async () => {
     await onConfirm();
@@ -135,7 +138,8 @@ export function ConfirmDialog({
             }}
             className={cn(
               variant === 'destructive' &&
-                'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+              confirmClassName
             )}
           >
             {isLoading ? (

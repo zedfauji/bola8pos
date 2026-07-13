@@ -33,10 +33,15 @@ const buttonVariants = cva(
           'size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
         'icon-lg': 'size-9',
       },
+      focusEmphasis: {
+        default: '',
+        high: 'focus-visible:ring-4 focus-visible:ring-ring',
+      },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      focusEmphasis: 'default',
     },
   }
 );
@@ -45,6 +50,7 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  focusEmphasis = 'default',
   asChild = false,
   ...props
 }: React.ComponentProps<'button'> &
@@ -58,7 +64,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, focusEmphasis, className }))}
       {...props}
     />
   );
