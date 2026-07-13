@@ -54,22 +54,24 @@ export default function POSPage() {
       <div className="flex min-w-0 flex-1 items-center justify-center p-4 md:p-6">
         <div className="flex h-full w-full max-w-[1600px] overflow-hidden rounded-xl border border-border shadow-lg">
           <main className="relative flex-1 overflow-y-auto p-4">
-            <button
+            <POSButton
               type="button"
+              variant="ghost"
+              touchSize="default"
               data-testid="pos-order-panel-toggle"
               aria-label={orderPanelCollapsed ? 'Show order panel' : 'Hide order panel'}
               aria-pressed={orderPanelCollapsed}
               onClick={() => {
                 setOrderPanelCollapsed(prev => !prev);
               }}
-              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border bg-background/80 shadow-sm hover:bg-accent"
+              className="absolute right-3 top-3 z-10 flex w-11 items-center justify-center rounded-md border bg-background/80 shadow-sm hover:bg-accent"
             >
               {orderPanelCollapsed ? (
                 <PanelRightOpen className="h-4 w-4" />
               ) : (
                 <PanelRightClose className="h-4 w-4" />
               )}
-            </button>
+            </POSButton>
             <LowStockAlert />
             <ProductGrid />
           </main>
