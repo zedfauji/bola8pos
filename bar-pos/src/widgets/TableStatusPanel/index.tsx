@@ -24,7 +24,6 @@ import {
   PoolTableGridSkeleton,
 } from '@shared/ui';
 import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 
 // ---------------------------------------------------------------------------
 // Pure helpers
@@ -234,11 +233,12 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                           {item.quantity}× {item.product?.name ?? 'Item'}
                         </span>
                         <MoneyDisplay amount={lineTotal} size="sm" />
-                        <Button
+                        <POSButton
                           type="button"
                           variant="ghost"
-                          size="icon-sm"
-                          className="text-muted-foreground hover:text-destructive ml-1 rounded p-1 transition-colors"
+                          size="icon"
+                          touchSize="default"
+                          className="text-muted-foreground hover:text-destructive ml-1 h-11 w-11 touch-manipulation rounded p-1 transition-colors"
                           title="Remove item"
                           onClick={() => {
                             setSelectedItemForRemoval(item);
@@ -246,7 +246,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                           }}
                         >
                           <X className="size-4" />
-                        </Button>
+                        </POSButton>
                       </div>
                     );
                   })}

@@ -4,8 +4,8 @@ import { useBumpKdsItem } from '@features/bump-kds-item';
 import { useKdsItems, useKdsRealtimeBridge } from '@entities/kds';
 import type { KdsOrderItem } from '@entities/kds';
 import { ComboBadge } from '@shared/ui/ComboBadge';
+import { POSButton } from '@shared/ui/POSButton';
 import { RoutingBadge } from '@shared/ui/RoutingBadge';
-import { Button } from '@shared/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@shared/ui/collapsible';
 
 function formatAge(createdAt: Date): string {
@@ -63,15 +63,15 @@ function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
       </div>
 
       {item.kdsStatus !== 'done' && (
-        <Button
-          size="sm"
+        <POSButton
+          touchSize="large"
           variant={item.kdsStatus === 'pending' ? 'secondary' : 'default'}
           disabled={isBumping}
           onClick={handleClick}
           className="w-full"
         >
           {item.kdsStatus === 'pending' ? 'Start' : 'Done'}
-        </Button>
+        </POSButton>
       )}
     </div>
   );
@@ -140,8 +140,8 @@ function ComboKdsCard({
       </Collapsible>
 
       {item.kdsStatus !== 'done' && (
-        <Button
-          size="sm"
+        <POSButton
+          touchSize="large"
           variant={item.kdsStatus === 'pending' ? 'secondary' : 'default'}
           disabled={isBumping}
           onClick={() => {
@@ -150,7 +150,7 @@ function ComboKdsCard({
           className="w-full"
         >
           {item.kdsStatus === 'pending' ? 'Start' : 'Done'}
-        </Button>
+        </POSButton>
       )}
     </div>
   );
@@ -176,9 +176,9 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
     return (
       <div className="p-6">
         <p className="text-destructive mb-2">Could not load {stationLabel} queue.</p>
-        <Button variant="outline" onClick={() => void refetch()}>
+        <POSButton touchSize="default" variant="outline" onClick={() => void refetch()}>
           Retry
-        </Button>
+        </POSButton>
       </div>
     );
   }
