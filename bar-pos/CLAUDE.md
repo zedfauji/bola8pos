@@ -145,6 +145,7 @@ All routes are registered in `src/app/router.tsx`. Protected by `<ProtectedRoute
 - `add-waitlist-entry`, `notify-waitlist`, `seat-waitlist-party`, `mark-no-show`, `mark-cancelled` — FIFO waitlist queue with WhatsApp notifications (Phase 7)
 - `split-payment` (multi-method) — up to 4 payment methods per tab close in a single atomic transaction; `payments.payment_group_id`/`split_index` tag legs of one checkout, `process_split_payment_atomic` RPC + `process-split-payment` edge function enforce all-or-nothing, `PaymentForm`'s split-mode toggle drives per-row method/amount/tip entry with a live remaining-balance display and sequential per-leg receipts (Phase 18)
 - `tip-distribution-config` — admin-configurable floor/bar/kitchen tip split (`settings` key=`'tip_distribution'`, floor/bar/kitchen percentages, default 34/33/33, warn-but-allow if the sum isn't 100%); `tip_distribution_entries` is an append-only per-caja-close snapshot computed inside `close_caja_session` via largest-remainder allocation (floor > bar > kitchen tiebreak), pooling `payments.tip_amount` across all payment methods for the session; admin-only `'Tip Split'` Settings tab (`TipDistributionSettingsTab`) + read-only `'Tip Split'` Reports tab (`TipBucketDistributionPanel`), both named apart from the pre-existing per-staff `'Tip Distribution'` tab; this migration also bundles the missed `version + 1` bump fix for `close_caja_session` (Phase 15's version trigger was rejecting every caja close with `STALE_VERSION` before this fix) (Phase 19)
+- Touch-target & focus-visible sweep — `focusEmphasis` CVA variant (`default | high`) on the base `Button`/`POSButton`; `touchSize` (44/56/72px) rollout across the pool-tables, pool-table-status, inventory, kitchen-prep, kds, and kds-bar pages; `ConfirmDialog`'s opt-in `confirmClassName` passthrough powering the two 72px/ring-4 destructive confirms (Stop pool session, Stop & Move); `e2e/44-focus-tab-order.spec.ts` regression-tests Tab order on ManagerPinDialog, the inventory filter/sort-header row, and the Batch Adjustment form (Phase 32)
 
 ## Key DB Tables (Remote Supabase)
 
@@ -186,8 +187,8 @@ Realtime subscriptions are initialized in Zustand stores, not React components. 
 
 ## E2E Test Suite (`bar-pos/e2e/`)
 
-22 spec files — all must pass before release:
-`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`
+23 spec files — all must pass before release:
+`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`, `44-focus-tab-order`
 
 Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')` — admin PIN is `0000`.
 

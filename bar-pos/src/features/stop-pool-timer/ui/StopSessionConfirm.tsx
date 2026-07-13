@@ -114,6 +114,7 @@ export function StopSessionConfirm({
       }
       confirmLabel="Stop & finalize"
       variant="destructive"
+      confirmClassName="min-h-[72px] text-lg font-semibold focus-visible:ring-4 focus-visible:ring-ring"
       onConfirm={() => {
         void handleConfirm();
       }}

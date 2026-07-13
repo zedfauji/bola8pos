@@ -70,6 +70,7 @@ export function StopAndMoveDialog({
       description={`Stop the pool session on ${table.label} and move the tab to a regular table.`}
       confirmLabel="Stop & Move"
       variant="destructive"
+      confirmClassName="min-h-[72px] text-lg font-semibold focus-visible:ring-4 focus-visible:ring-ring"
       onConfirm={() => {
         void handleConfirm();
       }}
