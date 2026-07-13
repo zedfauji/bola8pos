@@ -11,7 +11,7 @@ import { ManagerPinDialog } from "@features/manager-pin-gate";
 import { useOrderItemsByPayment } from "@entities/payment";
 import { useRefundsByPayment } from "@entities/refund";
 import type { RefundReason } from "@entities/refund";
-import { Button, MoneyDisplay, QuantityControl } from "@shared/ui";
+import { MoneyDisplay, POSButton, QuantityControl } from "@shared/ui";
 import { Checkbox } from "@shared/ui/checkbox";
 import { Label } from "@shared/ui/label";
 import {
@@ -304,20 +304,23 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
           </div>
 
           <SheetFooter className="px-6 pb-6 flex gap-3">
-            <Button
+            <POSButton
               variant="outline"
+              touchSize="large"
               className="flex-1"
               onClick={() => { onOpenChange(false); }}
             >
               Close refund
-            </Button>
-            <Button
-              className="flex-1 min-h-[56px]"
+            </POSButton>
+            <POSButton
+              touchSize="xl"
+              focusEmphasis="high"
+              className="flex-1"
               disabled={!isValid || mutation.isPending}
               onClick={() => { setPinOpen(true); }}
             >
               Request approval
-            </Button>
+            </POSButton>
           </SheetFooter>
         </SheetContent>
       </Sheet>
