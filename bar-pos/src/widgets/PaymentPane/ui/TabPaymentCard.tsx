@@ -1,7 +1,7 @@
 import { Clock } from 'lucide-react';
 import type { Tab } from '@entities/tab/model/types';
 import { cn } from '@shared/lib/utils';
-import { MoneyDisplay } from '@shared/ui';
+import { MoneyDisplay, POSButton } from '@shared/ui';
 import { Badge } from '@shared/ui/badge';
 
 export interface TabPaymentCardProps {
@@ -24,13 +24,15 @@ export function TabPaymentCard({ tab, selected, onClick }: TabPaymentCardProps) 
   const itemCount = tab.items.reduce((s, i) => s + i.quantity, 0);
 
   return (
-    <button
+    <POSButton
       type="button"
+      variant="ghost"
+      touchSize="large"
       aria-label={`tab ${tab.customerName}`}
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        'w-full rounded-lg border bg-card p-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'w-full flex-col items-stretch justify-start rounded-lg border border-border bg-card p-3 text-left transition-colors hover:bg-accent',
         selected && 'border-primary ring-1 ring-primary bg-accent'
       )}
     >
@@ -63,6 +65,6 @@ export function TabPaymentCard({ tab, selected, onClick }: TabPaymentCardProps) 
           </Badge>
         )}
       </div>
-    </button>
+    </POSButton>
   );
 }
