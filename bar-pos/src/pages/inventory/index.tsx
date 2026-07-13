@@ -5,7 +5,7 @@ import { PhysicalCountForm } from '@features/physical-count';
 import { LowStockBadge, useInventoryAlerts, useInventoryRealtimeBridge } from '@entities/inventory';
 import { useStaffStore } from '@entities/staff/model/store';
 import { canAccess } from '@shared/lib/rbac';
-import { Button, PageContainer } from '@shared/ui';
+import { PageContainer, POSButton } from '@shared/ui';
 
 /**
  * Fires a Sonner toast whenever a new low-stock alert arrives.
@@ -60,15 +60,16 @@ function InventoryPageInner() {
             <>
               <LowStockBadge />
               {canPhysicalCount && (
-                <Button
+                <POSButton
                   variant="outline"
+                  touchSize="default"
                   data-testid="physical-count-btn"
                   onClick={() => {
                     setPhysicalCountOpen(true);
                   }}
                 >
                   Physical Count
-                </Button>
+                </POSButton>
               )}
             </>
           }
