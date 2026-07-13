@@ -19,7 +19,7 @@ function SortHeader({ column, title }: { column: Column<Inventory>; title: strin
   return (
     <button
       type="button"
-      className="-ml-2 inline-flex items-center gap-1 rounded px-2 py-1 text-left font-medium hover:bg-muted"
+      className="-ml-2 inline-flex min-h-[44px] items-center gap-1 rounded px-2 py-1 text-left font-medium touch-manipulation hover:bg-muted"
       onClick={e => {
         column.getToggleSortingHandler()?.(e);
       }}
