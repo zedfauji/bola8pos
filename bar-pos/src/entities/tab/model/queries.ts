@@ -919,14 +919,31 @@ export function useMutationRecordTabPayment() {
         // handled above so updRow should be non-null here.
         void updRow;
       } else {
+        // No cached version — fetch it directly. tabs has a bump_version_on_update
+        // trigger (Phase 15) that rejects any UPDATE not explicitly advancing
+        // `version` by 1, so this can't be a bare status/closed_at update.
+        const versionRes = await supabaseQuery<Pick<Tables<'tabs'>, 'version'>>(() =>
+          supabase.from('tabs').select('version').eq('id', tabId).single()
+        );
+        if (!versionRes.ok) {
+          logger.error('tabs.close.version_fetch_failed', {
+            tabId,
+            code: versionRes.error.code,
+            message: versionRes.error.message,
+          });
+          return versionRes;
+        }
+
         const tabRes = await supabaseMutation(() =>
           supabase
             .from('tabs')
             .update({
               status: 'paid',
               closed_at: new Date().toISOString(),
+              version: versionRes.data.version + 1,
             })
             .eq('id', tabId)
+            .eq('version', versionRes.data.version)
         );
 
         if (!tabRes.ok) {

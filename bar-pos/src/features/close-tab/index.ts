@@ -39,11 +39,25 @@ export function useCloseTab() {
         return err(sessionStillRunningError(tableNumber));
       }
 
+      // tabs has a bump_version_on_update trigger (Phase 15) that rejects any
+      // UPDATE not explicitly advancing `version` by 1 — fetch it first.
+      const versionRes = await supabaseQuery<{ version: number }>(() =>
+        supabase.from('tabs').select('version').eq('id', tabId).single()
+      );
+      if (!versionRes.ok) {
+        return versionRes;
+      }
+
       const upd = await supabaseMutation(() =>
         supabase
           .from('tabs')
-          .update({ status: 'closed', closed_at: new Date().toISOString() })
+          .update({
+            status: 'closed',
+            closed_at: new Date().toISOString(),
+            version: versionRes.data.version + 1,
+          })
           .eq('id', tabId)
+          .eq('version', versionRes.data.version)
       );
 
       if (!upd.ok) {

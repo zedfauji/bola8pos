@@ -304,11 +304,25 @@ export async function _executeCloseTab(
     return err({ code: 'SESSION_STILL_RUNNING' as const, message: 'Active pool session on this tab. Stop the session first.' });
   }
 
+  // tabs has a bump_version_on_update trigger (Phase 15) that rejects any
+  // UPDATE not explicitly advancing `version` by 1 — fetch it first.
+  const { data: versionRow, error: versionErr } = await supabase
+    .from('tabs')
+    .select('version')
+    .eq('id', tab_id)
+    .single();
+
+  if (versionErr) {
+    void logAgentAction('close_tab', args, null, { ...ctx, durationMs: Date.now() - t0 });
+    return err({ code: 'AGENT_ERROR' as const, message: versionErr.message });
+  }
+
   const { data, error } = await supabase
     .from('tabs')
-    .update({ status: 'closed', closed_at: new Date().toISOString() })
+    .update({ status: 'closed', closed_at: new Date().toISOString(), version: versionRow.version + 1 })
     .eq('id', tab_id)
     .eq('status', 'open')
+    .eq('version', versionRow.version)
     .select('id, status, closed_at')
     .single();
 
