@@ -28,7 +28,7 @@ test.describe('Tab + Pool Transfer', () => {
     await expect(page.getByText(/tab opened/i)).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText('Table 5', { exact: false }).first()).toBeVisible({ timeout: 10_000 });
 
-    await page.getByRole('button', { name: 'Transfer tab' }).click();
+    await page.getByRole('button', { name: 'Transfer tab', exact: true }).click();
     const dlg = page.getByRole('dialog', { name: /transfer tab/i });
     await dlg.getByLabel(/new table/i).fill('12');
     await dlg.getByRole('button', { name: 'Transfer' }).click();
@@ -45,7 +45,7 @@ test.describe('Tab + Pool Transfer', () => {
     await page.getByRole('button', { name: 'Open Tab' }).click();
     await expect(page.getByText(/tab opened/i)).toBeVisible({ timeout: 20_000 });
 
-    await page.getByRole('button', { name: 'Transfer tab' }).click();
+    await page.getByRole('button', { name: 'Transfer tab', exact: true }).click();
     const dlg = page.getByRole('dialog', { name: /transfer tab/i });
     const primary = process.env.E2E_BARTENDER_NAME ?? '';
     const targetLabel = primary.includes('Sam')
@@ -131,7 +131,7 @@ test.describe('Tab + Pool Transfer', () => {
     await drawer.getByRole('button', { name: 'Close' }).click().catch(() => undefined);
 
     // Transfer Tab A to table 10 (already has Tab B)
-    await page.getByRole('button', { name: 'Transfer tab' }).click();
+    await page.getByRole('button', { name: 'Transfer tab', exact: true }).click();
     const dlg = page.getByRole('dialog', { name: /transfer tab/i });
     const tableField = dlg.getByLabel(/new table/i);
     if (await tableField.isVisible({ timeout: 5_000 }).catch(() => false)) {
@@ -197,7 +197,7 @@ test.describe('Tab + Pool Transfer', () => {
     await tabBtn.click();
     await drawer.getByRole('button', { name: 'Close' }).click().catch(() => undefined);
 
-    await page.getByRole('button', { name: 'Transfer tab' }).click();
+    await page.getByRole('button', { name: 'Transfer tab', exact: true }).click();
     const dlg = page.getByRole('dialog', { name: /transfer tab/i });
     const tableField = dlg.getByLabel(/new table/i);
     if (await tableField.isVisible({ timeout: 5_000 }).catch(() => false)) {

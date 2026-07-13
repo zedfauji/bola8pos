@@ -26,6 +26,29 @@ export function getServiceClient(): SupabaseClient {
 }
 
 /**
+ * Bumps `version` per-row while applying `patch` to every row in `rows`. tabs,
+ * pool_sessions, and caja_sessions all have a bump_version_on_update trigger
+ * (Phase 15) that rejects any UPDATE not explicitly advancing `version` by 1 —
+ * a single bulk `.update({...})` call can't express `version = version + 1`
+ * per row (that needs a raw SQL expression, not a PostgREST literal), so each
+ * matching row is updated individually with its own current version.
+ */
+async function bumpVersionedRows(
+  admin: SupabaseClient,
+  table: 'tabs' | 'pool_sessions' | 'caja_sessions',
+  rows: { id: string; version: number }[],
+  patch: Record<string, unknown>
+): Promise<void> {
+  for (const row of rows) {
+    await admin
+      .from(table)
+      .update({ ...patch, version: row.version + 1 })
+      .eq('id', row.id)
+      .eq('version', row.version);
+  }
+}
+
+/**
  * Best-effort reset: end pool sessions, void open tabs, close caja, end open shifts.
  */
 export async function resetTestState(): Promise<void> {
@@ -36,14 +59,15 @@ export async function resetTestState(): Promise<void> {
     .update({ status: 'available', current_session_id: null })
     .eq('status', 'occupied');
 
-  await admin
+  const { data: openSessions } = await admin
     .from('pool_sessions')
-    .update({
-      stopped_at: new Date().toISOString(),
-      billed_minutes: 15,
-      total_charge: 4,
-    })
+    .select('id, version')
     .is('stopped_at', null);
+  await bumpVersionedRows(admin, 'pool_sessions', (openSessions ?? []) as { id: string; version: number }[], {
+    stopped_at: new Date().toISOString(),
+    billed_minutes: 15,
+    total_charge: 4,
+  });
 
   // Reset kds_status for all non-done items so the KDS board is clean between tests
   await admin
@@ -51,23 +75,30 @@ export async function resetTestState(): Promise<void> {
     .update({ kds_status: 'done' })
     .neq('kds_status', 'done');
 
-  await admin
+  const { data: openTabs } = await admin
     .from('tabs')
-    .update({ status: 'voided', closed_at: new Date().toISOString() })
+    .select('id, version')
     .eq('status', 'open')
     .eq('is_deleted', false);
+  await bumpVersionedRows(admin, 'tabs', (openTabs ?? []) as { id: string; version: number }[], {
+    status: 'voided',
+    closed_at: new Date().toISOString(),
+  });
 
   // Bulk-close ALL open caja sessions to avoid duplicate-key errors on next openCaja()
   const { data: mgrForReset } = await admin.from('profiles').select('id').eq('role', 'manager').limit(1).maybeSingle();
-  await admin
-    .from('caja_sessions')
-    .update({
+  const { data: openCajaSessions } = await admin.from('caja_sessions').select('id, version').eq('status', 'open');
+  await bumpVersionedRows(
+    admin,
+    'caja_sessions',
+    (openCajaSessions ?? []) as { id: string; version: number }[],
+    {
       status: 'closed',
       closed_at: new Date().toISOString(),
       closed_by: mgrForReset?.id ?? null,
       closing_cash: 0,
-    })
-    .eq('status', 'open');
+    }
+  );
 
   await admin.from('shifts').update({ clock_out: new Date().toISOString() }).is('clock_out', null);
 
