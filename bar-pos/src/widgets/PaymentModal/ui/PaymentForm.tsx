@@ -721,6 +721,8 @@ export function PaymentForm({
                         <POSButton
                           type="button"
                           variant="ghost"
+                          touchSize="xl"
+                          focusEmphasis="high"
                           aria-label={`Remove payment ${String(index + 1)}`}
                           disabled={isProcessing}
                           className="px-2 text-destructive"
@@ -951,8 +953,10 @@ export function PaymentForm({
                 disabled={isProcessing}
               />
               {cardChargeOverride !== null && (
-                <button
+                <POSButton
                   type="button"
+                  variant="ghost"
+                  touchSize="default"
                   data-testid="card-override-reset"
                   className="text-xs text-muted-foreground underline"
                   onClick={() => {
@@ -960,7 +964,7 @@ export function PaymentForm({
                   }}
                 >
                   Reset to computed (${runningTotal.toFixed(2)})
-                </button>
+                </POSButton>
               )}
               <div className="space-y-2">
                 <Label htmlFor="card-ref">Reference # (optional)</Label>
@@ -1000,6 +1004,7 @@ export function PaymentForm({
           <POSButton
             type="button"
             touchSize="xl"
+            focusEmphasis="high"
             disabled={isProcessing || (isSplitMode ? !canSubmitSplit : !canSubmit)}
             className="w-full bg-[var(--pos-accent)] text-black hover:bg-[var(--pos-accent)]/90"
             onClick={() => {
