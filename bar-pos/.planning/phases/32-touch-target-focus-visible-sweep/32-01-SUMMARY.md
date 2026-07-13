@@ -112,3 +112,7 @@ None — plan executed exactly as written. All three tasks matched their `<actio
 ## Next Steps
 
 Plan 32-03 wires `focusEmphasis="high"` and `confirmClassName` onto the two real destructive-action ConfirmDialog call sites.
+
+## Self-Check: PASSED
+
+All created/modified files and all 5 task/metadata commit hashes verified present.
