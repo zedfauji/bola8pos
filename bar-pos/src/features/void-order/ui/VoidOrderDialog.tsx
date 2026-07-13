@@ -57,6 +57,7 @@ export function VoidOrderDialog({
       title="Void order?"
       description="This will mark the order voided, restore inventory, and remove it from tab totals."
       confirmLabel="Void order"
+      confirmClassName="min-h-[72px] text-lg font-semibold focus-visible:ring-4 focus-visible:ring-ring"
       variant="destructive"
       isLoading={isPending}
       confirmDisabled={!canConfirm}
