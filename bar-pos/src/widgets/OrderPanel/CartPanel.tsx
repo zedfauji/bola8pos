@@ -182,15 +182,17 @@ export function CartPanel() {
 
         {!isEmpty && (
           <div className="text-center">
-            <button
+            <POSButton
               type="button"
+              variant="ghost"
+              touchSize="default"
               className="text-sm text-muted-foreground underline decoration-muted-foreground/60 underline-offset-2 hover:text-foreground"
               onClick={() => {
                 clearCart();
               }}
             >
               Clear Cart
-            </button>
+            </POSButton>
           </div>
         )}
 
