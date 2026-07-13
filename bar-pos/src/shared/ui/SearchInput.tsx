@@ -118,7 +118,7 @@ export function SearchInput({
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+          className="absolute right-1 top-1/2 h-11 w-11 -translate-y-1/2 touch-manipulation"
           onClick={handleClear}
           aria-label="Clear search"
         >
