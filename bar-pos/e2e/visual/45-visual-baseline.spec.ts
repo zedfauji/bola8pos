@@ -133,14 +133,18 @@ function toastMask(page: Page): Locator {
  */
 function masksFor(page: Page, route: string): Locator[] {
   const toast = toastMask(page);
+  const liveClock = page.getByTestId('live-time-display');
   if (route === '/pos') {
     return [toast, page.getByTestId('active-promotions-banner')];
+  }
+  if (route === '/pool-tables' || route === '/rappi') {
+    return [toast, liveClock];
   }
   if (route.startsWith('/pool-tables/')) {
     return [toast, page.getByTestId('elapsed-minutes')];
   }
   if (route === '/kds' || route === '/kds-bar') {
-    return [toast, page.getByTestId('kds-board'), page.getByTestId('live-time-display')];
+    return [toast, page.getByTestId('kds-board'), liveClock];
   }
   if (route === '/staff') {
     return [
@@ -285,7 +289,7 @@ test.describe.serial('Visual regression baseline (Phase 34)', () => {
       await waitForPageReady(page);
       await expect.soft(page).toHaveScreenshot(`${role}-pool-tables.png`, {
         fullPage: true,
-        mask: [toastMask(page)],
+        mask: masksFor(page, '/pool-tables'),
       });
       await logout(page);
     }
