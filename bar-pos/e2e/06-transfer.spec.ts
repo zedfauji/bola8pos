@@ -127,8 +127,9 @@ test.describe('Tab + Pool Transfer', () => {
       test.skip(true, 'Tab A not found in drawer — cannot test duplicate table transfer');
       return;
     }
+    // Selecting a tab in the drawer auto-closes it (TabDrawer's onSelect calls closeDrawer()),
+    // so there is no separate Close button to click here — it self-dismisses.
     await tabABtn.click();
-    await drawer.getByRole('button', { name: 'Close' }).click().catch(() => undefined);
 
     // Transfer Tab A to table 10 (already has Tab B)
     await page.getByRole('button', { name: 'Transfer tab', exact: true }).click();
@@ -194,8 +195,9 @@ test.describe('Tab + Pool Transfer', () => {
       test.skip(true, 'Tab not found in drawer for T5 transfer test');
       return;
     }
+    // Selecting a tab in the drawer auto-closes it (TabDrawer's onSelect calls closeDrawer()),
+    // so there is no separate Close button to click here — it self-dismisses.
     await tabBtn.click();
-    await drawer.getByRole('button', { name: 'Close' }).click().catch(() => undefined);
 
     await page.getByRole('button', { name: 'Transfer tab', exact: true }).click();
     const dlg = page.getByRole('dialog', { name: /transfer tab/i });

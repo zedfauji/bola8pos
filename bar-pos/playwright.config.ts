@@ -38,7 +38,7 @@ export default defineConfig({
     screenshot: 'on',
     headless: false,
     slowMo,
-    actionTimeout: fastE2e ? 10_000 : undefined,
+    actionTimeout: fastE2e ? 10_000 : 15_000,
     navigationTimeout: fastE2e ? 15_000 : undefined,
     viewport: { width: 1280, height: 800 },
     launchOptions: {
