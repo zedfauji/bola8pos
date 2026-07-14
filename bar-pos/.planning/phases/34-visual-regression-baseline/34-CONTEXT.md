@@ -22,7 +22,7 @@ Stand up an isolated Playwright visual-regression suite (separate config from th
 - **D-04:** Admin role (PIN `0000`, via `e2e/helpers/auth.ts` `loginAs`) snapshots all 17 registered routes — satisfies the ROADMAP success criterion in one pass.
 - **D-05:** Bartender and manager roles additionally snapshot only their own normally-accessible route subset (e.g. bartender: `/pos`, `/pool-tables`, `/pool-tables/:tableId`, `/kds-bar`, `/kitchen-prep`, `/waitlist`) — to catch role-specific UI differences such as hidden admin nav items. Not all 3 roles × all 17 routes.
 - **D-06:** `/pool-tables/:tableId` uses the first seeded table id from `npm run setup:dev` — same lookup approach `e2e/16-table-status.spec.ts` already uses. No hardcoded UUID.
-- **D-07:** Access-denied/redirect states for role-gated routes (e.g. bartender hitting `/rbac` or `/audit`) ARE included as additional baselines in this phase (user overrode the "defer" recommendation — explicitly wants 403/redirect UI captured now, not deferred).
+- **D-07:** [informational] Access-denied/redirect states for role-gated routes (e.g. bartender hitting `/rbac` or `/audit`) ARE included as additional baselines in this phase (user overrode the "defer" recommendation — explicitly wants 403/redirect UI captured now, not deferred). Superseded by D-15, which is the plan-cited, implemented version of this decision.
 
 ### Dynamic region masking
 - **D-08:** Default masking strategy is Playwright's `toHaveScreenshot({ mask: [locator(...)] })` — paint a solid box over dynamic elements per-route, keep the rest of the page diffable. Do not exclude whole routes/panels.
