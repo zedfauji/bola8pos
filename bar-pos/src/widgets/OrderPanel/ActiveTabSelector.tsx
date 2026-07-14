@@ -120,7 +120,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 }}
                 disabled={currentTab.items.length === 0}
                 title={currentTab.items.length === 0 ? 'Add items before splitting' : undefined}
-                aria-label={`Split tab ${currentTab.customerName}`}
+                aria-label="Split bill"
               >
                 <SplitSquareHorizontal className="mr-2 h-4 w-4" />
                 Split bill
