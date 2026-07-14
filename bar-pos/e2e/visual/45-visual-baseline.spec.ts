@@ -298,9 +298,12 @@ test.describe.serial('Visual regression baseline (Phase 34)', () => {
     }
 
     // /audit is the one denied route that IS screenshotted (D-15) — a distinguishing
-    // sonner toast renders on top of /home before the redirect settles.
+    // sonner toast renders on top of /home before the redirect settles. React
+    // StrictMode double-invokes AuditRoute's render in dev mode, so toast.error()
+    // fires twice — `.first()` avoids a strict-mode locator violation (same
+    // toast-stacking-is-correct-UX precedent as e2e/06-transfer.spec.ts T4).
     await gotoAuthed(page, '/audit');
-    await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-sonner-toast]').first()).toBeVisible({ timeout: 10_000 });
     await page.evaluate(() => document.fonts.ready);
     await expect.soft(page).toHaveScreenshot('bartender-audit-denied.png', { fullPage: true });
 

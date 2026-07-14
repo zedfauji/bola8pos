@@ -35,6 +35,7 @@ storybook-static
 coverage/
 artifacts/
 e2e-results/
+e2e-results-visual/
 e2e-blob-reports/
 playwright-report/
 verification-artifacts/
