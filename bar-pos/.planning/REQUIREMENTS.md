@@ -86,7 +86,7 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 | FOCUS-01 | Phase 32 | Pending |
 | FOCUS-02 | Phase 32 | Pending |
 | FOCUS-03 | Phase 32 | Pending |
-| COMPONENT-04 | Phase 33 | Pending |
+| COMPONENT-04 | Phase 33 (E2E gate closed by Phase 33.1) | Complete |
 | VISUAL-01 | Phase 34 | Pending |
 | VISUAL-02 | Phase 34 | Pending |
 | VISUAL-03 | Phase 34 | Pending |
