@@ -38,6 +38,14 @@ Stand up an isolated Playwright visual-regression suite (separate config from th
 - Exact `mask` locator selectors per route (timer text, KDS board container, toast root) — implementer's judgment from existing component structure.
 - Whether admin-role snapshots and bartender/manager-role snapshots live in one spec file or are split by role — planner's call, D-11 only fixes the directory/number.
 
+### Post-research corrections & additions (2026-07-14, RESEARCH.md)
+- **D-13 (corrects D-05):** `/waitlist` requires `manage_waitlist` (manager+) per `rbac.ts` — a bartender is redirected, not the other way around. Bartender's actual accessible subset is `/pos`, `/pool-tables`, `/pool-tables/:tableId`, `/kitchen-prep`. `/kds`/`/kds-bar` require `view_kds` (kitchen role + admin only — manager is ALSO blocked from these, not just bartender). Planner must use RESEARCH.md's corrected route×role matrix (Pattern 3), not the illustrative example in D-05.
+- **D-14 (corrects D-06):** `npm run setup:dev` is broken — `scripts/setup-dev-users.ts` / `scripts/seed-dev-data.ts` referenced in `package.json` do not exist in the repo. Seed the pool table id (and any other fixture data) directly via `e2e/helpers/supabase.ts`'s `getServiceClient()`, the same pattern `e2e/16-table-status.spec.ts` already uses. Do not depend on `setup:dev` running successfully.
+- **D-15:** Denied-route captures (D-07) — for routes where denial is an instant `<Navigate>` redirect (pixel-identical to `/home`), assert the resulting URL is `/home` only; do NOT screenshot. `/audit`'s denial is the exception — it renders a distinguishing `sonner` toast before/during redirect, so it DOES get an actual screenshot.
+- **D-16:** `/kds` and `/kds-bar` boards are snapshotted with 1-2 pending orders seeded (not empty) — an empty board hides card layout/spacing drift, which is the point of a visual baseline. Card relative-age labels ("2 min") are masked per the same locator-mask pattern as D-08/D-09.
+- **D-17 (masking inventory expansion):** Beyond the timer/KDS-board/toast regions named in the original discussion, RESEARCH.md found additional dynamic regions requiring masks: `/pool-tables` grid view (not just the `:tableId` detail page) has live minutes-counters + SVG timer overlays on occupied cards; `/pos` has `data-testid="active-promotions-banner"` (happy-hour countdown — selector already exists in code); `/staff` has a live shift-duration tick; both KDS pages render a `LiveTimeDisplay` clock in the header separate from the board content. All must be masked using the same `mask: []` locator approach as D-08.
+- Toast mask selector confirmed: `data-sonner-toaster` (from direct `node_modules/sonner` inspection).
+
 </decisions>
 
 <canonical_refs>
