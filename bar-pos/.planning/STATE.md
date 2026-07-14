@@ -2,16 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
+current_phase: 33
 status: completed
-stopped_at: Phase 31 UI-SPEC approved (merged with Phase 20 promotions-engine — both branches reconciled)
-last_updated: "2026-07-12T17:35:08.000Z"
-last_activity: 2026-07-12 -- merged Phase 19-20 (promotions engine) work with Phase 21-31 (UI standardization) work
+stopped_at: Phase 33.1 context gathered
+last_updated: "2026-07-14T01:29:32.863Z"
+last_activity: 2026-07-13
+last_activity_desc: Phase 33 marked complete
 progress:
-  total_phases: 35
-  completed_phases: 19
-  total_plans: 134
-  completed_plans: 143
-  percent: 54
+  total_phases: 36
+  completed_phases: 21
+  total_plans: 145
+  completed_plans: 154
+  percent: 58
+current_phase_name: payment-critical-page-sweep-isolated
 ---
 
 # Session State
@@ -22,10 +25,10 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 31 — COMPLETE (Phase 20 promotions-engine also COMPLETE, merged from parallel branch)
-Plan: 1 of ?
-Status: Phase 31 complete
-Last activity: 2026-07-11 -- Phase 31 marked complete
+Phase: 33 — COMPLETE
+Plan: 1 of 8
+Status: Phase 33 complete
+Last activity: 2026-07-13 — Phase 33 marked complete
 
 ## Session Log
 
@@ -94,6 +97,7 @@ Last activity: 2026-07-11 -- Phase 31 marked complete
 ### Roadmap Evolution
 
 - Phase 12 added: Full RBAC page, Remove the breadcrumbs of RBAC from other page, There should be only one page to manage RBAC and it should be Protected. Follow the project Navigation rule.
+- Phase 33.1 inserted after Phase 33: E2E Test/RBAC Drift Fixes — closes Phase 33's outstanding Success Criterion 3 gap (06-transfer T4/T5, 09-rbac T7/T-RP-01/T-RP-02, all pre-existing/out-of-scope) (URGENT)
 
 ## Decisions
 
@@ -243,7 +247,7 @@ Last activity: 2026-07-11 -- Phase 31 marked complete
 
 ## Last Session
 
-- **Stopped at:** Phase 31 UI-SPEC approved; Phase 20 (promotions-engine) COMPLETE — 11/11 plans, verification passed 4/4, post-verify cleanup fix applied. Both merged into main 2026-07-12.
+- **Stopped at:** Phase 33.1 context gathered
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -256,3 +260,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 ### Blockers
 
 - Manual follow-up: run e2e/15-home-navigation.spec.ts, e2e/16-table-status.spec.ts, e2e/17-payment-pane.spec.ts once port 1420 is freed of the stray non-Vite process occupying it
+
+## Session
+
+**Last session:** 2026-07-14T01:29:32.853Z
+**Stopped at:** Phase 33.1 context gathered
+**Resume file:** .planning/phases/33.1-e2e-rbac-drift-fixes/33.1-CONTEXT.md
