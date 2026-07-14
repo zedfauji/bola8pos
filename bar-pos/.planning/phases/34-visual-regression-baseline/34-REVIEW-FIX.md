@@ -44,6 +44,41 @@ status: partial
 
 ---
 
+## Post-fix baseline re-verification (orchestrator, same session)
+
+The CR-01 code fix (`c68fce2`) only changes the spec's masking logic — it does not by itself
+regenerate the already-seeded baseline PNGs. Re-running `npm run test:e2e:visual -- --update-snapshots`
+after the fix landed did **not** actually rewrite the `admin/bartender/manager-pool-tables-*.png`
+or `*-rappi-*.png` files, even across three separate re-seed attempts: Playwright's `--update-snapshots`
+only rewrites a snapshot when the new capture differs from the existing baseline beyond its default
+comparison tolerance, and the previously-unmasked clock text apparently fell inside that tolerance
+across runs. The 6 affected PNGs (3× `pool-tables`, 3× `rappi`) were still the **original, unmasked**
+captures from before the fix, silently defeating VISUAL-03 despite the source-code fix being correct
+and committed.
+
+**Also discovered and corrected in the same pass:** an interim manual re-seed attempt used `-g` to
+scope `--update-snapshots` to a subset of the 5 tests. Because the spec uses `test.describe.serial`
+with a shared, file-scoped `poolTableId` fixture seeded only by the first test
+(`'pool-tables idle grid — ... then seed shared fixtures'`), running later tests in isolation via `-g`
+skipped that seed step, causing `/pool-tables/:tableId` requests to fire with `tableId=undefined` and
+a resulting Supabase 400 error rendered into the `admin-pool-table-status` baseline. **Lesson: this
+suite's shared-state design requires the full spec file to run in order for `--update-snapshots`
+re-seeds — partial `-g` filtering breaks the fixture chain and must not be used for baseline updates.**
+
+**Resolution:** deleted the 6 stale `pool-tables`/`rappi` PNGs (forcing Playwright to always create them
+fresh, since missing snapshots are unconditionally written), ran a full unfiltered
+`--update-snapshots` pass, then re-ran the two-consecutive-run zero-diff gate
+(`npm run test:e2e:visual` twice, no `-u`) — both passed clean. Visually confirmed
+`admin-pool-tables-chromium-win32.png` now shows a masked (magenta) clock box instead of live text,
+and `admin-pool-table-status-chromium-win32.png` shows the correct active-session detail view rather
+than the earlier Supabase-error state.
+
+No new commit was needed — the source fix (`c68fce2`) was already correct and committed; only the
+local, gitignored baseline artifacts (per D-12) required regeneration.
+
+---
+
 _Fixed: 2026-07-14T00:00:00Z_
 _Fixer: Claude (gsd-code-fixer)_
 _Iteration: 1_
+_Post-fix baseline re-verification: Claude (orchestrator), same session_
