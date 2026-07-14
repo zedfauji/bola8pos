@@ -109,14 +109,14 @@ test.describe('Tab + Pool Transfer', () => {
     await page.getByLabel(/customer name/i).fill('Transfer Conflict A');
     await page.getByLabel(/table number/i).fill('10');
     await page.getByRole('button', { name: 'Open Tab' }).click();
-    await expect(page.getByText(/tab opened/i)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText('Tab opened for Transfer Conflict A')).toBeVisible({ timeout: 20_000 });
 
     // Create Tab B also at table 10
     await page.getByRole('button', { name: /new tab/i }).click();
     await page.getByLabel(/customer name/i).fill('Transfer Conflict B');
     await page.getByLabel(/table number/i).fill('10');
     await page.getByRole('button', { name: 'Open Tab' }).click();
-    await expect(page.getByText(/tab opened/i)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText('Tab opened for Transfer Conflict B')).toBeVisible({ timeout: 20_000 });
 
     // Switch to Tab A
     await page.getByRole('button', { name: /switch tab|open tabs/i }).first().click();
