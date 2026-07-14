@@ -893,7 +893,7 @@ Plans:
 Closes Phase 33's outstanding Success Criterion 3 gap (see `.planning/phases/33-payment-critical-page-sweep-isolated/33-VERIFICATION.md`).
 **Requirements**: TBD (closes COMPONENT-04's E2E-gate clause — annotated in REQUIREMENTS.md per D-08, no new ID)
 **Depends on:** Phase 33
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 **Wave 1**
@@ -902,7 +902,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 33.1-02-PLAN.md — Phase gate (06-transfer x2 isolation + 5-spec SC3 gate + full unit suite, D-03) and COMPONENT-04 traceability annotation (D-08)
+- [x] 33.1-02-PLAN.md — Phase gate (06-transfer x2 isolation + 5-spec SC3 gate + full unit suite, D-03) and COMPONENT-04 traceability annotation (D-08)
 
 ### Phase 34: Visual Regression Baseline
 
