@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
-current_phase: 33
+current_phase: 33.1
+current_phase_name: e2e-rbac-drift-fixes
 status: executing
 stopped_at: Phase 33.1 context gathered
-last_updated: "2026-07-14T02:53:21.760Z"
-last_activity: 2026-07-13
-last_activity_desc: Phase 33 marked complete
+last_updated: "2026-07-14T03:07:32.191Z"
+last_activity: 2026-07-14
+last_activity_desc: Phase 33.1 execution started
 progress:
   total_phases: 36
   completed_phases: 21
-  total_plans: 145
-  completed_plans: 154
+  total_plans: 147
+  completed_plans: 155
   percent: 58
-current_phase_name: payment-critical-page-sweep-isolated
 ---
 
 # Session State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 33 — COMPLETE
-Plan: 1 of 8
+Phase: 33.1 (e2e-rbac-drift-fixes) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-07-13 — Phase 33 marked complete
+Last activity: 2026-07-14 — Phase 33.1 execution started
 
 ## Session Log
 
@@ -196,6 +196,9 @@ Last activity: 2026-07-13 — Phase 33 marked complete
 - [Phase ?]: [Phase 17-modifier-inventory-rules 17-05]: Delta hint/label rendered once above the row list (not per-row via FormField) to avoid clutter across N rows while still surfacing the load-bearing signed-delta explanation from 17-UI-SPEC.md
 - [Phase 30-shared-shell-primitive-extension-01]: PageContainer/SectionHeader backTo/backLabel absorb BackToHomeButton's markup inline above the h2 title (per 30-UI-SPEC.md classes), defaulting backLabel to literal 'Home' to preserve the E2E/unit test load-bearing accessible-name contract
 - [Phase 30-shared-shell-primitive-extension 30-05]: Deleted BackToHomeButton/AppShell/AppNav outright with no re-export shim (D-03); CLAUDE.md routes table Notes sourced from KdsRoute/AuditRoute guard checks; targeted E2E (15/16/17) deferred as manual follow-up due to a stray non-Vite process occupying port 1420
+- [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: Toast stacking is correct sonner UX (4s lifetime, no id dedup) — fixed via test-side exact-text scoping in 06-transfer.spec.ts T4, no App.tsx/toast.success() changes
+- [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: Deleted dead src/widgets/OrderPanel/OrderPanel.tsx outright (confirmed unimported anywhere in src/) instead of mirroring the aria-label fix into unused code
+- [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: 09-rbac.spec.ts PermissionMatrix drift (88->96) was a stale test expectation only — rbac.ts/PermissionMatrix.tsx untouched, already matched by passing PermissionMatrix.test.tsx
 
 ## Performance Metrics
 
@@ -244,10 +247,11 @@ Last activity: 2026-07-13 — Phase 33 marked complete
 | Phase 17-modifier-inventory-rules P05 | 30min | 2 tasks | 5 files |
 | Phase 30-shared-shell-primitive-extension P01 | 10min | 2 tasks | 3 files |
 | Phase 30-shared-shell-primitive-extension P05 | 15min | 3 tasks | 2 files |
+| Phase 33.1-e2e-rbac-drift-fixes P01 | 25min | 3 tasks | 5 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 33.1 UI-SPEC approved
+- **Stopped at:** Completed 33.1-01-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -263,6 +267,6 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-14T02:40:41.639Z
+**Last session:** 2026-07-14T03:07:32.181Z
 **Stopped at:** Phase 33.1 context gathered
-**Resume file:** .planning/phases/33.1-e2e-rbac-drift-fixes/33.1-UI-SPEC.md
+**Resume file:** None

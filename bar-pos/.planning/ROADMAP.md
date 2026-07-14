@@ -893,12 +893,12 @@ Plans:
 Closes Phase 33's outstanding Success Criterion 3 gap (see `.planning/phases/33-payment-critical-page-sweep-isolated/33-VERIFICATION.md`).
 **Requirements**: TBD (closes COMPONENT-04's E2E-gate clause — annotated in REQUIREMENTS.md per D-08, no new ID)
 **Depends on:** Phase 33
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 33.1-01-PLAN.md — Land the 3 drift fixes: 06-transfer T4 exact-toast text (D-01/D-02), ActiveTabSelector static aria-label + OrderPanel.tsx deletion (D-04/D-05/D-06), 09-rbac 88→96 count + exact locator (D-07)
+- [x] 33.1-01-PLAN.md — Land the 3 drift fixes: 06-transfer T4 exact-toast text (D-01/D-02), ActiveTabSelector static aria-label + OrderPanel.tsx deletion (D-04/D-05/D-06), 09-rbac 88→96 count + exact locator (D-07)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
