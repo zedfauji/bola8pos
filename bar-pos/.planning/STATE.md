@@ -4,17 +4,17 @@ milestone: v2.2
 milestone_name: — UI Standardization
 current_phase: 34
 current_phase_name: visual-regression-baseline
-status: executing
+status: verifying
 stopped_at: Phase 33.1 context gathered
-last_updated: "2026-07-14T20:23:30.260Z"
+last_updated: "2026-07-14T21:48:01.784Z"
 last_activity: 2026-07-14
 last_activity_desc: Phase 34 execution started
 progress:
   total_phases: 36
-  completed_phases: 22
+  completed_phases: 23
   total_plans: 149
-  completed_plans: 157
-  percent: 61
+  completed_plans: 158
+  percent: 64
 ---
 
 # Session State
@@ -27,11 +27,12 @@ See: .planning/PROJECT.md
 
 Phase: 34 (visual-regression-baseline) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-14 — Phase 34 execution started
 
 ## Session Log
 
+- 2026-07-14: **Phase 34 (visual-regression-baseline) Plan 02 COMPLETE — Task 3 checkpoint approved** — `e2e/visual/45-visual-baseline.spec.ts` (5 test blocks, admin 17 routes + bartender 11 + manager 14 accessible routes, denied-route URL assertions, `/audit` denied-toast screenshot) + `waitForPageReady()` content-readiness helper committed `70c7f4b`; local baseline seeded (43 PNGs, gitignored) with a genuine blank-screenshot bug found and fixed (`55470bc`, `e2986e1` — content wasn't awaited before `toHaveScreenshot()`, every `React.lazy()`+Suspense+TanStack-Query route captured blank); two consecutive `npm run test:e2e:visual` runs both exit 0 with zero diffs (VISUAL-03). Task 3's blocking `checkpoint:human-verify` was approved by the user ("Checked and confirmed i could see all the pNGs") after reviewing all 43 PNGs. VISUAL-02 + VISUAL-03 marked complete in REQUIREMENTS.md; ROADMAP.md Phase 34 marked Complete. **Phase 34 is now complete — 2/2 plans.**
 - 2026-07-10: **Phase 30 (shared-shell-primitive-extension) COMPLETE — verified passed** — 5/5 plans executed across 3 waves: 30-01 extended `PageContainer`/`SectionHeader` with `backTo`/`backLabel` (Wave-0 RED→GREEN test); 30-02/30-03/30-04 ran in parallel worktrees migrating all 15 non-exempt routes off `BackToHomeButton` (7 already-`PageContainer` pages, 5 first-time adoptions incl. `inventory`'s `LowStockBadge`+gated button and `reports`' 13-tab full-height layout, 3 special cases: `pos`/`payments` full-bleed `className` override + `pool-table-status`'s deliberate `backTo="/pool-tables"` non-default); 30-05 deleted dead `BackToHomeButton`/`AppShell`/`AppNav` + fixed `CLAUDE.md`'s routes table to all 17 rows. Initial verifier pass returned `gaps_found` (2 items): (1) SC#1's literal "all 17 routes" text vs the pre-planned D-02 exemption of `login`/`home` (no sensible back target for either) — user accepted this as an override; (2) 3 targeted E2E specs couldn't run (port 1420 held by a stray process). User asked to investigate rather than defer — freed the port and found a **real pre-existing bug**, unrelated to this phase: `src/pages/login/index.tsx`'s `isAuthenticated` guard redirected to `/pos`, racing `PINLoginForm.tsx`'s `navigate('/home')` after login, so `15-home-navigation.spec.ts`'s very first test failed on landing URL. Fixed (commit `b6e1729`, separate from the phase's plan commits) by aligning the guard to `/home`. Re-verified: `15-home-navigation` now green (bar one unrelated pre-existing item); `16-table-status`/`17-payment-pane` still have failures traced to live-Supabase RPC latency (120s timeout on a "Start Session" call) — confirmed via page snapshots that the shell/`PageContainer` code itself is correct in every failure, so this is pre-existing test-infra flakiness, not a regression. Full-repo `typecheck`/`lint`/unit suite re-confirmed clean throughout (2 pre-existing typecheck errors, lint exit 0, 1212 passed/1 pre-existing `useCloseTab.test.ts` failure/15 todo — exact baseline match, zero regressions). **Note: wave-2 worktree agents' SUMMARY.md files were lost on `git worktree remove --force`** (never committed — `.planning/` is gitignored and those files were never force-added before removal) — reconstructed from the orchestrator's retained task-notification text and committed after the fact; lesson for future worktree-isolated waves: force-add+commit any gitignored `.planning/` artifacts from inside the worktree BEFORE requesting removal.
 - 2026-07-10: **Phase 29 (ui-drift-audit) COMPLETE — verified passed** — `scripts/audit-ui-drift.ts` scanner + `.planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md` backlog committed (20 button / 8 input / 3 hex / 0 spacing files; 17 real routes vs 14 CLAUDE.md rows, missing `/kds`, `/kitchen-prep`, `/audit`). First verifier pass found a real bug: per-line regex missed `<button>`/`<input>` tags whose attributes wrap to a new line (Prettier's default JSX formatting) — undercounted 10/3 instead of 20/8, missing `src/pages/pos/index.tsx`. Fixed by scanning whole-file content instead of per-line (`\s` then matches the newline itself) — commits `ce8c38c` + regenerated `DRIFT-AUDIT.md`. Re-verification PASS, 5/5 must-haves, zero `src/` files modified, typecheck limited to the 2 pre-existing unrelated errors. Ready for `/gsd-plan-phase 30`.
 - 2026-07-10: **Phase 29 (ui-drift-audit) planned** — RESEARCH.md (verified live-repo counts: 20 raw-button files, 8 raw-input files, 3 hex-color files, 0 arbitrary-spacing files, 17 real routes vs 14 CLAUDE.md table rows, corrects CONTEXT.md's stale "28 button files" scouting note) + VALIDATION.md (Nyquist, manual-only baseline-diff verification, `nyquist_compliant: true`) + `29-01-PLAN.md` (1 wave, 2 tasks: build `scripts/audit-ui-drift.ts` filtered fs-walk+regex scanner citing RESEARCH's verified baseline, then generate/commit `.planning/phases/29-ui-drift-audit/DRIFT-AUDIT.md` checklist). plan-checker PASS (1 non-blocking cosmetic warning: RESEARCH.md Open Questions section missing `(RESOLVED)` suffix). Ready for `/gsd-execute-phase 29`.
@@ -201,6 +202,7 @@ Last activity: 2026-07-14 — Phase 34 execution started
 - [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: 09-rbac.spec.ts PermissionMatrix drift (88->96) was a stale test expectation only — rbac.ts/PermissionMatrix.tsx untouched, already matched by passing PermissionMatrix.test.tsx
 - [Phase 33.1-e2e-rbac-drift-fixes 02]: e2e/09-rbac.spec.ts confirms Wave 1's Root Cause 2/3 fixes are correct (T7 skips cleanly, T-RP-01/T-RP-02 pass); e2e/06-transfer.spec.ts's D-03 gate (5/5 twice) could not be confirmed — T4/T5 fail identically on both isolated runs with a test-timeout/context-closed pattern traced to execution-sandbox network/browser latency, not a code defect (page snapshots at failure time show correct, clickable UI state)
 - [Phase ?]: [Phase 34-visual-regression-baseline 34-01]: playwright.visual.config.ts built from scratch, never imports/spreads playwright.config.ts -- every use/project field diverges explicitly (headless, bundled Chromium, no slowMo/channel/globalTeardown)
+- [Phase ?]: [Phase 34-visual-regression-baseline 34-02]: Task 3's blocking checkpoint:human-verify approved by user ("Checked and confirmed i could see all the pNGs") -- 43-PNG baseline confirmed correct post-Phase-33.1 UI, VISUAL-02/VISUAL-03 satisfied
 
 ## Performance Metrics
 
@@ -251,10 +253,11 @@ Last activity: 2026-07-14 — Phase 34 execution started
 | Phase 30-shared-shell-primitive-extension P05 | 15min | 3 tasks | 2 files |
 | Phase 33.1-e2e-rbac-drift-fixes P01 | 25min | 3 tasks | 5 files |
 | Phase 34 P01 | 15min | 2 tasks | 6 files |
+| Phase 34-visual-regression-baseline P02 | ~55min | 3 tasks | 2 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 34 UI-SPEC approved
+- **Stopped at:** Phase 34 (visual-regression-baseline) complete -- Task 3 checkpoint approved, plan 34-02 committed
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -271,6 +274,6 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-14T20:22:46.392Z
+**Last session:** 2026-07-14T21:48:01.774Z
 **Stopped at:** Phase 33.1 context gathered
-**Resume file:** .planning/phases/34-visual-regression-baseline/34-UI-SPEC.md
+**Resume file:** None

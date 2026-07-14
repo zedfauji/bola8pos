@@ -63,7 +63,7 @@ App-wide UI consistency pass enforcing existing shadcn/Tailwind conventions acro
 - [x] **Phase 31: Component, Token & Spacing Consistency Sweep** — Non-payment pages use `shared/ui` primitives + Tailwind tokens + spacing scale (completed 2026-07-11)
 - [x] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings (completed 2026-07-13)
 - [ ] **Phase 33: Payment-Critical Page Sweep (Isolated)** — POS/payments/split/refund/tip surfaces standardized, zero behavior change, gated by existing E2E specs
-- [ ] **Phase 34: Visual Regression Baseline** — Isolated Playwright visual-diff config + post-fix screenshot baselines for all 17 routes
+- [x] **Phase 34: Visual Regression Baseline** — Isolated Playwright visual-diff config + post-fix screenshot baselines for all 17 routes (completed 2026-07-14)
 - [ ] **Phase 35: Guardrails — Tokens Doc & Drift Lint** — Design tokens reference doc + drift-detection lint rule, added only after conformance
 
 **Execution order** (strict — respects blast-radius tiering from `research/SUMMARY.md`; each phase depends on the previous):
@@ -909,12 +909,12 @@ Plans:
 **Goal:** Stand up a Playwright visual-regression suite, isolated from the functional E2E config, and capture screenshot baselines for all 17 routes only now that the audit/shell/token/component/touch/focus fixes (Phases 29-33) are complete — a pre-fix baseline would have frozen the current inconsistencies.
 **Requirements:** VISUAL-01, VISUAL-02, VISUAL-03
 **Depends on:** Phase 33
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 
 - [x] 34-01-PLAN.md — Wave 0 harness: isolated `playwright.visual.config.ts` + functional-config `testIgnore` + `test:e2e:visual` script + `.gitignore` snapshot entry + 2 mask test-hooks (`live-time-display`, `kds-board`) (VISUAL-01, VISUAL-03)
-- [ ] 34-02-PLAN.md — Wave 1: `e2e/visual/45-visual-baseline.spec.ts` (17 admin routes + bartender/manager subsets, masked, denied-route URL asserts) + seed baseline + two-run zero-diff gate + human eyeball (VISUAL-02, VISUAL-03)
+- [x] 34-02-PLAN.md — Wave 1: `e2e/visual/45-visual-baseline.spec.ts` (17 admin routes + bartender/manager subsets, masked, denied-route URL asserts) + seed baseline + two-run zero-diff gate + human eyeball (VISUAL-02, VISUAL-03)
 
 **Success Criteria:**
 

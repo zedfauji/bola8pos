@@ -54,13 +54,16 @@ coverage:
     human_judgment: false
   - id: D3
     description: "Baseline PNGs correctly show the standardized post-Phase-33.1 UI (not a broken/blank/half-loaded render frozen as 'correct') — this is the phase's Manual-Only verification per VALIDATION.md, since --update-snapshots always 'passes' by definition"
-    verification: []
+    verification:
+      - kind: other
+        ref: "Human review of e2e/visual/45-visual-baseline.spec.ts-snapshots/ (43 PNGs) — user response: \"Checked and confirmed i could see all the pNGs\""
+        status: pass
     human_judgment: true
-    rationale: "A human must eyeball the initial baseline once — automation cannot distinguish a genuinely-correct render from a plausible-looking-but-wrong one (this plan already caught and fixed one class of wrong render — blank pages — via its own spot-check; a human pass is still required per VALIDATION.md's explicit Manual-Only designation before the baseline is trusted)"
+    rationale: "A human must eyeball the initial baseline once — automation cannot distinguish a genuinely-correct render from a plausible-looking-but-wrong one (this plan already caught and fixed one class of wrong render — blank pages — via its own spot-check; a human pass is still required per VALIDATION.md's explicit Manual-Only designation before the baseline is trusted). Approved."
 
-duration: ~50min (through Task 2)
+duration: ~55min
 completed: 2026-07-14
-status: checkpoint-pending
+status: complete
 ---
 
 # Phase 34 Plan 02: Visual Baseline Spec + Seeded Local Baseline Summary
@@ -69,9 +72,9 @@ status: checkpoint-pending
 
 ## Performance
 
-- **Duration:** ~50 min (through Task 2; Task 3 is a blocking human-verify checkpoint)
-- **Completed (Tasks 1-2):** 2026-07-14
-- **Tasks:** 2 of 3 (Task 3 is the blocking checkpoint below)
+- **Duration:** ~55 min
+- **Completed:** 2026-07-14
+- **Tasks:** 3 of 3
 - **Files modified:** 2 (1 created — the spec; 1 modified — `.gitignore`)
 
 ## Accomplishments
@@ -86,8 +89,9 @@ Each task was committed atomically:
 
 1. **Task 1: Write the visual-baseline spec** - `70c7f4b` (feat)
 2. **Task 2: Seed the local baseline and prove the two-run zero-diff gate** - `55470bc` (fix — toast locator + gitignore), `e2986e1` (fix — content-ready wait, the actual root-cause fix)
+3. **Task 3: Human eyeball of the seeded baseline PNGs** - blocking `checkpoint:human-verify`, no code commit. Checkpoint summary committed at `32bed38`. **Approved** — user response: "Checked and confirmed i could see all the pNGs" (reviewed all 43 PNGs under `e2e/visual/45-visual-baseline.spec.ts-snapshots/`).
 
-_Note: no plan-metadata commit yet — this SUMMARY/STATE commit follows below. ROADMAP.md update is deferred to full plan completion (post-Task-3) per this plan's checkpoint status._
+This SUMMARY/STATE/ROADMAP finalization is committed separately as the plan-metadata commit below.
 
 ## Files Created/Modified
 - `e2e/visual/45-visual-baseline.spec.ts` - the baseline capture spec: route×role matrix, per-route masking, seed helpers reused from `e2e/helpers/supabase.ts`, `waitForPageReady()` content-readiness helper
@@ -141,8 +145,17 @@ None - no external service configuration required. The seeded baseline is local-
 
 ## Next Phase Readiness
 
-Tasks 1 and 2 are complete: the spec exists, lists correctly under the isolated visual config, and the local baseline is seeded, verified content-correct via spot-check, and proven stable across two consecutive runs. **Task 3 is a blocking `checkpoint:human-verify`** — a human must eyeball the full 43-PNG baseline once (not just this agent's spot-check) before it is trusted as the canonical baseline, per VALIDATION.md's Manual-Only designation (`--update-snapshots` always "passes" by definition). STATE.md/ROADMAP.md progress-tracking updates and the final plan-metadata commit are deferred until Task 3's approval closes out the plan.
+All 3 tasks complete: the spec exists, lists correctly under the isolated visual config, the local baseline is seeded and proven stable across two consecutive zero-diff runs, and a human has eyeballed the full 43-PNG baseline and approved it (D3, VISUAL-02, VISUAL-03 all satisfied). Phase 34 (visual-regression-baseline) is now complete — this was its only remaining plan.
+
+## Self-Check: PASSED
+
+- FOUND: `e2e/visual/45-visual-baseline.spec.ts`
+- FOUND: `e2e/visual/45-visual-baseline.spec.ts-snapshots/` (43 PNGs)
+- FOUND commit `70c7f4b` (feat — spec)
+- FOUND commit `55470bc` (fix — toast locator + gitignore)
+- FOUND commit `e2986e1` (fix — content-ready wait)
+- FOUND commit `32bed38` (docs — checkpoint summary)
 
 ---
 *Phase: 34-visual-regression-baseline*
-*Completed: 2026-07-14 (Tasks 1-2; Task 3 pending)*
+*Completed: 2026-07-14*
