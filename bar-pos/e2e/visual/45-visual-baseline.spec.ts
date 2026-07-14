@@ -12,6 +12,14 @@
  * Seeding: direct Supabase service-role inserts via getServiceClient(), same
  * pattern as e2e/16-table-status.spec.ts. The repo's dev-seed npm scripts are
  * broken (D-14) — this spec does not depend on them.
+ *
+ * Known flake: if `npm run dev` is cold-starting (this suite's own first request
+ * of the session), `waitForPageReady()` can occasionally stabilize on a loading
+ * skeleton instead of real content on a TanStack-Query-heavy route (seen on
+ * /pos). Re-run once before treating a failure as a real regression — a second
+ * run against the already-warm dev server has been reliable. If a retry still
+ * fails, that's a real diff (or `waitForPageReady()` needs to check for absence
+ * of a skeleton marker, not just stable text length) — don't just retry forever.
  */
 
 import type { Locator } from '@playwright/test';
