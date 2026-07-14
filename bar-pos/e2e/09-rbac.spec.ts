@@ -259,15 +259,15 @@ test.describe('Phase 13: Permission Matrix', () => {
     // Permission Matrix heading visible
     await expect(page.getByText('Permission Matrix')).toBeVisible({ timeout: 20_000 });
 
-    // Table has 22 action rows — STAFF_ACTIONS has 22 items
+    // Table has 24 action rows — STAFF_ACTIONS has 24 items
     // Each row has an action label in the first column
     await expect(page.getByText('create_order').first()).toBeVisible();
     await expect(page.getByText('manage_staff').first()).toBeVisible();
     await expect(page.getByText('view_kds').first()).toBeVisible();
 
-    // Switch elements present (22 rows × 4 roles = 88 switches)
+    // Switch elements present (24 rows × 4 roles = 96 switches)
     const switches = page.getByRole('switch');
-    await expect(switches).toHaveCount(88);
+    await expect(switches).toHaveCount(96);
 
     expect(consoleErrors).toHaveLength(0);
   });
@@ -285,7 +285,7 @@ test.describe('Phase 13: Permission Matrix', () => {
     await expect(page.getByText('Permission Matrix')).toBeVisible({ timeout: 20_000 });
 
     // Find the 'kitchen / view_kds' switch (kitchen has view_kds by default)
-    const kitchenViewKdsSwitch = page.getByRole('switch', { name: 'Kitchen can view_kds' });
+    const kitchenViewKdsSwitch = page.getByRole('switch', { name: 'Kitchen can view_kds', exact: true });
     await expect(kitchenViewKdsSwitch).toBeChecked();
 
     // Toggle it off
