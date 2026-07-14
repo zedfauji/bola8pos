@@ -885,6 +885,7 @@ Plans:
 ### Phase 33.1: E2E Test/RBAC Drift Fixes (INSERTED)
 
 **Goal:** Fix pre-existing test/seed drift surfaced by Phase 33 verification — none of the following files are in Phase 33's scope:
+
 - Toast-stacking timing bug in `src/app/App.tsx`'s Toaster causing `e2e/06-transfer.spec.ts` T4/T5 to fail
 - Aria-label collision in `src/widgets/OrderPanel/ActiveTabSelector.tsx`/`OrderPanel.tsx` causing `e2e/09-rbac.spec.ts` T7 to fail
 - `PermissionMatrix.tsx` switch-count/action-set drift (seed vs. test expectations) causing `e2e/09-rbac.spec.ts` T-RP-01/T-RP-02 to fail
@@ -895,8 +896,12 @@ Closes Phase 33's outstanding Success Criterion 3 gap (see `.planning/phases/33-
 **Plans:** 2 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 33.1-01-PLAN.md — Land the 3 drift fixes: 06-transfer T4 exact-toast text (D-01/D-02), ActiveTabSelector static aria-label + OrderPanel.tsx deletion (D-04/D-05/D-06), 09-rbac 88→96 count + exact locator (D-07)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 33.1-02-PLAN.md — Phase gate (06-transfer x2 isolation + 5-spec SC3 gate + full unit suite, D-03) and COMPONENT-04 traceability annotation (D-08)
 
 ### Phase 34: Visual Regression Baseline
