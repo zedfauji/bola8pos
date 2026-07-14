@@ -6,15 +6,15 @@ current_phase: 33.1
 current_phase_name: e2e-rbac-drift-fixes
 status: executing
 stopped_at: Phase 33.1 context gathered
-last_updated: "2026-07-14T03:07:32.191Z"
+last_updated: "2026-07-14T03:54:45.258Z"
 last_activity: 2026-07-14
 last_activity_desc: Phase 33.1 execution started
 progress:
   total_phases: 36
-  completed_phases: 21
+  completed_phases: 22
   total_plans: 147
-  completed_plans: 155
-  percent: 58
+  completed_plans: 156
+  percent: 61
 ---
 
 # Session State
@@ -199,6 +199,7 @@ Last activity: 2026-07-14 — Phase 33.1 execution started
 - [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: Toast stacking is correct sonner UX (4s lifetime, no id dedup) — fixed via test-side exact-text scoping in 06-transfer.spec.ts T4, no App.tsx/toast.success() changes
 - [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: Deleted dead src/widgets/OrderPanel/OrderPanel.tsx outright (confirmed unimported anywhere in src/) instead of mirroring the aria-label fix into unused code
 - [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: 09-rbac.spec.ts PermissionMatrix drift (88->96) was a stale test expectation only — rbac.ts/PermissionMatrix.tsx untouched, already matched by passing PermissionMatrix.test.tsx
+- [Phase 33.1-e2e-rbac-drift-fixes 02]: e2e/09-rbac.spec.ts confirms Wave 1's Root Cause 2/3 fixes are correct (T7 skips cleanly, T-RP-01/T-RP-02 pass); e2e/06-transfer.spec.ts's D-03 gate (5/5 twice) could not be confirmed — T4/T5 fail identically on both isolated runs with a test-timeout/context-closed pattern traced to execution-sandbox network/browser latency, not a code defect (page snapshots at failure time show correct, clickable UI state)
 
 ## Performance Metrics
 
@@ -251,7 +252,7 @@ Last activity: 2026-07-14 — Phase 33.1 execution started
 
 ## Last Session
 
-- **Stopped at:** Completed 33.1-01-PLAN.md
+- **Stopped at:** Blocked: 33.1-02 gate not verified (env test latency) — see 33.1-02-SUMMARY.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -264,9 +265,10 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 ### Blockers
 
 - Manual follow-up: run e2e/15-home-navigation.spec.ts, e2e/16-table-status.spec.ts, e2e/17-payment-pane.spec.ts once port 1420 is freed of the stray non-Vite process occupying it
+- Phase 33.1 Plan 02: e2e/06-transfer.spec.ts D-03 gate (5/5 twice, isolated) not confirmed -- both isolated runs failed on T4/T5 with 'Test timeout exceeded' + 'Target page/context/browser closed', traced to execution-sandbox network/browser latency (not a code defect; page snapshots show correct UI state at failure time). Wave 1's other 2 fixes ARE confirmed (09-rbac T7 skips cleanly, T-RP-01/T-RP-02 pass). Recommend re-running the gate in a lower-latency environment before Task 2 (REQUIREMENTS.md COMPONENT-04 annotation).
 
 ## Session
 
-**Last session:** 2026-07-14T03:07:32.181Z
+**Last session:** 2026-07-14T03:54:39.625Z
 **Stopped at:** Phase 33.1 context gathered
-**Resume file:** None
+**Resume file:** .planning/phases/33.1-e2e-rbac-drift-fixes/33.1-02-SUMMARY.md
