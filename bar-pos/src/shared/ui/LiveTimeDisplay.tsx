@@ -34,6 +34,7 @@ export function LiveTimeDisplay({ className }: LiveTimeDisplayProps) {
 
   return (
     <span
+      data-testid="live-time-display"
       className={cn('text-muted-foreground text-sm tabular-nums', className)}
       suppressHydrationWarning
     >

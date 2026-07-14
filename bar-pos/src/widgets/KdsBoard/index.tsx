@@ -235,7 +235,7 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
   }
 
   return (
-    <div className="grid gap-6 p-6 md:grid-cols-2">
+    <div data-testid="kds-board" className="grid gap-6 p-6 md:grid-cols-2">
       <section>
         <h2 className="mb-3 text-lg font-semibold">
           Pending
