@@ -890,13 +890,14 @@ Plans:
 - `PermissionMatrix.tsx` switch-count/action-set drift (seed vs. test expectations) causing `e2e/09-rbac.spec.ts` T-RP-01/T-RP-02 to fail
 
 Closes Phase 33's outstanding Success Criterion 3 gap (see `.planning/phases/33-payment-critical-page-sweep-isolated/33-VERIFICATION.md`).
-**Requirements**: TBD
+**Requirements**: TBD (closes COMPONENT-04's E2E-gate clause — annotated in REQUIREMENTS.md per D-08, no new ID)
 **Depends on:** Phase 33
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 33.1 to break down)
+- [ ] 33.1-01-PLAN.md — Land the 3 drift fixes: 06-transfer T4 exact-toast text (D-01/D-02), ActiveTabSelector static aria-label + OrderPanel.tsx deletion (D-04/D-05/D-06), 09-rbac 88→96 count + exact locator (D-07)
+- [ ] 33.1-02-PLAN.md — Phase gate (06-transfer x2 isolation + 5-spec SC3 gate + full unit suite, D-03) and COMPONENT-04 traceability annotation (D-08)
 
 ### Phase 34: Visual Regression Baseline
 
