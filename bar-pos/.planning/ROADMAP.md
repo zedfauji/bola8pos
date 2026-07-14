@@ -61,7 +61,7 @@ App-wide UI consistency pass enforcing existing shadcn/Tailwind conventions acro
 - [x] **Phase 29: UI Drift Audit** — File-mapped inventory of raw buttons/inputs, hardcoded colors, arbitrary-value spacing across all 17 routes (completed 2026-07-10)
 - [x] **Phase 30: Shared Shell & Primitive Extension** — Every route on one `PageContainer` shell; dead `AppShell`/`AppNav` removed; `CLAUDE.md` routes table corrected (completed 2026-07-10)
 - [x] **Phase 31: Component, Token & Spacing Consistency Sweep** — Non-payment pages use `shared/ui` primitives + Tailwind tokens + spacing scale (completed 2026-07-11)
-- [ ] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings
+- [x] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings (completed 2026-07-13)
 - [ ] **Phase 33: Payment-Critical Page Sweep (Isolated)** — POS/payments/split/refund/tip surfaces standardized, zero behavior change, gated by existing E2E specs
 - [ ] **Phase 34: Visual Regression Baseline** — Isolated Playwright visual-diff config + post-fix screenshot baselines for all 17 routes
 - [ ] **Phase 35: Guardrails — Tokens Doc & Drift Lint** — Design tokens reference doc + drift-detection lint rule, added only after conformance
@@ -806,7 +806,8 @@ Plans:
 **Depends on:** Phase 30
 **Plans:** 7/7 plans complete
 **UI hint**: yes
-Plans:
+
+Plans:
 **Wave 1**
 
 - [x] 31-01-PLAN.md — Wave 1: agent-chat FAB/chips/mic-send + 3 text-link buttons -> Button (COMPONENT-01, D-03)
@@ -835,8 +836,14 @@ Plans:
 **Goal:** Every interactive element on operational and realtime pages (pool-tables, pool-table-status, inventory, kitchen-prep, kds, kds-bar) meets the app's touch-target floor and shows a visible, keyboard-navigable focus state — sizing/contrast-only changes, no control reordering that would break muscle memory.
 **Requirements:** TOUCH-01, TOUCH-02, TOUCH-03, FOCUS-01, FOCUS-02, FOCUS-03
 **Depends on:** Phase 31
-**Plans:** Not yet planned
+**Plans:** 3/3 plans complete
 **UI hint**: yes
+
+Plans:
+
+- [x] 32-01-PLAN.md — Shared primitives: focusEmphasis CVA variant + ConfirmDialog confirmClassName passthrough + 44px SearchInput clear button + unit scaffolds (Wave 1) (FOCUS-01, FOCUS-02, TOUCH-01, TOUCH-02)
+- [x] 32-02-PLAN.md — Touch-target rollout: raw/icon/native Button conversions across pool-tables/kds/inventory + 8px grid-gap audit (Wave 1) (TOUCH-01, TOUCH-02, TOUCH-03)
+- [x] 32-03-PLAN.md — Destructive 72px/emphasized-ring wiring (Stop-session + Stop-and-Move confirms) + e2e/44-focus-tab-order.spec.ts + CLAUDE.md docs (Wave 2) (TOUCH-02, FOCUS-02, FOCUS-03)
 
 **Success Criteria:**
 
@@ -853,8 +860,19 @@ Plans:
 **Goal:** Standardize POS, payments, split-payment, refund, and tip-distribution surfaces to the shell/token/component/touch/focus conventions established in Phases 30-32 — markup/class-level swaps only, zero prop/handler/validation behavior change, one page/widget per PR, verified against the existing E2E suite.
 **Requirements:** COMPONENT-04
 **Depends on:** Phase 32
-**Plans:** Not yet planned
+**Plans:** 8 plans (2 waves)
 **UI hint**: yes
+
+Plans:
+
+- [ ] 33-01-PLAN.md — pos/index.tsx panel toggle raw button -> POSButton ghost/44px (Wave 1) (COMPONENT-04)
+- [ ] 33-02-PLAN.md — CartPanel Clear Cart raw button -> POSButton ghost/44px (Wave 1) (COMPONENT-04)
+- [ ] 33-03-PLAN.md — PaymentForm: Process-Payment + Remove-payment-N focusEmphasis=high, Reset-to-computed -> POSButton (Wave 1) (COMPONENT-04)
+- [ ] 33-04-PLAN.md — TabPaymentCard root button -> POSButton large (visual-parity overrides) (Wave 1) (COMPONENT-04)
+- [ ] 33-05-PLAN.md — RefundSheet footer Button -> POSButton (Request approval xl/high, Close refund large) (Wave 1) (COMPONENT-04)
+- [ ] 33-06-PLAN.md — SplitTabSheet: Confirm Split + Remove check xl/high, Add check/Add person -> POSButton large (Wave 1) (COMPONENT-04)
+- [ ] 33-07-PLAN.md — VoidOrderDialog confirmClassName 72px/high-ring (Wave 1) (COMPONENT-04)
+- [ ] 33-08-PLAN.md — Phase gate: static+unit regression + 5 required E2E gate specs + CLAUDE.md (Wave 2) (COMPONENT-04)
 
 **Success Criteria:**
 
@@ -863,6 +881,22 @@ Plans:
 3. `05-payments`, `41-split-payment`, `42-tip-distribution`, `06-transfer`, and `09-rbac` E2E specs pass unchanged after every payment-surface commit
 
 ---
+
+### Phase 33.1: E2E Test/RBAC Drift Fixes (INSERTED)
+
+**Goal:** Fix pre-existing test/seed drift surfaced by Phase 33 verification — none of the following files are in Phase 33's scope:
+- Toast-stacking timing bug in `src/app/App.tsx`'s Toaster causing `e2e/06-transfer.spec.ts` T4/T5 to fail
+- Aria-label collision in `src/widgets/OrderPanel/ActiveTabSelector.tsx`/`OrderPanel.tsx` causing `e2e/09-rbac.spec.ts` T7 to fail
+- `PermissionMatrix.tsx` switch-count/action-set drift (seed vs. test expectations) causing `e2e/09-rbac.spec.ts` T-RP-01/T-RP-02 to fail
+
+Closes Phase 33's outstanding Success Criterion 3 gap (see `.planning/phases/33-payment-critical-page-sweep-isolated/33-VERIFICATION.md`).
+**Requirements**: TBD
+**Depends on:** Phase 33
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 33.1 to break down)
 
 ### Phase 34: Visual Regression Baseline
 
