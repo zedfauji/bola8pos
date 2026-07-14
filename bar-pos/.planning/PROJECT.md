@@ -17,7 +17,7 @@ Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall loca
 - Design tokens/spacing/color discipline against the existing Tailwind theme
 - Layout/navigation shell consistency across all 12 routes
 - Accessibility + touch-target consistency (focus states, tap sizes, keyboard nav)
-- Playwright screenshot-diff visual regression suite
+- ✓ Playwright screenshot-diff visual regression suite — Phase 34 (isolated `playwright.visual.config.ts`, 43 masked baselines across admin/bartender/manager, manual-only two-run zero-diff gate)
 
 ## Requirements
 
@@ -103,4 +103,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-14 — Phase 33.1 complete: closed Phase 33's outstanding E2E gate (COMPONENT-04), fixed two latent test bugs in 06-transfer/42-tip-distribution*
+*Last updated: 2026-07-14 — Phase 34 complete: isolated Playwright visual-regression suite (`playwright.visual.config.ts`) with 43 masked local-only baselines across admin/bartender/manager roles (17/11/14 routes), two-consecutive-run zero-diff gate verified*
