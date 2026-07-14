@@ -42,8 +42,15 @@ test.describe('Tip Distribution Config', () => {
     await page.getByRole('tab', { name: 'Tip Split' }).click();
     await expect(page.getByRole('heading', { name: 'Tip Split' })).toBeVisible({ timeout: 20_000 });
 
+    // Clear before filling: a leftover 50/30/20 from a prior run would make .fill('50')
+    // a same-value no-op — number inputs don't dispatch `input` when the value is
+    // unchanged, so React's onChange (and the form's dirty flag) never fires. Clearing
+    // first guarantees a real value change regardless of the row's starting state.
+    await page.locator('#tip-split-floor').fill('');
     await page.locator('#tip-split-floor').fill('50');
+    await page.locator('#tip-split-bar').fill('');
     await page.locator('#tip-split-bar').fill('30');
+    await page.locator('#tip-split-kitchen').fill('');
     await page.locator('#tip-split-kitchen').fill('20');
     await page.getByRole('button', { name: /save tip split/i }).click();
     await expect(page.getByText(/tip split saved/i)).toBeVisible({ timeout: 15_000 });
