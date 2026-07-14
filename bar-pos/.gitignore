@@ -58,8 +58,9 @@ tsc_errors.txt
 fix_lint.cjs
 docs/
 tickets/
-.planning/
 
 # Markdown docs (CLAUDE.md is the exception — it's project instructions)
 *.md
 !CLAUDE.md
+# .planning/ is GSD's tracked planning-doc tree — not scratch, not excluded from *.md above
+!.planning/**
