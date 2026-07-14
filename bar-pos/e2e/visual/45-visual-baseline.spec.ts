@@ -155,9 +155,37 @@ function masksFor(page: Page, route: string): Locator[] {
 
 type RouteSpec = { path: string; slug: string };
 
+/**
+ * Wait for the SPA to have actually painted route content before screenshotting.
+ * `gotoAuthed()` only waits for `domcontentloaded`; every route component is
+ * `React.lazy()` + `Suspense` and fetches its own data via TanStack Query, so a
+ * screenshot taken immediately after navigation reliably captures a blank frame
+ * (confirmed empirically — every route lacking a preceding `toBeVisible()`
+ * assertion seeded as a fully blank PNG). How long that takes varies a lot per
+ * route (Reports/Settings/RBAC's heavier bundles are noticeably slower than
+ * POS/Inventory), so a single fixed delay under- or over-waits depending on the
+ * route — poll `document.body`'s text length until it stops changing instead.
+ * `networkidle` is not used here because the Supabase Realtime WebSocket retries
+ * continuously in this dev environment and would make every wait time out at
+ * its own timeout instead of resolving.
+ */
+async function waitForPageReady(page: Page): Promise<void> {
+  await page.waitForLoadState('load', { timeout: 15_000 }).catch(() => undefined);
+  let previousLength = -1;
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const length = await page
+      .evaluate(() => document.body.innerText.trim().length)
+      .catch(() => 0);
+    if (length > 0 && length === previousLength) break;
+    previousLength = length;
+    await page.waitForTimeout(500);
+  }
+  await page.evaluate(() => document.fonts.ready);
+}
+
 async function captureRoute(page: Page, role: string, route: RouteSpec): Promise<void> {
   await gotoAuthed(page, route.path);
-  await page.evaluate(() => document.fonts.ready);
+  await waitForPageReady(page);
   await expect.soft(page).toHaveScreenshot(`${role}-${route.slug}.png`, {
     fullPage: true,
     mask: masksFor(page, route.path),
@@ -254,7 +282,7 @@ test.describe.serial('Visual regression baseline (Phase 34)', () => {
     for (const role of roles) {
       await loginAs(page, role);
       await gotoAuthed(page, '/pool-tables');
-      await page.evaluate(() => document.fonts.ready);
+      await waitForPageReady(page);
       await expect.soft(page).toHaveScreenshot(`${role}-pool-tables.png`, {
         fullPage: true,
         mask: [toastMask(page)],
