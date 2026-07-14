@@ -909,7 +909,11 @@ Plans:
 **Goal:** Stand up a Playwright visual-regression suite, isolated from the functional E2E config, and capture screenshot baselines for all 17 routes only now that the audit/shell/token/component/touch/focus fixes (Phases 29-33) are complete — a pre-fix baseline would have frozen the current inconsistencies.
 **Requirements:** VISUAL-01, VISUAL-02, VISUAL-03
 **Depends on:** Phase 33
-**Plans:** Not yet planned
+**Plans:** 2 plans
+
+Plans:
+- [ ] 34-01-PLAN.md — Wave 0 harness: isolated `playwright.visual.config.ts` + functional-config `testIgnore` + `test:e2e:visual` script + `.gitignore` snapshot entry + 2 mask test-hooks (`live-time-display`, `kds-board`) (VISUAL-01, VISUAL-03)
+- [ ] 34-02-PLAN.md — Wave 1: `e2e/visual/45-visual-baseline.spec.ts` (17 admin routes + bartender/manager subsets, masked, denied-route URL asserts) + seed baseline + two-run zero-diff gate + human eyeball (VISUAL-02, VISUAL-03)
 
 **Success Criteria:**
 
