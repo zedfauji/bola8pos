@@ -140,10 +140,14 @@ test.describe('Tab + Pool Transfer', () => {
       await dlg.getByRole('button', { name: 'Transfer' }).click();
       // If the RPC guards duplicate table occupancy an error toast appears; if not the
       // transfer silently succeeds — both are acceptable, so this is a soft check only.
-      await page
+      const conflictToastShown = await page
         .getByText(/already.*occupied|table.*taken|conflict|duplicate/i)
         .isVisible({ timeout: 4_000 })
         .catch(() => false);
+      test.info().annotations.push({
+        type: 'note',
+        description: `duplicate-table conflict toast shown: ${conflictToastShown}`,
+      });
     }
     await logout(page);
   });

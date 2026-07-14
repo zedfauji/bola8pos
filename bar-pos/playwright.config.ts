@@ -39,7 +39,7 @@ export default defineConfig({
     headless: false,
     slowMo,
     actionTimeout: fastE2e ? 10_000 : 15_000,
-    navigationTimeout: fastE2e ? 15_000 : undefined,
+    navigationTimeout: fastE2e ? 15_000 : 30_000,
     viewport: { width: 1280, height: 800 },
     launchOptions: {
       headless: false,
