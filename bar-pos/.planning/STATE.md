@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
 current_phase: 34
-current_phase_name: Visual Regression Baseline
+current_phase_name: visual-regression-baseline
 status: executing
 stopped_at: Phase 33.1 context gathered
-last_updated: "2026-07-14T19:47:50.080Z"
+last_updated: "2026-07-14T20:23:30.260Z"
 last_activity: 2026-07-14
-last_activity_desc: Phase 33.1 complete, transitioned to Phase 34
+last_activity_desc: Phase 34 execution started
 progress:
   total_phases: 36
   completed_phases: 22
-  total_plans: 147
-  completed_plans: 156
+  total_plans: 149
+  completed_plans: 157
   percent: 61
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 34 — Visual Regression Baseline
-Plan: Not started
+Phase: 34 (visual-regression-baseline) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-07-14 — Phase 33.1 complete, transitioned to Phase 34
+Last activity: 2026-07-14 — Phase 34 execution started
 
 ## Session Log
 
@@ -200,6 +200,7 @@ Last activity: 2026-07-14 — Phase 33.1 complete, transitioned to Phase 34
 - [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: Deleted dead src/widgets/OrderPanel/OrderPanel.tsx outright (confirmed unimported anywhere in src/) instead of mirroring the aria-label fix into unused code
 - [Phase ?]: [Phase 33.1-e2e-rbac-drift-fixes 01]: 09-rbac.spec.ts PermissionMatrix drift (88->96) was a stale test expectation only — rbac.ts/PermissionMatrix.tsx untouched, already matched by passing PermissionMatrix.test.tsx
 - [Phase 33.1-e2e-rbac-drift-fixes 02]: e2e/09-rbac.spec.ts confirms Wave 1's Root Cause 2/3 fixes are correct (T7 skips cleanly, T-RP-01/T-RP-02 pass); e2e/06-transfer.spec.ts's D-03 gate (5/5 twice) could not be confirmed — T4/T5 fail identically on both isolated runs with a test-timeout/context-closed pattern traced to execution-sandbox network/browser latency, not a code defect (page snapshots at failure time show correct, clickable UI state)
+- [Phase ?]: [Phase 34-visual-regression-baseline 34-01]: playwright.visual.config.ts built from scratch, never imports/spreads playwright.config.ts -- every use/project field diverges explicitly (headless, bundled Chromium, no slowMo/channel/globalTeardown)
 
 ## Performance Metrics
 
@@ -249,6 +250,7 @@ Last activity: 2026-07-14 — Phase 33.1 complete, transitioned to Phase 34
 | Phase 30-shared-shell-primitive-extension P01 | 10min | 2 tasks | 3 files |
 | Phase 30-shared-shell-primitive-extension P05 | 15min | 3 tasks | 2 files |
 | Phase 33.1-e2e-rbac-drift-fixes P01 | 25min | 3 tasks | 5 files |
+| Phase 34 P01 | 15min | 2 tasks | 6 files |
 
 ## Last Session
 
@@ -269,6 +271,6 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-14T19:47:50.071Z
+**Last session:** 2026-07-14T20:22:46.392Z
 **Stopped at:** Phase 33.1 context gathered
 **Resume file:** .planning/phases/34-visual-regression-baseline/34-UI-SPEC.md

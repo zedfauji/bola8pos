@@ -41,9 +41,9 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 
 ### Visual
 
-- [ ] **VISUAL-01**: A Playwright visual-regression config exists, isolated from the existing functional E2E config (headless, bundled Chromium, no `slowMo`)
+- [x] **VISUAL-01**: A Playwright visual-regression config exists, isolated from the existing functional E2E config (headless, bundled Chromium, no `slowMo`)
 - [ ] **VISUAL-02**: Screenshot baselines are captured for all 17 routes, only after the audit/shell/component/token/touch/focus fixes are complete (not before — a pre-fix baseline would freeze current inconsistencies)
-- [ ] **VISUAL-03**: Dynamic/live regions (timers, realtime KDS boards, toasts) are masked or excluded from diffing to avoid flaky screenshots
+- [x] **VISUAL-03**: Dynamic/live regions (timers, realtime KDS boards, toasts) are masked or excluded from diffing to avoid flaky screenshots
 
 ### Docs
 
@@ -87,9 +87,9 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 | FOCUS-02 | Phase 32 | Pending |
 | FOCUS-03 | Phase 32 | Pending |
 | COMPONENT-04 | Phase 33 (E2E gate closed by Phase 33.1) | Complete |
-| VISUAL-01 | Phase 34 | Pending |
+| VISUAL-01 | Phase 34 | Complete |
 | VISUAL-02 | Phase 34 | Pending |
-| VISUAL-03 | Phase 34 | Pending |
+| VISUAL-03 | Phase 34 | Complete |
 | DOCS-01 | Phase 35 | Pending |
 | LINT-01 | Phase 35 | Pending |
 
