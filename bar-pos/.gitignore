@@ -38,6 +38,7 @@ e2e-results/
 e2e-blob-reports/
 playwright-report/
 verification-artifacts/
+e2e/visual/**/*-snapshots/
 
 # Local lint/type dumps (regenerate anytime)
 eslint-report.json

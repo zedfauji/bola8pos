@@ -27,6 +27,7 @@
     "setup:dev": "npm run setup:dev-users && npm run seed:dev",
     "test:e2e": "playwright test",
     "test:e2e:report": "playwright show-report",
+    "test:e2e:visual": "playwright test --config=playwright.visual.config.ts",
     "index-codebase": "tsx scripts/indexCodebase.ts"
   },
   "dependencies": {

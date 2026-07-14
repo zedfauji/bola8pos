@@ -15,6 +15,7 @@ const webServerTimeout = fastE2e ? 75_000 : 120_000;
 export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e-results',
+  testIgnore: /visual\//,
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
