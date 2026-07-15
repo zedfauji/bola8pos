@@ -1,33 +1,29 @@
 ---
 phase: 33-payment-critical-page-sweep-isolated
-verified: 2026-07-13T18:35:00Z
-status: gaps_found
-score: 6/8 must-haves verified
+verified: 2026-07-15T00:00:00Z
+status: human_needed
+score: 8/8 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
-gaps:
-  - truth: "05-payments, 41-split-payment, 42-tip-distribution, 06-transfer, and 09-rbac E2E specs pass unchanged after every payment-surface commit (ROADMAP Success Criterion 3)"
-    status: partial
-    reason: "3 of 5 required gate specs are fully green in isolated runs (05-payments 8/8, 41-split-payment 3/3, 42-tip-distribution 1/1). The other 2 have reproducible failures: 06-transfer.spec.ts (2 of 5 tests fail, reproduced identically in two independent isolated runs) and 09-rbac.spec.ts (3 of 28 tests fail, reproduced identically to 33-05's and 33-08's own SUMMARY findings). Every failing test's root cause traces to code that predates Phase 33 and was never touched by any of the phase's 7 commits (confirmed via git diff --stat and per-file git log)."
-    artifacts:
-      - path: "e2e/06-transfer.spec.ts"
-        issue: "T4 ('transfer tab to already-occupied table') fails with a Playwright strict-mode violation: getByText(/tab opened/i) resolves to 2 stacked toasts ('Tab opened for Transfer Conflict A' and '...B') instead of 1, because the first toast has not auto-dismissed before the second tab-creation toast fires. T5 ('transfer tab with pool session') then fails with 'Target page, context or browser has been closed' — cascading from the same run. Root cause is in the sonner Toaster (src/app/App.tsx, untouched) and the open-tab/transfer-tab flow (not among Phase 33's 7 files); reproduced in 2 separate isolated `npx playwright test e2e/06-transfer.spec.ts` runs with identical errors."
-      - path: "e2e/09-rbac.spec.ts"
-        issue: "T7 ('admin deletes a tab') fails on an ambiguous getByRole('button', {name: /delete tab/i}) match — a sibling 'Split tab {name}' button's aria-label incidentally contains the substring 'Delete Tab' when the seeded tab is named 'RBAC Delete Tab'. Root cause is in src/widgets/OrderPanel/ActiveTabSelector.tsx / OrderPanel.tsx (last touched at the initial commit, never in Phase 33's scope). T-RP-01/T-RP-02 fail because the live role_permissions action set has grown (88 expected vs 96 actual switches; an ambiguous 'view_kds'/'view_kds_bar' switch-name match) — root cause is src/widgets/RBACDashboard/PermissionMatrix.tsx (last touched Phase 13, never in Phase 33's scope) plus RBAC seed drift from later features."
-    missing:
-      - "None of the fixes required to make these 2 specs fully green touch any of Phase 33's 7 in-scope files — this is pre-existing test/seed drift, not a gap in this phase's own deliverable. Flagged per the escalation-gate pattern for a human decision: either (a) accept an override for this must-have given the evidence below, or (b) route the ActiveTabSelector/OrderPanel aria-label collision, the PermissionMatrix switch-count drift, and the toast-stacking timing issue in 06-transfer to a follow-up bug-fix task (none of Phase 34/35's roadmap goals cover this)."
+re_verification:
+  previous_status: gaps_found
+  previous_score: 6/8
+  gaps_closed:
+    - "05-payments, 41-split-payment, 42-tip-distribution, 06-transfer, and 09-rbac E2E specs pass unchanged after every payment-surface commit (ROADMAP Success Criterion 3) — closed by Phase 33.1 (e2e-rbac-drift-fixes), which root-caused and fixed the actual defects (a dead post-select drawer-Close click + unbounded actionTimeout in 06-transfer.spec.ts; a stale aria-label/switch-count expectation in ActiveTabSelector.tsx/09-rbac.spec.ts; a non-idempotent form-fill in 42-tip-distribution.spec.ts). None of the fixes touched Phase 33's 7 in-scope files."
+  gaps_remaining: []
+  regressions: []
 human_verification:
-  - test: "Visual spot-check the 7 standardized surfaces (Process Payment / Refund confirm / Void confirm / Confirm Split render at 72px with a visibly thicker ring-4 focus ring; the POS panel toggle and Clear Cart/Reset-to-computed links keep their transparent/underlined look with no solid-primary fill; the TabPaymentCard renders left-aligned/full-width/bordered exactly as before)."
-    expected: "All listed visual properties match the pre-phase appearance except the documented touch-size/focus-ring upgrades — no unintended color/layout regression."
-    why_human: "Pixel-level visual parity (especially TabPaymentCard's CVA-override className rework) cannot be confirmed by grep/typecheck; this is the one PLAN (33-04) whose own threat model flags it as the highest visual-risk file in the phase."
+  - test: "Visual parity spot-check on the 7 standardized surfaces: open the POS page, a payment modal (single + split mode), the refund sheet, the split-tab sheet, and the void-order dialog. Tab to each of the upgraded controls with keyboard focus."
+    expected: "Process Payment / Refund confirm / Void confirm / Confirm Split render at a visibly taller (~72px) size with a noticeably thicker focus ring on keyboard focus; the POS panel toggle, Clear Cart, and Reset-to-computed keep their transparent/underlined look (no solid-color fill); the TabPaymentCard renders left-aligned, full-width, with a visible border when unselected — pixel-identical to pre-phase except the documented size/ring upgrades."
+    why_human: "Pixel-level CSS-cascade parity (especially TabPaymentCard's CVA-override rework) cannot be confirmed by grep or typecheck. Phase 34's visual-regression baseline (43 PNGs, human-approved) does NOT cover this: it captures whole-page route screenshots in their default/idle state (`/pos`, `/payments`, etc.) — it never opens the PaymentForm modal, RefundSheet, SplitTabSheet, or VoidOrderDialog, and never demonstrates a keyboard-focus (`:focus-visible`) ring state on any control. Confirmed by reading `e2e/visual/45-visual-baseline.spec.ts`'s route table (lines 213-248) and its `captureRoute()`/test-block structure (lines 198-358) — no `.click()` into any of the 7 surfaces' modal/sheet/dialog triggers, no keyboard `.focus()`/`Tab` sequence anywhere in the file. This item remains open."
 ---
 
 # Phase 33: Payment-Critical Page Sweep (Isolated) Verification Report
 
 **Phase Goal:** Standardize POS, payments, split-payment, refund, and tip-distribution surfaces to the shell/token/component/touch/focus conventions established in Phases 30-32 — markup/class-level swaps only, zero prop/handler/validation behavior change, one page/widget per PR, verified against the existing E2E suite.
-**Verified:** 2026-07-13T18:35:00Z
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Verified:** 2026-07-15T00:00:00Z
+**Status:** human_needed
+**Re-verification:** Yes — re-verified after Phase 33.1 closed the E2E gate gap
 
 ## Goal Achievement
 
@@ -35,94 +31,90 @@ human_verification:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Zero prop/handler/validation behavior change across all 7 swapped surfaces (ROADMAP SC1 / COMPONENT-04) | ✓ VERIFIED | Direct source read of all 7 files confirms every diff is a `className`/prop-only change (raw `<button>`/shadcn `Button` → `POSButton`, `touchSize`/`focusEmphasis`/`confirmClassName` additions). Every `onClick`, `disabled`, `aria-label`, `aria-pressed`, `data-testid` cited in each plan's must_haves is byte-identical in the current file. `npm run typecheck` shows only the 2 documented pre-existing errors (`tab/model/queries.ts`, `agent/rag.ts`) — 0 new. `npm run lint` exits 0. `PaymentForm.test.tsx` + `PaymentPane.test.tsx` + `VoidOrderDialog.test.tsx` — 39/39 pass. |
-| 2 | Each payment-critical surface lands as its own isolated commit/PR (ROADMAP SC2) | ✓ VERIFIED | `git show --stat` on all 7 commits (`3af2694`, `ed99bfd`, `46f1ae1`, `1ea478c`, `88b928f`, `9a647d4`, `1837e9c`) confirms each touches exactly one `src/` file. `git diff --stat` from the pre-phase commit (`c299049`) to `HEAD` shows exactly 7 files changed, matching the declared scope 1:1 — no D-01a out-of-scope file (`TabDrawer/`, `TipDistributionPanel/`, `TipDistributionSettingsTab.tsx`) appears in the diff. |
-| 3 | 05-payments, 41-split-payment, 42-tip-distribution, 06-transfer, 09-rbac E2E specs pass unchanged (ROADMAP SC3) | ✗ FAILED (partial) | Independently re-run live against Supabase: `05-payments` 8/8 pass; `41-split-payment` 3/3 pass (T1+T3 in-batch, T2 confirmed in isolation); `42-tip-distribution` 1/1 pass in isolation (fails only when run concurrently with another spec batch — confirmed live-Supabase test-data collision, not a code issue). `06-transfer` 3/5 pass — T4/T5 fail, reproduced identically in 2 separate isolated runs, root-caused to `src/app/App.tsx` (Toaster) + open-tab/transfer-tab flow, none of which are in the 7-file scope. `09-rbac` 23/28 pass — T7/T-RP-01/T-RP-02 fail, root-caused to `src/widgets/OrderPanel/ActiveTabSelector.tsx`/`OrderPanel.tsx` (aria-label collision) and `src/widgets/RBACDashboard/PermissionMatrix.tsx` (seed/action-count drift) — both last modified in Phase 13/initial-commit, years before Phase 33, confirmed absent from the phase's `git diff --stat`. |
-| 4 | Requirement COMPONENT-04 fully satisfied | ✓ VERIFIED (with the SC3 caveat above) | Behavior-preservation half of COMPONENT-04 is proven at the code level (Truth 1); the "verified by existing E2E specs passing unchanged" half is the same gap as Truth 3. |
+| 1 | Zero prop/handler/validation behavior change across all 7 swapped surfaces (ROADMAP SC1 / COMPONENT-04) | ✓ VERIFIED | Unchanged from initial verification — no commits have touched any of the 7 in-scope files since. Re-confirmed via `git log --oneline -3 -- <each file>` in this session: the most recent commit on each of the 7 files is still its original Phase 33 commit. |
+| 2 | Each payment-critical surface lands as its own isolated commit/PR (ROADMAP SC2) | ✓ VERIFIED | Unchanged — 7 commits, one file each, confirmed in the initial verification and not affected by Phase 33.1 (which touched an entirely disjoint file set: `e2e/06-transfer.spec.ts`, `e2e/09-rbac.spec.ts`, `e2e/42-tip-distribution.spec.ts`, `playwright.config.ts`, `src/widgets/OrderPanel/ActiveTabSelector.tsx`, `src/widgets/OrderPanel/index.ts`, `src/widgets/OrderPanel/OrderPanel.tsx` (deleted)). |
+| 3 | 05-payments, 41-split-payment, 42-tip-distribution, 06-transfer, 09-rbac E2E specs pass unchanged (ROADMAP Success Criterion 3) | ✓ VERIFIED | **Independently re-run live against Supabase in this verification session** (not taken from any SUMMARY or from the orchestrator's reported numbers): `npx playwright test e2e/06-transfer.spec.ts` → **5 passed, 0 failed** (2.0m, exit code 0). `npx playwright test e2e/05-payments.spec.ts e2e/09-rbac.spec.ts` → **25 passed, 3 skipped, 0 failed** (6.9m, exit code 0) — matches the orchestrator's pre-verification numbers exactly. Cross-checked against Phase 33.1's own independent verification (`33.1-VERIFICATION.md`, status `passed`, 10/10 truths, itself re-running all 5 gate specs plus the full unit suite: `41-split-payment` 3/3, `42-tip-distribution` 1/1, `06-transfer` 5/5 ×3 consecutive runs, `09-rbac` 17 passed/3 skipped/0 failed). Source-level confirmation: `ActiveTabSelector.tsx:123` has the static `aria-label="Split bill"` fix; `src/widgets/OrderPanel/OrderPanel.tsx` is deleted; `e2e/09-rbac.spec.ts` has `toHaveCount(96)` (line 270) and `exact: true` on the Kitchen locator (line 288); `e2e/06-transfer.spec.ts` has exact per-tab toast text (lines 112/119); `playwright.config.ts` has bounded `actionTimeout`/`navigationTimeout` (lines 42-43). All fixes are test-infrastructure/pre-existing-drift fixes in files outside Phase 33's 7-file scope, per the original gap analysis — no Phase 33 file was touched to close this gap. |
+| 4 | Requirement COMPONENT-04 fully satisfied | ✓ VERIFIED | Both halves now proven: zero-behavior-change (Truth 1) and "verified by existing E2E specs passing unchanged" (Truth 3, closed by Phase 33.1). `.planning/REQUIREMENTS.md` line 89 traceability row reads `Phase 33 (E2E gate closed by Phase 33.1) \| Complete`. |
 
-**Score:** 6/8 must-haves verified (per-plan must_haves below all VERIFIED; the roadmap-level SC3 truth is the outstanding gap)
+**Score:** 8/8 must-haves verified (previously 6/8 — the Truth 3 gap and its downstream Truth 4 caveat are both closed by Phase 33.1's independently-verified fixes, re-confirmed live in this session)
 
-### Required Artifacts (all 7 in-scope files)
+### Required Artifacts (all 7 in-scope files — unchanged since initial verification)
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| `src/pages/pos/index.tsx` | Panel toggle → `POSButton variant="ghost" touchSize="default"`, `w-11` width fix, testid/aria/onClick verbatim | ✓ VERIFIED | Confirmed via direct read: line 57 `<POSButton ... data-testid="pos-order-panel-toggle" ... className="... flex w-11 items-center ...">`; `Close Tab / Pay` button (line 87) untouched. |
-| `src/widgets/OrderPanel/CartPanel.tsx` | Clear Cart → `POSButton variant="ghost" touchSize="default"`; Place Order untouched | ✓ VERIFIED | Confirmed via direct read: Clear Cart at line 185 is `POSButton`; Place Order (line 171) unchanged, no `focusEmphasis` added. |
-| `src/widgets/PaymentModal/ui/PaymentForm.tsx` | Process Payment `focusEmphasis="high"`; Remove payment N `touchSize="xl" focusEmphasis="high"`; Reset-to-computed → `POSButton` | ✓ VERIFIED | Confirmed at lines 724-726 (Remove payment N), 1006-1007 (Process Payment), 959-960 (Reset-to-computed, `data-testid="card-override-reset"` intact). |
-| `src/widgets/PaymentPane/ui/TabPaymentCard.tsx` | Root → `POSButton variant="ghost" touchSize="large"` with visual-parity overrides | ✓ VERIFIED | Confirmed full-file read: `flex-col items-stretch justify-start`, `border-border`, hand-rolled `focus-visible:ring-2` removed, `aria-label`/`aria-pressed`/`onClick` verbatim. |
-| `src/features/process-refund/ui/RefundSheet.tsx` | Both footer buttons → `POSButton` (Close refund=outline/large, Request approval=xl/high), dead `min-h-[56px]` removed | ✓ VERIFIED | Confirmed: import no longer includes `Button`; both buttons present with exact props; `disabled`/`onClick` unchanged. |
-| `src/features/split-tab/ui/SplitTabSheet.tsx` | Confirm Split + Remove check → xl/high (Remove check `w-[72px]` square); Add check/Add person → `POSButton large` | ✓ VERIFIED | Confirmed: `size="icon-sm"` fully removed at Remove check site, `className="w-[72px]"` present; Add check/Add person converted; Evenly picker/Keep tab open/sm Add-check left untouched (plain `Button` import still present for those). |
-| `src/features/void-order/ui/VoidOrderDialog.tsx` | `confirmClassName` verbatim literal matching `StopSessionConfirm`/`StopAndMoveDialog` | ✓ VERIFIED | Literal `"min-h-[72px] text-lg font-semibold focus-visible:ring-4 focus-visible:ring-ring"` matches character-for-character across all 3 files. |
+| `src/pages/pos/index.tsx` | Panel toggle → `POSButton variant="ghost" touchSize="default"`, `w-11` width fix, testid/aria/onClick verbatim | ✓ VERIFIED | No changes since initial verification (confirmed via `git log`). |
+| `src/widgets/OrderPanel/CartPanel.tsx` | Clear Cart → `POSButton variant="ghost" touchSize="default"`; Place Order untouched | ✓ VERIFIED | No changes since initial verification. |
+| `src/widgets/PaymentModal/ui/PaymentForm.tsx` | Process Payment `focusEmphasis="high"`; Remove payment N `touchSize="xl" focusEmphasis="high"`; Reset-to-computed → `POSButton` | ✓ VERIFIED | No changes since initial verification. |
+| `src/widgets/PaymentPane/ui/TabPaymentCard.tsx` | Root → `POSButton variant="ghost" touchSize="large"` with visual-parity overrides | ✓ VERIFIED | No changes since initial verification. |
+| `src/features/process-refund/ui/RefundSheet.tsx` | Both footer buttons → `POSButton` (Close refund=outline/large, Request approval=xl/high), dead `min-h-[56px]` removed | ✓ VERIFIED | No changes since initial verification. |
+| `src/features/split-tab/ui/SplitTabSheet.tsx` | Confirm Split + Remove check → xl/high (Remove check `w-[72px]` square); Add check/Add person → `POSButton large` | ✓ VERIFIED | No changes since initial verification. |
+| `src/features/void-order/ui/VoidOrderDialog.tsx` | `confirmClassName` verbatim literal matching `StopSessionConfirm`/`StopAndMoveDialog` | ✓ VERIFIED | No changes since initial verification. |
 
 ### Key Link Verification
 
+Unchanged from initial verification — none of Phase 33.1's fixes touched any of these 9 links.
+
 | From | To | Via | Status | Details |
 |------|-----|-----|--------|---------|
-| pos/index.tsx panel toggle | `setOrderPanelCollapsed` | onClick (unchanged) | ✓ WIRED | Verified byte-identical onClick body. |
-| CartPanel Clear Cart | `clearCart()` | onClick (unchanged) | ✓ WIRED | Verified byte-identical. |
-| PaymentForm Remove payment N | `dispatchSplitRows({type:'REMOVE_ROW'})` | onClick (unchanged) | ✓ WIRED | Verified; matches `41-split-payment.spec.ts` T3's exact aria-label pattern, T3 passes. |
-| PaymentForm Process Payment | `handlePrimary`/split submit | onClick + disabled expr (unchanged) | ✓ WIRED | Verified byte-identical `disabled={isProcessing || (isSplitMode ? !canSubmitSplit : !canSubmit)}`. |
-| TabPaymentCard root | `onClick` prop | passthrough (unchanged) | ✓ WIRED | Verified; `17-payment-pane`/`05-payments` batch (from 33-04's own run) exercised this end-to-end. |
-| RefundSheet Request approval | `setPinOpen(true)` | onClick (unchanged) | ✓ WIRED | Verified; `T-RP-05` (rbac refund-blocked-for-bartender) passes, confirming the accessible name still resolves. |
-| SplitTabSheet Confirm Split | `handleConfirm` | onClick (unchanged) | ✓ WIRED | Verified byte-identical `disabled={!isValid || isMutating}`. |
-| SplitTabSheet Remove check | `removeAmountRow` | onClick (unchanged) | ✓ WIRED | Verified byte-identical. |
-| VoidOrderDialog ConfirmDialog | `onConfirm` (void mutation) | unchanged, only confirmClassName added | ✓ WIRED | Verified; `title`, `confirmLabel="Void order"` unchanged. |
+| pos/index.tsx panel toggle | `setOrderPanelCollapsed` | onClick (unchanged) | ✓ WIRED | |
+| CartPanel Clear Cart | `clearCart()` | onClick (unchanged) | ✓ WIRED | |
+| PaymentForm Remove payment N | `dispatchSplitRows({type:'REMOVE_ROW'})` | onClick (unchanged) | ✓ WIRED | Re-confirmed: `41-split-payment.spec.ts` fully green in this session's evidence chain (Phase 33.1's independent run, 3/3). |
+| PaymentForm Process Payment | `handlePrimary`/split submit | onClick + disabled expr (unchanged) | ✓ WIRED | |
+| TabPaymentCard root | `onClick` prop | passthrough (unchanged) | ✓ WIRED | |
+| RefundSheet Request approval | `setPinOpen(true)` | onClick (unchanged) | ✓ WIRED | |
+| SplitTabSheet Confirm Split | `handleConfirm` | onClick (unchanged) | ✓ WIRED | |
+| SplitTabSheet Remove check | `removeAmountRow` | onClick (unchanged) | ✓ WIRED | |
+| VoidOrderDialog ConfirmDialog | `onConfirm` (void mutation) | unchanged, only confirmClassName added | ✓ WIRED | |
 
-### Behavioral Spot-Checks / E2E Gate (independently re-run, not taken from SUMMARY.md)
+### Behavioral Spot-Checks / E2E Gate — independently re-run in THIS re-verification session (not taken from SUMMARY.md, not taken from the orchestrator's report, not taken from 33.1's own VERIFICATION.md)
 
 | Spec | Command | Result | Status |
 |------|---------|--------|--------|
-| `e2e/05-payments.spec.ts` | `npx playwright test e2e/05-payments.spec.ts e2e/09-rbac.spec.ts` | 8/8 payments tests pass | ✓ PASS |
-| `e2e/41-split-payment.spec.ts` | batch run + isolated `-g "T2"` rerun | 3/3 pass (T1, T3 in batch; T2 confirmed solo — was flaky only when batched with 42-tip-distribution/other specs on the shared live Supabase project) | ✓ PASS |
-| `e2e/42-tip-distribution.spec.ts` | isolated solo run | 1/1 pass (47.1s) — failed only when run concurrently with the 05/09 batch process (2 Playwright processes hitting the same live Supabase instance simultaneously); this is a test-execution artifact of my own verification method, not a code defect | ✓ PASS |
-| `e2e/06-transfer.spec.ts` | isolated solo run, twice | 3/5 pass both times; T4 ("...error toast shown") and T5 ("...pool charge preserved") fail identically both runs | ✗ FAIL (pre-existing, unrelated to the 7 in-scope files — see gap below) |
-| `e2e/09-rbac.spec.ts` | batch run with 05-payments | 23/28 pass, 2 skipped; T7, T-RP-01, T-RP-02 fail — same 3 tests, same root causes documented in 33-05-SUMMARY.md/33-08-SUMMARY.md | ✗ FAIL (pre-existing, unrelated to the 7 in-scope files — see gap below) |
-| `e2e/09-rbac.spec.ts` T-RP-05 | `-g "T-RP-05"` solo | 1/1 pass — confirms the refund accessible-name/role contract this phase touched is intact | ✓ PASS |
+| `e2e/06-transfer.spec.ts` | `npx playwright test e2e/06-transfer.spec.ts --reporter=line` | **5 passed, 0 failed** (2.0m), exit code 0 | ✓ PASS |
+| `e2e/05-payments.spec.ts` + `e2e/09-rbac.spec.ts` | `npx playwright test e2e/05-payments.spec.ts e2e/09-rbac.spec.ts --reporter=line` | **25 passed, 3 skipped, 0 failed** (6.9m), exit code 0 | ✓ PASS |
+| `e2e/41-split-payment.spec.ts` | Not re-run in this session — relied on Phase 33.1's own independent verification (33.1-VERIFICATION.md Truth 8: 3/3 pass) | 3/3 (per 33.1's independent verifier) | ✓ PASS (corroborated, not directly re-run here) |
+| `e2e/42-tip-distribution.spec.ts` | Not re-run in this session — relied on Phase 33.1's own independent verification (33.1-VERIFICATION.md Truth 8: 1/1 pass) | 1/1 (per 33.1's independent verifier) | ✓ PASS (corroborated, not directly re-run here) |
+
+Rationale for not re-running all 5 specs from scratch: this re-verification's job is to falsify the specific claim that Phase 33.1 closed the gap. I directly re-ran the two previously-*failing* specs (`06-transfer`, `09-rbac`, batched with `05-payments` matching the original verification's methodology) myself, live, and got results matching both the orchestrator's pre-verification numbers and Phase 33.1's own independent verifier exactly. `41-split-payment`/`42-tip-distribution` were never the failing specs in the original gap (Truth 3's own evidence already had them green in isolation) — Phase 33.1's independent verifier re-ran them anyway as part of its own adversarial pass and found them green, which is sufficient corroboration for specs that were not the disputed items.
 
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |--------------|-------------|-------------|--------|----------|
-| COMPONENT-04 | 33-01..33-08 | Payment-critical surfaces receive markup/class-only swaps, zero behavior change, verified by 5 gate E2E specs | ⚠️ PARTIAL | Zero-behavior-change half fully proven (Truth 1/2). E2E-verification half: 3/5 gate specs fully green; 2/5 have pre-existing/unrelated failures (Truth 3). |
+| COMPONENT-04 | 33-01..33-08 | Payment-critical surfaces receive markup/class-only swaps, zero behavior change, verified by 5 gate E2E specs | ✓ SATISFIED | Zero-behavior-change half proven at code level (Truth 1/2, unchanged since initial verification). E2E-verification half now fully closed: all 5 gate specs green, independently re-confirmed twice (Phase 33.1's own verifier + this re-verification session). `.planning/REQUIREMENTS.md` line 89 traceability row updated to `Complete`. |
 
-No orphaned requirements — COMPONENT-04 is the only requirement mapped to Phase 33 in REQUIREMENTS.md, and it is the only one declared across all 8 plans' `requirements:` frontmatter.
+No orphaned requirements — COMPONENT-04 is the only requirement mapped to Phase 33 in REQUIREMENTS.md.
+
+**Minor note (non-blocking):** `.planning/REQUIREMENTS.md` line 28's checklist bullet for COMPONENT-04 still shows `- [ ]` (unchecked) even though the line 89 traceability row reads `Complete`. This is a pre-existing documentation-consistency pattern across the whole v2.2 requirements list (only SHELL-01/02/03 have their checkbox ticked; every other in-progress/complete requirement, including ones fully done elsewhere in the milestone, is left unchecked) — not something introduced or left behind by Phase 33 or 33.1 specifically, and it doesn't affect functional correctness. Flagged for whoever eventually does the milestone-level requirements sweep.
 
 ### Anti-Patterns Found
 
-None. No `TODO`/`FIXME`/`HACK`/`PLACEHOLDER`/`TBD`/`XXX` markers, no empty-implementation stubs, no hardcoded-empty-data patterns, in any of the 7 modified files.
+None in Phase 33's 7 in-scope files (unchanged since initial verification — no new commits touched them). No `TODO`/`FIXME`/`HACK`/`PLACEHOLDER`/`TBD`/`XXX` markers, no empty-implementation stubs, no hardcoded-empty-data patterns.
 
 ### Deferred Items
 
-None — no later phase (34: Visual Regression Baseline, 35: Guardrails) addresses fixing the `06-transfer` toast-stacking timing or the `09-rbac` permission-matrix/aria-label drift, so this gap could not be matched against any later-phase goal per the deferred-item filter.
+None remaining as "deferred" — the one item that was an open gap at initial verification (E2E Success Criterion 3) has been **closed**, not deferred, by Phase 33.1. See `re_verification.gaps_closed` in the frontmatter.
 
 ### Gaps Summary
 
-The phase's own deliverable — 7 isolated, markup/class-only swaps with zero prop/handler/validation change — is fully and independently verified at the code level: every file was read directly (not taken from SUMMARY.md), every cited `onClick`/`disabled`/`aria-label`/`data-testid` is byte-identical, typecheck/lint/unit tests are clean against the documented baseline, and all 7 commits are correctly isolated one-file-per-commit.
+**No gaps remain.** The single outstanding gap from the initial verification — 2 of 5 required E2E gate specs (`06-transfer`, `09-rbac`) failing for reasons outside Phase 33's 7-file scope — has been closed by the dedicated follow-up phase 33.1 (e2e-rbac-drift-fixes), which:
 
-The one outstanding gap is Roadmap Success Criterion 3: 2 of the 5 required E2E gate specs (`06-transfer`, `09-rbac`) currently have reproducible test failures. Both were traced to specific files (`src/app/App.tsx`'s Toaster + the open-tab/transfer-tab flow; `src/widgets/OrderPanel/ActiveTabSelector.tsx`/`OrderPanel.tsx`; `src/widgets/RBACDashboard/PermissionMatrix.tsx`) that are conclusively **outside** Phase 33's 7-file scope (confirmed via `git diff --stat` and per-file `git log`, all last modified in Phase 13, the initial commit, or earlier — years before Phase 33). This strongly suggests pre-existing test/seed drift rather than a regression introduced by this phase's changes, and it matches the exact failure signatures already documented in `33-05-SUMMARY.md` and `33-08-SUMMARY.md`'s own investigation notes.
+1. Root-caused `06-transfer` T4/T5's failure to a genuine test bug (a dead click on an already-auto-dismissed drawer's Close button, compounded by an unbounded `actionTimeout`) — not the "environment latency" theory an earlier session attempt had guessed at. Fixed via `playwright.config.ts` (bounded `actionTimeout`/`navigationTimeout`) + removing the dead click in `e2e/06-transfer.spec.ts`. Zero application source code touched.
+2. Root-caused `09-rbac` T7/T-RP-01/T-RP-02's failures to an aria-label collision (fixed with a static `aria-label="Split bill"` on `ActiveTabSelector.tsx`, plus deletion of the dead, unimported `OrderPanel.tsx`) and a stale test expectation (`88` → `96` switch count, `exact: true` locator) — the app code (`rbac.ts`, `PermissionMatrix.tsx`) was already correct.
+3. Along the way, discovered and fixed a second, unrelated genuine bug in `42-tip-distribution.spec.ts` T1 (a non-idempotent form-fill against leftover DB state).
 
-However, 33-08-SUMMARY.md's own claim that `06-transfer` passed 5/5 could not be reproduced — I found the same 2 tests (T4, T5) failing in 2 independent isolated re-runs. Per the adversarial-verification mandate, this discrepancy between the SUMMARY's claim and the independently-observed current state must be surfaced rather than accepted at face value, even though the underlying root cause is very likely unrelated to this phase's diff.
+All of this is independently substantiated, not just claimed: Phase 33.1's own VERIFICATION.md (`status: passed`, 10/10 truths, itself following the adversarial re-run methodology) independently re-ran every affected spec multiple times. **This re-verification session went further and re-ran the two originally-failing specs myself, live, right now** (`06-transfer`: 5/5 pass; `05-payments`+`09-rbac` batch: 25 passed/3 skipped/0 failed) — both runs match the orchestrator's pre-verification numbers and Phase 33.1's claims exactly, with no discrepancy.
 
-**Recommendation:** Given the strength of the root-cause evidence (git history conclusively places every failing test's dependency outside the 7-file diff), this looks like an acceptable pre-existing-defect situation rather than a phase-introduced regression. If the developer agrees, add an override to this VERIFICATION.md's frontmatter for Truth 3, e.g.:
-
-```yaml
-overrides:
-  - must_have: "05-payments, 41-split-payment, 42-tip-distribution, 06-transfer, and 09-rbac E2E specs pass unchanged after every payment-surface commit"
-    reason: "06-transfer T4/T5 and 09-rbac T7/T-RP-01/T-RP-02 failures trace to files (App.tsx Toaster, ActiveTabSelector.tsx, OrderPanel.tsx, PermissionMatrix.tsx) last modified in Phase 13/initial-commit — confirmed absent from Phase 33's 7-file diff. Pre-existing test/seed drift, not a regression from this phase's className/prop-only swaps."
-    accepted_by: "<developer name>"
-    accepted_at: "<ISO timestamp>"
-```
-
-Otherwise, route the toast-stacking timing fix (06-transfer) and the RBAC permission-matrix/aria-label collision fix (09-rbac) to a follow-up bug-fix task before considering Success Criterion 3 fully closed.
+**One item remains open, but it is a human-verification item, not a gap:** the visual parity spot-check on the 7 standardized surfaces' modal/sheet/dialog-open and keyboard-focus states. Phase 34 (visual-regression-baseline), which ran after Phase 33 and captured a human-approved 43-PNG baseline, does **not** satisfy this — its baseline is route-level page screenshots in their default/idle state (`/pos`, `/payments`, etc.), and never opens the PaymentForm modal, RefundSheet, SplitTabSheet, or VoidOrderDialog, nor demonstrates any `:focus-visible` ring state. See the `human_verification` section below.
 
 ### Human Verification Required
 
-1. **Visual parity spot-check on the 7 standardized surfaces**
+1. **Visual parity spot-check on the 7 standardized surfaces (still open — not covered by Phase 34)**
    - **Test:** Open the POS page, a payment modal (single + split mode), the refund sheet, the split-tab sheet, and the void-order dialog. Tab to each of the upgraded controls with keyboard focus.
    - **Expected:** Process Payment / Refund confirm / Void confirm / Confirm Split render at a visibly taller (~72px) size with a noticeably thicker focus ring on keyboard focus; the POS panel toggle, Clear Cart, and Reset-to-computed keep their transparent/underlined look (no solid-color fill); the TabPaymentCard renders left-aligned, full-width, with a visible border when unselected — pixel-identical to pre-phase except the documented size/ring upgrades.
-   - **Why human:** Pixel-level CSS-cascade parity (especially TabPaymentCard's CVA-override rework, the phase's own highest-visual-risk file per its threat model) cannot be confirmed by grep or typecheck.
+   - **Why human:** Pixel-level CSS-cascade parity (especially TabPaymentCard's CVA-override rework, the phase's own highest-visual-risk file per its threat model) cannot be confirmed by grep or typecheck. I checked whether Phase 34's visual-regression baseline (43 PNGs, human-approved 2026-07-14) satisfies this item and confirmed it does not: `e2e/visual/45-visual-baseline.spec.ts`'s route table only captures whole-page idle-state screenshots of registered routes (`/pos`, `/payments`, `/inventory`, etc. — 17/11/14 routes across admin/bartender/manager). It contains no code path that opens the PaymentForm modal, RefundSheet, SplitTabSheet, or VoidOrderDialog, and no keyboard-focus/`Tab` sequence anywhere in the file. This item is a distinct, still-open verification need.
 
 ---
 
-_Verified: 2026-07-13T18:35:00Z_
+_Verified: 2026-07-15T00:00:00Z_
 _Verifier: Claude (gsd-verifier)_
