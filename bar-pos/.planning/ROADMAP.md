@@ -933,8 +933,16 @@ Plans:
 **Plans:** 3 plans (3 waves)
 
 Plans:
+**Wave 1**
+
 - [ ] 35-01-PLAN.md — DESIGN-TOKENS.md + generate-design-tokens.ts generator + docs:tokens npm script (DOCS-01) (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 35-02-PLAN.md — Fix undocumented raw promotion button (D-16) + install eslint-plugin-tailwindcss@3.18.3 behind legitimacy checkpoint (LINT-01) (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 35-03-PLAN.md — eslint-rules/no-ui-drift.js (5 selectors) + wire scoped rules into eslint.config.js + convert 4 Phase-31 exception sites + D-14 clean-lint gate (LINT-01) (Wave 3)
 
 **Success Criteria:**

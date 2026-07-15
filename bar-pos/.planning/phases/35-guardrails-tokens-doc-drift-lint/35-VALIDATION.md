@@ -2,8 +2,8 @@
 phase: 35
 slug: guardrails-tokens-doc-drift-lint
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-07-15
 ---
 
@@ -38,9 +38,9 @@ created: 2026-07-15
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 35-01-01 | 01 | 0 | DOCS-01 | — | N/A | manual diff / smoke | `npm run docs:tokens && git diff DESIGN-TOKENS.md` (empty after clean run) | ❌ W0 | ⬜ pending |
-| 35-01-02 | 01 | 1 | LINT-01 (rule fires) | — | N/A | lint functional smoke | disposable fixture with 1 violation/category, `npx eslint <fixture> --no-ignore` exits non-zero, fixture deleted, not committed | ❌ W0 | ⬜ pending |
-| 35-01-03 | 01 | 1 | LINT-01 (zero false positives) | — | N/A | lint regression | `npm run lint` | ✓ (script exists; pre-existing real violations — Pitfalls 1-3 — must be fixed first) | ⬜ pending |
+| 35-01-01/02 | 01 | 1 | DOCS-01 | — | N/A | manual diff / smoke | `npm run docs:tokens && git diff DESIGN-TOKENS.md` (empty after clean run) | ✓ | ⬜ pending |
+| 35-03-01 | 03 | 3 | LINT-01 (rule fires) | T-35-SC | N/A | lint functional smoke | disposable fixture with 1 violation/category, `npx eslint <fixture> --no-ignore` exits non-zero, fixture deleted, not committed — runs before wiring rules into eslint.config.js | ✓ | ⬜ pending |
+| 35-03-02 | 03 | 3 | LINT-01 (zero false positives) | — | N/A | lint regression | `npm run lint` | ✓ (35-02 fixes the one known pre-existing violation first) | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -48,8 +48,8 @@ created: 2026-07-15
 
 ## Wave 0 Requirements
 
-- [ ] A disposable ESLint-rule fixture (created + asserted + deleted within one task, not committed) proving each of the 4 selectors actually fires — a rule with 0 matches could mean "codebase is clean" OR "selector syntax never matches anything," indistinguishable without a positive-case smoke test
-- [ ] `scripts/generate-design-tokens.ts` does not exist yet — must be built before DOCS-01 can be verified
+- [x] A disposable ESLint-rule fixture (created + asserted + deleted within one task, not committed) proving each of the 5 selectors actually fires — planned as 35-03 Task 1, ahead of eslint.config.js wiring
+- [x] `scripts/generate-design-tokens.ts` — planned as 35-01
 
 ---
 
@@ -61,11 +61,11 @@ created: 2026-07-15
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 120s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 120s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-07-15 (gsd-plan-checker VERIFICATION PASSED, 0 blockers)

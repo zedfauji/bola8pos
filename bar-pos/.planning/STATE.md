@@ -4,9 +4,9 @@ milestone: v2.2
 milestone_name: — UI Standardization
 current_phase: 35
 current_phase_name: Guardrails — Tokens Doc & Drift Lint
-status: verifying
+status: executing
 stopped_at: Phase 33.1 context gathered
-last_updated: "2026-07-15T16:53:20.467Z"
+last_updated: "2026-07-15T22:47:10.289Z"
 last_activity: 2026-07-14
 last_activity_desc: Phase 34 complete, transitioned to Phase 35
 progress:
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md
 
 Phase: 35 — Guardrails — Tokens Doc & Drift Lint
 Plan: Not started
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-07-14 — Phase 34 complete, transitioned to Phase 35
 
 ## Session Log
@@ -257,7 +257,7 @@ Last activity: 2026-07-14 — Phase 34 complete, transitioned to Phase 35
 
 ## Last Session
 
-- **Stopped at:** Phase 35 context gathered
+- **Stopped at:** Phase 35 UI-SPEC approved
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -274,6 +274,6 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-15T16:53:20.458Z
+**Last session:** 2026-07-15T17:18:24.448Z
 **Stopped at:** Phase 33.1 context gathered
-**Resume file:** .planning/phases/35-guardrails-tokens-doc-drift-lint/35-CONTEXT.md
+**Resume file:** .planning/phases/35-guardrails-tokens-doc-drift-lint/35-UI-SPEC.md
