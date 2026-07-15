@@ -37,6 +37,10 @@ Document the existing design tokens (colors/spacing/typography already in `tailw
 - **D-13:** New rules fold into the existing `eslint.config.js`, already run by `npm run lint` and already CI-gated — no new CI step/pipeline change needed.
 - **D-14:** Before flipping severity to `error`, this phase runs `npm run lint` as a verification task/checkpoint against the full codebase to confirm zero violations exist right now — a cheap safety check against drift that may have crept back in since Phase 33's sweep (e.g. from Phase 34's new visual-test files or any hotfixes).
 
+### Post-research amendments (resolved 2026-07-15, after RESEARCH.md findings)
+- **D-15:** Arbitrary-spacing drift (TOKEN-02) is enforced via a **narrow custom `no-restricted-syntax` regex** matching Phase 29's original `p-[...]`/`m-[...]`/`gap-[...]` prefix scope — NOT `eslint-plugin-tailwindcss`'s `no-arbitrary-value` rule, which flags any bracketed value (incl. `h-[...]`/`w-[...]`/`min-h-[...]`) and would sweep in ~70 pre-existing, never-audited arbitrary values across ~40 files outside this phase's scope. `eslint-plugin-tailwindcss@3.18.3` is still added for its other rules (`no-custom-classname`, `enforces-shorthand`) per D-08, just not `no-arbitrary-value`.
+- **D-16:** The undocumented raw `<button>` (day-picker) in `src/features/manage-promotions/ui/PromotionAvailabilityEditor.tsx` — found by RESEARCH.md, landed after Phase 29's audit, never fixed — is fixed in this phase (swap for `POSButton`/`Button`, matching Phases 30-33's pattern) so D-14's "npm run lint passes clean" checkpoint is genuinely true, not pre-suppressed.
+
 ### Claude's Discretion
 - Exact wording/table formatting inside `DESIGN-TOKENS.md`'s generated-block markers.
 - Exact regex patterns for the 3 custom `no-restricted-syntax` rules — implementer's judgment, informed by `scripts/audit-ui-drift.ts`'s existing patterns from Phase 29.
