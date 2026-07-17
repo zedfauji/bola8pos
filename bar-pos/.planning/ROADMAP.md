@@ -623,7 +623,7 @@ Plans:
 Plans:
 
 - [ ] 21-01-PLAN.md — i18n infrastructure: packages (SUS legitimacy gate) + shared-layer i18next singleton + 10 namespace catalogs + bootstrap wire + eslint.i18n.config.js helper (Wave 1) (SC-1, SC-3, D-02)
-- [ ] 21-02-PLAN.md — [BLOCKING push] profiles.locale migration + types + LocaleSchema/StaffSchema + useMutationUpdateStaffLocale + store locale-hydrate + getCurrentLocale (Wave 2) (SC-2, D-01, D-02)
+- [ ] 21-02-PLAN.md — [BLOCKING push] profiles.locale migration + set_own_locale self-RPC + types + LocaleSchema/StaffSchema + set-own/admin locale mutations + store locale-hydrate + getCurrentLocale + V4/T-21-02 RBAC guard integration test (Wave 2) (SC-2, D-01, D-02)
 - [ ] 21-03-PLAN.md — Settings → Language tab (role-agnostic, resolves Pitfall 1) + SettingsTabsPanel restructure (Wave 3) (SC-2, SC-4, D-03)
 - [ ] 21-04-PLAN.md — Staff admin per-staff locale field: EditLocaleDialog + StaffDashboard column/action (Wave 3) (SC-2, SC-4, D-03)
 - [ ] 21-05-PLAN.md — Receipt + PDF locale (D-06): receipt-format/printer.rs/pos-printer/pdf.tsx, move label selection into TS (Wave 3) (SC-2, SC-4, D-06)

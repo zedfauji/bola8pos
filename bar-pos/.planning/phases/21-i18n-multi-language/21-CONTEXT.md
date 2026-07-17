@@ -29,8 +29,11 @@ Add multi-language support across the whole app: `react-i18next` wired with `es-
 
 ### Claude's Discretion
 - Catalog file structure/namespacing (per-feature vs per-page vs single catalog) — planner's call based on FSD layer boundaries.
+  - **Resolution (planner, 2026-07-17):** 10 domain/layer namespaces (`common`, `featOrders`, `featMgmt`, `wPanels`, `wAdmin`, `entities`, `pages`, `settings`, `staff`, `receipt`), one owner per namespace, enabling parallel disjoint sweeps.
 - Exact ESLint rule implementation (custom rule vs existing plugin like `eslint-plugin-i18next`) — research/planner's call.
+  - **Resolution (planner, 2026-07-17):** `eslint-plugin-i18next`'s `no-literal-string` rule (`mode: 'all'`), committed repo-wide in 21-12; a standalone `eslint.i18n.config.js` helper drives per-sweep verification before the repo-wide gate turns on.
 - Whether `profiles.locale` also drives `Intl.NumberFormat`/date formatting or stays scoped to UI string translation only — planner should confirm against Phase 28 (Money Formatter Utility, which depends on Phase 21) to avoid overlap.
+  - **Resolution (planner, 2026-07-17):** Scope narrowed to **UI string translation + receipt/PDF date formatting only (D-06)**. The ~52 non-receipt `toLocaleString()`/`toLocaleDateString()` call sites are deliberately left UNTOUCHED: they currently render with the browser/OS default locale, and forcing an explicit `es-MX` there would change rendered date formats vs. today and fail SC-4's zero-visual-regression baseline. Receipts/PDFs (21-05) DO pass the acting staff's locale into their date calls, because a translated receipt with a mismatched-locale date is visibly wrong (RESEARCH Pitfall 3). `Intl.NumberFormat`/money formatting is entirely out of scope — owned by Phase 28, which consumes the `getCurrentLocale()` accessor added in 21-02. This resolves RESEARCH Open Question #1.
 
 </decisions>
 
