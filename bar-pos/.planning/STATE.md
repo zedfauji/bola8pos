@@ -5,7 +5,7 @@ milestone_name: — Cross-Pollination from billar-pos
 current_phase: 2
 status: Ready to plan
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-17T19:51:04.038Z"
+last_updated: "2026-07-17T20:55:51.441Z"
 last_activity: 2026-07-17
 last_activity_desc: Milestone v2.2 completed and archived
 progress:
@@ -289,7 +289,7 @@ Last activity: 2026-07-17 — Milestone v2.2 completed and archived
 
 ## Last Session
 
-- **Stopped at:** Phase 21 context gathered
+- **Stopped at:** Phase 21 UI-SPEC approved
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -306,9 +306,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-17T19:51:04.030Z
+**Last session:** 2026-07-17T20:55:51.433Z
 **Stopped at:** Phase 33.1 context gathered
-**Resume file:** .planning/phases/21-i18n-multi-language/21-CONTEXT.md
+**Resume file:** .planning/phases/21-i18n-multi-language/21-UI-SPEC.md
 
 ## Operator Next Steps
 
