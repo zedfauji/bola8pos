@@ -14,10 +14,12 @@ Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall loca
 
 **Target features:**
 - Component consistency (replace one-off UI with `shared/ui` primitives)
-- Design tokens/spacing/color discipline against the existing Tailwind theme
 - Layout/navigation shell consistency across all 12 routes
 - Accessibility + touch-target consistency (focus states, tap sizes, keyboard nav)
 - ✓ Playwright screenshot-diff visual regression suite — Phase 34 (isolated `playwright.visual.config.ts`, 43 masked baselines across admin/bartender/manager, manual-only two-run zero-diff gate)
+- ✓ Design tokens/spacing/color discipline against the existing Tailwind theme, enforced by error-severity drift lint — Phase 35 (`DESIGN-TOKENS.md` + generator, `eslint-rules/no-ui-drift.js` wired into `eslint.config.js` for raw button/input, hardcoded hex/rgb, arbitrary-value spacing)
+
+**Milestone status:** 3/3 target features complete (22/22 requirements) — last phase (35) done, ready for `/gsd-complete-milestone`.
 
 ## Requirements
 
@@ -103,4 +105,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-14 — Phase 34 complete: isolated Playwright visual-regression suite (`playwright.visual.config.ts`) with 43 masked local-only baselines across admin/bartender/manager roles (17/11/14 routes), two-consecutive-run zero-diff gate verified*
+*Last updated: 2026-07-17 — Phase 35 complete: DESIGN-TOKENS.md + generator (DOCS-01), drift-detection lint at error severity for raw button/input/hex-rgb/arbitrary-spacing wired into eslint.config.js (LINT-01) — closes the v2.2 UI Standardization milestone (22/22 requirements)*
