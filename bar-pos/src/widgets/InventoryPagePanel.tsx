@@ -140,7 +140,7 @@ export function InventoryPagePanel() {
       </label>
       <select
         id="inv-category-filter"
-        className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-xs"
+        className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-sm"
         value={categoryFilter}
         onChange={e => {
           setCategoryFilter(e.target.value);
@@ -348,6 +348,7 @@ export function InventoryPagePanel() {
               </select>
             </div>
             <FormField label="Quantity delta" hint="Use negative numbers to remove stock.">
+              {/* eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-06: signed-delta input, MoneyInput would clamp negatives */}
               <input
                 type="number"
                 className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"

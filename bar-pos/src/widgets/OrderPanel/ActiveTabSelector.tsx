@@ -52,9 +52,9 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <User className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                  <User className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                   {tabLoading && !currentTab ? (
-                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" aria-hidden />
+                    <Loader2 className="size-4 shrink-0 animate-spin text-primary" aria-hidden />
                   ) : (
                     <h3 className="truncate font-semibold">{currentTab?.customerName ?? 'Tab'}</h3>
                   )}
@@ -75,7 +75,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 className="flex-1"
                 onClick={handleSwitchTab}
               >
-                <RefreshCw className="mr-1 h-4 w-4" />
+                <RefreshCw className="mr-1 size-4" />
                 Switch Tab
                 {openTabCount > 1 && (
                   <Badge variant="secondary" className="ml-2">
@@ -93,7 +93,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                   }}
                   aria-label="Transfer tab"
                 >
-                  <ArrowLeftRight className="h-4 w-4" />
+                  <ArrowLeftRight className="size-4" />
                 </Button>
               )}
               <Button
@@ -105,7 +105,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 }}
                 aria-label="New tab"
               >
-                <Plus className="mr-1 h-4 w-4" />
+                <Plus className="mr-1 size-4" />
                 New Tab +
               </Button>
             </div>
@@ -122,7 +122,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 title={currentTab.items.length === 0 ? 'Add items before splitting' : undefined}
                 aria-label="Split bill"
               >
-                <SplitSquareHorizontal className="mr-2 h-4 w-4" />
+                <SplitSquareHorizontal className="mr-2 size-4" />
                 Split bill
               </POSButton>
             )}
@@ -178,7 +178,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 onClick={handleSwitchTab}
                 disabled={openTabCount === 0}
               >
-                <RefreshCw className="mr-1 h-4 w-4" />
+                <RefreshCw className="mr-1 size-4" />
                 Switch Tab
                 {openTabCount > 0 && (
                   <Badge variant="secondary" className="ml-2">
@@ -193,7 +193,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                   setOpenTabDialogOpen(true);
                 }}
               >
-                <Plus className="mr-1 h-4 w-4" />
+                <Plus className="mr-1 size-4" />
                 New Tab +
               </Button>
             </div>

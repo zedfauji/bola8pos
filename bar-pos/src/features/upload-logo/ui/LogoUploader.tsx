@@ -59,7 +59,7 @@ export function LogoUploader({ receipt }: Props) {
       <div className="flex items-start gap-4">
         <div
           data-testid="logo-uploader-preview"
-          className="flex h-20 w-20 items-center justify-center overflow-hidden rounded border bg-muted"
+          className="flex size-20 items-center justify-center overflow-hidden rounded border bg-muted"
         >
           {hasLogo ? (
             <img

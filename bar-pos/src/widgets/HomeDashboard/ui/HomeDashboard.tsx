@@ -166,13 +166,13 @@ export function HomeDashboard() {
             >
               {isGated && (
                 <Lock
-                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground"
+                  className="absolute right-3 top-3 size-4 text-muted-foreground"
                   aria-hidden="true"
                   data-testid="lock-icon"
                 />
               )}
               <div className="relative">
-                <Icon className="h-12 w-12" />
+                <Icon className="size-12" />
                 {item.path === '/waitlist' && waitingCount > 0 && (
                   <Badge
                     variant="destructive"
@@ -196,7 +196,7 @@ export function HomeDashboard() {
 
       {/* Logout */}
       <Button variant="ghost" size="sm" onClick={handleLogout}>
-        <LogOut className="mr-2 h-4 w-4" />
+        <LogOut className="mr-2 size-4" />
         Logout
       </Button>
 

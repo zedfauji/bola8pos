@@ -27,7 +27,7 @@ export function PrepBatchPreview({
       role="status"
     >
       <p className="text-sm font-semibold">Raw material consumption preview</p>
-      <div className="grid grid-cols-2 gap-2 text-xs font-medium text-pos-muted">
+      <div className="grid grid-cols-2 gap-2 text-xs font-medium text-muted-foreground">
         <span>Ingredient</span>
         <span className="text-right">Quantity</span>
       </div>

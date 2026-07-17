@@ -111,7 +111,7 @@ export function HappyHourBanner({ activePromotions }: HappyHourBannerProps) {
       aria-label="Promotions active"
       data-testid="active-promotions-banner"
     >
-      <Zap className="h-4 w-4 shrink-0 text-amber-400" aria-hidden />
+      <Zap className="size-4 shrink-0 text-amber-400" aria-hidden />
       <span className="flex-1 font-medium">Promotions Active — {names}</span>
       {countdown !== null && <span className="text-xs text-amber-400">Ends in {countdown}</span>}
     </div>

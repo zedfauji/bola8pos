@@ -151,7 +151,7 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
         </p>
 
         {state.rows.length === 0 && (
-          <p className="text-pos-muted text-sm italic">No recipe yet</p>
+          <p className="text-muted-foreground text-sm italic">No recipe yet</p>
         )}
 
         {state.rows.map(row => (
@@ -190,7 +190,7 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
               }}
               className="shrink-0 px-2"
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              <Trash2 className="size-4 text-destructive" />
             </POSButton>
           </div>
         ))}
@@ -231,7 +231,7 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
             }}
             disabled={!state.isDirty || isSaving}
           >
-            {isSaving ? <LoadingSpinner className="mr-2 h-4 w-4" /> : null}
+            {isSaving ? <LoadingSpinner className="mr-2 size-4" /> : null}
             Save recipe
           </POSButton>
           {state.isDirty && (
@@ -248,7 +248,7 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
         </div>
 
         <div className="border-t border-border pt-4">
-          <p className="mb-2 text-xs text-pos-muted">Depletion preview</p>
+          <p className="mb-2 text-xs text-muted-foreground">Depletion preview</p>
           <RecipePreviewPanel recipe={savedRecipe ?? null} isLoading={false} />
         </div>
       </div>

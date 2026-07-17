@@ -83,7 +83,7 @@ export function KitchenPrepDashboard() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ListOrdered className="h-5 w-5" aria-hidden />
+            <ListOrdered className="size-5" aria-hidden />
             <h2 className="text-lg font-semibold">Prep on hand</h2>
           </div>
           <POSButton
@@ -94,7 +94,7 @@ export function KitchenPrepDashboard() {
               setDialogOpen(true);
             }}
           >
-            <Plus className="mr-2 h-4 w-4" aria-hidden />
+            <Plus className="mr-2 size-4" aria-hidden />
             New batch
           </POSButton>
         </div>
@@ -121,7 +121,7 @@ export function KitchenPrepDashboard() {
 
       <section>
         <div className="mb-4 flex items-center gap-2">
-          <ListOrdered className="h-5 w-5" aria-hidden />
+          <ListOrdered className="size-5" aria-hidden />
           <h2 className="text-lg font-semibold">Recent batches</h2>
         </div>
         <DataTable columns={columns} data={batchRows} isLoading={prodLoading} />

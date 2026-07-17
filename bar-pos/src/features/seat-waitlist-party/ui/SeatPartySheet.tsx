@@ -173,7 +173,7 @@ export function SeatPartySheet({
               <LoadingSpinner size={16} className="p-0" />
             ) : (
               <>
-                <CheckSquare className="h-4 w-4 mr-1" aria-hidden="true" />
+                <CheckSquare className="size-4 mr-1" aria-hidden="true" />
                 Seat party
               </>
             )}

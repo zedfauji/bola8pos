@@ -602,7 +602,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   onClick={addItemColumn}
                   aria-label="Add sub-check column"
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="size-5" />
                   <span className="text-sm">Add check</span>
                 </POSButton>
               </div>
@@ -700,7 +700,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   onClick={addPersonColumn}
                   aria-label="Add person"
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="size-5" />
                   <span className="text-sm">Add person</span>
                 </POSButton>
               </div>
@@ -747,7 +747,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                           }}
                           aria-label={`Remove check ${String(i + 1)}`}
                         >
-                          <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                          <X className="size-4 text-muted-foreground hover:text-destructive" />
                         </POSButton>
                       )}
                     </div>
@@ -758,7 +758,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                     onClick={addAmountRow}
                     className="w-full"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     Add check
                   </Button>
                 </div>

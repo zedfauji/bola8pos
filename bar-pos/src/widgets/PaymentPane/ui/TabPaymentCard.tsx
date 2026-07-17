@@ -60,7 +60,7 @@ export function TabPaymentCard({ tab, selected, onClick }: TabPaymentCardProps) 
         )}
         {tab.hasActivePoolSession && (
           <Badge variant="outline" className="border-amber-500 text-xs text-amber-500">
-            <Clock className="mr-1 h-3 w-3" aria-hidden="true" />
+            <Clock className="mr-1 size-3" aria-hidden="true" />
             Timer Running
           </Badge>
         )}

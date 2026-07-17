@@ -10,6 +10,9 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import importPlugin from 'eslint-plugin-import'
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import boundaries from 'eslint-plugin-boundaries'
+import tailwindcss from 'eslint-plugin-tailwindcss'
+import { uiDriftSelectors } from './eslint-rules/no-ui-drift.js'
+import path from 'node:path'
 
 export default tseslint.config({
   ignores: [
@@ -128,6 +131,52 @@ export default tseslint.config({
         selector: 'ExportAllDeclaration',
         message: 'Barrel exports (export *) are banned. Export only what you explicitly need.',
       },
+    ],
+  },
+},
+{
+  // LINT-01 (D-13/D-14): drift-detection guardrails scoped to the Phase-29
+  // audited zone (src/pages|widgets|features), excluding src/shared/ui (D-12,
+  // the primitive-definition layer legitimately uses raw elements internally)
+  // and src/entities (never audited by Phase 29). Test/stories files are
+  // ignored — they carry raw elements in mock components (matches Phase 29's
+  // own scan exclusions).
+  files: ['src/pages/**/*.tsx', 'src/widgets/**/*.tsx', 'src/features/**/*.tsx'],
+  ignores: ['**/*.test.tsx', '**/*.stories.tsx'],
+  plugins: { tailwindcss },
+  settings: {
+    tailwindcss: {
+      // Must be an absolute path — eslint-plugin-tailwindcss@3.18.3 resolves
+      // the `tailwindcss` package via `require.resolve(..., { paths: [dirname(config)] })`,
+      // and Node's require.resolve `paths` option does not reliably resolve a
+      // relative dirname ('.') against process.cwd() in all cases.
+      config: path.resolve(import.meta.dirname, 'tailwind.config.ts'),
+      callees: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv'],
+      whitelist: ['^(animate|fade|slide|zoom)-(in|out)(-from-\\w+)?$'],
+    },
+  },
+  rules: {
+    'tailwindcss/no-custom-classname': 'error',
+    'tailwindcss/enforces-shorthand': 'error',
+    // tailwindcss/no-arbitrary-value intentionally NOT enabled — D-15.
+    // It flags any bracketed value (h-[...], w-[...], min-h-[...], etc.), not
+    // just spacing, which would newly flag ~70 pre-existing, non-drift,
+    // legitimate arbitrary-size classes outside this phase's scope.
+    // Arbitrary-value SPACING drift specifically is covered by the narrow
+    // custom selector in uiDriftSelectors below instead.
+
+    // Restate ExportAllDeclaration verbatim: flat config REPLACES (does not
+    // merge) a rule key across config objects matching the same file. This
+    // later, more-specific object fully overrides no-restricted-syntax for
+    // pages/widgets/features files — omitting the barrel-export selector
+    // here would silently kill that ban for those files.
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'ExportAllDeclaration',
+        message: 'Barrel exports (export *) are banned. Export only what you explicitly need.',
+      },
+      ...uiDriftSelectors,
     ],
   },
 },

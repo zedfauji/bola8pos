@@ -470,7 +470,7 @@ export function PaymentForm({
 
   if (step === 'receipt' && activeSplitReceipt) {
     return (
-      <div className="flex flex-1 flex-col overflow-hidden px-4 py-4 sm:px-6">
+      <div className="flex flex-1 flex-col overflow-hidden p-4 sm:px-6">
         <p className="mb-2 text-sm font-semibold">
           {`Receipt ${String(receiptIndex + 1)} of ${String(receiptQueue.length)} — ${paymentLabels[activeSplitReceipt.paymentMethod]}`}
         </p>
@@ -490,7 +490,7 @@ export function PaymentForm({
 
   if (step === 'receipt' && receiptData) {
     return (
-      <div className="flex flex-1 flex-col overflow-hidden px-4 py-4 sm:px-6">
+      <div className="flex flex-1 flex-col overflow-hidden p-4 sm:px-6">
         <ReceiptPreview
           receipt={receiptData}
           onDone={() => {
@@ -503,7 +503,7 @@ export function PaymentForm({
 
   return (
     <>
-      <ScrollArea className="flex-1 px-4 py-4 sm:px-6">
+      <ScrollArea className="flex-1 p-4 sm:px-6">
         <div className="space-y-6">
           <section className="space-y-3">
             <div>
@@ -730,7 +730,7 @@ export function PaymentForm({
                             dispatchSplitRows({ type: 'REMOVE_ROW', rowId: row.id });
                           }}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="size-4" />
                         </POSButton>
                       )}
                     </div>
@@ -988,7 +988,7 @@ export function PaymentForm({
               className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
               role="alert"
             >
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -1006,7 +1006,7 @@ export function PaymentForm({
             touchSize="xl"
             focusEmphasis="high"
             disabled={isProcessing || (isSplitMode ? !canSubmitSplit : !canSubmit)}
-            className="w-full bg-[var(--pos-accent)] text-black hover:bg-[var(--pos-accent)]/90"
+            className="w-full bg-[var(--pos-accent)] text-black hover:opacity-90"
             onClick={() => {
               if (isSplitMode) {
                 void handleSplitPrimary();
@@ -1017,7 +1017,7 @@ export function PaymentForm({
           >
             {isProcessing ? (
               <span className="inline-flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="size-4 animate-spin" />
                 Processing…
               </span>
             ) : (

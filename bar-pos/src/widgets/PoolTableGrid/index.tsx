@@ -129,9 +129,9 @@ export function PoolTableGrid() {
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           {filtersCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="size-4" />
           ) : (
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="size-4" />
           )}
           Filters
         </POSButton>

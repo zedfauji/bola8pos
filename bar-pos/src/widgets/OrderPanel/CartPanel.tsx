@@ -123,7 +123,7 @@ export function CartPanel() {
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
       <div className="border-b p-4">
         <div className="flex items-center gap-2">
-          <ShoppingCart className="h-5 w-5" aria-hidden />
+          <ShoppingCart className="size-5" aria-hidden />
           <h2 className="font-semibold">Current Order</h2>
         </div>
       </div>
@@ -131,7 +131,7 @@ export function CartPanel() {
       <ScrollArea className="min-h-0 flex-1 p-4">
         {isEmpty ? (
           <div className="flex h-full min-h-[200px] flex-col items-center justify-center text-muted-foreground">
-            <ShoppingCart className="mb-2 h-12 w-12 opacity-20" aria-hidden />
+            <ShoppingCart className="mb-2 size-12 opacity-20" aria-hidden />
             <p className="text-sm">Cart is empty</p>
             <p className="text-xs">Add items to get started</p>
           </div>

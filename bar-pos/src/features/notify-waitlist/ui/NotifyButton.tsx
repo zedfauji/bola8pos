@@ -28,7 +28,7 @@ export function NotifyButton({ entryId, entryName, hasPhone }: NotifyButtonProps
         <LoadingSpinner size={16} className="p-0" />
       ) : (
         <>
-          <BellRing className="h-4 w-4 mr-1" aria-hidden="true" />
+          <BellRing className="size-4 mr-1" aria-hidden="true" />
           {hasPhone ? 'Notify via WhatsApp' : 'Notify manager'}
         </>
       )}

@@ -238,7 +238,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                           variant="ghost"
                           size="icon"
                           touchSize="default"
-                          className="text-muted-foreground hover:text-destructive ml-1 h-11 w-11 touch-manipulation rounded p-1 transition-colors"
+                          className="text-muted-foreground hover:text-destructive ml-1 size-11 touch-manipulation rounded p-1 transition-colors"
                           title="Remove item"
                           onClick={() => {
                             setSelectedItemForRemoval(item);

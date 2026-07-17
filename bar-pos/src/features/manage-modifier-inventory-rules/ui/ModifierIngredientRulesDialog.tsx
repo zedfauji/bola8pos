@@ -137,14 +137,14 @@ function ModifierIngredientRulesForm({
     <div className="space-y-4">
       <div className="space-y-1">
         <p className="text-sm font-medium">Delta</p>
-        <p className="text-xs text-pos-muted">
+        <p className="text-xs text-muted-foreground">
           Positive adds usage (e.g. extra cheese). Negative reduces usage (e.g. no ice).
         </p>
       </div>
 
       <div className="space-y-3">
         {state.rows.length === 0 && (
-          <p className="text-pos-muted text-sm italic">No ingredient rules yet</p>
+          <p className="text-muted-foreground text-sm italic">No ingredient rules yet</p>
         )}
 
         {state.rows.map(row => (
@@ -182,7 +182,7 @@ function ModifierIngredientRulesForm({
               }}
               className="shrink-0 px-2"
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              <Trash2 className="size-4 text-destructive" />
             </POSButton>
           </div>
         ))}
@@ -217,7 +217,7 @@ function ModifierIngredientRulesForm({
           }}
           disabled={!state.isDirty || isSaving}
         >
-          {isSaving ? <LoadingSpinner className="mr-2 h-4 w-4" /> : null}
+          {isSaving ? <LoadingSpinner className="mr-2 size-4" /> : null}
           {isSaving ? 'Saving…' : 'Save rules'}
         </POSButton>
       </div>

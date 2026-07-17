@@ -61,9 +61,9 @@ export function LowStockAlert() {
       aria-label="Low stock alert"
       aria-live="polite"
     >
-      <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
+      <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
       <span className="shrink-0 font-medium">Low stock:</span>
-      <ul className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-1">
+      <ul className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
         {visible.map((a, i) => (
           <li key={a.productId} className="inline-flex items-center gap-0.5">
             {i > 0 ? <span className="text-muted-foreground">,</span> : null}
@@ -74,13 +74,13 @@ export function LowStockAlert() {
               type="button"
               variant="ghost"
               size="icon"
-              className="h-6 w-6 text-amber-900 hover:bg-amber-500/20 dark:text-amber-50"
+              className="size-6 text-amber-900 hover:bg-amber-500/20 dark:text-amber-50"
               aria-label={`Dismiss alert for ${a.name}`}
               onClick={() => {
                 dismiss(a.productId);
               }}
             >
-              <X className="h-3 w-3" />
+              <X className="size-3" />
             </Button>
           </li>
         ))}

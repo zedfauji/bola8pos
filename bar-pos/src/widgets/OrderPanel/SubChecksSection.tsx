@@ -23,7 +23,7 @@ export function SubChecksSection({ parentTabId }: SubChecksSectionProps) {
         return (
           <div
             key={sub.id}
-            className="flex items-center justify-between rounded-md px-2 py-2 hover:bg-muted/40"
+            className="flex items-center justify-between rounded-md p-2 hover:bg-muted/40"
           >
             <span className="text-sm">{sub.splitLabel ?? `Check ${sub.id.slice(0, 4)}`}</span>
             <span

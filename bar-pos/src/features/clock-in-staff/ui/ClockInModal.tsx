@@ -85,7 +85,7 @@ export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
 
         {phase === 'pin' && (
           <div className="flex flex-col items-center gap-4 py-2">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+            <div className="flex size-14 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
               {staff.name.charAt(0).toUpperCase()}
             </div>
             <PINKeypad

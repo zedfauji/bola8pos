@@ -38,7 +38,7 @@ export function EmployeeSelector() {
             }}
             className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 text-left hover:bg-accent transition-colors"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">
+            <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">
               {member.name.charAt(0).toUpperCase()}
             </div>
             <div>

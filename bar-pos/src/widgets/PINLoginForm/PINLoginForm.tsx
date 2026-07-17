@@ -182,7 +182,7 @@ export function PINLoginForm() {
   return (
     <div className="flex flex-col gap-6 w-full max-w-xs">
       <div className="text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-2xl mx-auto mb-2">
+        <div className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-2xl mx-auto mb-2">
           {selectedStaff.name.charAt(0).toUpperCase()}
         </div>
         <h2 className="text-xl font-bold">{selectedStaff.name}</h2>

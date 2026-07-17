@@ -52,7 +52,7 @@ export default function POSPage() {
       className="mx-0 flex h-screen max-w-none flex-col space-y-0 bg-background p-0"
     >
       <div className="flex min-w-0 flex-1 items-center justify-center p-4 md:p-6">
-        <div className="flex h-full w-full max-w-[1600px] overflow-hidden rounded-xl border border-border shadow-lg">
+        <div className="flex size-full max-w-[1600px] overflow-hidden rounded-xl border border-border shadow-lg">
           <main className="relative flex-1 overflow-y-auto p-4">
             <POSButton
               type="button"
@@ -67,9 +67,9 @@ export default function POSPage() {
               className="absolute right-3 top-3 z-10 flex w-11 items-center justify-center rounded-md border bg-background/80 shadow-sm hover:bg-accent"
             >
               {orderPanelCollapsed ? (
-                <PanelRightOpen className="h-4 w-4" />
+                <PanelRightOpen className="size-4" />
               ) : (
-                <PanelRightClose className="h-4 w-4" />
+                <PanelRightClose className="size-4" />
               )}
             </POSButton>
             <LowStockAlert />

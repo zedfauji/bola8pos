@@ -121,7 +121,7 @@ export function PaymentPane() {
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="flex size-full overflow-hidden">
       {/* Left panel — tab list */}
       <div className="flex w-80 shrink-0 flex-col border-r bg-background">
         <div className="border-b px-4 py-3">
@@ -146,7 +146,7 @@ export function PaymentPane() {
                 onClick={handleClearSelection}
                 aria-label="Back to tab list"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="size-4" />
               </POSButton>
               <h2 className="font-semibold">{selectedTab.customerName}</h2>
             </div>
@@ -156,7 +156,7 @@ export function PaymentPane() {
               <div className="flex flex-1 items-center justify-center p-8">
                 <div className="max-w-sm rounded-lg border border-amber-500/40 bg-amber-500/10 p-6 text-center">
                   <AlertTriangle
-                    className="mx-auto mb-3 h-8 w-8 text-amber-500"
+                    className="mx-auto mb-3 size-8 text-amber-500"
                     aria-hidden="true"
                   />
                   <h3 className="mb-1 font-semibold text-amber-600 dark:text-amber-400">

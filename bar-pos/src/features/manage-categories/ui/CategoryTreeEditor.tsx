@@ -107,10 +107,10 @@ function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormP
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="KITCHEN">
-              <UtensilsCrossed className="h-3.5 w-3.5" aria-hidden /> Kitchen
+              <UtensilsCrossed className="size-3.5" aria-hidden /> Kitchen
             </SelectItem>
             <SelectItem value="BAR">
-              <Beer className="h-3.5 w-3.5" aria-hidden /> Bar
+              <Beer className="size-3.5" aria-hidden /> Bar
             </SelectItem>
             <SelectItem value="NONE">None</SelectItem>
           </SelectContent>
@@ -469,6 +469,7 @@ export function CategoryTreeEditor() {
                   : // TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
                     // picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
                     // token — see 31-CONTEXT.md D-08.
+                    // eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-08: category.color is per-row user data, not a theme color
                     { name: '', color: '#6366f1', routing: 'NONE' }
               }
               submitting={createMutation.isPending || updateMutation.isPending}

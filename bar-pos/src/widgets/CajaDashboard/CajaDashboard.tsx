@@ -308,7 +308,7 @@ export function CajaDashboard() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                        className="size-6 p-0 text-muted-foreground hover:text-destructive"
                         disabled={deleteCajaEntryMut.isPending}
                         onClick={() => {
                           deleteCajaEntryMut.mutate(entry.id, {

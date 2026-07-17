@@ -83,7 +83,7 @@ export function WaitlistQueue() {
       {/* Header row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users className="h-5 w-5" aria-hidden="true" />
+          <Users className="size-5" aria-hidden="true" />
           <h2 className="text-lg font-semibold">Queue</h2>
         </div>
         <POSButton
@@ -94,7 +94,7 @@ export function WaitlistQueue() {
             setAddOpen(true);
           }}
         >
-          <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+          <Plus className="mr-2 size-4" aria-hidden="true" />
           Add to waitlist
         </POSButton>
       </div>
