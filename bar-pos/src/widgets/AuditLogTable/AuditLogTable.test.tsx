@@ -36,6 +36,7 @@ const STAFF: Staff = {
   pin: '0000',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX',
 };
 
 const ROW_A: AuditLog = {

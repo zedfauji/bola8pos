@@ -13,6 +13,7 @@ const staffOpen: Staff = {
   pin: '123456',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX',
 };
 
 const staffClosed: Staff = {
@@ -23,6 +24,7 @@ const staffClosed: Staff = {
   pin: '654321',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX',
 };
 
 const openShift: Shift = {

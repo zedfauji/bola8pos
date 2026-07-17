@@ -42,6 +42,7 @@ const mockBartender = {
   pin: '123456',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX' as const,
 };
 
 const mockManager = {
@@ -52,6 +53,7 @@ const mockManager = {
   pin: '789012',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX' as const,
 };
 
 const mockLogout = vi.fn();

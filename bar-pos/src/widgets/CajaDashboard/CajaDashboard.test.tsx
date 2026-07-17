@@ -123,6 +123,7 @@ const testStaff = {
   pin: '0000',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX' as const,
 };
 
 // ---------------------------------------------------------------------------

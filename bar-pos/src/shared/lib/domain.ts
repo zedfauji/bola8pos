@@ -49,6 +49,11 @@ export const UserRole = {
 
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
+// Phase 21: per-staff UI locale preference (D-01/D-02). Two-layer validation
+// with the DB CHECK constraint on profiles.locale (T-21-02).
+export const LocaleSchema = z.enum(['es-MX', 'en-US']);
+export type Locale = z.infer<typeof LocaleSchema>;
+
 // Phase 13: role_permissions table — DB-backed RBAC matrix.
 // One row per (role, action) pair that grants the permission.
 export const RolePermissionSchema = z.object({
@@ -291,6 +296,8 @@ export const StaffSchema = z.object({
   pin: PinSchema,
   isActive: z.boolean(),
   mustChangePin: z.boolean(),
+  /** D-02: defaults to es-MX for new/unset profiles. Drives i18n.changeLanguage() on login/rehydrate. */
+  locale: LocaleSchema.default('es-MX'),
 });
 
 export const StaffCreateSchema = StaffSchema.omit({ id: true });
@@ -1210,6 +1217,7 @@ export const domain = {
 
     // Enums
     UserRole: UserRoleSchema,
+    Locale: LocaleSchema,
     TabStatus: TabStatusSchema,
     OrderStatus: OrderStatusSchema,
     KdsStatus: KdsStatusSchema,
@@ -1330,6 +1338,7 @@ export const domain = {
   types: {} as {
     // Enums
     UserRole: z.infer<typeof UserRoleSchema>;
+    Locale: Locale;
     TabStatus: z.infer<typeof TabStatusSchema>;
     OrderStatus: z.infer<typeof OrderStatusSchema>;
     KdsStatus: KdsStatus;

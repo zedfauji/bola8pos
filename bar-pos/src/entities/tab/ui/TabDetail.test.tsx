@@ -104,6 +104,7 @@ describe('TabDetail', () => {
     pin: '123456',
     isActive: true,
     mustChangePin: false,
+    locale: 'es-MX',
   };
 
   const mockManager: Staff = {
@@ -114,6 +115,7 @@ describe('TabDetail', () => {
     pin: '654321',
     isActive: true,
     mustChangePin: false,
+    locale: 'es-MX',
   };
 
   beforeEach(() => {
@@ -415,6 +417,7 @@ describe('TabDetail', () => {
         pin: '901234',
         isActive: true,
         mustChangePin: false,
+        locale: 'es-MX',
       };
 
       vi.mocked(useTab).mockReturnValue({

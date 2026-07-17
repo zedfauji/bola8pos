@@ -116,6 +116,7 @@ const mockStaff = {
   pin: '789012',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX' as const,
 };
 
 function makeTab(overrides: Partial<Tab> & { id: string; customerName: string }): Tab {

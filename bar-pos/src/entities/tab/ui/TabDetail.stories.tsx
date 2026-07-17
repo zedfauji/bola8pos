@@ -71,6 +71,7 @@ const mockBartender: Staff = {
   pin: '123456',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX',
 };
 
 const mockManager: Staff = {
@@ -81,6 +82,7 @@ const mockManager: Staff = {
   pin: '654321',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX',
 };
 
 const singleOrderTab: Tab = {

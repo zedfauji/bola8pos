@@ -148,6 +148,7 @@ describe('useMutationClockIn', () => {
         pin: '123456',
         isActive: true,
         mustChangePin: false,
+        locale: 'es-MX',
       },
       currentShift: null,
       staffList: [],
@@ -210,6 +211,7 @@ describe('useMutationClockIn', () => {
         pin: '123456',
         isActive: true,
         mustChangePin: false,
+        locale: 'es-MX',
       },
       currentShift: null,
       staffList: [],
@@ -275,6 +277,7 @@ describe('useMutationClockOut', () => {
         pin: '123456',
         isActive: true,
         mustChangePin: false,
+        locale: 'es-MX',
       },
       currentShift: {
         id: openShiftId,

@@ -207,6 +207,7 @@ beforeEach(() => {
       pin: '123456',
       isActive: true,
       mustChangePin: false,
+      locale: 'es-MX',
     },
     currentShift: {
       id: shiftId,

@@ -36,6 +36,7 @@ export const mockStaff: Staff[] = [
     pin: '123456',
     isActive: true,
     mustChangePin: false,
+    locale: 'es-MX',
   },
   {
     id: '22222222-3333-4444-5555-666666666666',
@@ -45,5 +46,6 @@ export const mockStaff: Staff[] = [
     pin: '789012',
     isActive: true,
     mustChangePin: false,
+    locale: 'es-MX',
   },
 ];

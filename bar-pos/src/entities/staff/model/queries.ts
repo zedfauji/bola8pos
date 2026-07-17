@@ -30,7 +30,7 @@ export const staffKeys = {
   staffTips: (from: string, to: string) => [...staffKeys.all, 'staffTips', from, to] as const,
 };
 
-function mapStaffRow(row: Tables<'profiles'>): Result<Staff> {
+export function mapStaffRow(row: Tables<'profiles'>): Result<Staff> {
   try {
     const email =
       row.email && row.email.length > 0
@@ -45,6 +45,7 @@ function mapStaffRow(row: Tables<'profiles'>): Result<Staff> {
         pin: row.pin,
         isActive: row.is_active,
         mustChangePin: row.must_change_pin,
+        locale: row.locale,
       })
     );
   } catch (e) {

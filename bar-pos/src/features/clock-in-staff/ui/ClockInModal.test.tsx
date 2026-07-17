@@ -15,6 +15,7 @@ const staff: Staff = {
   pin: '123456',
   isActive: true,
   mustChangePin: false,
+  locale: 'es-MX',
 };
 
 const mutateAsync = vi.fn();
