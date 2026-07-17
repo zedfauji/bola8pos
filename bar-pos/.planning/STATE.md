@@ -1,20 +1,20 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.2
-milestone_name: — UI Standardization
-current_phase: 2
-status: Awaiting next milestone
-stopped_at: Phase 33.1 context gathered
+milestone: v2.1
+milestone_name: — Cross-Pollination from billar-pos
+current_phase: 21
+status: Ready to plan
+stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
 last_updated: "2026-07-17T19:22:33.406Z"
 last_activity: 2026-07-17
-last_activity_desc: Milestone v2.2 completed and archived
+last_activity_desc: Switched active milestone to v2.1 — resuming at Phase 21
 progress:
   total_phases: 36
   completed_phases: 24
   total_plans: 152
   completed_plans: 161
   percent: 67
-current_phase_name: guardrails-tokens-doc-drift-lint
+current_phase_name: i18n-multi-language
 ---
 
 # Session State

@@ -58,13 +58,6 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 5. **Cross-cutting**: 21 → 28 (28 depends 21)
 6. **Niche**: 27 (depends 14, 17)
 
-### ✅ v2.2 — UI Standardization — SHIPPED 2026-07-17
-
-Phases 29-35 (+33.1) — app-wide UI consistency pass enforcing existing shadcn/Tailwind conventions across all 17 routes. Full phase details archived to `.planning/milestones/v2.2-ROADMAP.md`; requirements archived to `.planning/milestones/v2.2-REQUIREMENTS.md`; audit report at `.planning/milestones/v2.2-MILESTONE-AUDIT.md`.
-
-Known gap accepted as tech debt at close: Phase 33's human visual/keyboard-focus-ring parity spot-check on 7 payment-critical surfaces was deferred by user request (automated E2E gate already passes; see `.planning/phases/33-payment-critical-page-sweep-isolated/33-UAT.md`).
----
-
 ### Phase 1: Foundation
 
 **Source:** S1-foundation.md
@@ -748,7 +741,7 @@ Plans:
 
 ---
 
-### v2.2 — UI Standardization (Phases 29-35, +33.1)
+### ✅ v2.2 — UI Standardization — SHIPPED 2026-07-17 (Phases 29-35, +33.1)
 
 Full phase detail (goals, requirements, plans, success criteria) archived to `.planning/milestones/v2.2-ROADMAP.md` — shipped 2026-07-17.
 
