@@ -41,7 +41,10 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 
 ## Project Reference
 
-See: .planning/PROJECT.md
+See: .planning/PROJECT.md (updated 2026-07-17)
+
+**Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
+**Current focus:** Planning next milestone — see PROJECT.md "Next Milestone Goals"
 
 ## Current Position
 
