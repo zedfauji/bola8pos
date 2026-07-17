@@ -6,14 +6,14 @@ current_phase: 21
 current_phase_name: i18n-multi-language
 status: executing
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-17T23:41:45.644Z"
+last_updated: "2026-07-17T23:55:36.190Z"
 last_activity: 2026-07-17
 last_activity_desc: Phase 21 execution started
 progress:
   total_phases: 28
   completed_phases: 17
   total_plans: 133
-  completed_plans: 132
+  completed_plans: 133
   percent: 61
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 21 (i18n-multi-language) — EXECUTING
-Plan: 3 of 13
+Plan: 4 of 13
 Status: Ready to execute
 Last activity: 2026-07-17 — Phase 21 execution started
 
@@ -236,6 +236,8 @@ Last activity: 2026-07-17 — Phase 21 execution started
 - [Phase 21-i18n-multi-language 01]: eslint.i18n.config.js needs a base config object matching **/*.{ts,tsx} extending tseslint.configs.recommended so shared/lib files are seen (not ignored-warning) by the standalone i18next lint gate
 - [Phase 21-i18n-multi-language 02]: Repaired migration-history drift (3 local migrations already live under different remote version ids) before the blocking db push, verified via direct SQL queries
 - [Phase 21-i18n-multi-language 02]: Two locale write paths: set_own_locale SECURITY DEFINER RPC (self, auth.uid()-scoped) and direct UPDATE gated by the existing manage_staff profiles_update_admin RLS (admin) — no new RLS policy introduced
+- [Phase 21-i18n-multi-language 03]: LanguageSettingsTab skips the GeneralSettingsTab-style hydration useEffect (currentStaff already populated at mount behind ProtectedRoute) and is deliberately not wrapped in ProtectedAction so every role incl. bartender can self-service switch locale
+- [Phase 21-i18n-multi-language 03]: eslint.i18n.config.js extended with object-properties exclude for 'key' and callees exclude for 'can' — structural RBAC/list-key literals in SettingsTabsPanel's tab-assembly array are not UI copy
 
 ## Performance Metrics
 
@@ -292,10 +294,11 @@ Last activity: 2026-07-17 — Phase 21 execution started
 | Phase 35-guardrails-tokens-doc-drift-lint P03 | 45min | 2 tasks | 31 files |
 | Phase 21-i18n-multi-language P01 | 25min | 2 tasks | 27 files |
 | Phase 21-i18n-multi-language P02 | ~90min | 4 tasks | 23 files |
+| Phase 21-i18n-multi-language P03 | ~20min | 2 tasks | 6 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 21-02-PLAN.md
+- **Stopped at:** Completed 21-03-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -312,7 +315,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-17T23:41:45.636Z
+**Last session:** 2026-07-17T23:55:36.181Z
 **Stopped at:** Phase 33.1 context gathered
 **Resume file:** None
 
