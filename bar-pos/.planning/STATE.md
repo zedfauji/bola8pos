@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: — UI Standardization
-current_phase: 35
-status: verifying
+current_phase: 2
+status: Awaiting next milestone
 stopped_at: Phase 33.1 context gathered
-last_updated: "2026-07-17T18:51:29.906Z"
+last_updated: "2026-07-17T19:22:33.406Z"
 last_activity: 2026-07-17
-last_activity_desc: Phase 35 complete
+last_activity_desc: Milestone v2.2 completed and archived
 progress:
   total_phases: 36
   completed_phases: 24
@@ -19,16 +19,36 @@ current_phase_name: guardrails-tokens-doc-drift-lint
 
 # Session State
 
+## Deferred Items
+
+Items acknowledged and deferred at v2.2 milestone close on 2026-07-17:
+
+| Category | Item | Status |
+|----------|------|--------|
+| uat_gap | Phase 02: 02-HUMAN-UAT.md | passed, 0 pending scenarios |
+| uat_gap | Phase 07: 07-HUMAN-UAT.md | partial, 3 pending scenarios |
+| uat_gap | Phase 09: 09-HUMAN-UAT.md | partial, 4 pending scenarios |
+| uat_gap | Phase 12: 12-HUMAN-UAT.md | partial, 5 pending scenarios |
+| verification_gap | Phase 01: 01-VERIFICATION.md | human_needed |
+| verification_gap | Phase 03: 03-VERIFICATION.md | gaps_found |
+| verification_gap | Phase 06: 06-VERIFICATION.md | human_needed |
+| verification_gap | Phase 07: 07-VERIFICATION.md | gaps_found |
+| verification_gap | Phase 09: 09-VERIFICATION.md | human_needed |
+| verification_gap | Phase 12: 12-VERIFICATION.md | human_needed |
+| verification_gap | Phase 33: 33-VERIFICATION.md | human_needed — visual/keyboard-focus-ring parity spot-check on 7 payment-critical surfaces deferred by user (33-UAT.md test 1 skipped with reason); automated E2E gate already passes |
+
+Phases 01-12 predate v2.2 scope (this is the project's first formal milestone close — no prior milestone was ever archived). Phase 33 gap is in-scope for v2.2 and tracked for manual follow-up.
+
 ## Project Reference
 
 See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-07-17 — Phase 35 complete
+Phase: Milestone v2.2 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-17 — Milestone v2.2 completed and archived
 
 ## Session Log
 
@@ -286,3 +306,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 **Last session:** 2026-07-17T18:37:39.184Z
 **Stopped at:** Phase 33.1 context gathered
 **Resume file:** None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
