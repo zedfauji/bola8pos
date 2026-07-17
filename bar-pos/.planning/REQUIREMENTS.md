@@ -51,7 +51,7 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 
 ### Lint
 
-- [ ] **LINT-01**: A drift-detection lint rule (via `eslint-plugin-tailwindcss` and/or `no-restricted-syntax`) is added to prevent regression, added only after the codebase conforms (post-fix, not pre-fix, to avoid a wall of pre-existing violations)
+- [x] **LINT-01**: A drift-detection lint rule (via `eslint-plugin-tailwindcss` and/or `no-restricted-syntax`) is added to prevent regression, added only after the codebase conforms (post-fix, not pre-fix, to avoid a wall of pre-existing violations)
 
 ## Future Requirements (Deferred)
 
@@ -91,6 +91,6 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 | VISUAL-02 | Phase 34 | Complete |
 | VISUAL-03 | Phase 34 | Complete |
 | DOCS-01 | Phase 35 | Complete |
-| LINT-01 | Phase 35 | Pending |
+| LINT-01 | Phase 35 | Complete |
 
 **Coverage:** 22/22 v2.2 requirements mapped. No orphans, no duplicates.

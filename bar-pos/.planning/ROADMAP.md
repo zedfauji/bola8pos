@@ -64,7 +64,7 @@ App-wide UI consistency pass enforcing existing shadcn/Tailwind conventions acro
 - [x] **Phase 32: Touch Target & Focus-Visible Sweep** — Operational/realtime pages meet the 44/56/72px touch floor + visible `focus-visible` rings (completed 2026-07-13)
 - [ ] **Phase 33: Payment-Critical Page Sweep (Isolated)** — POS/payments/split/refund/tip surfaces standardized, zero behavior change, gated by existing E2E specs
 - [x] **Phase 34: Visual Regression Baseline** — Isolated Playwright visual-diff config + post-fix screenshot baselines for all 17 routes (completed 2026-07-14)
-- [ ] **Phase 35: Guardrails — Tokens Doc & Drift Lint** — Design tokens reference doc + drift-detection lint rule, added only after conformance
+- [x] **Phase 35: Guardrails — Tokens Doc & Drift Lint** — Design tokens reference doc + drift-detection lint rule, added only after conformance (completed 2026-07-17)
 
 **Execution order** (strict — respects blast-radius tiering from `research/SUMMARY.md`; each phase depends on the previous):
 
@@ -930,7 +930,7 @@ Plans:
 **Goal:** Document the existing design tokens and add drift-detection lint, both deferred to last because a strict rule only makes sense once the codebase already conforms — adding it earlier would fail against every pre-existing violation Phase 29 catalogued.
 **Requirements:** DOCS-01, LINT-01
 **Depends on:** Phase 34
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**
@@ -943,7 +943,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 35-03-PLAN.md — eslint-rules/no-ui-drift.js (5 selectors) + wire scoped rules into eslint.config.js + convert 4 Phase-31 exception sites + D-14 clean-lint gate (LINT-01) (Wave 3)
+- [x] 35-03-PLAN.md — eslint-rules/no-ui-drift.js (5 selectors) + wire scoped rules into eslint.config.js + convert 4 Phase-31 exception sites + D-14 clean-lint gate (LINT-01) (Wave 3)
 
 **Success Criteria:**
 
