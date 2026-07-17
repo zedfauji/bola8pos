@@ -1,6 +1,8 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import { LocaleSchema, type Locale } from '@shared/lib/domain';
+
 import enCommon from './locales/en-US/common.json';
 import enEntities from './locales/en-US/entities.json';
 import enFeatMgmt from './locales/en-US/featMgmt.json';
@@ -76,5 +78,15 @@ void i18n.use(initReactI18next).init({
 // per-key typing would churn on every sweep as keys are added across 21-03..21-11;
 // the runtime + lint:i18n rule enforce correctness instead. Add when key stability
 // (post-migration) makes the augmentation worth the churn.
+
+/**
+ * Resolves the currently-active i18next language to a typed {@link Locale}.
+ * For non-component consumers (receipts/PDFs, Phase 28's money formatter)
+ * that cannot use the useTranslation() hook's `i18n.language`.
+ */
+export function getCurrentLocale(): Locale {
+  const parsed = LocaleSchema.safeParse(i18n.language);
+  return parsed.success ? parsed.data : 'es-MX';
+}
 
 export default i18n;

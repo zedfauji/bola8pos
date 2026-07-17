@@ -1,9 +1,26 @@
-import { describe, it, expect } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
+import { createElement, type ReactNode } from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { StaffSchema } from '@shared/lib/domain';
+import i18n, { getCurrentLocale } from '@shared/lib/i18n';
+import { supabase } from '@shared/lib/supabase';
 import type { Tables } from '@shared/lib/supabase.types';
 
-import { mapStaffRow } from './queries';
+import { mapStaffRow, useMutationSetOwnLocale, useMutationUpdateStaffLocale } from './queries';
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(QueryClientProvider, { client: queryClient }, children);
+  Wrapper.displayName = 'TestQueryClientProvider';
+  return Wrapper;
+}
+
+type Chainable = Record<string, ReturnType<typeof vi.fn>>;
 
 function makeProfileRow(overrides: Partial<Tables<'profiles'>> = {}): Tables<'profiles'> {
   return {
@@ -75,5 +92,78 @@ describe('mapStaffRow locale', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.data.locale).toBe('en-US');
+  });
+});
+
+describe('getCurrentLocale', () => {
+  it('returns es-MX by default and en-US after changeLanguage', async () => {
+    expect(getCurrentLocale()).toBe('es-MX');
+
+    await i18n.changeLanguage('en-US');
+    expect(getCurrentLocale()).toBe('en-US');
+
+    // Restore default so later tests in this file are unaffected.
+    await i18n.changeLanguage('es-MX');
+  });
+});
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const mockedRpc = vi.mocked(supabase.rpc);
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const mockedFrom = vi.mocked(supabase.from);
+
+describe('useMutationSetOwnLocale', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls set_own_locale RPC with p_locale and no staffId param', async () => {
+    mockedRpc.mockResolvedValue({ data: { ok: true }, error: null } as never);
+
+    const { result } = renderHook(() => useMutationSetOwnLocale(), { wrapper: createWrapper() });
+
+    await result.current.mutateAsync({ locale: 'en-US' });
+
+    await waitFor(() => {
+      expect(mockedRpc).toHaveBeenCalledTimes(1);
+    });
+
+    const [rpcName, rpcArgs] = mockedRpc.mock.calls[0]!;
+    expect(rpcName).toBe('set_own_locale');
+    expect(rpcArgs).toMatchObject({ p_locale: 'en-US' });
+    expect(rpcArgs).not.toHaveProperty('staffId');
+    expect(rpcArgs).not.toHaveProperty('p_staff_id');
+  });
+});
+
+describe('useMutationUpdateStaffLocale', () => {
+  const STAFF_ID = '22222222-2222-2222-2222-222222222222';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls profiles.update({ locale }).eq(id, staffId) for the target staff', async () => {
+    const chain: Chainable = {
+      update: vi.fn(),
+      eq: vi.fn(),
+      select: vi.fn(),
+      single: vi.fn().mockResolvedValue({ data: makeProfileRow({ id: STAFF_ID }), error: null }),
+    };
+    chain.update!.mockReturnValue(chain);
+    chain.eq!.mockReturnValue(chain);
+    chain.select!.mockReturnValue(chain);
+    mockedFrom.mockReturnValue(chain as never);
+    mockedRpc.mockResolvedValue({ data: null, error: null } as never);
+
+    const { result } = renderHook(() => useMutationUpdateStaffLocale(), {
+      wrapper: createWrapper(),
+    });
+
+    await result.current.mutateAsync({ staffId: STAFF_ID, locale: 'en-US' });
+
+    expect(mockedFrom).toHaveBeenCalledWith('profiles');
+    expect(chain.update).toHaveBeenCalledWith({ locale: 'en-US' });
+    expect(chain.eq).toHaveBeenCalledWith('id', STAFF_ID);
   });
 });

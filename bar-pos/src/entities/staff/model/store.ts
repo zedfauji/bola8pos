@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Staff, Shift } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 
@@ -68,6 +69,10 @@ export const useStaffStore = create<StaffStore>()(
           isAuthenticated: true,
           managerGrantedActions: new Set<string>(),
         });
+        // D-01/D-02: locale is staff-attribute-driven, never navigator.language —
+        // prevents one staff member's language leaking onto the next shift's
+        // login on the same shared kiosk terminal.
+        void i18n.changeLanguage(staff.locale);
       },
 
       logout: () => {
@@ -107,8 +112,13 @@ export const useStaffStore = create<StaffStore>()(
         isAuthenticated: state.isAuthenticated,
         // managerGrantedActions intentionally NOT persisted — session-only
       }),
-      onRehydrateStorage: () => () => {
+      onRehydrateStorage: () => state => {
         useStaffStore.setState({ hasHydrated: true });
+        // Reloaded page / restored session: re-apply the persisted staff's
+        // locale (D-01) rather than defaulting to navigator.language.
+        if (state?.currentStaff) {
+          void i18n.changeLanguage(state.currentStaff.locale);
+        }
       },
     }
   )

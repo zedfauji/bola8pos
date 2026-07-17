@@ -45,6 +45,7 @@ export const AuditActionSchema = z.enum([
   // Staff
   'staff.role_change',
   'staff.create',
+  'staff.locale_change',
   // Settings
   'settings.update',
   // Tip distribution
@@ -77,6 +78,7 @@ export const AuditAction = {
   PERMISSION_FORCE_PIN_CHANGE: 'permission.force_pin_change',
   STAFF_ROLE_CHANGE: 'staff.role_change',
   STAFF_CREATE: 'staff.create',
+  STAFF_LOCALE_CHANGE: 'staff.locale_change',
   SETTINGS_UPDATE: 'settings.update',
   TIP_DISTRIBUTION_COMPUTE: 'tip_distribution.compute',
   PROMOTION_APPLY: 'promotion.apply',

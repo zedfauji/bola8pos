@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type { Shift, Staff, StaffMetric, StaffTips } from '@shared/lib/domain';
-import { StaffMetricSchema, StaffTipsSchema } from '@shared/lib/domain';
+import { LocaleSchema, StaffMetricSchema, StaffTipsSchema } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
@@ -476,6 +476,91 @@ export function useMutationUpdateStaffRole() {
       } as never);
       if (auditRes.error) {
         logger.warn('staff.role_change.audit_failed', {
+          staffId,
+          message: auditRes.error.message,
+        });
+      }
+
+      return m;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: staffKeys.list() });
+    },
+  });
+}
+
+/**
+ * Self-service locale change (used by 21-03's Settings "Language" tab).
+ * Calls the `set_own_locale` SECURITY DEFINER RPC, which is scoped to
+ * `auth.uid()`'s own row only — no staffId param, works for ANY authenticated
+ * role including bartender (bypasses the manage_staff-only
+ * `profiles_update_admin` RLS safely). Audited server-side by the RPC itself.
+ */
+export function useMutationSetOwnLocale() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Result<null>, Error, { locale: Staff['locale'] }>({
+    mutationFn: async ({ locale }): Promise<Result<null>> => {
+      const parsed = LocaleSchema.safeParse(locale);
+      if (!parsed.success) {
+        return err({ code: 'VALIDATION_ERROR' as AppErrorCode, message: 'Unsupported locale' });
+      }
+
+      const res = await supabaseMutation(() =>
+        supabase.rpc('set_own_locale', { p_locale: parsed.data, p_terminal_id: TERMINAL_ID })
+      );
+
+      if (!res.ok) {
+        logger.error('staff.set_own_locale.failed', { message: res.error.message });
+        return res;
+      }
+
+      return ok(null);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: staffKeys.list() });
+    },
+  });
+}
+
+/**
+ * Admin-set locale for a target staff member (used by 21-04's Staff
+ * management page). Direct UPDATE gated server-side by the EXISTING
+ * `manage_staff` `profiles_update_admin` RLS policy — a non-manage_staff
+ * caller is RLS-filtered to 0 rows (see V4/T-21-02 integration test). No new
+ * write path is introduced.
+ */
+export function useMutationUpdateStaffLocale() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Result<Staff>, Error, { staffId: string; locale: Staff['locale'] }>({
+    mutationFn: async ({ staffId, locale }): Promise<Result<Staff>> => {
+      const res = await supabaseMutation(() =>
+        supabase.from('profiles').update({ locale }).eq('id', staffId).select().single()
+      );
+
+      if (!res.ok) {
+        logger.error('staff.update_locale.failed', { message: res.error.message });
+        return res;
+      }
+
+      const m = mapStaffRow(res.data as unknown as Tables<'profiles'>);
+      if (!m.ok) {
+        logger.error('staff.update_locale.map_failed', { message: m.error.message });
+        return m;
+      }
+
+      const auditRes = await supabase.rpc('record_audit', {
+        p_action: 'staff.locale_change',
+        p_entity_type: 'staff',
+        p_entity_id: staffId,
+        p_before: null,
+        p_after: { locale },
+        p_source: 'client',
+        p_terminal_id: TERMINAL_ID,
+      });
+      if (auditRes.error) {
+        logger.warn('staff.locale_change.audit_failed', {
           staffId,
           message: auditRes.error.message,
         });
