@@ -618,7 +618,23 @@ Plans:
 **Goal:** Add multi-language support via `react-i18next`, with `es-MX`/`en-US` catalogs, a `profiles.locale` preference, and an ESLint rule banning hard-coded UI strings going forward.
 **Requirements:** TBD (POS-COMPARISON.md §21 — source doc no longer present; scope locked in 21-CONTEXT.md)
 **Depends on:** —
-**Plans:** Not yet planned
+**Plans:** 13 plans (6 waves) — big-bang string migration across all FSD layers
+
+Plans:
+
+- [ ] 21-01-PLAN.md — i18n infrastructure: packages (SUS legitimacy gate) + shared-layer i18next singleton + 10 namespace catalogs + bootstrap wire + eslint.i18n.config.js helper (Wave 1) (SC-1, SC-3, D-02)
+- [ ] 21-02-PLAN.md — [BLOCKING push] profiles.locale migration + types + LocaleSchema/StaffSchema + useMutationUpdateStaffLocale + store locale-hydrate + getCurrentLocale (Wave 2) (SC-2, D-01, D-02)
+- [ ] 21-03-PLAN.md — Settings → Language tab (role-agnostic, resolves Pitfall 1) + SettingsTabsPanel restructure (Wave 3) (SC-2, SC-4, D-03)
+- [ ] 21-04-PLAN.md — Staff admin per-staff locale field: EditLocaleDialog + StaffDashboard column/action (Wave 3) (SC-2, SC-4, D-03)
+- [ ] 21-05-PLAN.md — Receipt + PDF locale (D-06): receipt-format/printer.rs/pos-printer/pdf.tsx, move label selection into TS (Wave 3) (SC-2, SC-4, D-06)
+- [ ] 21-06-PLAN.md — Sweep shared/ui → common ns (Wave 4) (SC-4, D-04)
+- [ ] 21-07-PLAN.md — Sweep features (orders/pool/payment cluster) → featOrders ns (Wave 4) (SC-4, D-04)
+- [ ] 21-08-PLAN.md — Sweep features (mgmt/inventory/staff/waitlist cluster) → featMgmt ns (Wave 4) (SC-4, D-04)
+- [ ] 21-09-PLAN.md — Sweep widgets (operational panels) → wPanels ns (Wave 4) (SC-4, D-04)
+- [ ] 21-10-PLAN.md — Sweep widgets (reports/admin + settings-tab contents) → wAdmin ns (Wave 4) (SC-4, D-04)
+- [ ] 21-11-PLAN.md — Sweep entities + pages → entities/pages ns (Wave 4) (SC-4, D-04)
+- [ ] 21-12-PLAN.md — ESLint enforcement gate: commit no-literal-string repo-wide + full lint green + remove helper (Wave 5) (SC-3, SC-4, D-05)
+- [ ] 21-13-PLAN.md — e2e locale-switch spec + visual-baseline no-regression gate + CLAUDE.md docs + human UAT (Wave 6) (SC-1, SC-4)
 
 **Success Criteria:**
 
