@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Cross-Pollination from billar-pos
-current_phase: 2
-status: Ready to plan
+current_phase: 21
+current_phase_name: i18n-multi-language
+status: executing
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-17T20:55:51.441Z"
+last_updated: "2026-07-17T23:18:58.839Z"
 last_activity: 2026-07-17
-last_activity_desc: Milestone v2.2 completed and archived
+last_activity_desc: Phase 21 execution started
 progress:
   total_phases: 28
   completed_phases: 17
-  total_plans: 120
-  completed_plans: 130
+  total_plans: 133
+  completed_plans: 131
   percent: 61
-current_phase_name: i18n-multi-language
 ---
 
 # Session State
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Planning next milestone — see PROJECT.md "Next Milestone Goals"
+**Current focus:** Phase 21 — i18n-multi-language
 
 ## Current Position
 
-Phase: Milestone v2.2 complete
-Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-17 — Milestone v2.2 completed and archived
+Phase: 21 (i18n-multi-language) — EXECUTING
+Plan: 2 of 13
+Status: Ready to execute
+Last activity: 2026-07-17 — Phase 21 execution started
 
 ## Session Log
 
@@ -232,6 +232,8 @@ Last activity: 2026-07-17 — Milestone v2.2 completed and archived
 - [Phase ?]: LINT-01 not marked complete after plan 35-02 — the requirement text requires the drift-detection rule to be wired/added, which is plan 35-03's deliverable; 35-02 only stages the exact-pinned dependency and fixes the remaining raw-button violation
 - [Phase ?]: [Phase 35-guardrails-tokens-doc-drift-lint 03]: eslint-plugin-tailwindcss settings.tailwindcss.config must be an absolute path -- relative dirname resolution fails in local-pkg's resolveModule
 - [Phase ?]: [Phase 35-guardrails-tokens-doc-drift-lint 03]: shadow-xs/text-pos-muted/hover-bg-var-pos-accent-90 were genuine dead-CSS drift newly surfaced by tailwindcss/no-custom-classname -- fixed (shadow-sm/text-muted-foreground/hover:opacity-90) rather than whitelisted
+- [Phase 21-i18n-multi-language 01]: npm rewrote i18next/react-i18next/eslint-plugin-i18next to caret ranges on install; edited package.json to exact pins (17.0.10/26.3.6/6.1.5) and re-ran npm install to sync the lockfile
+- [Phase 21-i18n-multi-language 01]: eslint.i18n.config.js needs a base config object matching **/*.{ts,tsx} extending tseslint.configs.recommended so shared/lib files are seen (not ignored-warning) by the standalone i18next lint gate
 
 ## Performance Metrics
 
@@ -286,10 +288,11 @@ Last activity: 2026-07-17 — Milestone v2.2 completed and archived
 | Phase 35-guardrails-tokens-doc-drift-lint P01 | 15min | 2 tasks | 3 files |
 | Phase 35-guardrails-tokens-doc-drift-lint P02 | 10min | 2 tasks | 3 files |
 | Phase 35-guardrails-tokens-doc-drift-lint P03 | 45min | 2 tasks | 31 files |
+| Phase 21-i18n-multi-language P01 | 25min | 2 tasks | 27 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 21 UI-SPEC approved
+- **Stopped at:** Completed 21-01-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -306,9 +309,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-17T20:55:51.433Z
+**Last session:** 2026-07-17T23:18:58.831Z
 **Stopped at:** Phase 33.1 context gathered
-**Resume file:** .planning/phases/21-i18n-multi-language/21-UI-SPEC.md
+**Resume file:** None
 
 ## Operator Next Steps
 

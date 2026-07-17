@@ -618,12 +618,12 @@ Plans:
 **Goal:** Add multi-language support via `react-i18next`, with `es-MX`/`en-US` catalogs, a `profiles.locale` preference, and an ESLint rule banning hard-coded UI strings going forward.
 **Requirements:** TBD (POS-COMPARISON.md §21 — source doc no longer present; scope locked in 21-CONTEXT.md)
 **Depends on:** —
-**Plans:** 13 plans (6 waves) — big-bang string migration across all FSD layers
+**Plans:** 1/13 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 21-01-PLAN.md — i18n infrastructure: packages (SUS legitimacy gate) + shared-layer i18next singleton + 10 namespace catalogs + bootstrap wire + eslint.i18n.config.js helper (Wave 1) (SC-1, SC-3, D-02)
+- [x] 21-01-PLAN.md — i18n infrastructure: packages (SUS legitimacy gate) + shared-layer i18next singleton + 10 namespace catalogs + bootstrap wire + eslint.i18n.config.js helper (Wave 1) (SC-1, SC-3, D-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
