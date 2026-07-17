@@ -47,7 +47,7 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 
 ### Docs
 
-- [ ] **DOCS-01**: A design tokens reference doc exists, documenting the existing color/spacing/typography tokens already defined in `tailwind.config.ts` and `index.css` (no new tokens invented)
+- [x] **DOCS-01**: A design tokens reference doc exists, documenting the existing color/spacing/typography tokens already defined in `tailwind.config.ts` and `index.css` (no new tokens invented)
 
 ### Lint
 
@@ -90,7 +90,7 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 | VISUAL-01 | Phase 34 | Complete |
 | VISUAL-02 | Phase 34 | Complete |
 | VISUAL-03 | Phase 34 | Complete |
-| DOCS-01 | Phase 35 | Pending |
+| DOCS-01 | Phase 35 | Complete |
 | LINT-01 | Phase 35 | Pending |
 
 **Coverage:** 22/22 v2.2 requirements mapped. No orphans, no duplicates.

@@ -930,12 +930,12 @@ Plans:
 **Goal:** Document the existing design tokens and add drift-detection lint, both deferred to last because a strict rule only makes sense once the codebase already conforms — adding it earlier would fail against every pre-existing violation Phase 29 catalogued.
 **Requirements:** DOCS-01, LINT-01
 **Depends on:** Phase 34
-**Plans:** 3 plans (3 waves)
+**Plans:** 1/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 35-01-PLAN.md — DESIGN-TOKENS.md + generate-design-tokens.ts generator + docs:tokens npm script (DOCS-01) (Wave 1)
+- [x] 35-01-PLAN.md — DESIGN-TOKENS.md + generate-design-tokens.ts generator + docs:tokens npm script (DOCS-01) (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

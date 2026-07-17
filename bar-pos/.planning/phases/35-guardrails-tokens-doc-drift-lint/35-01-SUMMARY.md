@@ -122,3 +122,10 @@ None - no external service configuration required.
 ---
 *Phase: 35-guardrails-tokens-doc-drift-lint*
 *Completed: 2026-07-17*
+
+## Self-Check: PASSED
+
+- FOUND: DESIGN-TOKENS.md
+- FOUND: scripts/generate-design-tokens.ts
+- FOUND: cceaae3 (Task 2 commit)
+- FOUND: 9de34ae (SUMMARY commit)
