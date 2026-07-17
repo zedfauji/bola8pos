@@ -70,14 +70,12 @@ Exceptions: none. The new "Language" tab reuses `GeneralSettingsTab.tsx`'s exact
 
 ## Typography
 
-**No new typography scale.** Inherit exactly what `SettingsTabsPanel` tabs already use — do not introduce new sizes/weights for this phase's two new surfaces.
+**No new typography scale.** Reuses sizes already present in `SettingsTabsPanel` tabs. Weight is capped at 2 (Dimension 4): 400 regular for body/caption text, 500 medium for anything emphasized (labels and the section heading alike — differentiated from body by size/line-height, not weight). This is a deliberate collapse from `GeneralSettingsTab.tsx`'s literal `font-semibold` (600) h2 — the new Language-tab heading uses `font-medium` instead, since it's new markup, not a byte-for-byte clone of existing migrated copy (the zero-visual-regression contract applies to migrated strings, not to this phase's two brand-new elements).
 
-| Role | Size | Weight | Line Height | Existing usage |
+| Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-----------------|
-| Body | 14px (`text-sm`) | 400 (regular) | 1.5 | Form labels, table cells, helper text |
-| Label | 14px (`text-sm`) | 500 (medium, shadcn `Label` default) | 1.5 | Form field labels (`<Label>`) |
-| Heading | 18px (`text-lg`) | 600 (semibold) | 1.2 | Tab section heading (e.g. `<h2 className="text-lg font-semibold">General</h2>` in `GeneralSettingsTab.tsx`) |
-| Muted/caption | 14px (`text-sm`), `text-muted-foreground` | 400 | 1.5 | Helper copy under the switcher (e.g. "Applies to your account only") |
+| Body | 14px (`text-sm`) | 400 (regular) | 1.5 | Form labels' input text, table cells, helper text |
+| Label / Heading | 14px (`text-sm`) label, 18px (`text-lg`) heading | 500 (medium) | 1.5 (label) / 1.2 (heading) | Form field `<Label>` (shadcn default, matches existing usage everywhere) and the new "Language" section heading (`text-lg font-medium`, not `font-semibold`) |
 
 ---
 
