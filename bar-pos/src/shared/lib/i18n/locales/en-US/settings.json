@@ -1,1 +1,18 @@
-{}
+{
+  "tabs": {
+    "language": "Language"
+  },
+  "language": {
+    "heading": "Language",
+    "fieldLabel": "Interface language",
+    "option": {
+      "esMX": "Español (México)",
+      "enUS": "English (US)"
+    },
+    "helper": "Applies only to your account and persists across devices.",
+    "save": "Save Language",
+    "saving": "Saving…",
+    "saveSuccess": "Language updated.",
+    "saveError": "Couldn't update language. Try again."
+  }
+}
