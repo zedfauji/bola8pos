@@ -618,7 +618,7 @@ Plans:
 **Goal:** Add multi-language support via `react-i18next`, with `es-MX`/`en-US` catalogs, a `profiles.locale` preference, and an ESLint rule banning hard-coded UI strings going forward.
 **Requirements:** TBD (POS-COMPARISON.md §21 — source doc no longer present; scope locked in 21-CONTEXT.md)
 **Depends on:** —
-**Plans:** 1/13 plans executed
+**Plans:** 2/13 plans executed
 
 Plans:
 **Wave 1**
@@ -627,7 +627,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 21-02-PLAN.md — [BLOCKING push] profiles.locale migration + set_own_locale self-RPC + types + LocaleSchema/StaffSchema + set-own/admin locale mutations + store locale-hydrate + getCurrentLocale + V4/T-21-02 RBAC guard integration test (Wave 2) (SC-2, D-01, D-02)
+- [x] 21-02-PLAN.md — [BLOCKING push] profiles.locale migration + set_own_locale self-RPC + types + LocaleSchema/StaffSchema + set-own/admin locale mutations + store locale-hydrate + getCurrentLocale + V4/T-21-02 RBAC guard integration test (Wave 2) (SC-2, D-01, D-02)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 

@@ -6,14 +6,14 @@ current_phase: 21
 current_phase_name: i18n-multi-language
 status: executing
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-17T23:18:58.839Z"
+last_updated: "2026-07-17T23:41:45.644Z"
 last_activity: 2026-07-17
 last_activity_desc: Phase 21 execution started
 progress:
   total_phases: 28
   completed_phases: 17
   total_plans: 133
-  completed_plans: 131
+  completed_plans: 132
   percent: 61
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 21 (i18n-multi-language) — EXECUTING
-Plan: 2 of 13
+Plan: 3 of 13
 Status: Ready to execute
 Last activity: 2026-07-17 — Phase 21 execution started
 
@@ -234,6 +234,8 @@ Last activity: 2026-07-17 — Phase 21 execution started
 - [Phase ?]: [Phase 35-guardrails-tokens-doc-drift-lint 03]: shadow-xs/text-pos-muted/hover-bg-var-pos-accent-90 were genuine dead-CSS drift newly surfaced by tailwindcss/no-custom-classname -- fixed (shadow-sm/text-muted-foreground/hover:opacity-90) rather than whitelisted
 - [Phase 21-i18n-multi-language 01]: npm rewrote i18next/react-i18next/eslint-plugin-i18next to caret ranges on install; edited package.json to exact pins (17.0.10/26.3.6/6.1.5) and re-ran npm install to sync the lockfile
 - [Phase 21-i18n-multi-language 01]: eslint.i18n.config.js needs a base config object matching **/*.{ts,tsx} extending tseslint.configs.recommended so shared/lib files are seen (not ignored-warning) by the standalone i18next lint gate
+- [Phase 21-i18n-multi-language 02]: Repaired migration-history drift (3 local migrations already live under different remote version ids) before the blocking db push, verified via direct SQL queries
+- [Phase 21-i18n-multi-language 02]: Two locale write paths: set_own_locale SECURITY DEFINER RPC (self, auth.uid()-scoped) and direct UPDATE gated by the existing manage_staff profiles_update_admin RLS (admin) — no new RLS policy introduced
 
 ## Performance Metrics
 
@@ -289,10 +291,11 @@ Last activity: 2026-07-17 — Phase 21 execution started
 | Phase 35-guardrails-tokens-doc-drift-lint P02 | 10min | 2 tasks | 3 files |
 | Phase 35-guardrails-tokens-doc-drift-lint P03 | 45min | 2 tasks | 31 files |
 | Phase 21-i18n-multi-language P01 | 25min | 2 tasks | 27 files |
+| Phase 21-i18n-multi-language P02 | ~90min | 4 tasks | 23 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 21-01-PLAN.md
+- **Stopped at:** Completed 21-02-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -309,7 +312,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-17T23:18:58.831Z
+**Last session:** 2026-07-17T23:41:45.636Z
 **Stopped at:** Phase 33.1 context gathered
 **Resume file:** None
 
