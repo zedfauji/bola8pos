@@ -6,14 +6,14 @@ current_phase: 35
 current_phase_name: guardrails-tokens-doc-drift-lint
 status: executing
 stopped_at: Phase 33.1 context gathered
-last_updated: "2026-07-17T16:12:17.460Z"
+last_updated: "2026-07-17T18:20:26.501Z"
 last_activity: 2026-07-17
 last_activity_desc: Phase 35 execution started
 progress:
   total_phases: 36
   completed_phases: 23
   total_plans: 152
-  completed_plans: 159
+  completed_plans: 160
   percent: 64
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 35 (guardrails-tokens-doc-drift-lint) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-07-17 — Phase 35 execution started
 
@@ -204,6 +204,9 @@ Last activity: 2026-07-17 — Phase 35 execution started
 - [Phase ?]: [Phase 34-visual-regression-baseline 34-01]: playwright.visual.config.ts built from scratch, never imports/spreads playwright.config.ts -- every use/project field diverges explicitly (headless, bundled Chromium, no slowMo/channel/globalTeardown)
 - [Phase ?]: [Phase 34-visual-regression-baseline 34-02]: Task 3's blocking checkpoint:human-verify approved by user ("Checked and confirmed i could see all the pNGs") -- 43-PNG baseline confirmed correct post-Phase-33.1 UI, VISUAL-02/VISUAL-03 satisfied
 - [Phase ?]: [Phase 35-guardrails-tokens-doc-drift-lint 01]: DESIGN-TOKENS.md left gitignored/untracked, matching pre-existing FSD-STRUCTURE.md/DOMAIN-CONTRACTS.md/SUPABASE-CONTRACTS.md convention (bar-pos/.gitignore:65 excludes all *.md except CLAUDE.md)
+- [Phase ?]: npm wrote a caret range for eslint-plugin-tailwindcss install; edited package.json to the exact 3.18.3 pin and re-ran npm install to sync the lockfile
+- [Phase ?]: Package-legitimacy checkpoint for eslint-plugin-tailwindcss (SUS-flagged on the unrelated 4.x latest tag) approved by user for the pinned 3.18.3 release
+- [Phase ?]: LINT-01 not marked complete after plan 35-02 — the requirement text requires the drift-detection rule to be wired/added, which is plan 35-03's deliverable; 35-02 only stages the exact-pinned dependency and fixes the remaining raw-button violation
 
 ## Performance Metrics
 
@@ -256,10 +259,11 @@ Last activity: 2026-07-17 — Phase 35 execution started
 | Phase 34 P01 | 15min | 2 tasks | 6 files |
 | Phase 34-visual-regression-baseline P02 | ~55min | 3 tasks | 2 files |
 | Phase 35-guardrails-tokens-doc-drift-lint P01 | 15min | 2 tasks | 3 files |
+| Phase 35-guardrails-tokens-doc-drift-lint P02 | 10min | 2 tasks | 3 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 35 UI-SPEC approved
+- **Stopped at:** Completed 35-02-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -276,6 +280,6 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-17T16:11:31.104Z
+**Last session:** 2026-07-17T18:19:56.274Z
 **Stopped at:** Phase 33.1 context gathered
-**Resume file:** .planning/phases/35-guardrails-tokens-doc-drift-lint/35-UI-SPEC.md
+**Resume file:** None

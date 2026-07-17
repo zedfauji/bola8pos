@@ -930,7 +930,7 @@ Plans:
 **Goal:** Document the existing design tokens and add drift-detection lint, both deferred to last because a strict rule only makes sense once the codebase already conforms — adding it earlier would fail against every pre-existing violation Phase 29 catalogued.
 **Requirements:** DOCS-01, LINT-01
 **Depends on:** Phase 34
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 **Wave 1**
@@ -939,7 +939,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 35-02-PLAN.md — Fix undocumented raw promotion button (D-16) + install eslint-plugin-tailwindcss@3.18.3 behind legitimacy checkpoint (LINT-01) (Wave 2)
+- [x] 35-02-PLAN.md — Fix undocumented raw promotion button (D-16) + install eslint-plugin-tailwindcss@3.18.3 behind legitimacy checkpoint (LINT-01) (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
