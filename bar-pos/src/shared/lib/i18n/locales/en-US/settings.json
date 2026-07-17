@@ -1,7 +1,20 @@
 {
   "tabs": {
-    "language": "Language"
+    "language": "Language",
+    "general": "General",
+    "hardware": "Hardware",
+    "rappi": "Rappi",
+    "email": "Email Receipts",
+    "backup": "Backup",
+    "tipSplit": "Tip Split",
+    "products": "Products",
+    "pool": "Pool Tables",
+    "billing": "Billing",
+    "combos": "Combos",
+    "promotions": "Promotions",
+    "ingredients": "Ingredients"
   },
+  "noPermission": "You do not have permission to view settings.",
   "language": {
     "heading": "Language",
     "fieldLabel": "Interface language",

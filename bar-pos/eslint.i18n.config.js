@@ -39,7 +39,12 @@ export default tseslint.config({
           'size', 'name', 'htmlFor', 'id', 'value', 'aria-hidden',
         ],
       },
-      callees: { exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't'] },
+      // 'can(...)' is the RBAC permission check (usePermissions().can) — its
+      // string argument is a fixed RBACAction identifier, not UI copy.
+      callees: { exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can'] },
+      // Object literal property named `key` (React list keys, internal tab
+      // identifiers) is structural data, not UI copy.
+      'object-properties': { exclude: ['key'] },
       words: { exclude: ['^[0-9.,$%:@#/x×+-]+$', '^[A-Z_]{2,}$'] },
     }],
   },

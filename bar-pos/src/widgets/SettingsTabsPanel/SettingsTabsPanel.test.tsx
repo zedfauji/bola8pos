@@ -1,5 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+// Real i18next singleton (not mocked) — resolves t('settings:tabs.*') to the
+// actual catalog values so these assertions double as an es-MX byte-identical
+// migration check (21-03 D-04/D-05).
+import '@shared/lib/i18n';
 import { SettingsTabsPanel } from './index';
 
 const permissionState = {
@@ -28,6 +32,9 @@ vi.mock('@entities/staff/model/usePermissions', () => ({
   }),
 }));
 
+vi.mock('./tabs/LanguageSettingsTab', () => ({
+  LanguageSettingsTab: () => <div>Language tab content</div>,
+}));
 vi.mock('./tabs/GeneralSettingsTab', () => ({
   GeneralSettingsTab: () => <div>General tab content</div>,
 }));
@@ -84,5 +91,19 @@ describe('SettingsTabsPanel', () => {
     expect(screen.getByRole('tab', { name: 'General' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Products' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Backup' })).toBeInTheDocument();
+  });
+
+  it('shows the role-agnostic Language tab as the default tab for a bartender with neither permission (D-03, Pitfall 1)', () => {
+    permissionState.manageProducts = false;
+    permissionState.manageSettings = false;
+    roleState.role = 'bartender';
+
+    render(<SettingsTabsPanel />);
+
+    // i18n defaults to es-MX (D-02) — the tab label resolves to the es-MX catalog value.
+    const languageTab = screen.getByRole('tab', { name: 'Idioma' });
+    expect(languageTab).toBeInTheDocument();
+    expect(languageTab).toHaveAttribute('data-state', 'active');
+    expect(screen.queryByText('You do not have permission to view settings.')).not.toBeInTheDocument();
   });
 });

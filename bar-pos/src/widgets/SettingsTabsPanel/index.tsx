@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ManageIngredientsTab } from '@widgets/ManageIngredientsTab';
 import { ManageCombosTab } from '@features/manage-combos';
 import { ManagePromotionsTab } from '@features/manage-promotions';
@@ -10,6 +11,7 @@ import { BillingSettingsTab } from './tabs/BillingSettingsTab';
 import { EmailReceiptsSettingsTab } from './tabs/EmailReceiptsSettingsTab';
 import { GeneralSettingsTab } from './tabs/GeneralSettingsTab';
 import { HardwareSettingsTab } from './tabs/HardwareSettingsTab';
+import { LanguageSettingsTab } from './tabs/LanguageSettingsTab';
 import { PoolTablesSettingsTab } from './tabs/PoolTablesSettingsTab';
 import { ProductsSettingsTab } from './tabs/ProductsSettingsTab';
 import { RappiSettingsTab } from './tabs/RappiSettingsTab';
@@ -22,43 +24,53 @@ type TabItem = {
 };
 
 export function SettingsTabsPanel() {
+  const { t } = useTranslation('settings');
   const currentRole = useStaffStore(s => s.currentStaff?.role ?? null);
   const { can } = usePermissions();
   const canManageSettings = can('manage_settings');
   const canManageProducts = can('manage_products');
 
   const tabs = useMemo<TabItem[]>(() => {
-    const out: TabItem[] = [];
+    // Role-agnostic — pushed first and outside both gates below so every
+    // authenticated role (incl. bartender) always has a non-empty tab list
+    // and Language is the default tab for roles with neither permission.
+    const out: TabItem[] = [
+      {
+        key: 'language',
+        label: t('tabs.language'),
+        render: () => <LanguageSettingsTab />,
+      },
+    ];
     if (canManageSettings) {
       out.push(
         {
           key: 'general',
-          label: 'General',
+          label: t('tabs.general'),
           render: () => <GeneralSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'hardware',
-          label: 'Hardware',
+          label: t('tabs.hardware'),
           render: () => <HardwareSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'rappi',
-          label: 'Rappi',
+          label: t('tabs.rappi'),
           render: () => <RappiSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'email',
-          label: 'Email Receipts',
+          label: t('tabs.email'),
           render: () => <EmailReceiptsSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'backup',
-          label: 'Backup',
+          label: t('tabs.backup'),
           render: () => <BackupSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'tip-split',
-          label: 'Tip Split',
+          label: t('tabs.tipSplit'),
           render: () => <TipDistributionSettingsTab currentRole={currentRole} />,
         }
       );
@@ -67,44 +79,44 @@ export function SettingsTabsPanel() {
       out.push(
         {
           key: 'products',
-          label: 'Products',
+          label: t('tabs.products'),
           render: () => <ProductsSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'pool',
-          label: 'Pool Tables',
+          label: t('tabs.pool'),
           render: () => <PoolTablesSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'billing',
-          label: 'Billing',
+          label: t('tabs.billing'),
           render: () => <BillingSettingsTab currentRole={currentRole} />,
         },
         {
           key: 'combos',
-          label: 'Combos',
+          label: t('tabs.combos'),
           render: () => <ManageCombosTab />,
         },
         {
           key: 'promotions',
-          label: 'Promotions',
+          label: t('tabs.promotions'),
           render: () => <ManagePromotionsTab />,
         },
         {
           key: 'ingredients',
-          label: 'Ingredients',
+          label: t('tabs.ingredients'),
           render: () => <ManageIngredientsTab />,
         }
       );
     }
     return out;
-  }, [canManageProducts, canManageSettings, currentRole]);
+  }, [canManageProducts, canManageSettings, currentRole, t]);
 
   const firstTab = tabs[0];
   if (!firstTab) {
     return (
       <section className="rounded-lg border p-4 text-sm text-muted-foreground">
-        You do not have permission to view settings.
+        {t('noPermission')}
       </section>
     );
   }
