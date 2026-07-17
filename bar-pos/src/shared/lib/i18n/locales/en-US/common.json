@@ -1,0 +1,7 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "saving": "Saving…"
+  }
+}
