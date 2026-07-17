@@ -1502,6 +1502,7 @@ export type Database = {
           email: string | null
           id: string
           is_active: boolean
+          locale: string
           must_change_pin: boolean
           name: string
           pin: string
@@ -1514,6 +1515,7 @@ export type Database = {
           email?: string | null
           id: string
           is_active?: boolean
+          locale?: string
           must_change_pin?: boolean
           name: string
           pin: string
@@ -1526,6 +1528,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          locale?: string
           must_change_pin?: boolean
           name?: string
           pin?: string
@@ -2683,6 +2686,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_own_locale: {
+        Args: { p_locale: string; p_terminal_id?: string }
+        Returns: Json
       }
       split_tab_by_amount: {
         Args: { p_amounts: Json; p_parent_tab_id: string }
