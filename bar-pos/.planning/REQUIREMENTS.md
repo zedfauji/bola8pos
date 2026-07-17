@@ -6,8 +6,8 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 
 ### Audit
 
-- [ ] **AUDIT-01**: A drift audit exists identifying every raw `<button>`/`<input>`, hardcoded hex color, and arbitrary-value Tailwind class across `pages/`, `widgets/`, `features/` (17 routes)
-- [ ] **AUDIT-02**: Audit output is a checklist/backlog mapped to specific files, usable to scope subsequent fix phases
+- [x] **AUDIT-01**: A drift audit exists identifying every raw `<button>`/`<input>`, hardcoded hex color, and arbitrary-value Tailwind class across `pages/`, `widgets/`, `features/` (17 routes)
+- [x] **AUDIT-02**: Audit output is a checklist/backlog mapped to specific files, usable to scope subsequent fix phases
 
 ### Shell
 
@@ -17,27 +17,27 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 
 ### Token
 
-- [ ] **TOKEN-01**: Hardcoded hex/rgb color values in `pages/widgets/features` are replaced with existing Tailwind CSS-variable tokens (`--background`, `--primary`, `--pos-accent`, `--pos-danger`, etc.)
-- [ ] **TOKEN-02**: Arbitrary-value spacing classes (e.g. `p-[13px]`) are replaced with the existing Tailwind spacing scale
+- [x] **TOKEN-01**: Hardcoded hex/rgb color values in `pages/widgets/features` are replaced with existing Tailwind CSS-variable tokens (`--background`, `--primary`, `--pos-accent`, `--pos-danger`, etc.)
+- [x] **TOKEN-02**: Arbitrary-value spacing classes (e.g. `p-[13px]`) are replaced with the existing Tailwind spacing scale
 
 ### Component
 
-- [ ] **COMPONENT-01**: Raw `<button>` elements outside `shared/ui` are replaced with `POSButton` (or the correct shared primitive)
-- [ ] **COMPONENT-02**: Raw `<input>` elements outside `shared/ui` are replaced with the correct shared form primitive (`FormField`, `MoneyInput`, etc.), except where a signed-delta/no-clamp field intentionally opts out (documented pattern from Phase 17)
-- [ ] **COMPONENT-03**: Duplicate one-off components that shadow an existing `shared/ui` primitive (e.g. the `pool-table-status` hand-rolled back button) are removed in favor of the shared primitive
+- [x] **COMPONENT-01**: Raw `<button>` elements outside `shared/ui` are replaced with `POSButton` (or the correct shared primitive)
+- [x] **COMPONENT-02**: Raw `<input>` elements outside `shared/ui` are replaced with the correct shared form primitive (`FormField`, `MoneyInput`, etc.), except where a signed-delta/no-clamp field intentionally opts out (documented pattern from Phase 17)
+- [x] **COMPONENT-03**: Duplicate one-off components that shadow an existing `shared/ui` primitive (e.g. the `pool-table-status` hand-rolled back button) are removed in favor of the shared primitive
 - [ ] **COMPONENT-04**: Payment-critical surfaces (POS, payments, split-payment, refund, tip-distribution) receive only markup/class-level swaps — zero prop/handler/validation behavior change, verified by existing E2E specs (`05-payments`, `41-split-payment`, `42-tip-distribution`, `06-transfer`, `09-rbac`) passing unchanged
 
 ### Touch
 
-- [ ] **TOUCH-01**: All interactive elements meet a 44px minimum touch target (app floor, above WCAG's 24px legal minimum)
-- [ ] **TOUCH-02**: Frequent-action controls (add item, confirm) use the 56px `POSButton` size; critical/rare high-stakes actions (process payment, void order, close tab) use the 72px size
-- [ ] **TOUCH-03**: Adjacent touch targets in grids (product grid, quantity steppers) maintain adequate spacing to avoid mis-taps
+- [x] **TOUCH-01**: All interactive elements meet a 44px minimum touch target (app floor, above WCAG's 24px legal minimum)
+- [x] **TOUCH-02**: Frequent-action controls (add item, confirm) use the 56px `POSButton` size; critical/rare high-stakes actions (process payment, void order, close tab) use the 72px size
+- [x] **TOUCH-03**: Adjacent touch targets in grids (product grid, quantity steppers) maintain adequate spacing to avoid mis-taps
 
 ### Focus
 
-- [ ] **FOCUS-01**: All interactive elements have a visible `focus-visible` state using the existing `--ring` token
-- [ ] **FOCUS-02**: Primary action buttons use a higher-contrast/thicker focus ring than the shadcn default subtle ring
-- [ ] **FOCUS-03**: Tab order across forms and keypad/search inputs (`PINKeypad`, `SearchInput`) is verified sane for keyboard/barcode-scanner input
+- [x] **FOCUS-01**: All interactive elements have a visible `focus-visible` state using the existing `--ring` token
+- [x] **FOCUS-02**: Primary action buttons use a higher-contrast/thicker focus ring than the shadcn default subtle ring
+- [x] **FOCUS-03**: Tab order across forms and keypad/search inputs (`PINKeypad`, `SearchInput`) is verified sane for keyboard/barcode-scanner input
 
 ### Visual
 
@@ -70,23 +70,23 @@ Scoped from `.planning/research/SUMMARY.md`. Enforcement of existing shadcn/Tail
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 29 | Pending |
-| AUDIT-02 | Phase 29 | Pending |
+| AUDIT-01 | Phase 29 | Complete |
+| AUDIT-02 | Phase 29 | Complete |
 | SHELL-01 | Phase 30 | Complete |
 | SHELL-02 | Phase 30 | Complete |
 | SHELL-03 | Phase 30 | Complete |
-| TOKEN-01 | Phase 31 | Pending |
-| TOKEN-02 | Phase 31 | Pending |
-| COMPONENT-01 | Phase 31 | Pending |
-| COMPONENT-02 | Phase 31 | Pending |
-| COMPONENT-03 | Phase 31 | Pending |
-| TOUCH-01 | Phase 32 | Pending |
-| TOUCH-02 | Phase 32 | Pending |
-| TOUCH-03 | Phase 32 | Pending |
-| FOCUS-01 | Phase 32 | Pending |
-| FOCUS-02 | Phase 32 | Pending |
-| FOCUS-03 | Phase 32 | Pending |
-| COMPONENT-04 | Phase 33 (E2E gate closed by Phase 33.1) | Complete |
+| TOKEN-01 | Phase 31 | Complete |
+| TOKEN-02 | Phase 31 | Complete |
+| COMPONENT-01 | Phase 31 | Complete |
+| COMPONENT-02 | Phase 31 | Complete |
+| COMPONENT-03 | Phase 31 | Complete |
+| TOUCH-01 | Phase 32 | Complete |
+| TOUCH-02 | Phase 32 | Complete |
+| TOUCH-03 | Phase 32 | Complete |
+| FOCUS-01 | Phase 32 | Complete |
+| FOCUS-02 | Phase 32 | Complete |
+| FOCUS-03 | Phase 32 | Complete |
+| COMPONENT-04 | Phase 33 (E2E gate closed by Phase 33.1) | Complete — human visual/focus-ring parity spot-check deferred by user, tracked as tech debt |
 | VISUAL-01 | Phase 34 | Complete |
 | VISUAL-02 | Phase 34 | Complete |
 | VISUAL-03 | Phase 34 | Complete |
