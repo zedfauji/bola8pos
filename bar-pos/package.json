@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --max-warnings 0",
     "lint:fix": "eslint src --fix",
+    "lint:i18n": "eslint --config eslint.i18n.config.js --max-warnings 0",
     "format": "prettier --write src",
     "test": "vitest run --project unit --reporter=dot",
     "test:integration": "vitest run --reporter=dot \"src/**/*.integration.test.ts\"",
