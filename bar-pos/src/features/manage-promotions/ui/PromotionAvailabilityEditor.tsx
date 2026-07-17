@@ -88,7 +88,8 @@ function WindowRow({
         {DAY_LABELS.map(({ iso, label }) => {
           const selected = draft.daysOfWeek.includes(iso);
           return (
-            <button
+            <Button
+              variant="outline"
               key={iso}
               type="button"
               aria-pressed={selected}
@@ -102,7 +103,7 @@ function WindowRow({
               }`}
             >
               {label}
-            </button>
+            </Button>
           );
         })}
       </div>
