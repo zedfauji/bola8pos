@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { Users } from 'lucide-react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useStaffMetrics } from '@entities/staff';
 import type { StaffMetric } from '@shared/lib/domain';
@@ -9,6 +10,7 @@ import { DataTable, EmptyState, LoadingSpinner, MoneyDisplay } from '@shared/ui'
 type Props = { dateRange: { from: Date; to: Date } };
 
 export function StaffSalesPanel({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useStaffMetrics(dateRange.from, dateRange.to);
   const rows = useMemo(() => (result?.ok ? result.data : []), [result]);
 
@@ -16,33 +18,33 @@ export function StaffSalesPanel({ dateRange }: Props) {
     () => [
       {
         accessorKey: 'staffName',
-        header: 'Staff Member',
+        header: t('staffSalesPanel.columnStaffMember'),
         cell: info => <span className="font-medium">{info.getValue<string>()}</span>,
       },
       {
         accessorKey: 'revenue',
-        header: 'Revenue',
+        header: t('staffSalesPanel.columnRevenue'),
         cell: info => <MoneyDisplay amount={info.getValue<number>()} size="sm" />,
       },
       {
         accessorKey: 'transactionCount',
-        header: 'Transactions',
+        header: t('staffSalesPanel.columnTransactions'),
         cell: info => <span className="tabular-nums">{info.getValue<number>()}</span>,
       },
       {
         accessorKey: 'avgCheckSize',
-        header: 'Avg Check',
+        header: t('staffSalesPanel.columnAvgCheck'),
         cell: info => <MoneyDisplay amount={info.getValue<number>()} size="sm" />,
       },
       {
         accessorKey: 'voidCount',
-        header: 'Voids',
+        header: t('staffSalesPanel.columnVoids'),
         cell: info => (
           <span className="tabular-nums text-muted-foreground">{info.getValue<number>()}</span>
         ),
       },
     ],
-    []
+    [t]
   );
 
   const toolbar =
@@ -58,8 +60,8 @@ export function StaffSalesPanel({ dateRange }: Props) {
       emptyState={
         <EmptyState
           icon={Users}
-          title="No staff activity"
-          description="No staff activity in this date range."
+          title={t('staffSalesPanel.emptyTitle')}
+          description={t('staffSalesPanel.emptyDescription')}
         />
       }
     />

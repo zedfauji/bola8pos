@@ -7,6 +7,8 @@
  * `useAuditLogs(filters)` call when "Apply filters" is clicked — matches the
  * E2E's explicit "click Apply filters" step (14-UI-SPEC.md section B).
  */
+import { useTranslation } from 'react-i18next';
+
 import type { AuditLogFilters } from '@entities/audit-log';
 import { useStaffList } from '@entities/staff';
 import { AuditActionSchema } from '@shared/lib/audit-actions';
@@ -61,6 +63,7 @@ function omit<T extends object, K extends keyof T>(obj: T, key: K): Omit<T, K> {
 }
 
 export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogFilterBarProps) {
+  const { t } = useTranslation('wAdmin');
   const { data: staffList } = useStaffList();
 
   function setAction(value: string) {
@@ -97,10 +100,10 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
     <div className="flex flex-wrap items-center gap-2">
       <Select value={staged.action ?? ALL_VALUE} onValueChange={setAction}>
         <SelectTrigger id="audit-filter-action" className="w-[180px]">
-          <SelectValue placeholder="All actions" />
+          <SelectValue placeholder={t('auditLogFilterBar.allActions')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL_VALUE}>All actions</SelectItem>
+          <SelectItem value={ALL_VALUE}>{t('auditLogFilterBar.allActions')}</SelectItem>
           {AuditActionSchema.options.map(action => (
             <SelectItem key={action} value={action}>
               {action}
@@ -111,10 +114,10 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
 
       <Select value={staged.entityType ?? ALL_VALUE} onValueChange={setEntityType}>
         <SelectTrigger className="w-[160px]">
-          <SelectValue placeholder="All entities" />
+          <SelectValue placeholder={t('auditLogFilterBar.allEntities')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL_VALUE}>All entities</SelectItem>
+          <SelectItem value={ALL_VALUE}>{t('auditLogFilterBar.allEntities')}</SelectItem>
           {ENTITY_TYPES.map(entityType => (
             <SelectItem key={entityType} value={entityType}>
               {entityType}
@@ -125,10 +128,10 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
 
       <Select value={staged.actorId ?? ALL_VALUE} onValueChange={setActorId}>
         <SelectTrigger className="w-[160px]">
-          <SelectValue placeholder="All staff" />
+          <SelectValue placeholder={t('auditLogFilterBar.allStaff')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL_VALUE}>All staff</SelectItem>
+          <SelectItem value={ALL_VALUE}>{t('auditLogFilterBar.allStaff')}</SelectItem>
           {(staffList ?? []).map(staff => (
             <SelectItem key={staff.id} value={staff.id}>
               {staff.name}
@@ -137,7 +140,7 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
         </SelectContent>
       </Select>
 
-      <FormField label="Date from">
+      <FormField label={t('auditLogFilterBar.dateFrom')}>
         <input
           type="date"
           value={toDateInputValue(staged.dateFrom)}
@@ -147,7 +150,7 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
           className={DATE_INPUT_CLASS}
         />
       </FormField>
-      <FormField label="Date to">
+      <FormField label={t('auditLogFilterBar.dateTo')}>
         <input
           type="date"
           value={toDateInputValue(staged.dateTo)}
@@ -164,12 +167,12 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
           onChange={e => {
             setSearch(e.target.value);
           }}
-          placeholder="Search by entity ID or action…"
-          aria-label="Search by entity ID or action"
+          placeholder={t('auditLogFilterBar.searchPlaceholder')}
+          aria-label={t('auditLogFilterBar.searchAriaLabel')}
           className="w-[220px]"
         />
         <span className="text-xs text-muted-foreground">
-          Some characters aren&apos;t searchable and will be ignored
+          {t('auditLogFilterBar.searchHint')}
         </span>
       </div>
 
@@ -178,7 +181,7 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
           onApply(staged);
         }}
       >
-        Apply filters
+        {t('auditLogFilterBar.applyFilters')}
       </Button>
     </div>
   );

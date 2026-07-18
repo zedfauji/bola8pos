@@ -1,4 +1,5 @@
 import { Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useWaitlistAnalyticsReport } from '@entities/tab/model/queries-reports';
 import type { WaitlistMetricsRow } from '@shared/lib/domain';
@@ -8,12 +9,14 @@ import { Skeleton } from '@shared/ui/skeleton';
 type Props = { dateRange: { from: Date; to: Date } };
 
 function heatmapBgColor(count: number, max: number): string {
+  // eslint-disable-next-line i18next/no-literal-string -- CSS custom-property value, not UI copy
   if (max === 0) return 'var(--muted)';
   const intensity = count / max;
   return `oklch(${(0.72 - intensity * 0.3).toFixed(3)} ${(intensity * 0.19).toFixed(3)} 145)`;
 }
 
 export function WaitlistAnalyticsReport({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useWaitlistAnalyticsReport(dateRange.from, dateRange.to);
 
   if (isLoading) {
@@ -34,8 +37,8 @@ export function WaitlistAnalyticsReport({ dateRange }: Props) {
     return (
       <EmptyState
         icon={Users}
-        title="No waitlist activity"
-        description="No waitlist entries found for this date range."
+        title={t('waitlistAnalyticsReport.emptyTitle')}
+        description={t('waitlistAnalyticsReport.emptyDescription')}
       />
     );
   }
@@ -66,17 +69,17 @@ export function WaitlistAnalyticsReport({ dateRange }: Props) {
   const maxCount = Math.max(...hourCounts.map(h => h.count), 1);
 
   const metrics = [
-    { label: 'Parties Seated', value: String(totalSeated) },
+    { label: t('waitlistAnalyticsReport.metricPartiesSeated'), value: String(totalSeated) },
     {
-      label: 'No-Show Rate',
+      label: t('waitlistAnalyticsReport.metricNoShowRate'),
       value: avgNoShowRate !== null ? `${avgNoShowRate.toFixed(1)}%` : '—',
     },
     {
-      label: 'Avg Quoted Wait',
+      label: t('waitlistAnalyticsReport.metricAvgQuotedWait'),
       value: avgQuotedWait !== null ? `${avgQuotedWait.toFixed(1)} min` : '—',
     },
     {
-      label: 'Avg Actual Wait',
+      label: t('waitlistAnalyticsReport.metricAvgActualWait'),
       value: avgActualWait !== null ? `${avgActualWait.toFixed(1)} min` : '—',
     },
   ];
@@ -92,7 +95,9 @@ export function WaitlistAnalyticsReport({ dateRange }: Props) {
         ))}
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-normal text-muted-foreground">Queue Length by Hour</h3>
+        <h3 className="mb-2 text-sm font-normal text-muted-foreground">
+          {t('waitlistAnalyticsReport.queueLengthByHour')}
+        </h3>
         <div className="grid grid-cols-12 gap-1">
           {hourCounts.map(({ hour, count }) => (
             <div

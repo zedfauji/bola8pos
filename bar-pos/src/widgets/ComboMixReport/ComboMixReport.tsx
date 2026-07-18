@@ -1,4 +1,5 @@
 import { TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -25,10 +26,12 @@ const CHART_COLORS = [
 type Props = { dateRange: { from: Date; to: Date } };
 
 function chartColor(index: number): string {
+  // eslint-disable-next-line i18next/no-literal-string -- CSS custom-property value, not UI copy
   return CHART_COLORS[index % CHART_COLORS.length] ?? 'var(--chart-1)';
 }
 
 export function ComboMixReport({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useComboMixReport(dateRange.from, dateRange.to);
 
   if (isLoading) return <LoadingSpinner />;
@@ -39,8 +42,8 @@ export function ComboMixReport({ dateRange }: Props) {
     return (
       <EmptyState
         icon={TrendingUp}
-        title="No combo sales"
-        description="No combo orders recorded in this date range."
+        title={t('comboMixReport.emptyTitle')}
+        description={t('comboMixReport.emptyDescription')}
       />
     );
   }
@@ -86,11 +89,11 @@ export function ComboMixReport({ dateRange }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Combo</TableHead>
-              <TableHead className="tabular-nums">Units Sold</TableHead>
-              <TableHead className="tabular-nums">Gross Revenue</TableHead>
-              <TableHead className="tabular-nums">Avg Price</TableHead>
-              <TableHead className="tabular-nums">Overrides</TableHead>
+              <TableHead>{t('comboMixReport.columnCombo')}</TableHead>
+              <TableHead className="tabular-nums">{t('comboMixReport.columnUnitsSold')}</TableHead>
+              <TableHead className="tabular-nums">{t('comboMixReport.columnGrossRevenue')}</TableHead>
+              <TableHead className="tabular-nums">{t('comboMixReport.columnAvgPrice')}</TableHead>
+              <TableHead className="tabular-nums">{t('comboMixReport.columnOverrides')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

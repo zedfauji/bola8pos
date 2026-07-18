@@ -1,1 +1,164 @@
-{}
+{
+  "auditLogDetailSheet": {
+    "system": "System"
+  },
+  "auditLogFilterBar": {
+    "allActions": "All actions",
+    "allEntities": "All entities",
+    "allStaff": "All staff",
+    "dateFrom": "Date from",
+    "dateTo": "Date to",
+    "searchPlaceholder": "Search by entity ID or action…",
+    "searchAriaLabel": "Search by entity ID or action",
+    "searchHint": "Some characters aren't searchable and will be ignored",
+    "applyFilters": "Apply filters"
+  },
+  "auditLogTable": {
+    "columnAction": "Action",
+    "viewDiffAriaLabel": "View diff for {{action}} on {{date}}",
+    "viewDiff": "View diff",
+    "columnEntityType": "Entity type",
+    "columnActor": "Actor",
+    "system": "System",
+    "columnTimestamp": "Timestamp",
+    "columnSource": "Source",
+    "loadErrorTitle": "Couldn't load audit log",
+    "loadErrorDescription": "Couldn't load audit log — check your connection and try again.",
+    "noMatchesTitle": "No matches",
+    "noMatchesDescription": "No audit entries match your filters. Try widening the date range or clearing a filter.",
+    "noActivityTitle": "No audit activity yet",
+    "noActivityDescription": "Audit entries appear here as staff process payments, refunds, and other tracked actions.",
+    "loadMoreEntries": "Load more entries"
+  },
+  "categoryRevenuePanel": {
+    "emptyTitle": "No category data",
+    "emptyDescription": "No revenue recorded in this date range.",
+    "columnCategory": "Category",
+    "columnUnitsSold": "Units Sold",
+    "columnOrders": "Orders",
+    "columnRevenue": "Revenue",
+    "columnPctTotal": "% of Total"
+  },
+  "comboMixReport": {
+    "emptyTitle": "No combo sales",
+    "emptyDescription": "No combo orders recorded in this date range.",
+    "columnCombo": "Combo",
+    "columnUnitsSold": "Units Sold",
+    "columnGrossRevenue": "Gross Revenue",
+    "columnAvgPrice": "Avg Price",
+    "columnOverrides": "Overrides"
+  },
+  "comboOverrideReport": {
+    "emptyTitle": "No overrides",
+    "emptyDescription": "No combo availability overrides found for this date range.",
+    "columnTimestamp": "Timestamp",
+    "columnActor": "Actor",
+    "columnCombo": "Combo",
+    "columnReason": "Reason"
+  },
+  "hourlyBreakdownPanel": {
+    "emptyTitle": "No hourly data",
+    "emptyDescription": "No revenue recorded in this date range.",
+    "peakLabel": "Peak:",
+    "slowestLabel": "Slowest:",
+    "hourRevenueValue": "{{hour}} (${{revenue}})",
+    "columnHour": "Hour",
+    "columnOrders": "Orders",
+    "columnRevenue": "Revenue"
+  },
+  "productSalesPanel": {
+    "columnProduct": "Product",
+    "columnCategory": "Category",
+    "columnUnitsSold": "Units Sold",
+    "columnRevenue": "Revenue",
+    "columnPctTotal": "% of Total",
+    "filterByCategoryAriaLabel": "Filter by category",
+    "sortByRevenue": "By Revenue",
+    "sortByUnits": "By Units",
+    "emptyTitle": "No sales in this range",
+    "emptyDescription": "No products sold in this date range."
+  },
+  "recipeVarianceReport": {
+    "emptyTitle": "No variance data",
+    "emptyDescription": "No stock movements recorded for this date range and category.",
+    "columnDate": "Date",
+    "columnIngredient": "Ingredient",
+    "columnTheoreticalUsed": "Theoretical Used",
+    "columnPhysicalDelta": "Physical Delta",
+    "columnVariancePct": "Variance %",
+    "totalLabel": "Total"
+  },
+  "refundsList": {
+    "columnDate": "Date",
+    "columnPaymentRef": "Payment ref",
+    "truncatedId": "{{id}}…",
+    "columnReason": "Reason",
+    "columnItems": "Items",
+    "itemsCount": "{{itemCount}} item(s)",
+    "columnAmount": "Amount",
+    "columnRestocked": "Restocked",
+    "yes": "Yes",
+    "no": "No",
+    "columnStaff": "Staff",
+    "emptyTitle": "No refunds yet",
+    "emptyDescription": "Refunds processed on paid orders will appear here."
+  },
+  "refundsRegister": {
+    "emptyTitle": "No refunds",
+    "emptyDescription": "No refunds issued in this date range.",
+    "columnDate": "Date",
+    "columnOperator": "Operator",
+    "columnTab": "Tab",
+    "columnItems": "Items",
+    "columnAmount": "Amount",
+    "columnReason": "Reason",
+    "columnRestock": "Restock",
+    "truncatedId": "{{id}}…",
+    "totalLabel": "Total"
+  },
+  "staffSalesPanel": {
+    "columnStaffMember": "Staff Member",
+    "columnRevenue": "Revenue",
+    "columnTransactions": "Transactions",
+    "columnAvgCheck": "Avg Check",
+    "columnVoids": "Voids",
+    "emptyTitle": "No staff activity",
+    "emptyDescription": "No staff activity in this date range."
+  },
+  "tipBucketDistributionPanel": {
+    "bucketFloor": "Floor",
+    "bucketBar": "Bar",
+    "bucketKitchen": "Kitchen",
+    "title": "Tip Split",
+    "description": "Floor / Bar / Kitchen allocation for a closed caja session.",
+    "selectSession": "Select session",
+    "openSuffix": "(open)",
+    "emptyTitle": "No tip split recorded for this session.",
+    "emptyDescription": "A tip split is computed when a caja session is closed.",
+    "totalTips": "Total Tips",
+    "bucketLine": "{{label}} ({{pct}}%)"
+  },
+  "tipDistributionPanel": {
+    "columnStaffMember": "Staff Member",
+    "columnTotalTips": "Total Tips",
+    "emptyTitle": "No tip data",
+    "emptyDescription": "No tip data in this date range."
+  },
+  "voidRefundPanel": {
+    "columnTimestamp": "Timestamp",
+    "columnStaff": "Staff",
+    "columnAmount": "Amount",
+    "columnReason": "Reason",
+    "emptyTitle": "No voids or refunds",
+    "emptyDescription": "No voids or refunds in this range."
+  },
+  "waitlistAnalyticsReport": {
+    "emptyTitle": "No waitlist activity",
+    "emptyDescription": "No waitlist entries found for this date range.",
+    "metricPartiesSeated": "Parties Seated",
+    "metricNoShowRate": "No-Show Rate",
+    "metricAvgQuotedWait": "Avg Quoted Wait",
+    "metricAvgActualWait": "Avg Actual Wait",
+    "queueLengthByHour": "Queue Length by Hour"
+  }
+}

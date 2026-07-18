@@ -1,4 +1,5 @@
 import { ShieldOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useComboOverrides } from '@entities/tab/model/queries-reports';
 import type { ComboOverrideRow } from '@shared/lib/domain';
@@ -8,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 type Props = { dateRange: { from: Date; to: Date } };
 
 export function ComboOverrideReport({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useComboOverrides(dateRange.from, dateRange.to);
 
   if (isLoading) return <LoadingSpinner />;
@@ -18,8 +20,8 @@ export function ComboOverrideReport({ dateRange }: Props) {
     return (
       <EmptyState
         icon={ShieldOff}
-        title="No overrides"
-        description="No combo availability overrides found for this date range."
+        title={t('comboOverrideReport.emptyTitle')}
+        description={t('comboOverrideReport.emptyDescription')}
       />
     );
   }
@@ -36,10 +38,10 @@ export function ComboOverrideReport({ dateRange }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Timestamp</TableHead>
-              <TableHead>Actor</TableHead>
-              <TableHead>Combo</TableHead>
-              <TableHead>Reason</TableHead>
+              <TableHead>{t('comboOverrideReport.columnTimestamp')}</TableHead>
+              <TableHead>{t('comboOverrideReport.columnActor')}</TableHead>
+              <TableHead>{t('comboOverrideReport.columnCombo')}</TableHead>
+              <TableHead>{t('comboOverrideReport.columnReason')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

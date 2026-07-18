@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { BarChart2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useProductSalesReport, type ProductSalesRow } from '@entities/tab/model/queries-reports';
 import { Button, DataTable, EmptyState, LoadingSpinner, MoneyDisplay } from '@shared/ui';
@@ -12,6 +13,7 @@ type Props = {
 const ALL_CATEGORIES = 'All';
 
 export function ProductSalesPanel({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useProductSalesReport(dateRange.from, dateRange.to);
 
   const rawRows = useMemo(() => (result?.ok ? result.data : []), [result]);
@@ -43,32 +45,32 @@ export function ProductSalesPanel({ dateRange }: Props) {
     () => [
       {
         accessorKey: 'productName',
-        header: 'Product',
+        header: t('productSalesPanel.columnProduct'),
         cell: info => <span className="font-medium">{info.getValue<string>()}</span>,
       },
       {
         accessorKey: 'categoryName',
-        header: 'Category',
+        header: t('productSalesPanel.columnCategory'),
       },
       {
         accessorKey: 'units',
-        header: 'Units Sold',
+        header: t('productSalesPanel.columnUnitsSold'),
         cell: info => <span className="tabular-nums">{info.getValue<number>()}</span>,
       },
       {
         accessorKey: 'revenue',
-        header: 'Revenue',
+        header: t('productSalesPanel.columnRevenue'),
         cell: info => <MoneyDisplay amount={info.getValue<number>()} size="sm" />,
       },
       {
         accessorKey: 'pctTotal',
-        header: '% of Total',
+        header: t('productSalesPanel.columnPctTotal'),
         cell: info => (
           <span className="tabular-nums text-muted-foreground">{info.getValue<number>()}%</span>
         ),
       },
     ],
-    []
+    [t]
   );
 
   const exportData = { rows: filtered, dateRange };
@@ -81,7 +83,7 @@ export function ProductSalesPanel({ dateRange }: Props) {
         onChange={e => {
           setSelectedCategory(e.target.value);
         }}
-        aria-label="Filter by category"
+        aria-label={t('productSalesPanel.filterByCategoryAriaLabel')}
       >
         {categories.map(cat => (
           <option key={cat} value={cat}>
@@ -103,7 +105,7 @@ export function ProductSalesPanel({ dateRange }: Props) {
               : 'border border-input bg-background text-foreground hover:bg-muted'
           }`}
         >
-          By Revenue
+          {t('productSalesPanel.sortByRevenue')}
         </Button>
         <Button
           type="button"
@@ -117,7 +119,7 @@ export function ProductSalesPanel({ dateRange }: Props) {
               : 'border border-input bg-background text-foreground hover:bg-muted'
           }`}
         >
-          By Units
+          {t('productSalesPanel.sortByUnits')}
         </Button>
       </div>
 
@@ -137,13 +139,14 @@ export function ProductSalesPanel({ dateRange }: Props) {
       emptyState={
         <EmptyState
           icon={BarChart2}
-          title="No sales in this range"
-          description="No products sold in this date range."
+          title={t('productSalesPanel.emptyTitle')}
+          description={t('productSalesPanel.emptyDescription')}
         />
       }
       getRowClassName={(row: ProductSalesRow) => {
         const idx = filtered.indexOf(row);
         if (idx < 3 && filtered.length > 0) {
+          // eslint-disable-next-line i18next/no-literal-string -- Tailwind class string, not UI copy
           return 'border-l-2 border-l-amber-400 bg-amber-500/5';
         }
         return undefined;

@@ -104,6 +104,10 @@ export default tseslint.config({
           // passthrough (e.g. highlight="border-amber-500/40") — a CSS class
           // string, not UI copy, same category as 'className'/'confirmClassName'.
           'highlight',
+          // 'stackId' is Recharts' <Bar> stacking-group identifier (e.g.
+          // stackId="a" in ComboMixReport's day-of-week stacked bar chart)
+          // — a chart-library technical grouping key, not UI copy.
+          'stackId',
         ],
       },
       // 'can(...)'/'canAccess(...)' are the RBAC permission checks (usePermissions().can,
@@ -139,10 +143,10 @@ export default tseslint.config({
       // error logger, wrapping logger.warn + toast.error) takes a fixed telemetry
       // event name as its first arg (e.g. 'cash_drawer.failed') — same category as
       // the already-excluded 'logger\.\w+', just not dotted since it's a local fn.
-      // 'toLocaleDateString'/'toLocaleTimeString' (Date.prototype's Intl
-      // formatting methods, e.g. payment.processedAt.toLocaleDateString('en-GB',
-      // {...})) take a fixed BCP-47 locale identifier as their first arg — a
-      // technical Intl parameter, not UI copy.
+      // 'toLocaleDateString'/'toLocaleTimeString'/'toLocaleString' (Date.prototype's
+      // Intl formatting methods, e.g. payment.processedAt.toLocaleDateString('en-GB',
+      // {...}), row.ts's toLocaleString('es-MX')) take a fixed BCP-47 locale
+      // identifier as their first arg — a technical Intl parameter, not UI copy.
       // 'usePersistedBool' (@shared/lib/usePersistedBool, e.g.
       // usePersistedBool('pool_filters_collapsed', false)) takes a fixed
       // localStorage key as its first arg — a wire-protocol identifier, not
@@ -152,7 +156,7 @@ export default tseslint.config({
           'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'canAccess', 'logger\\.\\w+',
           'rpc', 'navigate', 'from', 'select', 'eq', 'order', 'insert', 'update', 'delete',
           'executeTool', 'logHardwareFail', 'toLocaleDateString', 'toLocaleTimeString',
-          'usePersistedBool',
+          'toLocaleString', 'usePersistedBool',
         ],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list

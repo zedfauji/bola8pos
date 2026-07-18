@@ -1,4 +1,5 @@
 import { PieChart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import {
   useCategoryRevenueReport,
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function CategoryRevenuePanel({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useCategoryRevenueReport(dateRange.from, dateRange.to);
 
   if (isLoading) return <LoadingSpinner />;
@@ -22,8 +24,8 @@ export function CategoryRevenuePanel({ dateRange }: Props) {
     return (
       <EmptyState
         icon={PieChart}
-        title="No category data"
-        description="No revenue recorded in this date range."
+        title={t('categoryRevenuePanel.emptyTitle')}
+        description={t('categoryRevenuePanel.emptyDescription')}
       />
     );
   }
@@ -39,11 +41,11 @@ export function CategoryRevenuePanel({ dateRange }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Category</TableHead>
-              <TableHead>Units Sold</TableHead>
-              <TableHead>Orders</TableHead>
-              <TableHead>Revenue</TableHead>
-              <TableHead>% of Total</TableHead>
+              <TableHead>{t('categoryRevenuePanel.columnCategory')}</TableHead>
+              <TableHead>{t('categoryRevenuePanel.columnUnitsSold')}</TableHead>
+              <TableHead>{t('categoryRevenuePanel.columnOrders')}</TableHead>
+              <TableHead>{t('categoryRevenuePanel.columnRevenue')}</TableHead>
+              <TableHead>{t('categoryRevenuePanel.columnPctTotal')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

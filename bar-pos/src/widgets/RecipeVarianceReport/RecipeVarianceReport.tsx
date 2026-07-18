@@ -1,4 +1,5 @@
 import { FlaskConical } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useRecipeVarianceReport } from '@entities/tab/model/queries-reports';
 import type { RecipeVarianceRow } from '@shared/lib/domain';
@@ -8,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 type Props = { dateRange: { from: Date; to: Date } };
 
 export function RecipeVarianceReport({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useRecipeVarianceReport(dateRange.from, dateRange.to);
 
   if (isLoading) return <LoadingSpinner />;
@@ -18,8 +20,8 @@ export function RecipeVarianceReport({ dateRange }: Props) {
     return (
       <EmptyState
         icon={FlaskConical}
-        title="No variance data"
-        description="No stock movements recorded for this date range and category."
+        title={t('recipeVarianceReport.emptyTitle')}
+        description={t('recipeVarianceReport.emptyDescription')}
       />
     );
   }
@@ -39,11 +41,11 @@ export function RecipeVarianceReport({ dateRange }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Ingredient</TableHead>
-              <TableHead className="tabular-nums">Theoretical Used</TableHead>
-              <TableHead className="tabular-nums">Physical Delta</TableHead>
-              <TableHead className="tabular-nums">Variance %</TableHead>
+              <TableHead>{t('recipeVarianceReport.columnDate')}</TableHead>
+              <TableHead>{t('recipeVarianceReport.columnIngredient')}</TableHead>
+              <TableHead className="tabular-nums">{t('recipeVarianceReport.columnTheoreticalUsed')}</TableHead>
+              <TableHead className="tabular-nums">{t('recipeVarianceReport.columnPhysicalDelta')}</TableHead>
+              <TableHead className="tabular-nums">{t('recipeVarianceReport.columnVariancePct')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -66,7 +68,7 @@ export function RecipeVarianceReport({ dateRange }: Props) {
               </TableRow>
             ))}
             <TableRow className="border-t-2 font-semibold bg-muted/20">
-              <TableCell colSpan={2}>Total</TableCell>
+              <TableCell colSpan={2}>{t('recipeVarianceReport.totalLabel')}</TableCell>
               <TableCell className="tabular-nums">{totalTheoretical.toFixed(3)}</TableCell>
               <TableCell className="tabular-nums">{totalPhysical.toFixed(3)}</TableCell>
               <TableCell className="tabular-nums text-muted-foreground">—</TableCell>

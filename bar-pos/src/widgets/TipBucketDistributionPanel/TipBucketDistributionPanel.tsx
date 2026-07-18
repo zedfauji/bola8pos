@@ -1,5 +1,6 @@
 import { PieChart } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCajaList, useTipDistributionEntry } from '@entities/caja';
 import type { CajaSession } from '@shared/lib/domain';
 import { EmptyState } from '@shared/ui/EmptyState';
@@ -12,6 +13,7 @@ function formatDate(d: Date) {
 }
 
 export function TipBucketDistributionPanel() {
+  const { t } = useTranslation('wAdmin');
   const { data: listResult, isLoading: listLoading } = useCajaList();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -23,17 +25,32 @@ export function TipBucketDistributionPanel() {
 
   const buckets = entry
     ? [
-        { key: 'floor', label: 'Floor', pct: entry.floorPct, amount: entry.floorAmount },
-        { key: 'bar', label: 'Bar', pct: entry.barPct, amount: entry.barAmount },
-        { key: 'kitchen', label: 'Kitchen', pct: entry.kitchenPct, amount: entry.kitchenAmount },
+        {
+          key: 'floor',
+          label: t('tipBucketDistributionPanel.bucketFloor'),
+          pct: entry.floorPct,
+          amount: entry.floorAmount,
+        },
+        {
+          key: 'bar',
+          label: t('tipBucketDistributionPanel.bucketBar'),
+          pct: entry.barPct,
+          amount: entry.barAmount,
+        },
+        {
+          key: 'kitchen',
+          label: t('tipBucketDistributionPanel.bucketKitchen'),
+          pct: entry.kitchenPct,
+          amount: entry.kitchenAmount,
+        },
       ]
     : [];
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <SectionHeader
-        title="Tip Split"
-        description="Floor / Bar / Kitchen allocation for a closed caja session."
+        title={t('tipBucketDistributionPanel.title')}
+        description={t('tipBucketDistributionPanel.description')}
       />
 
       {listLoading && <LoadingSpinner />}
@@ -41,7 +58,7 @@ export function TipBucketDistributionPanel() {
       {!listLoading && (
         <div className="flex items-center gap-3">
           <label htmlFor="tip-split-caja-selector" className="text-sm font-medium">
-            Select session
+            {t('tipBucketDistributionPanel.selectSession')}
           </label>
           <select
             id="tip-split-caja-selector"
@@ -53,7 +70,8 @@ export function TipBucketDistributionPanel() {
           >
             {sessions.map((s: CajaSession) => (
               <option key={s.id} value={s.id}>
-                {formatDate(s.openedAt)} {s.status === 'open' ? '(open)' : ''}
+                {formatDate(s.openedAt)}{' '}
+                {s.status === 'open' ? t('tipBucketDistributionPanel.openSuffix') : ''}
               </option>
             ))}
           </select>
@@ -65,15 +83,17 @@ export function TipBucketDistributionPanel() {
       {!entryLoading && !entry && (
         <EmptyState
           icon={PieChart}
-          title="No tip split recorded for this session."
-          description="A tip split is computed when a caja session is closed."
+          title={t('tipBucketDistributionPanel.emptyTitle')}
+          description={t('tipBucketDistributionPanel.emptyDescription')}
         />
       )}
 
       {entry && (
         <div className="space-y-6">
           <div className="rounded-lg border p-4">
-            <p className="text-sm text-muted-foreground">Total Tips</p>
+            <p className="text-sm text-muted-foreground">
+              {t('tipBucketDistributionPanel.totalTips')}
+            </p>
             <MoneyDisplay amount={entry.totalTips} size="lg" className="mt-1 font-bold" />
           </div>
 
@@ -81,7 +101,10 @@ export function TipBucketDistributionPanel() {
             {buckets.map(bucket => (
               <div key={bucket.key} className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">
-                  {bucket.label} ({bucket.pct}%)
+                  {t('tipBucketDistributionPanel.bucketLine', {
+                    label: bucket.label,
+                    pct: bucket.pct,
+                  })}
                 </p>
                 <MoneyDisplay amount={bucket.amount} size="lg" className="mt-1 font-bold" />
               </div>

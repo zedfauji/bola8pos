@@ -4,6 +4,8 @@
  * shape exactly (14-UI-SPEC.md section D). No footer/mutation — this Sheet
  * is read-only.
  */
+import { useTranslation } from 'react-i18next';
+
 import type { AuditLog } from '@entities/audit-log';
 import { JsonDiffViewer } from '@shared/ui/JsonDiffViewer/JsonDiffViewer';
 import {
@@ -37,6 +39,7 @@ export function AuditLogDetailSheet({
   open,
   onOpenChange,
 }: AuditLogDetailSheetProps) {
+  const { t } = useTranslation('wAdmin');
   const isTruncated = row
     ? isTruncatedPayload(row.before) || isTruncatedPayload(row.after)
     : false;
@@ -48,7 +51,7 @@ export function AuditLogDetailSheet({
           <SheetTitle>{row?.action ?? ''}</SheetTitle>
           <SheetDescription>
             {row
-              ? `${row.entityType} · ${row.createdAt.toLocaleString()} · ${actorName ?? 'System'}`
+              ? `${row.entityType} · ${row.createdAt.toLocaleString()} · ${actorName ?? t('auditLogDetailSheet.system')}`
               : ''}
           </SheetDescription>
         </SheetHeader>

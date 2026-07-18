@@ -1,4 +1,5 @@
 import { Receipt } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useRefundsRegister } from '@entities/tab/model/queries-reports';
 import type { RefundRegisterRow } from '@shared/lib/domain';
@@ -8,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 type Props = { dateRange: { from: Date; to: Date } };
 
 export function RefundsRegister({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useRefundsRegister(dateRange.from, dateRange.to);
 
   if (isLoading) return <LoadingSpinner />;
@@ -18,8 +20,8 @@ export function RefundsRegister({ dateRange }: Props) {
     return (
       <EmptyState
         icon={Receipt}
-        title="No refunds"
-        description="No refunds issued in this date range."
+        title={t('refundsRegister.emptyTitle')}
+        description={t('refundsRegister.emptyDescription')}
       />
     );
   }
@@ -41,13 +43,13 @@ export function RefundsRegister({ dateRange }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Operator</TableHead>
-              <TableHead>Tab</TableHead>
-              <TableHead className="tabular-nums">Items</TableHead>
-              <TableHead className="tabular-nums">Amount</TableHead>
-              <TableHead>Reason</TableHead>
-              <TableHead className="tabular-nums">Restock</TableHead>
+              <TableHead>{t('refundsRegister.columnDate')}</TableHead>
+              <TableHead>{t('refundsRegister.columnOperator')}</TableHead>
+              <TableHead>{t('refundsRegister.columnTab')}</TableHead>
+              <TableHead className="tabular-nums">{t('refundsRegister.columnItems')}</TableHead>
+              <TableHead className="tabular-nums">{t('refundsRegister.columnAmount')}</TableHead>
+              <TableHead>{t('refundsRegister.columnReason')}</TableHead>
+              <TableHead className="tabular-nums">{t('refundsRegister.columnRestock')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -58,7 +60,7 @@ export function RefundsRegister({ dateRange }: Props) {
                 </TableCell>
                 <TableCell>{row.operatorName}</TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
-                  {row.originalPaymentId.slice(0, 8)}…
+                  {t('refundsRegister.truncatedId', { id: row.originalPaymentId.slice(0, 8) })}
                 </TableCell>
                 <TableCell className="tabular-nums">{row.items.length}</TableCell>
                 <TableCell className="tabular-nums">${row.amount.toFixed(2)}</TableCell>
@@ -69,7 +71,7 @@ export function RefundsRegister({ dateRange }: Props) {
               </TableRow>
             ))}
             <TableRow className="border-t-2 font-semibold">
-              <TableCell>Total</TableCell>
+              <TableCell>{t('refundsRegister.totalLabel')}</TableCell>
               <TableCell>—</TableCell>
               <TableCell>—</TableCell>
               <TableCell className="tabular-nums">{totalItems}</TableCell>

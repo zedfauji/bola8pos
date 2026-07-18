@@ -1,4 +1,5 @@
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import {
   useHourlyBreakdown,
@@ -20,6 +21,7 @@ function formatHour(h: number): string {
 }
 
 export function HourlyBreakdownPanel({ dateRange }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: result, isLoading } = useHourlyBreakdown(dateRange.from, dateRange.to);
 
   if (isLoading) {
@@ -33,8 +35,8 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
     return (
       <EmptyState
         icon={Clock}
-        title="No hourly data"
-        description="No revenue recorded in this date range."
+        title={t('hourlyBreakdownPanel.emptyTitle')}
+        description={t('hourlyBreakdownPanel.emptyDescription')}
       />
     );
   }
@@ -53,17 +55,23 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
         <div className="flex flex-wrap gap-4 rounded-lg border bg-muted/30 px-4 py-2 text-sm">
           {peakHour && (
             <span>
-              Peak:{' '}
+              {t('hourlyBreakdownPanel.peakLabel')}{' '}
               <span className="font-semibold text-emerald-500">
-                {formatHour(peakHour.hour)} (${peakHour.revenue.toFixed(2)})
+                {t('hourlyBreakdownPanel.hourRevenueValue', {
+                  hour: formatHour(peakHour.hour),
+                  revenue: peakHour.revenue.toFixed(2),
+                })}
               </span>
             </span>
           )}
           {slowestHour && (
             <span>
-              Slowest:{' '}
+              {t('hourlyBreakdownPanel.slowestLabel')}{' '}
               <span className="font-semibold text-amber-400">
-                {formatHour(slowestHour.hour)} (${slowestHour.revenue.toFixed(2)})
+                {t('hourlyBreakdownPanel.hourRevenueValue', {
+                  hour: formatHour(slowestHour.hour),
+                  revenue: slowestHour.revenue.toFixed(2),
+                })}
               </span>
             </span>
           )}
@@ -75,9 +83,9 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Hour</TableHead>
-              <TableHead>Orders</TableHead>
-              <TableHead>Revenue</TableHead>
+              <TableHead>{t('hourlyBreakdownPanel.columnHour')}</TableHead>
+              <TableHead>{t('hourlyBreakdownPanel.columnOrders')}</TableHead>
+              <TableHead>{t('hourlyBreakdownPanel.columnRevenue')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

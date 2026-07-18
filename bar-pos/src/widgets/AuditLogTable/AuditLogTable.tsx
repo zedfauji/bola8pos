@@ -12,6 +12,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { ClipboardList, Loader2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useAuditLogs } from '@entities/audit-log';
 import type { AuditLog, AuditLogFilters } from '@entities/audit-log';
@@ -33,6 +34,7 @@ function hasAnyFilter(filters: AuditLogFilters): boolean {
 }
 
 export function AuditLogTable() {
+  const { t } = useTranslation('wAdmin');
   const [staged, setStaged] = useState<AuditLogFilters>({});
   const [appliedFilters, setAppliedFilters] = useState<AuditLogFilters>({});
   const [selectedRow, setSelectedRow] = useState<AuditLog | null>(null);
@@ -61,7 +63,7 @@ export function AuditLogTable() {
     {
       id: 'action',
       accessorKey: 'action',
-      header: 'Action',
+      header: t('auditLogTable.columnAction'),
       cell: ({ row }) => {
         const auditLog = row.original;
         return (
@@ -71,12 +73,15 @@ export function AuditLogTable() {
               type="button"
               variant="link"
               className="sr-only"
-              aria-label={`View diff for ${auditLog.action} on ${formatAuditDate(auditLog.createdAt)}`}
+              aria-label={t('auditLogTable.viewDiffAriaLabel', {
+                action: auditLog.action,
+                date: formatAuditDate(auditLog.createdAt),
+              })}
               onClick={() => {
                 openSheet(auditLog);
               }}
             >
-              View diff
+              {t('auditLogTable.viewDiff')}
             </Button>
           </>
         );
@@ -85,26 +90,26 @@ export function AuditLogTable() {
     {
       id: 'entityType',
       accessorKey: 'entityType',
-      header: 'Entity type',
+      header: t('auditLogTable.columnEntityType'),
     },
     {
       id: 'actor',
-      header: 'Actor',
+      header: t('auditLogTable.columnActor'),
       cell: ({ row }) => {
         const actorId = row.original.actorId;
-        return actorId ? (staffNameMap.get(actorId) ?? actorId) : 'System';
+        return actorId ? (staffNameMap.get(actorId) ?? actorId) : t('auditLogTable.system');
       },
     },
     {
       id: 'createdAt',
       accessorKey: 'createdAt',
-      header: 'Timestamp',
+      header: t('auditLogTable.columnTimestamp'),
       cell: ({ row }) => formatAuditDate(row.original.createdAt),
     },
     {
       id: 'source',
       accessorKey: 'source',
-      header: 'Source',
+      header: t('auditLogTable.columnSource'),
       cell: ({ row }) => <Badge variant="outline">{row.original.source}</Badge>,
     },
   ];
@@ -116,22 +121,22 @@ export function AuditLogTable() {
     emptyState = (
       <EmptyState
         icon={ClipboardList}
-        title="Couldn't load audit log"
-        description="Couldn't load audit log — check your connection and try again."
+        title={t('auditLogTable.loadErrorTitle')}
+        description={t('auditLogTable.loadErrorDescription')}
       />
     );
   } else if (status === 'success' && rows.length === 0) {
     emptyState = filtersApplied ? (
       <EmptyState
         icon={ClipboardList}
-        title="No matches"
-        description="No audit entries match your filters. Try widening the date range or clearing a filter."
+        title={t('auditLogTable.noMatchesTitle')}
+        description={t('auditLogTable.noMatchesDescription')}
       />
     ) : (
       <EmptyState
         icon={ClipboardList}
-        title="No audit activity yet"
-        description="Audit entries appear here as staff process payments, refunds, and other tracked actions."
+        title={t('auditLogTable.noActivityTitle')}
+        description={t('auditLogTable.noActivityDescription')}
       />
     );
   }
@@ -163,7 +168,7 @@ export function AuditLogTable() {
           }}
         >
           {isFetchingNextPage && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />}
-          Load more entries
+          {t('auditLogTable.loadMoreEntries')}
         </Button>
       )}
 
