@@ -6,6 +6,7 @@
  * Uses native <select> elements (no @shared/ui/select — not yet installed).
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Ingredient, IngredientCreate } from '@entities/ingredient';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
@@ -51,6 +52,7 @@ interface Props {
 }
 
 export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Props) {
+  const { t } = useTranslation('featMgmt');
   const [name, setName] = useState(ingredient?.name ?? '');
   const [category, setCategory] = useState(ingredient?.category ?? '');
   const [uom, setUom] = useState(ingredient?.uom ?? '');
@@ -70,12 +72,14 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
 
   function validate(): boolean {
     const next: Partial<Record<string, string>> = {};
-    if (!name.trim()) next['name'] = 'Name is required';
-    if (!uom) next['uom'] = 'Base unit is required';
+    if (!name.trim()) next['name'] = t('manageIngredients.form.nameRequired');
+    if (!uom) next['uom'] = t('manageIngredients.form.baseUnitRequired');
     const factor = parseFloat(purchaseToBaseFactor);
-    if (isNaN(factor) || factor <= 0) next['purchaseToBaseFactor'] = 'Factor must be greater than 0';
+    if (isNaN(factor) || factor <= 0)
+      next['purchaseToBaseFactor'] = t('manageIngredients.form.factorMustBeGreaterThanZero');
     const cost = parseFloat(costPerBaseUnit);
-    if (!isNaN(cost) && cost < 0) next['costPerBaseUnit'] = 'Cost must be 0 or greater';
+    if (!isNaN(cost) && cost < 0)
+      next['costPerBaseUnit'] = t('manageIngredients.form.costMustBeZeroOrGreater');
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -106,10 +110,10 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div className="space-y-1.5">
-        <Label htmlFor="ing-name">Name</Label>
+        <Label htmlFor="ing-name">{t('manageIngredients.form.nameLabel')}</Label>
         <Input
           id="ing-name"
-          placeholder="e.g. Corona 355ml, Wings, Salsa Mexicana"
+          placeholder={t('manageIngredients.form.namePlaceholder')}
           value={name}
           onChange={e => {
             setName(e.target.value);
@@ -124,10 +128,10 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
 
       {/* Category */}
       <div className="space-y-1.5">
-        <Label htmlFor="ing-category">Category</Label>
+        <Label htmlFor="ing-category">{t('manageIngredients.form.categoryLabel')}</Label>
         <Input
           id="ing-category"
-          placeholder="e.g. beer-regular, produce, prep"
+          placeholder={t('manageIngredients.form.categoryPlaceholder')}
           value={category}
           onChange={e => {
             setCategory(e.target.value);
@@ -138,7 +142,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
 
       {/* Base UOM */}
       <div className="space-y-1.5">
-        <Label htmlFor="ing-uom">Base unit</Label>
+        <Label htmlFor="ing-uom">{t('manageIngredients.form.baseUnitLabel')}</Label>
         <select
           id="ing-uom"
           value={uom}
@@ -149,7 +153,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
           className={SELECT_CLASS}
         >
           <option value="" disabled>
-            Select base unit…
+            {t('manageIngredients.form.selectBaseUnit')}
           </option>
           {BASE_UOM_GROUPS.map(group => (
             <optgroup key={group.label} label={group.label}>
@@ -162,7 +166,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
           ))}
         </select>
         <p className="text-xs text-muted-foreground">
-          The smallest unit used in recipes (e.g. g, ml, unit)
+          {t('manageIngredients.form.baseUnitHelp')}
         </p>
         {errors['uom'] !== undefined && (
           <p className="text-xs text-destructive">{errors['uom']}</p>
@@ -171,7 +175,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
 
       {/* Purchase UOM */}
       <div className="space-y-1.5">
-        <Label htmlFor="ing-purchase-uom">Purchase unit</Label>
+        <Label htmlFor="ing-purchase-uom">{t('manageIngredients.form.purchaseUnitLabel')}</Label>
         <select
           id="ing-purchase-uom"
           value={purchaseUom}
@@ -181,7 +185,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
           disabled={isPending}
           className={SELECT_CLASS}
         >
-          <option value="">Select purchase unit…</option>
+          <option value="">{t('manageIngredients.form.selectPurchaseUnit')}</option>
           {ALL_UOM_GROUPS.map(group => (
             <optgroup key={group.label} label={group.label}>
               {group.values.map(v => (
@@ -193,19 +197,19 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
           ))}
         </select>
         <p className="text-xs text-muted-foreground">
-          How you receive deliveries (e.g. kg, case_24)
+          {t('manageIngredients.form.purchaseUnitHelp')}
         </p>
       </div>
 
       {/* Purchase to base factor */}
       <div className="space-y-1.5">
-        <Label htmlFor="ing-factor">Units per purchase</Label>
+        <Label htmlFor="ing-factor">{t('manageIngredients.form.unitsPerPurchaseLabel')}</Label>
         <Input
           id="ing-factor"
           type="number"
           step="any"
           min="0.000001"
-          placeholder="e.g. 1000"
+          placeholder={t('manageIngredients.form.unitsPerPurchasePlaceholder')}
           value={purchaseToBaseFactor}
           onChange={e => {
             setPurchaseToBaseFactor(e.target.value);
@@ -214,7 +218,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
           className="font-mono"
         />
         <p className="text-xs text-muted-foreground">
-          How many base units are in one purchase unit
+          {t('manageIngredients.form.unitsPerPurchaseHelp')}
         </p>
         {errors['purchaseToBaseFactor'] !== undefined && (
           <p className="text-xs text-destructive">{errors['purchaseToBaseFactor']}</p>
@@ -223,7 +227,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
 
       {/* Cost per base unit */}
       <div className="space-y-1.5">
-        <Label htmlFor="ing-cost">Cost per base unit (MXN)</Label>
+        <Label htmlFor="ing-cost">{t('manageIngredients.form.costPerBaseUnitLabel')}</Label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
             $
@@ -233,7 +237,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
             type="number"
             step="0.0001"
             min="0"
-            placeholder="e.g. 0.012"
+            placeholder={t('manageIngredients.form.costPerBaseUnitPlaceholder')}
             value={costPerBaseUnit}
             onChange={e => {
               setCostPerBaseUnit(e.target.value);
@@ -249,13 +253,13 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
 
       {/* Reorder point */}
       <div className="space-y-1.5">
-        <Label htmlFor="ing-reorder">Reorder point</Label>
+        <Label htmlFor="ing-reorder">{t('manageIngredients.form.reorderPointLabel')}</Label>
         <Input
           id="ing-reorder"
           type="number"
           step="1"
           min="0"
-          placeholder="e.g. 2000"
+          placeholder={t('manageIngredients.form.reorderPointPlaceholder')}
           value={reorderPoint}
           onChange={e => {
             setReorderPoint(e.target.value);
@@ -263,7 +267,7 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
           disabled={isPending}
         />
         <p className="text-xs text-muted-foreground">
-          Alert when stock falls below this level
+          {t('manageIngredients.form.reorderPointHelp')}
         </p>
       </div>
 
@@ -279,10 +283,10 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
         />
         <div className="space-y-0.5">
           <Label htmlFor="ing-is-prep" className="cursor-pointer">
-            Prep item
+            {t('manageIngredients.form.isPrepLabel')}
           </Label>
           <p className="text-xs text-muted-foreground">
-            Mark if this ingredient is produced in-house (e.g. Salsa Mexicana)
+            {t('manageIngredients.form.isPrepHelp')}
           </p>
         </div>
       </div>
@@ -290,10 +294,14 @@ export function IngredientForm({ ingredient, isPending, onSubmit, onCancel }: Pr
       {/* Footer */}
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Add ingredient'}
+          {isPending
+            ? t('common:actions.saving')
+            : isEdit
+              ? t('manageIngredients.form.saveChanges')
+              : t('manageIngredients.form.addIngredient')}
         </Button>
       </div>
     </form>

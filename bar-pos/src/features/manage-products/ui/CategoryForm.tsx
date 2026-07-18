@@ -1,4 +1,5 @@
 import { useState, type SyntheticEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import type { Category } from '@shared/lib/domain';
 import { CategoryCreateSchema, CategoryUpdateSchema } from '@shared/lib/domain';
@@ -27,13 +28,14 @@ export function CategoryForm({
   onSubmitUpdate,
   onCancel,
 }: CategoryFormProps) {
+  const { t } = useTranslation('featMgmt');
   const isEdit = initialCategory != null;
 
   const [name, setName] = useState(initialCategory?.name ?? '');
   // TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
   // picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
   // token — see 31-CONTEXT.md D-08.
-  // eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-08: category.color is per-row user data, not a theme color
+  // eslint-disable-next-line no-restricted-syntax, i18next/no-literal-string -- 31-CONTEXT.md D-08: category.color is per-row user data, not a theme color / translatable copy
   const [color, setColor] = useState(initialCategory?.color ?? '#6B7280');
   const [sortOrder, setSortOrder] = useState(String(initialCategory?.sortOrder ?? 0));
 
@@ -45,7 +47,7 @@ export function CategoryForm({
 
     const sortParsed = Number.parseInt(sortOrder, 10);
     if (Number.isNaN(sortParsed) || sortParsed < 0) {
-      setFieldErrors({ sortOrder: 'Sort order must be a non-negative integer' });
+      setFieldErrors({ sortOrder: t('manageProducts.categoryForm.sortOrderInvalid') });
       return;
     }
 
@@ -99,7 +101,7 @@ export function CategoryForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <FormField label="Name" required error={fieldErrors.name ?? ''}>
+      <FormField label={t('manageProducts.categoryForm.nameLabel')} required error={fieldErrors.name ?? ''}>
         <Input
           value={name}
           onChange={e => {
@@ -110,16 +112,16 @@ export function CategoryForm({
       </FormField>
 
       <FormField
-        label="Color"
+        label={t('manageProducts.categoryForm.colorLabel')}
         required
         error={fieldErrors.color ?? ''}
-        hint="Hex or use the picker"
+        hint={t('manageProducts.categoryForm.colorHint')}
       >
         <div className="flex flex-wrap items-center gap-2">
           {/* native color input — no shared/ui color-picker primitive exists, see 31-CONTEXT.md D-05 */}
           <input
             type="color"
-            aria-label="Color picker"
+            aria-label={t('manageProducts.categoryForm.colorPickerAria')}
             className="h-9 w-14 cursor-pointer rounded border bg-transparent p-0"
             value={color.startsWith('#') ? color.slice(0, 7) : `#${color}`.slice(0, 7)}
             onChange={e => {
@@ -136,14 +138,14 @@ export function CategoryForm({
             onChange={e => {
               setColor(e.target.value);
             }}
-            // eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-08: category.color is per-row user data, not a theme color
+            // eslint-disable-next-line no-restricted-syntax, i18next/no-literal-string -- 31-CONTEXT.md D-08: category.color is per-row user data, not a theme color / translatable copy
             placeholder="#6B7280"
             disabled={submitting}
           />
         </div>
       </FormField>
 
-      <FormField label="Sort order" required error={fieldErrors.sortOrder ?? ''}>
+      <FormField label={t('manageProducts.categoryForm.sortOrderLabel')} required error={fieldErrors.sortOrder ?? ''}>
         <Input
           inputMode="numeric"
           value={sortOrder}
@@ -164,10 +166,14 @@ export function CategoryForm({
           disabled={submitting}
           onClick={onCancel}
         >
-          Cancel
+          {t('common:actions.cancel')}
         </POSButton>
         <POSButton type="submit" touchSize="default" disabled={submitting}>
-          {submitting ? 'Saving…' : isEdit ? 'Save category' : 'Create category'}
+          {submitting
+            ? t('common:actions.saving')
+            : isEdit
+              ? t('manageProducts.categoryForm.saveCategory')
+              : t('manageProducts.categoryForm.createCategory')}
         </POSButton>
       </div>
     </form>

@@ -69,12 +69,20 @@ export default tseslint.config({
       'jsx-attributes': {
         exclude: [
           'data-testid', 'className', 'to', 'type', 'key', 'role', 'variant',
-          'size', 'name', 'htmlFor', 'id', 'value', 'aria-hidden',
+          'size', 'name', 'htmlFor', 'id', 'value', 'defaultValue', 'aria-hidden',
           // 'data-slot' is the shadcn/Radix structural slot marker (e.g.
           // data-slot="dialog-content") used across every shared/ui shadcn
           // primitive — a CSS/DOM hook, not UI copy. 'aria-invalid' is always
           // the literal string 'true'/'false', never translatable text.
           'data-slot', 'aria-invalid',
+          // 'step' is the native <input type="number"> HTML attribute
+          // controlling increment granularity (e.g. step="any", step="0.01")
+          // — a numeric/DOM behavior value, not UI copy.
+          'step',
+          // 'accept' is the native <input type="file"> HTML attribute listing
+          // accepted MIME types/extensions (e.g. accept=".csv") — a technical
+          // DOM filter value, not UI copy.
+          'accept',
           // 'confirmClassName' is ConfirmDialog's Tailwind class passthrough for
           // the destructive confirm button (Phase 32/33's touch-target/focus-ring
           // sweep, e.g. VoidOrderDialog's 72px/ring-4 confirm) — a CSS class
@@ -94,8 +102,19 @@ export default tseslint.config({
       // 'navigate(...)' (react-router's useNavigate() return value) first
       // arg is a route path (e.g. '/pos', '/pool-tables'), never UI copy —
       // recurs across pages/widgets, not just this plan's feature folders.
+      // 'from(...)' (Supabase query-builder's db.from('table_name')/supabase.from(...))
+      // first arg is a fixed Postgres table name — a wire-protocol identifier like
+      // 'rpc', not UI copy; recurs 30+ times across the 21-08 management/inventory/
+      // staff-ops feature cluster's pre-regen `db = supabase as any` query builders.
+      // 'select(...)'/'eq(...)'/'order(...)' (chained off the same query-builder,
+      // e.g. db.from('products').select('id, name').eq('is_active', true).order('name'))
+      // carry DB column-name/wildcard literals, not UI copy — same category as 'from',
+      // recurring 20+ times in this plan's scope alone.
       callees: {
-        exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+', 'rpc', 'navigate'],
+        exclude: [
+          'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+',
+          'rpc', 'navigate', 'from', 'select', 'eq', 'order',
+        ],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list
       // keys, TanStack Table column identifiers/accessors) are structural

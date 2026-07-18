@@ -1,5 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { RecipeEditorTab } from '@features/manage-recipe';
 import { useCategories } from '@entities/category';
@@ -114,6 +115,7 @@ function ProductBasePriceCell({
 }
 
 export function CatalogProductsTab() {
+  const { t } = useTranslation('featMgmt');
   const { data: products, isLoading, resultError } = useProductsForManagement();
   const { data: categories } = useCategories();
   const { data: modifiers } = useModifiers();
@@ -178,7 +180,7 @@ export function CatalogProductsTab() {
   const columns: ColumnDef<Product>[] = [
     {
       id: 'name',
-      header: 'Name',
+      header: t('manageProducts.productsTab.nameHeader'),
       cell: ({ row }) => {
         const p = row.original;
         const d = getDraft(p);
@@ -190,7 +192,11 @@ export function CatalogProductsTab() {
               setDraft(p.id, { name });
             }}
             onCommit={name => {
-              runUpdate({ id: p.id, name, modifierIds: modifierIdsOf(p) }, 'Product updated', p.id);
+              runUpdate(
+                { id: p.id, name, modifierIds: modifierIdsOf(p) },
+                t('manageProducts.productsTab.productUpdated'),
+                p.id
+              );
             }}
           />
         );
@@ -198,7 +204,7 @@ export function CatalogProductsTab() {
     },
     {
       id: 'category',
-      header: 'Category',
+      header: t('manageProducts.productsTab.categoryHeader'),
       cell: ({ row }) => {
         const p = row.original;
         const d = getDraft(p);
@@ -213,7 +219,7 @@ export function CatalogProductsTab() {
             onCommit={categoryId => {
               runUpdate(
                 { id: p.id, categoryId, modifierIds: modifierIdsOf(p) },
-                'Category updated',
+                t('manageProducts.productsTab.categoryUpdated'),
                 p.id
               );
             }}
@@ -223,7 +229,7 @@ export function CatalogProductsTab() {
     },
     {
       id: 'basePrice',
-      header: 'Base',
+      header: t('manageProducts.productsTab.baseHeader'),
       cell: ({ row }) => {
         const p = row.original;
         const d = getDraft(p);
@@ -237,7 +243,7 @@ export function CatalogProductsTab() {
             onCommit={basePrice => {
               runUpdate(
                 { id: p.id, basePrice, modifierIds: modifierIdsOf(p) },
-                'Price updated',
+                t('manageProducts.productsTab.priceUpdated'),
                 p.id
               );
             }}
@@ -247,12 +253,14 @@ export function CatalogProductsTab() {
     },
     {
       id: 'active',
-      header: 'Status',
+      header: t('manageProducts.productsTab.statusHeader'),
       cell: ({ row }) => {
         const p = row.original;
         return (
           <Badge variant={p.isActive ? 'default' : 'secondary'}>
-            {p.isActive ? 'Active' : 'Inactive'}
+            {p.isActive
+              ? t('manageProducts.productsTab.active')
+              : t('manageProducts.productsTab.inactive')}
           </Badge>
         );
       },
@@ -272,7 +280,7 @@ export function CatalogProductsTab() {
                 setEditProduct(p);
               }}
             >
-              Edit
+              {t('manageProducts.productsTab.edit')}
             </POSButton>
             <POSButton
               type="button"
@@ -283,7 +291,7 @@ export function CatalogProductsTab() {
                 setDeactivateId(p.id);
               }}
             >
-              Deactivate
+              {t('manageProducts.productsTab.deactivate')}
             </POSButton>
           </div>
         );
@@ -293,7 +301,9 @@ export function CatalogProductsTab() {
 
   if (resultError) {
     return (
-      <p className="text-destructive text-sm">Could not load products: {resultError.message}</p>
+      <p className="text-destructive text-sm">
+        {t('manageProducts.productsTab.loadError', { message: resultError.message })}
+      </p>
     );
   }
 
@@ -303,7 +313,7 @@ export function CatalogProductsTab() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm">
-          Edit name, category, or prices inline (saved on blur). Use Edit for modifiers and SKU.
+          {t('manageProducts.productsTab.headerHelp')}
         </p>
         <POSButton
           type="button"
@@ -312,7 +322,7 @@ export function CatalogProductsTab() {
             setCreateOpen(true);
           }}
         >
-          Add product
+          {t('manageProducts.productsTab.addProduct')}
         </POSButton>
       </div>
 
@@ -321,14 +331,14 @@ export function CatalogProductsTab() {
         data={products ?? []}
         isLoading={isLoading}
         searchable
-        searchPlaceholder="Search products…"
+        searchPlaceholder={t('manageProducts.productsTab.searchPlaceholder')}
         enableSorting
       />
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-md sm:max-w-md" showCloseButton>
           <DialogHeader>
-            <DialogTitle>New product</DialogTitle>
+            <DialogTitle>{t('manageProducts.productsTab.newProductTitle')}</DialogTitle>
           </DialogHeader>
           <ProductForm
             categories={catList}
@@ -343,7 +353,7 @@ export function CatalogProductsTab() {
                 onSuccess: r => {
                   if (!r.ok) toast.error(r.error.message);
                   else {
-                    toast.success('Product created');
+                    toast.success(t('manageProducts.productsTab.productCreated'));
                     setCreateOpen(false);
                   }
                 },
@@ -362,13 +372,15 @@ export function CatalogProductsTab() {
       >
         <DialogContent className="max-w-2xl sm:max-w-2xl" showCloseButton>
           <DialogHeader>
-            <DialogTitle>Edit product</DialogTitle>
+            <DialogTitle>{t('manageProducts.productsTab.editProductTitle')}</DialogTitle>
           </DialogHeader>
           {editProduct ? (
             <Tabs defaultValue="details">
               <TabsList>
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="recipe">Recipe</TabsTrigger>
+                <TabsTrigger value="details">
+                  {t('manageProducts.productsTab.detailsTab')}
+                </TabsTrigger>
+                <TabsTrigger value="recipe">{t('manageProducts.productsTab.recipeTab')}</TabsTrigger>
               </TabsList>
               <TabsContent value="details">
                 <ProductForm
@@ -386,7 +398,7 @@ export function CatalogProductsTab() {
                       onSuccess: r => {
                         if (!r.ok) toast.error(r.error.message);
                         else {
-                          toast.success('Product saved');
+                          toast.success(t('manageProducts.productsTab.productSaved'));
                           setEditProduct(null);
                         }
                       },
@@ -407,9 +419,9 @@ export function CatalogProductsTab() {
 
       <ConfirmDialog
         open={deactivateId != null}
-        title="Deactivate product?"
-        description="The product will be hidden from the POS menu. Existing orders are unchanged."
-        confirmLabel="Deactivate"
+        title={t('manageProducts.productsTab.deactivateProductTitle')}
+        description={t('manageProducts.productsTab.deactivateProductDescription')}
+        confirmLabel={t('manageProducts.productsTab.deactivateProductConfirmLabel')}
         variant="destructive"
         isLoading={deactivateMutation.isPending}
         onConfirm={async () => {
@@ -418,7 +430,7 @@ export function CatalogProductsTab() {
           const r = await deactivateMutation.mutateAsync(id);
           setDeactivateId(null);
           if (!r.ok) toast.error(r.error.message);
-          else toast.success('Product deactivated');
+          else toast.success(t('manageProducts.productsTab.productDeactivated'));
         }}
         onCancel={() => {
           setDeactivateId(null);

@@ -12,9 +12,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useCombos, comboKeys } from '@entities/combo';
 import type { Product } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
@@ -34,10 +36,11 @@ function useMutationCreateCombo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (): Promise<string> => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { data, error } = await db
         .from('products')
         .insert({
-          name: 'New Combo',
+          name: i18n.t('featMgmt:manageCombos.tab.newComboDefaultName'),
           base_price: 0,
           is_combo: true,
           is_active: true,
@@ -45,6 +48,7 @@ function useMutationCreateCombo() {
         })
         .select('id')
         .single();
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('useMutationCreateCombo: insert failed', { error });
         throw error;
@@ -81,7 +85,7 @@ function formatPrice(product: Product): string {
   if (product.comboPriceOverride != null) {
     return `$${product.comboPriceOverride.toFixed(2)}`;
   }
-  return 'Sum of children';
+  return i18n.t('featMgmt:manageCombos.tab.sumOfChildren');
 }
 
 // ============================================================================
@@ -91,6 +95,7 @@ function formatPrice(product: Product): string {
 type ComboDialogState = { kind: 'edit'; comboId: string } | { kind: 'delete'; combo: Product };
 
 export function ManageCombosTab() {
+  const { t } = useTranslation('featMgmt');
   const { data: combos, isLoading, error: queryError } = useCombos();
   const createMutation = useMutationCreateCombo();
   const deleteMutation = useMutationDeleteCombo();
@@ -102,26 +107,30 @@ export function ManageCombosTab() {
       const newId = await createMutation.mutateAsync();
       setDialogState({ kind: 'edit', comboId: newId });
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Failed to create combo');
+      toast.error(e instanceof Error ? e.message : t('manageCombos.tab.failedToCreateCombo'));
     }
   }
 
   async function handleDelete(id: string) {
     try {
       await deleteMutation.mutateAsync(id);
-      toast.success('Combo deleted');
+      toast.success(t('manageCombos.tab.comboDeleted'));
       setDialogState(null);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Failed to delete combo');
+      toast.error(e instanceof Error ? e.message : t('manageCombos.tab.failedToDeleteCombo'));
     }
   }
 
   if (queryError) {
-    return <p className="text-sm text-destructive">Could not load combos: {queryError.message}</p>;
+    return (
+      <p className="text-sm text-destructive">
+        {t('manageCombos.tab.loadError', { message: queryError.message })}
+      </p>
+    );
   }
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading combos…</p>;
+    return <p className="text-sm text-muted-foreground">{t('manageCombos.tab.loading')}</p>;
   }
 
   const resolvedCombos = combos ?? [];
@@ -129,9 +138,7 @@ export function ManageCombosTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
-          Manage combo products — bundles of items sold at a single price.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('manageCombos.tab.headerHelp')}</p>
         <Button
           type="button"
           size="sm"
@@ -140,16 +147,16 @@ export function ManageCombosTab() {
             void handleCreate();
           }}
         >
-          {createMutation.isPending ? 'Creating…' : '+ Add combo'}
+          {createMutation.isPending
+            ? t('manageCombos.tab.creating')
+            : t('manageCombos.tab.addComboButton')}
         </Button>
       </div>
 
       {resolvedCombos.length === 0 ? (
         <div className="rounded-md border px-4 py-10 text-center space-y-2">
-          <p className="font-semibold text-base">No combos yet</p>
-          <p className="text-sm text-muted-foreground">
-            Add a combo to bundle products and pool time into a single price.
-          </p>
+          <p className="font-semibold text-base">{t('manageCombos.tab.emptyTitle')}</p>
+          <p className="text-sm text-muted-foreground">{t('manageCombos.tab.emptyHelp')}</p>
           <Button
             type="button"
             size="sm"
@@ -159,7 +166,7 @@ export function ManageCombosTab() {
               void handleCreate();
             }}
           >
-            Add combo
+            {t('manageCombos.tab.addCombo')}
           </Button>
         </div>
       ) : (
@@ -175,19 +182,19 @@ export function ManageCombosTab() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  aria-label={`Edit ${combo.name}`}
+                  aria-label={t('manageCombos.tab.editAria', { name: combo.name })}
                   onClick={() => {
                     setDialogState({ kind: 'edit', comboId: combo.id });
                   }}
                 >
                   <Pencil className="size-3.5" />
-                  <span className="ml-1 text-xs">Edit</span>
+                  <span className="ml-1 text-xs">{t('manageCombos.tab.edit')}</span>
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  aria-label={`Delete ${combo.name}`}
+                  aria-label={t('manageCombos.tab.deleteAria', { name: combo.name })}
                   onClick={() => {
                     setDialogState({ kind: 'delete', combo });
                   }}
@@ -212,7 +219,7 @@ export function ManageCombosTab() {
           showCloseButton
         >
           <DialogHeader>
-            <DialogTitle>Edit Combo</DialogTitle>
+            <DialogTitle>{t('manageCombos.tab.editComboTitle')}</DialogTitle>
           </DialogHeader>
           {dialogState?.kind === 'edit' && (
             <div className="space-y-6">
@@ -235,9 +242,9 @@ export function ManageCombosTab() {
       {dialogState?.kind === 'delete' && (
         <ConfirmDialog
           open
-          title={`Delete '${dialogState.combo.name}'?`}
-          description="This will remove the combo and all its slots. Orders already placed are not affected."
-          confirmLabel="Delete Combo"
+          title={t('manageCombos.tab.deleteComboTitle', { name: dialogState.combo.name })}
+          description={t('manageCombos.tab.deleteComboDescription')}
+          confirmLabel={t('manageCombos.tab.deleteComboConfirmLabel')}
           variant="destructive"
           isLoading={deleteMutation.isPending}
           onConfirm={() => {

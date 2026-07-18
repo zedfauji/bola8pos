@@ -1,4 +1,5 @@
 import { useReducer, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useIngredientsActive } from '@entities/ingredient';
 import { useRecipeByPrepIngredient } from '@entities/prep';
@@ -55,6 +56,7 @@ export interface PrepProductionFormProps {
 }
 
 export function PrepProductionForm({ open, onClose }: PrepProductionFormProps) {
+  const { t } = useTranslation('featMgmt');
   const [state, dispatch] = useReducer(reducer, {
     selectedIngredientId: null,
     qty: '',
@@ -110,12 +112,12 @@ export function PrepProductionForm({ open, onClose }: PrepProductionFormProps) {
     >
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Record prep batch</DialogTitle>
-          <DialogDescription>Credit a prep ingredient and consume raw materials.</DialogDescription>
+          <DialogTitle>{t('producePrepBatch.dialogTitle')}</DialogTitle>
+          <DialogDescription>{t('producePrepBatch.dialogDescription')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <FormField label="Prep ingredient">
+          <FormField label={t('producePrepBatch.prepIngredientLabel')}>
             <IngredientAutocomplete
               value={state.selectedIngredientId}
               onSelect={ing => {
@@ -127,19 +129,23 @@ export function PrepProductionForm({ open, onClose }: PrepProductionFormProps) {
               ingredients={prepIngredients}
               isLoading={isLoading}
               disabled={isPending}
-              commandInputPlaceholder="Search prep ingredients…"
+              commandInputPlaceholder={t('producePrepBatch.searchPrepIngredientsPlaceholder')}
             />
           </FormField>
 
           <FormField
-            label="Quantity produced"
-            hint={selected ? `Unit: ${selected.uom}` : 'Select an ingredient to see units.'}
+            label={t('producePrepBatch.quantityProducedLabel')}
+            hint={
+              selected
+                ? t('producePrepBatch.unitHint', { uom: selected.uom })
+                : t('producePrepBatch.selectIngredientHint')
+            }
           >
             <Input
               type="number"
               min={0.01}
               step={0.01}
-              placeholder="e.g. 10"
+              placeholder={t('producePrepBatch.quantityPlaceholder')}
               value={state.qty}
               onChange={e => {
                 dispatch({ type: 'SET_QTY', qty: e.target.value });
@@ -149,12 +155,12 @@ export function PrepProductionForm({ open, onClose }: PrepProductionFormProps) {
           </FormField>
 
           <div className="space-y-2">
-            <Label htmlFor="prep-notes">Notes (optional)</Label>
+            <Label htmlFor="prep-notes">{t('producePrepBatch.notesLabel')}</Label>
             <textarea
               id="prep-notes"
               maxLength={200}
               rows={2}
-              placeholder="e.g. Morning batch — double yield"
+              placeholder={t('producePrepBatch.notesPlaceholder')}
               value={state.notes}
               onChange={e => {
                 dispatch({ type: 'SET_NOTES', notes: e.target.value });
@@ -188,7 +194,7 @@ export function PrepProductionForm({ open, onClose }: PrepProductionFormProps) {
               handleClose();
             }}
           >
-            Discard batch
+            {t('producePrepBatch.discardBatch')}
           </POSButton>
           <POSButton
             type="button"
@@ -198,7 +204,11 @@ export function PrepProductionForm({ open, onClose }: PrepProductionFormProps) {
               void handleSubmit();
             }}
           >
-            {isPending ? <LoadingSpinner size={20} className="p-0" /> : 'Record batch'}
+            {isPending ? (
+              <LoadingSpinner size={20} className="p-0" />
+            ) : (
+              t('producePrepBatch.recordBatch')
+            )}
           </POSButton>
         </DialogFooter>
       </DialogContent>

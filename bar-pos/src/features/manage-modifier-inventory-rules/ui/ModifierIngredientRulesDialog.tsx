@@ -1,5 +1,6 @@
 import { Trash2 } from 'lucide-react';
 import { useEffect, useReducer, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useIngredientsActive } from '@entities/ingredient';
 import { useModifierInventoryRules } from '@entities/modifier-inventory-rule';
 import type {
@@ -96,6 +97,7 @@ function ModifierIngredientRulesForm({
   modifierId,
   onOpenChange,
 }: ModifierIngredientRulesFormProps) {
+  const { t } = useTranslation('featMgmt');
   const { data: savedRules, isLoading } = useModifierInventoryRules(modifierId);
   const { data: ingredients = [], isLoading: ingredientsLoading } = useIngredientsActive();
   const { saveRules, isSaving } = useManageModifierInventoryRules();
@@ -136,15 +138,17 @@ function ModifierIngredientRulesForm({
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <p className="text-sm font-medium">Delta</p>
+        <p className="text-sm font-medium">{t('manageModifierInventoryRules.deltaLabel')}</p>
         <p className="text-xs text-muted-foreground">
-          Positive adds usage (e.g. extra cheese). Negative reduces usage (e.g. no ice).
+          {t('manageModifierInventoryRules.deltaHelp')}
         </p>
       </div>
 
       <div className="space-y-3">
         {state.rows.length === 0 && (
-          <p className="text-muted-foreground text-sm italic">No ingredient rules yet</p>
+          <p className="text-muted-foreground text-sm italic">
+            {t('manageModifierInventoryRules.noRulesYet')}
+          </p>
         )}
 
         {state.rows.map(row => (
@@ -171,12 +175,12 @@ function ModifierIngredientRulesForm({
                   dispatch({ type: 'SET_DELTA', rowId: row.id, value: e.target.value });
                 }}
                 className="font-mono text-right"
-                aria-label="Delta"
+                aria-label={t('manageModifierInventoryRules.deltaLabel')}
               />
             </div>
             <POSButton
               variant="ghost"
-              aria-label="Remove ingredient rule row"
+              aria-label={t('manageModifierInventoryRules.removeRowAria')}
               onClick={() => {
                 dispatch({ type: 'REMOVE_ROW', rowId: row.id });
               }}
@@ -193,7 +197,7 @@ function ModifierIngredientRulesForm({
             dispatch({ type: 'ADD_ROW' });
           }}
         >
-          + Add ingredient
+          {t('manageModifierInventoryRules.addIngredient')}
         </POSButton>
       </div>
 
@@ -207,7 +211,7 @@ function ModifierIngredientRulesForm({
           }}
           disabled={isSaving}
         >
-          Cancel
+          {t('common:actions.cancel')}
         </POSButton>
         <POSButton
           type="button"
@@ -218,7 +222,7 @@ function ModifierIngredientRulesForm({
           disabled={!state.isDirty || isSaving}
         >
           {isSaving ? <LoadingSpinner className="mr-2 size-4" /> : null}
-          {isSaving ? 'Saving…' : 'Save rules'}
+          {isSaving ? t('common:actions.saving') : t('manageModifierInventoryRules.saveRules')}
         </POSButton>
       </div>
     </div>
@@ -238,11 +242,14 @@ export function ModifierIngredientRulesDialog({
   open,
   onOpenChange,
 }: ModifierIngredientRulesDialogProps) {
+  const { t } = useTranslation('featMgmt');
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
         <DialogHeader>
-          <DialogTitle>Ingredient rules — {modifierName}</DialogTitle>
+          <DialogTitle>
+            {t('manageModifierInventoryRules.dialogTitle', { name: modifierName })}
+          </DialogTitle>
         </DialogHeader>
         {open && modifierId != null ? (
           <ModifierIngredientRulesForm

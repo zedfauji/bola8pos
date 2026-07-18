@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 import { useMutationSaveModifierInventoryRules } from '@entities/modifier-inventory-rule';
 import type { ModifierInventoryRule, ModifierInventoryRuleCreate } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 
 type SaveModifierInventoryRulesArgs = {
   modifierId: string;
@@ -23,7 +24,7 @@ export function useManageModifierInventoryRules(): UseManageModifierInventoryRul
       toast.error(result.error.message);
       return null;
     }
-    toast.success('Ingredient rules saved');
+    toast.success(i18n.t('featMgmt:manageModifierInventoryRules.rulesSaved'));
     return result.data;
   };
 

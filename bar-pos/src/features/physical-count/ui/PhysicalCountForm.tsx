@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useInventory } from '@entities/inventory';
 import { useStaffStore } from '@entities/staff/model/store';
@@ -36,6 +37,7 @@ type Phase = 'entry' | 'report';
  *   Manager can close or run another count.
  */
 export function PhysicalCountForm({ open, onOpenChange }: Props) {
+  const { t } = useTranslation('featMgmt');
   const { data: inventory, isIdleOrLoading } = useInventory();
   const staffId = useStaffStore(s => s.currentStaff?.id);
 
@@ -71,7 +73,7 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
 
   async function handleSubmit() {
     if (!inventory || !staffId) {
-      toast.error('Cannot submit: inventory data or staff session is missing.');
+      toast.error(t('physicalCount.cannotSubmit'));
       return;
     }
 
@@ -85,14 +87,14 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
 
     if (!result.ok) {
       logger.error('physical_count.submit_failed', { message: result.error.message });
-      toast.error(`Physical count failed: ${result.error.message}`);
+      toast.error(t('physicalCount.submitFailed', { message: result.error.message }));
       return;
     }
 
     toast.success(
       result.data.adjustedRows.length === 0
-        ? 'Physical count complete — no variances found.'
-        : `Physical count complete — ${String(result.data.adjustedRows.length)} product(s) adjusted.`
+        ? t('physicalCount.completeNoVariances')
+        : t('physicalCount.completeAdjusted', { count: result.data.adjustedRows.length })
     );
 
     setVarianceRows(result.data.allRows);
@@ -103,11 +105,11 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Physical Inventory Count</DialogTitle>
+          <DialogTitle>{t('physicalCount.dialogTitle')}</DialogTitle>
           <DialogDescription>
             {phase === 'entry'
-              ? 'Enter the actual quantity on hand for each product. Leave unchanged if the count matches.'
-              : 'Review the variance report. Red rows indicate a shortage; green rows indicate a surplus.'}
+              ? t('physicalCount.entryDescription')
+              : t('physicalCount.reportDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -123,7 +125,7 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
                   className="text-center text-sm text-muted-foreground py-4"
                   data-testid="physical-count-empty"
                 >
-                  No inventory items found.
+                  {t('physicalCount.noInventoryItems')}
                 </p>
               ) : (
                 inventory.map(item => (
@@ -136,10 +138,10 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
                       htmlFor={`count-${item.productId}`}
                       className="flex-1 text-sm font-medium truncate"
                     >
-                      {item.product?.name ?? 'Unknown'}
+                      {item.product?.name ?? t('physicalCount.unknownProduct')}
                     </Label>
                     <span className="text-xs text-muted-foreground w-20 text-right shrink-0">
-                      Expected: {item.quantityOnHand}
+                      {t('physicalCount.expectedCount', { count: item.quantityOnHand })}
                     </span>
                     <Input
                       id={`count-${item.productId}`}
@@ -164,7 +166,7 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
                 }}
                 disabled={isPending}
               >
-                Cancel
+                {t('common:actions.cancel')}
               </Button>
               <Button
                 data-testid="physical-count-submit"
@@ -173,7 +175,7 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
                 }}
                 disabled={isPending || isIdleOrLoading || !inventory}
               >
-                {isPending ? 'Saving…' : 'Submit Count'}
+                {isPending ? t('common:actions.saving') : t('physicalCount.submitCount')}
               </Button>
             </DialogFooter>
           </>
@@ -190,14 +192,14 @@ export function PhysicalCountForm({ open, onOpenChange }: Props) {
                   setVarianceRows([]);
                 }}
               >
-                New Count
+                {t('physicalCount.newCount')}
               </Button>
               <Button
                 onClick={() => {
                   handleOpenChange(false);
                 }}
               >
-                Done
+                {t('physicalCount.done')}
               </Button>
             </DialogFooter>
           </>

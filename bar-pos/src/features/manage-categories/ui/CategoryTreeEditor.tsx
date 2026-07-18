@@ -14,6 +14,7 @@
 
 import { Beer, ChevronDown, ChevronRight, Pencil, Plus, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useCategories,
@@ -55,6 +56,7 @@ interface CategoryFormProps {
 }
 
 function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormProps) {
+  const { t } = useTranslation('featMgmt');
   const [name, setName] = useState(initial.name);
   const [color, setColor] = useState(initial.color);
   const [routing, setRouting] = useState<CategoryRouting>(initial.routing);
@@ -68,19 +70,19 @@ function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormP
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <FormField label="Name">
+      <FormField label={t('manageCategories.form.nameLabel')}>
         <Input
           id="cat-name"
           value={name}
           onChange={e => {
             setName(e.target.value);
           }}
-          placeholder="e.g. Beer, Cocktails"
+          placeholder={t('manageCategories.form.namePlaceholder')}
           maxLength={50}
           required
         />
       </FormField>
-      <FormField label="Color">
+      <FormField label={t('manageCategories.form.colorLabel')}>
         <div className="flex items-center gap-3">
           {/* native color input — no shared/ui color-picker primitive exists, see 31-CONTEXT.md D-05 */}
           <input
@@ -95,7 +97,7 @@ function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormP
           <span className="text-sm text-muted-foreground">{color}</span>
         </div>
       </FormField>
-      <FormField label="Routing station">
+      <FormField label={t('manageCategories.form.routingLabel')}>
         <Select
           value={routing}
           onValueChange={value => {
@@ -103,29 +105,26 @@ function CategoryForm({ initial, submitting, onCancel, onSubmit }: CategoryFormP
           }}
         >
           <SelectTrigger id="cat-routing">
-            <SelectValue placeholder="Select routing" />
+            <SelectValue placeholder={t('manageCategories.form.routingPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="KITCHEN">
-              <UtensilsCrossed className="size-3.5" aria-hidden /> Kitchen
+              <UtensilsCrossed className="size-3.5" aria-hidden /> {t('manageCategories.form.kitchenOption')}
             </SelectItem>
             <SelectItem value="BAR">
-              <Beer className="size-3.5" aria-hidden /> Bar
+              <Beer className="size-3.5" aria-hidden /> {t('manageCategories.form.barOption')}
             </SelectItem>
-            <SelectItem value="NONE">None</SelectItem>
+            <SelectItem value="NONE">{t('manageCategories.form.noneOption')}</SelectItem>
           </SelectContent>
         </Select>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Controls which KDS board this category&apos;s items appear on. Choose &ldquo;None&rdquo;
-          for items that aren&rsquo;t prepped (e.g. merch).
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('manageCategories.form.routingHelp')}</p>
       </FormField>
       <div className="flex justify-end gap-2">
         <POSButton type="button" variant="outline" touchSize="default" onClick={onCancel}>
-          Cancel
+          {t('common:actions.cancel')}
         </POSButton>
         <POSButton type="submit" touchSize="default" disabled={submitting || !name.trim()}>
-          {submitting ? 'Saving…' : 'Save'}
+          {submitting ? t('common:actions.saving') : t('common:actions.save')}
         </POSButton>
       </div>
     </form>
@@ -152,6 +151,7 @@ interface NodeRowProps {
 }
 
 function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChild }: NodeRowProps) {
+  const { t } = useTranslation('featMgmt');
   const { category, depth, children } = item;
   const isExpanded = expandedIds.has(category.id);
   const hasChildren = children.length > 0;
@@ -169,7 +169,11 @@ function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChil
           variant="ghost"
           size="icon-sm"
           type="button"
-          aria-label={isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
+          aria-label={
+            isExpanded
+              ? t('manageCategories.tree.collapseAria', { name: category.name })
+              : t('manageCategories.tree.expandAria', { name: category.name })
+          }
           className={[
             'flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground',
             'hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -200,13 +204,17 @@ function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChil
 
         {/* Routing */}
         {category.routing === 'NONE' ? (
-          <span className="text-xs text-muted-foreground">Not routed</span>
+          <span className="text-xs text-muted-foreground">
+            {t('manageCategories.tree.notRouted')}
+          </span>
         ) : (
           <RoutingBadge routing={category.routing} />
         )}
 
         {/* Depth badge */}
-        <span className="text-xs text-muted-foreground">L{depth + 1}</span>
+        <span className="text-xs text-muted-foreground">
+          {t('manageCategories.tree.depthBadge', { level: depth + 1 })}
+        </span>
 
         {/* Actions */}
         <div className="flex items-center gap-1">
@@ -214,7 +222,7 @@ function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChil
             type="button"
             variant="ghost"
             touchSize="default"
-            aria-label={`Edit ${category.name}`}
+            aria-label={t('manageCategories.tree.editAria', { name: category.name })}
             onClick={() => {
               onEdit(category);
             }}
@@ -226,7 +234,7 @@ function NodeRow({ item, allCategories, expandedIds, onToggle, onEdit, onAddChil
               type="button"
               variant="ghost"
               touchSize="default"
-              aria-label={`Add subcategory under ${category.name}`}
+              aria-label={t('manageCategories.tree.addSubcategoryAria', { name: category.name })}
               onClick={() => {
                 onAddChild(category.id);
               }}
@@ -307,6 +315,7 @@ function buildTree(categories: Category[]): CategoryWithDepth[] {
 // ============================================================================
 
 export function CategoryTreeEditor() {
+  const { t } = useTranslation('featMgmt');
   const { data: categories, isLoading, resultError } = useCategories();
   const createMutation = useMutationCreateCategory();
   const updateMutation = useMutationUpdateCategory();
@@ -344,7 +353,7 @@ export function CategoryTreeEditor() {
         allCats.map(c => ({ id: c.id, parentId: c.parentId }))
       )
     ) {
-      toast.error('Cannot add: maximum nesting depth (3 levels) would be exceeded.');
+      toast.error(t('manageCategories.maxDepthError'));
       return;
     }
 
@@ -362,7 +371,7 @@ export function CategoryTreeEditor() {
     if (!r.ok) {
       toast.error(r.error.message);
     } else {
-      toast.success('Category created');
+      toast.success(t('manageCategories.categoryCreated'));
       setDialog(null);
     }
   }
@@ -378,19 +387,21 @@ export function CategoryTreeEditor() {
     if (!r.ok) {
       toast.error(r.error.message);
     } else {
-      toast.success('Category saved');
+      toast.success(t('manageCategories.categorySaved'));
       setDialog(null);
     }
   }
 
   if (resultError) {
     return (
-      <p className="text-destructive text-sm">Could not load categories: {resultError.message}</p>
+      <p className="text-destructive text-sm">
+        {t('manageCategories.loadError', { message: resultError.message })}
+      </p>
     );
   }
 
   if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Loading categories…</p>;
+    return <p className="text-muted-foreground text-sm">{t('manageCategories.loading')}</p>;
   }
 
   const tree = buildTree(categories ?? []);
@@ -399,9 +410,7 @@ export function CategoryTreeEditor() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
-          Manage up to 3 levels: root &rarr; subcategory &rarr; sub-subcategory.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('manageCategories.headerHelp')}</p>
         <POSButton
           type="button"
           touchSize="default"
@@ -410,14 +419,14 @@ export function CategoryTreeEditor() {
           }}
         >
           <Plus className="size-4" />
-          Add root category
+          {t('manageCategories.addRootCategory')}
         </POSButton>
       </div>
 
       {/* Tree */}
       {tree.length === 0 ? (
         <p className="rounded-md border px-4 py-8 text-center text-sm text-muted-foreground">
-          No categories yet. Add your first root category above.
+          {t('manageCategories.emptyState')}
         </p>
       ) : (
         <ul className="divide-y rounded-md border">
@@ -450,10 +459,10 @@ export function CategoryTreeEditor() {
           <DialogHeader>
             <DialogTitle>
               {dialog?.kind === 'edit'
-                ? `Edit "${dialog.category.name}"`
+                ? t('manageCategories.editDialogTitle', { name: dialog.category.name })
                 : dialog?.kind === 'create-child'
-                  ? 'New subcategory'
-                  : 'New root category'}
+                  ? t('manageCategories.newSubcategoryTitle')
+                  : t('manageCategories.newRootCategoryTitle')}
             </DialogTitle>
           </DialogHeader>
           {dialog != null && (
@@ -469,7 +478,7 @@ export function CategoryTreeEditor() {
                   : // TOKEN-01 exempt: category.color is arbitrary per-row USER DATA (each category
                     // picks its own color), not an app theme color. Do not map to a Tailwind CSS-variable
                     // token — see 31-CONTEXT.md D-08.
-                    // eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-08: category.color is per-row user data, not a theme color
+                    // eslint-disable-next-line no-restricted-syntax, i18next/no-literal-string -- 31-CONTEXT.md D-08: category.color is per-row user data, not a theme color / translatable copy
                     { name: '', color: '#6366f1', routing: 'NONE' }
               }
               submitting={createMutation.isPending || updateMutation.isPending}

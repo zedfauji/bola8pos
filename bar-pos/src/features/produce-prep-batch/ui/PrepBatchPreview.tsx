@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { RecipeWithItems } from '@shared/lib/domain';
 import { computePrepConsumption } from '@shared/lib/prep-math';
 
@@ -14,6 +15,7 @@ export function PrepBatchPreview({
   prepIngredient,
   currentStock,
 }: PrepBatchPreviewProps) {
+  const { t } = useTranslation('featMgmt');
   const rows = computePrepConsumption(
     qtyProduced,
     recipe.items.map(i => ({ ingredientId: i.ingredientId, qty: i.qty })),
@@ -23,13 +25,13 @@ export function PrepBatchPreview({
   return (
     <div
       className="space-y-3 rounded-lg border bg-muted p-4"
-      aria-label="Ingredient consumption preview"
+      aria-label={t('producePrepBatch.consumptionPreviewAria')}
       role="status"
     >
-      <p className="text-sm font-semibold">Raw material consumption preview</p>
+      <p className="text-sm font-semibold">{t('producePrepBatch.consumptionPreviewTitle')}</p>
       <div className="grid grid-cols-2 gap-2 text-xs font-medium text-muted-foreground">
-        <span>Ingredient</span>
-        <span className="text-right">Quantity</span>
+        <span>{t('producePrepBatch.ingredientHeader')}</span>
+        <span className="text-right">{t('producePrepBatch.quantityHeader')}</span>
       </div>
       <div className="space-y-2">
         {rows.map(row => {
@@ -43,7 +45,11 @@ export function PrepBatchPreview({
               className="grid grid-cols-2 gap-2 rounded border border-border bg-background px-2 py-1 text-sm"
               aria-label={
                 isInsufficient
-                  ? `${label}: insufficient — need ${need.toFixed(2)}, have ${stock ? String(stock.qty) : '0'}`
+                  ? t('producePrepBatch.insufficientAria', {
+                      label,
+                      need: need.toFixed(2),
+                      have: stock ? String(stock.qty) : '0',
+                    })
                   : undefined
               }
             >
@@ -58,7 +64,11 @@ export function PrepBatchPreview({
         })}
       </div>
       <div className="border-t pt-2 text-sm text-pos-accent font-mono tabular-nums">
-        +{qtyProduced.toFixed(2)} {prepIngredient.uom} ({prepIngredient.name})
+        {t('producePrepBatch.yieldSummary', {
+          qty: qtyProduced.toFixed(2),
+          uom: prepIngredient.uom,
+          name: prepIngredient.name,
+        })}
       </div>
     </div>
   );

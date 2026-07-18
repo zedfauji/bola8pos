@@ -1,5 +1,6 @@
 import { FlaskConical, Pencil, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ModifierIngredientRulesDialog } from '@features/manage-modifier-inventory-rules';
 import {
@@ -18,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dia
 import { Input } from '@shared/ui/input';
 
 export function CatalogModifiersTab() {
+  const { t } = useTranslation('featMgmt');
   const { data: modifiers, isLoading, resultError } = useModifiers();
   const createMutation = useMutationCreateModifier();
   const updateMutation = useMutationUpdateModifier();
@@ -43,19 +45,21 @@ export function CatalogModifiersTab() {
 
   if (resultError) {
     return (
-      <p className="text-destructive text-sm">Could not load modifiers: {resultError.message}</p>
+      <p className="text-destructive text-sm">
+        {t('manageProducts.modifiersTab.loadError', { message: resultError.message })}
+      </p>
     );
   }
 
   if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Loading modifiers…</p>;
+    return <p className="text-muted-foreground text-sm">{t('manageProducts.modifiersTab.loading')}</p>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap justify-between gap-2">
         <p className="text-muted-foreground text-sm">
-          Modifiers add optional price changes when ordering drinks.
+          {t('manageProducts.modifiersTab.headerHelp')}
         </p>
         <POSButton
           type="button"
@@ -64,7 +68,7 @@ export function CatalogModifiersTab() {
             setCreateOpen(true);
           }}
         >
-          Add modifier
+          {t('manageProducts.modifiersTab.addModifier')}
         </POSButton>
       </div>
 
@@ -74,7 +78,9 @@ export function CatalogModifiersTab() {
             <div>
               <p className="font-medium">{m.name}</p>
               <p className="text-muted-foreground text-sm">
-                Price delta <MoneyDisplay amount={m.priceDelta} /> · Sort {m.sortOrder}
+                {t('manageProducts.modifiersTab.priceDeltaLabel')}{' '}
+                <MoneyDisplay amount={m.priceDelta} />{' '}
+                {t('manageProducts.modifiersTab.sortLabel', { sortOrder: m.sortOrder })}
               </p>
             </div>
             <div className="flex gap-1">
@@ -87,7 +93,7 @@ export function CatalogModifiersTab() {
                 }}
               >
                 <Pencil className="size-4" />
-                <span className="sr-only">Edit</span>
+                <span className="sr-only">{t('manageProducts.modifiersTab.edit')}</span>
               </POSButton>
               <POSButton
                 type="button"
@@ -98,7 +104,7 @@ export function CatalogModifiersTab() {
                 }}
               >
                 <Trash2 className="size-4" />
-                <span className="sr-only">Delete</span>
+                <span className="sr-only">{t('manageProducts.modifiersTab.delete')}</span>
               </POSButton>
               <POSButton
                 type="button"
@@ -109,7 +115,7 @@ export function CatalogModifiersTab() {
                 }}
               >
                 <FlaskConical className="size-4" />
-                <span className="sr-only">Ingredient rules</span>
+                <span className="sr-only">{t('manageProducts.modifiersTab.ingredientRules')}</span>
               </POSButton>
             </div>
           </li>
@@ -117,7 +123,7 @@ export function CatalogModifiersTab() {
       </ul>
 
       <ModifierDialog
-        title="New modifier"
+        title={t('manageProducts.modifiersTab.newModifierTitle')}
         open={createOpen}
         onOpenChange={setCreateOpen}
         submitting={createMutation.isPending}
@@ -127,14 +133,14 @@ export function CatalogModifiersTab() {
           const r = await createMutation.mutateAsync({ name, priceDelta, sortOrder });
           if (!r.ok) toast.error(r.error.message);
           else {
-            toast.success('Modifier created');
+            toast.success(t('manageProducts.modifiersTab.modifierCreated'));
             setCreateOpen(false);
           }
         }}
       />
 
       <ModifierDialog
-        title="Edit modifier"
+        title={t('manageProducts.modifiersTab.editModifierTitle')}
         open={editModifier != null}
         onOpenChange={o => {
           if (!o) setEditModifier(null);
@@ -152,7 +158,7 @@ export function CatalogModifiersTab() {
           });
           if (!r.ok) toast.error(r.error.message);
           else {
-            toast.success('Modifier saved');
+            toast.success(t('manageProducts.modifiersTab.modifierSaved'));
             setEditModifier(null);
           }
         }}
@@ -160,9 +166,9 @@ export function CatalogModifiersTab() {
 
       <ConfirmDialog
         open={deleteId != null}
-        title="Delete modifier?"
-        description="This removes the modifier from the catalog. It will be unlinked from products that use it."
-        confirmLabel="Delete"
+        title={t('manageProducts.modifiersTab.deleteModifierTitle')}
+        description={t('manageProducts.modifiersTab.deleteModifierDescription')}
+        confirmLabel={t('manageProducts.modifiersTab.deleteModifierConfirmLabel')}
         variant="destructive"
         isLoading={deleteMutation.isPending}
         onConfirm={async () => {
@@ -171,7 +177,7 @@ export function CatalogModifiersTab() {
           const r = await deleteMutation.mutateAsync(id);
           setDeleteId(null);
           if (!r.ok) toast.error(r.error.message);
-          else toast.success('Modifier deleted');
+          else toast.success(t('manageProducts.modifiersTab.modifierDeleted'));
         }}
         onCancel={() => {
           setDeleteId(null);
@@ -241,6 +247,7 @@ function ModifierDialogForm({
   onSave: (name: string, priceDelta: number, sortOrder: number) => Promise<void>;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslation('featMgmt');
   const [name, setName] = useState(initial?.name ?? '');
   const [priceDelta, setPriceDelta] = useState(initial?.priceDelta ?? 0);
   const [sortOrder, setSortOrder] = useState(String(initial?.sortOrder ?? defaultSortOrder));
@@ -252,17 +259,17 @@ function ModifierDialogForm({
         e.preventDefault();
         const so = Number.parseInt(sortOrder, 10);
         if (name.trim() === '') {
-          toast.error('Name is required');
+          toast.error(t('manageProducts.modifiersTab.nameRequired'));
           return;
         }
         if (Number.isNaN(so) || so < 0) {
-          toast.error('Sort order must be a non-negative integer');
+          toast.error(t('manageProducts.modifiersTab.sortOrderInvalid'));
           return;
         }
         void onSave(name.trim(), priceDelta, so);
       }}
     >
-      <FormField label="Name" required error="">
+      <FormField label={t('manageProducts.modifiersTab.nameLabel')} required error="">
         <Input
           value={name}
           onChange={e => {
@@ -272,13 +279,13 @@ function ModifierDialogForm({
         />
       </FormField>
       <FormField
-        label="Price delta"
-        hint="Added to the drink price when this modifier is selected."
+        label={t('manageProducts.modifiersTab.priceDeltaLabel')}
+        hint={t('manageProducts.modifiersTab.priceDeltaHint')}
         error=""
       >
         <MoneyInput value={priceDelta} onChange={setPriceDelta} disabled={submitting} />
       </FormField>
-      <FormField label="Sort order" required error="">
+      <FormField label={t('manageProducts.modifiersTab.sortOrderLabel')} required error="">
         <Input
           inputMode="numeric"
           value={sortOrder}
@@ -297,10 +304,10 @@ function ModifierDialogForm({
             onOpenChange(false);
           }}
         >
-          Cancel
+          {t('common:actions.cancel')}
         </POSButton>
         <POSButton type="submit" touchSize="default" disabled={submitting}>
-          {submitting ? 'Saving…' : 'Save'}
+          {submitting ? t('common:actions.saving') : t('common:actions.save')}
         </POSButton>
       </div>
     </form>

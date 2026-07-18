@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, Pencil } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useCategories,
@@ -13,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/ui/dia
 import { CategoryForm } from './CategoryForm';
 
 export function CatalogCategoriesTab() {
+  const { t } = useTranslation('featMgmt');
   const { data: categories, isLoading, resultError } = useCategories();
   const createMutation = useMutationCreateCategory();
   const updateMutation = useMutationUpdateCategory();
@@ -42,24 +44,28 @@ export function CatalogCategoriesTab() {
       sortOrder: a.sortOrder,
     });
     if (!r2.ok) toast.error(r2.error.message);
-    else toast.success('Order updated');
+    else toast.success(t('manageProducts.categoriesTab.orderUpdated'));
   }
 
   if (resultError) {
     return (
-      <p className="text-destructive text-sm">Could not load categories: {resultError.message}</p>
+      <p className="text-destructive text-sm">
+        {t('manageProducts.categoriesTab.loadError', { message: resultError.message })}
+      </p>
     );
   }
 
   if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Loading categories…</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t('manageProducts.categoriesTab.loading')}</p>
+    );
   }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap justify-between gap-2">
         <p className="text-muted-foreground text-sm">
-          Drag-free reorder with arrows. Happy-hour pricing is managed in Settings → Promotions.
+          {t('manageProducts.categoriesTab.headerHelp')}
         </p>
         <POSButton
           type="button"
@@ -68,7 +74,7 @@ export function CatalogCategoriesTab() {
             setCreateOpen(true);
           }}
         >
-          Add category
+          {t('manageProducts.categoriesTab.addCategory')}
         </POSButton>
       </div>
 
@@ -83,7 +89,9 @@ export function CatalogCategoriesTab() {
             />
             <div className="min-w-0 flex-1">
               <p className="font-medium">{c.name}</p>
-              <p className="text-muted-foreground text-xs">Sort {c.sortOrder}</p>
+              <p className="text-muted-foreground text-xs">
+                {t('manageProducts.categoriesTab.sort', { order: c.sortOrder })}
+              </p>
             </div>
             <div className="flex items-center gap-1">
               <POSButton
@@ -91,7 +99,7 @@ export function CatalogCategoriesTab() {
                 variant="outline"
                 touchSize="default"
                 disabled={index === 0 || updateMutation.isPending}
-                aria-label="Move up"
+                aria-label={t('manageProducts.categoriesTab.moveUpAria')}
                 onClick={() => {
                   const prev = sorted[index - 1];
                   if (prev) void swapOrder(c, prev);
@@ -104,7 +112,7 @@ export function CatalogCategoriesTab() {
                 variant="outline"
                 touchSize="default"
                 disabled={index >= sorted.length - 1 || updateMutation.isPending}
-                aria-label="Move down"
+                aria-label={t('manageProducts.categoriesTab.moveDownAria')}
                 onClick={() => {
                   const next = sorted[index + 1];
                   if (next) void swapOrder(c, next);
@@ -121,7 +129,7 @@ export function CatalogCategoriesTab() {
                 }}
               >
                 <Pencil className="size-4" />
-                <span className="sr-only">Edit</span>
+                <span className="sr-only">{t('manageProducts.categoriesTab.edit')}</span>
               </POSButton>
             </div>
           </li>
@@ -131,7 +139,7 @@ export function CatalogCategoriesTab() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-md sm:max-w-md" showCloseButton>
           <DialogHeader>
-            <DialogTitle>New category</DialogTitle>
+            <DialogTitle>{t('manageProducts.categoriesTab.newCategoryTitle')}</DialogTitle>
           </DialogHeader>
           <CategoryForm
             submitting={createMutation.isPending}
@@ -143,7 +151,7 @@ export function CatalogCategoriesTab() {
                 onSuccess: r => {
                   if (!r.ok) toast.error(r.error.message);
                   else {
-                    toast.success('Category created');
+                    toast.success(t('manageProducts.categoriesTab.categoryCreated'));
                     setCreateOpen(false);
                   }
                 },
@@ -162,7 +170,7 @@ export function CatalogCategoriesTab() {
       >
         <DialogContent className="max-w-md sm:max-w-md" showCloseButton>
           <DialogHeader>
-            <DialogTitle>Edit category</DialogTitle>
+            <DialogTitle>{t('manageProducts.categoriesTab.editCategoryTitle')}</DialogTitle>
           </DialogHeader>
           {editCategory ? (
             <CategoryForm
@@ -178,7 +186,7 @@ export function CatalogCategoriesTab() {
                   onSuccess: r => {
                     if (!r.ok) toast.error(r.error.message);
                     else {
-                      toast.success('Category saved');
+                      toast.success(t('manageProducts.categoriesTab.categorySaved'));
                       setEditCategory(null);
                     }
                   },

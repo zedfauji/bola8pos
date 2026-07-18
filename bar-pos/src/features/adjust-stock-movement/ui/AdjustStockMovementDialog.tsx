@@ -8,9 +8,11 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { Ingredient, ManualAdjustReason } from '@entities/ingredient';
 import { ingredientKeys } from '@entities/ingredient';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 import { Button } from '@shared/ui/button';
@@ -26,12 +28,14 @@ import { Label } from '@shared/ui/label';
 
 const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
 
-const REASON_LABELS: Record<ManualAdjustReason, string> = {
-  waste: 'Waste',
-  delivery: 'Delivery',
-  correction: 'Correction',
-  physical_count: 'Physical count',
+/* eslint-disable i18next/no-literal-string -- i18next key identifiers (looked up via t()), not literal UI copy themselves */
+const REASON_LABEL_KEYS: Record<ManualAdjustReason, string> = {
+  waste: 'adjustStockMovement.reasonWaste',
+  delivery: 'adjustStockMovement.reasonDelivery',
+  correction: 'adjustStockMovement.reasonCorrection',
+  physical_count: 'adjustStockMovement.reasonPhysicalCount',
 };
+/* eslint-enable i18next/no-literal-string */
 
 const REASONS: ManualAdjustReason[] = ['waste', 'delivery', 'correction', 'physical_count'];
 
@@ -42,6 +46,7 @@ interface Props {
 }
 
 export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Props) {
+  const { t } = useTranslation('featMgmt');
   const qc = useQueryClient();
   const [delta, setDelta] = useState('');
   const [reason, setReason] = useState<ManualAdjustReason | ''>('');
@@ -51,10 +56,10 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
     mutationFn: async () => {
       const parsedDelta = parseFloat(delta);
       if (isNaN(parsedDelta) || parsedDelta === 0) {
-        throw new Error('Quantity cannot be zero');
+        throw new Error(i18n.t('featMgmt:adjustStockMovement.quantityCannotBeZero'));
       }
       if (!reason) {
-        throw new Error('Reason is required');
+        throw new Error(i18n.t('featMgmt:adjustStockMovement.reasonRequired'));
       }
 
       const { error } = await (supabase as any).rpc('record_stock_movement', {
@@ -70,9 +75,7 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
       if (error) {
         logger.error('AdjustStockMovementDialog: rpc failed', { error });
         if ((error.message as string).includes('INVENTORY_NEGATIVE')) {
-          throw new Error(
-            'Insufficient stock. Use "Correction" or "Physical count" reason to force a negative balance.',
-          );
+          throw new Error(i18n.t('featMgmt:adjustStockMovement.insufficientStock'));
         }
         throw new Error(error.message as string);
       }
@@ -83,14 +86,14 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
         queryKey: ingredientKeys.movements(ingredient.id),
       });
       void qc.invalidateQueries({ queryKey: ingredientKeys.detail(ingredient.id) });
-      toast.success('Adjustment recorded');
+      toast.success(t('adjustStockMovement.adjustmentRecorded'));
       setDelta('');
       setReason('');
       setNotes('');
       onOpenChange(false);
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to record adjustment');
+      toast.error(e instanceof Error ? e.message : t('adjustStockMovement.failedToRecord'));
       // Do NOT close dialog on error — let user correct reason or quantity
     },
   });
@@ -104,16 +107,18 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm sm:max-w-sm" showCloseButton>
         <DialogHeader>
-          <DialogTitle>Record adjustment — {ingredient.name}</DialogTitle>
+          <DialogTitle>
+            {t('adjustStockMovement.dialogTitle', { name: ingredient.name })}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="delta">Quantity change</Label>
+            <Label htmlFor="delta">{t('adjustStockMovement.quantityChangeLabel')}</Label>
             <Input
               id="delta"
               type="number"
               step="any"
-              placeholder="e.g. -500 for waste"
+              placeholder={t('adjustStockMovement.quantityChangePlaceholder')}
               value={delta}
               onChange={e => {
                 setDelta(e.target.value);
@@ -122,12 +127,12 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
               required
             />
             <p className="text-xs text-muted-foreground">
-              Positive to add stock, negative to remove (e.g. -500 for waste)
+              {t('adjustStockMovement.quantityChangeHelp')}
             </p>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="reason">Reason</Label>
+            <Label htmlFor="reason">{t('adjustStockMovement.reasonLabel')}</Label>
             <select
               id="reason"
               value={reason}
@@ -139,22 +144,22 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="" disabled>
-                Select reason…
+                {t('adjustStockMovement.selectReason')}
               </option>
               {REASONS.map(r => (
                 <option key={r} value={r}>
-                  {REASON_LABELS[r]}
+                  {t(REASON_LABEL_KEYS[r])}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="notes">Notes (optional)</Label>
+            <Label htmlFor="notes">{t('adjustStockMovement.notesLabel')}</Label>
             <Input
               id="notes"
               type="text"
-              placeholder="e.g. Weekly physical count — 3 trays of wings"
+              placeholder={t('adjustStockMovement.notesPlaceholder')}
               value={notes}
               onChange={e => {
                 setNotes(e.target.value);
@@ -173,10 +178,12 @@ export function AdjustStockMovementDialog({ ingredient, open, onOpenChange }: Pr
               }}
               disabled={mutation.isPending}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
             <Button type="submit" disabled={mutation.isPending || !delta || !reason}>
-              {mutation.isPending ? 'Saving…' : 'Record adjustment'}
+              {mutation.isPending
+                ? t('common:actions.saving')
+                : t('adjustStockMovement.recordAdjustment')}
             </Button>
           </DialogFooter>
         </form>

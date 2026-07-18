@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import { useMutationCreatePrepProduction } from '@entities/prep';
 import type { PrepProduction, PrepProductionCreate } from '@entities/prep';
+import i18n from '@shared/lib/i18n';
 import type { Result } from '@shared/lib/result';
 
 export function useProducePrepBatch() {
@@ -18,24 +19,28 @@ export function useProducePrepBatch() {
     const result = await mutation.mutateAsync(input);
 
     if (result.ok) {
-      toast.success(`Batch recorded. ${ingredientName} +${String(input.qtyProduced)} ${uom}.`);
+      toast.success(
+        i18n.t('featMgmt:producePrepBatch.batchRecorded', {
+          name: ingredientName,
+          qty: input.qtyProduced,
+          uom,
+        })
+      );
       return result;
     }
 
     switch (result.error.code) {
       case 'PREP_INGREDIENT_REQUIRED':
-        toast.error(
-          'That ingredient is not marked as a prep ingredient. Check ingredient settings.',
-        );
+        toast.error(i18n.t('featMgmt:producePrepBatch.errorPrepIngredientRequired'));
         break;
       case 'INVENTORY_NEGATIVE':
-        toast.error('Insufficient stock — reduce batch size or check raw ingredient levels.');
+        toast.error(i18n.t('featMgmt:producePrepBatch.errorInventoryNegative'));
         break;
       case 'NOT_FOUND':
-        toast.error('Prep ingredient not found. Refresh and try again.');
+        toast.error(i18n.t('featMgmt:producePrepBatch.errorNotFound'));
         break;
       default:
-        toast.error('Could not record batch. Check your connection and try again.');
+        toast.error(i18n.t('featMgmt:producePrepBatch.errorDefault'));
     }
 
     return result;

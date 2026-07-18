@@ -14,6 +14,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useCategories } from '@entities/category';
 import { usePromotion, useMutationUpdatePromotion } from '@entities/promotion';
@@ -36,14 +37,17 @@ const db = supabase as any;
 
 function usePromotionEligibleProducts() {
   return useQuery({
+    // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache key, not UI copy
     queryKey: ['promotion_eligible_products'],
     queryFn: async (): Promise<Product[]> => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { data, error } = await db
         .from('products')
         .select('*')
         .eq('is_active', true)
         .eq('is_combo', false)
         .order('name', { ascending: true });
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('usePromotionEligibleProducts: query failed', { error });
         throw error;
@@ -63,6 +67,7 @@ interface Props {
 }
 
 export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
+  const { t } = useTranslation('featMgmt');
   const nameInputId = useId();
   const priorityInputId = useId();
   const productPickerId = useId();
@@ -114,21 +119,21 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
     if (!promotionId) return;
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error('Promotion name is required.');
+      toast.error(t('managePromotions.builder.nameRequired'));
       return;
     }
     const parsedValue = parseFloat(discountValue);
     if (isNaN(parsedValue) || parsedValue < 0) {
-      toast.error('Invalid discount value.');
+      toast.error(t('managePromotions.builder.invalidDiscountValue'));
       return;
     }
     if (discountType === 'percentage' && parsedValue > 100) {
-      toast.error('Percentage discount cannot exceed 100.');
+      toast.error(t('managePromotions.builder.percentageExceeds100'));
       return;
     }
     const parsedPriority = parseInt(priority, 10);
     if (isNaN(parsedPriority) || parsedPriority < 0) {
-      toast.error('Invalid priority.');
+      toast.error(t('managePromotions.builder.invalidPriority'));
       return;
     }
 
@@ -146,22 +151,28 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       },
       {
         onSuccess: () => {
-          toast.success('Promotion saved');
+          toast.success(t('managePromotions.builder.promotionSaved'));
           onSaved(promotionId);
         },
         onError: (e: unknown) => {
-          toast.error(e instanceof Error ? e.message : 'Failed to save promotion');
+          toast.error(e instanceof Error ? e.message : t('managePromotions.builder.failedToSave'));
         },
       }
     );
   }
 
   if (!promotionId) {
-    return <p className="text-sm text-muted-foreground">Select or create a promotion to edit.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        {t('managePromotions.builder.selectOrCreatePrompt')}
+      </p>
+    );
   }
 
   if (promotionLoading) {
-    return <p className="text-sm text-muted-foreground">Loading promotion…</p>;
+    return (
+      <p className="text-sm text-muted-foreground">{t('managePromotions.builder.loading')}</p>
+    );
   }
 
   const categoryItems = (categories ?? []).map(c => ({
@@ -176,7 +187,7 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       {/* 1. Promotion name */}
       <div className="space-y-1">
         <label htmlFor={nameInputId} className="text-sm font-medium">
-          Promotion name
+          {t('managePromotions.builder.promotionNameLabel')}
         </label>
         <Input
           id={nameInputId}
@@ -184,7 +195,7 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
           onChange={e => {
             setName(e.target.value);
           }}
-          placeholder="e.g. Happy Hour Beers"
+          placeholder={t('managePromotions.builder.promotionNamePlaceholder')}
           maxLength={100}
           required
         />
@@ -193,7 +204,7 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       {/* 2. Discount type */}
       <div className="space-y-1">
         <label htmlFor={discountTypeId} className="text-sm font-medium">
-          Discount type
+          {t('managePromotions.builder.discountTypeLabel')}
         </label>
         <Select
           value={discountType}
@@ -205,9 +216,15 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="percentage">Percentage off</SelectItem>
-            <SelectItem value="fixed_amount">Fixed amount off</SelectItem>
-            <SelectItem value="fixed_price">Fixed override price</SelectItem>
+            <SelectItem value="percentage">
+              {t('managePromotions.builder.percentageOff')}
+            </SelectItem>
+            <SelectItem value="fixed_amount">
+              {t('managePromotions.builder.fixedAmountOff')}
+            </SelectItem>
+            <SelectItem value="fixed_price">
+              {t('managePromotions.builder.fixedOverridePrice')}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -216,7 +233,7 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       {discountType === 'percentage' ? (
         <div className="space-y-1">
           <label htmlFor={discountValueId} className="text-sm font-medium">
-            Discount value
+            {t('managePromotions.builder.discountValueLabel')}
           </label>
           <div className="relative">
             <Input
@@ -239,7 +256,7 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
         </div>
       ) : (
         <MoneyInput
-          label="Discount value"
+          label={t('managePromotions.builder.discountValueLabel')}
           value={discountValue.length > 0 ? parseFloat(discountValue) || 0 : 0}
           onChange={value => {
             setDiscountValue(String(value));
@@ -250,15 +267,14 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       {/* 4. Fixed-price stacking hint (only for fixed_price) */}
       {discountType === 'fixed_price' && (
         <p className="text-xs text-muted-foreground">
-          Fixed override price replaces the running price — it does not stack with promotions
-          applied before it. Set Priority to 1 if this should always apply first.
+          {t('managePromotions.builder.fixedPriceStackingHint')}
         </p>
       )}
 
       {/* 5. Target type */}
       <div className="space-y-1">
         <label htmlFor={targetTypeId} className="text-sm font-medium">
-          Applies to
+          {t('managePromotions.builder.appliesToLabel')}
         </label>
         <Select
           value={targetType}
@@ -270,10 +286,16 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="item">Item</SelectItem>
-            <SelectItem value="category">Category</SelectItem>
-            <SelectItem value="pool_billing">Pool time billing</SelectItem>
-            <SelectItem value="pool_grant">Pool time bonus</SelectItem>
+            <SelectItem value="item">{t('managePromotions.tab.targetTypeItem')}</SelectItem>
+            <SelectItem value="category">
+              {t('managePromotions.tab.targetTypeCategory')}
+            </SelectItem>
+            <SelectItem value="pool_billing">
+              {t('managePromotions.builder.poolTimeBilling')}
+            </SelectItem>
+            <SelectItem value="pool_grant">
+              {t('managePromotions.builder.poolTimeBonus')}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -282,7 +304,7 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       {targetType === 'item' && (
         <div className="space-y-1">
           <label htmlFor={productPickerId} className="text-sm font-medium">
-            Product
+            {t('managePromotions.builder.productLabel')}
           </label>
           <select
             id={productPickerId}
@@ -292,7 +314,7 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
             }}
             className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm"
           >
-            <option value="">Pick a product…</option>
+            <option value="">{t('managePromotions.builder.pickProductPlaceholder')}</option>
             {(eligibleProducts ?? []).map(p => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -303,12 +325,14 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       )}
       {targetType === 'category' && (
         <div className="space-y-1">
-          <span className="text-sm font-medium">Category</span>
+          <span className="text-sm font-medium">
+            {t('managePromotions.tab.targetTypeCategory')}
+          </span>
           <CategoryTreePicker
             items={categoryItems}
             value={targetCategoryId}
             onChange={setTargetCategoryId}
-            label="Select category"
+            label={t('managePromotions.builder.selectCategoryLabel')}
           />
         </div>
       )}
@@ -316,11 +340,10 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       {/* 7. Priority */}
       <div className="space-y-1">
         <label htmlFor={priorityInputId} className="text-sm font-medium">
-          Priority
+          {t('managePromotions.builder.priorityLabel')}
         </label>
         <p className="text-xs text-muted-foreground">
-          Lower number applies first. Promotions with the same priority apply in the order they
-          were created.
+          {t('managePromotions.builder.priorityHint')}
         </p>
         <Input
           id={priorityInputId}
@@ -344,14 +367,16 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
           }}
         />
         <label htmlFor={activeSwitchId} className="text-sm font-medium">
-          Active
+          {t('managePromotions.builder.activeLabel')}
         </label>
       </div>
 
       {/* 9. Save */}
       <div className="flex justify-end">
         <Button type="button" disabled={updateMutation.isPending} onClick={handleSave}>
-          {updateMutation.isPending ? 'Saving…' : 'Save promotion'}
+          {updateMutation.isPending
+            ? t('common:actions.saving')
+            : t('managePromotions.builder.savePromotion')}
         </Button>
       </div>
     </div>

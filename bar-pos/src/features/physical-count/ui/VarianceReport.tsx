@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@shared/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import type { PhysicalCountVarianceRow } from '../model/usePhysicalCount';
@@ -14,10 +15,12 @@ type Props = {
  * - Positive variance rows → green highlight
  */
 export function VarianceReport({ rows }: Props) {
+  const { t } = useTranslation('featMgmt');
+
   if (rows.length === 0) {
     return (
       <p className="text-center text-sm text-muted-foreground py-4">
-        No variance — all stock counts match.
+        {t('physicalCount.noVariance')}
       </p>
     );
   }
@@ -27,10 +30,10 @@ export function VarianceReport({ rows }: Props) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Product</TableHead>
-            <TableHead className="text-right">Expected</TableHead>
-            <TableHead className="text-right">Actual</TableHead>
-            <TableHead className="text-right">Variance</TableHead>
+            <TableHead>{t('physicalCount.productHeader')}</TableHead>
+            <TableHead className="text-right">{t('physicalCount.expectedHeader')}</TableHead>
+            <TableHead className="text-right">{t('physicalCount.actualHeader')}</TableHead>
+            <TableHead className="text-right">{t('physicalCount.varianceHeader')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

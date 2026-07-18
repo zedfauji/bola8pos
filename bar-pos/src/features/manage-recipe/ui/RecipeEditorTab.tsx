@@ -1,5 +1,6 @@
 import { Trash2 } from 'lucide-react';
 import { useEffect, useReducer, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useIngredientsActive } from '@entities/ingredient';
 import { useRecipe, RecipePreviewPanel } from '@entities/recipe';
 import type { Ingredient, RecipeItemCreate, RecipeWithItems } from '@shared/lib/domain';
@@ -102,6 +103,7 @@ type RecipeEditorTabProps = {
 };
 
 export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps) {
+  const { t } = useTranslation('featMgmt');
   const { data: savedRecipe, isLoading } = useRecipe(productId);
   const { data: ingredients = [], isLoading: ingredientsLoading } = useIngredientsActive();
   const { saveRecipe, isSaving } = useManageRecipe();
@@ -147,11 +149,11 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
       {/* Left column — ingredient rows */}
       <div className="space-y-3">
         <p className="text-sm font-medium">
-          Ingredients for <span className="font-semibold">{productName}</span>
+          {t('manageRecipe.ingredientsFor')} <span className="font-semibold">{productName}</span>
         </p>
 
         {state.rows.length === 0 && (
-          <p className="text-muted-foreground text-sm italic">No recipe yet</p>
+          <p className="text-muted-foreground text-sm italic">{t('manageRecipe.noRecipeYet')}</p>
         )}
 
         {state.rows.map(row => (
@@ -179,12 +181,12 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
                   dispatch({ type: 'SET_QTY', rowId: row.id, value: e.target.value });
                 }}
                 className="font-mono text-right"
-                aria-label="Quantity"
+                aria-label={t('manageRecipe.quantityAria')}
               />
             </div>
             <POSButton
               variant="ghost"
-              aria-label="Remove ingredient row"
+              aria-label={t('manageRecipe.removeIngredientRowAria')}
               onClick={() => {
                 dispatch({ type: 'REMOVE_ROW', rowId: row.id });
               }}
@@ -202,14 +204,14 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
           }}
           className="mt-1"
         >
-          + Add ingredient
+          {t('manageRecipe.addIngredient')}
         </POSButton>
       </div>
 
       {/* Right column — yield + save controls + preview */}
       <div className="space-y-4">
         <div>
-          <Label htmlFor="yield-qty">Yield (servings)</Label>
+          <Label htmlFor="yield-qty">{t('manageRecipe.yieldServingsLabel')}</Label>
           <Input
             id="yield-qty"
             type="number"
@@ -232,7 +234,7 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
             disabled={!state.isDirty || isSaving}
           >
             {isSaving ? <LoadingSpinner className="mr-2 size-4" /> : null}
-            Save recipe
+            {t('manageRecipe.saveRecipe')}
           </POSButton>
           {state.isDirty && (
             <POSButton
@@ -242,13 +244,15 @@ export function RecipeEditorTab({ productId, productName }: RecipeEditorTabProps
               }}
               disabled={isSaving}
             >
-              Discard changes
+              {t('manageRecipe.discardChanges')}
             </POSButton>
           )}
         </div>
 
         <div className="border-t border-border pt-4">
-          <p className="mb-2 text-xs text-muted-foreground">Depletion preview</p>
+          <p className="mb-2 text-xs text-muted-foreground">
+            {t('manageRecipe.depletionPreview')}
+          </p>
           <RecipePreviewPanel recipe={savedRecipe ?? null} isLoading={false} />
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState, type SyntheticEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import type { Category, Modifier, Product } from '@shared/lib/domain';
 import { ProductCreateSchema, ProductUpdateSchema, UuidSchema } from '@shared/lib/domain';
@@ -35,6 +36,7 @@ export function ProductForm({
   onSubmitUpdate,
   onCancel,
 }: ProductFormProps) {
+  const { t } = useTranslation('featMgmt');
   const isEdit = initialProduct != null;
 
   const [name, setName] = useState(initialProduct?.name ?? '');
@@ -67,7 +69,7 @@ export function ProductForm({
 
     const modParsed = ModifierIdsSchema.safeParse(modifierIds);
     if (!modParsed.success) {
-      setFieldErrors({ modifiers: 'Invalid modifier selection' });
+      setFieldErrors({ modifiers: t('manageProducts.productForm.invalidModifierSelection') });
       return;
     }
 
@@ -138,7 +140,7 @@ export function ProductForm({
     <form onSubmit={handleSubmit} className="flex max-h-[min(70vh,560px)] flex-col gap-4">
       {fieldErrors._form ? <p className="text-sm text-destructive">{fieldErrors._form}</p> : null}
 
-      <FormField label="Name" required error={fieldErrors.name ?? ''}>
+      <FormField label={t('manageProducts.productForm.nameLabel')} required error={fieldErrors.name ?? ''}>
         <Input
           value={name}
           onChange={e => {
@@ -148,7 +150,7 @@ export function ProductForm({
         />
       </FormField>
 
-      <FormField label="Category" required error={fieldErrors.categoryId ?? ''}>
+      <FormField label={t('manageProducts.productForm.categoryLabel')} required error={fieldErrors.categoryId ?? ''}>
         <select
           className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm"
           value={categoryId}
@@ -157,7 +159,9 @@ export function ProductForm({
           }}
           disabled={submitting || categories.length === 0}
         >
-          {categories.length === 0 ? <option value="">No categories</option> : null}
+          {categories.length === 0 ? (
+            <option value="">{t('manageProducts.productForm.noCategories')}</option>
+          ) : null}
           {categories.map(c => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -166,13 +170,13 @@ export function ProductForm({
         </select>
       </FormField>
 
-      <FormField label="Base price" required error={fieldErrors.basePrice ?? ''}>
+      <FormField label={t('manageProducts.productForm.basePriceLabel')} required error={fieldErrors.basePrice ?? ''}>
         <MoneyInput value={basePrice} onChange={setBasePrice} disabled={submitting} />
       </FormField>
 
       {/* Happy-hour pricing is now managed in Settings → Promotions (D-01). */}
 
-      <FormField label="SKU" error={fieldErrors.sku ?? ''}>
+      <FormField label={t('manageProducts.productForm.skuLabel')} error={fieldErrors.sku ?? ''}>
         <Input
           value={sku}
           onChange={e => {
@@ -183,8 +187,8 @@ export function ProductForm({
       </FormField>
 
       <FormField
-        label="Barcode"
-        hint="Optional — scan or type product barcode."
+        label={t('manageProducts.productForm.barcodeLabel')}
+        hint={t('manageProducts.productForm.barcodeHint')}
         error={fieldErrors.barcode ?? ''}
       >
         <Input
@@ -197,13 +201,13 @@ export function ProductForm({
         />
       </FormField>
 
-      <FormField label="Image URL" error={fieldErrors.imageUrl ?? ''}>
+      <FormField label={t('manageProducts.productForm.imageUrlLabel')} error={fieldErrors.imageUrl ?? ''}>
         <Input
           value={imageUrl}
           onChange={e => {
             setImageUrl(e.target.value);
           }}
-          placeholder="https://…"
+          placeholder={t('manageProducts.productForm.imageUrlPlaceholder')}
           disabled={submitting}
         />
       </FormField>
@@ -218,15 +222,17 @@ export function ProductForm({
           disabled={submitting}
         />
         <label htmlFor="product-active" className="text-sm font-medium">
-          Active
+          {t('manageProducts.productForm.activeLabel')}
         </label>
       </div>
 
-      <FormField label="Modifiers" error={fieldErrors.modifiers ?? ''}>
+      <FormField label={t('manageProducts.productForm.modifiersLabel')} error={fieldErrors.modifiers ?? ''}>
         <ScrollArea className="max-h-40 rounded-md border p-2">
           <ul className="space-y-2 pr-2">
             {sortedModifiers.length === 0 ? (
-              <li className="text-muted-foreground text-sm">No modifiers defined.</li>
+              <li className="text-muted-foreground text-sm">
+                {t('manageProducts.productForm.noModifiersDefined')}
+              </li>
             ) : (
               sortedModifiers.map(m => (
                 <li key={m.id} className="flex items-center gap-2">
@@ -240,10 +246,12 @@ export function ProductForm({
                   />
                   <label htmlFor={`mod-${m.id}`} className="text-sm">
                     {m.name}{' '}
+                    {/* eslint-disable i18next/no-literal-string -- signed money formatting ('+'/parens), not UI copy */}
                     <span className="text-muted-foreground">
                       ({m.priceDelta >= 0 ? '+' : ''}
                       {m.priceDelta.toFixed(2)})
                     </span>
+                    {/* eslint-enable i18next/no-literal-string */}
                   </label>
                 </li>
               ))
@@ -260,14 +268,18 @@ export function ProductForm({
           disabled={submitting}
           onClick={onCancel}
         >
-          Cancel
+          {t('common:actions.cancel')}
         </POSButton>
         <POSButton
           type="submit"
           touchSize="default"
           disabled={submitting || categories.length === 0}
         >
-          {submitting ? 'Saving…' : isEdit ? 'Save product' : 'Create product'}
+          {submitting
+            ? t('common:actions.saving')
+            : isEdit
+              ? t('manageProducts.productForm.saveProduct')
+              : t('manageProducts.productForm.createProduct')}
         </POSButton>
       </div>
     </form>

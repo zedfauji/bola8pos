@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 import { useMutationSaveRecipe } from '@entities/recipe';
 import type { RecipeItemCreate, RecipeWithItems } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 
 type SaveRecipeArgs = {
   productId: string;
@@ -23,7 +24,7 @@ export function useManageRecipe(): UseManageRecipeReturn {
       toast.error(result.error.message);
       return null;
     }
-    toast.success('Recipe saved');
+    toast.success(i18n.t('featMgmt:manageRecipe.recipeSaved'));
     return result.data;
   };
 

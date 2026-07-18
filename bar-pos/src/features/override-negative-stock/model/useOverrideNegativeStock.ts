@@ -84,6 +84,7 @@ export function useOverrideNegativeStock() {
       }
 
       // 3. Write top-level audit_log row for the override event
+      /* eslint-disable i18next/no-literal-string -- fixed audit_log action/entity_type identifiers, not UI copy */
       const { error: auditError } = await db.from('audit_log').insert({
         action: 'override_negative_stock',
         actor_id: input.actorId,
@@ -94,6 +95,7 @@ export function useOverrideNegativeStock() {
           approvedAt: new Date().toISOString(),
         },
       });
+      /* eslint-enable i18next/no-literal-string */
 
       if (auditError) {
         logger.warn('override_negative_stock.audit_log_failed', { error: auditError });

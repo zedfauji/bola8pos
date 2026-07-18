@@ -10,6 +10,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useComboAvailabilityWindows, comboKeys } from '@entities/combo';
 import type { ComboAvailability } from '@entities/combo';
@@ -70,6 +71,7 @@ function WindowRow({
   onSetEndTime: (idx: number, value: string) => void;
   onRemove: (idx: number) => void;
 }) {
+  const { t } = useTranslation('featMgmt');
   const startId = useId();
   const endId = useId();
 
@@ -109,7 +111,7 @@ function WindowRow({
       {/* Time inputs — only shown when at least 1 day selected */}
       {draft.daysOfWeek.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
-          <FormField label="From">
+          <FormField label={t('manageCombos.availability.from')}>
             <input
               id={startId}
               type="time"
@@ -120,7 +122,7 @@ function WindowRow({
               className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </FormField>
-          <FormField label="To">
+          <FormField label={t('manageCombos.availability.to')}>
             <input
               id={endId}
               type="time"
@@ -132,7 +134,7 @@ function WindowRow({
             />
           </FormField>
           {hasTimeError && (
-            <p className="text-sm text-destructive">End time must be after start time</p>
+            <p className="text-sm text-destructive">{t('manageCombos.availability.timeOrderError')}</p>
           )}
         </div>
       )}
@@ -143,13 +145,13 @@ function WindowRow({
           type="button"
           variant="ghost"
           size="sm"
-          aria-label="Remove window"
+          aria-label={t('manageCombos.availability.removeWindowAria')}
           onClick={() => {
             onRemove(idx);
           }}
         >
           <Trash2 className="size-4" />
-          Remove
+          {t('manageCombos.availability.remove')}
         </Button>
       </div>
     </div>
@@ -157,6 +159,7 @@ function WindowRow({
 }
 
 export function ComboAvailabilityEditor({ comboId }: Props) {
+  const { t } = useTranslation('featMgmt');
   const { data: windows, isLoading } = useComboAvailabilityWindows(comboId);
   const qc = useQueryClient();
 
@@ -172,10 +175,12 @@ export function ComboAvailabilityEditor({ comboId }: Props) {
   const saveMutation = useMutation({
     mutationFn: async (windowDrafts: WindowDraft[]) => {
       // Delete all existing windows for this combo then re-insert
+      /* eslint-disable i18next/no-literal-string -- 'combo_availability' table name / 'combo_product_id' column name, not UI copy */
       const { error: delErr } = await db
         .from('combo_availability')
         .delete()
         .eq('combo_product_id', comboId);
+      /* eslint-enable i18next/no-literal-string */
       if (delErr) throw delErr;
 
       if (windowDrafts.length > 0) {
@@ -191,11 +196,11 @@ export function ComboAvailabilityEditor({ comboId }: Props) {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: comboKeys.availability(comboId) });
-      toast.success('Availability saved');
+      toast.success(t('manageCombos.availability.saved'));
       setInitialized(false); // re-sync drafts on next data fetch
     },
     onError: (e: unknown) => {
-      const msg = e instanceof Error ? e.message : 'Failed to save availability';
+      const msg = e instanceof Error ? e.message : t('manageCombos.availability.saveFailed');
       toast.error(msg);
     },
   });
@@ -234,15 +239,19 @@ export function ComboAvailabilityEditor({ comboId }: Props) {
   }
 
   if (isLoading && !initialized) {
-    return <p className="text-sm text-muted-foreground">Loading availability…</p>;
+    return (
+      <p className="text-sm text-muted-foreground">{t('manageCombos.availability.loading')}</p>
+    );
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-medium">Availability Windows</p>
+      <p className="text-sm font-medium">{t('manageCombos.availability.title')}</p>
 
       {drafts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No windows = always available</p>
+        <p className="text-sm text-muted-foreground">
+          {t('manageCombos.availability.noWindows')}
+        </p>
       ) : (
         <div className="space-y-3">
           {drafts.map((draft, idx) => (
@@ -259,14 +268,14 @@ export function ComboAvailabilityEditor({ comboId }: Props) {
         </div>
       )}
 
-      <p className="text-sm text-muted-foreground">No windows = always available</p>
+      <p className="text-sm text-muted-foreground">{t('manageCombos.availability.noWindows')}</p>
 
       <div className="flex items-center justify-between gap-2">
         <Button type="button" variant="outline" size="sm" onClick={addWindow}>
-          + Add window
+          {t('manageCombos.availability.addWindow')}
         </Button>
         <Button type="button" size="sm" disabled={saveMutation.isPending} onClick={handleSave}>
-          {saveMutation.isPending ? 'Saving…' : 'Save'}
+          {saveMutation.isPending ? t('common:actions.saving') : t('common:actions.save')}
         </Button>
       </div>
     </div>

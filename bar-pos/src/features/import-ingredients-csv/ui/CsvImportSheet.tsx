@@ -10,6 +10,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Download } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { IngredientCreate } from '@entities/ingredient';
 import { IngredientCreateSchema, ingredientKeys } from '@entities/ingredient';
@@ -54,11 +55,13 @@ type ImportState =
   | { step: 'importing' };
 
 function downloadTemplate() {
+  /* eslint-disable i18next/no-literal-string -- MIME type + filename, not UI copy */
   const blob = new Blob([CSV_TEMPLATE], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = 'ingredients-template.csv';
+  /* eslint-enable i18next/no-literal-string */
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -69,6 +72,7 @@ interface Props {
 }
 
 export function CsvImportSheet({ open, onOpenChange }: Props) {
+  const { t } = useTranslation('featMgmt');
   const qc = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importState, setImportState] = useState<ImportState>({ step: 'select' });
@@ -84,7 +88,7 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
 
       const rows = parseCsvText(text);
       if (rows.length === 0) {
-        toast.error('CSV file is empty or could not be parsed');
+        toast.error(t('csvImport.emptyOrUnparseable'));
         return;
       }
 
@@ -93,7 +97,9 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
 
       const MAX_IMPORT_ROWS = 500;
       if (dataRows.length > MAX_IMPORT_ROWS) {
-        toast.error(`CSV has ${String(dataRows.length)} rows — max ${String(MAX_IMPORT_ROWS)} allowed. Split into smaller files.`);
+        toast.error(
+          t('csvImport.tooManyRows', { count: dataRows.length, max: MAX_IMPORT_ROWS })
+        );
         if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
@@ -138,14 +144,18 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
           failedRows.push({
             rowNum,
             reason: firstIssue
-              ? `${firstIssue.path.join('.')} — ${firstIssue.message}`
-              : 'Validation failed',
+              ? t('csvImport.rowValidationIssue', {
+                  path: firstIssue.path.join('.'),
+                  message: firstIssue.message,
+                })
+              : t('csvImport.validationFailed'),
           });
         }
       });
 
       setImportState({ step: 'staged', validRows, failedRows });
     };
+    // eslint-disable-next-line i18next/no-literal-string -- text encoding name, not UI copy
     reader.readAsText(file, 'utf-8');
   }
 
@@ -171,13 +181,13 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
 
     if (error) {
       logger.error('CsvImportSheet: bulk insert failed', { error });
-      toast.error(`Import failed: ${String(error.message)}`);
+      toast.error(t('csvImport.importFailed', { message: String(error.message) }));
       setImportState({ step: 'staged', validRows, failedRows: importState.failedRows });
       return;
     }
 
     void qc.invalidateQueries({ queryKey: ingredientKeys.lists() });
-    toast.success(`${String(validRows.length)} ingredients imported`);
+    toast.success(t('csvImport.ingredientsImported', { count: validRows.length }));
     setImportState({ step: 'select' });
     if (fileInputRef.current) fileInputRef.current.value = '';
     onOpenChange(false);
@@ -203,11 +213,8 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Import ingredients</SheetTitle>
-          <SheetDescription>
-            Upload a CSV file to bulk-add ingredients. Download the template to see the required
-            format.
-          </SheetDescription>
+          <SheetTitle>{t('csvImport.title')}</SheetTitle>
+          <SheetDescription>{t('csvImport.description')}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-4">
@@ -220,11 +227,11 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
                 className="flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
               >
                 <Download className="size-3.5" />
-                Download template
+                {t('csvImport.downloadTemplate')}
               </Button>
 
               <div className="space-y-1.5">
-                <Label htmlFor="csv-file">CSV file</Label>
+                <Label htmlFor="csv-file">{t('csvImport.csvFileLabel')}</Label>
                 <Input
                   id="csv-file"
                   type="file"
@@ -232,7 +239,7 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
                   ref={fileInputRef}
                   onChange={handleFileChange}
                 />
-                <p className="text-xs text-muted-foreground">UTF-8 encoded · max 500 rows</p>
+                <p className="text-xs text-muted-foreground">{t('csvImport.encodingHint')}</p>
               </div>
             </>
           )}
@@ -240,33 +247,34 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
           {importState.step === 'staged' && (
             <div className="space-y-3">
               <p className="font-semibold text-sm">
-                Preview — {validCount + failedRows.length} rows found
+                {t('csvImport.previewRowsFound', { count: validCount + failedRows.length })}
               </p>
 
               {failedRows.length === 0 && validCount > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {validCount} ingredients ready to import
+                  {t('csvImport.readyToImport', { count: validCount })}
                 </p>
               )}
 
               {failedRows.length > 0 && validCount > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {validCount} of {validCount + failedRows.length} rows valid ·{' '}
-                  {failedRows.length} rows have errors (shown below)
+                  {t('csvImport.partiallyValid', {
+                    valid: validCount,
+                    total: validCount + failedRows.length,
+                    failed: failedRows.length,
+                  })}
                 </p>
               )}
 
               {failedRows.length > 0 && validCount === 0 && (
-                <p className="text-sm text-destructive">
-                  0 rows valid — check your file format and try again
-                </p>
+                <p className="text-sm text-destructive">{t('csvImport.noneValid')}</p>
               )}
 
               {failedRows.length > 0 && (
                 <ul className="divide-y rounded-md border max-h-48 overflow-y-auto">
                   {failedRows.map(row => (
                     <li key={row.rowNum} className="px-3 py-2 text-xs text-destructive">
-                      Row {row.rowNum}: {row.reason}
+                      {t('csvImport.rowError', { rowNum: row.rowNum, reason: row.reason })}
                     </li>
                   ))}
                 </ul>
@@ -275,7 +283,7 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
           )}
 
           {importState.step === 'importing' && (
-            <p className="text-sm text-muted-foreground">Importing…</p>
+            <p className="text-sm text-muted-foreground">{t('csvImport.importing')}</p>
           )}
         </div>
 
@@ -288,16 +296,16 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
                   onOpenChange(false);
                 }}
               >
-                Cancel
+                {t('common:actions.cancel')}
               </Button>
-              <Button disabled>Import ingredients</Button>
+              <Button disabled>{t('csvImport.importIngredientsButton')}</Button>
             </>
           )}
 
           {importState.step === 'staged' && (
             <>
               <Button variant="outline" onClick={handleReset}>
-                Choose different file
+                {t('csvImport.chooseDifferentFile')}
               </Button>
               <Button
                 disabled={validCount === 0}
@@ -305,7 +313,7 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
                   void handleConfirmImport();
                 }}
               >
-                Import {validCount} ingredients
+                {t('csvImport.importNIngredients', { count: validCount })}
               </Button>
             </>
           )}
@@ -313,9 +321,9 @@ export function CsvImportSheet({ open, onOpenChange }: Props) {
           {importState.step === 'importing' && (
             <>
               <Button variant="outline" disabled>
-                Choose different file
+                {t('csvImport.chooseDifferentFile')}
               </Button>
-              <Button disabled>Importing…</Button>
+              <Button disabled>{t('csvImport.importing')}</Button>
             </>
           )}
         </SheetFooter>

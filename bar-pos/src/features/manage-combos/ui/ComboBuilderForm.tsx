@@ -10,6 +10,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useCombo, useComboSlots, useComboSlotOptions, comboKeys } from '@entities/combo';
 import type { ComboSlot, ComboSlotOption } from '@entities/combo';
@@ -29,14 +30,17 @@ const db = supabase as any;
 
 function useComboEligibleProducts() {
   return useQuery({
+    // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache key, not UI copy
     queryKey: ['combo_eligible_products'],
     queryFn: async (): Promise<Product[]> => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { data, error } = await db
         .from('products')
         .select('*')
         .eq('is_active', true)
         .eq('is_combo', false)
         .order('name', { ascending: true });
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('useComboEligibleProducts: query failed', { error });
         throw error;
@@ -63,6 +67,7 @@ interface SlotFormProps {
 }
 
 function SlotForm({ onSave, onCancel }: SlotFormProps) {
+  const { t } = useTranslation('featMgmt');
   const labelId = useId();
   const slotTypeId = useId();
   const minQtyId = useId();
@@ -77,13 +82,13 @@ function SlotForm({ onSave, onCancel }: SlotFormProps) {
     e.preventDefault();
     const trimmed = label.trim();
     if (!trimmed) {
-      toast.error('Slot label is required.');
+      toast.error(t('manageCombos.builder.slotLabelRequired'));
       return;
     }
     const min = parseInt(minQty, 10);
     const max = parseInt(maxQty, 10);
     if (isNaN(min) || isNaN(max) || min < 1 || max < 1 || min > max) {
-      toast.error('Invalid qty range. Min and Max must be ≥ 1 and Max ≥ Min.');
+      toast.error(t('manageCombos.builder.invalidQtyRange'));
       return;
     }
     onSave({ label: trimmed, slotType, minQty: min, maxQty: max });
@@ -91,21 +96,21 @@ function SlotForm({ onSave, onCancel }: SlotFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-md border p-3 space-y-3 bg-muted/30">
-      <p className="text-sm font-medium">New slot</p>
+      <p className="text-sm font-medium">{t('manageCombos.builder.newSlotTitle')}</p>
       <Input
         id={labelId}
         value={label}
         onChange={e => {
           setLabel(e.target.value);
         }}
-        placeholder="Slot label, e.g. Choose a beer"
+        placeholder={t('manageCombos.builder.slotLabelPlaceholder')}
         maxLength={100}
         required
         className="text-sm"
       />
       <div className="flex items-center gap-2">
         <label htmlFor={slotTypeId} className="text-xs text-muted-foreground">
-          Type
+          {t('manageCombos.builder.typeLabel')}
         </label>
         <select
           id={slotTypeId}
@@ -115,11 +120,11 @@ function SlotForm({ onSave, onCancel }: SlotFormProps) {
           }}
           className="rounded-md border border-input bg-background px-2 py-1 text-sm"
         >
-          <option value="product">Product</option>
-          <option value="pool_time">Pool time</option>
+          <option value="product">{t('manageCombos.builder.productOption')}</option>
+          <option value="pool_time">{t('manageCombos.builder.poolTimeOption')}</option>
         </select>
         <label htmlFor={minQtyId} className="text-xs text-muted-foreground ml-2">
-          Min
+          {t('manageCombos.builder.minLabel')}
         </label>
         <Input
           id={minQtyId}
@@ -132,7 +137,7 @@ function SlotForm({ onSave, onCancel }: SlotFormProps) {
           className="w-16 text-sm"
         />
         <label htmlFor={maxQtyId} className="text-xs text-muted-foreground">
-          Max
+          {t('manageCombos.builder.maxLabel')}
         </label>
         <Input
           id={maxQtyId}
@@ -147,10 +152,10 @@ function SlotForm({ onSave, onCancel }: SlotFormProps) {
       </div>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onCancel}>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button type="submit" size="sm">
-          Add slot
+          {t('manageCombos.builder.addSlot')}
         </Button>
       </div>
     </form>
@@ -167,6 +172,7 @@ interface SlotEditorProps {
 }
 
 function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
+  const { t } = useTranslation('featMgmt');
   const { data: options, isLoading } = useComboSlotOptions(slot.id);
   const { data: eligibleProducts } = useComboEligibleProducts();
   const qc = useQueryClient();
@@ -196,19 +202,21 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
       void qc.invalidateQueries({ queryKey: comboKeys.slotOptions(slot.id) });
       setAddingOption(false);
       setSelectedProductId('');
-      toast.success('Option added');
+      toast.success(t('manageCombos.builder.optionAdded'));
     },
     onError: (e: unknown) => {
       const msg = e instanceof Error ? e.message : String(e);
       // DB trigger raises: NESTED_COMBO_FORBIDDEN: Product % is a combo and cannot be a slot option
       const isNestedCombo =
-        msg.includes('NESTED_COMBO_FORBIDDEN') || msg.toLowerCase().includes('nested combo');
+        msg.includes('NESTED_COMBO_FORBIDDEN') ||
+        // eslint-disable-next-line i18next/no-literal-string -- matching a fixed backend error substring, not UI copy
+        msg.toLowerCase().includes('nested combo');
       if (isNestedCombo) {
         const prod = (eligibleProducts ?? []).find(p => p.id === selectedProductId);
-        const name = prod?.name ?? 'the selected product';
-        toast.error(`Nested combos are not allowed. Remove '${name}' from the slot options.`);
+        const name = prod?.name ?? t('manageCombos.builder.theSelectedProduct');
+        toast.error(t('manageCombos.builder.nestedComboError', { name }));
       } else {
-        toast.error(msg.length > 0 ? msg : 'Failed to add option');
+        toast.error(msg.length > 0 ? msg : t('manageCombos.builder.failedToAddOption'));
       }
     },
   });
@@ -221,18 +229,20 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: comboKeys.slotOptions(slot.id) });
       setDeleteConfirm(null);
-      toast.success('Option removed');
+      toast.success(t('manageCombos.builder.optionRemoved'));
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to remove option');
+      toast.error(e instanceof Error ? e.message : t('manageCombos.builder.failedToRemoveOption'));
     },
   });
 
   const resolvedOptions = options ?? [];
+  /* eslint-disable i18next/no-literal-string -- Tailwind class strings, not UI copy */
   const slotTypeBadge =
     slot.slotType === 'product'
       ? 'bg-blue-500/20 text-blue-300'
       : 'bg-purple-500/20 text-purple-300';
+  /* eslint-enable i18next/no-literal-string */
 
   return (
     <div className="rounded-md border p-3 space-y-2">
@@ -241,11 +251,15 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
           <p className="font-medium text-sm truncate">{slot.label}</p>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${slotTypeBadge}`}>
-              {slot.slotType === 'pool_time' ? 'Pool time' : 'Product'}
+              {slot.slotType === 'pool_time'
+                ? t('manageCombos.builder.poolTimeOption')
+                : t('manageCombos.builder.productOption')}
             </span>
             <span className="text-xs text-muted-foreground">
-              Qty: {slot.minQty}–{slot.maxQty}
-              {slot.isRequired ? ' · Required' : ' · Optional'}
+              {t('manageCombos.builder.qtyRange', { min: slot.minQty, max: slot.maxQty })}
+              {slot.isRequired
+                ? t('manageCombos.builder.requiredSuffix')
+                : t('manageCombos.builder.optionalSuffix')}
             </span>
           </div>
         </div>
@@ -253,7 +267,7 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
           type="button"
           variant="ghost"
           size="sm"
-          aria-label={`Delete slot ${slot.label}`}
+          aria-label={t('manageCombos.builder.deleteSlotAria', { label: slot.label })}
           onClick={() => {
             setDeleteConfirm({ type: 'slot' });
           }}
@@ -264,9 +278,11 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
 
       {/* Options list */}
       {isLoading ? (
-        <p className="text-xs text-muted-foreground">Loading options…</p>
+        <p className="text-xs text-muted-foreground">{t('manageCombos.builder.loadingOptions')}</p>
       ) : resolvedOptions.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic">No options yet.</p>
+        <p className="text-xs text-muted-foreground italic">
+          {t('manageCombos.builder.noOptionsYet')}
+        </p>
       ) : (
         <ul className="space-y-1">
           {resolvedOptions.map((opt: ComboSlotOption) => {
@@ -274,7 +290,7 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
             const optLabel =
               prod?.name ??
               (opt.prepaidMinutes != null
-                ? `${String(opt.prepaidMinutes)} min`
+                ? t('manageCombos.builder.prepaidMinutes', { minutes: opt.prepaidMinutes })
                 : (opt.childProductId ?? '—'));
             return (
               <li key={opt.id} className="flex items-center justify-between text-sm py-0.5">
@@ -283,7 +299,7 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  aria-label={`Remove option ${optLabel}`}
+                  aria-label={t('manageCombos.builder.removeOptionAria', { label: optLabel })}
                   onClick={() => {
                     setDeleteConfirm({ type: 'option', optionId: opt.id });
                   }}
@@ -306,9 +322,9 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
                 setSelectedProductId(e.target.value);
               }}
               className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-sm"
-              aria-label="Pick a product to add as option"
+              aria-label={t('manageCombos.builder.pickProductAria')}
             >
-              <option value="">Pick a product…</option>
+              <option value="">{t('manageCombos.builder.pickProductPlaceholder')}</option>
               {(eligibleProducts ?? []).map(p => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -328,7 +344,7 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
                 }
               }}
             >
-              Add
+              {t('manageCombos.builder.add')}
             </Button>
             <Button
               type="button"
@@ -339,7 +355,7 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
                 setSelectedProductId('');
               }}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
           </div>
         ) : (
@@ -352,7 +368,7 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
             }}
           >
             <Plus className="size-3.5 mr-1" />
-            Add option
+            {t('manageCombos.builder.addOption')}
           </Button>
         ))}
 
@@ -360,9 +376,9 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
       {deleteConfirm?.type === 'slot' && (
         <ConfirmDialog
           open
-          title={`Remove slot '${slot.label}'?`}
-          description="This will remove the slot and all its options from this combo."
-          confirmLabel="Remove slot"
+          title={t('manageCombos.builder.removeSlotTitle', { label: slot.label })}
+          description={t('manageCombos.builder.removeSlotDescription')}
+          confirmLabel={t('manageCombos.builder.removeSlotConfirmLabel')}
           variant="destructive"
           onConfirm={() => {
             setDeleteConfirm(null);
@@ -376,9 +392,9 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
       {deleteConfirm?.type === 'option' && (
         <ConfirmDialog
           open
-          title="Remove option?"
-          description="This option will be removed from the slot."
-          confirmLabel="Remove"
+          title={t('manageCombos.builder.removeOptionTitle')}
+          description={t('manageCombos.builder.removeOptionDescription')}
+          confirmLabel={t('manageCombos.builder.removeOptionConfirmLabel')}
           variant="destructive"
           isLoading={deleteOptionMutation.isPending}
           onConfirm={() => {
@@ -403,6 +419,7 @@ interface Props {
 }
 
 export function ComboBuilderForm({ comboId, onSaved }: Props) {
+  const { t } = useTranslation('featMgmt');
   const nameInputId = useId();
   const priceInputId = useId();
 
@@ -432,20 +449,22 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
       comboName: string;
       price: number | null;
     }) => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { error } = await db
         .from('products')
         .update({ name: comboName, combo_price_override: price })
         .eq('id', id);
+      /* eslint-enable i18next/no-literal-string */
       if (error) throw error;
       return id;
     },
     onSuccess: (id: string) => {
       void qc.invalidateQueries({ queryKey: comboKeys.all });
-      toast.success('Combo saved');
+      toast.success(t('manageCombos.builder.comboSaved'));
       onSaved(id);
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to save combo');
+      toast.error(e instanceof Error ? e.message : t('manageCombos.builder.failedToSaveCombo'));
     },
   });
 
@@ -466,10 +485,10 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: comboKeys.slots(comboId ?? '') });
       setShowSlotForm(false);
-      toast.success('Slot added');
+      toast.success(t('manageCombos.builder.slotAdded'));
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to add slot');
+      toast.error(e instanceof Error ? e.message : t('manageCombos.builder.failedToAddSlot'));
     },
   });
 
@@ -480,10 +499,10 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: comboKeys.slots(comboId ?? '') });
-      toast.success('Slot removed');
+      toast.success(t('manageCombos.builder.slotRemoved'));
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to remove slot');
+      toast.error(e instanceof Error ? e.message : t('manageCombos.builder.failedToRemoveSlot'));
     },
   });
 
@@ -491,7 +510,7 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
     if (!comboId) return;
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error('Combo name is required.');
+      toast.error(t('manageCombos.builder.comboNameRequired'));
       return;
     }
     const parsedPrice = priceOverride.trim().length > 0 ? parseFloat(priceOverride) : null;
@@ -499,18 +518,22 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
       priceOverride.trim().length > 0 &&
       (parsedPrice === null || isNaN(parsedPrice) || parsedPrice < 0)
     ) {
-      toast.error('Invalid price override. Leave empty for &quot;sum of children&quot;.');
+      toast.error(t('manageCombos.builder.invalidPriceOverride'));
       return;
     }
     saveComboMutation.mutate({ id: comboId, comboName: trimmed, price: parsedPrice });
   }
 
   if (!comboId) {
-    return <p className="text-sm text-muted-foreground">Select or create a combo to edit.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        {t('manageCombos.builder.selectOrCreatePrompt')}
+      </p>
+    );
   }
 
   if (comboLoading || slotsLoading) {
-    return <p className="text-sm text-muted-foreground">Loading combo…</p>;
+    return <p className="text-sm text-muted-foreground">{t('manageCombos.builder.loadingCombo')}</p>;
   }
 
   const resolvedSlots = slots ?? [];
@@ -520,7 +543,7 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
       {/* Name */}
       <div className="space-y-1">
         <label htmlFor={nameInputId} className="text-sm font-medium">
-          Combo name
+          {t('manageCombos.builder.comboNameLabel')}
         </label>
         <Input
           id={nameInputId}
@@ -528,7 +551,7 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
           onChange={e => {
             setName(e.target.value);
           }}
-          placeholder="e.g. Cubeta de cervezas"
+          placeholder={t('manageCombos.builder.comboNamePlaceholder')}
           maxLength={100}
         />
       </div>
@@ -536,10 +559,10 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
       {/* Price override */}
       <div className="space-y-1">
         <label htmlFor={priceInputId} className="text-sm font-medium">
-          Price override (optional)
+          {t('manageCombos.builder.priceOverrideLabel')}
         </label>
         <p className="text-xs text-muted-foreground">
-          Leave empty to use the sum of children&apos;s prices.
+          {t('manageCombos.builder.priceOverrideHelp')}
         </p>
         <Input
           id={priceInputId}
@@ -550,16 +573,18 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
           onChange={e => {
             setPriceOverride(e.target.value);
           }}
-          placeholder="e.g. 150.00"
+          placeholder={t('manageCombos.builder.priceOverridePlaceholder')}
         />
       </div>
 
       {/* Slots */}
       <div className="space-y-2">
-        <p className="text-sm font-medium">Slots ({resolvedSlots.length})</p>
+        <p className="text-sm font-medium">
+          {t('manageCombos.builder.slotsCount', { count: resolvedSlots.length })}
+        </p>
         {resolvedSlots.length === 0 && !showSlotForm && (
           <p className="text-xs text-muted-foreground italic">
-            No slots yet. Add a slot to define what the customer chooses.
+            {t('manageCombos.builder.noSlotsYet')}
           </p>
         )}
         {resolvedSlots.map((slot: ComboSlot) => (
@@ -591,7 +616,7 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
             }}
           >
             <Plus className="size-3.5 mr-1" />
-            Add slot
+            {t('manageCombos.builder.addSlot')}
           </Button>
         )}
       </div>
@@ -599,7 +624,7 @@ export function ComboBuilderForm({ comboId, onSaved }: Props) {
       {/* Save */}
       <div className="flex justify-end">
         <Button type="button" disabled={saveComboMutation.isPending} onClick={handleSave}>
-          {saveComboMutation.isPending ? 'Saving…' : 'Save combo'}
+          {saveComboMutation.isPending ? t('common:actions.saving') : t('manageCombos.builder.saveCombo')}
         </Button>
       </div>
     </div>

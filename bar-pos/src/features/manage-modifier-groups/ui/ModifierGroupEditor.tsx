@@ -13,6 +13,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Plus, Tags, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useModifiers } from '@entities/product';
 import type { Modifier, ModifierGroup, ModifierGroupCreate } from '@shared/lib/domain';
@@ -46,11 +47,13 @@ function useModifierGroups() {
   return useQuery({
     queryKey: MODIFIER_GROUPS_KEY,
     queryFn: async () => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { data, error } = await db
         .from('modifier_groups')
         .select('*')
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('useModifierGroups: query failed', { error });
         throw error;
@@ -77,11 +80,13 @@ function useModifierGroupItems(groupId: string | null) {
     enabled: groupId != null,
     queryFn: async () => {
       if (groupId == null) return [] as string[];
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { data, error } = await db
         .from('modifier_group_items')
         .select('modifier_id')
         .eq('group_id', groupId)
         .order('sort_order', { ascending: true });
+      /* eslint-enable i18next/no-literal-string */
       if (error) throw error;
       return ((data ?? []) as unknown[]).map(
         (r: unknown) => (r as Record<string, unknown>)['modifier_id'] as string
@@ -120,6 +125,7 @@ function useMutationUpdateGroup() {
       maxSelect: number;
       isRequired: boolean;
     }) => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { error } = await db
         .from('modifier_groups')
         .update({
@@ -129,6 +135,7 @@ function useMutationUpdateGroup() {
           is_required: payload.isRequired,
         })
         .eq('id', payload.id);
+      /* eslint-enable i18next/no-literal-string */
       if (error) return err(unknownError(error));
       return ok(undefined);
     },
@@ -156,10 +163,12 @@ function useMutationSetGroupItems() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ groupId, modifierIds }: { groupId: string; modifierIds: string[] }) => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder table/column identifiers, not UI copy */
       const { error: delErr } = await db
         .from('modifier_group_items')
         .delete()
         .eq('group_id', groupId);
+      /* eslint-enable i18next/no-literal-string */
       if (delErr) return err(unknownError(delErr));
 
       if (modifierIds.length > 0) {
@@ -198,6 +207,7 @@ interface GroupFormProps {
 }
 
 function GroupForm({ initial, submitting, onCancel, onSubmit }: GroupFormProps) {
+  const { t } = useTranslation('featMgmt');
   const [name, setName] = useState(initial.name);
   const [minSelect, setMinSelect] = useState(String(initial.minSelect));
   const [maxSelect, setMaxSelect] = useState(String(initial.maxSelect));
@@ -210,7 +220,7 @@ function GroupForm({ initial, submitting, onCancel, onSubmit }: GroupFormProps) 
     const min = parseInt(minSelect, 10);
     const max = parseInt(maxSelect, 10);
     if (isNaN(min) || isNaN(max) || min < 0 || max < 1 || min > max) {
-      toast.error('Invalid selection range. Max must be >= 1 and >= Min.');
+      toast.error(t('manageModifierGroups.form.invalidSelectionRange'));
       return;
     }
     onSubmit({ name: trimmed, minSelect: min, maxSelect: max, isRequired });
@@ -218,19 +228,19 @@ function GroupForm({ initial, submitting, onCancel, onSubmit }: GroupFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <FormField label="Group name">
+      <FormField label={t('manageModifierGroups.form.groupNameLabel')}>
         <Input
           value={name}
           onChange={e => {
             setName(e.target.value);
           }}
-          placeholder="e.g. Extra toppings"
+          placeholder={t('manageModifierGroups.form.groupNamePlaceholder')}
           maxLength={100}
           required
         />
       </FormField>
       <div className="grid grid-cols-2 gap-3">
-        <FormField label="Min selections">
+        <FormField label={t('manageModifierGroups.form.minSelectionsLabel')}>
           <Input
             type="number"
             min={0}
@@ -240,7 +250,7 @@ function GroupForm({ initial, submitting, onCancel, onSubmit }: GroupFormProps) 
             }}
           />
         </FormField>
-        <FormField label="Max selections">
+        <FormField label={t('manageModifierGroups.form.maxSelectionsLabel')}>
           <Input
             type="number"
             min={1}
@@ -259,14 +269,14 @@ function GroupForm({ initial, submitting, onCancel, onSubmit }: GroupFormProps) 
             setIsRequired(c === true);
           }}
         />
-        Required (customer must select)
+        {t('manageModifierGroups.form.requiredLabel')}
       </label>
       <div className="flex justify-end gap-2">
         <POSButton type="button" variant="outline" touchSize="default" onClick={onCancel}>
-          Cancel
+          {t('common:actions.cancel')}
         </POSButton>
         <POSButton type="submit" touchSize="default" disabled={submitting || !name.trim()}>
-          {submitting ? 'Saving…' : 'Save'}
+          {submitting ? t('common:actions.saving') : t('common:actions.save')}
         </POSButton>
       </div>
     </form>
@@ -283,6 +293,7 @@ interface ModifierSelectorProps {
 }
 
 function ModifierSelector({ group, onClose }: ModifierSelectorProps) {
+  const { t } = useTranslation('featMgmt');
   const { data: allModifiers } = useModifiers();
   const { data: attachedIds } = useModifierGroupItems(group.id);
   const setItemsMutation = useMutationSetGroupItems();
@@ -310,7 +321,7 @@ function ModifierSelector({ group, onClose }: ModifierSelectorProps) {
     if (!r.ok) {
       toast.error(r.error.message);
     } else {
-      toast.success('Modifiers updated');
+      toast.success(t('manageModifierGroups.selector.modifiersUpdated'));
       onClose();
     }
   }
@@ -322,11 +333,11 @@ function ModifierSelector({ group, onClose }: ModifierSelectorProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Select modifiers for <strong>{group.name}</strong>.
+        {t('manageModifierGroups.selector.selectModifiersFor')} <strong>{group.name}</strong>.
       </p>
       {sorted.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No modifiers available. Add modifiers first in the Modifiers tab.
+          {t('manageModifierGroups.selector.noModifiersAvailable')}
         </p>
       ) : (
         <ul className="max-h-64 divide-y overflow-y-auto rounded-md border">
@@ -349,7 +360,7 @@ function ModifierSelector({ group, onClose }: ModifierSelectorProps) {
       )}
       <div className="flex justify-end gap-2">
         <POSButton type="button" variant="outline" touchSize="default" onClick={onClose}>
-          Cancel
+          {t('common:actions.cancel')}
         </POSButton>
         <POSButton
           type="button"
@@ -359,7 +370,7 @@ function ModifierSelector({ group, onClose }: ModifierSelectorProps) {
             void handleSave();
           }}
         >
-          {setItemsMutation.isPending ? 'Saving…' : 'Save'}
+          {setItemsMutation.isPending ? t('common:actions.saving') : t('common:actions.save')}
         </POSButton>
       </div>
     </div>
@@ -371,6 +382,7 @@ function ModifierSelector({ group, onClose }: ModifierSelectorProps) {
 // ============================================================================
 
 export function ModifierGroupEditor() {
+  const { t } = useTranslation('featMgmt');
   const { data: groups, isLoading, error: queryError } = useModifierGroups();
   const createMutation = useMutationCreateGroup();
   const updateMutation = useMutationUpdateGroup();
@@ -387,13 +399,15 @@ export function ModifierGroupEditor() {
   if (queryError) {
     return (
       <p className="text-destructive text-sm">
-        Could not load modifier groups: {queryError.message}
+        {t('manageModifierGroups.editor.loadError', { message: queryError.message })}
       </p>
     );
   }
 
   if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Loading modifier groups…</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t('manageModifierGroups.editor.loading')}</p>
+    );
   }
 
   async function handleCreate(data: GroupFormData) {
@@ -408,7 +422,7 @@ export function ModifierGroupEditor() {
     if (!r.ok) {
       toast.error(r.error.message);
     } else {
-      toast.success('Modifier group created');
+      toast.success(t('manageModifierGroups.editor.groupCreated'));
       setDialog(null);
     }
   }
@@ -418,7 +432,7 @@ export function ModifierGroupEditor() {
     if (!r.ok) {
       toast.error(r.error.message);
     } else {
-      toast.success('Modifier group saved');
+      toast.success(t('manageModifierGroups.editor.groupSaved'));
       setDialog(null);
     }
   }
@@ -428,7 +442,7 @@ export function ModifierGroupEditor() {
     if (!r.ok) {
       toast.error(r.error.message);
     } else {
-      toast.success('Modifier group deleted');
+      toast.success(t('manageModifierGroups.editor.groupDeleted'));
       setDialog(null);
     }
   }
@@ -441,7 +455,7 @@ export function ModifierGroupEditor() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
-          Groups define which optional modifiers customers can choose for a product.
+          {t('manageModifierGroups.editor.headerHelp')}
         </p>
         <POSButton
           type="button"
@@ -451,13 +465,13 @@ export function ModifierGroupEditor() {
           }}
         >
           <Plus className="size-4" />
-          Add group
+          {t('manageModifierGroups.editor.addGroup')}
         </POSButton>
       </div>
 
       {sorted.length === 0 ? (
         <p className="rounded-md border px-4 py-8 text-center text-sm text-muted-foreground">
-          No modifier groups yet. Add a group to get started.
+          {t('manageModifierGroups.editor.emptyState')}
         </p>
       ) : (
         <ul className="divide-y rounded-md border">
@@ -466,8 +480,13 @@ export function ModifierGroupEditor() {
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{group.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  Select {group.minSelect}&ndash;{group.maxSelect}
-                  {group.isRequired ? ' · Required' : ' · Optional'}
+                  {t('manageModifierGroups.editor.selectRange', {
+                    min: group.minSelect,
+                    max: group.maxSelect,
+                  })}
+                  {group.isRequired
+                    ? t('manageCombos.builder.requiredSuffix')
+                    : t('manageCombos.builder.optionalSuffix')}
                 </p>
               </div>
               <div className="flex items-center gap-1">
@@ -475,19 +494,21 @@ export function ModifierGroupEditor() {
                   type="button"
                   variant="outline"
                   touchSize="default"
-                  aria-label={`Attach modifiers to ${group.name}`}
+                  aria-label={t('manageModifierGroups.editor.attachModifiersAria', {
+                    name: group.name,
+                  })}
                   onClick={() => {
                     setDialog({ kind: 'attach', group });
                   }}
                 >
                   <Tags className="size-3.5" />
-                  <span className="ml-1 text-xs">Modifiers</span>
+                  <span className="ml-1 text-xs">{t('manageModifierGroups.editor.modifiers')}</span>
                 </POSButton>
                 <POSButton
                   type="button"
                   variant="outline"
                   touchSize="default"
-                  aria-label={`Edit ${group.name}`}
+                  aria-label={t('manageModifierGroups.editor.editAria', { name: group.name })}
                   onClick={() => {
                     setDialog({ kind: 'edit', group });
                   }}
@@ -498,7 +519,7 @@ export function ModifierGroupEditor() {
                   type="button"
                   variant="outline"
                   touchSize="default"
-                  aria-label={`Delete ${group.name}`}
+                  aria-label={t('manageModifierGroups.editor.deleteAria', { name: group.name })}
                   onClick={() => {
                     setDialog({ kind: 'delete', group });
                   }}
@@ -521,7 +542,9 @@ export function ModifierGroupEditor() {
         <DialogContent className="max-w-md sm:max-w-md" showCloseButton>
           <DialogHeader>
             <DialogTitle>
-              {dialog?.kind === 'edit' ? `Edit "${dialog.group.name}"` : 'New modifier group'}
+              {dialog?.kind === 'edit'
+                ? t('manageModifierGroups.editor.editGroupTitle', { name: dialog.group.name })
+                : t('manageModifierGroups.editor.newGroupTitle')}
             </DialogTitle>
           </DialogHeader>
           {(dialog?.kind === 'create' || dialog?.kind === 'edit') && (
@@ -562,7 +585,7 @@ export function ModifierGroupEditor() {
       >
         <DialogContent className="max-w-md sm:max-w-md" showCloseButton>
           <DialogHeader>
-            <DialogTitle>Attach modifiers</DialogTitle>
+            <DialogTitle>{t('manageModifierGroups.editor.attachModifiersTitle')}</DialogTitle>
           </DialogHeader>
           {dialog?.kind === 'attach' && (
             <ModifierSelector
@@ -580,9 +603,9 @@ export function ModifierGroupEditor() {
       {dialog?.kind === 'delete' && (
         <ConfirmDialog
           open
-          title={`Delete "${dialog.group.name}"?`}
-          description="This will remove the group and all its modifier associations. Products using this group will no longer have these options."
-          confirmLabel="Delete"
+          title={t('manageModifierGroups.editor.deleteGroupTitle', { name: dialog.group.name })}
+          description={t('manageModifierGroups.editor.deleteGroupDescription')}
+          confirmLabel={t('manageModifierGroups.editor.deleteGroupConfirmLabel')}
           onConfirm={() => {
             void handleDelete(dialog.group.id);
           }}
