@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationUpdateStaffRole } from '@entities/staff/model/queries';
 import type { Staff } from '@shared/lib/domain';
@@ -40,6 +41,7 @@ export function EditRoleDialog({
   currentStaffId,
   preSelectedStaffId,
 }: EditRoleDialogProps) {
+  const { t } = useTranslation('featMgmt');
   const editableStaff = staff.filter(s => s.id !== currentStaffId);
 
   const [selectedStaffId, setSelectedStaffId] = useState<string>(preSelectedStaffId ?? '');
@@ -60,7 +62,7 @@ export function EditRoleDialog({
 
     const parsed = UserRoleSchema.safeParse(selectedRole);
     if (!parsed.success) {
-      toast.error('Invalid role selected.');
+      toast.error(t('editStaffRole.invalidRole'));
       return;
     }
 
@@ -71,13 +73,16 @@ export function EditRoleDialog({
 
     if (!result.ok) {
       logger.error('edit-staff-role.submit.failed', { message: result.error.message });
-      toast.error('Failed to update role', { description: result.error.message });
+      toast.error(t('editStaffRole.updateFailed'), { description: result.error.message });
       return;
     }
 
     const member = editableStaff.find(s => s.id === selectedStaffId);
-    toast.success('Role updated', {
-      description: `${member?.name ?? 'Staff'} is now a ${parsed.data}.`,
+    toast.success(t('editStaffRole.updateSuccess'), {
+      description: t('editStaffRole.updateSuccessDescription', {
+        name: member?.name ?? t('editStaffRole.fallbackStaffName'),
+        role: parsed.data,
+      }),
     });
     handleOpenChange(false);
   }
@@ -88,22 +93,20 @@ export function EditRoleDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Edit Staff Role</DialogTitle>
-          <DialogDescription>
-            Change the role for a team member. You cannot change your own role.
-          </DialogDescription>
+          <DialogTitle>{t('editStaffRole.dialogTitle')}</DialogTitle>
+          <DialogDescription>{t('editStaffRole.dialogDescription')}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-role-staff">Staff member</Label>
+            <Label htmlFor="edit-role-staff">{t('editStaffRole.staffMemberLabel')}</Label>
             <Select
               value={selectedStaffId}
               onValueChange={setSelectedStaffId}
               disabled={editableStaff.length === 0}
             >
               <SelectTrigger id="edit-role-staff">
-                <SelectValue placeholder="Select staff…" />
+                <SelectValue placeholder={t('editStaffRole.selectStaffPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -118,10 +121,10 @@ export function EditRoleDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-role-role">New role</Label>
+            <Label htmlFor="edit-role-role">{t('editStaffRole.newRoleLabel')}</Label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
               <SelectTrigger id="edit-role-role">
-                <SelectValue placeholder="Select role…" />
+                <SelectValue placeholder={t('editStaffRole.selectRolePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -136,7 +139,7 @@ export function EditRoleDialog({
           </div>
 
           {editableStaff.length === 0 && (
-            <p className="text-sm text-muted-foreground">No other staff members to edit.</p>
+            <p className="text-sm text-muted-foreground">{t('editStaffRole.noOtherStaff')}</p>
           )}
         </div>
 
@@ -149,7 +152,7 @@ export function EditRoleDialog({
             }}
             disabled={mutation.isPending}
           >
-            Cancel
+            {t('editStaffRole.cancel')}
           </Button>
           <Button
             type="button"
@@ -158,7 +161,7 @@ export function EditRoleDialog({
             }}
             disabled={!canSubmit}
           >
-            {mutation.isPending ? 'Saving…' : 'Save'}
+            {mutation.isPending ? t('editStaffRole.saving') : t('editStaffRole.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

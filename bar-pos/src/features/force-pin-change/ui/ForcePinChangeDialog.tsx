@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import type { Staff } from '@shared/lib/domain';
@@ -16,6 +17,7 @@ export interface ForcePinChangeDialogProps {
  * they must set a new PIN before their next login (force_pin_change RPC).
  */
 export function ForcePinChangeDialog({ staff, open, onOpenChange }: ForcePinChangeDialogProps) {
+  const { t } = useTranslation('featMgmt');
   const mutation = useForcePinChange();
 
   async function handleConfirm(): Promise<void> {
@@ -27,17 +29,19 @@ export function ForcePinChangeDialog({ staff, open, onOpenChange }: ForcePinChan
       return;
     }
 
-    toast.success(`${staff.name}'s PIN will be changed on next login.`);
+    toast.success(t('forcePinChange.successToast', { name: staff.name }));
     onOpenChange(false);
   }
 
   return (
     <ConfirmDialog
       open={open && staff !== null}
-      title={`Force PIN change for ${staff?.name ?? ''}?`}
-      description={`${staff?.name ?? 'This staff member'} will be required to set a new PIN before they can log in again. This does not log them out of an active shift.`}
-      confirmLabel="Force PIN change"
-      cancelLabel="Cancel"
+      title={t('forcePinChange.dialogTitle', { name: staff?.name ?? '' })}
+      description={t('forcePinChange.dialogDescription', {
+        name: staff?.name ?? t('forcePinChange.fallbackStaffName'),
+      })}
+      confirmLabel={t('forcePinChange.confirmLabel')}
+      cancelLabel={t('forcePinChange.cancelLabel')}
       onConfirm={handleConfirm}
       onCancel={() => {
         onOpenChange(false);

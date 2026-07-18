@@ -9,6 +9,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { staffKeys } from '@entities/staff/model/queries';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type AppErrorCode, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -35,7 +36,9 @@ export function useForcePinChange() {
         logger.error('force_pin_change.failed', { staffId, message: error.message as string });
         return err({
           code: 'SUPABASE_ERROR' as AppErrorCode,
-          message: (error.message as string | undefined) ?? 'Failed to force PIN change.',
+          message:
+            (error.message as string | undefined) ??
+            i18n.t('featMgmt:forcePinChange.failedGeneric'),
           raw: error,
         });
       }
@@ -44,7 +47,7 @@ export function useForcePinChange() {
         logger.error('force_pin_change.unexpected_response', { staffId, data });
         return err({
           code: 'UNKNOWN_ERROR' as AppErrorCode,
-          message: 'Failed to force PIN change.',
+          message: i18n.t('featMgmt:forcePinChange.failedGeneric'),
         });
       }
 

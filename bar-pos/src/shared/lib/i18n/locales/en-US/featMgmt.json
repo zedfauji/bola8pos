@@ -527,5 +527,35 @@
     "occupied": "Occupied",
     "close": "Close",
     "seatParty": "Seat party"
+  },
+  "editStaffRole": {
+    "invalidRole": "Invalid role selected.",
+    "updateFailed": "Failed to update role",
+    "updateSuccess": "Role updated",
+    "updateSuccessDescription": "{{name}} is now a {{role}}.",
+    "fallbackStaffName": "Staff",
+    "dialogTitle": "Edit Staff Role",
+    "dialogDescription": "Change the role for a team member. You cannot change your own role.",
+    "staffMemberLabel": "Staff member",
+    "selectStaffPlaceholder": "Select staff…",
+    "newRoleLabel": "New role",
+    "selectRolePlaceholder": "Select role…",
+    "noOtherStaff": "No other staff members to edit.",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "save": "Save"
+  },
+  "forcePinChange": {
+    "failedGeneric": "Failed to force PIN change.",
+    "successToast": "{{name}}'s PIN will be changed on next login.",
+    "dialogTitle": "Force PIN change for {{name}}?",
+    "dialogDescription": "{{name}} will be required to set a new PIN before they can log in again. This does not log them out of an active shift.",
+    "fallbackStaffName": "This staff member",
+    "confirmLabel": "Force PIN change",
+    "cancelLabel": "Cancel"
+  },
+  "togglePermission": {
+    "enableFailed": "Failed to enable permission",
+    "disableFailed": "Failed to disable permission"
   }
 }

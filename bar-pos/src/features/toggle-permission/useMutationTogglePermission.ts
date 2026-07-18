@@ -4,6 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { rbacKeys } from '@entities/rbac';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import type { StaffAction, StaffRole } from '@shared/lib/rbac';
 import { err, ok, type Result } from '@shared/lib/result';
@@ -29,17 +30,21 @@ export function useMutationTogglePermission() {
       enabled,
     }: TogglePermissionInput): Promise<Result<null>> => {
       if (enabled) {
+        /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain:
+           table name, not UI copy */
         const { error } = await db
           .from('role_permissions')
           .insert({ role, action })
           .select()
           .single();
+        /* eslint-enable i18next/no-literal-string */
         if (error) {
           logger.error('toggle-permission.enable.failed', { role, action, error });
           return err({
             code: 'SUPABASE_ERROR' as const,
             message:
-              (error as { message?: string }).message ?? 'Failed to enable permission',
+              (error as { message?: string }).message ??
+              i18n.t('featMgmt:togglePermission.enableFailed'),
           });
         }
 
@@ -64,17 +69,21 @@ export function useMutationTogglePermission() {
         return ok(null);
       }
 
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain:
+         table/column names, not UI copy */
       const { error } = await db
         .from('role_permissions')
         .delete()
         .eq('role', role)
         .eq('action', action);
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('toggle-permission.disable.failed', { role, action, error });
         return err({
           code: 'SUPABASE_ERROR' as const,
           message:
-            (error as { message?: string }).message ?? 'Failed to disable permission',
+            (error as { message?: string }).message ??
+            i18n.t('featMgmt:togglePermission.disableFailed'),
         });
       }
 
