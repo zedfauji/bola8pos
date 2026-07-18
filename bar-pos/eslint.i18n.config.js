@@ -75,6 +75,10 @@ export default tseslint.config({
           // primitive — a CSS/DOM hook, not UI copy. 'aria-invalid' is always
           // the literal string 'true'/'false', never translatable text.
           'data-slot', 'aria-invalid',
+          // 'aria-describedby' is a DOM ID reference (e.g. linking an input to
+          // its inline error <span id="...">), not UI copy — same category as
+          // 'aria-invalid'.
+          'aria-describedby',
           // 'step' is the native <input type="number"> HTML attribute
           // controlling increment granularity (e.g. step="any", step="0.01")
           // — a numeric/DOM behavior value, not UI copy.
@@ -110,10 +114,15 @@ export default tseslint.config({
       // e.g. db.from('products').select('id, name').eq('is_active', true).order('name'))
       // carry DB column-name/wildcard literals, not UI copy — same category as 'from',
       // recurring 20+ times in this plan's scope alone.
+      // 'insert(...)'/'update(...)'/'delete(...)' (the remaining Supabase query-builder
+      // mutation verbs, e.g. db.from('waitlist_entries').update({ status: 'cancelled' }))
+      // carry DB payload objects/enum values, not UI copy — same rationale as 'from'/
+      // 'select'/'eq'/'order'; recurs across the waitlist mark-* hooks + toggle-permission
+      // in this plan's scope.
       callees: {
         exclude: [
           'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+',
-          'rpc', 'navigate', 'from', 'select', 'eq', 'order',
+          'rpc', 'navigate', 'from', 'select', 'eq', 'order', 'insert', 'update', 'delete',
         ],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list
@@ -127,8 +136,15 @@ export default tseslint.config({
       // FormField's cloned-child props object uses `'aria-invalid': ...`).
       // `labelKey` (StatusBadge's status->i18next-key config map) holds a
       // dot-path key string looked up via t(), not the UI copy itself.
+      // `status` is a Postgres enum column value (e.g. `{ status: 'cancelled' }`
+      // in a Supabase `.update()` payload for waitlist_entries/tabs/pool_sessions)
+      // — a wire-protocol identifier, never UI copy on its own; user-facing status
+      // text goes through StatusBadge's `labelKey` mapping instead.
       'object-properties': {
-        exclude: ['key', 'id', 'accessorKey', 'displayName', 'className', 'aria-invalid', 'labelKey'],
+        exclude: [
+          'key', 'id', 'accessorKey', 'displayName', 'className', 'aria-invalid', 'labelKey',
+          'status',
+        ],
       },
       // Em dash ('—') is a standalone symbol used as an empty-value
       // placeholder (e.g. no open shift), not translatable UI copy.

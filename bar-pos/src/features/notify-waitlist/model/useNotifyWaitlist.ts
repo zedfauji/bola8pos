@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { waitlistKeys } from '@entities/waitlist';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -23,6 +24,8 @@ export function useNotifyWaitlist() {
   const mutation = useMutation({
     mutationFn: async (input: NotifyWaitlistInput): Promise<Result<void>> => {
       // UPDATE status → 'notified'; pg_net trigger fires edge function automatically
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain:
+         table/column names + status enum value, not UI copy */
       const { error } = await db
         .from('waitlist_entries')
         .update({
@@ -30,6 +33,7 @@ export function useNotifyWaitlist() {
           notified_at: new Date().toISOString(),
         })
         .eq('id', input.entryId);
+      /* eslint-enable i18next/no-literal-string */
 
       if (error) {
         logger.error('waitlist.notify.failed', { entryId: input.entryId, error });
@@ -38,7 +42,10 @@ export function useNotifyWaitlist() {
 
       // Tauri desktop notification fallback when no phone (manager sees queue, but gets native alert too)
       if (!input.hasPhone) {
-        await sendManagerNotification('Party ready', `${input.entryName} is ready to be seated.`);
+        await sendManagerNotification(
+          i18n.t('featMgmt:notifyWaitlist.partyReadyTitle'),
+          i18n.t('featMgmt:notifyWaitlist.partyReadyBody', { name: input.entryName })
+        );
       }
 
       logger.info('waitlist.notify.succeeded', { entryId: input.entryId });
@@ -47,14 +54,14 @@ export function useNotifyWaitlist() {
     onSuccess: (result, input) => {
       if (!result.ok) {
         toast.error(
-          `Could not send notification for ${input.entryName}. Check notification history.`
+          i18n.t('featMgmt:notifyWaitlist.errorToast', { name: input.entryName })
         );
         return;
       }
       if (input.hasPhone) {
-        toast.success(`WhatsApp sent to ${input.entryName}.`);
+        toast.success(i18n.t('featMgmt:notifyWaitlist.whatsappSentToast', { name: input.entryName }));
       } else {
-        toast.success(`Manager notified for ${input.entryName}. No phone on file.`);
+        toast.success(i18n.t('featMgmt:notifyWaitlist.managerNotifiedToast', { name: input.entryName }));
       }
       void queryClient.invalidateQueries({ queryKey: waitlistKeys.lists() });
     },

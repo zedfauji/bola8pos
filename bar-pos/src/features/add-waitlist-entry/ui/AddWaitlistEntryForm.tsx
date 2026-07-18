@@ -1,4 +1,5 @@
 import { useReducer } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { toE164 } from '@shared/lib/phone';
 import {
@@ -88,6 +89,7 @@ export interface AddWaitlistEntryFormProps {
 }
 
 export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProps) {
+  const { t } = useTranslation('featMgmt');
   const [state, dispatch] = useReducer(reducer, initialState);
   const { addEntry, isPending } = useAddWaitlistEntry();
 
@@ -121,15 +123,15 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
       {/* Focus is trapped by Radix UI SheetContent — no explicit autoFocus needed */}
       <SheetContent side="right" className="max-w-md w-full flex flex-col gap-0 p-0">
         <SheetHeader className="px-6 pt-6 pb-4">
-          <SheetTitle>Add to waitlist</SheetTitle>
-          <SheetDescription>Record a walk-in party waiting for a pool table.</SheetDescription>
+          <SheetTitle>{t('addWaitlistEntry.dialogTitle')}</SheetTitle>
+          <SheetDescription>{t('addWaitlistEntry.dialogDescription')}</SheetDescription>
         </SheetHeader>
 
         <div className="flex flex-col gap-4 px-6 py-4 flex-1">
           {/* Party name */}
-          <FormField label="Party name" required>
+          <FormField label={t('addWaitlistEntry.partyNameLabel')} required>
             <Input
-              placeholder="e.g. García"
+              placeholder={t('addWaitlistEntry.partyNamePlaceholder')}
               maxLength={100}
               value={state.name}
               onChange={e => {
@@ -141,7 +143,7 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
           {/* Party size */}
           <div className="flex flex-col gap-1.5">
             <Label>
-              Party size{' '}
+              {t('addWaitlistEntry.partySizeLabel')}{' '}
               <span aria-hidden="true" className="text-destructive">
                 *
               </span>
@@ -167,12 +169,12 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
 
           {/* Phone number */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="waitlist-phone">Phone number</Label>
+            <Label htmlFor="waitlist-phone">{t('addWaitlistEntry.phoneLabel')}</Label>
             <Input
               id="waitlist-phone"
               type="tel"
               inputMode="tel"
-              placeholder="e.g. 55 1234 5678"
+              placeholder={t('addWaitlistEntry.phonePlaceholder')}
               value={state.phoneRaw}
               aria-describedby={phoneError ? 'waitlist-phone-error' : undefined}
               onChange={e => {
@@ -183,11 +185,11 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
               }}
             />
             <span className="text-sm text-muted-foreground">
-              MX/US number. Used to send WhatsApp notification.
+              {t('addWaitlistEntry.phoneHelp')}
             </span>
             {phoneError && (
               <span id="waitlist-phone-error" role="alert" className="text-sm text-destructive">
-                Not a valid MX or US phone number.
+                {t('addWaitlistEntry.phoneInvalid')}
               </span>
             )}
           </div>
@@ -195,7 +197,7 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
 
         <SheetFooter className="px-6 pb-6 flex gap-3">
           <Button size="lg" variant="outline" className="flex-1" onClick={handleClose}>
-            Discard
+            {t('addWaitlistEntry.discard')}
           </Button>
           <Button
             size="lg"
@@ -205,7 +207,11 @@ export function AddWaitlistEntryForm({ open, onClose }: AddWaitlistEntryFormProp
               void handleSubmit();
             }}
           >
-            {isPending ? <LoadingSpinner size={16} className="p-0" /> : 'Add to waitlist'}
+            {isPending ? (
+              <LoadingSpinner size={16} className="p-0" />
+            ) : (
+              t('addWaitlistEntry.addToWaitlist')
+            )}
           </Button>
         </SheetFooter>
       </SheetContent>

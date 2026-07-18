@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { waitlistKeys } from '@entities/waitlist';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -15,10 +16,13 @@ export function useMarkNoShow() {
 
   const mutation = useMutation({
     mutationFn: async (input: { entryId: string; entryName: string }): Promise<Result<void>> => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain:
+         table name + status enum value, not UI copy */
       const { error } = await db
         .from('waitlist_entries')
         .update({ status: 'no_show' })
         .eq('id', input.entryId);
+      /* eslint-enable i18next/no-literal-string */
 
       if (error) {
         logger.error('waitlist.noshow.failed', { entryId: input.entryId, error });
@@ -28,10 +32,10 @@ export function useMarkNoShow() {
     },
     onSuccess: (result, input) => {
       if (!result.ok) {
-        toast.error('Could not mark no-show. Try again or refresh the waitlist.');
+        toast.error(i18n.t('featMgmt:markWaitlistNoShow.errorToast'));
         return;
       }
-      toast.success(`${input.entryName} marked as no-show.`);
+      toast.success(i18n.t('featMgmt:markWaitlistNoShow.successToast', { name: input.entryName }));
       void queryClient.invalidateQueries({ queryKey: waitlistKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: waitlistKeys.waitingCount() });
     },
