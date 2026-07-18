@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationLinkPoolSessionToTab } from '@entities/pool-table/model/queries';
 import type { Tab } from '@entities/tab';
@@ -28,6 +29,7 @@ export function AssignPoolSessionSheet({
   tableLabel,
   openTabs,
 }: AssignPoolSessionSheetProps) {
+  const { t } = useTranslation('featOrders');
   const link = useMutationLinkPoolSessionToTab();
   const [tabId, setTabId] = useState<string>('');
 
@@ -40,7 +42,7 @@ export function AssignPoolSessionSheet({
 
   const handleConfirm = async () => {
     if (!sessionId || !tabId) {
-      toast.error('Select an open tab.');
+      toast.error(t('assignPoolSession.selectOpenTab'));
       return;
     }
     const result = await link.mutateAsync({ sessionId, tabId });
@@ -48,7 +50,7 @@ export function AssignPoolSessionSheet({
       toast.error(result.error.message);
       return;
     }
-    toast.success('Session linked to tab.');
+    toast.success(t('assignPoolSession.sessionLinked'));
     handleClose(false);
   };
 
@@ -56,14 +58,14 @@ export function AssignPoolSessionSheet({
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Assign to tab</SheetTitle>
+          <SheetTitle>{t('assignPoolSession.title')}</SheetTitle>
           <SheetDescription>
-            Link the active session on {tableLabel} to a customer tab.
+            {t('assignPoolSession.description', { tableLabel })}
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="assign-tab">Open tab</Label>
+            <Label htmlFor="assign-tab">{t('assignPoolSession.openTabLabel')}</Label>
             <select
               id="assign-tab"
               className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-11 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -72,7 +74,7 @@ export function AssignPoolSessionSheet({
                 setTabId(e.target.value);
               }}
             >
-              <option value="">Select tab…</option>
+              <option value="">{t('assignPoolSession.selectTabOption')}</option>
               {openTabs.map(tab => (
                 <option key={tab.id} value={tab.id}>
                   {tab.customerName}
@@ -91,7 +93,7 @@ export function AssignPoolSessionSheet({
               void handleConfirm();
             }}
           >
-            {link.isPending ? 'Saving…' : 'Link session'}
+            {link.isPending ? t('assignPoolSession.saving') : t('assignPoolSession.linkSession')}
           </POSButton>
         </SheetFooter>
       </SheetContent>

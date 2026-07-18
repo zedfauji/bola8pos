@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { bumpKdsItem, kdsKeys } from '@entities/kds';
+import i18n from '@shared/lib/i18n';
 
 export function useBumpKdsItem() {
   const queryClient = useQueryClient();
@@ -15,6 +16,6 @@ export function useBumpKdsItem() {
       }
       void queryClient.invalidateQueries({ queryKey: kdsKeys.all });
     },
-    onError: () => toast.error('Failed to update item status.'),
+    onError: () => toast.error(i18n.t('featOrders:bumpKdsItem.failed')),
   });
 }

@@ -169,5 +169,92 @@
     "totalVoided": "Total voided",
     "voidReasonLabel": "Void reason",
     "requiredReasonPlaceholder": "Required reason"
+  },
+  "assignPoolSession": {
+    "selectOpenTab": "Select an open tab.",
+    "sessionLinked": "Session linked to tab.",
+    "title": "Assign to tab",
+    "description": "Link the active session on {{tableLabel}} to a customer tab.",
+    "openTabLabel": "Open tab",
+    "selectTabOption": "Select tab…",
+    "saving": "Saving…",
+    "linkSession": "Link session"
+  },
+  "bumpKdsItem": {
+    "failed": "Failed to update item status."
+  },
+  "editSessionStartTime": {
+    "mustBeInPast": "Start time must be in the past",
+    "mustBeBeforeEnded": "Start time must be before the session ended",
+    "invalidDateTime": "Invalid date/time value",
+    "updated": "Session start time updated.",
+    "title": "Edit Session Start Time",
+    "current": "Current:",
+    "newStartTime": "New start time"
+  },
+  "managerPinGate": {
+    "incorrectPin": "Incorrect PIN. Ask a manager to enter their PIN.",
+    "title": "Manager Access Required",
+    "description": "A manager or admin PIN is required to access this section.",
+    "pinLabel": "Enter manager PIN"
+  },
+  "printPrecheque": {
+    "barFallback": "Bar",
+    "staffFallback": "Staff",
+    "itemFallback": "Item"
+  },
+  "registerCajaEntry": {
+    "noOpenCaja": "No open caja session",
+    "amountPositive": "Amount must be greater than 0",
+    "conceptRequired": "Concept is required",
+    "conceptMaxLength": "Concept must be 200 characters or less",
+    "noActiveStaff": "No active staff session.",
+    "expenseRecorded": "Expense recorded: ${{amount}}",
+    "incomeRecorded": "Income recorded: ${{amount}}",
+    "title": "Register Expense / Income",
+    "typeLabel": "Type",
+    "expense": "Expense",
+    "income": "Income",
+    "amountLabel": "Amount",
+    "conceptLabel": "Concept",
+    "conceptPlaceholder": "Describe this entry…",
+    "saveEntry": "Save Entry"
+  },
+  "startPoolTimer": {
+    "tableUnavailable": "This table is not available to start a session.",
+    "noActiveStaffOrShift": "No active staff or shift.",
+    "tableFallbackName": "Table {{number}}",
+    "sessionStarted": "Pool session started.",
+    "title": "Start pool session",
+    "selectTableHint": "Select a table from the grid.",
+    "ratePerHour": "Rate per hour",
+    "linkToOpenTab": "Link to open tab",
+    "newTabAutoCreate": "New Tab (auto-create)",
+    "starting": "Starting…",
+    "startSession": "Start Session"
+  },
+  "stopAndMove": {
+    "sessionStoppedMoved": "Session stopped. Tab moved to table {{number}}.",
+    "title": "Stop Timer & Move Table",
+    "description": "Stop the pool session on {{tableLabel}} and move the tab to a regular table.",
+    "confirmLabel": "Stop & Move",
+    "newTableNumberLabel": "New table number",
+    "tableNumberPlaceholder": "Table number (1–200)"
+  },
+  "stopPoolTimer": {
+    "underMinuteNote": "Sessions under 15 minutes are billed at the 15-minute minimum.",
+    "paidTabBlock": "Cannot stop a session on a tab that is already paid.",
+    "sessionStopped": "Pool session stopped.",
+    "title": "Stop pool session?",
+    "description": "Table {{number}} — charges use 15-minute blocks.",
+    "noActiveSession": "No active session selected.",
+    "confirmLabel": "Stop & finalize",
+    "elapsed": "Elapsed",
+    "finalChargePreview": "Final charge (preview)",
+    "addToTab": "Add to tab:",
+    "linkedTabFallback": "Linked tab",
+    "chargeSeparately": "Charge separately",
+    "notLinkedToTab": "— this session is not linked to a tab.",
+    "paidTabDisabledNote": "This session is on a tab that is already paid. Stop is disabled."
   }
 }

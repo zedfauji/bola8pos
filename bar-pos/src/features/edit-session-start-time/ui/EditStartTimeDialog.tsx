@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { PoolSession } from '@shared/lib/domain';
 import { POSButton } from '@shared/ui';
@@ -20,6 +21,7 @@ const toDatetimeLocal = (d: Date): string => {
 };
 
 export function EditStartTimeDialog({ open, onOpenChange, session }: EditStartTimeDialogProps) {
+  const { t } = useTranslation('featOrders');
   const [value, setValue] = useState(() => toDatetimeLocal(session.startedAt));
   const [fieldError, setFieldError] = useState<string | null>(null);
   const { editStartTime, isPending } = useEditSessionStartTime();
@@ -36,7 +38,7 @@ export function EditStartTimeDialog({ open, onOpenChange, session }: EditStartTi
 
     const parsed = new Date(value);
     if (isNaN(parsed.getTime())) {
-      setFieldError('Invalid date/time value');
+      setFieldError(t('editSessionStartTime.invalidDateTime'));
       return;
     }
 
@@ -57,7 +59,7 @@ export function EditStartTimeDialog({ open, onOpenChange, session }: EditStartTi
       return;
     }
 
-    toast.success('Session start time updated.');
+    toast.success(t('editSessionStartTime.updated'));
     onOpenChange(false);
   }
 
@@ -70,7 +72,7 @@ export function EditStartTimeDialog({ open, onOpenChange, session }: EditStartTi
     >
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Edit Session Start Time</DialogTitle>
+          <DialogTitle>{t('editSessionStartTime.title')}</DialogTitle>
         </DialogHeader>
 
         <form
@@ -82,7 +84,7 @@ export function EditStartTimeDialog({ open, onOpenChange, session }: EditStartTi
           <div className="space-y-4 py-2">
             <div className="space-y-1">
               <p className="text-muted-foreground text-sm">
-                Current:{' '}
+                {t('editSessionStartTime.current')}{' '}
                 {session.startedAt.toLocaleString([], {
                   dateStyle: 'short',
                   timeStyle: 'short',
@@ -91,7 +93,7 @@ export function EditStartTimeDialog({ open, onOpenChange, session }: EditStartTi
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="start-time-input">New start time</Label>
+              <Label htmlFor="start-time-input">{t('editSessionStartTime.newStartTime')}</Label>
               <Input
                 id="start-time-input"
                 type="datetime-local"
@@ -107,10 +109,10 @@ export function EditStartTimeDialog({ open, onOpenChange, session }: EditStartTi
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
             <POSButton type="submit" disabled={isPending}>
-              {isPending ? 'Saving…' : 'Save'}
+              {isPending ? t('common:actions.saving') : t('common:actions.save')}
             </POSButton>
           </DialogFooter>
         </form>

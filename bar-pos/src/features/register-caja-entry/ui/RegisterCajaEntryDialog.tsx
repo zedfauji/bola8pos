@@ -1,21 +1,28 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useStaffStore } from '@entities/staff/model/store';
+import i18n from '@shared/lib/i18n';
 import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { useRegisterCajaEntry } from '../model/useRegisterCajaEntry';
 
-const FormSchema = z.object({
-  type: z.enum(['expense', 'income']),
-  amount: z.coerce.number().positive('Amount must be greater than 0'),
-  concept: z
-    .string()
-    .min(1, 'Concept is required')
-    .max(200, 'Concept must be 200 characters or less'),
-});
+// Built fresh (not a module-level const) so a locale switch is reflected in the
+// next validation instead of baking in whichever language was active at first
+// import (Rule 1 fix, same pattern as open-tab's OpenTabDialog).
+function buildFormSchema() {
+  return z.object({
+    type: z.enum(['expense', 'income']),
+    amount: z.coerce.number().positive(i18n.t('featOrders:registerCajaEntry.amountPositive')),
+    concept: z
+      .string()
+      .min(1, i18n.t('featOrders:registerCajaEntry.conceptRequired'))
+      .max(200, i18n.t('featOrders:registerCajaEntry.conceptMaxLength')),
+  });
+}
 
 interface RegisterCajaEntryDialogProps {
   open: boolean;
@@ -23,6 +30,7 @@ interface RegisterCajaEntryDialogProps {
 }
 
 export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntryDialogProps) {
+  const { t } = useTranslation('featOrders');
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [amount, setAmount] = useState('');
   const [concept, setConcept] = useState('');
@@ -47,7 +55,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
     e.preventDefault();
     setErrors({});
 
-    const validation = FormSchema.safeParse({ type, amount, concept });
+    const validation = buildFormSchema().safeParse({ type, amount, concept });
 
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
@@ -62,7 +70,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
     }
 
     if (!currentStaff) {
-      toast.error('No active staff session.');
+      toast.error(t('registerCajaEntry.noActiveStaff'));
       return;
     }
 
@@ -79,9 +87,9 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
     }
 
     toast.success(
-      type === 'expense'
-        ? `Expense recorded: $${validation.data.amount.toFixed(2)}`
-        : `Income recorded: $${validation.data.amount.toFixed(2)}`
+      t(type === 'expense' ? 'registerCajaEntry.expenseRecorded' : 'registerCajaEntry.incomeRecorded', {
+        amount: validation.data.amount.toFixed(2),
+      })
     );
     resetForm();
     onOpenChange(false);
@@ -96,7 +104,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
     >
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Register Expense / Income</DialogTitle>
+          <DialogTitle>{t('registerCajaEntry.title')}</DialogTitle>
         </DialogHeader>
 
         <form
@@ -108,7 +116,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
           <div className="space-y-4 py-2">
             {/* Type toggle */}
             <div className="space-y-1">
-              <Label>Type</Label>
+              <Label>{t('registerCajaEntry.typeLabel')}</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -119,7 +127,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
                     setType('expense');
                   }}
                 >
-                  Expense
+                  {t('registerCajaEntry.expense')}
                 </Button>
                 <Button
                   type="button"
@@ -130,7 +138,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
                     setType('income');
                   }}
                 >
-                  Income
+                  {t('registerCajaEntry.income')}
                 </Button>
               </div>
               {errors.type && <p className="text-sm text-destructive">{errors.type}</p>}
@@ -139,7 +147,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
             {/* Amount */}
             <div className="space-y-1">
               <Label htmlFor="entry-amount">
-                Amount <span className="text-destructive">*</span>
+                {t('registerCajaEntry.amountLabel')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="entry-amount"
@@ -159,7 +167,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
             {/* Concept */}
             <div className="space-y-1">
               <Label htmlFor="entry-concept">
-                Concept <span className="text-destructive">*</span>
+                {t('registerCajaEntry.conceptLabel')} <span className="text-destructive">*</span>
               </Label>
               <textarea
                 id="entry-concept"
@@ -169,7 +177,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
                 }}
                 maxLength={200}
                 rows={3}
-                placeholder="Describe this entry…"
+                placeholder={t('registerCajaEntry.conceptPlaceholder')}
                 disabled={isPending}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
@@ -179,10 +187,10 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? 'Saving…' : 'Save Entry'}
+              {isPending ? t('common:actions.saving') : t('registerCajaEntry.saveEntry')}
             </Button>
           </DialogFooter>
         </form>

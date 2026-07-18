@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { PoolSession, PoolTable } from '@shared/lib/domain';
 import { ConfirmDialog, Input } from '@shared/ui';
@@ -29,6 +30,7 @@ export function StopAndMoveDialog({
   onClose,
   onSuccess,
 }: StopAndMoveDialogProps) {
+  const { t } = useTranslation('featOrders');
   const [tableInput, setTableInput] = useState('');
   const mutation = useStopAndMoveSession();
 
@@ -52,7 +54,7 @@ export function StopAndMoveDialog({
       return;
     }
 
-    toast.success(`Session stopped. Tab moved to table ${String(newTableNumber)}.`);
+    toast.success(t('stopAndMove.sessionStoppedMoved', { number: newTableNumber }));
     setTableInput('');
     onSuccess();
     onClose();
@@ -66,9 +68,9 @@ export function StopAndMoveDialog({
   return (
     <ConfirmDialog
       open={open}
-      title="Stop Timer & Move Table"
-      description={`Stop the pool session on ${table.label} and move the tab to a regular table.`}
-      confirmLabel="Stop & Move"
+      title={t('stopAndMove.title')}
+      description={t('stopAndMove.description', { tableLabel: table.label })}
+      confirmLabel={t('stopAndMove.confirmLabel')}
       variant="destructive"
       confirmClassName="min-h-[72px] text-lg font-semibold focus-visible:ring-4 focus-visible:ring-ring"
       onConfirm={() => {
@@ -80,14 +82,14 @@ export function StopAndMoveDialog({
     >
       <div className="flex flex-col gap-2 py-2">
         <label className="text-sm font-medium" htmlFor="new-table-number">
-          New table number
+          {t('stopAndMove.newTableNumberLabel')}
         </label>
         <Input
           id="new-table-number"
           type="number"
           min={1}
           max={200}
-          placeholder="Table number (1–200)"
+          placeholder={t('stopAndMove.tableNumberPlaceholder')}
           value={tableInput}
           onChange={e => {
             setTableInput(e.target.value);

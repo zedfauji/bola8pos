@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab, PoolSession, PoolTable } from '@shared/lib/domain';
-import { getCurrentLocale } from '@shared/lib/i18n';
+import i18n, { getCurrentLocale } from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { computePoolSessionBilling } from '@shared/lib/pool-billing';
 import { printRawText } from '@shared/lib/pos-printer';
@@ -30,8 +30,8 @@ export function usePrintPreCheque() {
 
   return useMutation({
     mutationFn: async ({ tab, session, table }: PrintPreChequeInput): Promise<Result<void>> => {
-      const barName = settings?.general.barName ?? 'Bar';
-      const cashierName = currentStaff?.name ?? tab.staff?.name ?? 'Staff';
+      const barName = settings?.general.barName ?? i18n.t('featOrders:printPrecheque.barFallback');
+      const cashierName = currentStaff?.name ?? tab.staff?.name ?? i18n.t('featOrders:printPrecheque.staffFallback');
 
       // When kdsEnabled, KITCHEN- and BAR-routed items are handled by their KDS boards and excluded from the pre-cheque.
       const kdsEnabled = settings?.receipt.kdsEnabled ?? false;
@@ -43,7 +43,7 @@ export function usePrintPreCheque() {
           o.items
             .filter(item => !kdsEnabled || item.product?.category?.routing === 'NONE')
             .map(item => ({
-              name: item.product?.name ?? 'Item',
+              name: item.product?.name ?? i18n.t('featOrders:printPrecheque.itemFallback'),
               quantity: item.quantity,
               lineTotal: item.lineTotal ?? item.quantity * item.unitPrice,
               orderedAt: o.createdAt,

@@ -91,8 +91,11 @@ export default tseslint.config({
       // function name — a wire-protocol identifier, never UI copy; the
       // withDottedPrefix wrapper makes this exclude match any receiver
       // (db.rpc, supabase.rpc, (supabase as any).rpc, deplDb.rpc, etc).
+      // 'navigate(...)' (react-router's useNavigate() return value) first
+      // arg is a route path (e.g. '/pos', '/pool-tables'), never UI copy —
+      // recurs across pages/widgets, not just this plan's feature folders.
       callees: {
-        exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+', 'rpc'],
+        exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+', 'rpc', 'navigate'],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list
       // keys, TanStack Table column identifiers/accessors) are structural

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationStartSession } from '@entities/pool-table/model/queries';
 import { useSettings } from '@entities/settings';
@@ -32,6 +33,7 @@ export interface StartSessionSheetProps {
 }
 
 export function StartSessionSheet({ open, onOpenChange, table, openTabs }: StartSessionSheetProps) {
+  const { t } = useTranslation('featOrders');
   const startSession = useMutationStartSession();
   const currentRole = useStaffStore(s => s.currentStaff?.role);
   const openTab = useMutationOpenTab();
@@ -50,7 +52,7 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
   const handleConfirm = async () => {
     if (!table) return;
     if (table.status !== 'available') {
-      toast.error('This table is not available to start a session.');
+      toast.error(t('startPoolTimer.tableUnavailable'));
       return;
     }
 
@@ -58,10 +60,10 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
 
     if (tabChoice === NEW_TAB) {
       if (!currentStaff || !currentShift) {
-        toast.error('No active staff or shift.');
+        toast.error(t('startPoolTimer.noActiveStaffOrShift'));
         return;
       }
-      const tabName = `Pool ${table.label.trim() || 'Table ' + String(table.number)}`;
+      const tabName = `Pool ${table.label.trim() || t('startPoolTimer.tableFallbackName', { number: table.number })}`;
       const createResult = await openTab.mutateAsync({
         customerName: tabName,
         tableNumber: null,
@@ -85,7 +87,7 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
       toast.error(result.error.message);
       return;
     }
-    toast.success('Pool session started.');
+    toast.success(t('startPoolTimer.sessionStarted'));
 
     if (settings.data?.receipt.printOnStart) {
       const text = buildStartTicketText({
@@ -109,23 +111,23 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto sm:max-h-[85vh]">
         <SheetHeader>
-          <SheetTitle>Start pool session</SheetTitle>
+          <SheetTitle>{t('startPoolTimer.title')}</SheetTitle>
           <SheetDescription>
             {table
               ? `Table ${String(table.number)} · ${table.label}`
-              : 'Select a table from the grid.'}
+              : t('startPoolTimer.selectTableHint')}
           </SheetDescription>
         </SheetHeader>
 
         {table && (
           <div className="space-y-6 py-4">
             <div>
-              <p className="text-muted-foreground mb-1 text-sm">Rate per hour</p>
+              <p className="text-muted-foreground mb-1 text-sm">{t('startPoolTimer.ratePerHour')}</p>
               <MoneyDisplay amount={table.ratePerHour} size="xl" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="pool-start-tab">Link to open tab</Label>
+              <Label htmlFor="pool-start-tab">{t('startPoolTimer.linkToOpenTab')}</Label>
               <select
                 id="pool-start-tab"
                 className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-11 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -134,7 +136,7 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
                   setTabChoice(e.target.value);
                 }}
               >
-                <option value={NEW_TAB}>New Tab (auto-create)</option>
+                <option value={NEW_TAB}>{t('startPoolTimer.newTabAutoCreate')}</option>
                 {openTabs.map(tab => (
                   <option key={tab.id} value={tab.id}>
                     {tab.customerName}
@@ -160,7 +162,7 @@ export function StartSessionSheet({ open, onOpenChange, table, openTabs }: Start
                 void handleConfirm();
               }}
             >
-              {isBusy ? 'Starting…' : 'Start Session'}
+              {isBusy ? t('startPoolTimer.starting') : t('startPoolTimer.startSession')}
             </POSButton>
           </ProtectedAction>
         </SheetFooter>

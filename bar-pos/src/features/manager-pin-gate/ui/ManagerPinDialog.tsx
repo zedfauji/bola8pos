@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useStaffList } from '@entities/staff/model/queries';
 import { canAccess } from '@shared/lib/rbac';
@@ -27,6 +28,7 @@ export function ManagerPinDialog({
   requiredAction,
   onSuccess,
 }: ManagerPinDialogProps) {
+  const { t } = useTranslation('featOrders');
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const { data: staffList, isIdleOrLoading } = useStaffList();
@@ -49,7 +51,7 @@ export function ManagerPinDialog({
     if (match) {
       onSuccess();
     } else {
-      setError('Incorrect PIN. Ask a manager to enter their PIN.');
+      setError(t('managerPinGate.incorrectPin'));
       setPin('');
     }
   }
@@ -58,9 +60,9 @@ export function ManagerPinDialog({
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Manager Access Required</AlertDialogTitle>
+          <AlertDialogTitle>{t('managerPinGate.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            A manager or admin PIN is required to access this section.
+            {t('managerPinGate.description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -68,13 +70,13 @@ export function ManagerPinDialog({
           value={pin}
           onChange={setPin}
           onComplete={handlePinComplete}
-          label="Enter manager PIN"
+          label={t('managerPinGate.pinLabel')}
           error={error}
           isLoading={isIdleOrLoading}
         />
 
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

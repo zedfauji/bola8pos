@@ -77,7 +77,9 @@ export function useStopAndMoveSession() {
         return;
       }
       void qc.invalidateQueries({ queryKey: poolTableKeys.all });
+      // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache keys, not UI copy
       void qc.invalidateQueries({ queryKey: ['pool-sessions'] });
+      // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache key, not UI copy
       void qc.invalidateQueries({ queryKey: ['tabs'] });
     },
 

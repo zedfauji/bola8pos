@@ -9,6 +9,7 @@ export function useLookupProductByBarcode() {
 
   const findCached = useCallback(
     (code: string): Product | null => {
+      // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache key, not UI copy
       const cached = queryClient.getQueryData<Product[] | undefined>(['products']);
       if (Array.isArray(cached)) {
         const hit = cached.find(p => p.barcode === code);
@@ -26,9 +27,9 @@ export function useLookupProductByBarcode() {
 
       const { data, error } = await supabase
         .from('products')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, i18next/no-literal-string -- DB column selector, not UI copy
         .select('id, name, barcode' as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, i18next/no-literal-string -- DB column name, not UI copy
         .eq('barcode' as any, code)
         .maybeSingle();
       if (error) {

@@ -1,5 +1,6 @@
 import { useCajaStore, useMutationCreateCajaEntry } from '@entities/caja';
 import type { CajaEntryCreate, CajaEntryType } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err } from '@shared/lib/result';
 
@@ -16,7 +17,7 @@ export function useRegisterCajaEntry() {
 
   const registerEntry = async (input: RegisterEntryInput) => {
     if (!currentCaja) {
-      return err({ code: 'NOT_FOUND' as const, message: 'No open caja session' });
+      return err({ code: 'NOT_FOUND' as const, message: i18n.t('featOrders:registerCajaEntry.noOpenCaja') });
     }
 
     const payload: CajaEntryCreate = {

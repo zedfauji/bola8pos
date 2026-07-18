@@ -1,5 +1,6 @@
 import { useMutationUpdateSessionStartTime } from '@entities/pool-table/model/queries';
 import type { PoolSession } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { err, validationError } from '@shared/lib/result';
 
 export function useEditSessionStartTime() {
@@ -8,10 +9,10 @@ export function useEditSessionStartTime() {
   const editStartTime = async (session: PoolSession, startedAt: Date) => {
     const now = new Date();
     if (startedAt >= now) {
-      return err(validationError({ startedAt: 'Start time must be in the past' }));
+      return err(validationError({ startedAt: i18n.t('featOrders:editSessionStartTime.mustBeInPast') }));
     }
     if (session.stoppedAt && startedAt >= session.stoppedAt) {
-      return err(validationError({ startedAt: 'Start time must be before the session ended' }));
+      return err(validationError({ startedAt: i18n.t('featOrders:editSessionStartTime.mustBeBeforeEnded') }));
     }
     return mutation.mutateAsync({ sessionId: session.id, startedAt });
   };
