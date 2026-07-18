@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import i18n from '@shared/lib/i18n';
 import { logError } from '@shared/lib/telemetry';
 import { POSButton } from '@shared/ui/POSButton';
 
@@ -31,9 +32,14 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback;
       }
+      // Class component — cannot use the useTranslation() hook. Uses the
+      // imported i18n singleton's .t() directly (same pattern as non-component
+      // consumers documented in @shared/lib/i18n/index.ts).
       return (
         <div className="p-6 bg-destructive/10 rounded-lg border border-destructive/20 text-center">
-          <h2 className="text-lg font-bold text-destructive mb-2">Something went wrong</h2>
+          <h2 className="text-lg font-bold text-destructive mb-2">
+            {i18n.t('common:errorBoundary.title')}
+          </h2>
           <p className="text-sm text-destructive/80 mb-4">{this.state.error?.message}</p>
           <POSButton
             touchSize="large"
@@ -42,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
               this.setState({ hasError: false });
             }}
           >
-            Try Again
+            {i18n.t('common:actions.tryAgain')}
           </POSButton>
         </div>
       );

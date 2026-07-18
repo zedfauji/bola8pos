@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Button } from './button';
 
 export type DateRangePickerProps = {
@@ -55,6 +57,7 @@ const PRESETS: Preset[] = [
 ];
 
 export function DateRangePicker({ fromStr, toStr, onChange }: DateRangePickerProps) {
+  const { t } = useTranslation('common');
   return (
     <div className="flex flex-wrap items-center gap-2">
       {PRESETS.map(preset => (
@@ -70,7 +73,7 @@ export function DateRangePicker({ fromStr, toStr, onChange }: DateRangePickerPro
         </Button>
       ))}
       <label className="flex items-center gap-2 text-sm">
-        <span className="text-muted-foreground">From:</span>
+        <span className="text-muted-foreground">{t('dateRangePicker.from')}</span>
         <input
           type="date"
           value={fromStr}
@@ -81,7 +84,7 @@ export function DateRangePicker({ fromStr, toStr, onChange }: DateRangePickerPro
         />
       </label>
       <label className="flex items-center gap-2 text-sm">
-        <span className="text-muted-foreground">To:</span>
+        <span className="text-muted-foreground">{t('dateRangePicker.to')}</span>
         <input
           type="date"
           value={toStr}

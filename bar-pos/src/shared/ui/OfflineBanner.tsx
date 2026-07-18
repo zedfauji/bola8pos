@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOnlineStatus } from '@shared/lib/connectivity';
 import { cn } from '@shared/lib/utils';
 
@@ -15,6 +16,7 @@ type BannerState = 'offline' | 'done' | 'hidden';
  */
 export function OfflineBanner() {
   const isOnline = useOnlineStatus();
+  const { t } = useTranslation('common');
 
   const [bannerState, setBannerState] = useState<BannerState>('hidden');
   const [visible, setVisible] = useState(false);
@@ -62,8 +64,8 @@ export function OfflineBanner() {
         isDone ? 'opacity-0' : 'opacity-100'
       )}
     >
-      {bannerState === 'offline' && 'Offline \u2014 running on cached data'}
-      {bannerState === 'done' && 'All actions synced'}
+      {bannerState === 'offline' && t('offlineBanner.offline')}
+      {bannerState === 'done' && t('offlineBanner.done')}
     </div>
   );
 }

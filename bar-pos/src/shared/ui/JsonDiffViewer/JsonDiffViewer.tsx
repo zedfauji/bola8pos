@@ -10,6 +10,7 @@
  */
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { diffJson } from '@shared/lib/json-diff';
 import type { DiffNode } from '@shared/lib/json-diff';
@@ -36,31 +37,35 @@ interface DiffLineProps {
 }
 
 function DiffLine({ node, depth }: DiffLineProps) {
+  const { t } = useTranslation('common');
   const [expanded, setExpanded] = useState(depth === 0);
   const hasChildren = (node.children?.length ?? 0) > 0;
 
-  const bgClass =
+  const bgClass = cn(
     node.status === 'added'
       ? 'bg-emerald-500/10'
       : node.status === 'removed'
         ? 'bg-destructive/10'
-        : 'bg-transparent';
+        : 'bg-transparent'
+  );
 
-  const textClass =
+  const textClass = cn(
     node.status === 'added'
       ? 'text-emerald-400'
       : node.status === 'removed'
         ? 'text-destructive'
-        : 'text-muted-foreground';
+        : 'text-muted-foreground'
+  );
 
   const gutter = node.status === 'added' ? '+' : node.status === 'removed' ? '−' : ' ';
 
-  const gutterClass =
+  const gutterClass = cn(
     node.status === 'added'
       ? 'text-emerald-400'
       : node.status === 'removed'
         ? 'text-destructive'
-        : 'text-muted-foreground';
+        : 'text-muted-foreground'
+  );
 
   return (
     <>
@@ -82,7 +87,7 @@ function DiffLine({ node, depth }: DiffLineProps) {
               setExpanded(e => !e);
             }}
             aria-expanded={expanded}
-            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${node.key}`}
+            aria-label={`${expanded ? t('jsonDiffViewer.collapse') : t('jsonDiffViewer.expand')} ${node.key}`}
             className="mr-1 size-4 shrink-0 flex items-center justify-center"
           >
             <ChevronRight
@@ -121,6 +126,7 @@ function DiffLine({ node, depth }: DiffLineProps) {
 // ---------------------------------------------------------------------------
 
 export function JsonDiffViewer({ before, after, truncated }: JsonDiffViewerProps) {
+  const { t } = useTranslation('common');
   const nodes = diffJson(before, after);
   const [expandAll, setExpandAll] = useState(false);
 
@@ -129,7 +135,7 @@ export function JsonDiffViewer({ before, after, truncated }: JsonDiffViewerProps
   if (bothEmpty) {
     return (
       <p className="text-muted-foreground text-sm py-4 text-center">
-        No payload recorded for this entry.
+        {t('jsonDiffViewer.noPayload')}
       </p>
     );
   }
@@ -138,15 +144,15 @@ export function JsonDiffViewer({ before, after, truncated }: JsonDiffViewerProps
     <div className="flex flex-col gap-2">
       {truncated && (
         <div className="rounded border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
-          Payload truncated at 64 KB. Full snapshot not available.
+          {t('jsonDiffViewer.truncated')}
         </div>
       )}
 
       {/* Controls */}
       <div className="flex items-center justify-between">
         <div className="flex gap-4 text-xs text-muted-foreground">
-          <span className="font-semibold uppercase tracking-wide">Before</span>
-          <span className="font-semibold uppercase tracking-wide">After</span>
+          <span className="font-semibold uppercase tracking-wide">{t('jsonDiffViewer.before')}</span>
+          <span className="font-semibold uppercase tracking-wide">{t('jsonDiffViewer.after')}</span>
         </div>
         <button
           type="button"
@@ -155,7 +161,7 @@ export function JsonDiffViewer({ before, after, truncated }: JsonDiffViewerProps
           }}
           className="text-xs text-muted-foreground underline-offset-2 hover:underline"
         >
-          {expandAll ? 'Collapse all' : 'Expand all'}
+          {expandAll ? t('jsonDiffViewer.collapseAll') : t('jsonDiffViewer.expandAll')}
         </button>
       </div>
 
@@ -163,7 +169,7 @@ export function JsonDiffViewer({ before, after, truncated }: JsonDiffViewerProps
       <div className="rounded border border-border overflow-auto">
         {nodes.length === 0 ? (
           <p className="text-muted-foreground text-sm py-4 text-center">
-            No changes detected.
+            {t('jsonDiffViewer.noChanges')}
           </p>
         ) : (
           nodes.map((node, i) => (

@@ -4,6 +4,7 @@
  * Reusable skeleton components for common loading states.
  */
 
+import { useTranslation } from 'react-i18next';
 import { cn } from '@shared/lib/utils';
 import { Skeleton } from '@shared/ui/skeleton';
 
@@ -27,11 +28,12 @@ export type CardSkeletonProps = {
  * ```
  */
 export function CardSkeleton({ height = 200, className }: CardSkeletonProps) {
+  const { t } = useTranslation('common');
   return (
     <div
       className={cn('rounded-lg border bg-card p-4', className)}
       style={{ height: typeof height === 'number' ? `${String(height)}px` : height }}
-      aria-label="Loading..."
+      aria-label={t('loading.generic')}
       role="status"
     >
       <div className="space-y-3">
@@ -63,10 +65,11 @@ export type TableRowSkeletonProps = {
  * ```
  */
 export function TableRowSkeleton({ columns = 4, className }: TableRowSkeletonProps) {
+  const { t } = useTranslation('common');
   return (
     <div
       className={cn('flex items-center gap-4 border-b py-4', className)}
-      aria-label="Loading..."
+      aria-label={t('loading.generic')}
       role="status"
     >
       {Array.from({ length: columns }).map((_, i) => (
@@ -96,10 +99,11 @@ export type ProductGridSkeletonProps = {
  * ```
  */
 export function ProductGridSkeleton({ count = 8, className }: ProductGridSkeletonProps) {
+  const { t } = useTranslation('common');
   return (
     <div
       className={cn('grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4', className)}
-      aria-label="Loading products..."
+      aria-label={t('loading.products')}
       role="status"
     >
       {Array.from({ length: count }).map((_, i) => (
@@ -133,10 +137,11 @@ export type PoolTableGridSkeletonProps = {
  * ```
  */
 export function PoolTableGridSkeleton({ count = 6, className }: PoolTableGridSkeletonProps) {
+  const { t } = useTranslation('common');
   return (
     <div
       className={cn('grid grid-cols-2 gap-4 md:grid-cols-3', className)}
-      aria-label="Loading pool tables..."
+      aria-label={t('loading.poolTables')}
       role="status"
     >
       {Array.from({ length: count }).map((_, i) => (
@@ -173,8 +178,9 @@ export type TabListSkeletonProps = {
  * ```
  */
 export function TabListSkeleton({ count = 5, className }: TabListSkeletonProps) {
+  const { t } = useTranslation('common');
   return (
-    <div className={cn('space-y-3', className)} aria-label="Loading tabs..." role="status">
+    <div className={cn('space-y-3', className)} aria-label={t('loading.tabs')} role="status">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="rounded-lg border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">

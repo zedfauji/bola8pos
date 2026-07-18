@@ -11,6 +11,7 @@ import importPlugin from 'eslint-plugin-import'
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import boundaries from 'eslint-plugin-boundaries'
 import tailwindcss from 'eslint-plugin-tailwindcss'
+import i18next from 'eslint-plugin-i18next'
 import { uiDriftSelectors } from './eslint-rules/no-ui-drift.js'
 import path from 'node:path'
 
@@ -43,6 +44,22 @@ export default tseslint.config({
     import: importPlugin,
     'no-relative-import-paths': noRelativeImportPaths,
     boundaries,
+    // Registered (not enabled) so eslint-disable comments targeting the
+    // standalone eslint.i18n.config.js gate's `i18next/no-literal-string`
+    // rule (e.g. shared/ui's Tailwind class-name lookup tables) resolve as
+    // known-but-inactive here instead of "Definition for rule ... was not
+    // found" — mirrors the reverse registration already present in
+    // eslint.i18n.config.js for react-refresh/react-hooks/jsx-a11y/react.
+    // 21-12 folds an equivalent enabled rule block into this file and
+    // deletes the standalone helper.
+    i18next,
+  },
+  linterOptions: {
+    // A disable comment for `i18next/no-literal-string` is legitimately
+    // "unused" here (the rule is registered but never enabled in this
+    // committed gate — see the `i18next` plugin registration comment
+    // above) without being a real problem in the file.
+    reportUnusedDisableDirectives: 'off',
   },
   settings: {
     react: {

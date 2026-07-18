@@ -8,6 +8,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@shared/lib/utils';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -68,6 +69,7 @@ export function MoneyInput({
   disabled = false,
   className,
 }: MoneyInputProps) {
+  const { t } = useTranslation('common');
   const inputId = useId();
   const [displayValue, setDisplayValue] = useState(() => {
     const cents = Math.round(value * 100);
@@ -128,7 +130,7 @@ export function MoneyInput({
           placeholder={placeholder}
           disabled={disabled}
           className="pl-7 font-mono tabular-nums"
-          {...(!label ? { 'aria-label': 'Money amount' as const } : {})}
+          {...(!label ? { 'aria-label': t('moneyInput.amountAria') } : {})}
         />
       </div>
     </div>

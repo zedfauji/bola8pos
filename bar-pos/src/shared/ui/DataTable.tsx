@@ -17,6 +17,7 @@ import {
 } from '@tanstack/react-table';
 import { FileQuestion } from 'lucide-react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@shared/lib/utils';
 
@@ -69,6 +70,7 @@ export function DataTable<T>({
   getRowClassName,
   className,
 }: DataTableProps<T>) {
+  const { t } = useTranslation('common');
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [sorting, setSorting] = React.useState<SortingState>(() => initialSorting ?? []);
@@ -148,7 +150,11 @@ export function DataTable<T>({
           />
         )}
         {emptyState || (
-          <EmptyState icon={FileQuestion} title="No data" description="No records found." />
+          <EmptyState
+            icon={FileQuestion}
+            title={t('dataTable.noDataTitle')}
+            description={t('dataTable.noDataDescription')}
+          />
         )}
       </div>
     );
@@ -187,8 +193,8 @@ export function DataTable<T>({
                   {emptyState || (
                     <EmptyState
                       icon={FileQuestion}
-                      title="No results"
-                      description="No records match your search."
+                      title={t('dataTable.noResultsTitle')}
+                      description={t('dataTable.noResultsDescription')}
                     />
                   )}
                 </TableCell>
@@ -197,6 +203,7 @@ export function DataTable<T>({
               table.getRowModel().rows.map(row => (
                 <TableRow
                   key={row.id}
+                  // eslint-disable-next-line i18next/no-literal-string -- 'selected' is the Radix/Tailwind data-state value, not UI copy
                   data-state={row.getIsSelected() && 'selected'}
                   className={cn(onRowClick && 'cursor-pointer', getRowClassName?.(row.original))}
                   onClick={() => onRowClick?.(row.original)}

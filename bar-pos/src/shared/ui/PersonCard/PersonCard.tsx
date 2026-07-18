@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { SubTabColumnProps } from '@shared/ui/SubTabColumn';
 import { SubTabColumn } from '@shared/ui/SubTabColumn';
@@ -46,6 +47,7 @@ export function PersonCard({
   autoFocusName = false,
   ...rest
 }: PersonCardProps) {
+  const { t } = useTranslation('common');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export function PersonCard({
       onChange={e => {
         onNameChange(e.target.value);
       }}
-      placeholder="Person name"
+      placeholder={t('personCard.namePlaceholder')}
       className="text-sm font-semibold h-7 border-0 px-1 bg-transparent focus-visible:ring-1 max-w-[100px]"
       maxLength={30}
       onClick={e => {

@@ -5,6 +5,7 @@
  */
 
 import { ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { cn } from '@shared/lib/utils';
@@ -50,6 +51,7 @@ export function SectionHeader({
   backTo,
   backLabel,
 }: SectionHeaderProps) {
+  const { t } = useTranslation('common');
   return (
     <div className={cn('flex items-start justify-between gap-4 border-b pb-4', className)}>
       <div className="space-y-1">
@@ -57,7 +59,7 @@ export function SectionHeader({
           <Button variant="ghost" size="sm" asChild className="-ml-2.5 h-6 px-2 text-xs">
             <Link to={backTo}>
               <ChevronLeft className="mr-1 h-3.5 w-3.5" />
-              {backLabel ?? 'Home'}
+              {backLabel ?? t('sectionHeader.backHome')}
             </Link>
           </Button>
         )}

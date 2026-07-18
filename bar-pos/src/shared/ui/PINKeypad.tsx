@@ -7,6 +7,7 @@
 
 import { Delete, Loader2 } from 'lucide-react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@shared/lib/utils';
 
@@ -64,6 +65,7 @@ export function PINKeypad({
   isLoading = false,
   className,
 }: PINKeypadProps) {
+  const { t } = useTranslation('common');
   const handleKeyPress = React.useCallback(
     (digit: string) => {
       if (isLoading || value.length >= maxLength) return;
@@ -118,7 +120,7 @@ export function PINKeypad({
           error ? 'border-destructive' : 'border-input',
           isLoading && 'opacity-50'
         )}
-        aria-label="PIN display"
+        aria-label={t('pinKeypad.display')}
         aria-live="polite"
       >
         {isLoading ? (
@@ -149,7 +151,7 @@ export function PINKeypad({
       )}
 
       {/* Keypad Grid */}
-      <div className="grid grid-cols-3 gap-2" role="group" aria-label="Numeric keypad">
+      <div className="grid grid-cols-3 gap-2" role="group" aria-label={t('pinKeypad.keypad')}>
         {/* Keys 1-9 */}
         {keys.slice(0, 9).map(key => (
           <Button
@@ -177,7 +179,7 @@ export function PINKeypad({
             handleKeyPress('0');
           }}
           disabled={isLoading || value.length >= maxLength}
-          aria-label="Key 0"
+          aria-label={t('pinKeypad.key0')}
         >
           0
         </Button>
@@ -189,7 +191,7 @@ export function PINKeypad({
             handleBackspace();
           }}
           disabled={isLoading || value.length === 0}
-          aria-label="Backspace"
+          aria-label={t('pinKeypad.backspace')}
         >
           <Delete className="h-6 w-6" />
         </Button>

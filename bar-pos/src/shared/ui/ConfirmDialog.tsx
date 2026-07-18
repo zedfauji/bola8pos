@@ -7,6 +7,7 @@
 
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@shared/lib/utils';
 
@@ -85,6 +86,7 @@ export function ConfirmDialog({
   confirmDisabled = false,
   confirmClassName,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation('common');
   const handleConfirm = React.useCallback(async () => {
     await onConfirm();
   }, [onConfirm]);
@@ -145,7 +147,7 @@ export function ConfirmDialog({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
+                {t('loading.generic')}
               </>
             ) : (
               confirmLabel

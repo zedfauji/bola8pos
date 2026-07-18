@@ -6,6 +6,7 @@
 
 import { Search, X } from 'lucide-react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@shared/lib/utils';
 
@@ -51,6 +52,7 @@ export function SearchInput({
   debounceMs = 300,
   className,
 }: SearchInputProps) {
+  const { t } = useTranslation('common');
   const [localValue, setLocalValue] = React.useState(value);
   const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -109,7 +111,7 @@ export function SearchInput({
         }}
         placeholder={placeholder}
         className="pl-9 pr-9"
-        aria-label="Search"
+        aria-label={t('searchInput.search')}
       />
 
       {/* Clear Button */}
@@ -120,7 +122,7 @@ export function SearchInput({
           size="icon"
           className="absolute right-1 top-1/2 h-11 w-11 -translate-y-1/2 touch-manipulation"
           onClick={handleClear}
-          aria-label="Clear search"
+          aria-label={t('searchInput.clear')}
         >
           <X className="h-4 w-4" />
         </Button>

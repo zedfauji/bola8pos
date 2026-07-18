@@ -2,6 +2,13 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
+// Initialize the real i18next singleton for every unit test (same side-effect
+// import as src/main.tsx). shared/ui primitives (ConfirmDialog, DataTable,
+// etc.) call useTranslation('common') — without this, t() has no i18next
+// instance to attach to and every test using those primitives renders raw
+// key strings (e.g. "loading.generic") instead of resolved catalog values.
+import '@shared/lib/i18n';
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();

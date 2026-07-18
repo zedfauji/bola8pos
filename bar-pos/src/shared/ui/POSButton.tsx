@@ -36,11 +36,13 @@ export interface POSButtonProps extends ButtonProps {
  */
 export const POSButton = React.forwardRef<HTMLButtonElement, POSButtonProps>(
   ({ className, touchSize = 'default', ...props }, ref) => {
+    /* eslint-disable i18next/no-literal-string -- Tailwind class-name lookup table, not UI copy */
     const touchSizeClasses = {
       default: 'min-h-[44px]',
       large: 'min-h-[56px] text-base',
       xl: 'min-h-[72px] text-lg font-semibold',
     };
+    /* eslint-enable i18next/no-literal-string */
 
     return (
       <Button

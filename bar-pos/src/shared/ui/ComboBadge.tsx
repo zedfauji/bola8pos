@@ -5,6 +5,7 @@
  * Used in ProductGrid to indicate combo products in the catalog.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@shared/ui/badge';
 
 /**
@@ -16,12 +17,13 @@ import { Badge } from '@shared/ui/badge';
  * ```
  */
 export function ComboBadge() {
+  const { t } = useTranslation('common');
   return (
     <Badge
       variant="secondary"
       className="bg-pos-accent/20 text-pos-accent border-pos-accent/30 text-sm px-1.5 py-0.5"
     >
-      Combo
+      {t('comboBadge.label')}
     </Badge>
   );
 }

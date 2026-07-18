@@ -1,5 +1,6 @@
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Ingredient } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
 import { POSButton } from '@shared/ui/POSButton';
@@ -40,18 +41,19 @@ export function IngredientAutocomplete({
   disabled = false,
   commandInputPlaceholder = 'Search ingredients…',
 }: IngredientAutocompleteProps) {
+  const { t } = useTranslation('common');
   const [open, setOpen] = useState(false);
   const selected = ingredients.find(i => i.id === value) ?? null;
 
   function getStockColor(ingredient: Ingredient): string {
-    if (ingredient.quantityOnHand <= 0) return 'text-destructive';
+    if (ingredient.quantityOnHand <= 0) return cn('text-destructive');
     if (
       ingredient.reorderPoint != null &&
       ingredient.quantityOnHand <= ingredient.reorderPoint
     ) {
-      return 'text-yellow-500';
+      return cn('text-yellow-500');
     }
-    return 'text-pos-accent';
+    return cn('text-pos-accent');
   }
 
   return (
@@ -62,7 +64,11 @@ export function IngredientAutocomplete({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            aria-label={selected ? `Selected: ${selected.name}` : 'Select ingredient'}
+            aria-label={
+              selected
+                ? t('ingredientAutocomplete.selectedAria', { name: selected.name })
+                : t('ingredientAutocomplete.selectAria')
+            }
             disabled={disabled}
             className="h-11 w-full justify-between"
           >
@@ -71,7 +77,7 @@ export function IngredientAutocomplete({
             ) : selected ? (
               <span className="truncate">{selected.name}</span>
             ) : (
-              <span className="text-pos-muted">Select ingredient…</span>
+              <span className="text-pos-muted">{t('ingredientAutocomplete.selectPlaceholder')}</span>
             )}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </POSButton>
@@ -80,7 +86,7 @@ export function IngredientAutocomplete({
           <Command>
             <CommandInput placeholder={commandInputPlaceholder} />
             <CommandList>
-              <CommandEmpty>No ingredient found.</CommandEmpty>
+              <CommandEmpty>{t('ingredientAutocomplete.notFound')}</CommandEmpty>
               <CommandGroup>
                 {ingredients.map(ingredient => (
                   <CommandItem
@@ -113,7 +119,7 @@ export function IngredientAutocomplete({
       {selected && !disabled && (
         <POSButton
           variant="ghost"
-          aria-label="Clear ingredient selection"
+          aria-label={t('ingredientAutocomplete.clearAria')}
           className="absolute right-8 top-0 h-11 px-2"
           onClick={e => {
             e.stopPropagation();

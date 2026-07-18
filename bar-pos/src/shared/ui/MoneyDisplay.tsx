@@ -5,6 +5,7 @@
  * Uses domain-helpers.formatMoney() for consistent formatting.
  */
 
+import { useTranslation } from 'react-i18next';
 import { formatMoney } from '@shared/lib/domain-helpers';
 import { cn } from '@shared/lib/utils';
 
@@ -19,12 +20,14 @@ export type MoneyDisplayProps = {
   className?: string;
 };
 
+/* eslint-disable i18next/no-literal-string -- Tailwind class-name lookup table, not UI copy */
 const sizeClasses = {
   sm: 'text-sm',
   md: 'text-base',
   lg: 'text-xl',
   xl: 'text-3xl font-bold',
 };
+/* eslint-enable i18next/no-literal-string */
 
 /**
  * Displays a formatted money amount.
@@ -42,6 +45,7 @@ export function MoneyDisplay({
   size = 'md',
   className,
 }: MoneyDisplayProps) {
+  const { t } = useTranslation('common');
   const isNegative = amount < 0 || negative;
   const formatted = formatMoney(Math.abs(amount));
 
@@ -53,7 +57,7 @@ export function MoneyDisplay({
         isNegative && 'text-red-600 dark:text-red-400',
         className
       )}
-      aria-label={`${isNegative ? 'Negative ' : ''}${formatted} dollars`}
+      aria-label={`${isNegative ? t('moneyDisplay.negativePrefix') : ''}${formatted} dollars`}
     >
       {isNegative && '−'}${formatted}
     </span>

@@ -11,6 +11,8 @@
  * Shows a red border when the slot is required but no option is selected.
  */
 
+import { useTranslation } from 'react-i18next';
+
 import type { ComboSlot, ComboSlotOption, SlotSelection } from '@shared/lib/domain';
 
 import { cn } from '@shared/lib/utils';
@@ -56,6 +58,7 @@ export function ComboSlotCard({
   onChange,
   disabled = false,
 }: ComboSlotCardProps) {
+  const { t } = useTranslation('common');
   const isUnfilled = slot.isRequired && value.childProductId === null;
   const isFixedQty = slot.minQty === slot.maxQty;
 
@@ -92,14 +95,14 @@ export function ComboSlotCard({
       <div>
         <p className="text-base font-medium">{slot.label}</p>
         <p className="text-sm text-muted-foreground">
-          Select {slot.minQty}–{slot.maxQty}
+          {t('comboSlotCard.selectRange', { min: slot.minQty, max: slot.maxQty })}
         </p>
       </div>
 
       {/* Pool time slot — non-interactive info card */}
       {slot.slotType === 'pool_time' && (
         <div className="rounded-md bg-muted px-3 py-2">
-          <p className="text-sm text-muted-foreground">1 hour pool time included</p>
+          <p className="text-sm text-muted-foreground">{t('comboSlotCard.poolTimeIncluded')}</p>
         </div>
       )}
 
@@ -162,7 +165,7 @@ export function ComboSlotCard({
       {/* Quantity control — shown when option selected and range differs */}
       {slot.slotType === 'product' && value.childProductId !== null && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Quantity</span>
+          <span className="text-sm text-muted-foreground">{t('comboSlotCard.quantity')}</span>
           {isFixedQty ? (
             <span className="rounded-full border bg-muted px-3 py-0.5 text-sm font-medium">
               {slot.minQty}

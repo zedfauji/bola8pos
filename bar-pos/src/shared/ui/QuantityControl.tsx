@@ -6,6 +6,7 @@
  */
 
 import { Minus, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@shared/lib/utils';
 import { Button } from '@shared/ui/button';
 
@@ -54,6 +55,7 @@ export function QuantityControl({
   disabled = false,
   className,
 }: QuantityControlProps) {
+  const { t } = useTranslation('common');
   const canDecrement = value > min;
   const canIncrement = value < max;
 
@@ -75,7 +77,7 @@ export function QuantityControl({
     <div
       className={cn('flex items-center gap-2', className)}
       role="group"
-      aria-label="Quantity control"
+      aria-label={t('quantityControl.group')}
     >
       <Button
         type="button"
@@ -83,7 +85,7 @@ export function QuantityControl({
         size="icon"
         onClick={handleDecrement}
         disabled={disabled || !canDecrement}
-        aria-label="Decrease quantity"
+        aria-label={t('quantityControl.decrease')}
         className="h-11 w-11 touch-manipulation"
       >
         <Minus className="h-4 w-4" />
@@ -103,7 +105,7 @@ export function QuantityControl({
         size="icon"
         onClick={handleIncrement}
         disabled={disabled || !canIncrement}
-        aria-label="Increase quantity"
+        aria-label={t('quantityControl.increase')}
         className="h-11 w-11 touch-manipulation"
       >
         <Plus className="h-4 w-4" />
