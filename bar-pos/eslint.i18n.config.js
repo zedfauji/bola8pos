@@ -46,10 +46,13 @@ export default tseslint.config({
       callees: {
         exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+'],
       },
-      // Object literal property named `key` (React list keys, internal tab
-      // identifiers) is structural data, not UI copy.
-      'object-properties': { exclude: ['key'] },
-      words: { exclude: ['^[0-9.,$%:@#/x×+-]+$', '^[A-Z_]{2,}$'] },
+      // Object literal properties named `key`/`id`/`accessorKey` (React list
+      // keys, TanStack Table column identifiers/accessors) are structural
+      // data, not UI copy.
+      'object-properties': { exclude: ['key', 'id', 'accessorKey'] },
+      // Em dash ('—') is a standalone symbol used as an empty-value
+      // placeholder (e.g. no open shift), not translatable UI copy.
+      words: { exclude: ['^[0-9.,$%:@#/x×+-]+$', '^[A-Z_]{2,}$', '^—$'] },
     }],
   },
 })

@@ -1,6 +1,22 @@
 {
   "table": {
-    "locale": "Idioma"
+    "name": "Name",
+    "role": "Role",
+    "locale": "Idioma",
+    "clockIn": "Clock in",
+    "duration": "Shift duration"
+  },
+  "actions": {
+    "clockIn": "Clock In",
+    "clockOut": "Clock Out",
+    "forcePinChange": "Force PIN Change"
+  },
+  "section": {
+    "title": "Staff",
+    "description": "Active team members and open shifts."
+  },
+  "search": {
+    "placeholder": "Search staff…"
   },
   "locale": {
     "editTrigger": "Cambiar idioma",

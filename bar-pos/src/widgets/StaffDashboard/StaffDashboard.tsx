@@ -1,7 +1,9 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ClockInModal } from '@features/clock-in-staff';
 import { ClockOutDialog } from '@features/clock-out-staff';
+import { EditLocaleDialog } from '@features/edit-staff-locale';
 import { ForcePinChangeDialog } from '@features/force-pin-change';
 import { useOpenShifts, useStaffList } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
@@ -28,6 +30,7 @@ function formatShiftDuration(clockIn: Date, tick: number): string {
 }
 
 export function StaffDashboard() {
+  const { t } = useTranslation('staff');
   const { data: staffList, isIdleOrLoading: staffLoading } = useStaffList();
   const { data: openShifts, isIdleOrLoading: shiftsLoading } = useOpenShifts();
   const currentRole = useStaffStore(s => s.currentStaff?.role);
@@ -45,6 +48,7 @@ export function StaffDashboard() {
   const [clockInStaff, setClockInStaff] = useState<Staff | null>(null);
   const [clockOutTarget, setClockOutTarget] = useState<{ staff: Staff; shift: Shift } | null>(null);
   const [forcePinTarget, setForcePinTarget] = useState<Staff | null>(null);
+  const [localeTarget, setLocaleTarget] = useState<Staff | null>(null);
 
   const rows: StaffShiftRow[] = useMemo(() => {
     const staff = staffList ?? [];
@@ -59,12 +63,12 @@ export function StaffDashboard() {
     () => [
       {
         accessorKey: 'staff.name',
-        header: 'Name',
+        header: t('table.name'),
         cell: ({ row }) => <span className="font-medium">{row.original.staff.name}</span>,
       },
       {
         id: 'role',
-        header: 'Role',
+        header: t('table.role'),
         cell: ({ row }) => (
           <Badge variant="outline" className="capitalize">
             {row.original.staff.role}
@@ -72,8 +76,17 @@ export function StaffDashboard() {
         ),
       },
       {
+        id: 'locale',
+        header: t('table.locale'),
+        cell: ({ row }) => (
+          <Badge variant="outline" className="uppercase">
+            {row.original.staff.locale}
+          </Badge>
+        ),
+      },
+      {
         id: 'clockIn',
-        header: 'Clock in',
+        header: t('table.clockIn'),
         cell: ({ row }) =>
           row.original.shift ? (
             <span className="tabular-nums text-sm">
@@ -88,7 +101,7 @@ export function StaffDashboard() {
       },
       {
         id: 'duration',
-        header: 'Shift duration',
+        header: t('table.duration'),
         cell: ({ row }) =>
           row.original.shift ? (
             <span className="tabular-nums text-sm">
@@ -115,7 +128,7 @@ export function StaffDashboard() {
                       setClockInStaff(staff);
                     }}
                   >
-                    Clock In
+                    {t('actions.clockIn')}
                   </POSButton>
                 </ProtectedAction>
               )}
@@ -129,7 +142,7 @@ export function StaffDashboard() {
                       setClockOutTarget({ staff, shift });
                     }}
                   >
-                    Clock Out
+                    {t('actions.clockOut')}
                   </POSButton>
                 </ProtectedAction>
               )}
@@ -142,7 +155,19 @@ export function StaffDashboard() {
                     setForcePinTarget(staff);
                   }}
                 >
-                  Force PIN Change
+                  {t('actions.forcePinChange')}
+                </POSButton>
+              </ProtectedAction>
+              <ProtectedAction action="manage_staff" currentRole={currentRole}>
+                <POSButton
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setLocaleTarget(staff);
+                  }}
+                >
+                  {t('locale.editTrigger')}
                 </POSButton>
               </ProtectedAction>
             </div>
@@ -150,21 +175,21 @@ export function StaffDashboard() {
         },
       },
     ],
-    [currentRole, tick]
+    [currentRole, t, tick]
   );
 
   const isLoading = staffLoading || shiftsLoading;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      <SectionHeader title="Staff" description="Active team members and open shifts." />
+      <SectionHeader title={t('section.title')} description={t('section.description')} />
 
       <DataTable
         columns={columns}
         data={rows}
         isLoading={isLoading}
         searchable
-        searchPlaceholder="Search staff…"
+        searchPlaceholder={t('search.placeholder')}
       />
 
       <ClockInModal
@@ -197,6 +222,13 @@ export function StaffDashboard() {
         }}
       />
 
+      <EditLocaleDialog
+        staff={localeTarget}
+        open={localeTarget !== null}
+        onOpenChange={next => {
+          if (!next) setLocaleTarget(null);
+        }}
+      />
     </div>
   );
 }
