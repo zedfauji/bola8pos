@@ -1,4 +1,5 @@
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Tab } from '@entities/tab/model/types';
 import { cn } from '@shared/lib/utils';
 import { MoneyDisplay, POSButton } from '@shared/ui';
@@ -20,6 +21,7 @@ function calculateSubtotal(tab: Tab): number {
 }
 
 export function TabPaymentCard({ tab, selected, onClick }: TabPaymentCardProps) {
+  const { t } = useTranslation('wPanels');
   const subtotal = calculateSubtotal(tab);
   const itemCount = tab.items.reduce((s, i) => s + i.quantity, 0);
 
@@ -40,7 +42,7 @@ export function TabPaymentCard({ tab, selected, onClick }: TabPaymentCardProps) 
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium leading-tight">{tab.customerName}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {itemCount} item{itemCount !== 1 ? 's' : ''}
+            {t('tabPaymentCard.itemCount', { count: itemCount })}
           </p>
         </div>
         <MoneyDisplay amount={subtotal} size="sm" className="shrink-0 font-semibold" />
@@ -50,18 +52,18 @@ export function TabPaymentCard({ tab, selected, onClick }: TabPaymentCardProps) 
       <div className="mt-2 flex flex-wrap gap-1.5">
         {tab.tableNumber != null && !tab.hasActivePoolSession && (
           <Badge variant="secondary" className="text-xs">
-            Table {tab.tableNumber}
+            {t('tabPaymentCard.tableLabel', { number: tab.tableNumber })}
           </Badge>
         )}
         {tab.activePoolTableNumber != null && (
           <Badge variant="secondary" className="text-xs">
-            Pool #{tab.activePoolTableNumber}
+            {t('tabPaymentCard.poolLabel', { number: tab.activePoolTableNumber })}
           </Badge>
         )}
         {tab.hasActivePoolSession && (
           <Badge variant="outline" className="border-amber-500 text-xs text-amber-500">
             <Clock className="mr-1 size-3" aria-hidden="true" />
-            Timer Running
+            {t('tabPaymentCard.timerRunning')}
           </Badge>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useSubTabs } from '@entities/tab';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 
@@ -7,6 +8,7 @@ export interface SubChecksSectionProps {
 
 /** Lists sub-tabs when a parent tab has status `split`. */
 export function SubChecksSection({ parentTabId }: SubChecksSectionProps) {
+  const { t } = useTranslation('wPanels');
   const queryResult = useSubTabs(parentTabId);
   const subTabs = queryResult.data?.ok ? queryResult.data.data : [];
 
@@ -14,7 +16,7 @@ export function SubChecksSection({ parentTabId }: SubChecksSectionProps) {
 
   return (
     <div className="mt-4 border-t pt-4">
-      <p className="mb-2 text-sm font-semibold">Sub-checks</p>
+      <p className="mb-2 text-sm font-semibold">{t('subChecksSection.subChecks')}</p>
       {subTabs.map(sub => {
         const lineTotal = sub.items.reduce(
           (sum, i) => sum + i.unitPrice * i.quantity,

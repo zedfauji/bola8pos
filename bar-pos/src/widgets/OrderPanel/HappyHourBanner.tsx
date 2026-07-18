@@ -1,5 +1,6 @@
 import { Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ActivePromotionEntry } from '@entities/promotion';
 import type { PromotionAvailability } from '@shared/lib/domain';
 import { isPromotionActive } from '@shared/lib/domain-helpers';
@@ -56,6 +57,7 @@ function getMatchedWindowEndMinutes(
 }
 
 export function HappyHourBanner({ activePromotions }: HappyHourBannerProps) {
+  const { t } = useTranslation('wPanels');
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -108,12 +110,18 @@ export function HappyHourBanner({ activePromotions }: HappyHourBannerProps) {
     <div
       className="mb-3 flex items-center gap-2 rounded-lg border border-amber-700 bg-amber-950 px-3 py-2 text-sm text-amber-200"
       role="status"
-      aria-label="Promotions active"
+      aria-label={t('happyHourBanner.promotionsActiveAriaLabel')}
       data-testid="active-promotions-banner"
     >
       <Zap className="size-4 shrink-0 text-amber-400" aria-hidden />
-      <span className="flex-1 font-medium">Promotions Active — {names}</span>
-      {countdown !== null && <span className="text-xs text-amber-400">Ends in {countdown}</span>}
+      <span className="flex-1 font-medium">
+        {t('happyHourBanner.promotionsActive', { names })}
+      </span>
+      {countdown !== null && (
+        <span className="text-xs text-amber-400">
+          {t('happyHourBanner.endsIn', { countdown })}
+        </span>
+      )}
     </div>
   );
 }

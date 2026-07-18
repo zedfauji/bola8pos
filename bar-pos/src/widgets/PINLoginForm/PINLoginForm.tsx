@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useLoginUiStore } from '@entities/staff/model/loginUiStore';
@@ -16,6 +17,7 @@ type Phase = 'pin' | 'forced_pin_change' | 'opening_cash';
 const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
 
 export function PINLoginForm() {
+  const { t } = useTranslation('wPanels');
   const selectedStaff = useLoginUiStore(s => s.selectedStaff);
   const clearSelection = useLoginUiStore(s => s.clearSelection);
   const [pin, setPin] = useState('');
@@ -38,7 +40,7 @@ export function PINLoginForm() {
   const proceedAfterAuth = async (): Promise<void> => {
     // Check for an existing open shift — if found, resume it instead of starting a new one.
     // supabase.types.ts may lag behind schema; cast to any until types are regenerated.
-    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, i18next/no-literal-string */
     const db = supabase as any;
     const { data: existingShift } = (await db
       .from('shifts')
@@ -48,6 +50,7 @@ export function PINLoginForm() {
       .order('clock_in', { ascending: false })
       .limit(1)
       .maybeSingle()) as { data: any };
+    /* eslint-enable i18next/no-literal-string */
 
     if (existingShift) {
       useStaffStore.getState().login(selectedStaff, {
@@ -71,7 +74,7 @@ export function PINLoginForm() {
 
   const handlePinComplete = async (enteredPin: string): Promise<void> => {
     if (enteredPin !== selectedStaff.pin) {
-      setError('Incorrect PIN. Try again.');
+      setError(t('pinLoginForm.incorrectPin'));
       setPin('');
       return;
     }
@@ -82,7 +85,7 @@ export function PINLoginForm() {
     });
     if (signInError) {
       logger.error('login.supabase_sign_in_failed', { message: signInError.message });
-      setError('Sign-in failed. Please try again or contact your manager.');
+      setError(t('pinLoginForm.signInFailed'));
       setPin('');
       return;
     }
@@ -102,13 +105,13 @@ export function PINLoginForm() {
 
   const handleConfirmPinComplete = async (enteredConfirmPin: string): Promise<void> => {
     if (newPin !== enteredConfirmPin) {
-      setPinChangeError("PINs don't match. Try again.");
+      setPinChangeError(t('pinLoginForm.pinsDontMatch'));
       resetForcedPinChangeFields();
       return;
     }
 
     if (newPin === selectedStaff.pin) {
-      setPinChangeError('Choose a PIN different from your current one.');
+      setPinChangeError(t('pinLoginForm.choosePinDifferent'));
       resetForcedPinChangeFields();
       return;
     }
@@ -120,7 +123,7 @@ export function PINLoginForm() {
         logger.error('login.forced_pin_change.update_user_failed', {
           message: updateError.message,
         });
-        setPinChangeError('Could not set your new PIN. Please try again.');
+        setPinChangeError(t('pinLoginForm.couldNotSetPin'));
         resetForcedPinChangeFields();
         return;
       }
@@ -135,7 +138,7 @@ export function PINLoginForm() {
         logger.error('login.forced_pin_change.clear_flag_failed', {
           message: clearError.message,
         });
-        setPinChangeError('Could not finish setting your new PIN. Please try again.');
+        setPinChangeError(t('pinLoginForm.couldNotFinishPin'));
         resetForcedPinChangeFields();
         return;
       }
@@ -196,7 +199,7 @@ export function PINLoginForm() {
           onComplete={pin => {
             void handlePinComplete(pin);
           }}
-          label="Enter PIN"
+          label={t('pinLoginForm.enterPinLabel')}
           error={error}
         />
       )}
@@ -204,10 +207,9 @@ export function PINLoginForm() {
       {phase === 'forced_pin_change' && (
         <div className="flex flex-col gap-4">
           <div className="text-center">
-            <h3 className="text-xl font-semibold">Set a new PIN</h3>
+            <h3 className="text-xl font-semibold">{t('pinLoginForm.setNewPinTitle')}</h3>
             <p className="text-sm text-muted-foreground">
-              A manager has required you to change your PIN before continuing. Enter a new 4–6
-              digit PIN, then confirm it.
+              {t('pinLoginForm.setNewPinDescription')}
             </p>
           </div>
 
@@ -222,7 +224,7 @@ export function PINLoginForm() {
               onComplete={pin => {
                 setNewPin(pin);
               }}
-              label="New PIN"
+              label={t('pinLoginForm.newPinLabel')}
               error={pinChangeError}
               isLoading={isSubmittingNewPin}
             />
@@ -237,7 +239,7 @@ export function PINLoginForm() {
               onComplete={pin => {
                 void handleConfirmPinComplete(pin);
               }}
-              label="Confirm new PIN"
+              label={t('pinLoginForm.confirmNewPinLabel')}
               error={pinChangeError}
               isLoading={isSubmittingNewPin}
             />
@@ -247,7 +249,7 @@ export function PINLoginForm() {
 
       {phase === 'opening_cash' && (
         <p className="text-center text-sm text-muted-foreground">
-          Enter opening cash float, then confirm.
+          {t('pinLoginForm.enterOpeningCashFloat')}
         </p>
       )}
 
@@ -258,16 +260,16 @@ export function PINLoginForm() {
           onClick={clearSelection}
           className="text-sm text-muted-foreground underline-offset-2 hover:underline"
         >
-          Not you? Go back
+          {t('pinLoginForm.notYouGoBack')}
         </Button>
       )}
 
       <ConfirmDialog
         open={phase === 'opening_cash'}
-        title="Opening cash"
-        description="Enter the cash drawer float for this shift. You can use zero if nothing is counted yet."
-        confirmLabel="Start shift"
-        cancelLabel="Back"
+        title={t('pinLoginForm.openingCashTitle')}
+        description={t('pinLoginForm.openingCashDescription')}
+        confirmLabel={t('pinLoginForm.startShift')}
+        cancelLabel={t('pinLoginForm.back')}
         onConfirm={handleOpeningCashConfirm}
         onCancel={handleOpeningCashCancel}
         isLoading={isClockingIn}
@@ -275,7 +277,7 @@ export function PINLoginForm() {
       >
         <div className="py-4">
           <MoneyInput
-            label="Drawer float"
+            label={t('pinLoginForm.drawerFloat')}
             value={openingCash}
             onChange={setOpeningCash}
             disabled={isClockingIn}

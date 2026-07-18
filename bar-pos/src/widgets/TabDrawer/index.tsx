@@ -6,6 +6,7 @@
  */
 
 import { Receipt } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { OpenTabButton } from '@features/open-tab/ui/OpenTabButton';
 import { useTabs } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
@@ -15,10 +16,11 @@ import { EmptyState } from '@shared/ui';
 import { TabListSkeleton } from '@shared/ui/LoadingSkeletons';
 
 export function TabDrawer() {
+  const { t } = useTranslation('wPanels');
   const { isTabDrawerOpen, closeDrawer, selectTab, activeTabId } = useTabStore();
   const { data: tabs, isLoading, isError, error, resultError, isDisabled } = useTabs();
   const hasError = isError || Boolean(resultError);
-  const errorMessage = resultError?.message ?? error?.message ?? 'An unknown error occurred';
+  const errorMessage = resultError?.message ?? error?.message ?? t('tabDrawer.unknownError');
 
   const tabCount = tabs?.length ?? 0;
 
@@ -27,10 +29,10 @@ export function TabDrawer() {
       <SheetContent side="right" className="flex w-[380px] max-w-[100vw] flex-col sm:max-w-[380px]">
         <SheetHeader>
           <SheetTitle {...(tabCount > 0 ? { 'aria-label': `${String(tabCount)} open tabs` } : {})}>
-            Open Tabs ({tabCount})
+            {t('tabDrawer.openTabsCount', { count: tabCount })}
           </SheetTitle>
           <SheetDescription className="sr-only">
-            View and select from all currently active customer tabs.
+            {t('tabDrawer.viewAndSelectDescription')}
           </SheetDescription>
         </SheetHeader>
 
@@ -38,8 +40,8 @@ export function TabDrawer() {
           <div className="py-8">
             <EmptyState
               icon={Receipt}
-              title="No active shift"
-              description="Your session has no shift linked. Sign out and sign in again with opening cash to start a shift."
+              title={t('tabDrawer.noActiveShift')}
+              description={t('tabDrawer.noActiveShiftDescription')}
             />
           </div>
         )}
@@ -52,7 +54,11 @@ export function TabDrawer() {
 
         {!isDisabled && hasError && (
           <div className="py-4" role="alert">
-            <EmptyState icon={Receipt} title="Error loading tabs" description={errorMessage} />
+            <EmptyState
+              icon={Receipt}
+              title={t('tabDrawer.errorLoadingTabs')}
+              description={errorMessage}
+            />
           </div>
         )}
 
@@ -60,8 +66,8 @@ export function TabDrawer() {
           <div className="py-8">
             <EmptyState
               icon={Receipt}
-              title="No open tabs"
-              description="Open a new tab to get started"
+              title={t('tabDrawer.noOpenTabs')}
+              description={t('tabDrawer.openNewTabToStart')}
             />
           </div>
         )}

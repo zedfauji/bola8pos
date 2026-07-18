@@ -5,6 +5,7 @@
 
 import { AlertCircle, Loader2, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ReceiptPreview } from '@features/process-payment/ui/ReceiptPreview';
 import { useSettings } from '@entities/settings';
@@ -138,15 +139,16 @@ export function PaymentForm({
   onClose,
   processors = defaultProcessors,
 }: PaymentFormProps) {
+  const { t } = useTranslation('wPanels');
   const currentRole = useStaffStore(s => s.currentStaff?.role);
   const { data: settings } = useSettings();
   const tipPresets = settings?.billing.defaultTipPercentages ?? DEFAULT_TIP_PRESETS;
   const enabledMethods = settings?.billing.paymentMethods ?? DEFAULT_ENABLED_METHODS;
   const taxRatePercent = settings?.billing.taxRatePercent ?? DEFAULT_TAX_RATE_PERCENT;
   const paymentLabels = settings?.paymentLabels ?? {
-    cash: 'Efectivo',
-    card: 'Terminal BBVA',
-    rappi: 'Rappi',
+    cash: t('paymentForm.defaultLabelCash'),
+    card: t('paymentForm.defaultLabelCard'),
+    rappi: t('paymentForm.defaultLabelRappi'),
   };
   const isRappiTab = Boolean(tab.rappiOrderId);
 
@@ -308,7 +310,7 @@ export function PaymentForm({
     Result<{ receiptData: ReceiptData }, { message: string }>
   > => {
     if (!staffId) {
-      return { ok: false, error: { message: 'Not signed in.' } };
+      return { ok: false, error: { message: t('paymentForm.notSignedIn') } };
     }
 
     const discountInfoArg =
@@ -344,7 +346,7 @@ export function PaymentForm({
     }
 
     if (!tab.rappiOrderId) {
-      return { ok: false, error: { message: 'Missing Rappi order id.' } };
+      return { ok: false, error: { message: t('paymentForm.missingRappiOrderId') } };
     }
     const r = await processors.processRappiPayment(
       tab.id,
@@ -391,7 +393,7 @@ export function PaymentForm({
         }
       } catch (e) {
         logger.warn('printer.post_payment.exception', { tabId: tab.id, raw: String(e) });
-        toast.error('Print or drawer failed unexpectedly.');
+        toast.error(t('paymentForm.printOrDrawerFailed'));
       }
     })();
   };
@@ -425,7 +427,7 @@ export function PaymentForm({
     setIsProcessing(false);
 
     if (!result.ok) {
-      setErrorMessage('Split payment failed — please review each row and try again.');
+      setErrorMessage(t('paymentForm.splitPaymentFailed'));
       logger.warn('payment.split_failed', { tabId: tab.id, code: 'client' });
       return;
     }
@@ -452,18 +454,18 @@ export function PaymentForm({
         }
       } catch (e) {
         logger.warn('printer.post_payment.exception', { tabId: tab.id, raw: String(e) });
-        toast.error('Print or drawer failed unexpectedly.');
+        toast.error(t('paymentForm.printOrDrawerFailed'));
       }
     })();
   };
 
   const primaryLabel = isSplitMode
-    ? 'Process split payment'
+    ? t('paymentForm.processSplitPayment')
     : method === 'card'
-      ? 'Confirm card payment'
+      ? t('paymentForm.confirmCardPayment')
       : method === 'rappi'
-        ? 'Confirm & close tab'
-        : 'Process payment';
+        ? t('paymentForm.confirmAndCloseTab')
+        : t('paymentForm.processPayment');
 
   const activeSplitReceipt =
     isSplitMode && receiptQueue.length > 0 ? (receiptQueue[receiptIndex] ?? null) : null;
@@ -472,7 +474,11 @@ export function PaymentForm({
     return (
       <div className="flex flex-1 flex-col overflow-hidden p-4 sm:px-6">
         <p className="mb-2 text-sm font-semibold">
-          {`Receipt ${String(receiptIndex + 1)} of ${String(receiptQueue.length)} — ${paymentLabels[activeSplitReceipt.paymentMethod]}`}
+          {t('paymentForm.receiptOfLabel', {
+            index: receiptIndex + 1,
+            total: receiptQueue.length,
+            label: paymentLabels[activeSplitReceipt.paymentMethod],
+          })}
         </p>
         <ReceiptPreview
           receipt={activeSplitReceipt}
@@ -509,8 +515,11 @@ export function PaymentForm({
             <div>
               <h3 className="text-lg font-semibold">{tab.customerName}</h3>
               <p className="text-sm text-muted-foreground">
-                {groupedItems.length} item type{groupedItems.length !== 1 ? 's' : ''} ·{' '}
-                {tab.items.reduce((s, i) => s + i.quantity, 0)} total
+                {t('paymentForm.itemTypesAndTotal', {
+                  itemTypeCount: groupedItems.length,
+                  plural: groupedItems.length !== 1 ? 's' : '',
+                  itemCount: tab.items.reduce((s, i) => s + i.quantity, 0),
+                })}
               </p>
             </div>
             <div className="space-y-2">
@@ -529,7 +538,7 @@ export function PaymentForm({
                 </div>
               ))}
               <div className="flex justify-between border-t pt-2 font-semibold">
-                <span>Items subtotal</span>
+                <span>{t('paymentForm.itemsSubtotal')}</span>
                 <MoneyDisplay amount={itemsSubtotal} size="sm" />
               </div>
             </div>
@@ -537,11 +546,14 @@ export function PaymentForm({
 
           {tab.poolCharges.length > 0 && (
             <section className="space-y-2 rounded-lg border p-3">
-              <h4 className="font-medium">Pool charges</h4>
+              <h4 className="font-medium">{t('paymentForm.poolCharges')}</h4>
               {tab.poolCharges.map(charge => (
                 <div key={charge.sessionId} className="flex items-center justify-between text-sm">
                   <span>
-                    Table {charge.tableNumber} · {charge.billedMinutes} min
+                    {t('paymentForm.tableMinLabel', {
+                      tableNumber: charge.tableNumber,
+                      minutes: charge.billedMinutes,
+                    })}
                   </span>
                   <MoneyDisplay amount={charge.totalCharge} size="sm" />
                 </div>
@@ -551,7 +563,7 @@ export function PaymentForm({
 
           {method !== 'rappi' && (
             <section className="space-y-3">
-              <h4 className="font-medium">Tip</h4>
+              <h4 className="font-medium">{t('paymentForm.tip')}</h4>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {tipPresets.map(percent => (
                   <POSButton
@@ -572,7 +584,7 @@ export function PaymentForm({
                 ))}
               </div>
               <MoneyInput
-                label="Custom tip"
+                label={t('paymentForm.customTip')}
                 value={tipMode === 'custom' ? customTip : 0}
                 onChange={value => {
                   setCustomTip(value);
@@ -585,9 +597,10 @@ export function PaymentForm({
 
           {method !== 'rappi' && (
             <section className="space-y-3" data-testid="discount-section">
-              <h4 className="font-medium">Discount</h4>
+              <h4 className="font-medium">{t('paymentForm.discount')}</h4>
               <div className="space-y-2">
                 <div className="flex gap-2">
+                  {/* eslint-disable-next-line i18next/no-literal-string -- fixed discount-scope enum identifiers, not UI copy */}
                   {(['all', 'pool_only', 'consumptions_only'] as const).map(scope => (
                     <POSButton
                       key={scope}
@@ -602,14 +615,15 @@ export function PaymentForm({
                       className="flex-1 text-xs"
                     >
                       {scope === 'all'
-                        ? 'All Items'
+                        ? t('paymentForm.discountScopeAll')
                         : scope === 'pool_only'
-                          ? 'Pool Only'
-                          : 'Consumptions'}
+                          ? t('paymentForm.discountScopePool')
+                          : t('paymentForm.discountScopeConsumptions')}
                     </POSButton>
                   ))}
                 </div>
                 <div className="flex gap-2">
+                  {/* eslint-disable-next-line i18next/no-literal-string -- fixed discount-type enum identifiers, not UI copy */}
                   {(['percent', 'fixed'] as const).map(type => (
                     <POSButton
                       key={type}
@@ -623,12 +637,18 @@ export function PaymentForm({
                       }}
                       className="flex-1"
                     >
-                      {type === 'percent' ? '% Percent' : '$ Fixed'}
+                      {type === 'percent'
+                        ? t('paymentForm.discountTypePercent')
+                        : t('paymentForm.discountTypeFixed')}
                     </POSButton>
                   ))}
                 </div>
                 <MoneyInput
-                  label={discountType === 'percent' ? 'Discount %' : 'Discount amount'}
+                  label={
+                    discountType === 'percent'
+                      ? t('paymentForm.discountPercentLabel')
+                      : t('paymentForm.discountAmountLabel')
+                  }
                   value={discountValue}
                   onChange={setDiscountValue}
                   disabled={isProcessing}
@@ -636,7 +656,7 @@ export function PaymentForm({
                 />
                 {discountAmount > 0 && (
                   <p className="text-sm text-green-400" data-testid="discount-applied-label">
-                    ✓ Discount applied: -{discountAmount.toFixed(2)}
+                    {t('paymentForm.discountApplied', { amount: discountAmount.toFixed(2) })}
                   </p>
                 )}
               </div>
@@ -645,13 +665,13 @@ export function PaymentForm({
 
           {method === 'rappi' && (
             <section className="rounded-lg border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
-              Payment collected by Rappi. Confirm here to close this tab in the POS.
+              {t('paymentForm.rappiCollectedNotice')}
             </section>
           )}
 
           <section className="space-y-2 rounded-lg border p-3">
             <div className="flex items-center justify-between text-sm">
-              <span>Subtotal</span>
+              <span>{t('paymentForm.subtotal')}</span>
               <MoneyDisplay amount={baseSubtotal} size="sm" />
             </div>
             {discountAmount > 0 && (
@@ -661,46 +681,51 @@ export function PaymentForm({
                   data-testid="discount-row"
                 >
                   <span>
-                    Discount ({discountType === 'percent' ? `${String(discountValue)}%` : 'fixed'})
+                    {t('paymentForm.discountRow', {
+                      detail:
+                        discountType === 'percent'
+                          ? `${String(discountValue)}%`
+                          : t('paymentForm.discountRowFixed'),
+                    })}
                   </span>
                   <span>
                     -<MoneyDisplay amount={discountAmount} size="sm" />
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span>After discount</span>
+                  <span>{t('paymentForm.afterDiscount')}</span>
                   <MoneyDisplay amount={afterDiscount} size="sm" />
                 </div>
               </>
             )}
             {method !== 'rappi' && (
               <div className="flex items-center justify-between text-sm">
-                <span>Tax ({taxRatePercent}%)</span>
+                <span>{t('paymentForm.taxLabel', { rate: taxRatePercent })}</span>
                 <MoneyDisplay amount={taxAmount} size="sm" />
               </div>
             )}
             {method !== 'rappi' && (
               <div className="flex items-center justify-between text-sm">
-                <span>Tip</span>
+                <span>{t('paymentForm.tip')}</span>
                 <MoneyDisplay amount={tipAmount} size="sm" />
               </div>
             )}
             <div className="flex items-center justify-between border-t pt-2 text-lg font-semibold">
-              <span>Total</span>
+              <span>{t('paymentForm.total')}</span>
               <MoneyDisplay amount={runningTotal} size="lg" />
             </div>
           </section>
 
           <section className="space-y-2">
-            <h4 className="font-medium">Payment method</h4>
+            <h4 className="font-medium">{t('paymentForm.paymentMethod')}</h4>
 
             <div className="flex items-center justify-between gap-2 rounded-lg border p-3">
               <div>
                 <Label htmlFor="split-mode-toggle" className="text-sm font-semibold">
-                  Split payment
+                  {t('paymentForm.splitPayment')}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Divide this total across up to 4 payment methods
+                  {t('paymentForm.splitPaymentDescription')}
                 </p>
               </div>
               <Switch
@@ -716,7 +741,9 @@ export function PaymentForm({
                 {splitRows.map((row, index) => (
                   <div key={row.id} className="space-y-3 rounded-lg border p-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">{`Payment ${String(index + 1)}`}</span>
+                      <span className="text-sm font-semibold">
+                        {t('paymentForm.paymentNumber', { number: index + 1 })}
+                      </span>
                       {splitRows.length > 2 && (
                         <POSButton
                           type="button"
@@ -778,7 +805,7 @@ export function PaymentForm({
                     </div>
 
                     <MoneyInput
-                      label="Amount"
+                      label={t('paymentForm.amount')}
                       value={row.amount}
                       onChange={value => {
                         dispatchSplitRows({ type: 'SET_AMOUNT', rowId: row.id, value });
@@ -788,7 +815,7 @@ export function PaymentForm({
 
                     {row.method !== 'rappi' && (
                       <MoneyInput
-                        label="Tip"
+                        label={t('paymentForm.tip')}
                         value={row.tip}
                         onChange={value => {
                           dispatchSplitRows({ type: 'SET_TIP', rowId: row.id, value });
@@ -800,7 +827,7 @@ export function PaymentForm({
                     {row.method === 'cash' && (
                       <>
                         <MoneyInput
-                          label="Amount tendered"
+                          label={t('paymentForm.amountTendered')}
                           value={row.tenderedAmount}
                           onChange={value => {
                             dispatchSplitRows({ type: 'SET_TENDERED', rowId: row.id, value });
@@ -808,7 +835,7 @@ export function PaymentForm({
                           disabled={isProcessing}
                         />
                         <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2 text-sm font-medium">
-                          <span>Change due</span>
+                          <span>{t('paymentForm.changeDue')}</span>
                           <MoneyDisplay
                             amount={Math.max(
                               0,
@@ -822,7 +849,9 @@ export function PaymentForm({
 
                     {row.method === 'card' && (
                       <div className="space-y-2">
-                        <Label htmlFor={`split-card-ref-${row.id}`}>Reference # (optional)</Label>
+                        <Label htmlFor={`split-card-ref-${row.id}`}>
+                          {t('paymentForm.referenceOptional')}
+                        </Label>
                         <Input
                           id={`split-card-ref-${row.id}`}
                           value={row.cardReference}
@@ -833,7 +862,7 @@ export function PaymentForm({
                               value: e.target.value,
                             });
                           }}
-                          placeholder="Terminal receipt / auth code"
+                          placeholder={t('paymentForm.terminalReceiptPlaceholder')}
                           maxLength={64}
                           disabled={isProcessing}
                           autoComplete="off"
@@ -860,7 +889,7 @@ export function PaymentForm({
                     dispatchSplitRows({ type: 'ADD_ROW', defaultMethod });
                   }}
                 >
-                  + Add payment method
+                  {t('paymentForm.addPaymentMethod')}
                 </POSButton>
 
                 <div
@@ -871,10 +900,10 @@ export function PaymentForm({
                   <div className="flex items-center justify-between text-sm font-semibold">
                     <span>
                       {splitRemaining > 0
-                        ? 'Remaining to pay'
+                        ? t('paymentForm.remainingToPay')
                         : splitRemaining === 0
-                          ? 'Fully allocated ✓'
-                          : `Over by $${Math.abs(splitRemaining).toFixed(2)}`}
+                          ? t('paymentForm.fullyAllocated')
+                          : t('paymentForm.overBy', { amount: Math.abs(splitRemaining).toFixed(2) })}
                     </span>
                     {splitRemaining >= 0 && <MoneyDisplay amount={splitRemaining} size="sm" />}
                   </div>
@@ -931,13 +960,13 @@ export function PaymentForm({
           {!isSplitMode && method === 'cash' && (
             <section className="space-y-3">
               <MoneyInput
-                label="Amount tendered"
+                label={t('paymentForm.amountTendered')}
                 value={tenderedAmount}
                 onChange={setTenderedAmount}
                 disabled={isProcessing}
               />
               <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2 text-sm font-medium">
-                <span>Change due</span>
+                <span>{t('paymentForm.changeDue')}</span>
                 <MoneyDisplay amount={changeDue} size="sm" />
               </div>
             </section>
@@ -945,9 +974,9 @@ export function PaymentForm({
 
           {!isSplitMode && method === 'card' && (
             <section className="space-y-3 rounded-lg border p-4">
-              <p className="text-sm font-medium">Process payment on BBVA Terminal</p>
+              <p className="text-sm font-medium">{t('paymentForm.processOnBbvaTerminal')}</p>
               <MoneyInput
-                label="Charge amount"
+                label={t('paymentForm.chargeAmount')}
                 value={effectiveCardAmount}
                 onChange={setCardChargeOverride}
                 disabled={isProcessing}
@@ -963,18 +992,18 @@ export function PaymentForm({
                     setCardChargeOverride(null);
                   }}
                 >
-                  Reset to computed (${runningTotal.toFixed(2)})
+                  {t('paymentForm.resetToComputed', { amount: runningTotal.toFixed(2) })}
                 </POSButton>
               )}
               <div className="space-y-2">
-                <Label htmlFor="card-ref">Reference # (optional)</Label>
+                <Label htmlFor="card-ref">{t('paymentForm.referenceOptional')}</Label>
                 <Input
                   id="card-ref"
                   value={cardReference}
                   onChange={e => {
                     setCardReference(e.target.value);
                   }}
-                  placeholder="Terminal receipt / auth code"
+                  placeholder={t('paymentForm.terminalReceiptPlaceholder')}
                   maxLength={64}
                   disabled={isProcessing}
                   autoComplete="off"
@@ -1018,7 +1047,7 @@ export function PaymentForm({
             {isProcessing ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin" />
-                Processing…
+                {t('paymentForm.processing')}
               </span>
             ) : (
               primaryLabel
@@ -1034,7 +1063,7 @@ export function PaymentForm({
             disabled={isProcessing}
             onClick={onClose}
           >
-            Cancel
+            {t('paymentForm.cancel')}
           </POSButton>
         )}
       </div>

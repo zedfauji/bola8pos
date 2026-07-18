@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
 import { useOverrideNegativeStock, type OverrideInput } from '@features/override-negative-stock';
@@ -16,6 +17,7 @@ import { POSButton } from '@shared/ui/POSButton';
 import { ScrollArea } from '@shared/ui/ScrollArea';
 
 export function CartPanel() {
+  const { t } = useTranslation('wPanels');
   const queryClient = useQueryClient();
   const activeTabId = useTabStore(s => s.activeTabId);
   const { items, setLineQuantity, removeItem, setItemNotes, clearCart, totalAmount, itemCount } = useCartStore();
@@ -35,7 +37,7 @@ export function CartPanel() {
       return;
     }
     if (!currentStaff?.id) {
-      toast.error('Sign in and start a shift before placing orders.');
+      toast.error(t('cartPanel.signInBeforeOrder'));
       return;
     }
 
@@ -65,7 +67,7 @@ export function CartPanel() {
         items: orderItems,
       });
     } catch {
-      toast.error('Failed to place order. Please try again.');
+      toast.error(t('cartPanel.placeOrderFailed'));
       return;
     }
 
@@ -86,10 +88,10 @@ export function CartPanel() {
           items: orderItems,
           actorId: currentStaff.id,
         });
-        toast.error('An ingredient is out of stock. Manager PIN required to override.', {
+        toast.error(t('cartPanel.ingredientOutOfStock'), {
           duration: 6000,
           action: {
-            label: 'Allow override',
+            label: t('cartPanel.allowOverride'),
             onClick: () => { setIsPinDialogOpen(true); },
           },
         });
@@ -102,7 +104,7 @@ export function CartPanel() {
     inventoryStore.getState().decrementQuantities(inventoryDecrementLines);
     void queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
 
-    toast.success('Order placed successfully');
+    toast.success(t('cartPanel.orderPlacedSuccess'));
     clearCart();
   };
 
@@ -113,7 +115,7 @@ export function CartPanel() {
         toast.error(result.error.message);
         return;
       }
-      toast.success('Order placed with manager override');
+      toast.success(t('cartPanel.orderPlacedWithOverride'));
       clearCart();
       setPendingOverride(null);
     });
@@ -124,7 +126,7 @@ export function CartPanel() {
       <div className="border-b p-4">
         <div className="flex items-center gap-2">
           <ShoppingCart className="size-5" aria-hidden />
-          <h2 className="font-semibold">Current Order</h2>
+          <h2 className="font-semibold">{t('cartPanel.currentOrder')}</h2>
         </div>
       </div>
 
@@ -132,11 +134,11 @@ export function CartPanel() {
         {isEmpty ? (
           <div className="flex h-full min-h-[200px] flex-col items-center justify-center text-muted-foreground">
             <ShoppingCart className="mb-2 size-12 opacity-20" aria-hidden />
-            <p className="text-sm">Cart is empty</p>
-            <p className="text-xs">Add items to get started</p>
+            <p className="text-sm">{t('cartPanel.cartEmpty')}</p>
+            <p className="text-xs">{t('cartPanel.addItemsToStart')}</p>
           </div>
         ) : (
-          <ul className="space-y-2" aria-label="Cart items">
+          <ul className="space-y-2" aria-label={t('cartPanel.cartItemsAriaLabel')}>
             {items.map(item => (
               <li key={item.tempId}>
                 <CartItem
@@ -160,10 +162,10 @@ export function CartPanel() {
       <div className="space-y-3 border-t p-4">
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-muted-foreground">
-            {count} {count === 1 ? 'item' : 'items'}
+            {t('cartPanel.itemCount', { count })}
           </span>
           <div className="text-right">
-            <div className="text-xs text-muted-foreground">Total</div>
+            <div className="text-xs text-muted-foreground">{t('cartPanel.total')}</div>
             <MoneyDisplay amount={total} size="xl" />
           </div>
         </div>
@@ -177,7 +179,7 @@ export function CartPanel() {
             void handlePlaceOrder();
           }}
         >
-          Place Order
+          {t('cartPanel.placeOrder')}
         </POSButton>
 
         {!isEmpty && (
@@ -191,14 +193,14 @@ export function CartPanel() {
                 clearCart();
               }}
             >
-              Clear Cart
+              {t('cartPanel.clearCart')}
             </POSButton>
           </div>
         )}
 
         {!activeTabId && !isEmpty && (
           <p className="text-center text-xs text-muted-foreground">
-            Select or create a tab to place order
+            {t('cartPanel.selectTabToPlaceOrder')}
           </p>
         )}
       </div>

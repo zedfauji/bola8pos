@@ -1,5 +1,6 @@
 import { AlertCircle, Clock, DollarSign, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { AssignPoolSessionSheet } from '@features/assign-pool-session-to-tab';
@@ -45,6 +46,7 @@ function formatOrderTime(date: Date): string {
 // ---------------------------------------------------------------------------
 
 export function TableStatusPanel({ tableId }: { tableId: string }) {
+  const { t } = useTranslation('wPanels');
   const navigate = useNavigate();
 
   // ── Server state ──────────────────────────────────────────────────────────
@@ -100,7 +102,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
   const subtotal = itemsTotal + poolTotal;
 
   const errMsg =
-    resultError?.message ?? (error instanceof Error ? error.message : 'Failed to load table.');
+    resultError?.message ?? (error instanceof Error ? error.message : t('tableStatusPanel.failedToLoad'));
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   function handleAddItems() {
@@ -121,14 +123,14 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
 
   async function handlePrintPreCheque() {
     if (!tab || !session || !table) {
-      toast.error('Cannot print — session or tab data not ready.');
+      toast.error(t('tableStatusPanel.cannotPrint'));
       return;
     }
     const result = await printPreCheque.mutateAsync({ tab, session, table });
     if (!result.ok) {
       toast.error(result.error.message);
     } else {
-      toast.success('Pre-cheque sent to printer.');
+      toast.success(t('tableStatusPanel.preChequeSent'));
     }
   }
 
@@ -149,10 +151,10 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
       <div className="p-6">
         <EmptyState
           icon={AlertCircle}
-          title="Could not load table"
+          title={t('tableStatusPanel.couldNotLoadTable')}
           description={errMsg}
           action={{
-            label: 'Retry',
+            label: t('tableStatusPanel.retry'),
             onClick: () => {
               void refetch();
             },
@@ -167,10 +169,10 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
       <div className="p-6">
         <EmptyState
           icon={AlertCircle}
-          title="No active session"
-          description="This table has no running pool session."
+          title={t('tableStatusPanel.noActiveSession')}
+          description={t('tableStatusPanel.noRunningSession')}
           action={{
-            label: 'Back to Pool Tables',
+            label: t('tableStatusPanel.backToPoolTables'),
             onClick: () => {
               navigate('/pool-tables');
             },
@@ -208,7 +210,9 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
         <div className="flex flex-wrap gap-2">
           {session.previousTableId && (
             <Badge variant="outline" className="text-xs">
-              Moved from Table {session.previousTableNumber ?? '?'}
+              {t('tableStatusPanel.movedFromTable', {
+                number: session.previousTableNumber ?? '?',
+              })}
             </Badge>
           )}
         </div>
@@ -217,12 +221,17 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
       {/* Items ordered */}
       {tab && activeOrders.length > 0 && (
         <div className="rounded-xl border p-4">
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide">Items Ordered</h3>
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide">
+            {t('tableStatusPanel.itemsOrdered')}
+          </h3>
           <div className="flex flex-col gap-4">
             {activeOrders.map((order, idx) => (
               <div key={order.id}>
                 <p className="text-muted-foreground mb-2 text-xs font-medium">
-                  Order #{idx + 1} — {formatOrderTime(order.createdAt)}
+                  {t('tableStatusPanel.orderNumberTime', {
+                    index: idx + 1,
+                    time: formatOrderTime(order.createdAt),
+                  })}
                 </p>
                 <div className="flex flex-col gap-1">
                   {order.items.map(item => {
@@ -230,7 +239,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                     return (
                       <div key={item.id} className="flex items-center gap-2">
                         <span className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
-                          {item.quantity}× {item.product?.name ?? 'Item'}
+                          {item.quantity}× {item.product?.name ?? t('tableStatusPanel.item')}
                         </span>
                         <MoneyDisplay amount={lineTotal} size="sm" />
                         <POSButton
@@ -239,7 +248,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                           size="icon"
                           touchSize="default"
                           className="text-muted-foreground hover:text-destructive ml-1 size-11 touch-manipulation rounded p-1 transition-colors"
-                          title="Remove item"
+                          title={t('tableStatusPanel.removeItem')}
                           onClick={() => {
                             setSelectedItemForRemoval(item);
                             setShowPinForRemoval(true);
@@ -258,11 +267,13 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
           {/* Pool charge + subtotal */}
           <div className="mt-4 border-t pt-3">
             <div className="flex items-center justify-between py-1 text-sm">
-              <span className="text-muted-foreground">{table.label} — pool charge (live)</span>
+              <span className="text-muted-foreground">
+                {t('tableStatusPanel.poolChargeLive', { label: table.label })}
+              </span>
               <MoneyDisplay amount={poolTotal} size="sm" />
             </div>
             <div className="flex items-center justify-between py-1 text-sm font-semibold">
-              <span>Subtotal</span>
+              <span>{t('tableStatusPanel.subtotal')}</span>
               <MoneyDisplay amount={subtotal} size="sm" />
             </div>
           </div>
@@ -271,7 +282,9 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
 
       {/* Action buttons */}
       <div className="rounded-xl border p-4">
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide">Actions</h3>
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide">
+          {t('tableStatusPanel.actions')}
+        </h3>
         <div className="grid grid-cols-2 gap-3">
           <POSButton
             type="button"
@@ -280,7 +293,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
             className="min-h-[56px]"
             onClick={handleAddItems}
           >
-            Add More Items
+            {t('tableStatusPanel.addMoreItems')}
           </POSButton>
 
           <POSButton
@@ -292,7 +305,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
               setShowStop(true);
             }}
           >
-            Stop Timer
+            {t('tableStatusPanel.stopTimer')}
           </POSButton>
 
           {!session.tabId && (
@@ -305,7 +318,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                 setShowAssign(true);
               }}
             >
-              Assign to Tab
+              {t('tableStatusPanel.assignToTab')}
             </POSButton>
           )}
 
@@ -318,7 +331,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
               setShowTransfer(true);
             }}
           >
-            Move Table
+            {t('tableStatusPanel.moveTable')}
           </POSButton>
 
           <POSButton
@@ -331,7 +344,9 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
               void handlePrintPreCheque();
             }}
           >
-            {printPreCheque.isPending ? 'Printing…' : 'Print Pre-cheque'}
+            {printPreCheque.isPending
+              ? t('tableStatusPanel.printing')
+              : t('tableStatusPanel.printPreCheque')}
           </POSButton>
 
           <POSButton
@@ -343,7 +358,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
               setShowCloseConfirm(true);
             }}
           >
-            Close &amp; Pay
+            {t('tableStatusPanel.closeAndPay')}
           </POSButton>
 
           <POSButton
@@ -355,7 +370,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
               setShowStopMove(true);
             }}
           >
-            Stop &amp; Move to Table
+            {t('tableStatusPanel.stopAndMoveToTable')}
           </POSButton>
 
           {!session.stoppedAt && (
@@ -368,7 +383,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                 setShowPinForEditStart(true);
               }}
             >
-              Edit Start Time
+              {t('tableStatusPanel.editStartTime')}
             </POSButton>
           )}
         </div>
@@ -447,9 +462,9 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
       {/* Close & Pay confirm */}
       <ConfirmDialog
         open={showCloseConfirm}
-        title="Close tab & proceed to payment?"
-        description="This will take you to the POS to finalize payment for this tab."
-        confirmLabel="Close & Pay"
+        title={t('tableStatusPanel.closeTabConfirmTitle')}
+        description={t('tableStatusPanel.closeTabConfirmDescription')}
+        confirmLabel={t('tableStatusPanel.closeAndPay')}
         onConfirm={handleCloseAndPay}
         onCancel={() => {
           setShowCloseConfirm(false);

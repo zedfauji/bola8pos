@@ -1,5 +1,6 @@
 import { AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { StartSessionSheet } from '@features/start-pool-timer';
@@ -29,6 +30,7 @@ const TYPE_FILTER_LABELS: { value: TypeFilter; label: string }[] = [
 ];
 
 export function PoolTableGrid() {
+  const { t } = useTranslation('wPanels');
   const navigate = useNavigate();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const { can } = usePermissions();
@@ -63,7 +65,7 @@ export function PoolTableGrid() {
     [tables]
   );
 
-  const errMsg = resultError?.message ?? error?.message ?? 'Failed to load pool tables.';
+  const errMsg = resultError?.message ?? error?.message ?? t('poolTableGrid.failedToLoad');
 
   const resolveCustomerName = (session: PoolSession | null | undefined): string | null => {
     if (!session?.tabId) return null;
@@ -73,7 +75,7 @@ export function PoolTableGrid() {
 
   const handleAddTable = async () => {
     if (!tables?.length) {
-      toast.error('No existing tables to copy pricing from.');
+      toast.error(t('poolTableGrid.noExistingTables'));
       return;
     }
     const nextNumber = Math.max(...tables.map(t => t.number)) + 1;
@@ -87,17 +89,17 @@ export function PoolTableGrid() {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Table added.');
+    toast.success(t('poolTableGrid.tableAdded'));
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold tracking-tight">
-          Pool Tables
+          {t('poolTableGrid.poolTables')}
           <span className="text-muted-foreground font-normal">
             {' '}
-            | Available: {availableCount} | Occupied: {occupiedCount}
+            {t('poolTableGrid.availableOccupiedCounts', { availableCount, occupiedCount })}
           </span>
         </h2>
         <ProtectedAction action="manage_settings" currentRole={currentStaff?.role ?? null}>
@@ -110,7 +112,7 @@ export function PoolTableGrid() {
               void handleAddTable();
             }}
           >
-            {addTable.isPending ? 'Adding…' : 'Add Table'}
+            {addTable.isPending ? t('poolTableGrid.adding') : t('poolTableGrid.addTable')}
           </POSButton>
         </ProtectedAction>
       </div>
@@ -133,7 +135,7 @@ export function PoolTableGrid() {
           ) : (
             <ChevronDown className="size-4" />
           )}
-          Filters
+          {t('poolTableGrid.filters')}
         </POSButton>
         {!filtersCollapsed && (
           <div data-testid="pool-filters" className="flex flex-wrap gap-2">
@@ -164,9 +166,9 @@ export function PoolTableGrid() {
       {isError && (
         <EmptyState
           icon={AlertCircle}
-          title="Could not load pool tables"
+          title={t('poolTableGrid.couldNotLoad')}
           description={errMsg}
-          action={{ label: 'Retry', onClick: () => void refetch() }}
+          action={{ label: t('poolTableGrid.retry'), onClick: () => void refetch() }}
         />
       )}
 
@@ -212,7 +214,7 @@ export function PoolTableGrid() {
                             toast.error(r.error.message);
                             return;
                           }
-                          toast.success('Table released.');
+                          toast.success(t('poolTableGrid.tableReleased'));
                         })();
                       },
                     }

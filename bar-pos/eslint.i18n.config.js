@@ -79,6 +79,11 @@ export default tseslint.config({
           // its inline error <span id="...">), not UI copy — same category as
           // 'aria-invalid'.
           'aria-describedby',
+          // 'aria-labelledby' is likewise a DOM ID reference (e.g.
+          // MoneyDisplay's aria-labelledby="subtotal-label" pointing at a
+          // sibling <span id="subtotal-label">), not UI copy — same category
+          // as 'aria-describedby'.
+          'aria-labelledby',
           // 'step' is the native <input type="number"> HTML attribute
           // controlling increment granularity (e.g. step="any", step="0.01")
           // — a numeric/DOM behavior value, not UI copy.
@@ -87,6 +92,9 @@ export default tseslint.config({
           // accepted MIME types/extensions (e.g. accept=".csv") — a technical
           // DOM filter value, not UI copy.
           'accept',
+          // 'height' is CardSkeleton's pixel-dimension prop (e.g.
+          // height="160px") — a CSS layout value, not UI copy.
+          'height',
           // 'confirmClassName' is ConfirmDialog's Tailwind class passthrough for
           // the destructive confirm button (Phase 32/33's touch-target/focus-ring
           // sweep, e.g. VoidOrderDialog's 72px/ring-4 confirm) — a CSS class
@@ -123,11 +131,24 @@ export default tseslint.config({
       // carry DB payload objects/enum values, not UI copy — same rationale as 'from'/
       // 'select'/'eq'/'order'; recurs across the waitlist mark-* hooks + toggle-permission
       // in this plan's scope.
+      // 'logHardwareFail' (PaymentForm.tsx's locally-defined post-payment hardware
+      // error logger, wrapping logger.warn + toast.error) takes a fixed telemetry
+      // event name as its first arg (e.g. 'cash_drawer.failed') — same category as
+      // the already-excluded 'logger\.\w+', just not dotted since it's a local fn.
+      // 'toLocaleDateString'/'toLocaleTimeString' (Date.prototype's Intl
+      // formatting methods, e.g. payment.processedAt.toLocaleDateString('en-GB',
+      // {...})) take a fixed BCP-47 locale identifier as their first arg — a
+      // technical Intl parameter, not UI copy.
+      // 'usePersistedBool' (@shared/lib/usePersistedBool, e.g.
+      // usePersistedBool('pool_filters_collapsed', false)) takes a fixed
+      // localStorage key as its first arg — a wire-protocol identifier, not
+      // UI copy, same category as 'rpc'.
       callees: {
         exclude: [
           'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'canAccess', 'logger\\.\\w+',
           'rpc', 'navigate', 'from', 'select', 'eq', 'order', 'insert', 'update', 'delete',
-          'executeTool',
+          'executeTool', 'logHardwareFail', 'toLocaleDateString', 'toLocaleTimeString',
+          'usePersistedBool',
         ],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list
@@ -145,10 +166,12 @@ export default tseslint.config({
       // in a Supabase `.update()` payload for waitlist_entries/tabs/pool_sessions)
       // — a wire-protocol identifier, never UI copy on its own; user-facing status
       // text goes through StatusBadge's `labelKey` mapping instead.
+      // `maxHeight` is a CSS style-object value (e.g. `style={{ maxHeight:
+      // 'calc(100vh - 200px)' }}`), same category as `className`, not UI copy.
       'object-properties': {
         exclude: [
           'key', 'id', 'accessorKey', 'displayName', 'className', 'aria-invalid', 'labelKey',
-          'status',
+          'status', 'maxHeight',
         ],
       },
       // Em dash ('—') is a standalone symbol used as an empty-value

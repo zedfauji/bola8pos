@@ -1,4 +1,5 @@
 import { AlertCircle, CreditCard } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTabs } from '@entities/tab/model/queries';
 import type { Tab } from '@entities/tab/model/types';
 import { EmptyState, ScrollArea, TabListSkeleton } from '@shared/ui';
@@ -28,6 +29,7 @@ function sortTabs(tabs: Tab[]): Tab[] {
 }
 
 export function TabPaymentList({ selectedTabId, onSelect }: TabPaymentListProps) {
+  const { t } = useTranslation('wPanels');
   const { data: tabs, isIdleOrLoading, resultError } = useTabs();
 
   const openTabs = sortTabs((tabs ?? []).filter(t => t.status === 'open'));
@@ -45,7 +47,7 @@ export function TabPaymentList({ selectedTabId, onSelect }: TabPaymentListProps)
       <div className="p-3">
         <EmptyState
           icon={AlertCircle}
-          title="Could not load tabs"
+          title={t('tabPaymentList.couldNotLoadTabs')}
           description={resultError.message}
         />
       </div>
@@ -57,8 +59,8 @@ export function TabPaymentList({ selectedTabId, onSelect }: TabPaymentListProps)
       <div className="flex flex-1 items-center justify-center p-6">
         <EmptyState
           icon={CreditCard}
-          title="No tabs waiting for payment"
-          description="All open tabs will appear here."
+          title={t('tabPaymentList.noTabsWaiting')}
+          description={t('tabPaymentList.allOpenTabsAppearHere')}
         />
       </div>
     );
@@ -67,7 +69,7 @@ export function TabPaymentList({ selectedTabId, onSelect }: TabPaymentListProps)
   return (
     <div
       className="flex-1 overflow-hidden"
-      aria-label="tabs waiting for payment"
+      aria-label={t('tabPaymentList.tabsWaitingForPaymentAriaLabel')}
       data-testid="tabs-waiting-for-payment"
     >
       <ScrollArea className="h-full">

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ export function PaymentModal({
   onPaymentSuccess,
   processors,
 }: PaymentModalProps) {
+  const { t } = useTranslation('wPanels');
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       onClose();
@@ -40,9 +42,9 @@ export function PaymentModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="top-0 left-0 h-dvh w-screen max-w-none translate-x-0 translate-y-0 rounded-none p-0 sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:p-0">
         <DialogHeader className="border-b px-4 py-3 sm:px-6 sm:py-4">
-          <DialogTitle>Process payment</DialogTitle>
+          <DialogTitle>{t('paymentModal.processPayment')}</DialogTitle>
           <DialogDescription className="sr-only">
-            Review the tab, choose payment method, and confirm.
+            {t('paymentModal.reviewChooseConfirm')}
           </DialogDescription>
         </DialogHeader>
 

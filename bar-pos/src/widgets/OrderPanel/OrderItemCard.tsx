@@ -5,6 +5,7 @@
  * Read-only view (no quantity adjustment or removal).
  */
 
+import { useTranslation } from 'react-i18next';
 import type { OrderItem } from '@entities/tab/model/types';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { Badge } from '@shared/ui/badge';
@@ -25,6 +26,7 @@ export interface OrderItemCardProps {
  * Note: This is read-only. For editable cart items, see CartItem component.
  */
 export function OrderItemCard({ item }: OrderItemCardProps) {
+  const { t } = useTranslation('wPanels');
   const lineTotal = (item.unitPrice + item.modifierPriceDelta) * item.quantity;
 
   return (
@@ -33,7 +35,9 @@ export function OrderItemCard({ item }: OrderItemCardProps) {
         <div className="flex items-start justify-between gap-2 mb-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">{item.quantity}×</span>
-            <h4 className="font-medium text-sm">{item.product?.name ?? 'Unknown Product'}</h4>
+            <h4 className="font-medium text-sm">
+              {item.product?.name ?? t('orderItemCard.unknownProduct')}
+            </h4>
           </div>
           <MoneyDisplay amount={lineTotal} className="font-semibold" />
         </div>

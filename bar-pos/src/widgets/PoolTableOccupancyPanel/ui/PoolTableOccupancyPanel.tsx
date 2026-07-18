@@ -2,6 +2,7 @@
    @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { useQuery } from '@tanstack/react-query';
 import { Table2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { supabase } from '@shared/lib/supabase';
 import { cn } from '@shared/lib/utils';
@@ -15,6 +16,7 @@ const db = supabase as any;
 type PoolTable = { id: string; label: string; number: number; status: string };
 
 function usePoolTables() {
+  /* eslint-disable i18next/no-literal-string -- queryKey + Supabase query-builder chain, wire-protocol identifiers not UI copy */
   return useQuery({
     queryKey: ['pool_tables'],
     queryFn: async (): Promise<PoolTable[]> => {
@@ -27,6 +29,7 @@ function usePoolTables() {
     },
     staleTime: 30 * 1000,
   });
+  /* eslint-enable i18next/no-literal-string */
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -34,6 +37,7 @@ function usePoolTables() {
 // ────────────────────────────────────────────────────────────────────────────
 
 export function PoolTableOccupancyPanel() {
+  const { t } = useTranslation('wPanels');
   const { data: tables = [], isLoading } = usePoolTables();
   const available = tables.filter((t) => t.status === 'available');
 
@@ -43,26 +47,26 @@ export function PoolTableOccupancyPanel() {
     return (
       <EmptyState
         icon={Table2}
-        title="No tables configured"
-        description="Configure pool tables in Settings."
+        title={t('poolTableOccupancyPanel.noTablesConfiguredTitle')}
+        description={t('poolTableOccupancyPanel.configureInSettings')}
       />
     );
   }
 
   return (
-    <div className="space-y-3" aria-label="Pool table occupancy">
-      <h2 className="text-lg font-semibold">Tables</h2>
+    <div className="space-y-3" aria-label={t('poolTableOccupancyPanel.panelAriaLabel')}>
+      <h2 className="text-lg font-semibold">{t('poolTableOccupancyPanel.tables')}</h2>
 
       {/* Summary row */}
       <div className="flex items-center gap-3 text-sm" role="status">
         <div className="flex items-center gap-1 text-pos-accent">
           <span className="text-2xl font-semibold font-mono">{available.length}</span>
-          <span>available</span>
+          <span>{t('poolTableOccupancyPanel.available')}</span>
         </div>
         <div className="text-muted-foreground">/</div>
         <div className="flex items-center gap-1 text-muted-foreground">
           <span className="font-mono">{tables.length}</span>
-          <span>total</span>
+          <span>{t('poolTableOccupancyPanel.total')}</span>
         </div>
       </div>
 
@@ -80,9 +84,16 @@ export function PoolTableOccupancyPanel() {
                   : 'border-pos-danger/50 bg-pos-danger/5 opacity-75',
               )}
             >
-              <span className="block text-sm font-semibold">Table {table.number} – {table.label}</span>
+              <span className="block text-sm font-semibold">
+                {t('poolTableOccupancyPanel.tableLabel', {
+                  number: table.number,
+                  label: table.label,
+                })}
+              </span>
               <span className="text-sm text-muted-foreground">
-                {isAvailable ? 'Free' : 'Occupied'}
+                {isAvailable
+                  ? t('poolTableOccupancyPanel.free')
+                  : t('poolTableOccupancyPanel.occupied')}
               </span>
             </div>
           );

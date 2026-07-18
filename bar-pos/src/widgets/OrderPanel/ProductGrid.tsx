@@ -1,5 +1,6 @@
 import { AlertCircle, Package } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ComboBuilderSheet } from '@features/add-combo-to-tab';
 import { ModifierSheet } from '@features/add-item-to-tab/ui/ModifierSheet';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
@@ -54,6 +55,7 @@ function ComboAwareProductCard({
   onSelect,
   onUnavailableSelect,
 }: ComboAwareProductCardProps) {
+  const { t } = useTranslation('wPanels');
   const { data: isAvailable = true } = useComboAvailability(product.id);
   return (
     <div className="relative">
@@ -71,7 +73,11 @@ function ComboAwareProductCard({
         {...(!isAvailable ? { className: 'opacity-60' } : {})}
       />
       <div className="absolute top-2 right-2 pointer-events-none">
-        {isAvailable ? <ComboBadge /> : <ComboUnavailableBadge availabilityHint="Check schedule" />}
+        {isAvailable ? (
+          <ComboBadge />
+        ) : (
+          <ComboUnavailableBadge availabilityHint={t('productGrid.checkSchedule')} />
+        )}
       </div>
     </div>
   );
@@ -86,6 +92,7 @@ export interface ProductGridProps {
 }
 
 export function ProductGrid({ className }: ProductGridProps) {
+  const { t } = useTranslation('wPanels');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [catalogNow, setCatalogNow] = useState(() => gridClockFromWallTime());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -182,10 +189,10 @@ export function ProductGrid({ className }: ProductGridProps) {
       {hasError && (
         <EmptyState
           icon={AlertCircle}
-          title="Failed to load products"
-          description="There was an error loading the product catalog."
+          title={t('productGrid.loadFailedTitle')}
+          description={t('productGrid.loadFailedDescription')}
           action={{
-            label: 'Retry',
+            label: t('productGrid.retry'),
             onClick: () => {
               void refetch();
             },
@@ -236,8 +243,16 @@ export function ProductGrid({ className }: ProductGridProps) {
       {!hasError && !isLoading && filteredProducts.length === 0 && (
         <EmptyState
           icon={Package}
-          title={activeCategory ? 'No products found' : 'No products available'}
-          description={activeCategory ? 'No products in this category.' : 'No products available.'}
+          title={
+            activeCategory
+              ? t('productGrid.noProductsFoundTitle')
+              : t('productGrid.noProductsAvailableTitle')
+          }
+          description={
+            activeCategory
+              ? t('productGrid.noProductsInCategory')
+              : t('productGrid.noProductsAvailableDescription')
+          }
         />
       )}
 
@@ -254,10 +269,9 @@ export function ProductGrid({ className }: ProductGridProps) {
       <Dialog open={unavailableDialogOpen} onOpenChange={setUnavailableDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Combo not available</DialogTitle>
+            <DialogTitle>{t('productGrid.comboNotAvailableTitle')}</DialogTitle>
             <DialogDescription>
-              {unavailableCombo?.name} is only available during specific hours. A manager can
-              override.
+              {t('productGrid.comboNotAvailableDescription', { name: unavailableCombo?.name })}
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2 justify-end pt-4">
@@ -267,7 +281,7 @@ export function ProductGrid({ className }: ProductGridProps) {
                 setUnavailableDialogOpen(false);
               }}
             >
-              Cancel
+              {t('productGrid.cancel')}
             </Button>
             <Button
               onClick={() => {
@@ -275,7 +289,7 @@ export function ProductGrid({ className }: ProductGridProps) {
                 setPinDialogOpen(true);
               }}
             >
-              Request override
+              {t('productGrid.requestOverride')}
             </Button>
           </div>
         </DialogContent>

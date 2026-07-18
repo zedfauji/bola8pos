@@ -1,5 +1,6 @@
 import { ArrowLeftRight, Loader2, Plus, RefreshCw, SplitSquareHorizontal, User } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { OpenTabDialog } from '@features/open-tab/ui/OpenTabDialog';
 import { SplitTabSheet } from '@features/split-tab';
 import { TransferTabDialog } from '@features/transfer-tab';
@@ -20,6 +21,7 @@ export interface ActiveTabSelectorProps {
 }
 
 export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
+  const { t } = useTranslation('wPanels');
   const activeTabId = useTabStore(s => s.activeTabId);
   const openDrawer = useTabStore(s => s.openDrawer);
   const currentStaff = useStaffStore(state => state.currentStaff);
@@ -56,11 +58,13 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                   {tabLoading && !currentTab ? (
                     <Loader2 className="size-4 shrink-0 animate-spin text-primary" aria-hidden />
                   ) : (
-                    <h3 className="truncate font-semibold">{currentTab?.customerName ?? 'Tab'}</h3>
+                    <h3 className="truncate font-semibold">
+                      {currentTab?.customerName ?? t('activeTabSelector.defaultTabName')}
+                    </h3>
                   )}
                   {currentTab?.tableNumber != null && (
                     <Badge variant="secondary" className="shrink-0 font-mono">
-                      Table {String(currentTab.tableNumber)}
+                      {t('activeTabSelector.tableLabel', { number: String(currentTab.tableNumber) })}
                     </Badge>
                   )}
                 </div>
@@ -76,7 +80,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 onClick={handleSwitchTab}
               >
                 <RefreshCw className="mr-1 size-4" />
-                Switch Tab
+                {t('activeTabSelector.switchTab')}
                 {openTabCount > 1 && (
                   <Badge variant="secondary" className="ml-2">
                     {openTabCount}
@@ -91,7 +95,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                   onClick={() => {
                     setTransferOpen(true);
                   }}
-                  aria-label="Transfer tab"
+                  aria-label={t('activeTabSelector.transferTabAriaLabel')}
                 >
                   <ArrowLeftRight className="size-4" />
                 </Button>
@@ -103,10 +107,10 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 onClick={() => {
                   setOpenTabDialogOpen(true);
                 }}
-                aria-label="New tab"
+                aria-label={t('activeTabSelector.newTabAriaLabel')}
               >
                 <Plus className="mr-1 size-4" />
-                New Tab +
+                {t('activeTabSelector.newTabButton')}
               </Button>
             </div>
             {currentTab && currentTab.status === 'open' && (
@@ -119,11 +123,15 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                   setSplitSheetOpen(true);
                 }}
                 disabled={currentTab.items.length === 0}
-                title={currentTab.items.length === 0 ? 'Add items before splitting' : undefined}
-                aria-label="Split bill"
+                title={
+                  currentTab.items.length === 0
+                    ? t('activeTabSelector.splitBillDisabledTitle')
+                    : undefined
+                }
+                aria-label={t('activeTabSelector.splitBillAriaLabel')}
               >
                 <SplitSquareHorizontal className="mr-2 size-4" />
-                Split bill
+                {t('activeTabSelector.splitBillAriaLabel')}
               </POSButton>
             )}
             {currentTab?.status === 'split' && currentTab.id && (
@@ -131,7 +139,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
             )}
             {(currentTab?.orders.length ?? 0) > 0 && (
               <div className="space-y-2 border-t pt-2">
-                <p className="text-xs text-muted-foreground">Order history</p>
+                <p className="text-xs text-muted-foreground">{t('activeTabSelector.orderHistory')}</p>
                 <div className="space-y-1">
                   {[...(currentTab?.orders ?? [])]
                     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -150,10 +158,11 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                             setOrderToVoid(order);
                           }}
                         >
-                          Void{' '}
-                          {order.createdAt.toLocaleTimeString([], {
-                            hour: 'numeric',
-                            minute: '2-digit',
+                          {t('activeTabSelector.voidOrder', {
+                            time: order.createdAt.toLocaleTimeString([], {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                            }),
                           })}
                         </Button>
                       </ProtectedAction>
@@ -168,7 +177,9 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
             role="status"
             aria-live="polite"
           >
-            <p className="text-center text-sm text-muted-foreground">Select or create a tab</p>
+            <p className="text-center text-sm text-muted-foreground">
+              {t('activeTabSelector.selectOrCreateTab')}
+            </p>
             <div className="flex gap-2">
               <Button
                 type="button"
@@ -179,7 +190,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 disabled={openTabCount === 0}
               >
                 <RefreshCw className="mr-1 size-4" />
-                Switch Tab
+                {t('activeTabSelector.switchTab')}
                 {openTabCount > 0 && (
                   <Badge variant="secondary" className="ml-2">
                     {openTabCount}
@@ -194,7 +205,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                 }}
               >
                 <Plus className="mr-1 size-4" />
-                New Tab +
+                {t('activeTabSelector.newTabButton')}
               </Button>
             </div>
           </div>
