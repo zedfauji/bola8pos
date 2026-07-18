@@ -1,5 +1,6 @@
 import { Mic, MicOff, Send } from 'lucide-react';
 import { useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { logger } from '@shared/lib/logger';
 import { Button } from '@shared/ui/button';
 
@@ -43,6 +44,7 @@ function getSpeechRecognition(): (new () => SpeechRecognitionInstance) | null {
 }
 
 export function FileDropZone({ onSend, onFileDrop, disabled }: FileDropZoneProps) {
+  const { t } = useTranslation('featMgmt');
   const [text, setText] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -103,6 +105,7 @@ export function FileDropZone({ onSend, onFileDrop, disabled }: FileDropZoneProps
     }
 
     const recognition = new SpeechRecognitionCtor();
+    // eslint-disable-next-line i18next/no-literal-string -- BCP-47 speech-recognition locale code, not UI copy
     recognition.lang = 'es-MX';
     recognition.interimResults = false;
 
@@ -136,7 +139,7 @@ export function FileDropZone({ onSend, onFileDrop, disabled }: FileDropZoneProps
     >
       {isDragOver && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-md border-2 border-dashed border-primary bg-primary/10">
-          <span className="text-sm text-primary">Suelta el archivo aquí</span>
+          <span className="text-sm text-primary">{t('agentChat.dropFileHere')}</span>
         </div>
       )}
       <div className="flex items-end gap-2">
@@ -145,7 +148,7 @@ export function FileDropZone({ onSend, onFileDrop, disabled }: FileDropZoneProps
           onChange={(e) => { setText(e.target.value); }}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder="Escribe un mensaje..."
+          placeholder={t('agentChat.messagePlaceholder')}
           rows={1}
           className="min-h-[40px] flex-1 resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
           style={{ maxHeight: '120px', overflowY: 'auto' }}
@@ -156,7 +159,9 @@ export function FileDropZone({ onSend, onFileDrop, disabled }: FileDropZoneProps
           size="icon"
           onClick={toggleVoice}
           disabled={disabled}
-          aria-label={isListening ? 'Detener grabación de voz' : 'Iniciar grabación de voz'}
+          aria-label={
+            isListening ? t('agentChat.stopVoiceRecordingAria') : t('agentChat.startVoiceRecordingAria')
+          }
           className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
         >
           {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
@@ -167,7 +172,7 @@ export function FileDropZone({ onSend, onFileDrop, disabled }: FileDropZoneProps
           size="icon"
           onClick={handleSend}
           disabled={disabled || !text.trim()}
-          aria-label="Enviar mensaje"
+          aria-label={t('agentChat.sendMessageAria')}
           className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           <Send className="size-4" />

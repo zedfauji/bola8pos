@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useStaffStore } from '@entities/staff/model/store';
 import { runAgent } from '@shared/lib/agent/brain';
 import type { Message } from '@shared/lib/agent/brain';
@@ -29,6 +30,7 @@ function readFileAsText(file: File): Promise<string> {
 }
 
 export function useAgent() {
+  const { t } = useTranslation('featMgmt');
   const state = useAgentStore();
   const userRole = useStaffStore((s) => s.currentStaff?.role ?? 'bartender');
   const userId = useStaffStore((s) => s.currentStaff?.id);
@@ -60,8 +62,7 @@ export function useAgent() {
       logger.error('agent.sendMessage.failed', { role: userRole }, e);
       const errorMessage: Message = {
         role: 'assistant',
-        content:
-          'Lo siento, ocurrió un error al procesar tu mensaje. Por favor intenta de nuevo.',
+        content: t('agentChat.processErrorMessage'),
       };
       state.addMessage(errorMessage);
     } finally {
@@ -102,26 +103,28 @@ export function useAgent() {
           .slice(0, 5)
           .map((p) => `| ${p.name} | $${p.price.toFixed(2)} |`)
           .join('\n');
-        const header = '| Nombre | Precio |\n|--------|--------|';
+        const header = `| ${t('agentChat.nameHeader')} | ${t('agentChat.priceHeader')} |\n|--------|--------|`;
         const remaining = products.length - 5;
-        const more = products.length > 5 ? `\n\n...y ${String(remaining)} más` : '';
+        const more =
+          products.length > 5 ? t('agentChat.andMoreInline', { count: remaining }) : '';
         const count = String(products.length);
+        // eslint-disable-next-line i18next/no-literal-string -- English plural-suffix grammar token, not standalone UI copy
         const plural = products.length !== 1 ? 's' : '';
         state.addMessage({
           role: 'assistant',
-          content: `${header}\n${preview}${more}\n\nHaz clic en **Confirmar** para importar ${count} producto${plural}.`,
+          content: `${header}\n${preview}${more}\n\n${t('agentChat.confirmImportPrompt', { count, plural })}`,
         });
       } else {
         state.addMessage({
           role: 'assistant',
-          content: 'No encontré productos en el archivo.',
+          content: t('agentChat.noProductsFoundMessage'),
         });
       }
     } catch (e) {
       logger.error('agent.handleFileImport.failed', { fileName: file.name }, e);
       state.addMessage({
         role: 'assistant',
-        content: 'No encontré productos en el archivo.',
+        content: t('agentChat.noProductsFoundMessage'),
       });
     } finally {
       state.setTyping(false);
@@ -137,12 +140,15 @@ export function useAgent() {
       state.addMessage({
         role: 'assistant',
         content: result.ok
-          ? '✅ Acción ejecutada correctamente.'
-          : `❌ Error: ${result.error.message}`,
+          ? t('agentChat.actionExecutedSuccess')
+          : t('agentChat.actionErrorPrefix', { message: result.error.message }),
       });
     } catch (e) {
       logger.error('agent.confirmAction.failed', {}, e);
-      state.addMessage({ role: 'assistant', content: `❌ Error al confirmar: ${String(e)}` });
+      state.addMessage({
+        role: 'assistant',
+        content: t('agentChat.confirmErrorPrefix', { error: String(e) }),
+      });
     } finally {
       state.setTyping(false);
     }
@@ -152,7 +158,7 @@ export function useAgent() {
     state.setPendingConfirmation(null);
     const ctx = { userId, userRole, durationMs: undefined };
     await executeTool('cancel_action', { token }, ctx);
-    state.addMessage({ role: 'assistant', content: 'Acción cancelada.' });
+    state.addMessage({ role: 'assistant', content: t('agentChat.actionCancelled') });
   };
 
   const confirmImport = async (): Promise<void> => {
@@ -167,24 +173,25 @@ export function useAgent() {
       const result = await executeTool('bulk_import_products', { products }, ctx);
 
       const count = String(products.length);
+      // eslint-disable-next-line i18next/no-literal-string -- English plural-suffix grammar token, not standalone UI copy
       const plural = products.length !== 1 ? 's' : '';
 
       if (result.ok) {
         state.addMessage({
           role: 'assistant',
-          content: `✅ ${count} producto${plural} importado${plural} correctamente.`,
+          content: t('agentChat.importSuccessMessage', { count, plural }),
         });
       } else {
         state.addMessage({
           role: 'assistant',
-          content: `❌ Error al importar: ${result.error.message}`,
+          content: t('agentChat.importErrorPrefix', { message: result.error.message }),
         });
       }
     } catch (e) {
       logger.error('agent.confirmImport.failed', {}, e);
       state.addMessage({
         role: 'assistant',
-        content: `❌ Error al importar: ${String(e)}`,
+        content: t('agentChat.importErrorPrefix', { message: String(e) }),
       });
     } finally {
       state.setTyping(false);

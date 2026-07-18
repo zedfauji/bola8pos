@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStaffStore } from '@entities/staff/model/store';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -13,6 +14,7 @@ import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 
 export function AgentPanel() {
+  const { t } = useTranslation('featMgmt');
   const {
     isOpen,
     messages,
@@ -48,7 +50,7 @@ export function AgentPanel() {
   return (
     <div
       role="dialog"
-      aria-label="Asistente IA"
+      aria-label={t('agentChat.assistantAria')}
       aria-modal="false"
       className={`fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-background shadow-2xl transition-transform duration-300 md:w-[380px] ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -57,7 +59,7 @@ export function AgentPanel() {
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-foreground">Asistente IA</span>
+          <span className="font-semibold text-foreground">{t('agentChat.assistantTitle')}</span>
           <Badge variant="secondary" className="text-xs">
             {userRole}
           </Badge>
@@ -66,7 +68,7 @@ export function AgentPanel() {
           variant="ghost"
           size="icon"
           onClick={close}
-          aria-label="Cerrar asistente"
+          aria-label={t('agentChat.closeAssistantAria')}
           className="size-8"
         >
           <X className="size-4" />

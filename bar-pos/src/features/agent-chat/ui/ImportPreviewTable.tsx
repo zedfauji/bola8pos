@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@shared/ui/button';
 
 interface ImportPreviewTableProps {
@@ -15,20 +16,28 @@ export function ImportPreviewTable({
   onCancel,
   isLoading,
 }: ImportPreviewTableProps) {
+  const { t } = useTranslation('featMgmt');
   const displayed = products.slice(0, MAX_DISPLAY);
   const remaining = products.length - MAX_DISPLAY;
 
   return (
     <div className="rounded-lg border border-border bg-card p-3">
       <p className="mb-2 text-sm font-medium text-foreground">
-        Vista previa — {products.length} producto{products.length !== 1 ? 's' : ''}
+        {t('agentChat.previewTitle', {
+          count: products.length,
+          plural: products.length !== 1 ? 's' : '',
+        })}
       </p>
       <div className="max-h-48 overflow-y-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="pb-1 text-left font-medium text-muted-foreground">Nombre</th>
-              <th className="pb-1 text-right font-medium text-muted-foreground">Precio</th>
+              <th className="pb-1 text-left font-medium text-muted-foreground">
+                {t('agentChat.nameHeader')}
+              </th>
+              <th className="pb-1 text-right font-medium text-muted-foreground">
+                {t('agentChat.priceHeader')}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -43,7 +52,9 @@ export function ImportPreviewTable({
           </tbody>
         </table>
         {remaining > 0 && (
-          <p className="mt-1 text-xs text-muted-foreground">y {remaining} más...</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t('agentChat.andMore', { count: remaining })}
+          </p>
         )}
       </div>
       <div className="mt-3 flex gap-2">
@@ -53,7 +64,7 @@ export function ImportPreviewTable({
           disabled={isLoading}
           className="flex-1"
         >
-          {isLoading ? 'Importando...' : 'Confirmar importación'}
+          {isLoading ? t('agentChat.importing') : t('agentChat.confirmImport')}
         </Button>
         <Button
           size="sm"
@@ -61,7 +72,7 @@ export function ImportPreviewTable({
           onClick={onCancel}
           disabled={isLoading}
         >
-          Cancelar
+          {t('agentChat.cancel')}
         </Button>
       </div>
     </div>

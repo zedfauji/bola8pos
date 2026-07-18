@@ -115,6 +115,9 @@ export default tseslint.config({
       // e.g. db.from('products').select('id, name').eq('is_active', true).order('name'))
       // carry DB column-name/wildcard literals, not UI copy — same category as 'from',
       // recurring 20+ times in this plan's scope alone.
+      // 'executeTool(...)' (src/shared/lib/agent's tool dispatcher) first arg is a
+      // fixed AI-agent tool-name identifier (e.g. 'confirm_action', 'bulk_import_products'),
+      // a wire-protocol identifier like 'rpc', never UI copy.
       // 'insert(...)'/'update(...)'/'delete(...)' (the remaining Supabase query-builder
       // mutation verbs, e.g. db.from('waitlist_entries').update({ status: 'cancelled' }))
       // carry DB payload objects/enum values, not UI copy — same rationale as 'from'/
@@ -124,6 +127,7 @@ export default tseslint.config({
         exclude: [
           'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'canAccess', 'logger\\.\\w+',
           'rpc', 'navigate', 'from', 'select', 'eq', 'order', 'insert', 'update', 'delete',
+          'executeTool',
         ],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list

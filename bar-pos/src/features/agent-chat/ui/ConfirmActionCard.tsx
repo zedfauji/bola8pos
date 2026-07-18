@@ -1,4 +1,5 @@
 import { AlertTriangle, Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { PendingConfirmation } from '@shared/lib/agent/brain';
 import { Button } from '@shared/ui/button';
 
@@ -37,6 +38,7 @@ function renderPreview(preview: unknown): React.ReactNode {
 }
 
 export function ConfirmActionCard({ pending, onConfirm, onCancel, isLoading }: Props) {
+  const { t } = useTranslation('featMgmt');
   const label = TOOL_LABELS[pending.toolName] ?? pending.toolName;
 
   return (
@@ -59,7 +61,7 @@ export function ConfirmActionCard({ pending, onConfirm, onCancel, isLoading }: P
           disabled={isLoading}
         >
           <Check className="size-3.5" />
-          Confirmar
+          {t('agentChat.confirm')}
         </Button>
         <Button
           size="sm"
@@ -69,7 +71,7 @@ export function ConfirmActionCard({ pending, onConfirm, onCancel, isLoading }: P
           disabled={isLoading}
         >
           <X className="size-3.5" />
-          Cancelar
+          {t('agentChat.cancel')}
         </Button>
       </div>
     </div>
