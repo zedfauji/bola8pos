@@ -1,182 +1,18 @@
 //! ESC/POS thermal receipt printing (58mm / 32 columns).
-//! Layout mirrors `bar-pos/src/shared/lib/receipt-format.ts` — keep both in sync.
+//! Line content (all labels, locale-translated) is built in TypeScript —
+//! `bar-pos/src/shared/lib/receipt-format.ts` via `receiptDataToPrinterLines()`.
+//! This module only ESC/POS-encodes the pre-formatted lines it receives; it
+//! holds zero receipt-label strings.
 
-use serde::Deserialize;
 use std::fs;
 use std::io::Write;
 use std::time::{SystemTime, UNIX_EPOCH};
-
-const LINE_WIDTH: usize = 32;
 
 const ESC: u8 = 0x1B;
 const GS: u8 = 0x1D;
 
 /// Drawer kick: ESC p 0 0x19 0xFA
 const DRAWER_PULSE: [u8; 5] = [ESC, 0x70, 0x00, 0x19, 0xFA];
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ReceiptItemDto {
-    name: String,
-    quantity: i64,
-    line_total: f64,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ReceiptPrintDto {
-    bar_name: String,
-    bar_address: String,
-    receipt_number: String,
-    customer_name: String,
-    cashier_name: String,
-    processed_at: String,
-    items: Vec<ReceiptItemDto>,
-    subtotal: f64,
-    tip_amount: f64,
-    total: f64,
-    payment_method: String,
-    tendered_amount: Option<f64>,
-    change_amount: Option<f64>,
-    terminal_reference: Option<String>,
-    footer_text: Option<String>,
-}
-
-fn format_money(amount: f64) -> String {
-    let is_negative = amount < 0.0;
-    let abs_amount = amount.abs();
-    let formatted = format!("{abs_amount:.2}");
-    if is_negative {
-        format!("-${formatted}")
-    } else {
-        format!("${formatted}")
-    }
-}
-
-fn pad_right(s: &str, width: usize) -> String {
-    let t = if s.chars().count() > width {
-        s.chars().take(width).collect::<String>()
-    } else {
-        s.to_string()
-    };
-    let pad = width.saturating_sub(t.chars().count());
-    format!("{t}{}", " ".repeat(pad))
-}
-
-fn line_left_right(left: &str, right: &str) -> String {
-    let r: String = if right.chars().count() >= LINE_WIDTH {
-        right
-            .chars()
-            .rev()
-            .take(LINE_WIDTH)
-            .collect::<String>()
-            .chars()
-            .rev()
-            .collect()
-    } else {
-        right.to_string()
-    };
-    let max_left = LINE_WIDTH.saturating_sub(r.chars().count());
-    let l = if left.chars().count() > max_left {
-        let take = max_left.saturating_sub(1);
-        let prefix: String = left.chars().take(take.max(1)).collect();
-        format!("{prefix}~")
-    } else {
-        left.to_string()
-    };
-    let padded = pad_right(&l, LINE_WIDTH.saturating_sub(r.chars().count()));
-    format!("{padded}{r}")
-}
-
-fn center_line(text: &str) -> String {
-    let count = text.chars().count();
-    if count >= LINE_WIDTH {
-        return text.chars().take(LINE_WIDTH).collect();
-    }
-    let pad = (LINE_WIDTH - count) / 2;
-    let right_pad = LINE_WIDTH - pad - count;
-    format!("{}{}{}", " ".repeat(pad), text, " ".repeat(right_pad))
-}
-
-fn divider() -> String {
-    "-".repeat(LINE_WIDTH)
-}
-
-fn payment_method_label(method: &str) -> &'static str {
-    match method {
-        "cash" => "Cash",
-        "card" => "Card (BBVA Terminal)",
-        "rappi" => "Rappi",
-        _ => "Payment",
-    }
-}
-
-/// Plain-text lines (32 cols) — same logic as TS `buildThermalReceiptText`.
-fn build_receipt_lines(r: &ReceiptPrintDto) -> Vec<String> {
-    let mut lines: Vec<String> = Vec::new();
-    let bar = if r.bar_name.trim().is_empty() {
-        "Bar".to_string()
-    } else {
-        r.bar_name.clone()
-    };
-    lines.push(center_line(&bar));
-    if !r.bar_address.trim().is_empty() {
-        let addr = r.bar_address.trim();
-        let mut i = 0;
-        let char_count = addr.chars().count();
-        while i < char_count {
-            let chunk: String = addr.chars().skip(i).take(LINE_WIDTH).collect();
-            lines.push(pad_right(&chunk, LINE_WIDTH));
-            i += LINE_WIDTH;
-        }
-    }
-    lines.push(divider());
-    lines.push(line_left_right("Date", &r.processed_at));
-    lines.push(line_left_right("Cashier", &r.cashier_name));
-    lines.push(line_left_right("Customer", &r.customer_name));
-    lines.push(divider());
-    for item in &r.items {
-        let left = format!("{}× {}", item.quantity, item.name);
-        let price = format_money(item.line_total);
-        lines.push(line_left_right(&left, &price));
-    }
-    lines.push(divider());
-    lines.push(line_left_right("Subtotal", &format_money(r.subtotal)));
-    lines.push(line_left_right("Tip", &format_money(r.tip_amount)));
-    lines.push(line_left_right("Total", &format_money(r.total)));
-    lines.push(line_left_right(
-        "Payment",
-        payment_method_label(&r.payment_method),
-    ));
-    if r.payment_method == "cash" {
-        if let Some(t) = r.tendered_amount {
-            lines.push(line_left_right("Tendered", &format_money(t)));
-            let ch = r.change_amount.unwrap_or(0.0);
-            lines.push(line_left_right("Change", &format_money(ch)));
-        }
-    }
-    if let Some(ref tr) = r.terminal_reference {
-        if !tr.is_empty() {
-            lines.push(line_left_right("Ref", tr));
-        }
-    }
-    lines.push(divider());
-    lines.push(center_line(&format!("#{}", r.receipt_number)));
-    if let Some(ref ft) = r.footer_text {
-        if !ft.trim().is_empty() {
-            for ln in ft.lines() {
-                let mut i = 0;
-                let n = ln.chars().count();
-                while i < n {
-                    lines.push(ln.chars().skip(i).take(LINE_WIDTH).collect());
-                    i += LINE_WIDTH;
-                }
-            }
-        }
-    }
-    lines.push(String::new());
-    lines
-}
 
 fn lines_to_esc_pos(lines: &[String]) -> Vec<u8> {
     let mut out = Vec::new();
@@ -285,10 +121,7 @@ fn try_send_raw(_bytes: &[u8]) -> Result<(), String> {
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub fn print_receipt(receipt_json: String) -> Result<(), String> {
-    let dto: ReceiptPrintDto =
-        serde_json::from_str(&receipt_json).map_err(|e| format!("Invalid receipt JSON: {e}"))?;
-    let lines = build_receipt_lines(&dto);
+pub fn print_receipt(lines: Vec<String>) -> Result<(), String> {
     let bytes = lines_to_esc_pos(&lines);
 
     #[cfg(target_os = "windows")]
