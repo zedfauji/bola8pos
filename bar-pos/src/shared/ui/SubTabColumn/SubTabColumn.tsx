@@ -10,6 +10,7 @@
  */
 
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import type { OrderItem } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
@@ -56,6 +57,7 @@ export function SubTabColumn({
   onSelect,
   onRemoveItem,
 }: SubTabColumnProps) {
+  const { t } = useTranslation('common');
   return (
     <div
       role="option"
@@ -121,7 +123,7 @@ export function SubTabColumn({
       {/* DropZone — visible only when column has no items */}
       {items.length === 0 && (
         <div className="px-3 py-2 text-sm text-muted-foreground text-center border-t">
-          Tap an item to assign here
+          {t('subTabColumn.dropHint')}
         </div>
       )}
     </div>

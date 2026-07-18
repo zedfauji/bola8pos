@@ -82,8 +82,10 @@ export default tseslint.config({
       // shape as their JSX-attribute counterparts above (e.g. StatusBadge's
       // `statusConfig` map uses `className: 'bg-green-500...'` entries, and
       // FormField's cloned-child props object uses `'aria-invalid': ...`).
+      // `labelKey` (StatusBadge's status->i18next-key config map) holds a
+      // dot-path key string looked up via t(), not the UI copy itself.
       'object-properties': {
-        exclude: ['key', 'id', 'accessorKey', 'displayName', 'className', 'aria-invalid'],
+        exclude: ['key', 'id', 'accessorKey', 'displayName', 'className', 'aria-invalid', 'labelKey'],
       },
       // Em dash ('—') is a standalone symbol used as an empty-value
       // placeholder (e.g. no open shift), not translatable UI copy.

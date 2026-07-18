@@ -7,6 +7,7 @@
  */
 
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { UpdaterState } from '@shared/lib/useAppUpdater';
 import { ScrollArea } from './ScrollArea';
 import {
@@ -36,6 +37,7 @@ export function UpdateAvailableDialog({
   onDismiss,
   onRestart,
 }: UpdateAvailableDialogProps) {
+  const { t } = useTranslation('common');
   const isOpen = state.phase !== 'idle';
   const isDownloading = state.phase === 'downloading';
 
@@ -45,17 +47,19 @@ export function UpdateAvailableDialog({
       : undefined;
 
   const titleMap: Record<Exclude<UpdaterState['phase'], 'idle'>, string> = {
-    available: 'Update Available',
-    downloading: 'Downloading Update',
-    'restart-ready': 'Ready to Restart',
-    error: 'Update Failed',
+    available: t('updateAvailableDialog.titleAvailable'),
+    downloading: t('updateAvailableDialog.titleDownloading'),
+    'restart-ready': t('updateAvailableDialog.titleRestartReady'),
+    error: t('updateAvailableDialog.titleError'),
   };
 
   const descriptionMap: Record<Exclude<UpdaterState['phase'], 'idle'>, string> = {
-    available: version ? `Version ${version} is ready to install.` : 'A new version is ready.',
-    downloading: 'Please wait — do not close the app.',
-    'restart-ready': 'Update installed. Restart now to apply changes.',
-    error: 'Could not download the update. Try again later.',
+    available: version
+      ? t('updateAvailableDialog.descAvailableVersion', { version })
+      : t('updateAvailableDialog.descAvailableGeneric'),
+    downloading: t('updateAvailableDialog.descDownloading'),
+    'restart-ready': t('updateAvailableDialog.descRestartReady'),
+    error: t('updateAvailableDialog.descError'),
   };
 
   const title = state.phase !== 'idle' ? titleMap[state.phase] : '';
@@ -94,7 +98,7 @@ export function UpdateAvailableDialog({
         {/* Changelog — available state only */}
         {state.phase === 'available' && (
           <div>
-            <p className="text-sm font-semibold mb-2">What&apos;s new</p>
+            <p className="text-sm font-semibold mb-2">{t('updateAvailableDialog.whatsNew')}</p>
             <ScrollArea className="max-h-48 rounded-md border p-3">
               {/* Render as pre-formatted text — never dangerouslySetInnerHTML (XSS, ASVS V5) */}
               <p className="whitespace-pre-wrap text-sm text-muted-foreground">
@@ -112,7 +116,9 @@ export function UpdateAvailableDialog({
               value={state.percent}
               className="w-full"
             />
-            <p className="text-xs text-muted-foreground">Downloading {state.percent}%</p>
+            <p className="text-xs text-muted-foreground">
+              {t('loading.downloading', { percent: state.percent })}
+            </p>
           </div>
         )}
 
@@ -121,10 +127,10 @@ export function UpdateAvailableDialog({
           {state.phase === 'available' && (
             <>
               <Button variant="ghost" onClick={onRemindLater}>
-                Remind Later
+                {t('updateAvailableDialog.remindLater')}
               </Button>
               <Button variant="default" onClick={() => { void onInstall(); }}>
-                Install Now
+                {t('updateAvailableDialog.installNow')}
               </Button>
             </>
           )}
@@ -133,11 +139,11 @@ export function UpdateAvailableDialog({
           {state.phase === 'downloading' && (
             <>
               <Button variant="ghost" disabled>
-                Remind Later
+                {t('updateAvailableDialog.remindLater')}
               </Button>
               <Button variant="default" disabled>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Installing...
+                {t('updateAvailableDialog.installing')}
               </Button>
             </>
           )}
@@ -146,10 +152,10 @@ export function UpdateAvailableDialog({
           {state.phase === 'restart-ready' && (
             <>
               <Button variant="ghost" onClick={onDismiss}>
-                Later
+                {t('updateAvailableDialog.later')}
               </Button>
               <Button variant="default" onClick={() => { void onRestart(); }}>
-                Restart Now
+                {t('updateAvailableDialog.restartNow')}
               </Button>
             </>
           )}
@@ -157,7 +163,7 @@ export function UpdateAvailableDialog({
           {/* Error state: Close (ghost) only */}
           {state.phase === 'error' && (
             <Button variant="ghost" onClick={onDismiss}>
-              Close
+              {t('actions.close')}
             </Button>
           )}
         </AlertDialogFooter>

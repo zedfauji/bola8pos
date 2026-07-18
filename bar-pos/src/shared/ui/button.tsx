@@ -57,6 +57,7 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) {
+  // eslint-disable-next-line i18next/no-literal-string -- HTML tag name for the rendered element, not UI copy
   const Comp = asChild ? Slot.Root : 'button';
 
   return (

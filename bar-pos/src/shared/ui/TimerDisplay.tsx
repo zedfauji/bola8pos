@@ -27,11 +27,13 @@ export type TimerDisplayProps = {
   className?: string;
 };
 
+/* eslint-disable i18next/no-literal-string -- Tailwind class-name lookup table, not UI copy */
 const sizeClasses = {
   sm: 'text-sm',
   md: 'text-base',
   lg: 'text-2xl font-semibold',
 };
+/* eslint-enable i18next/no-literal-string */
 
 /**
  * Displays elapsed time with optional warning styling.

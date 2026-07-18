@@ -5,6 +5,7 @@
  * Maps domain status types to visual badges.
  */
 
+import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 import type { TabStatusSchema, PoolTableStatusSchema, OrderStatusSchema } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
@@ -29,7 +30,8 @@ export type StatusBadgeProps = {
 };
 
 type StatusConfig = {
-  label: string;
+  /** i18next key (within the `common` namespace) resolving to the display label */
+  labelKey: string;
   variant: 'default' | 'secondary' | 'destructive' | 'outline';
   className?: string;
 };
@@ -37,87 +39,87 @@ type StatusConfig = {
 const statusConfig: Record<string, StatusConfig> = {
   // Tab statuses
   open: {
-    label: 'Open',
+    labelKey: 'statusBadge.open',
     variant: 'default',
     className: 'bg-green-500 hover:bg-green-600 text-white',
   },
   closed: {
-    label: 'Closed',
+    labelKey: 'statusBadge.closed',
     variant: 'secondary',
   },
   paid: {
-    label: 'Paid',
+    labelKey: 'statusBadge.paid',
     variant: 'default',
     className: 'bg-blue-500 hover:bg-blue-600 text-white',
   },
   voided: {
-    label: 'Voided',
+    labelKey: 'statusBadge.voided',
     variant: 'destructive',
   },
 
   // Pool table statuses
   available: {
-    label: 'Available',
+    labelKey: 'statusBadge.available',
     variant: 'default',
     className: 'bg-green-500 hover:bg-green-600 text-white',
   },
   occupied: {
-    label: 'Occupied',
+    labelKey: 'statusBadge.occupied',
     variant: 'default',
     className: 'bg-red-600 hover:bg-red-700 text-white',
   },
   reserved: {
-    label: 'Reserved',
+    labelKey: 'statusBadge.reserved',
     variant: 'default',
     className: 'bg-yellow-500 hover:bg-yellow-600 text-white',
   },
   maintenance: {
-    label: 'Maintenance',
+    labelKey: 'statusBadge.maintenance',
     variant: 'secondary',
     className: 'bg-muted text-muted-foreground hover:bg-muted',
   },
 
   // Order statuses
   pending: {
-    label: 'Pending',
+    labelKey: 'statusBadge.pending',
     variant: 'default',
     className: 'bg-green-500 hover:bg-green-600 text-white',
   },
   served: {
-    label: 'Served',
+    labelKey: 'statusBadge.served',
     variant: 'secondary',
   },
 
   // Open tab duration (how long the bill has been open)
   tab_open_ok: {
-    label: 'Open',
+    labelKey: 'statusBadge.open',
     variant: 'default',
     className: 'bg-green-600 hover:bg-green-700 text-white dark:bg-green-700',
   },
   tab_open_warn: {
-    label: '2h+',
+    labelKey: 'statusBadge.tabOpenWarn',
     variant: 'default',
     className: 'bg-yellow-500 hover:bg-yellow-600 text-black dark:text-black',
   },
   tab_open_critical: {
-    label: '4h+',
+    labelKey: 'statusBadge.tabOpenCritical',
     variant: 'destructive',
     className: 'bg-red-600 hover:bg-red-700 text-white',
   },
 
   // Inventory (quantity vs threshold)
   inv_in_stock: {
-    label: 'In stock',
+    labelKey: 'statusBadge.inStock',
     variant: 'secondary',
     className: 'bg-muted text-muted-foreground hover:bg-muted',
   },
   inv_low_stock: {
-    label: 'Low stock',
+    labelKey: 'statusBadge.lowStock',
     variant: 'destructive',
     className: 'bg-red-600 hover:bg-red-700 text-white',
   },
   inv_out_of_stock: {
-    label: 'Out of stock',
+    labelKey: 'statusBadge.outOfStock',
     variant: 'destructive',
     className: 'bg-red-700 hover:bg-red-800 text-white',
   },
@@ -134,19 +136,18 @@ const statusConfig: Record<string, StatusConfig> = {
  * ```
  */
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config: StatusConfig = statusConfig[status] || {
-    label: status,
-    variant: 'outline',
-  };
+  const { t } = useTranslation('common');
+  const config: StatusConfig | undefined = statusConfig[status];
+  const label = config ? t(config.labelKey) : status;
 
   return (
     <Badge
       role="status"
-      variant={config.variant}
-      className={cn(config.className, className)}
-      aria-label={`Status: ${config.label}`}
+      variant={config?.variant ?? 'outline'}
+      className={cn(config?.className, className)}
+      aria-label={`Status: ${label}`}
     >
-      {config.label}
+      {label}
     </Badge>
   );
 }

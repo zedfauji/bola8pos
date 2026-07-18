@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@shared/lib/utils';
 
@@ -41,6 +42,7 @@ export interface SplitLayoutProps {
  * ```
  */
 export function SplitLayout({ left, right, leftWeight = 60, className }: SplitLayoutProps) {
+  const { t } = useTranslation('common');
   const [activePanel, setActivePanel] = React.useState<'left' | 'right'>('left');
 
   const rightWeight = 100 - leftWeight;
@@ -56,7 +58,7 @@ export function SplitLayout({ left, right, leftWeight = 60, className }: SplitLa
             setActivePanel('left');
           }}
         >
-          Products
+          {t('splitLayout.products')}
         </Button>
         <Button
           variant={activePanel === 'right' ? 'default' : 'outline'}
@@ -65,7 +67,7 @@ export function SplitLayout({ left, right, leftWeight = 60, className }: SplitLa
             setActivePanel('right');
           }}
         >
-          Current Tab
+          {t('splitLayout.currentTab')}
         </Button>
       </div>
 
