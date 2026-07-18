@@ -6,14 +6,14 @@ current_phase: 21
 current_phase_name: i18n-multi-language
 status: executing
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-18T22:46:42.252Z"
+last_updated: "2026-07-18T23:29:33.358Z"
 last_activity: 2026-07-18
 last_activity_desc: Plan 21-07 complete (order/pool/payment feature cluster sweep to featOrders ns)
 progress:
   total_phases: 28
   completed_phases: 17
   total_plans: 133
-  completed_plans: 137
+  completed_plans: 139
   percent: 61
 ---
 
@@ -49,12 +49,13 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 21 (i18n-multi-language) — EXECUTING
-Plan: 9 of 13
-Status: Ready to execute 21-08
-Last activity: 2026-07-18 — Plan 21-07 complete (order/pool/payment feature cluster sweep to featOrders ns)
+Plan: 10 of 13
+Status: Ready to execute 21-10
+Last activity: 2026-07-18 — Plan 21-09 complete (order/payment/pool/table + kds/caja/rappi/waitlist/inventory widget cluster sweep to wPanels ns)
 
 ## Session Log
 
+- 2026-07-18: **Phase 21 (i18n-multi-language) Plan 09 COMPLETE — order/payment/pool/table + kds/caja/rappi/waitlist/inventory widget cluster sweep to wPanels ns** — Ran `npm run lint:i18n` against all 22 operational-panel widget folders across two commits (`b11c9ed`, `df2a897`): Task 1 fixed violations across `OrderPanel` (7 files), `PaymentModal`/`PaymentForm` (largest single file in the plan, ~65 keys), `PaymentPane` (3 files), `PoolTableGrid`, `PoolTableOccupancyPanel`, `TableStatusPanel`, `TabDrawer`, `PINLoginForm`; Task 2 fixed violations across `CajaDashboard`, `CajaReportPanel`, `KdsBoard`, `KitchenPrepDashboard`, `IngredientsTable`, `StockMovementsList`, `LowStockAlert`, `RappiOrdersPanel`, `WaitlistQueue`, `HomeDashboard` (tile grid `ITEMS` array converted to `labelKey`/`managerLabelKey` per the plan's explicit instruction), `EmployeeSelector`, `HelpSheet` (`RappiOrderBadge`/`LogoImage` had 0 violations, untouched). `wPanels.json` seeded from empty `{}` to 400 keys across 35 widget-scoped groups (both locales, byte-identical es-MX except PaymentForm's Spanish-source payment-label defaults, which got a genuine en-US translation mirroring 21-08's agent-chat precedent). `eslint.i18n.config.js` extended with `aria-labelledby`/`height`/`highlight` jsx-attribute excludes, `maxHeight` object-property exclude, and `logHardwareFail`/`toLocaleDateString`/`toLocaleTimeString`/`usePersistedBool` callee excludes. Found + fixed a real TypeScript gotcha: `TFunction` imported from `'react-i18next'` (not re-exported there) silently degrades to an unresolved-type error rather than a hard parse failure — surfaced as 38 `@typescript-eslint/no-unsafe-*` lint errors before `typecheck`'s `TS2305` pinpointed the root cause; fixed by importing `TFunction` from `'i18next'` in the 3 files that needed a module-level column-def-builder/helper-function pattern (`CajaReportPanel`, `KdsBoard`, `StockMovementsList`). Recurrence of 21-08's multi-line-Supabase-chain plugin quirk in 3 files (`PINLoginForm`, `PoolTableOccupancyPanel`, `WaitlistQueue`) — same scoped eslint-disable/eslint-enable fix. Task 3 proved zero violations across the exact 22-folder Task-3 command, reconciled the catalog (400/400 keys byte-identical both locales, 0 real unused keys — 4 false positives were i18next `_one`/`_other` pluralization-suffix keys a naive leaf-name scanner doesn't understand), and re-confirmed `typecheck`/`lint`/full unit suite (140 files/1248 tests, zero regressions) — no code changes needed, already clean after Tasks 1-2. `gsd-tools state record-metric`/`add-decision` again required named-flag syntax (`--phase`/`--plan`/`--duration`/`--tasks`/`--files`, `--summary`), not the positional syntax documented in execute-plan.md; `state advance-plan`/`state update-progress`/`state record-session`/`roadmap update-plan-progress` all worked with positional args; `requirements mark-complete SC-4` again reported `REQUIREMENTS.md not found` (confirmed absent for this milestone, not a tool bug).
 - 2026-07-18: **Phase 21 (i18n-multi-language) Plan 07 COMPLETE — order/pool/payment feature cluster sweep to featOrders ns** — Ran `npm run lint:i18n` against all 21 order/pool-timer/payment/refund/split/void/caja-entry feature folders across two commits (`cbbc10a`, `7d49987`): Task 1 fixed 191 violations across `process-payment`, `process-refund`, `split-tab`, `close-tab`, `open-tab`, `transfer-tab`, `void-order`, `add-item-to-tab`, `add-combo-to-tab`, `remove-tab-item`; Task 2 fixed 77 violations across `start-pool-timer`, `stop-pool-timer`, `stop-and-move-table`, `assign-pool-session-to-tab`, `edit-session-start-time`, `bump-kds-item`, `lookup-product-by-barcode`, `manager-pin-gate`, `print-precheque`, `register-caja-entry`. `featOrders.json` seeded (both locales, byte-identical) with 218 keys across 20 feature-scoped groups. `eslint.i18n.config.js` extended with `rpc`/`navigate` callee excludes (RPC names/route paths aren't UI copy — recurs across the whole codebase, benefits future 21-xx sweeps), `confirmClassName` jsx-attribute exclude (ConfirmDialog's Tailwind passthrough), and a test-file `no-explicit-any` override mirroring the committed gate. Found + fixed 2 real bugs: `OpenTabDialog` and `RegisterCajaEntryDialog` both had module-level zod `FormSchema` consts baking validation messages in whichever locale was active at first import — converted both to a `buildFormSchema()` function called fresh per validation so a runtime locale switch (Phase 21-03) is reflected immediately. Task 3 proved zero violations across the combined 21-folder command, reconciled the catalog (218/218 keys byte-identical both locales, 0 unused keys against the whole `src/**` tree), and re-confirmed `typecheck`/`lint`/full unit suite (1248 tests, zero regressions) — no code changes needed, already clean after Tasks 1-2. `gsd-tools state record-metric`/`add-decision` worked via named-flag syntax this session (`--phase`/`--plan`/`--summary`, not the positional syntax in execute-plan.md) — `roadmap update-plan-progress` also worked live; `requirements mark-complete SC-4` reported `REQUIREMENTS.md not found` (this project has no REQUIREMENTS.md file in `.planning/` — not a tool bug, the file is genuinely absent for this milestone).
 - 2026-07-18: **Phase 21 (i18n-multi-language) Plan 06 COMPLETE — shared/ui sweep to common ns** — Ran `npm run lint:i18n -- src/shared/ui` to enumerate the 222-violation baseline across 45 files, fixed every one across two commits (`c2fc2eb`, `af7af14`): 24 components migrated to `useTranslation('common')` (byte-identical es-MX values, 20 new component-scoped key groups + 3 shared `actions.*`/`loading.*` buckets seeded in both locales), `StatusBadge`'s config map switched to `labelKey` i18next dot-paths, and technical non-copy literals (Tailwind size-class lookup tables, a DOM-tag-selection ternary, a Radix `data-state` marker) excluded via config/eslint-disable instead of translated. Found + fixed 2 real bugs surfaced by the sweep: (1) shared/ui components calling `useTranslation()` rendered raw key strings in dozens of pre-existing test files that never imported the i18n singleton — fixed by adding a global `import '@shared/lib/i18n';` to `src/shared/lib/test-setup.ts`; (2) `ErrorBoundary`'s first attempt at `withTranslation()` HOC broke `LanguageSettingsTab.test.tsx`'s partial `react-i18next` mock — reverted to the i18n singleton's `.t()` called directly (class component, no hooks). `npm run lint:i18n -- src/shared/ui` exits 0; `npm run typecheck`/`npm run lint` exit 0 (only the 2 pre-existing unrelated typecheck errors); full unit suite 140 files/1248 tests pass, zero regressions. `gsd-tools query state.record-metric`/`state.add-decision`/`roadmap.update-plan-progress`/`requirements.mark-complete` all silently no-op'd in this environment (exit 0, zero stdout/stderr, no file diff) — STATE.md/ROADMAP.md updated manually to match the intended output instead.
 - 2026-07-14: **Phase 34 (visual-regression-baseline) Plan 02 COMPLETE — Task 3 checkpoint approved** — `e2e/visual/45-visual-baseline.spec.ts` (5 test blocks, admin 17 routes + bartender 11 + manager 14 accessible routes, denied-route URL assertions, `/audit` denied-toast screenshot) + `waitForPageReady()` content-readiness helper committed `70c7f4b`; local baseline seeded (43 PNGs, gitignored) with a genuine blank-screenshot bug found and fixed (`55470bc`, `e2986e1` — content wasn't awaited before `toHaveScreenshot()`, every `React.lazy()`+Suspense+TanStack-Query route captured blank); two consecutive `npm run test:e2e:visual` runs both exit 0 with zero diffs (VISUAL-03). Task 3's blocking `checkpoint:human-verify` was approved by the user ("Checked and confirmed i could see all the pNGs") after reviewing all 43 PNGs. VISUAL-02 + VISUAL-03 marked complete in REQUIREMENTS.md; ROADMAP.md Phase 34 marked Complete. **Phase 34 is now complete — 2/2 plans.**
@@ -250,6 +251,9 @@ Last activity: 2026-07-18 — Plan 21-07 complete (order/pool/payment feature cl
 - [Phase 21-i18n-multi-language 06]: ErrorBoundary (class component) uses the i18n singleton's i18n.t() directly instead of react-i18next's withTranslation() HOC -- the HOC's module-level side effect broke LanguageSettingsTab.test.tsx's partial react-i18next mock (no withTranslation export)
 - [Phase ?]: featOrders.json: 218 keys across 20 feature groups (payment/refund/split-tab/tab-lifecycle/pool-timer/kds/barcode/pin-gate/caja-entry), byte-identical es-MX/en-US
 - [Phase ?]: eslint.i18n.config.js multi-line Supabase chain plugin quirk worked around with scoped eslint-disable blocks (config-exclude alone insufficient); agent-chat's Spanish source strings got genuine en-US translations
+- [Phase ?]: [Phase 21-09]: TFunction must be imported from 'i18next', not 'react-i18next' — the latter never re-exports it, causing a silent unresolved-type error (TS2305) rather than a hard parse failure
+- [Phase ?]: [Phase 21-09]: i18next's count-triggered auto-pluralization (_one/_other suffixes) used only where original text varied singular/plural; interpolation param renamed away from reserved 'count' key everywhere text never varied, to keep rendered output byte-identical
+- [Phase ?]: [Phase 21-09]: PaymentForm's Spanish-source payment-label defaults (Efectivo/Terminal BBVA/Rappi) kept byte-identical in es-MX; en-US got a genuine English translation, not a byte-copy (mirrors 21-08 agent-chat precedent)
 
 ## Performance Metrics
 
@@ -312,6 +316,7 @@ Last activity: 2026-07-18 — Plan 21-07 complete (order/pool/payment feature cl
 | Phase 21-i18n-multi-language P06 | ~90min | 2 tasks | 34 files |
 | Phase 21-i18n-multi-language P07 | 105min | 3 tasks | 36 files |
 | Phase 21 P08 | ~150min | 3 tasks | 31 files |
+| Phase 21 P09 | 140 | 3 tasks | 20 files |
 
 ## Last Session
 
@@ -332,7 +337,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-18T22:46:42.243Z
+**Last session:** 2026-07-18T23:29:15.434Z
 **Stopped at:** Completed 21-07-PLAN.md
 **Resume file:** None
 

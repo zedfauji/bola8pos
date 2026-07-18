@@ -618,7 +618,7 @@ Plans:
 **Goal:** Add multi-language support via `react-i18next`, with `es-MX`/`en-US` catalogs, a `profiles.locale` preference, and an ESLint rule banning hard-coded UI strings going forward.
 **Requirements:** TBD (POS-COMPARISON.md §21 — source doc no longer present; scope locked in 21-CONTEXT.md)
 **Depends on:** —
-**Plans:** 7/13 plans executed
+**Plans:** 9/13 plans executed
 
 Plans:
 **Wave 1**
@@ -639,8 +639,8 @@ Plans:
 
 - [x] 21-06-PLAN.md — Sweep shared/ui → common ns (Wave 4) (SC-4, D-04)
 - [x] 21-07-PLAN.md — Sweep features (orders/pool/payment cluster) → featOrders ns (Wave 4) (SC-4, D-04)
-- [ ] 21-08-PLAN.md — Sweep features (mgmt/inventory/staff/waitlist cluster) → featMgmt ns (Wave 4) (SC-4, D-04)
-- [ ] 21-09-PLAN.md — Sweep widgets (operational panels) → wPanels ns (Wave 4) (SC-4, D-04)
+- [x] 21-08-PLAN.md — Sweep features (mgmt/inventory/staff/waitlist cluster) → featMgmt ns (Wave 4) (SC-4, D-04)
+- [x] 21-09-PLAN.md — Sweep widgets (operational panels) → wPanels ns (Wave 4) (SC-4, D-04)
 - [ ] 21-10-PLAN.md — Sweep widgets (reports/admin + settings-tab contents) → wAdmin ns (Wave 4) (SC-4, D-04)
 - [ ] 21-11-PLAN.md — Sweep entities + pages → entities/pages ns (Wave 4) (SC-4, D-04)
 
