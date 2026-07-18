@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { rappiOrderKeys, useRappiOrderStore, useRappiOrdersList } from '@entities/rappi-order';
 import { useStaffStore } from '@entities/staff/model/store';
@@ -16,6 +17,7 @@ function formatReceivedAt(d: Date): string {
 }
 
 function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () => void }) {
+  const { t } = useTranslation('wPanels');
   const queryClient = useQueryClient();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const currentShift = useStaffStore(s => s.currentShift);
@@ -30,7 +32,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
 
   const handleAccept = async () => {
     if (!currentStaff?.id || !currentShift?.id) {
-      toast.error('Clock in with an active shift before accepting orders.');
+      toast.error(t('rappiOrdersPanel.clockInBeforeAccepting'));
       return;
     }
     setBusy(true);
@@ -42,7 +44,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
       toast.error(r.error.message);
       return;
     }
-    toast.success('Rappi order accepted — tab opened.');
+    toast.success(t('rappiOrdersPanel.orderAcceptedTabOpened'));
     invalidate();
     onAccepted();
   };
@@ -50,7 +52,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
   const handleReject = async () => {
     const reason = rejectReason.trim();
     if (reason.length < 2) {
-      toast.error('Enter a short rejection reason.');
+      toast.error(t('rappiOrdersPanel.enterShortRejectionReason'));
       return;
     }
     setBusy(true);
@@ -60,7 +62,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
       toast.error(r.error.message);
       return;
     }
-    toast.message('Order rejected');
+    toast.message(t('rappiOrdersPanel.orderRejected'));
     setRejectOpen(false);
     setRejectReason('');
     invalidate();
@@ -88,7 +90,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
     setBusy(false);
     if (!r.ok) toast.error(r.error.message);
     else {
-      toast.success('Rappi payment recorded — tab closed.');
+      toast.success(t('rappiOrdersPanel.paymentRecordedTabClosed'));
       invalidate();
     }
   };
@@ -120,10 +122,10 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
         </ul>
         <div className="mb-4 flex flex-wrap gap-4 text-sm">
           <span>
-            Subtotal: <MoneyDisplay amount={order.subtotal} />
+            {t('rappiOrdersPanel.subtotalLabel')} <MoneyDisplay amount={order.subtotal} />
           </span>
           <span className="text-muted-foreground">
-            Rappi total: <MoneyDisplay amount={order.rappiTotal} />
+            {t('rappiOrdersPanel.rappiTotalLabel')} <MoneyDisplay amount={order.rappiTotal} />
           </span>
         </div>
 
@@ -131,7 +133,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
           {order.status === 'pending_acceptance' && (
             <>
               <Button size="sm" onClick={() => void handleAccept()} disabled={busy}>
-                Accept
+                {t('rappiOrdersPanel.accept')}
               </Button>
               <Button
                 size="sm"
@@ -141,7 +143,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
                 }}
                 disabled={busy}
               >
-                Reject
+                {t('rappiOrdersPanel.reject')}
               </Button>
             </>
           )}
@@ -154,17 +156,17 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
                   onClick={() => void handlePreparing()}
                   disabled={busy}
                 >
-                  Preparing
+                  {t('rappiOrdersPanel.preparing')}
                 </Button>
               )}
               <Button size="sm" onClick={() => void handleReady()} disabled={busy}>
-                Ready for Pickup
+                {t('rappiOrdersPanel.readyForPickup')}
               </Button>
             </>
           )}
           {order.status === 'ready_for_pickup' && (
             <Button size="sm" onClick={() => void handleComplete()} disabled={busy}>
-              Complete
+              {t('rappiOrdersPanel.complete')}
             </Button>
           )}
         </div>
@@ -173,17 +175,17 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
       <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Rappi order</DialogTitle>
+            <DialogTitle>{t('rappiOrdersPanel.rejectRappiOrderTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <Label htmlFor="reject-reason">Reason</Label>
+            <Label htmlFor="reject-reason">{t('rappiOrdersPanel.reasonLabel')}</Label>
             <Input
               id="reject-reason"
               value={rejectReason}
               onChange={e => {
                 setRejectReason(e.target.value);
               }}
-              placeholder="Out of stock, closed, …"
+              placeholder={t('rappiOrdersPanel.rejectReasonPlaceholder')}
             />
           </div>
           <DialogFooter>
@@ -193,10 +195,10 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
                 setRejectOpen(false);
               }}
             >
-              Cancel
+              {t('rappiOrdersPanel.cancel')}
             </Button>
             <Button variant="destructive" disabled={busy} onClick={() => void handleReject()}>
-              Reject order
+              {t('rappiOrdersPanel.rejectOrder')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -206,6 +208,7 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
 }
 
 export function RappiOrdersPanel() {
+  const { t } = useTranslation('wPanels');
   const { data: res, isLoading, isError, refetch } = useRappiOrdersList();
   const setOrdersFromServer = useRappiOrderStore(s => s.setOrdersFromServer);
 
@@ -223,15 +226,17 @@ export function RappiOrdersPanel() {
   }, [res]);
 
   if (isLoading) {
-    return <p className="text-muted-foreground p-6">Loading Rappi orders…</p>;
+    return (
+      <p className="text-muted-foreground p-6">{t('rappiOrdersPanel.loadingOrders')}</p>
+    );
   }
 
   if (isError || !res?.ok) {
     return (
       <div className="p-6">
-        <p className="text-destructive mb-2">Could not load Rappi orders.</p>
+        <p className="text-destructive mb-2">{t('rappiOrdersPanel.couldNotLoadOrders')}</p>
         <Button variant="outline" onClick={() => void refetch()}>
-          Retry
+          {t('rappiOrdersPanel.retry')}
         </Button>
       </div>
     );
@@ -240,20 +245,24 @@ export function RappiOrdersPanel() {
   return (
     <div className="grid gap-6 p-6 md:grid-cols-2">
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Incoming</h2>
+        <h2 className="mb-3 text-lg font-semibold">{t('rappiOrdersPanel.incoming')}</h2>
         <div className="space-y-4">
           {incoming.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No orders awaiting acceptance.</p>
+            <p className="text-muted-foreground text-sm">
+              {t('rappiOrdersPanel.noOrdersAwaitingAcceptance')}
+            </p>
           ) : (
             incoming.map(o => <OrderCard key={o.id} order={o} onAccepted={() => void refetch()} />)
           )}
         </div>
       </section>
       <section>
-        <h2 className="mb-3 text-lg font-semibold">In progress</h2>
+        <h2 className="mb-3 text-lg font-semibold">{t('rappiOrdersPanel.inProgress')}</h2>
         <div className="space-y-4">
           {inProgress.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nothing in the kitchen queue.</p>
+            <p className="text-muted-foreground text-sm">
+              {t('rappiOrdersPanel.nothingInKitchenQueue')}
+            </p>
           ) : (
             inProgress.map(o => (
               <OrderCard key={o.id} order={o} onAccepted={() => void refetch()} />

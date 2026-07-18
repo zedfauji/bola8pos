@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { RegisterCajaEntryDialog } from '@features/register-caja-entry';
@@ -58,6 +59,7 @@ function SummaryCard({ label, amount, isLoading, highlight }: SummaryCardProps) 
 }
 
 export function CajaDashboard() {
+  const { t } = useTranslation('wPanels');
   const { can } = usePermissions();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const settings = useSettings();
@@ -119,7 +121,7 @@ export function CajaDashboard() {
       {
         onSuccess: result => {
           if (result.ok) {
-            toast.success('Caja opened successfully.');
+            toast.success(t('cajaDashboard.cajaOpenedSuccess'));
             setOpenDialogVisible(false);
             setOpeningCash(0);
           } else {
@@ -142,14 +144,14 @@ export function CajaDashboard() {
       {
         onSuccess: result => {
           if (result.ok) {
-            toast.success('Caja closed successfully.');
+            toast.success(t('cajaDashboard.cajaClosedSuccess'));
             setCloseDialogVisible(false);
             setClosingCash(0);
             setCloseNotes('');
           } else {
             const msg =
               result.error.code === 'OPEN_TABS_EXIST'
-                ? `Cannot close caja — there are open tabs. Close all tabs first.`
+                ? t('cajaDashboard.openTabsExist')
                 : result.error.message;
             toast.error(msg);
           }
@@ -164,19 +166,21 @@ export function CajaDashboard() {
 
     const openedAt = formatDateTime(currentCaja.openedAt);
     const lines = [
-      '================================',
-      '         CAJA SUMMARY',
-      '================================',
-      `Opened: ${openedAt}`,
-      currentCaja.openedByName ? `By: ${currentCaja.openedByName}` : '',
-      '--------------------------------',
-      `Cash:        $${cash.toFixed(2)}`,
-      `Card:        $${card.toFixed(2)}`,
-      `Rappi:       $${rappi.toFixed(2)}`,
-      '--------------------------------',
-      `Net Total:   $${net.toFixed(2)}`,
-      `Open Tabs:   $${pendingTotal.toFixed(2)}`,
-      '================================',
+      t('cajaDashboard.printDivider'),
+      t('cajaDashboard.printTitle'),
+      t('cajaDashboard.printDivider'),
+      t('cajaDashboard.printOpened', { openedAt }),
+      currentCaja.openedByName
+        ? t('cajaDashboard.printBy', { name: currentCaja.openedByName })
+        : '',
+      t('cajaDashboard.printThinDivider'),
+      t('cajaDashboard.printCash', { amount: cash.toFixed(2) }),
+      t('cajaDashboard.printCard', { amount: card.toFixed(2) }),
+      t('cajaDashboard.printRappi', { amount: rappi.toFixed(2) }),
+      t('cajaDashboard.printThinDivider'),
+      t('cajaDashboard.printNetTotal', { amount: net.toFixed(2) }),
+      t('cajaDashboard.printOpenTabs', { amount: pendingTotal.toFixed(2) }),
+      t('cajaDashboard.printDivider'),
     ]
       .filter(l => l !== '')
       .join('\n');
@@ -185,9 +189,9 @@ export function CajaDashboard() {
     setIsPrinting(false);
 
     if (result.ok) {
-      toast.success('Summary printed.');
+      toast.success(t('cajaDashboard.summaryPrinted'));
     } else {
-      toast.error('Print failed: ' + result.error.message);
+      toast.error(t('cajaDashboard.printFailed', { message: result.error.message }));
     }
   }
 
@@ -196,31 +200,32 @@ export function CajaDashboard() {
   return (
     <section className="space-y-4 rounded-lg border p-4">
       <SectionHeader
-        title="Caja"
-        description="Daily business session. All tabs require an open caja."
+        title={t('cajaDashboard.title')}
+        description={t('cajaDashboard.description')}
       />
 
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Status:</span>
+          <span className="text-sm text-muted-foreground">{t('cajaDashboard.statusLabel')}</span>
           <Badge variant={isCajaOpen ? 'default' : 'secondary'}>
-            {isCajaOpen ? 'Open' : 'Closed'}
+            {isCajaOpen ? t('cajaDashboard.open') : t('cajaDashboard.closed')}
           </Badge>
         </div>
 
         {currentCaja && (
           <>
             <div className="text-sm text-muted-foreground">
-              Opened:{' '}
+              {t('cajaDashboard.openedLabel')}{' '}
               <span className="text-foreground">{formatDateTime(currentCaja.openedAt)}</span>
             </div>
             {currentCaja.openedByName && (
               <div className="text-sm text-muted-foreground">
-                By: <span className="text-foreground">{currentCaja.openedByName}</span>
+                {t('cajaDashboard.byLabel')}{' '}
+                <span className="text-foreground">{currentCaja.openedByName}</span>
               </div>
             )}
             <div className="text-sm text-muted-foreground">
-              Opening cash:{' '}
+              {t('cajaDashboard.openingCashLabel')}{' '}
               <span className="text-foreground font-mono">
                 ${currentCaja.openingCash.toFixed(2)}
               </span>
@@ -233,17 +238,21 @@ export function CajaDashboard() {
       {isCajaOpen && currentCaja !== null && (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-            <SummaryCard label="Cash" amount={cash} isLoading={isSummaryLoading} />
-            <SummaryCard label="Card" amount={card} isLoading={isSummaryLoading} />
-            <SummaryCard label="Rappi" amount={rappi} isLoading={isSummaryLoading} />
+            <SummaryCard label={t('cajaDashboard.cash')} amount={cash} isLoading={isSummaryLoading} />
+            <SummaryCard label={t('cajaDashboard.card')} amount={card} isLoading={isSummaryLoading} />
             <SummaryCard
-              label="Pending (open tabs)"
+              label={t('cajaDashboard.rappi')}
+              amount={rappi}
+              isLoading={isSummaryLoading}
+            />
+            <SummaryCard
+              label={t('cajaDashboard.pendingOpenTabs')}
               amount={pendingTotal}
               isLoading={isPendingLoading}
               highlight="border-amber-500/40"
             />
             <SummaryCard
-              label="Net"
+              label={t('cajaDashboard.net')}
               amount={net}
               isLoading={isSummaryLoading}
               highlight="border-emerald-500/40"
@@ -259,21 +268,23 @@ export function CajaDashboard() {
                   setEntryDialogOpen(true);
                 }}
               >
-                Register Expense / Income
+                {t('cajaDashboard.registerExpenseIncome')}
               </POSButton>
             )}
             <Link
               to="/payments"
               className="text-sm text-muted-foreground underline-offset-4 hover:underline"
             >
-              View Tabs →
+              {t('cajaDashboard.viewTabs')}
             </Link>
           </div>
 
           {/* Entries list */}
           {can('manage_caja') && entries.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-muted-foreground">Recent Entries</h4>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                {t('cajaDashboard.recentEntries')}
+              </h4>
               <div className="space-y-1">
                 {entries.slice(-10).map(entry => (
                   <div
@@ -314,7 +325,7 @@ export function CajaDashboard() {
                           deleteCajaEntryMut.mutate(entry.id, {
                             onSuccess: result => {
                               if (result.ok) {
-                                toast.success('Entry deleted.');
+                                toast.success(t('cajaDashboard.entryDeleted'));
                               } else {
                                 toast.error(result.error.message);
                               }
@@ -331,11 +342,12 @@ export function CajaDashboard() {
               </div>
               {totalExpenses > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Total expenses: <span className="text-red-400">${totalExpenses.toFixed(2)}</span>
+                  {t('cajaDashboard.totalExpensesLabel')}{' '}
+                  <span className="text-red-400">${totalExpenses.toFixed(2)}</span>
                   {totalIncome > 0 && (
                     <>
                       {' '}
-                      | Total income:{' '}
+                      {t('cajaDashboard.totalIncomeLabel')}{' '}
                       <span className="text-green-400">${totalIncome.toFixed(2)}</span>
                     </>
                   )}
@@ -360,12 +372,12 @@ export function CajaDashboard() {
                     void handlePrintSummary();
                   }}
                 >
-                  {isPrinting ? 'Printing…' : 'Print Summary'}
+                  {isPrinting ? t('cajaDashboard.printing') : t('cajaDashboard.printSummary')}
                 </POSButton>
               </span>
             </TooltipTrigger>
             {(!isCajaOpen || !currentCaja) && (
-              <TooltipContent>Open a caja session first</TooltipContent>
+              <TooltipContent>{t('cajaDashboard.openCajaSessionFirst')}</TooltipContent>
             )}
           </Tooltip>
         </TooltipProvider>
@@ -383,7 +395,7 @@ export function CajaDashboard() {
               setOpenDialogVisible(true);
             }}
           >
-            Open Caja
+            {t('cajaDashboard.openCaja')}
           </POSButton>
         )}
         {isCajaOpen && currentCaja && (
@@ -395,7 +407,7 @@ export function CajaDashboard() {
               setCloseDialogVisible(true);
             }}
           >
-            Close Caja
+            {t('cajaDashboard.closeCaja')}
           </POSButton>
         )}
       </div>
@@ -404,11 +416,11 @@ export function CajaDashboard() {
       <Dialog open={openDialogVisible} onOpenChange={setOpenDialogVisible}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Open Caja</DialogTitle>
+            <DialogTitle>{t('cajaDashboard.openCaja')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <MoneyInput
-              label="Opening Cash"
+              label={t('cajaDashboard.openingCash')}
               value={openingCash}
               onChange={setOpeningCash}
               placeholder="0.00"
@@ -422,10 +434,10 @@ export function CajaDashboard() {
                 setOpenDialogVisible(false);
               }}
             >
-              Cancel
+              {t('cajaDashboard.cancel')}
             </Button>
             <POSButton type="button" disabled={openCajaMut.isPending} onClick={handleOpenCaja}>
-              {openCajaMut.isPending ? 'Opening…' : 'Open Caja'}
+              {openCajaMut.isPending ? t('cajaDashboard.opening') : t('cajaDashboard.openCaja')}
             </POSButton>
           </DialogFooter>
         </DialogContent>
@@ -435,18 +447,18 @@ export function CajaDashboard() {
       <Dialog open={closeDialogVisible} onOpenChange={setCloseDialogVisible}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Close Caja</DialogTitle>
+            <DialogTitle>{t('cajaDashboard.closeCaja')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <MoneyInput
-              label="Closing Cash Count"
+              label={t('cajaDashboard.closingCashCount')}
               value={closingCash}
               onChange={setClosingCash}
               placeholder="0.00"
             />
             <div className="space-y-1">
               <label htmlFor="close-notes" className="text-sm font-medium">
-                Notes (optional)
+                {t('cajaDashboard.notesOptional')}
               </label>
               <textarea
                 id="close-notes"
@@ -454,7 +466,7 @@ export function CajaDashboard() {
                 onChange={e => {
                   setCloseNotes(e.target.value);
                 }}
-                placeholder="End of day notes…"
+                placeholder={t('cajaDashboard.endOfDayNotesPlaceholder')}
                 rows={3}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
@@ -468,7 +480,7 @@ export function CajaDashboard() {
                 setCloseDialogVisible(false);
               }}
             >
-              Cancel
+              {t('cajaDashboard.cancel')}
             </Button>
             <POSButton
               type="button"
@@ -476,7 +488,7 @@ export function CajaDashboard() {
               disabled={closeCajaMut.isPending}
               onClick={handleCloseCaja}
             >
-              {closeCajaMut.isPending ? 'Closing…' : 'Close Caja'}
+              {closeCajaMut.isPending ? t('cajaDashboard.closing') : t('cajaDashboard.closeCaja')}
             </POSButton>
           </DialogFooter>
         </DialogContent>

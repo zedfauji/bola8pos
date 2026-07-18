@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { AddWaitlistEntryForm } from '@features/add-waitlist-entry/ui/AddWaitlistEntryForm';
 import { useMarkCancelled } from '@features/mark-waitlist-entry-cancelled/model/useMarkCancelled';
@@ -26,6 +27,7 @@ const db = supabase as any;
 type PoolTableStatus = { id: string; label: string; number: number; status: string };
 
 function usePoolTablesCount() {
+  /* eslint-disable i18next/no-literal-string -- queryKey + Supabase query-builder chain, wire-protocol identifiers not UI copy */
   return useQuery({
     queryKey: ['pool_tables'],
     queryFn: async (): Promise<PoolTableStatus[]> => {
@@ -38,6 +40,7 @@ function usePoolTablesCount() {
     },
     staleTime: 30 * 1000,
   });
+  /* eslint-enable i18next/no-literal-string */
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -45,6 +48,7 @@ function usePoolTablesCount() {
 // ────────────────────────────────────────────────────────────────────────────
 
 export function WaitlistQueue() {
+  const { t } = useTranslation('wPanels');
   const [addOpen, setAddOpen] = useState(false);
   const [seatEntryId, setSeatEntryId] = useState<string | null>(null);
   const { data: entries = [], isLoading } = useWaitlistEntries();
@@ -84,18 +88,18 @@ export function WaitlistQueue() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="size-5" aria-hidden="true" />
-          <h2 className="text-lg font-semibold">Queue</h2>
+          <h2 className="text-lg font-semibold">{t('waitlistQueue.queue')}</h2>
         </div>
         <POSButton
           type="button"
           touchSize="large"
-          aria-label="Add to waitlist"
+          aria-label={t('waitlistQueue.addToWaitlist')}
           onClick={() => {
             setAddOpen(true);
           }}
         >
           <Plus className="mr-2 size-4" aria-hidden="true" />
-          Add to waitlist
+          {t('waitlistQueue.addToWaitlist')}
         </POSButton>
       </div>
 
@@ -109,8 +113,8 @@ export function WaitlistQueue() {
       ) : entries.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No one waiting"
-          description="Add a walk-in party using the 'Add to waitlist' button."
+          title={t('waitlistQueue.noOneWaitingTitle')}
+          description={t('waitlistQueue.noOneWaitingDescription')}
         />
       ) : (
         <div className="flex flex-col gap-3" role="list">

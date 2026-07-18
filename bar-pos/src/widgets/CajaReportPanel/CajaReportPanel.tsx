@@ -1,5 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { useState } from 'react';
+import type { TFunction } from 'i18next';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useCajaList, useCajaReport } from '@entities/caja';
 import type { CajaEntry, CajaReport, CajaSession } from '@shared/lib/domain';
@@ -13,66 +15,77 @@ function formatDate(d: Date) {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-const topProductsColumns: ColumnDef<CajaReport['topProducts'][number]>[] = [
-  { accessorKey: 'productName', header: 'Product' },
-  { accessorKey: 'quantity', header: 'Qty' },
-  {
-    accessorKey: 'revenue',
-    header: 'Revenue',
-    cell: ({ row }) => <MoneyDisplay amount={row.original.revenue} size="sm" />,
-  },
-];
+function buildTopProductsColumns(
+  t: TFunction<'wPanels'>
+): ColumnDef<CajaReport['topProducts'][number]>[] {
+  return [
+    { accessorKey: 'productName', header: t('cajaReportPanel.product') },
+    { accessorKey: 'quantity', header: t('cajaReportPanel.qty') },
+    {
+      accessorKey: 'revenue',
+      header: t('cajaReportPanel.revenue'),
+      cell: ({ row }) => <MoneyDisplay amount={row.original.revenue} size="sm" />,
+    },
+  ];
+}
 
-const staffColumns: ColumnDef<CajaReport['staffSummary'][number]>[] = [
-  { accessorKey: 'staffName', header: 'Staff' },
-  { accessorKey: 'orderCount', header: 'Orders' },
-  {
-    accessorKey: 'salesTotal',
-    header: 'Sales Total',
-    cell: ({ row }) => <MoneyDisplay amount={row.original.salesTotal} size="sm" />,
-  },
-];
+function buildStaffColumns(
+  t: TFunction<'wPanels'>
+): ColumnDef<CajaReport['staffSummary'][number]>[] {
+  return [
+    { accessorKey: 'staffName', header: t('cajaReportPanel.staff') },
+    { accessorKey: 'orderCount', header: t('cajaReportPanel.orders') },
+    {
+      accessorKey: 'salesTotal',
+      header: t('cajaReportPanel.salesTotal'),
+      cell: ({ row }) => <MoneyDisplay amount={row.original.salesTotal} size="sm" />,
+    },
+  ];
+}
 
-const entriesColumns: ColumnDef<CajaEntry>[] = [
-  {
-    accessorKey: 'type',
-    header: 'Type',
-    cell: ({ row }) => (
-      <Badge
-        variant={row.original.type === 'expense' ? 'destructive' : 'default'}
-        className="capitalize"
-      >
-        {row.original.type}
-      </Badge>
-    ),
-  },
-  { accessorKey: 'concept', header: 'Concept' },
-  {
-    accessorKey: 'amount',
-    header: 'Amount',
-    cell: ({ row }) => (
-      <span className={row.original.type === 'expense' ? 'text-red-400' : 'text-green-400'}>
-        {row.original.type === 'expense' ? '-' : '+'}${row.original.amount.toFixed(2)}
-      </span>
-    ),
-  },
-  {
-    accessorKey: 'staffName',
-    header: 'Staff',
-    cell: ({ row }) => <span>{row.original.staffName ?? '—'}</span>,
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Time',
-    cell: ({ row }) =>
-      row.original.createdAt.toLocaleTimeString(undefined, {
-        hour: 'numeric',
-        minute: '2-digit',
-      }),
-  },
-];
+function buildEntriesColumns(t: TFunction<'wPanels'>): ColumnDef<CajaEntry>[] {
+  return [
+    {
+      accessorKey: 'type',
+      header: t('cajaReportPanel.type'),
+      cell: ({ row }) => (
+        <Badge
+          variant={row.original.type === 'expense' ? 'destructive' : 'default'}
+          className="capitalize"
+        >
+          {row.original.type}
+        </Badge>
+      ),
+    },
+    { accessorKey: 'concept', header: t('cajaReportPanel.concept') },
+    {
+      accessorKey: 'amount',
+      header: t('cajaReportPanel.amount'),
+      cell: ({ row }) => (
+        <span className={row.original.type === 'expense' ? 'text-red-400' : 'text-green-400'}>
+          {row.original.type === 'expense' ? '-' : '+'}${row.original.amount.toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'staffName',
+      header: t('cajaReportPanel.staff'),
+      cell: ({ row }) => <span>{row.original.staffName ?? '—'}</span>,
+    },
+    {
+      accessorKey: 'createdAt',
+      header: t('cajaReportPanel.time'),
+      cell: ({ row }) =>
+        row.original.createdAt.toLocaleTimeString(undefined, {
+          hour: 'numeric',
+          minute: '2-digit',
+        }),
+    },
+  ];
+}
 
 export function CajaReportPanel() {
+  const { t } = useTranslation('wPanels');
   const { data: listResult, isLoading: listLoading } = useCajaList();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -82,16 +95,23 @@ export function CajaReportPanel() {
   const { data: reportResult, isLoading: reportLoading } = useCajaReport(effectiveId);
   const report = reportResult?.ok ? reportResult.data : null;
 
+  const topProductsColumns = useMemo(() => buildTopProductsColumns(t), [t]);
+  const staffColumns = useMemo(() => buildStaffColumns(t), [t]);
+  const entriesColumns = useMemo(() => buildEntriesColumns(t), [t]);
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <SectionHeader title="Daily Caja Report" description="Sales summary for a business day." />
+      <SectionHeader
+        title={t('cajaReportPanel.dailyCajaReport')}
+        description={t('cajaReportPanel.salesSummaryDescription')}
+      />
 
       {listLoading && <LoadingSpinner />}
 
       {!listLoading && (
         <div className="flex items-center gap-3">
           <label htmlFor="caja-selector" className="text-sm font-medium">
-            Select session
+            {t('cajaReportPanel.selectSession')}
           </label>
           <select
             id="caja-selector"
@@ -103,7 +123,8 @@ export function CajaReportPanel() {
           >
             {sessions.map((s: CajaSession) => (
               <option key={s.id} value={s.id}>
-                {formatDate(s.openedAt)} {s.status === 'open' ? '(open)' : ''}
+                {formatDate(s.openedAt)}{' '}
+                {s.status === 'open' ? t('cajaReportPanel.openSuffix') : ''}
               </option>
             ))}
           </select>
@@ -118,10 +139,10 @@ export function CajaReportPanel() {
           {/* Summary cards */}
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {[
-              { label: 'Total Revenue', value: report.summary.totalRevenue },
-              { label: 'Cash Sales', value: report.summary.cashSales },
-              { label: 'Card Sales', value: report.summary.cardSales },
-              { label: 'Rappi Sales', value: report.summary.rappiSales },
+              { label: t('cajaReportPanel.totalRevenue'), value: report.summary.totalRevenue },
+              { label: t('cajaReportPanel.cashSales'), value: report.summary.cashSales },
+              { label: t('cajaReportPanel.cardSales'), value: report.summary.cardSales },
+              { label: t('cajaReportPanel.rappiSales'), value: report.summary.rappiSales },
             ].map(({ label, value }) => (
               <div key={label} className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">{label}</p>
@@ -129,7 +150,7 @@ export function CajaReportPanel() {
               </div>
             ))}
             <div className="rounded-lg border p-4">
-              <p className="text-sm text-muted-foreground">Tabs / Orders</p>
+              <p className="text-sm text-muted-foreground">{t('cajaReportPanel.tabsOrders')}</p>
               <p className="mt-1 text-2xl font-bold tabular-nums">
                 {report.summary.tabCount} / {report.summary.orderCount}
               </p>
@@ -138,13 +159,25 @@ export function CajaReportPanel() {
 
           {/* Cash reconciliation */}
           <div className="rounded-lg border p-4">
-            <h3 className="mb-3 font-semibold">Cash Reconciliation</h3>
+            <h3 className="mb-3 font-semibold">{t('cajaReportPanel.cashReconciliation')}</h3>
             <div className="space-y-2 text-sm">
               {[
-                { label: 'Opening cash', value: report.cashReconciliation.openingCash },
-                { label: 'Cash collected', value: report.cashReconciliation.cashSales },
-                { label: 'Expected in drawer', value: report.cashReconciliation.expectedCash },
-                { label: 'Closing count', value: report.cashReconciliation.closingCash },
+                {
+                  label: t('cajaReportPanel.openingCashLabel'),
+                  value: report.cashReconciliation.openingCash,
+                },
+                {
+                  label: t('cajaReportPanel.cashCollected'),
+                  value: report.cashReconciliation.cashSales,
+                },
+                {
+                  label: t('cajaReportPanel.expectedInDrawer'),
+                  value: report.cashReconciliation.expectedCash,
+                },
+                {
+                  label: t('cajaReportPanel.closingCount'),
+                  value: report.cashReconciliation.closingCash,
+                },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between">
                   <span className="text-muted-foreground">{label}</span>
@@ -157,24 +190,28 @@ export function CajaReportPanel() {
               ))}
               {report.summary.totalIncome > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">+ Income entries</span>
+                  <span className="text-muted-foreground">
+                    {t('cajaReportPanel.incomeEntries')}
+                  </span>
                   <span className="text-green-400">${report.summary.totalIncome.toFixed(2)}</span>
                 </div>
               )}
               {report.summary.totalExpenses > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">- Expense entries</span>
+                  <span className="text-muted-foreground">
+                    {t('cajaReportPanel.expenseEntries')}
+                  </span>
                   <span className="text-red-400">${report.summary.totalExpenses.toFixed(2)}</span>
                 </div>
               )}
               {(report.summary.totalExpenses > 0 || report.summary.totalIncome > 0) && (
                 <div className="flex justify-between font-semibold">
-                  <span>= Net Balance</span>
+                  <span>{t('cajaReportPanel.netBalance')}</span>
                   <MoneyDisplay amount={report.summary.netBalance} size="sm" />
                 </div>
               )}
               <div className="flex justify-between border-t pt-2 font-semibold">
-                <span>Variance</span>
+                <span>{t('cajaReportPanel.variance')}</span>
                 {report.cashReconciliation.variance != null ? (
                   <span
                     className={
@@ -195,29 +232,31 @@ export function CajaReportPanel() {
 
           {/* Top products */}
           <div>
-            <h3 className="mb-3 font-semibold">Top 10 Products</h3>
+            <h3 className="mb-3 font-semibold">{t('cajaReportPanel.top10Products')}</h3>
             {report.topProducts.length > 0 ? (
               <DataTable columns={topProductsColumns} data={report.topProducts} />
             ) : (
-              <p className="text-sm text-muted-foreground">No products sold in this session.</p>
+              <p className="text-sm text-muted-foreground">
+                {t('cajaReportPanel.noProductsSold')}
+              </p>
             )}
           </div>
 
           {/* Expenses & Income entries */}
           <div>
-            <h3 className="mb-3 font-semibold">Expenses & Income</h3>
+            <h3 className="mb-3 font-semibold">{t('cajaReportPanel.expensesAndIncome')}</h3>
             {report.cajaEntries.length > 0 ? (
               <>
                 <DataTable columns={entriesColumns} data={report.cajaEntries} />
                 <div className="mt-2 flex gap-4 text-sm">
                   <span>
-                    Total Expenses:{' '}
+                    {t('cajaReportPanel.totalExpensesLabel')}{' '}
                     <span className="text-red-400 font-mono">
                       ${report.summary.totalExpenses.toFixed(2)}
                     </span>
                   </span>
                   <span>
-                    Total Income:{' '}
+                    {t('cajaReportPanel.totalIncomeLabel')}{' '}
                     <span className="text-green-400 font-mono">
                       ${report.summary.totalIncome.toFixed(2)}
                     </span>
@@ -225,17 +264,21 @@ export function CajaReportPanel() {
                 </div>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">No entries for this session.</p>
+              <p className="text-sm text-muted-foreground">
+                {t('cajaReportPanel.noEntriesForSession')}
+              </p>
             )}
           </div>
 
           {/* Staff performance */}
           <div>
-            <h3 className="mb-3 font-semibold">Staff Performance</h3>
+            <h3 className="mb-3 font-semibold">{t('cajaReportPanel.staffPerformance')}</h3>
             {report.staffSummary.length > 0 ? (
               <DataTable columns={staffColumns} data={report.staffSummary} />
             ) : (
-              <p className="text-sm text-muted-foreground">No staff activity in this session.</p>
+              <p className="text-sm text-muted-foreground">
+                {t('cajaReportPanel.noStaffActivity')}
+              </p>
             )}
           </div>
         </div>

@@ -1,5 +1,7 @@
+import type { TFunction } from 'i18next';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBumpKdsItem } from '@features/bump-kds-item';
 import { useKdsItems, useKdsRealtimeBridge } from '@entities/kds';
 import type { KdsOrderItem } from '@entities/kds';
@@ -8,13 +10,23 @@ import { POSButton } from '@shared/ui/POSButton';
 import { RoutingBadge } from '@shared/ui/RoutingBadge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@shared/ui/collapsible';
 
-function formatAge(createdAt: Date): string {
+function formatAge(createdAt: Date, t: TFunction<'wPanels'>): string {
   const diffMs = Date.now() - createdAt.getTime();
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return 'just now';
-  if (diffMin === 1) return '1 min';
-  return `${String(diffMin)} min`;
+  if (diffMin < 1) return t('kdsBoard.justNow');
+  if (diffMin === 1) return t('kdsBoard.oneMin');
+  return t('kdsBoard.minutesAgo', { minutes: diffMin });
 }
+
+/* eslint-disable i18next/no-literal-string -- Tailwind class strings, not UI copy */
+function statusColorFor(status: KdsOrderItem['kdsStatus']): string {
+  return status === 'pending'
+    ? 'border-yellow-500 bg-yellow-950 text-yellow-100'
+    : status === 'in_progress'
+      ? 'border-blue-500 bg-blue-950 text-blue-100'
+      : 'border-green-500 bg-green-950 text-green-100';
+}
+/* eslint-enable i18next/no-literal-string */
 
 type KdsCardProps = {
   item: KdsOrderItem;
@@ -23,12 +35,8 @@ type KdsCardProps = {
 };
 
 function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
-  const statusColor =
-    item.kdsStatus === 'pending'
-      ? 'border-yellow-500 bg-yellow-950 text-yellow-100'
-      : item.kdsStatus === 'in_progress'
-        ? 'border-blue-500 bg-blue-950 text-blue-100'
-        : 'border-green-500 bg-green-950 text-green-100';
+  const { t } = useTranslation('wPanels');
+  const statusColor = statusColorFor(item.kdsStatus);
 
   const handleClick = () => {
     onBump(item.id, item.kdsStatus === 'pending' ? 'in_progress' : 'done');
@@ -49,17 +57,19 @@ function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
             <p className="truncate text-lg font-bold">{item.productName}</p>
             <RoutingBadge routing={item.routing} />
           </div>
-          <p className="text-sm opacity-80">Qty: {item.quantity}</p>
+          <p className="text-sm opacity-80">{t('kdsBoard.qty', { quantity: item.quantity })}</p>
           {item.modifierNames.length > 0 && (
             <p data-testid="kds-item-modifiers" className="mt-1 text-sm opacity-80">
               {item.modifierNames.join(' / ')}
             </p>
           )}
           {item.notes && (
-            <p className="mt-1 text-sm italic opacity-70">&ldquo;{item.notes}&rdquo;</p>
+            <p className="mt-1 text-sm italic opacity-70">
+              {t('kdsBoard.quotedNotes', { notes: item.notes })}
+            </p>
           )}
         </div>
-        <span className="shrink-0 text-xs opacity-60">{formatAge(item.createdAt)}</span>
+        <span className="shrink-0 text-xs opacity-60">{formatAge(item.createdAt, t)}</span>
       </div>
 
       {item.kdsStatus !== 'done' && (
@@ -70,7 +80,7 @@ function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
           onClick={handleClick}
           className="w-full"
         >
-          {item.kdsStatus === 'pending' ? 'Start' : 'Done'}
+          {item.kdsStatus === 'pending' ? t('kdsBoard.start') : t('kdsBoard.done')}
         </POSButton>
       )}
     </div>
@@ -88,14 +98,10 @@ function ComboKdsCard({
   onBump: (id: string, next: 'in_progress' | 'done') => void;
   isBumping: boolean;
 }) {
+  const { t } = useTranslation('wPanels');
   const [open, setOpen] = useState(false);
 
-  const statusColor =
-    item.kdsStatus === 'pending'
-      ? 'border-yellow-500 bg-yellow-950 text-yellow-100'
-      : item.kdsStatus === 'in_progress'
-        ? 'border-blue-500 bg-blue-950 text-blue-100'
-        : 'border-green-500 bg-green-950 text-green-100';
+  const statusColor = statusColorFor(item.kdsStatus);
 
   return (
     <div
@@ -112,9 +118,9 @@ function ComboKdsCard({
             <RoutingBadge routing={item.routing} />
             <ComboBadge />
           </div>
-          <p className="text-sm opacity-80">Qty: {item.quantity}</p>
+          <p className="text-sm opacity-80">{t('kdsBoard.qty', { quantity: item.quantity })}</p>
         </div>
-        <span className="shrink-0 text-xs opacity-60">{formatAge(item.createdAt)}</span>
+        <span className="shrink-0 text-xs opacity-60">{formatAge(item.createdAt, t)}</span>
       </div>
 
       <Collapsible open={open} onOpenChange={setOpen}>
@@ -124,8 +130,12 @@ function ComboKdsCard({
             className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
             aria-hidden
           />
-          <span aria-label={open ? 'Collapse combo items' : 'Expand combo items'}>
-            {comboChildren.length} items
+          <span
+            aria-label={
+              open ? t('kdsBoard.collapseComboItems') : t('kdsBoard.expandComboItems')
+            }
+          >
+            {t('kdsBoard.itemsCount', { itemCount: comboChildren.length })}
           </span>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -149,7 +159,7 @@ function ComboKdsCard({
           }}
           className="w-full"
         >
-          {item.kdsStatus === 'pending' ? 'Start' : 'Done'}
+          {item.kdsStatus === 'pending' ? t('kdsBoard.start') : t('kdsBoard.done')}
         </POSButton>
       )}
     </div>
@@ -157,10 +167,11 @@ function ComboKdsCard({
 }
 
 export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
+  const { t } = useTranslation('wPanels');
   useKdsRealtimeBridge();
   const { data: result, isLoading, isError, refetch } = useKdsItems(routing);
   const bump = useBumpKdsItem();
-  const stationLabel = routing === 'KITCHEN' ? 'kitchen' : 'bar';
+  const stationLabel = routing === 'KITCHEN' ? t('kdsBoard.stationKitchen') : t('kdsBoard.stationBar');
 
   const handleBump = (id: string, next: 'in_progress' | 'done') => {
     bump.mutate({ itemId: id, nextStatus: next });
@@ -169,15 +180,21 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
   const bumpingItemId = bump.isPending ? bump.variables.itemId : null;
 
   if (isLoading) {
-    return <p className="text-muted-foreground p-6">Loading {stationLabel} queue...</p>;
+    return (
+      <p className="text-muted-foreground p-6">
+        {t('kdsBoard.loadingQueue', { station: stationLabel })}
+      </p>
+    );
   }
 
   if (isError || !result?.ok) {
     return (
       <div className="p-6">
-        <p className="text-destructive mb-2">Could not load {stationLabel} queue.</p>
+        <p className="text-destructive mb-2">
+          {t('kdsBoard.couldNotLoadQueue', { station: stationLabel })}
+        </p>
         <POSButton touchSize="default" variant="outline" onClick={() => void refetch()}>
-          Retry
+          {t('kdsBoard.retry')}
         </POSButton>
       </div>
     );
@@ -206,7 +223,7 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
   if (topLevelItems.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center text-muted-foreground">
-        No active {stationLabel} orders
+        {t('kdsBoard.noActiveOrders', { station: stationLabel })}
       </div>
     );
   }
@@ -238,7 +255,7 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
     <div data-testid="kds-board" className="grid gap-6 p-6 md:grid-cols-2">
       <section>
         <h2 className="mb-3 text-lg font-semibold">
-          Pending
+          {t('kdsBoard.pending')}
           {pending.length > 0 && (
             <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs text-black">
               {pending.length}
@@ -247,7 +264,7 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
         </h2>
         <div className="space-y-4">
           {pending.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No pending items.</p>
+            <p className="text-muted-foreground text-sm">{t('kdsBoard.noPendingItems')}</p>
           ) : (
             pending.map(item => renderItem(item))
           )}
@@ -255,7 +272,7 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
       </section>
       <section>
         <h2 className="mb-3 text-lg font-semibold">
-          In Progress
+          {t('kdsBoard.inProgress')}
           {inProgress.length > 0 && (
             <span className="ml-2 rounded-full bg-blue-500 px-2 py-0.5 text-xs text-white">
               {inProgress.length}
@@ -264,7 +281,7 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
         </h2>
         <div className="space-y-4">
           {inProgress.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nothing in progress.</p>
+            <p className="text-muted-foreground text-sm">{t('kdsBoard.nothingInProgress')}</p>
           ) : (
             inProgress.map(item => renderItem(item))
           )}

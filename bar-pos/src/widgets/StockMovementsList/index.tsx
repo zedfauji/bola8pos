@@ -6,7 +6,9 @@
  * Delta cells colored green (positive) or red (negative).
  */
 import type { ColumnDef } from '@tanstack/react-table';
+import type { TFunction } from 'i18next';
 import { History } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useStockMovements } from '@entities/ingredient';
 import type { StockMovement } from '@shared/lib/domain';
 import { DataTable } from '@shared/ui/DataTable';
@@ -23,18 +25,18 @@ function formatDate(d: Date): string {
   });
 }
 
-function refTypeLabel(refType: string | null | undefined): string {
+function refTypeLabel(refType: string | null | undefined, t: TFunction<'wPanels'>): string {
   switch (refType) {
     case 'order_item':
-      return 'Order';
+      return t('stockMovementsList.refTypeOrder');
     case 'refund':
-      return 'Refund';
+      return t('stockMovementsList.refTypeRefund');
     case 'prep_production':
-      return 'Prep';
+      return t('stockMovementsList.refTypePrep');
     case 'manual':
-      return 'Manual';
+      return t('stockMovementsList.refTypeManual');
     case 'physical_count':
-      return 'Count';
+      return t('stockMovementsList.refTypeCount');
     default:
       return refType ?? '—';
   }
@@ -46,12 +48,13 @@ interface Props {
 }
 
 export function StockMovementsList({ ingredientId, uom }: Props) {
+  const { t } = useTranslation('wPanels');
   const { data: movements, isLoading, error } = useStockMovements(ingredientId);
 
   if (error) {
     return (
       <p className="text-sm text-destructive">
-        Could not load movements: {error.message}
+        {t('stockMovementsList.couldNotLoadMovements', { message: error.message })}
       </p>
     );
   }
@@ -60,7 +63,7 @@ export function StockMovementsList({ ingredientId, uom }: Props) {
     {
       id: 'createdAt',
       accessorKey: 'createdAt',
-      header: 'Date',
+      header: t('stockMovementsList.dateHeader'),
       cell: ({ row }) => (
         <span className="font-mono text-xs text-muted-foreground">
           {formatDate(row.original.createdAt)}
@@ -70,7 +73,7 @@ export function StockMovementsList({ ingredientId, uom }: Props) {
     {
       id: 'quantityDelta',
       accessorKey: 'quantityDelta',
-      header: 'Change',
+      header: t('stockMovementsList.changeHeader'),
       cell: ({ row }) => {
         const delta = row.original.quantityDelta;
         const isPositive = delta > 0;
@@ -87,7 +90,7 @@ export function StockMovementsList({ ingredientId, uom }: Props) {
     {
       id: 'reason',
       accessorKey: 'reason',
-      header: 'Reason',
+      header: t('stockMovementsList.reasonHeader'),
       cell: ({ row }) => {
         const r = row.original.reason;
         return r.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
@@ -96,18 +99,20 @@ export function StockMovementsList({ ingredientId, uom }: Props) {
     {
       id: 'refType',
       accessorKey: 'refType',
-      header: 'Source',
-      cell: ({ row }) => refTypeLabel(row.original.refType),
+      header: t('stockMovementsList.sourceHeader'),
+      cell: ({ row }) => refTypeLabel(row.original.refType, t),
     },
     {
       id: 'refId',
       accessorKey: 'refId',
-      header: 'Ref',
+      header: t('stockMovementsList.refHeader'),
       cell: ({ row }) => {
         const id = row.original.refId;
         if (!id) return <span className="text-muted-foreground">—</span>;
         return (
-          <span className="font-mono text-xs text-muted-foreground">{id.slice(0, 8)}…</span>
+          <span className="font-mono text-xs text-muted-foreground">
+            {t('stockMovementsList.truncatedId', { id: id.slice(0, 8) })}
+          </span>
         );
       },
     },
@@ -124,8 +129,8 @@ export function StockMovementsList({ ingredientId, uom }: Props) {
       emptyState={
         <EmptyState
           icon={History}
-          title="No movements recorded"
-          description="Stock movements will appear here as orders are processed and adjustments are made."
+          title={t('stockMovementsList.noMovementsRecordedTitle')}
+          description={t('stockMovementsList.noMovementsRecordedDescription')}
         />
       }
     />

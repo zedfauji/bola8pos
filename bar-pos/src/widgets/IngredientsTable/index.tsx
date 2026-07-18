@@ -8,6 +8,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { Package2, Pencil, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Ingredient } from '@entities/ingredient';
 import { ChefHatBadge, DataTable, EmptyState, POSButton } from '@shared/ui';
 import { Badge } from '@shared/ui/badge';
@@ -35,6 +36,7 @@ export function IngredientsTable({
   onImportClick,
   filterPrep,
 }: Props) {
+  const { t } = useTranslation('wPanels');
   const [prepFilter, setPrepFilter] = useState<PrepFilter>('all');
   const activePrepFilter: PrepFilter = filterPrep ?? prepFilter;
 
@@ -49,7 +51,7 @@ export function IngredientsTable({
       {
         id: 'name',
         accessorKey: 'name',
-        header: 'Name',
+        header: t('ingredientsTable.nameHeader'),
         cell: ({ row }) => {
           const item = row.original;
           const isLow =
@@ -61,7 +63,7 @@ export function IngredientsTable({
               <span>{item.name}</span>
               {isLow ? (
                 <Badge variant="destructive" className="px-1.5 py-0 text-xs">
-                  Low stock
+                  {t('ingredientsTable.lowStock')}
                 </Badge>
               ) : null}
             </div>
@@ -71,19 +73,19 @@ export function IngredientsTable({
       {
         id: 'category',
         accessorKey: 'category',
-        header: 'Category',
+        header: t('ingredientsTable.categoryHeader'),
         cell: ({ row }) => row.original.category ?? '—',
       },
       {
         id: 'uom',
         accessorKey: 'uom',
-        header: 'Base unit',
+        header: t('ingredientsTable.baseUnitHeader'),
         cell: ({ row }) => row.original.uom.toUpperCase(),
       },
       {
         id: 'quantityOnHand',
         accessorKey: 'quantityOnHand',
-        header: 'Stock',
+        header: t('ingredientsTable.stockHeader'),
         cell: ({ row }) => (
           <span className="font-mono text-sm">
             {row.original.quantityOnHand} {row.original.uom}
@@ -93,7 +95,7 @@ export function IngredientsTable({
       {
         id: 'reorderPoint',
         accessorKey: 'reorderPoint',
-        header: 'Reorder at',
+        header: t('ingredientsTable.reorderAtHeader'),
         cell: ({ row }) => {
           const rp = row.original.reorderPoint;
           if (rp == null || rp === 0) return '—';
@@ -107,7 +109,7 @@ export function IngredientsTable({
       {
         id: 'costPerBaseUnit',
         accessorKey: 'costPerBaseUnit',
-        header: 'Cost/unit',
+        header: t('ingredientsTable.costPerUnitHeader'),
         cell: ({ row }) => (
           <span className="font-mono text-sm">${row.original.costPerBaseUnit.toFixed(4)}</span>
         ),
@@ -115,13 +117,13 @@ export function IngredientsTable({
       {
         id: 'isPrep',
         accessorKey: 'isPrep',
-        header: 'Type',
+        header: t('ingredientsTable.typeHeader'),
         cell: ({ row }) =>
           row.original.isPrep ? (
             <ChefHatBadge />
           ) : (
             <Badge variant="outline" className="text-xs">
-              Raw
+              {t('ingredientsTable.raw')}
             </Badge>
           ),
       },
@@ -143,7 +145,7 @@ export function IngredientsTable({
                 }}
               >
                 <Pencil className="size-3.5" />
-                <span className="ml-1 text-xs">Edit</span>
+                <span className="ml-1 text-xs">{t('ingredientsTable.edit')}</span>
               </Button>
               <Button
                 type="button"
@@ -162,7 +164,7 @@ export function IngredientsTable({
         },
       },
     ],
-    [onDeleteClick, onEditClick],
+    [onDeleteClick, onEditClick, t],
   );
 
   return (
@@ -173,19 +175,21 @@ export function IngredientsTable({
       enableSorting
       initialSorting={[{ id: 'name', desc: false }]}
       searchable
-      searchPlaceholder="Search ingredients…"
+      searchPlaceholder={t('ingredientsTable.searchPlaceholder')}
+      /* eslint-disable i18next/no-literal-string -- Tailwind class string, not UI copy */
       getRowClassName={row =>
         row.reorderPoint != null && row.reorderPoint > 0 && row.quantityOnHand <= row.reorderPoint
           ? 'bg-pos-danger/10'
           : ''
       }
+      /* eslint-enable i18next/no-literal-string */
       emptyState={
         <EmptyState
           icon={Package2}
-          title="No ingredients yet"
-          description="Add your first ingredient to start tracking stock levels."
+          title={t('ingredientsTable.noIngredientsYet')}
+          description={t('ingredientsTable.addFirstIngredientDescription')}
           action={{
-            label: 'Add ingredient',
+            label: t('ingredientsTable.addIngredient'),
             onClick: onAddClick,
           }}
         />
@@ -193,7 +197,11 @@ export function IngredientsTable({
       toolbar={
         <div className="flex flex-wrap items-center gap-2">
           {filterPrep == null && (
-            <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Filter by prep type">
+            <div
+              className="flex flex-wrap items-center gap-1"
+              role="group"
+              aria-label={t('ingredientsTable.filterByPrepTypeAriaLabel')}
+            >
               <POSButton
                 type="button"
                 touchSize="default"
@@ -203,7 +211,7 @@ export function IngredientsTable({
                   setPrepFilter('all');
                 }}
               >
-                All
+                {t('ingredientsTable.all')}
               </POSButton>
               <POSButton
                 type="button"
@@ -214,7 +222,7 @@ export function IngredientsTable({
                   setPrepFilter('prep');
                 }}
               >
-                Prep
+                {t('ingredientsTable.prep')}
               </POSButton>
               <POSButton
                 type="button"
@@ -225,15 +233,15 @@ export function IngredientsTable({
                   setPrepFilter('raw');
                 }}
               >
-                Raw
+                {t('ingredientsTable.raw')}
               </POSButton>
             </div>
           )}
           <Button type="button" size="sm" onClick={onAddClick}>
-            + Add ingredient
+            {t('ingredientsTable.addIngredientButton')}
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={onImportClick}>
-            Import CSV
+            {t('ingredientsTable.importCsv')}
           </Button>
         </div>
       }

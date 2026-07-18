@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { getHelpForRoute } from '@shared/lib/help/content';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
@@ -62,20 +63,24 @@ function renderMarkdown(markdown: string): ReactElement[] {
 }
 
 function escapeHtml(value: string): string {
+  /* eslint-disable i18next/no-literal-string -- HTML entity escape sequences, not UI copy */
   return value
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+  /* eslint-enable i18next/no-literal-string */
 }
 
 function inlineFormat(text: string): string {
   const escaped = escapeHtml(text);
+  // eslint-disable-next-line i18next/no-literal-string -- markdown-to-HTML tag substitution, not UI copy
   return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
 export function HelpSheet() {
+  const { t } = useTranslation('wPanels');
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const entry = getHelpForRoute(location.pathname);
@@ -102,7 +107,7 @@ export function HelpSheet() {
         <div data-testid="help-sheet-body" className="mt-4 space-y-3 overflow-y-auto pr-2">
           {renderMarkdown(entry.body)}
         </div>
-        <p className="mt-6 text-xs text-muted-foreground">Press F1 or Esc to close.</p>
+        <p className="mt-6 text-xs text-muted-foreground">{t('helpSheet.pressF1OrEsc')}</p>
       </SheetContent>
     </Sheet>
   );

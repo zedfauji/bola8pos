@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useLoginUiStore } from '@entities/staff/model/loginUiStore';
 import { useStaffList } from '@entities/staff/model/queries';
 import type { Staff } from '@entities/staff/model/types';
@@ -5,9 +6,10 @@ import { LoadingSpinner } from '@shared/ui/LoadingSpinner';
 import { Button } from '@shared/ui/button';
 
 export function EmployeeSelector() {
+  const { t } = useTranslation('wPanels');
   const { data: staff, isLoading, error, resultError } = useStaffList();
   const hasError = Boolean(error || resultError);
-  const errorMessage = resultError?.message ?? error?.message ?? 'Unknown error';
+  const errorMessage = resultError?.message ?? error?.message ?? t('employeeSelector.unknownError');
   const setSelectedStaff = useLoginUiStore(s => s.setSelectedStaff);
 
   if (isLoading) {
@@ -20,13 +22,15 @@ export function EmployeeSelector() {
 
   if (hasError) {
     return (
-      <div className="text-center text-destructive p-8">Failed to load staff. {errorMessage}</div>
+      <div className="text-center text-destructive p-8">
+        {t('employeeSelector.failedToLoadStaff')} {errorMessage}
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-center">Who are you?</h2>
+      <h2 className="text-2xl font-bold text-center">{t('employeeSelector.whoAreYou')}</h2>
       <div className="flex flex-col gap-2">
         {(staff ?? []).map((member: Staff) => (
           <Button

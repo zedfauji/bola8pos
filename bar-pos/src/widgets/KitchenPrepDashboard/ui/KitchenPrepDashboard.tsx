@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { ListOrdered, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { PrepProductionForm } from '@features/produce-prep-batch';
 import { useIngredientsActive } from '@entities/ingredient';
@@ -11,6 +12,7 @@ import { DataTable, EmptyState, POSButton } from '@shared/ui';
 type BatchRow = PrepProduction & { ingredientName: string };
 
 export function KitchenPrepDashboard() {
+  const { t } = useTranslation('wPanels');
   const [dialogOpen, setDialogOpen] = useState(false);
   const { data: ingredients = [], isLoading: ingLoading } = useIngredientsActive();
   const prepIngredients = useMemo(() => ingredients.filter(i => i.isPrep), [ingredients]);
@@ -24,29 +26,30 @@ export function KitchenPrepDashboard() {
     () =>
       productions.map(p => ({
         ...p,
-        ingredientName: ingById.get(p.prepIngredientId)?.name ?? 'Unknown',
+        ingredientName: ingById.get(p.prepIngredientId)?.name ?? t('kitchenPrepDashboard.unknown'),
       })),
-    [productions, ingById],
+    [productions, ingById, t],
   );
 
   const columns: ColumnDef<BatchRow>[] = useMemo(
     () => [
       {
         accessorKey: 'createdAt',
-        header: 'Recorded',
+        header: t('kitchenPrepDashboard.recordedHeader'),
         cell: ({ row }) =>
+          // eslint-disable-next-line i18next/no-literal-string -- fixed Intl locale identifier, not UI copy
           new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).format(
             row.original.createdAt,
           ),
       },
       {
         accessorKey: 'ingredientName',
-        header: 'Prep item',
+        header: t('kitchenPrepDashboard.prepItemHeader'),
         cell: ({ row }) => row.original.ingredientName,
       },
       {
         accessorKey: 'qtyProduced',
-        header: 'Qty',
+        header: t('kitchenPrepDashboard.qtyHeader'),
         cell: ({ row }) => {
           const uom = ingById.get(row.original.prepIngredientId)?.uom ?? '';
           return (
@@ -58,7 +61,7 @@ export function KitchenPrepDashboard() {
       },
       {
         id: 'producedBy',
-        header: 'Recorded by',
+        header: t('kitchenPrepDashboard.recordedByHeader'),
         cell: ({ row }) => {
           const id = row.original.producedBy;
           if (id == null) return '—';
@@ -67,7 +70,7 @@ export function KitchenPrepDashboard() {
       },
       {
         accessorKey: 'notes',
-        header: 'Notes',
+        header: t('kitchenPrepDashboard.notesHeader'),
         cell: ({ row }) => {
           const n = row.original.notes;
           if (n == null || n === '') return '—';
@@ -75,34 +78,34 @@ export function KitchenPrepDashboard() {
         },
       },
     ],
-    [ingById, staffById],
+    [ingById, staffById, t],
   );
 
   return (
-    <div className="space-y-8" aria-label="Kitchen prep dashboard">
+    <div className="space-y-8" aria-label={t('kitchenPrepDashboard.dashboardAriaLabel')}>
       <section>
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ListOrdered className="size-5" aria-hidden />
-            <h2 className="text-lg font-semibold">Prep on hand</h2>
+            <h2 className="text-lg font-semibold">{t('kitchenPrepDashboard.prepOnHand')}</h2>
           </div>
           <POSButton
             type="button"
             touchSize="large"
-            aria-label="Record new prep batch"
+            aria-label={t('kitchenPrepDashboard.recordNewBatchAriaLabel')}
             onClick={() => {
               setDialogOpen(true);
             }}
           >
             <Plus className="mr-2 size-4" aria-hidden />
-            New batch
+            {t('kitchenPrepDashboard.newBatch')}
           </POSButton>
         </div>
         {prepIngredients.length === 0 && !ingLoading ? (
           <EmptyState
             icon={ListOrdered}
-            title="No prep ingredients"
-            description="Mark ingredients as prep in Settings → Ingredients."
+            title={t('kitchenPrepDashboard.noPrepIngredientsTitle')}
+            description={t('kitchenPrepDashboard.markIngredientsDescription')}
           />
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -122,7 +125,7 @@ export function KitchenPrepDashboard() {
       <section>
         <div className="mb-4 flex items-center gap-2">
           <ListOrdered className="size-5" aria-hidden />
-          <h2 className="text-lg font-semibold">Recent batches</h2>
+          <h2 className="text-lg font-semibold">{t('kitchenPrepDashboard.recentBatches')}</h2>
         </div>
         <DataTable columns={columns} data={batchRows} isLoading={prodLoading} />
       </section>

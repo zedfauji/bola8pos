@@ -100,6 +100,10 @@ export default tseslint.config({
           // sweep, e.g. VoidOrderDialog's 72px/ring-4 confirm) — a CSS class
           // string, not UI copy, same category as 'className' above.
           'confirmClassName',
+          // 'highlight' is CajaDashboard's SummaryCard Tailwind class
+          // passthrough (e.g. highlight="border-amber-500/40") — a CSS class
+          // string, not UI copy, same category as 'className'/'confirmClassName'.
+          'highlight',
         ],
       },
       // 'can(...)'/'canAccess(...)' are the RBAC permission checks (usePermissions().can,

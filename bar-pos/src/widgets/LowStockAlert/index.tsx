@@ -1,5 +1,6 @@
 import { AlertTriangle, X } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { inventoryStore, useInventory } from '@entities/inventory';
 import { useStaffStore } from '@entities/staff/model/store';
 import { cn } from '@shared/lib/utils';
@@ -24,6 +25,7 @@ function writeDismissedIds(ids: Set<string>) {
 }
 
 export function LowStockAlert() {
+  const { t } = useTranslation('wPanels');
   useInventory();
   const role = useStaffStore(s => s.currentStaff?.role);
   const lowStockAlerts = inventoryStore(s => s.lowStockAlerts);
@@ -58,17 +60,17 @@ export function LowStockAlert() {
         'mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-50'
       )}
       role="status"
-      aria-label="Low stock alert"
+      aria-label={t('lowStockAlert.lowStockAlertAriaLabel')}
       aria-live="polite"
     >
       <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
-      <span className="shrink-0 font-medium">Low stock:</span>
+      <span className="shrink-0 font-medium">{t('lowStockAlert.lowStockLabel')}</span>
       <ul className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
         {visible.map((a, i) => (
           <li key={a.productId} className="inline-flex items-center gap-0.5">
             {i > 0 ? <span className="text-muted-foreground">,</span> : null}
             <span className="whitespace-nowrap">
-              {a.name} ({a.quantityOnHand})
+              {t('lowStockAlert.nameQuantity', { name: a.name, quantity: a.quantityOnHand })}
             </span>
             <Button
               type="button"

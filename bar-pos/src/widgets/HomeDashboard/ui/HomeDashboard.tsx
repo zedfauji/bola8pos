@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { ManagerPinDialog } from '@features/manager-pin-gate';
@@ -29,87 +30,88 @@ import { Badge, Button } from '@shared/ui';
 
 type DashboardItem = {
   path: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   requiredAction?: StaffAction;
-  managerLabel?: string;
+  managerLabelKey?: string;
   /** If set, only these roles can see this item. All roles see it when undefined. */
   visibleToRoles?: string[];
 };
 
 const ITEMS: DashboardItem[] = [
-  { path: '/pos', label: 'POS Register', icon: Home },
-  { path: '/payments', label: 'Payments', icon: CreditCard },
-  { path: '/pool-tables', label: 'Pool Tables', icon: Clock },
-  { path: '/rappi', label: 'Rappi Orders', icon: Bike },
-  { path: '/staff', label: 'Staff', icon: Users },
+  { path: '/pos', labelKey: 'homeDashboard.tiles.posRegister', icon: Home },
+  { path: '/payments', labelKey: 'homeDashboard.tiles.payments', icon: CreditCard },
+  { path: '/pool-tables', labelKey: 'homeDashboard.tiles.poolTables', icon: Clock },
+  { path: '/rappi', labelKey: 'homeDashboard.tiles.rappiOrders', icon: Bike },
+  { path: '/staff', labelKey: 'homeDashboard.tiles.staff', icon: Users },
   {
     path: '/reports',
-    label: 'Reports',
+    labelKey: 'homeDashboard.tiles.reports',
     icon: BarChart,
     requiredAction: 'view_reports',
-    managerLabel: 'Manager',
+    managerLabelKey: 'homeDashboard.managerLabels.manager',
   },
   {
     path: '/inventory',
-    label: 'Inventory',
+    labelKey: 'homeDashboard.tiles.inventory',
     icon: Package,
     requiredAction: 'adjust_inventory',
-    managerLabel: 'Manager',
+    managerLabelKey: 'homeDashboard.managerLabels.manager',
   },
   {
     path: '/settings',
-    label: 'Settings',
+    labelKey: 'homeDashboard.tiles.settings',
     icon: Settings,
     requiredAction: 'manage_settings',
-    managerLabel: 'Admin',
+    managerLabelKey: 'homeDashboard.managerLabels.admin',
   },
   {
     path: '/kitchen-prep',
-    label: 'Kitchen Prep',
+    labelKey: 'homeDashboard.tiles.kitchenPrep',
     icon: ChefHat,
     requiredAction: 'produce_prep_batch',
-    managerLabel: 'Manager',
+    managerLabelKey: 'homeDashboard.managerLabels.manager',
   },
   {
     path: '/waitlist',
-    label: 'Waitlist',
+    labelKey: 'homeDashboard.tiles.waitlist',
     icon: ListOrdered,
     requiredAction: 'manage_waitlist',
-    managerLabel: 'Manager',
+    managerLabelKey: 'homeDashboard.managerLabels.manager',
   },
   {
     path: '/rbac',
-    label: 'Roles & Permissions',
+    labelKey: 'homeDashboard.tiles.rolesAndPermissions',
     icon: ShieldCheck,
     requiredAction: 'manage_staff',
-    managerLabel: 'Admin',
+    managerLabelKey: 'homeDashboard.managerLabels.admin',
   },
   {
     path: '/audit',
-    label: 'Audit Log',
+    labelKey: 'homeDashboard.tiles.auditLog',
     icon: ClipboardList,
     requiredAction: 'view_audit_log',
-    managerLabel: 'Manager',
+    managerLabelKey: 'homeDashboard.managerLabels.manager',
   },
   {
     path: '/kds',
-    label: 'Kitchen Display',
+    labelKey: 'homeDashboard.tiles.kitchenDisplay',
     icon: UtensilsCrossed,
     visibleToRoles: ['admin', 'kitchen'],
   },
   {
     path: '/kds-bar',
-    label: 'Bar Display',
+    labelKey: 'homeDashboard.tiles.barDisplay',
     icon: Beer,
     requiredAction: 'view_kds_bar',
-    managerLabel: 'Bartender',
+    managerLabelKey: 'homeDashboard.managerLabels.bartender',
   },
 ];
 
 type GatedTarget = { action: StaffAction; path: string };
 
 export function HomeDashboard() {
+  const { t } = useTranslation('wPanels');
   const { can } = usePermissions();
   const navigate = useNavigate();
   const currentStaff = useStaffStore(s => s.currentStaff);
@@ -136,7 +138,9 @@ export function HomeDashboard() {
       {/* Staff context */}
       {currentStaff && (
         <div className="flex items-center gap-3">
-          <span className="text-xl font-semibold">Welcome, {currentStaff.name}</span>
+          <span className="text-xl font-semibold">
+            {t('homeDashboard.welcome', { name: currentStaff.name })}
+          </span>
           <Badge variant="secondary" className="capitalize">
             {currentStaff.role}
           </Badge>
@@ -152,6 +156,7 @@ export function HomeDashboard() {
         ).map(item => {
           const isGated = !!item.requiredAction && !can(item.requiredAction);
           const Icon = item.icon;
+          const itemLabel = t(item.labelKey);
           return (
             <Button
               key={item.path}
@@ -161,7 +166,7 @@ export function HomeDashboard() {
                 handleItemClick(item);
               }}
               className="relative flex min-h-[160px] min-w-[160px] flex-col items-center justify-center gap-3 rounded-2xl border bg-card p-6 shadow transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label={item.label}
+              aria-label={itemLabel}
               data-testid={item.path === '/audit' ? 'home-tile-audit' : undefined}
             >
               {isGated && (
@@ -177,16 +182,18 @@ export function HomeDashboard() {
                   <Badge
                     variant="destructive"
                     className="absolute -right-1 -top-1 h-5 min-w-[20px] rounded-full px-1 text-xs"
-                    aria-label={`Waitlist: ${String(waitingCount)} parties waiting`}
+                    aria-label={t('homeDashboard.waitlistPartiesWaiting', {
+                      waitingCount,
+                    })}
                   >
                     {waitingCount > 99 ? '99+' : waitingCount}
                   </Badge>
                 )}
               </div>
-              <span className="text-center text-sm font-medium">{item.label}</span>
-              {isGated && item.managerLabel && (
+              <span className="text-center text-sm font-medium">{itemLabel}</span>
+              {isGated && item.managerLabelKey && (
                 <Badge variant="secondary" className="text-xs">
-                  {item.managerLabel}
+                  {t(item.managerLabelKey)}
                 </Badge>
               )}
             </Button>
@@ -197,7 +204,7 @@ export function HomeDashboard() {
       {/* Logout */}
       <Button variant="ghost" size="sm" onClick={handleLogout}>
         <LogOut className="mr-2 size-4" />
-        Logout
+        {t('homeDashboard.logout')}
       </Button>
 
       {/* Manager PIN gate dialog */}
