@@ -618,7 +618,7 @@ Plans:
 **Goal:** Add multi-language support via `react-i18next`, with `es-MX`/`en-US` catalogs, a `profiles.locale` preference, and an ESLint rule banning hard-coded UI strings going forward.
 **Requirements:** TBD (POS-COMPARISON.md §21 — source doc no longer present; scope locked in 21-CONTEXT.md)
 **Depends on:** —
-**Plans:** 4/13 plans executed
+**Plans:** 5/13 plans executed
 
 Plans:
 **Wave 1**
@@ -633,7 +633,7 @@ Plans:
 
 - [x] 21-03-PLAN.md — Settings → Language tab (role-agnostic, resolves Pitfall 1) + SettingsTabsPanel restructure (Wave 3) (SC-2, SC-4, D-03)
 - [x] 21-04-PLAN.md — Staff admin per-staff locale field: EditLocaleDialog + StaffDashboard column/action (Wave 3) (SC-2, SC-4, D-03)
-- [ ] 21-05-PLAN.md — Receipt + PDF locale (D-06): receipt-format/printer.rs/pos-printer/pdf.tsx, move label selection into TS (Wave 3) (SC-2, SC-4, D-06)
+- [x] 21-05-PLAN.md — Receipt + PDF locale (D-06): receipt-format/printer.rs/pos-printer/pdf.tsx, move label selection into TS (Wave 3) (SC-2, SC-4, D-06)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 

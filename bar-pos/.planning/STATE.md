@@ -6,14 +6,14 @@ current_phase: 21
 current_phase_name: i18n-multi-language
 status: executing
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-18T00:09:18.826Z"
+last_updated: "2026-07-18T00:28:09.157Z"
 last_activity: 2026-07-17
 last_activity_desc: Phase 21 execution started
 progress:
   total_phases: 28
   completed_phases: 17
   total_plans: 133
-  completed_plans: 134
+  completed_plans: 135
   percent: 61
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 21 (i18n-multi-language) — EXECUTING
-Plan: 5 of 13
+Plan: 6 of 13
 Status: Ready to execute
 Last activity: 2026-07-17 — Phase 21 execution started
 
@@ -240,6 +240,8 @@ Last activity: 2026-07-17 — Phase 21 execution started
 - [Phase 21-i18n-multi-language 03]: eslint.i18n.config.js extended with object-properties exclude for 'key' and callees exclude for 'can' — structural RBAC/list-key literals in SettingsTabsPanel's tab-assembly array are not UI copy
 - [Phase 21-i18n-multi-language 04]: StaffDashboard.tsx is fully owned/migrated by plan 21-04 -- 21-11's admin sweep must skip it entirely (Language column/action already in the staff namespace)
 - [Phase 21-i18n-multi-language 04]: eslint.i18n.config.js extended with logger.* callee, id/accessorKey object-property, and em-dash word excludes -- structural/non-copy literals, same category as the existing can/key excludes
+- [Phase ?]: [Phase 21-i18n-multi-language 05]: receipt.json key layout is receipt.*/precheque.*/pdf.*, all inside one shared 'receipt' i18next namespace -- TS builds fully-translated lines, print_receipt(lines: Vec<String>) replaces receipt_json: String, Rust holds zero label strings
+- [Phase ?]: [Phase 21-i18n-multi-language 05]: pdf.tsx locale resolved once per export via getCurrentLocale() inside each xToPdfBytes() function -- no ReportsPage caller signature change needed
 
 ## Performance Metrics
 
@@ -298,10 +300,11 @@ Last activity: 2026-07-17 — Phase 21 execution started
 | Phase 21-i18n-multi-language P02 | ~90min | 4 tasks | 23 files |
 | Phase 21-i18n-multi-language P03 | ~20min | 2 tasks | 6 files |
 | Phase 21-i18n-multi-language P04 | 20min | 2 tasks | 7 files |
+| Phase 21-i18n-multi-language P05 | ~45min | 3 tasks | 13 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 21-04-PLAN.md
+- **Stopped at:** Completed 21-05-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -318,7 +321,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-18T00:09:18.818Z
+**Last session:** 2026-07-18T00:28:09.149Z
 **Stopped at:** Phase 33.1 context gathered
 **Resume file:** None
 
