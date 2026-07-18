@@ -43,6 +43,17 @@ export default tseslint.config({
     reportUnusedDisableDirectives: 'off',
   },
 }, {
+  // Mirrors eslint.config.js's test-file override — tseslint.configs.recommended
+  // (registered above) enables @typescript-eslint/no-explicit-any repo-wide,
+  // but this standalone i18n gate has no equivalent override, so pre-existing
+  // `any` usage in test/mock/story files (unrelated to string migration) was
+  // failing this narrower gate even though the committed `npm run lint` gate
+  // already permits it there.
+  files: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx', '**/mocks.ts'],
+  rules: {
+    '@typescript-eslint/no-explicit-any': 'off',
+  },
+}, {
   files: [
     'src/shared/ui/**/*.tsx',
     'src/entities/**/*.{ts,tsx}',
@@ -64,14 +75,24 @@ export default tseslint.config({
           // primitive — a CSS/DOM hook, not UI copy. 'aria-invalid' is always
           // the literal string 'true'/'false', never translatable text.
           'data-slot', 'aria-invalid',
+          // 'confirmClassName' is ConfirmDialog's Tailwind class passthrough for
+          // the destructive confirm button (Phase 32/33's touch-target/focus-ring
+          // sweep, e.g. VoidOrderDialog's 72px/ring-4 confirm) — a CSS class
+          // string, not UI copy, same category as 'className' above.
+          'confirmClassName',
         ],
       },
       // 'can(...)' is the RBAC permission check (usePermissions().can) — its
       // string argument is a fixed RBACAction identifier, not UI copy.
       // 'logger.error/.warn/.info/.debug(...)' first args are internal
       // telemetry event names (e.g. 'staff.update_locale.failed'), not UI copy.
+      // '.rpc(...)' (db.rpc/supabase.rpc, mutation hooks across the order/
+      // pool/payment feature cluster) first arg is the fixed Postgres RPC
+      // function name — a wire-protocol identifier, never UI copy; the
+      // withDottedPrefix wrapper makes this exclude match any receiver
+      // (db.rpc, supabase.rpc, (supabase as any).rpc, deplDb.rpc, etc).
       callees: {
-        exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+'],
+        exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+', 'rpc'],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list
       // keys, TanStack Table column identifiers/accessors) are structural

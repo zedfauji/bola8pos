@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useStaffList } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
@@ -17,6 +18,7 @@ export type TransferTabDialogProps = {
 };
 
 export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialogProps) {
+  const { t } = useTranslation('featOrders');
   const currentStaff = useStaffStore(s => s.currentStaff);
   const { data: staffList } = useStaffList();
   const transferMut = useTransferTab();
@@ -27,7 +29,7 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
   function handleSubmit() {
     if (!tab || !currentStaff) return;
     if (!newTableNumber && !newStaffId) {
-      toast.error('Select a new table or staff member to transfer to.');
+      toast.error(t('transferTab.selectTargetTabOrStaff'));
       return;
     }
 
@@ -41,7 +43,7 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
       {
         onSuccess: result => {
           if (result.ok) {
-            toast.success('Tab transferred successfully.');
+            toast.success(t('transferTab.tabTransferred'));
             setNewTableNumber('');
             setNewStaffId('');
             onOpenChange(false);
@@ -57,28 +59,28 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Transfer Tab{tab ? ` — ${tab.customerName}` : ''}</DialogTitle>
+          <DialogTitle>{t('transferTab.transferTabTitle')}{tab ? ` — ${tab.customerName}` : ''}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <p className="text-sm text-muted-foreground">
-            Fill in the field(s) you want to change. Leave blank to keep unchanged.
+            {t('transferTab.fillFieldsHint')}
           </p>
 
           <div className="space-y-1">
-            <Label htmlFor="transfer-table">New Table</Label>
+            <Label htmlFor="transfer-table">{t('transferTab.newTableLabel')}</Label>
             <Input
               id="transfer-table"
               value={newTableNumber}
               onChange={e => {
                 setNewTableNumber(e.target.value);
               }}
-              placeholder={tab?.tableNumber != null ? String(tab.tableNumber) : 'Table number'}
+              placeholder={tab?.tableNumber != null ? String(tab.tableNumber) : t('transferTab.tableNumberPlaceholder')}
             />
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="transfer-staff">Assign to Staff</Label>
+            <Label htmlFor="transfer-staff">{t('transferTab.assignToStaffLabel')}</Label>
             <select
               id="transfer-staff"
               value={newStaffId}
@@ -87,10 +89,10 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
               }}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value="">— keep current —</option>
+              <option value="">{t('transferTab.keepCurrentOption')}</option>
               {(staffList ?? []).map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.name} ({s.role})
+                  {t('transferTab.staffOption', { name: s.name, role: s.role })}
                 </option>
               ))}
             </select>
@@ -105,10 +107,10 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
               onOpenChange(false);
             }}
           >
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
           <POSButton type="button" disabled={transferMut.isPending} onClick={handleSubmit}>
-            {transferMut.isPending ? 'Transferring…' : 'Transfer'}
+            {transferMut.isPending ? t('transferTab.transferring') : t('transferTab.transfer')}
           </POSButton>
         </DialogFooter>
       </DialogContent>

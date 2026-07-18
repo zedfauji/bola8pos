@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { tabKeys } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
+import i18n from '@shared/lib/i18n';
 import {
   err,
   ok,
@@ -74,7 +75,7 @@ export function useCloseTab() {
       toast.error(result.error.message);
       return result;
     }
-    toast.success('Tab closed successfully.');
+    toast.success(i18n.t('featOrders:closeTab.success'));
     await queryClient.invalidateQueries({ queryKey: tabKeys.lists() });
     clearSelection();
     return result;

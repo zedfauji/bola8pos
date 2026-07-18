@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Product, Modifier } from '@entities/product/model/types';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { Button } from '@shared/ui/button';
@@ -21,6 +22,7 @@ interface ModifierSheetProps {
 }
 
 export function ModifierSheet({ product, open, onConfirm, onClose }: ModifierSheetProps) {
+  const { t } = useTranslation('featOrders');
   const [selectedModifiers, setSelectedModifiers] = useState<Modifier[]>([]);
 
   const runningTotal = useMemo(() => {
@@ -60,10 +62,10 @@ export function ModifierSheet({ product, open, onConfirm, onClose }: ModifierShe
     >
       <SheetContent side="bottom" className="h-[80vh]">
         <SheetHeader>
-          <SheetTitle>Customize {product.name}</SheetTitle>
-          <SheetDescription>Select any modifiers for this item</SheetDescription>
+          <SheetTitle>{t('addItem.customize', { name: product.name })}</SheetTitle>
+          <SheetDescription>{t('addItem.sheetDescription')}</SheetDescription>
           <div className="flex items-center justify-between gap-4 border-t pt-4 mt-2">
-            <span className="text-sm font-medium text-muted-foreground">Item total</span>
+            <span className="text-sm font-medium text-muted-foreground">{t('addItem.itemTotal')}</span>
             <MoneyDisplay amount={runningTotal} size="lg" />
           </div>
         </SheetHeader>
@@ -71,7 +73,7 @@ export function ModifierSheet({ product, open, onConfirm, onClose }: ModifierShe
         <div className="max-h-[calc(80vh-240px)] space-y-4 overflow-y-auto py-6">
           {availableModifiers.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              No modifiers available for this product
+              {t('addItem.noModifiers')}
             </p>
           ) : (
             availableModifiers.map(modifier => (
@@ -90,7 +92,7 @@ export function ModifierSheet({ product, open, onConfirm, onClose }: ModifierShe
                       ? `+$${modifier.priceDelta.toFixed(2)}`
                       : modifier.priceDelta < 0
                         ? `-$${Math.abs(modifier.priceDelta).toFixed(2)}`
-                        : 'Free'}
+                        : t('addItem.free')}
                   </span>
                 </Label>
               </div>
@@ -100,10 +102,10 @@ export function ModifierSheet({ product, open, onConfirm, onClose }: ModifierShe
 
         <SheetFooter className="gap-2">
           <Button variant="outline" onClick={handleCancel} className="flex-1">
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
           <Button onClick={handleConfirm} className="flex-1">
-            Add to Order
+            {t('shared.addToOrder')}
           </Button>
         </SheetFooter>
       </SheetContent>

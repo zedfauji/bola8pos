@@ -6,6 +6,7 @@
  * Confirm is disabled until all required slots have a selection.
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useComboSlots, useComboSlotOptions } from '@entities/combo';
 import { useProducts } from '@entities/product/model/queries';
@@ -70,6 +71,7 @@ function ComboBuilderSheetInner({
   overrideActive,
   onClose,
 }: ComboBuilderSheetInnerProps) {
+  const { t } = useTranslation('featOrders');
   const { data: slots = [] } = useComboSlots(combo.id);
   const { data: allProducts = [] } = useProducts();
   const mutation = useAddComboToTab();
@@ -166,9 +168,9 @@ function ComboBuilderSheetInner({
       <SheetContent side="bottom" className="h-[80vh]">
         <SheetHeader>
           <SheetTitle>{combo.name}</SheetTitle>
-          <SheetDescription>Select options for each slot</SheetDescription>
+          <SheetDescription>{t('addCombo.sheetDescription')}</SheetDescription>
           <div className="flex items-center justify-between border-t pt-4 mt-2">
-            <span className="text-sm font-medium text-muted-foreground">Total</span>
+            <span className="text-sm font-medium text-muted-foreground">{t('addCombo.total')}</span>
             <MoneyDisplay amount={runningTotal} size="lg" />
           </div>
         </SheetHeader>
@@ -176,7 +178,7 @@ function ComboBuilderSheetInner({
         <div className="max-h-[calc(80vh-240px)] overflow-y-auto space-y-4 py-4">
           {overrideActive && (
             <Alert className="border-yellow-500 bg-yellow-950/20 mb-4">
-              <AlertDescription>Manager override — availability check bypassed</AlertDescription>
+              <AlertDescription>{t('addCombo.overrideNotice')}</AlertDescription>
             </Alert>
           )}
 
@@ -202,14 +204,14 @@ function ComboBuilderSheetInner({
 
         <SheetFooter className="gap-2">
           <Button variant="outline" className="flex-1" onClick={handleCancel}>
-            Discard selection
+            {t('addCombo.discardSelection')}
           </Button>
           <Button
             className="flex-1"
             disabled={!allSlotsFilled || mutation.isPending}
             onClick={handleConfirm}
           >
-            Add to Order
+            {t('shared.addToOrder')}
           </Button>
         </SheetFooter>
       </SheetContent>

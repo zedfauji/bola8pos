@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
 import { getCurrentLocale } from '@shared/lib/i18n';
 import { printReceipt } from '@shared/lib/pos-printer';
@@ -12,13 +13,14 @@ export interface ReceiptPreviewProps {
 }
 
 export function ReceiptPreview({ receipt, onDone }: ReceiptPreviewProps) {
+  const { t } = useTranslation('featOrders');
   const [emailOpen, setEmailOpen] = useState(false);
   const [printBusy, setPrintBusy] = useState(false);
   const text = buildThermalReceiptText(receipt, getCurrentLocale());
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Receipt</h2>
+      <h2 className="text-lg font-semibold">{t('processPayment.receiptTitle')}</h2>
       <pre className="max-h-[50vh] overflow-auto rounded-md border bg-muted/40 p-3 font-mono text-[11px] leading-tight whitespace-pre">
         {text}
       </pre>
@@ -35,7 +37,7 @@ export function ReceiptPreview({ receipt, onDone }: ReceiptPreviewProps) {
             });
           }}
         >
-          {printBusy ? 'Printing…' : 'Print receipt'}
+          {printBusy ? t('processPayment.printing') : t('processPayment.printReceipt')}
         </POSButton>
         <POSButton
           type="button"
@@ -46,7 +48,7 @@ export function ReceiptPreview({ receipt, onDone }: ReceiptPreviewProps) {
             setEmailOpen(true);
           }}
         >
-          Email receipt
+          {t('processPayment.emailReceiptButton')}
         </POSButton>
         <POSButton
           type="button"
@@ -55,7 +57,7 @@ export function ReceiptPreview({ receipt, onDone }: ReceiptPreviewProps) {
           className="flex-1"
           onClick={onDone}
         >
-          Done
+          {t('processPayment.done')}
         </POSButton>
       </div>
       <EmailReceiptDialog receipt={receipt} open={emailOpen} onOpenChange={setEmailOpen} />

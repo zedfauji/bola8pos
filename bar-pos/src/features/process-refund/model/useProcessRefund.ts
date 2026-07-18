@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { refundKeys } from '@entities/refund';
 import { tabKeys } from '@entities/tab';
+import i18n from '@shared/lib/i18n';
 import type { AppErrorCode, Result } from '@shared/lib/result';
 import { err, ok } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -41,13 +42,13 @@ export function useProcessRefund() {
       });
       if (error) {
         if ((error.message as string).includes('REFUND_EXCEEDS_ORIGINAL')) {
-          return err({ code: 'REFUND_EXCEEDS_ORIGINAL' as AppErrorCode, message: 'Refund amount exceeds the remaining refundable balance.' });
+          return err({ code: 'REFUND_EXCEEDS_ORIGINAL' as AppErrorCode, message: i18n.t('featOrders:processRefund.exceedsOriginal') });
         }
         if ((error.message as string).includes('ITEM_NOT_IN_ORIGINAL_ORDER')) {
-          return err({ code: 'ITEM_NOT_IN_ORIGINAL_ORDER' as AppErrorCode, message: 'One or more items were not part of the original order.' });
+          return err({ code: 'ITEM_NOT_IN_ORIGINAL_ORDER' as AppErrorCode, message: i18n.t('featOrders:processRefund.itemNotInOriginalOrder') });
         }
         if ((error.message as string).includes('AUTH_FORBIDDEN')) {
-          return err({ code: 'AUTH_FORBIDDEN' as AppErrorCode, message: 'Manager approval is required to process a refund.' });
+          return err({ code: 'AUTH_FORBIDDEN' as AppErrorCode, message: i18n.t('featOrders:processRefund.authForbidden') });
         }
         return err({ code: 'SUPABASE_ERROR' as AppErrorCode, message: error.message as string, raw: error });
       }

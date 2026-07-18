@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { poolTableKeys } from '@entities/pool-table/model/queries';
 import { tabKeys } from '@entities/tab/model/queries';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, unknownError, type AppError, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -45,7 +46,7 @@ export function useTransferPoolSession() {
         const e = result.error;
         const appErr: AppError = {
           code: (e?.code ?? 'UNKNOWN_ERROR') as AppError['code'],
-          message: e?.message ?? 'Pool transfer failed.',
+          message: e?.message ?? i18n.t('featOrders:transferTab.poolTransferFailed'),
         };
         logger.warn('transfer_pool_session.blocked', { code: appErr.code });
         return err(appErr);

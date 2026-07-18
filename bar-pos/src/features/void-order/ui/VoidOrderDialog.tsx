@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Order } from '@shared/lib/domain';
@@ -36,6 +37,7 @@ export function VoidOrderDialog({
   onOpenChange,
   onSuccess,
 }: VoidOrderDialogProps) {
+  const { t } = useTranslation('featOrders');
   const currentStaff = useStaffStore(state => state.currentStaff);
   const { voidOrder, isPending } = useVoidOrder();
   const [reason, setReason] = useState('');
@@ -54,9 +56,9 @@ export function VoidOrderDialog({
   return (
     <ConfirmDialog
       open={open}
-      title="Void order?"
-      description="This will mark the order voided, restore inventory, and remove it from tab totals."
-      confirmLabel="Void order"
+      title={t('voidOrder.title')}
+      description={t('voidOrder.description')}
+      confirmLabel={t('voidOrder.confirmLabel')}
       confirmClassName="min-h-[72px] text-lg font-semibold focus-visible:ring-4 focus-visible:ring-ring"
       variant="destructive"
       isLoading={isPending}
@@ -77,7 +79,7 @@ export function VoidOrderDialog({
           return;
         }
 
-        toast.success('Order voided.');
+        toast.success(t('voidOrder.orderVoided'));
         handleClose();
         onSuccess?.();
       }}
@@ -86,14 +88,14 @@ export function VoidOrderDialog({
         <div className="space-y-4">
           <div className="rounded-md border border-border/70 p-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Order time</span>
+              <span className="text-muted-foreground">{t('voidOrder.orderTime')}</span>
               <span>{formatOrderTime(order.createdAt)}</span>
             </div>
             <ul className="mt-3 space-y-2">
               {order.items.map(item => (
                 <li key={item.id} className="flex items-center justify-between gap-3">
                   <span className="min-w-0 truncate text-muted-foreground">
-                    {item.quantity}x {item.product?.name ?? 'Unknown item'}
+                    {item.quantity}x {item.product?.name ?? t('voidOrder.unknownItem')}
                   </span>
                   <MoneyDisplay
                     amount={(item.unitPrice + item.modifierPriceDelta) * item.quantity}
@@ -103,14 +105,14 @@ export function VoidOrderDialog({
               ))}
             </ul>
             <div className="mt-3 flex items-center justify-between border-t border-border/70 pt-2 font-semibold">
-              <span>Total voided</span>
+              <span>{t('voidOrder.totalVoided')}</span>
               <MoneyDisplay amount={total} size="sm" />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="void-order-reason" className="text-sm font-medium">
-              Void reason
+              {t('voidOrder.voidReasonLabel')}
             </label>
             <Input
               id="void-order-reason"
@@ -118,7 +120,7 @@ export function VoidOrderDialog({
               onChange={event => {
                 setReason(event.target.value);
               }}
-              placeholder="Required reason"
+              placeholder={t('voidOrder.requiredReasonPlaceholder')}
               required
             />
           </div>

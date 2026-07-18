@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 import { tabKeys } from '@entities/tab/model/queries';
 import type { AddComboToTabInput } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 
@@ -34,22 +35,22 @@ export function useAddComboToTab() {
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: tabKeys.all });
       logger.info('useAddComboToTab: success', { comboProductId: input.comboProductId });
-      toast.success('Added combo');
+      toast.success(i18n.t('featOrders:addCombo.success'));
     },
     onError: (error: unknown) => {
       const msg = (error as { message?: string }).message ?? '';
       if (msg.includes('COMBO_UNAVAILABLE')) {
-        toast.error('This combo is not available right now. Ask a manager to override.');
+        toast.error(i18n.t('featOrders:addCombo.unavailable'));
       } else if (msg.includes('SLOT_MIN_MAX_VIOLATION')) {
-        toast.error('Selection error — check all slot quantities.');
+        toast.error(i18n.t('featOrders:addCombo.slotError'));
       } else if (msg.includes('INVALID_CHILD')) {
-        toast.error('One or more selections are not valid for this combo.');
+        toast.error(i18n.t('featOrders:addCombo.invalidChild'));
       } else if (msg.includes('NESTED_COMBO_FORBIDDEN')) {
-        toast.error('Nested combos are not allowed.');
+        toast.error(i18n.t('featOrders:addCombo.nestedForbidden'));
       } else if (msg.includes('AUTH_FORBIDDEN')) {
-        toast.error('Manager PIN required to override availability.');
+        toast.error(i18n.t('featOrders:addCombo.authForbidden'));
       } else {
-        toast.error('Could not add combo. Try again.');
+        toast.error(i18n.t('featOrders:addCombo.genericError'));
       }
     },
   });

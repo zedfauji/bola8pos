@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { tabKeys } from '@entities/tab/model/queries';
 import { callProcessPayment } from '@shared/lib/edge-function-contracts';
+import i18n from '@shared/lib/i18n';
 import { err, ok, type AppErrorCode, type Result } from '@shared/lib/result';
 import { buildEvenPayments } from '@shared/lib/split-math';
 import { supabase } from '@shared/lib/supabase';
@@ -34,17 +35,17 @@ export function useSplitByItem() {
         if ((error.message as string).includes('PARENT_TAB_PAID'))
           return err({
             code: 'PARENT_TAB_PAID' as AppErrorCode,
-            message: 'This tab has already been paid and cannot be split.',
+            message: i18n.t('featOrders:splitTab.parentTabPaid'),
           });
         if ((error.message as string).includes('ITEM_ASSIGNED_TWICE'))
           return err({
             code: 'ITEM_ASSIGNED_TWICE' as AppErrorCode,
-            message: 'An item was assigned to more than one check. Remove duplicate assignments.',
+            message: i18n.t('featOrders:splitTab.itemAssignedTwice'),
           });
         if ((error.message as string).includes('ITEM_NOT_IN_PARENT'))
           return err({
             code: 'ITEM_NOT_IN_PARENT' as AppErrorCode,
-            message: "One or more items don't belong to this tab.",
+            message: i18n.t('featOrders:splitTab.itemNotInParent'),
           });
         return err({ code: 'SUPABASE_ERROR', message: error.message as string, raw: error });
       }
@@ -78,7 +79,7 @@ export function useSplitEvenly() {
         if ((error.message as string).includes('PARENT_TAB_PAID'))
           return err({
             code: 'PARENT_TAB_PAID' as AppErrorCode,
-            message: 'This tab has already been paid and cannot be split.',
+            message: i18n.t('featOrders:splitTab.parentTabPaid'),
           });
         return err({ code: 'SUPABASE_ERROR', message: error.message as string, raw: error });
       }
@@ -145,12 +146,12 @@ export function useSplitByPerson() {
         if ((error.message as string).includes('PARENT_TAB_PAID'))
           return err({
             code: 'PARENT_TAB_PAID' as AppErrorCode,
-            message: 'This tab has already been paid and cannot be split.',
+            message: i18n.t('featOrders:splitTab.parentTabPaid'),
           });
         if ((error.message as string).includes('ITEM_ASSIGNED_TWICE'))
           return err({
             code: 'ITEM_ASSIGNED_TWICE' as AppErrorCode,
-            message: 'An item was assigned to more than one check. Remove duplicate assignments.',
+            message: i18n.t('featOrders:splitTab.itemAssignedTwice'),
           });
         return err({ code: 'SUPABASE_ERROR', message: error.message as string, raw: error });
       }
@@ -180,7 +181,7 @@ export function useSplitByAmount() {
         if ((error.message as string).includes('PARENT_TAB_PAID'))
           return err({
             code: 'PARENT_TAB_PAID' as AppErrorCode,
-            message: 'This tab has already been paid and cannot be split.',
+            message: i18n.t('featOrders:splitTab.parentTabPaid'),
           });
         return err({ code: 'SUPABASE_ERROR', message: error.message as string, raw: error });
       }

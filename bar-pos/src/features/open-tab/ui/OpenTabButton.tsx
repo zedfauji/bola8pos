@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStaffStore } from '@entities/staff/model/store';
 import { POSButton } from '@shared/ui/POSButton';
 import {
@@ -22,6 +23,7 @@ import { Label } from '@shared/ui/label';
 import { useOpenTab } from '../model/useOpenTab';
 
 export function OpenTabButton() {
+  const { t } = useTranslation('featOrders');
   const { openTab, isPending } = useOpenTab();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const currentShift = useStaffStore(s => s.currentShift);
@@ -34,13 +36,13 @@ export function OpenTabButton() {
 
   const handleOpenTab = async () => {
     if (!currentStaff?.id || !currentShift?.id) {
-      setSubmitError('No active shift. Please clock in before opening tabs.');
+      setSubmitError(t('openTab.noActiveShiftInline'));
       return;
     }
     setSubmitError('');
 
     const result = await openTab({
-      customerName: customerName.trim() || 'Guest',
+      customerName: customerName.trim() || t('openTab.guestDefault'),
       tableNumber: tableNumber ? parseInt(tableNumber, 10) : null,
       staffId: currentStaff.id,
       shiftId: currentShift.id,
@@ -70,27 +72,27 @@ export function OpenTabButton() {
     >
       <DialogTrigger asChild>
         <POSButton touchSize="large" variant="default" disabled={!currentStaff}>
-          Open Tab
+          {t('openTab.openTabLabel')}
         </POSButton>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Open New Tab</DialogTitle>
-          <DialogDescription>Enter customer name and optional table number</DialogDescription>
+          <DialogTitle>{t('openTab.title')}</DialogTitle>
+          <DialogDescription>{t('openTab.descriptionButton')}</DialogDescription>
         </DialogHeader>
 
         {!canOpen && (
           <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2">
-            No active shift — clock in before opening tabs.
+            {t('openTab.noActiveShiftBanner')}
           </p>
         )}
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="customerName">Customer Name</Label>
+            <Label htmlFor="customerName">{t('openTab.customerNameLabel')}</Label>
             <Input
               id="customerName"
-              placeholder="Guest"
+              placeholder={t('openTab.guestDefault')}
               value={customerName}
               onChange={e => {
                 setCustomerName(e.target.value);
@@ -99,13 +101,13 @@ export function OpenTabButton() {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="tableNumber">Table Number (Optional)</Label>
+            <Label htmlFor="tableNumber">{t('openTab.tableNumberLabel')}</Label>
             <Input
               id="tableNumber"
               type="number"
               min="1"
               max="200"
-              placeholder="Leave empty if no table"
+              placeholder={t('openTab.tableNumberPlaceholderButton')}
               value={tableNumber}
               onChange={e => {
                 setTableNumber(e.target.value);
@@ -124,7 +126,7 @@ export function OpenTabButton() {
             }}
             disabled={isPending || !canOpen}
           >
-            {isPending ? 'Opening...' : 'Open Tab'}
+            {isPending ? t('openTab.opening') : t('openTab.openTabLabel')}
           </POSButton>
         </DialogFooter>
       </DialogContent>

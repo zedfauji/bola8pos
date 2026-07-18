@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { usePoolTables } from '@entities/pool-table';
 import { useStaffStore } from '@entities/staff/model/store';
@@ -16,6 +17,7 @@ export type TransferPoolDialogProps = {
 };
 
 export function TransferPoolDialog({ open, onOpenChange, session }: TransferPoolDialogProps) {
+  const { t } = useTranslation('featOrders');
   const currentStaff = useStaffStore(s => s.currentStaff);
   const { data: tables } = usePoolTables();
   const transferMut = useTransferPoolSession();
@@ -23,12 +25,12 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
   const [targetTableId, setTargetTableId] = useState('');
 
   const availableTables = (tables ?? []).filter(
-    (t: PoolTable) => t.status === 'available' && t.id !== session?.tableId
+    (tbl: PoolTable) => tbl.status === 'available' && tbl.id !== session?.tableId
   );
 
   function handleSubmit() {
     if (!session || !currentStaff || !targetTableId) {
-      toast.error('Select a target pool table.');
+      toast.error(t('transferTab.selectTargetTable'));
       return;
     }
 
@@ -42,7 +44,7 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
       {
         onSuccess: result => {
           if (result.ok) {
-            toast.success('Pool session moved. Timer continues from original start time.');
+            toast.success(t('transferTab.poolSessionMoved'));
             setTargetTableId('');
             onOpenChange(false);
           } else {
@@ -57,16 +59,16 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Move Pool Session</DialogTitle>
+          <DialogTitle>{t('transferTab.movePoolSessionTitle')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <p className="text-sm text-muted-foreground">
-            Session time is preserved — billing continues from when it started.
+            {t('transferTab.sessionTimePreserved')}
           </p>
 
           <div className="space-y-1">
-            <Label htmlFor="target-table">Target Pool Table</Label>
+            <Label htmlFor="target-table">{t('transferTab.targetPoolTable')}</Label>
             <select
               id="target-table"
               value={targetTableId}
@@ -75,15 +77,15 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
               }}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value="">— select table —</option>
-              {availableTables.map((t: PoolTable) => (
-                <option key={t.id} value={t.id}>
-                  Table {String(t.number)}
+              <option value="">{t('transferTab.selectTableOption')}</option>
+              {availableTables.map((tbl: PoolTable) => (
+                <option key={tbl.id} value={tbl.id}>
+                  {t('transferTab.tableOption', { number: tbl.number })}
                 </option>
               ))}
             </select>
             {availableTables.length === 0 && (
-              <p className="text-xs text-destructive">No free pool tables available.</p>
+              <p className="text-xs text-destructive">{t('transferTab.noFreeTables')}</p>
             )}
           </div>
         </div>
@@ -96,14 +98,14 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
               onOpenChange(false);
             }}
           >
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
           <POSButton
             type="button"
             disabled={transferMut.isPending || !targetTableId}
             onClick={handleSubmit}
           >
-            {transferMut.isPending ? 'Moving…' : 'Move Session'}
+            {transferMut.isPending ? t('transferTab.moving') : t('transferTab.moveSession')}
           </POSButton>
         </DialogFooter>
       </DialogContent>

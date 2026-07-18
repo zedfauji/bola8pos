@@ -5,6 +5,7 @@
  *   CLOSED -> OPEN (SELECTING) -> CONFIGURING -> PIN_MODAL -> SUBMITTING -> CLOSED
  */
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ManagerPinDialog } from "@features/manager-pin-gate";
@@ -84,6 +85,7 @@ const REFUND_REASONS: RefundReason[] = [
 // ============================================================================
 
 export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps) {
+  const { t } = useTranslation("featOrders");
   const { data: orderItemsRaw, isLoading: itemsLoading } = useOrderItemsByPayment(paymentId);
   const { data: existingRefunds } = useRefundsByPayment(paymentId);
   const mutation = useProcessRefund();
@@ -181,11 +183,15 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
       toast.error(
         result.error.message !== ""
           ? result.error.message
-          : "Could not process refund. Check your connection and try again."
+          : t("processRefund.genericError")
       );
       return;
     }
-    toast.success(`Refund of $${(Math.round(refundTotal * 100) / 100).toFixed(2)} processed.`);
+    toast.success(
+      t("processRefund.refundProcessed", {
+        amount: (Math.round(refundTotal * 100) / 100).toFixed(2),
+      })
+    );
     onOpenChange(false);
   }
 
@@ -203,19 +209,19 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
       <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto flex flex-col">
           <SheetHeader>
-            <SheetTitle>Process refund</SheetTitle>
+            <SheetTitle>{t("processRefund.title")}</SheetTitle>
             <SheetDescription>
-              Select items to refund, set quantities, and request manager approval.
+              {t("processRefund.description")}
             </SheetDescription>
           </SheetHeader>
 
           <div className="mt-4 flex-1 space-y-2 px-1">
             {itemsLoading && (
-              <p className="text-sm text-muted-foreground py-4 text-center">Loading items...</p>
+              <p className="text-sm text-muted-foreground py-4 text-center">{t("processRefund.loadingItems")}</p>
             )}
             {!itemsLoading && items.length === 0 && (
               <p className="text-sm text-muted-foreground py-4 text-center">
-                No refundable items found.
+                {t("processRefund.noRefundableItems")}
               </p>
             )}
             {items.map(item => {
@@ -225,7 +231,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
                 <div
                   key={item.orderItemId}
                   className={"rounded-lg border p-3 space-y-2 transition-opacity" + (fullyRefunded ? " opacity-50" : "")}
-                  title={fullyRefunded ? "Fully refunded" : undefined}
+                  title={fullyRefunded ? t("processRefund.fullyRefunded") : undefined}
                 >
                   <div className="flex items-center gap-3">
                     <Checkbox
@@ -235,7 +241,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
                       onCheckedChange={() => {
                         if (!fullyRefunded) toggleItem(item.orderItemId);
                       }}
-                      aria-label={"Select " + item.productName + " for refund"}
+                      aria-label={t("processRefund.selectForRefund", { name: item.productName })}
                     />
                     <label
                       htmlFor={"refund-item-" + item.orderItemId}
@@ -248,7 +254,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
                   {item.selected && (
                     <div className="flex items-center gap-4 pl-7">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Qty:</span>
+                        <span className="text-xs text-muted-foreground">{t("processRefund.qty")}</span>
                         <QuantityControl
                           value={item.refundQty}
                           min={1}
@@ -263,10 +269,10 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
                           onCheckedChange={checked => {
                             updateRestock(item.orderItemId, checked === true);
                           }}
-                          aria-label={"Restock " + item.productName}
+                          aria-label={t("processRefund.restockAria", { name: item.productName })}
                         />
                         <Label htmlFor={"restock-" + item.orderItemId} className="text-xs">
-                          Restock
+                          {t("processRefund.restock")}
                         </Label>
                       </div>
                     </div>
@@ -279,14 +285,14 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
           <div className="border-t px-6 py-4 space-y-3 bg-background sticky bottom-0">
             <div className="space-y-1.5">
               <Label htmlFor="refund-reason" className="text-sm font-medium">
-                Reason <span className="text-destructive">*</span>
+                {t("processRefund.reason")} <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={reason}
                 onValueChange={val => { setReason(val as RefundReason); }}
               >
                 <SelectTrigger id="refund-reason" className="w-full">
-                  <SelectValue placeholder="Select a reason..." />
+                  <SelectValue placeholder={t("processRefund.selectReasonPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {REFUND_REASONS.map(r => (
@@ -298,7 +304,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
               </Select>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-base font-semibold">Refund total</span>
+              <span className="text-base font-semibold">{t("processRefund.refundTotal")}</span>
               <MoneyDisplay amount={refundTotal} size="lg" negative={true} />
             </div>
           </div>
@@ -310,7 +316,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
               className="flex-1"
               onClick={() => { onOpenChange(false); }}
             >
-              Close refund
+              {t("processRefund.closeRefund")}
             </POSButton>
             <POSButton
               touchSize="xl"
@@ -319,7 +325,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
               disabled={!isValid || mutation.isPending}
               onClick={() => { setPinOpen(true); }}
             >
-              Request approval
+              {t("processRefund.requestApproval")}
             </POSButton>
           </SheetFooter>
         </SheetContent>

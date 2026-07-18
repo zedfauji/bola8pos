@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import type { OrderItem } from '@shared/lib/domain';
@@ -31,12 +32,13 @@ export function RemoveTabItemDialog({
   orderId,
   onClose,
 }: RemoveTabItemDialogProps) {
+  const { t } = useTranslation('featOrders');
   const { removeTabItem, isPending } = useRemoveTabItem();
 
   if (!item) return null;
 
   const lineTotal = (item.unitPrice + item.modifierPriceDelta) * item.quantity;
-  const productName = item.product?.name ?? 'Unknown item';
+  const productName = item.product?.name ?? t('removeTabItem.unknownItem');
 
   const handleConfirm = async () => {
     const result = await removeTabItem({
@@ -52,16 +54,16 @@ export function RemoveTabItemDialog({
       return;
     }
 
-    toast.success(`${productName} removed from order.`);
+    toast.success(t('removeTabItem.removedFromOrder', { name: productName }));
     onClose();
   };
 
   return (
     <ConfirmDialog
       open={open}
-      title="Remove item?"
-      description="This item will be permanently removed from the order. This cannot be undone."
-      confirmLabel="Remove item"
+      title={t('removeTabItem.title')}
+      description={t('removeTabItem.description')}
+      confirmLabel={t('removeTabItem.confirmLabel')}
       variant="destructive"
       isLoading={isPending}
       onConfirm={handleConfirm}

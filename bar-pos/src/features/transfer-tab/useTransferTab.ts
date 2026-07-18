@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { tabKeys } from '@entities/tab/model/queries';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, unknownError, type AppError, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -48,7 +49,7 @@ export function useTransferTab() {
         const e = result.error;
         const appErr: AppError = {
           code: (e?.code ?? 'UNKNOWN_ERROR') as AppError['code'],
-          message: e?.message ?? 'Transfer failed.',
+          message: e?.message ?? i18n.t('featOrders:transferTab.transferFailed'),
         };
         logger.warn('transfer_tab.blocked', { code: appErr.code });
         return err(appErr);

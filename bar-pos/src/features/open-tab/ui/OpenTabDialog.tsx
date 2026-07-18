@@ -1,10 +1,12 @@
 import { useState, type SyntheticEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useStaffStore } from '@entities/staff/model/store';
 import { useMutationOpenTab } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import type { CreateTab } from '@entities/tab/model/types';
+import i18n from '@shared/lib/i18n';
 import { Button } from '@shared/ui/button';
 import {
   Dialog,
@@ -17,15 +19,20 @@ import {
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 
-const FormSchema = z.object({
-  customerName: z.string().trim().min(1, 'Customer name is required'),
-  tableNumber: z
-    .number()
-    .int()
-    .min(1, 'Table number must be between 1 and 200')
-    .max(200, 'Table number must be between 1 and 200')
-    .optional(),
-});
+// Built fresh (not a module-level const) so a locale switch (LanguageSettingsTab,
+// Phase 21-03) is reflected in the very next validation instead of baking in
+// whichever language was active at first import (Rule 1 fix).
+function buildFormSchema() {
+  return z.object({
+    customerName: z.string().trim().min(1, i18n.t('featOrders:openTab.customerNameRequired')),
+    tableNumber: z
+      .number()
+      .int()
+      .min(1, i18n.t('featOrders:openTab.tableNumberRangeMessage'))
+      .max(200, i18n.t('featOrders:openTab.tableNumberRangeMessage'))
+      .optional(),
+  });
+}
 
 interface OpenTabDialogProps {
   open: boolean;
@@ -33,6 +40,7 @@ interface OpenTabDialogProps {
 }
 
 export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
+  const { t } = useTranslation('featOrders');
   const [customerName, setCustomerName] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -54,13 +62,13 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
     if (tableNumber.trim() !== '') {
       const n = parseInt(tableNumber, 10);
       if (Number.isNaN(n)) {
-        setErrors({ tableNumber: 'Enter a valid table number' });
+        setErrors({ tableNumber: t('openTab.tableNumberInvalid') });
         return;
       }
       parsedTable = n;
     }
 
-    const validation = FormSchema.safeParse({
+    const validation = buildFormSchema().safeParse({
       customerName,
       tableNumber: parsedTable,
     });
@@ -78,7 +86,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
     }
 
     if (!currentStaff?.id || !currentShift?.id) {
-      setShiftError('No active shift. Clock in before opening tabs.');
+      setShiftError(t('openTab.noActiveShiftDialog'));
       return;
     }
 
@@ -101,7 +109,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
     }
 
     useTabStore.getState().selectTab(result.data.id);
-    toast.success(`Tab opened for ${result.data.customerName}`);
+    toast.success(i18n.t('featOrders:openTab.openedFor', { name: result.data.customerName }));
 
     setCustomerName('');
     setTableNumber('');
@@ -127,8 +135,8 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Open New Tab</DialogTitle>
-          <DialogDescription>Create a new tab for a customer or table</DialogDescription>
+          <DialogTitle>{t('openTab.title')}</DialogTitle>
+          <DialogDescription>{t('openTab.descriptionDialog')}</DialogDescription>
         </DialogHeader>
 
         <form
@@ -139,7 +147,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
           <div className="space-y-4 py-4">
             {!canOpen && (
               <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                No active shift — clock in before opening tabs.
+                {t('openTab.noActiveShiftBanner')}
               </p>
             )}
             {shiftError && (
@@ -150,7 +158,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
 
             <div className="space-y-2">
               <Label htmlFor="customerName">
-                Customer Name <span className="text-destructive">*</span>
+                {t('openTab.customerNameLabel')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="customerName"
@@ -158,7 +166,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
                 onChange={e => {
                   setCustomerName(e.target.value);
                 }}
-                placeholder="Enter customer name"
+                placeholder={t('openTab.enterCustomerNamePlaceholder')}
                 disabled={isSubmitting}
               />
               {errors.customerName && (
@@ -167,7 +175,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tableNumber">Table Number (Optional)</Label>
+              <Label htmlFor="tableNumber">{t('openTab.tableNumberLabel')}</Label>
               <Input
                 id="tableNumber"
                 type="number"
@@ -175,7 +183,7 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
                 onChange={e => {
                   setTableNumber(e.target.value);
                 }}
-                placeholder="Enter table number"
+                placeholder={t('openTab.tableNumberPlaceholderDialog')}
                 min="1"
                 max="200"
                 disabled={isSubmitting}
@@ -188,10 +196,10 @@ export function OpenTabDialog({ open, onClose }: OpenTabDialogProps) {
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || !canOpen}>
-              {isSubmitting ? 'Opening...' : 'Open Tab'}
+              {isSubmitting ? t('openTab.opening') : t('openTab.openTabLabel')}
             </Button>
           </DialogFooter>
         </form>

@@ -8,6 +8,7 @@
 
 import { Plus, X } from 'lucide-react';
 import { useCallback, useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import type { OrderItem, Tab } from '@shared/lib/domain';
@@ -87,6 +88,7 @@ function columnTotal(itemIds: string[], allItems: OrderItem[]): number {
 // ── SplitTabSheet ──────────────────────────────────────────────────────────
 
 export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetProps) {
+  const { t } = useTranslation('featOrders');
   const uid = useId();
 
   // ── Mode ──
@@ -97,21 +99,21 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
 
   // ── Item mode state ──
   const [itemColumns, setItemColumns] = useState<ColumnState[]>(() => [
-    { id: `${uid}-col-1`, label: 'Check 1', itemIds: [] },
+    { id: `${uid}-col-1`, label: t('splitTab.check1'), itemIds: [] },
   ]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   // ── Person mode state ──
   const [personColumns, setPersonColumns] = useState<PersonState[]>(() => [
-    { id: `${uid}-p-1`, name: 'Person 1', itemIds: [] },
-    { id: `${uid}-p-2`, name: 'Person 2', itemIds: [] },
+    { id: `${uid}-p-1`, name: t('splitTab.person1'), itemIds: [] },
+    { id: `${uid}-p-2`, name: t('splitTab.person2'), itemIds: [] },
   ]);
   const [selectedPersonItemId, setSelectedPersonItemId] = useState<string | null>(null);
 
   // ── Amount mode state ──
   const [amountRows, setAmountRows] = useState<AmountRow[]>(() => [
-    { id: `${uid}-a-1`, label: 'Check 1', amount: 0 },
-    { id: `${uid}-a-2`, label: 'Check 2', amount: 0 },
+    { id: `${uid}-a-1`, label: t('splitTab.check1'), amount: 0 },
+    { id: `${uid}-a-2`, label: t('splitTab.check2'), amount: 0 },
   ]);
 
   // ── Cancel confirm ──
@@ -169,19 +171,19 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
   const resetAllState = useCallback(() => {
     setActiveMode('evenly');
     setN(0);
-    setItemColumns([{ id: `${uid}-col-1`, label: 'Check 1', itemIds: [] }]);
+    setItemColumns([{ id: `${uid}-col-1`, label: t('splitTab.check1'), itemIds: [] }]);
     setSelectedItemId(null);
     setPersonColumns([
-      { id: `${uid}-p-1`, name: 'Person 1', itemIds: [] },
-      { id: `${uid}-p-2`, name: 'Person 2', itemIds: [] },
+      { id: `${uid}-p-1`, name: t('splitTab.person1'), itemIds: [] },
+      { id: `${uid}-p-2`, name: t('splitTab.person2'), itemIds: [] },
     ]);
     setSelectedPersonItemId(null);
     setAmountRows([
-      { id: `${uid}-a-1`, label: 'Check 1', amount: 0 },
-      { id: `${uid}-a-2`, label: 'Check 2', amount: 0 },
+      { id: `${uid}-a-1`, label: t('splitTab.check1'), amount: 0 },
+      { id: `${uid}-a-2`, label: t('splitTab.check2'), amount: 0 },
     ]);
     setConfirmDiscardOpen(false);
-  }, [uid]);
+  }, [uid, t]);
 
   // ── Cancel / discard ──
   const handleCancel = useCallback(() => {
@@ -214,7 +216,12 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
         showErrorToast(result.error.message);
         return;
       }
-      toast.success(`Tab split ${String(n)} ways. Each payment: ${evenSplit ? `$${(evenSplit.baseAmount / 100).toFixed(2)}` : ''}`);
+      toast.success(
+        t('splitTab.evenlySplitSuccess', {
+          n,
+          amount: evenSplit ? `$${(evenSplit.baseAmount / 100).toFixed(2)}` : '',
+        })
+      );
       resetAllState();
       onClose();
       return;
@@ -230,7 +237,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
         showErrorToast(result.error.message);
         return;
       }
-      toast.success(`Tab split into ${String(itemColumns.length)} checks.`);
+      toast.success(t('splitTab.itemSplitSuccess', { count: itemColumns.length }));
       resetAllState();
       onClose();
       return;
@@ -250,7 +257,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
         showErrorToast(result.error.message);
         return;
       }
-      toast.success(`Tab split between ${String(personColumns.length)} persons.`);
+      toast.success(t('splitTab.personSplitSuccess', { count: personColumns.length }));
       resetAllState();
       onClose();
       return;
@@ -266,7 +273,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
       showErrorToast(amountResult.error.message);
       return;
     }
-    toast.success(`Tab split into ${String(amountRows.length)} checks by amount.`);
+    toast.success(t('splitTab.amountSplitSuccess', { count: amountRows.length }));
     resetAllState();
     onClose();
   };
@@ -452,9 +459,9 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
       >
         <SheetContent side="bottom" className="h-[85vh] flex flex-col p-0">
           <SheetHeader className="px-6 pt-4 pb-2 shrink-0">
-            <SheetTitle>Split tab — {tabLabel}</SheetTitle>
+            <SheetTitle>{t('splitTab.title', { label: tabLabel })}</SheetTitle>
             <SheetDescription>
-              Total:{' '}
+              {t('splitTab.total')}{' '}
               <MoneyDisplay amount={tabTotal} size="md" />
             </SheetDescription>
           </SheetHeader>
@@ -469,17 +476,17 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
             className="flex flex-1 flex-col overflow-hidden"
           >
             <TabsList className="mx-6 mb-0 mt-2 grid grid-cols-4 shrink-0">
-              <TabsTrigger value="evenly">Evenly</TabsTrigger>
-              <TabsTrigger value="item">By Item</TabsTrigger>
-              <TabsTrigger value="person">By Person</TabsTrigger>
-              <TabsTrigger value="amount">By Amount</TabsTrigger>
+              <TabsTrigger value="evenly">{t('splitTab.tabEvenly')}</TabsTrigger>
+              <TabsTrigger value="item">{t('splitTab.tabByItem')}</TabsTrigger>
+              <TabsTrigger value="person">{t('splitTab.tabByPerson')}</TabsTrigger>
+              <TabsTrigger value="amount">{t('splitTab.tabByAmount')}</TabsTrigger>
             </TabsList>
 
             {/* ── Evenly mode ── */}
             <TabsContent value="evenly" className="flex-1 overflow-y-auto">
               <div className="px-6 py-4 flex flex-col items-center gap-6">
                 <p className="text-sm text-muted-foreground">
-                  How many people are splitting this tab?
+                  {t('splitTab.evenlyPrompt')}
                 </p>
 
                 <div className="grid grid-cols-3 gap-3 w-full max-w-[280px]">
@@ -501,21 +508,21 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
 
                 {evenSplit !== null && n >= 2 && (
                   <div className="rounded-lg bg-card border p-4 w-full space-y-2">
-                    <p className="text-sm font-semibold">Preview</p>
+                    <p className="text-sm font-semibold">{t('splitTab.previewLabel')}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">
-                        {n - 1} × payments
+                        {t('splitTab.paymentsCount', { count: n - 1 })}
                       </span>
                       <MoneyDisplay amount={evenSplit.baseAmount / 100} size="sm" />
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">
-                        1 × payment (absorbs rounding)
+                        {t('splitTab.lastPaymentNote')}
                       </span>
                       <MoneyDisplay amount={evenSplit.lastAmount / 100} size="sm" />
                     </div>
                     <div className="flex items-center justify-between border-t pt-2">
-                      <span className="text-sm font-semibold">Total</span>
+                      <span className="text-sm font-semibold">{t('splitTab.totalLabel')}</span>
                       <MoneyDisplay amount={tabTotal} size="md" />
                     </div>
                   </div>
@@ -528,9 +535,11 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
               {selectedItemId !== null && (
                 <div className="mx-6 mb-3 flex items-center gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-2">
                   <span className="text-sm text-primary">
-                    &ldquo;{getItemById(orderItems, selectedItemId)?.product?.name ?? selectedItemId}&rdquo; selected
+                    {t('splitTab.itemSelected', {
+                      name: getItemById(orderItems, selectedItemId)?.product?.name ?? selectedItemId,
+                    })}
                   </span>
-                  <span className="text-sm text-muted-foreground ml-auto">Tap a column to assign</span>
+                  <span className="text-sm text-muted-foreground ml-auto">{t('splitTab.tapToAssign')}</span>
                 </div>
               )}
 
@@ -555,7 +564,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   }}
                 >
                   <div className="flex items-center justify-between px-3 py-2 border-b">
-                    <span className="text-sm font-semibold truncate max-w-[100px]">Unassigned</span>
+                    <span className="text-sm font-semibold truncate max-w-[100px]">{t('splitTab.unassignedLabel')}</span>
                     <span className="text-xs text-muted-foreground">{unassignedItems.length}</span>
                   </div>
                   <ul
@@ -566,7 +575,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   </ul>
                   {unassignedItems.length === 0 && (
                     <div className="px-3 py-2 text-sm text-pos-accent text-center border-t">
-                      All items assigned
+                      {t('splitTab.allItemsAssigned')}
                     </div>
                   )}
                 </div>
@@ -600,16 +609,16 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   type="button"
                   className="min-w-[140px] flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
                   onClick={addItemColumn}
-                  aria-label="Add sub-check column"
+                  aria-label={t('splitTab.addCheckColumnAria')}
                 >
                   <Plus className="size-5" />
-                  <span className="text-sm">Add check</span>
+                  <span className="text-sm">{t('splitTab.addCheck')}</span>
                 </POSButton>
               </div>
 
               {unassignedItems.length > 0 && (
                 <p className="px-6 pb-2 text-sm text-pos-danger">
-                  {unassignedItems.length} item(s) not assigned. Assign all items before confirming.
+                  {t('splitTab.unassignedWarning', { count: unassignedItems.length })}
                 </p>
               )}
             </TabsContent>
@@ -619,9 +628,11 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
               {selectedPersonItemId !== null && (
                 <div className="mx-6 mb-3 flex items-center gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-2">
                   <span className="text-sm text-primary">
-                    &ldquo;{getItemById(orderItems, selectedPersonItemId)?.product?.name ?? selectedPersonItemId}&rdquo; selected
+                    {t('splitTab.itemSelected', {
+                      name: getItemById(orderItems, selectedPersonItemId)?.product?.name ?? selectedPersonItemId,
+                    })}
                   </span>
-                  <span className="text-sm text-muted-foreground ml-auto">Tap a column to assign</span>
+                  <span className="text-sm text-muted-foreground ml-auto">{t('splitTab.tapToAssign')}</span>
                 </div>
               )}
 
@@ -647,7 +658,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                 >
                   <div className="flex items-center justify-between px-3 py-2 border-b">
                     <span className="text-sm font-semibold truncate max-w-[100px] italic text-muted-foreground">
-                      Unassigned (split evenly)
+                      {t('splitTab.unassignedSplitEvenly')}
                     </span>
                   </div>
                   <ul
@@ -658,7 +669,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   </ul>
                   {unassignedPersonItems.length === 0 && (
                     <div className="px-3 py-2 text-sm text-muted-foreground text-center border-t">
-                      No unassigned items
+                      {t('splitTab.noUnassignedItems')}
                     </div>
                   )}
                 </div>
@@ -698,10 +709,10 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   type="button"
                   className="min-w-[140px] flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
                   onClick={addPersonColumn}
-                  aria-label="Add person"
+                  aria-label={t('splitTab.addPersonAria')}
                 >
                   <Plus className="size-5" />
-                  <span className="text-sm">Add person</span>
+                  <span className="text-sm">{t('splitTab.addPerson')}</span>
                 </POSButton>
               </div>
             </TabsContent>
@@ -711,7 +722,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
               <div className="px-6 py-4 flex flex-col gap-4">
                 <div className="rounded-md border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
                   <p className="text-sm text-muted-foreground">
-                    Amount split does not preserve item-level reporting. Use By Item when possible.
+                    {t('splitTab.amountModeWarning')}
                   </p>
                 </div>
 
@@ -759,13 +770,13 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                     className="w-full"
                   >
                     <Plus className="size-4 mr-2" />
-                    Add check
+                    {t('splitTab.addCheck')}
                   </Button>
                 </div>
 
                 <div className="rounded-lg bg-card border p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Entered total</span>
+                    <span className="text-sm text-muted-foreground">{t('splitTab.enteredTotal')}</span>
                     <MoneyDisplay
                       amount={enteredTotal}
                       size="sm"
@@ -773,7 +784,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Remaining</span>
+                    <span className="text-sm text-muted-foreground">{t('splitTab.remaining')}</span>
                     <MoneyDisplay
                       amount={Math.abs(remaining)}
                       size="sm"
@@ -781,7 +792,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                     />
                   </div>
                   <div className="flex items-center justify-between border-t pt-2">
-                    <span className="text-sm font-semibold">Tab total</span>
+                    <span className="text-sm font-semibold">{t('splitTab.tabTotalLabel')}</span>
                     <MoneyDisplay amount={tabTotal} size="md" />
                   </div>
                 </div>
@@ -791,7 +802,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
 
           <SheetFooter className="px-6 pb-6 pt-4 border-t flex gap-3 shrink-0">
             <Button variant="outline" className="flex-1" onClick={handleCancel}>
-              Keep tab open
+              {t('splitTab.keepTabOpen')}
             </Button>
             <POSButton
               touchSize="xl"
@@ -802,7 +813,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                 void handleConfirm();
               }}
             >
-              Confirm Split
+              {t('splitTab.confirmSplit')}
             </POSButton>
           </SheetFooter>
         </SheetContent>
@@ -810,10 +821,10 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
 
       <ConfirmDialog
         open={confirmDiscardOpen}
-        title="Discard split?"
-        description="Your assignments will be lost."
-        confirmLabel="Discard"
-        cancelLabel="Keep editing"
+        title={t('splitTab.discardTitle')}
+        description={t('splitTab.discardDescription')}
+        confirmLabel={t('splitTab.discardConfirmLabel')}
+        cancelLabel={t('splitTab.keepEditingLabel')}
         variant="destructive"
         onConfirm={() => {
           resetAllState();

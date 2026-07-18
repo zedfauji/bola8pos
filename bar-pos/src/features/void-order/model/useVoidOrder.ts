@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { tabKeys } from '@entities/tab/model/queries';
 import type { Order } from '@shared/lib/domain';
 import { callVoidOrder } from '@shared/lib/edge-function-contracts';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -43,7 +44,7 @@ export function useVoidOrder() {
       if (trimmedReason.length === 0) {
         return err({
           code: 'VALIDATION_ERROR',
-          message: 'Void reason is required.',
+          message: i18n.t('featOrders:voidOrder.reasonRequired'),
         });
       }
 

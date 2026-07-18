@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
 import { sendReceiptByEmail } from '@shared/lib/email-receipt';
@@ -22,6 +23,7 @@ export interface EmailReceiptDialogProps {
 }
 
 export function EmailReceiptDialog({ receipt, open, onOpenChange }: EmailReceiptDialogProps) {
+  const { t } = useTranslation('featOrders');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -38,7 +40,7 @@ export function EmailReceiptDialog({ receipt, open, onOpenChange }: EmailReceipt
     setError(null);
     const parsed = ReceiptEmailSchema.safeParse(email);
     if (!parsed.success) {
-      const msg = parsed.error.issues[0]?.message ?? 'Invalid email';
+      const msg = parsed.error.issues[0]?.message ?? t('processPayment.invalidEmail');
       setError(msg);
       return;
     }
@@ -49,7 +51,7 @@ export function EmailReceiptDialog({ receipt, open, onOpenChange }: EmailReceipt
       setError(result.error.message);
       return;
     }
-    toast.success('Receipt sent.');
+    toast.success(t('processPayment.receiptSent'));
     setEmail('');
     onOpenChange(false);
   };
@@ -58,11 +60,11 @@ export function EmailReceiptDialog({ receipt, open, onOpenChange }: EmailReceipt
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Email receipt</DialogTitle>
-          <DialogDescription>Send a copy to the customer&apos;s email.</DialogDescription>
+          <DialogTitle>{t('processPayment.emailReceiptTitle')}</DialogTitle>
+          <DialogDescription>{t('processPayment.emailReceiptDescription')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="receipt-email">Email</Label>
+          <Label htmlFor="receipt-email">{t('processPayment.emailLabel')}</Label>
           <Input
             id="receipt-email"
             type="email"
@@ -71,7 +73,7 @@ export function EmailReceiptDialog({ receipt, open, onOpenChange }: EmailReceipt
             onChange={e => {
               setEmail(e.target.value);
             }}
-            placeholder="name@example.com"
+            placeholder={t('processPayment.emailPlaceholder')}
             disabled={pending}
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
@@ -86,7 +88,7 @@ export function EmailReceiptDialog({ receipt, open, onOpenChange }: EmailReceipt
               handleOpenChange(false);
             }}
           >
-            Cancel
+            {t('common:actions.cancel')}
           </POSButton>
           <POSButton
             type="button"
@@ -96,7 +98,7 @@ export function EmailReceiptDialog({ receipt, open, onOpenChange }: EmailReceipt
               void handleSubmit();
             }}
           >
-            {pending ? 'Sending…' : 'Send Receipt'}
+            {pending ? t('processPayment.sending') : t('processPayment.sendReceipt')}
           </POSButton>
         </DialogFooter>
       </DialogContent>
