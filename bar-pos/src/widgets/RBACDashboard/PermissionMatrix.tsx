@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useMutationTogglePermission } from '@features/toggle-permission';
@@ -16,6 +17,7 @@ const ROLE_LABELS: Record<StaffRole, string> = {
 };
 
 export function PermissionMatrix() {
+  const { t } = useTranslation('wAdmin');
   const currentRole = useStaffStore(s => s.currentStaff?.role);
   const isAdmin = currentRole === 'admin';
 
@@ -37,16 +39,19 @@ export function PermissionMatrix() {
         action,
         message: result.error.message,
       });
-      toast.error('Failed to update permission', { description: result.error.message });
+      toast.error(t('permissionMatrix.updateFailed'), { description: result.error.message });
       return;
     }
-    toast.success(checked ? 'Permission enabled' : 'Permission disabled', {
-      description: `${ROLE_LABELS[role]} / ${action}`,
-    });
+    toast.success(
+      checked ? t('permissionMatrix.permissionEnabled') : t('permissionMatrix.permissionDisabled'),
+      {
+        description: `${ROLE_LABELS[role]} / ${action}`,
+      }
+    );
   };
 
   if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading permissions…</div>;
+    return <div className="text-sm text-muted-foreground">{t('permissionMatrix.loading')}</div>;
   }
 
   return (
@@ -55,7 +60,7 @@ export function PermissionMatrix() {
         <thead>
           <tr>
             <th className="min-w-[180px] py-2 pr-4 text-left font-medium text-muted-foreground">
-              Action
+              {t('permissionMatrix.columnAction')}
             </th>
             {STAFF_ROLES.map(role => (
               <th

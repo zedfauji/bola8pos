@@ -1,5 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { EditRoleDialog } from '@features/edit-staff-role';
 import { useStaffList } from '@entities/staff';
@@ -13,6 +14,7 @@ import { Button } from '@shared/ui/button';
 import { PermissionMatrix } from './PermissionMatrix';
 
 export function RBACDashboard() {
+  const { t } = useTranslation('wAdmin');
   const { data: staffList, isIdleOrLoading } = useStaffList();
   const currentStaffId = useStaffStore(s => s.currentStaff?.id) ?? null;
 
@@ -25,12 +27,12 @@ export function RBACDashboard() {
     () => [
       {
         accessorKey: 'name',
-        header: 'Name',
+        header: t('rbacDashboard.columnName'),
         cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
       },
       {
         id: 'role',
-        header: 'Role',
+        header: t('rbacDashboard.columnRole'),
         cell: ({ row }) => (
           <Badge variant="outline" className="capitalize">
             {row.original.role}
@@ -55,45 +57,45 @@ export function RBACDashboard() {
                   setDialogOpen(true);
                 }}
               >
-                Edit Role
+                {t('rbacDashboard.editRole')}
               </POSButton>
             </div>
           );
         },
       },
     ],
-    [currentStaffId]
+    [currentStaffId, t]
   );
 
   return (
     <div className="space-y-8">
       {/* Panel 1: Staff Roles (Phase 12 — unchanged) */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Staff Roles</h2>
+        <h2 className="text-lg font-semibold">{t('rbacDashboard.staffRolesTitle')}</h2>
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="secondary"
             size="sm"
             onClick={() => {
-              toast.message('Add Staff', {
-                description: 'Connect create-staff flow when ready.',
+              toast.message(t('rbacDashboard.addStaffToastTitle'), {
+                description: t('rbacDashboard.addStaffToastDescription'),
               });
             }}
           >
-            Add Staff
+            {t('rbacDashboard.addStaff')}
           </Button>
           <Button
             type="button"
             variant="secondary"
             size="sm"
             onClick={() => {
-              toast.message('Deactivate', {
-                description: 'Deactivate staff flow coming soon.',
+              toast.message(t('rbacDashboard.deactivateToastTitle'), {
+                description: t('rbacDashboard.deactivateToastDescription'),
               });
             }}
           >
-            Deactivate
+            {t('rbacDashboard.deactivate')}
           </Button>
         </div>
 
@@ -102,7 +104,7 @@ export function RBACDashboard() {
           data={staff}
           isLoading={isIdleOrLoading}
           searchable
-          searchPlaceholder="Search staff…"
+          searchPlaceholder={t('rbacDashboard.searchStaffPlaceholder')}
         />
 
         <EditRoleDialog
@@ -121,10 +123,9 @@ export function RBACDashboard() {
       {/* Panel 2: Permission Matrix (Phase 13) */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold">Permission Matrix</h2>
+          <h2 className="text-lg font-semibold">{t('rbacDashboard.permissionMatrixTitle')}</h2>
           <p className="text-sm text-muted-foreground">
-            Toggle which actions each role can perform. Changes take effect immediately. Only
-            admins can modify permissions.
+            {t('rbacDashboard.permissionMatrixDescription')}
           </p>
         </div>
         <PermissionMatrix />

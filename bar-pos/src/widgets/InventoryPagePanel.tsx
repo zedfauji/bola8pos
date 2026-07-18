@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   inventoryRowColumns,
@@ -36,9 +37,11 @@ function sortInventoryRows(rows: Inventory[]): Inventory[] {
 
 function rowHighlightClass(inv: Inventory): string | undefined {
   if (inv.quantityOnHand === 0) {
+    // eslint-disable-next-line i18next/no-literal-string -- Tailwind class string, not UI copy
     return 'border-l-4 border-destructive bg-destructive/5';
   }
   if (inv.quantityOnHand <= inv.lowStockThreshold) {
+    // eslint-disable-next-line i18next/no-literal-string -- Tailwind class string, not UI copy
     return 'border-l-4 border-amber-500 bg-amber-500/5';
   }
   return undefined;
@@ -46,12 +49,14 @@ function rowHighlightClass(inv: Inventory): string | undefined {
 
 function escapeCsvField(value: string): string {
   if (/[",\n]/.test(value)) {
+    // eslint-disable-next-line i18next/no-literal-string -- CSV quote-escaping, not UI copy
     return `"${value.replace(/"/g, '""')}"`;
   }
   return value;
 }
 
 function downloadInventoryCsv(rows: Inventory[]) {
+  /* eslint-disable i18next/no-literal-string -- machine-readable CSV column keys, not UI copy */
   const headers = [
     'product',
     'category',
@@ -61,6 +66,7 @@ function downloadInventoryCsv(rows: Inventory[]) {
     'low_stock_threshold',
     'base_price',
   ];
+  /* eslint-enable i18next/no-literal-string */
   const lines = [
     headers.join(','),
     ...rows.map(r => {
@@ -76,6 +82,7 @@ function downloadInventoryCsv(rows: Inventory[]) {
       return cells.map(escapeCsvField).join(',');
     }),
   ];
+  // eslint-disable-next-line i18next/no-literal-string -- MIME type, not UI copy
   const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -86,6 +93,7 @@ function downloadInventoryCsv(rows: Inventory[]) {
 }
 
 export function InventoryPagePanel() {
+  const { t } = useTranslation('wAdmin');
   const currentStaff = useStaffStore(s => s.currentStaff);
   const currentRole = currentStaff?.role;
   const staffId = currentStaff?.id ?? '';
@@ -94,6 +102,7 @@ export function InventoryPagePanel() {
   const { data: logs, isLoading: logsLoading } = useInventoryLog();
   const adjustMutation = useMutationAdjustInventory();
 
+  // eslint-disable-next-line i18next/no-literal-string -- sentinel value, not UI copy
   const [categoryFilter, setCategoryFilter] = useState<string>('__all__');
   const [batchOpen, setBatchOpen] = useState(false);
   const [batchProductId, setBatchProductId] = useState<string>('');
@@ -136,7 +145,7 @@ export function InventoryPagePanel() {
   const toolbar = (
     <div className="flex flex-wrap items-center gap-3">
       <label htmlFor="inv-category-filter" className="text-sm text-muted-foreground">
-        Category
+        {t('inventoryPagePanel.categoryLabel')}
       </label>
       <select
         id="inv-category-filter"
@@ -146,7 +155,7 @@ export function InventoryPagePanel() {
           setCategoryFilter(e.target.value);
         }}
       >
-        <option value="__all__">All categories</option>
+        <option value="__all__">{t('inventoryPagePanel.allCategories')}</option>
         {uniqueCategories.map(c => (
           <option key={c} value={c}>
             {c}
@@ -158,21 +167,21 @@ export function InventoryPagePanel() {
 
   const handleExportCsv = () => {
     if (!displayedRows.length) {
-      toast.message('Nothing to export');
+      toast.message(t('inventoryPagePanel.nothingToExport'));
       return;
     }
     downloadInventoryCsv(displayedRows);
-    toast.success('CSV downloaded');
+    toast.success(t('inventoryPagePanel.csvDownloaded'));
   };
 
   const handleBatchSubmit = async () => {
     if (!staffId) {
-      toast.error('Sign in to adjust inventory.');
+      toast.error(t('inventoryPagePanel.signInToAdjust'));
       return;
     }
     const delta = Number.parseInt(batchDelta, 10);
     if (!batchProductId || Number.isNaN(delta) || delta === 0) {
-      toast.error('Choose a product and a non-zero whole number delta.');
+      toast.error(t('inventoryPagePanel.chooseProductAndDelta'));
       return;
     }
     const res = await adjustMutation.mutateAsync({
@@ -185,7 +194,7 @@ export function InventoryPagePanel() {
       toast.error(res.error.message);
       return;
     }
-    toast.success('Stock updated');
+    toast.success(t('inventoryPagePanel.stockUpdated'));
     setBatchOpen(false);
     setBatchDelta('1');
   };
@@ -200,23 +209,23 @@ export function InventoryPagePanel() {
 
       {!staffId ? (
         <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100">
-          Sign in to adjust inventory and export CSV.
+          {t('inventoryPagePanel.signInBanner')}
         </p>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-4">
         <div className="rounded-lg border bg-card px-4 py-3 text-center">
-          <div className="text-xs text-muted-foreground">Total SKUs</div>
+          <div className="text-xs text-muted-foreground">{t('inventoryPagePanel.totalSkus')}</div>
           <div className="text-2xl font-semibold tabular-nums">{stats.totalSkus}</div>
         </div>
         <div className="rounded-lg border bg-card px-4 py-3 text-center">
-          <div className="text-xs text-muted-foreground">Low stock</div>
+          <div className="text-xs text-muted-foreground">{t('inventoryPagePanel.lowStock')}</div>
           <Badge variant="destructive" className="mt-1 text-base tabular-nums">
             {stats.lowStock}
           </Badge>
         </div>
         <div className="rounded-lg border bg-card px-4 py-3 text-center">
-          <div className="text-xs text-muted-foreground">Out of stock</div>
+          <div className="text-xs text-muted-foreground">{t('inventoryPagePanel.outOfStock')}</div>
           <Badge variant="destructive" className="mt-1 text-base tabular-nums">
             {stats.outOfStock}
           </Badge>
@@ -231,7 +240,7 @@ export function InventoryPagePanel() {
                 setBatchOpen(true);
               }}
             >
-              Adjust
+              {t('inventoryPagePanel.adjust')}
             </POSButton>
           </ProtectedAction>
           <ProtectedAction action="adjust_inventory" currentRole={currentRole}>
@@ -242,7 +251,7 @@ export function InventoryPagePanel() {
               disabled={displayedRows.length === 0}
               onClick={handleExportCsv}
             >
-              Export CSV
+              {t('inventoryPagePanel.exportCsv')}
             </POSButton>
           </ProtectedAction>
         </div>
@@ -250,8 +259,8 @@ export function InventoryPagePanel() {
 
       <section>
         <SectionHeader
-          title="On-hand levels"
-          description="Sort columns, filter by category, quick-adjust quantities."
+          title={t('inventoryPagePanel.onHandLevelsTitle')}
+          description={t('inventoryPagePanel.onHandLevelsDescription')}
         />
         <DataTable<Inventory>
           columns={columns}
@@ -263,11 +272,11 @@ export function InventoryPagePanel() {
           emptyState={
             isEmpty ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No inventory records yet.
+                {t('inventoryPagePanel.noInventoryRecords')}
               </p>
             ) : (data?.length ?? 0) > 0 && displayedRows.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No rows for this category. Choose &quot;All categories&quot; to see everything.
+                {t('inventoryPagePanel.noRowsForCategory')}
               </p>
             ) : undefined
           }
@@ -276,31 +285,31 @@ export function InventoryPagePanel() {
 
       <section>
         <SectionHeader
-          title="Change log"
-          description="Recent manual and system adjustments (last 100)."
+          title={t('inventoryPagePanel.changeLogTitle')}
+          description={t('inventoryPagePanel.changeLogDescription')}
         />
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>When</TableHead>
-                <TableHead>Product ID</TableHead>
-                <TableHead>Delta</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Staff ID</TableHead>
+                <TableHead>{t('inventoryPagePanel.columnWhen')}</TableHead>
+                <TableHead>{t('inventoryPagePanel.columnProductId')}</TableHead>
+                <TableHead>{t('inventoryPagePanel.columnDelta')}</TableHead>
+                <TableHead>{t('inventoryPagePanel.columnReason')}</TableHead>
+                <TableHead>{t('inventoryPagePanel.columnStaffId')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {logsLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-muted-foreground">
-                    Loading…
+                    {t('inventoryPagePanel.loading')}
                   </TableCell>
                 </TableRow>
               ) : !logs?.length ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-muted-foreground">
-                    No log entries.
+                    {t('inventoryPagePanel.noLogEntries')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -324,12 +333,12 @@ export function InventoryPagePanel() {
       <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Batch adjustment</DialogTitle>
+            <DialogTitle>{t('inventoryPagePanel.batchAdjustmentTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <label htmlFor="batch-product" className="text-sm font-medium">
-                Product
+                {t('inventoryPagePanel.productLabel')}
               </label>
               <select
                 id="batch-product"
@@ -339,7 +348,7 @@ export function InventoryPagePanel() {
                   setBatchProductId(e.target.value);
                 }}
               >
-                <option value="">Select…</option>
+                <option value="">{t('inventoryPagePanel.selectPlaceholder')}</option>
                 {(data ?? []).map(inv => (
                   <option key={inv.productId} value={inv.productId}>
                     {inv.product?.name ?? inv.productId}
@@ -347,7 +356,10 @@ export function InventoryPagePanel() {
                 ))}
               </select>
             </div>
-            <FormField label="Quantity delta" hint="Use negative numbers to remove stock.">
+            <FormField
+              label={t('inventoryPagePanel.quantityDeltaLabel')}
+              hint={t('inventoryPagePanel.quantityDeltaHint')}
+            >
               {/* eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-06: signed-delta input, MoneyInput would clamp negatives */}
               <input
                 type="number"
@@ -368,7 +380,7 @@ export function InventoryPagePanel() {
                 setBatchOpen(false);
               }}
             >
-              Cancel
+              {t('inventoryPagePanel.cancel')}
             </POSButton>
             <POSButton
               type="button"
@@ -378,7 +390,7 @@ export function InventoryPagePanel() {
                 void handleBatchSubmit();
               }}
             >
-              Apply
+              {t('inventoryPagePanel.apply')}
             </POSButton>
           </DialogFooter>
         </DialogContent>

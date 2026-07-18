@@ -13,6 +13,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { IngredientsTable } from '@widgets/IngredientsTable';
 import { StockMovementsList } from '@widgets/StockMovementsList';
@@ -40,8 +41,10 @@ const db = supabase as any;
 
 function useMutationCreateIngredient() {
   const qc = useQueryClient();
+  const { t } = useTranslation('wAdmin');
   return useMutation({
     mutationFn: async (input: IngredientCreate) => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain, not UI copy */
       const { error } = await db.from('ingredients').insert({
         name: input.name,
         uom: input.uom,
@@ -53,6 +56,7 @@ function useMutationCreateIngredient() {
         is_active: true,
         category: input.category ?? null,
       });
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('useMutationCreateIngredient: insert failed', { error });
         throw error;
@@ -60,18 +64,20 @@ function useMutationCreateIngredient() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ingredientKeys.lists() });
-      toast.success('Ingredient added');
+      toast.success(t('manageIngredientsTab.ingredientAdded'));
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to save ingredient');
+      toast.error(e instanceof Error ? e.message : t('manageIngredientsTab.failedToSave'));
     },
   });
 }
 
 function useMutationUpdateIngredient() {
   const qc = useQueryClient();
+  const { t } = useTranslation('wAdmin');
   return useMutation({
     mutationFn: async ({ id, input }: { id: string; input: IngredientCreate }) => {
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain, not UI copy */
       const { error } = await db
         .from('ingredients')
         .update({
@@ -87,6 +93,7 @@ function useMutationUpdateIngredient() {
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('useMutationUpdateIngredient: update failed', { error });
         throw error;
@@ -95,23 +102,26 @@ function useMutationUpdateIngredient() {
     onSuccess: (_data, { id }) => {
       void qc.invalidateQueries({ queryKey: ingredientKeys.lists() });
       void qc.invalidateQueries({ queryKey: ingredientKeys.detail(id) });
-      toast.success('Ingredient saved');
+      toast.success(t('manageIngredientsTab.ingredientSaved'));
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to save ingredient');
+      toast.error(e instanceof Error ? e.message : t('manageIngredientsTab.failedToSave'));
     },
   });
 }
 
 function useMutationDeleteIngredient() {
   const qc = useQueryClient();
+  const { t } = useTranslation('wAdmin');
   return useMutation({
     mutationFn: async (id: string) => {
       // Soft delete — set is_active=false to preserve ledger history
+      /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain, not UI copy */
       const { error } = await db
         .from('ingredients')
         .update({ is_active: false })
         .eq('id', id);
+      /* eslint-enable i18next/no-literal-string */
       if (error) {
         logger.error('useMutationDeleteIngredient: soft delete failed', { error });
         throw error;
@@ -119,10 +129,10 @@ function useMutationDeleteIngredient() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ingredientKeys.lists() });
-      toast.success('Ingredient removed');
+      toast.success(t('manageIngredientsTab.ingredientRemoved'));
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : 'Failed to delete ingredient');
+      toast.error(e instanceof Error ? e.message : t('manageIngredientsTab.failedToDelete'));
     },
   });
 }
@@ -142,6 +152,7 @@ type DialogState =
 // ============================================================================
 
 export function ManageIngredientsTab() {
+  const { t } = useTranslation('wAdmin');
   const { data: ingredients, isLoading, error: queryError } = useIngredients();
   const createMutation = useMutationCreateIngredient();
   const updateMutation = useMutationUpdateIngredient();
@@ -153,13 +164,13 @@ export function ManageIngredientsTab() {
   if (queryError) {
     return (
       <p className="text-sm text-destructive">
-        Could not load ingredients: {queryError.message}
+        {t('manageIngredientsTab.loadError', { message: queryError.message })}
       </p>
     );
   }
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading ingredients…</p>;
+    return <p className="text-sm text-muted-foreground">{t('manageIngredientsTab.loading')}</p>;
   }
 
   function handleCreate(data: IngredientCreate) {
@@ -194,8 +205,7 @@ export function ManageIngredientsTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Manage raw ingredients and prep items. Stock levels update automatically when orders are
-        processed.
+        {t('manageIngredientsTab.description')}
       </p>
 
       <IngredientsTable
@@ -224,7 +234,7 @@ export function ManageIngredientsTab() {
       >
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto sm:max-w-lg" showCloseButton>
           <DialogHeader>
-            <DialogTitle>New ingredient</DialogTitle>
+            <DialogTitle>{t('manageIngredientsTab.newIngredientTitle')}</DialogTitle>
           </DialogHeader>
           {dialogState?.kind === 'create' && (
             <IngredientForm
@@ -249,7 +259,11 @@ export function ManageIngredientsTab() {
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto sm:max-w-lg" showCloseButton>
           <DialogHeader>
             <DialogTitle>
-              {dialogState?.kind === 'edit' ? `Edit "${dialogState.ingredient.name}"` : 'Edit'}
+              {dialogState?.kind === 'edit'
+                ? t('manageIngredientsTab.editIngredientTitle', {
+                    name: dialogState.ingredient.name,
+                  })
+                : t('manageIngredientsTab.editTitle')}
             </DialogTitle>
           </DialogHeader>
           {dialogState?.kind === 'edit' && (
@@ -265,7 +279,9 @@ export function ManageIngredientsTab() {
               />
               <div className="space-y-3 border-t pt-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">Stock movements</h3>
+                  <h3 className="text-sm font-semibold">
+                    {t('manageIngredientsTab.stockMovements')}
+                  </h3>
                   <Button
                     type="button"
                     variant="link"
@@ -274,12 +290,13 @@ export function ManageIngredientsTab() {
                       setDialogState({ kind: 'adjust', ingredient: dialogState.ingredient });
                     }}
                   >
-                    Record adjustment
+                    {t('manageIngredientsTab.recordAdjustment')}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Append-only ledger for {dialogState.ingredient.name}. All adjustments and sales
-                  are recorded here.
+                  {t('manageIngredientsTab.ledgerDescription', {
+                    name: dialogState.ingredient.name,
+                  })}
                 </p>
                 <StockMovementsList
                   ingredientId={dialogState.ingredient.id}
@@ -295,9 +312,9 @@ export function ManageIngredientsTab() {
       {dialogState?.kind === 'delete' && (
         <ConfirmDialog
           open
-          title={`Delete "${dialogState.ingredient.name}"?`}
-          description="This will hide the ingredient from the list. Its stock movement history is preserved and it can be restored from the database if needed."
-          confirmLabel="Delete ingredient"
+          title={t('manageIngredientsTab.deleteTitle', { name: dialogState.ingredient.name })}
+          description={t('manageIngredientsTab.deleteDescription')}
+          confirmLabel={t('manageIngredientsTab.deleteConfirmLabel')}
           variant="destructive"
           isLoading={deleteMutation.isPending}
           onConfirm={handleDelete}

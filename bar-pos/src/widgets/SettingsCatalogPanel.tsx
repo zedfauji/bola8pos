@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   CatalogCategoriesTab,
   CatalogModifiersTab,
@@ -8,14 +9,15 @@ import { ProtectedAction } from '@shared/ui/ProtectedAction';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 
 export function SettingsCatalogPanel() {
+  const { t } = useTranslation('wAdmin');
   const currentRole = useStaffStore(s => s.currentStaff?.role);
 
   return (
     <section className="space-y-4 rounded-lg border p-4">
       <div>
-        <h2 className="text-lg font-semibold">Menu catalog</h2>
+        <h2 className="text-lg font-semibold">{t('settingsCatalogPanel.title')}</h2>
         <p className="text-muted-foreground text-sm">
-          Manage products, categories, and modifiers. Changes apply to the POS menu after save.
+          {t('settingsCatalogPanel.description')}
         </p>
       </div>
 
@@ -23,9 +25,11 @@ export function SettingsCatalogPanel() {
         <fieldset className="m-0 min-w-0 border-0 p-0">
           <Tabs defaultValue="products" className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="products">Products</TabsTrigger>
-              <TabsTrigger value="categories">Categories</TabsTrigger>
-              <TabsTrigger value="modifiers">Modifiers</TabsTrigger>
+              <TabsTrigger value="products">{t('settingsCatalogPanel.tabProducts')}</TabsTrigger>
+              <TabsTrigger value="categories">
+                {t('settingsCatalogPanel.tabCategories')}
+              </TabsTrigger>
+              <TabsTrigger value="modifiers">{t('settingsCatalogPanel.tabModifiers')}</TabsTrigger>
             </TabsList>
             <TabsContent value="products" className="min-h-[12rem]">
               <CatalogProductsTab />
