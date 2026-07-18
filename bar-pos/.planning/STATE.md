@@ -6,14 +6,14 @@ current_phase: 21
 current_phase_name: i18n-multi-language
 status: executing
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-18T17:14:59.961Z"
+last_updated: "2026-07-18T18:04:30.090Z"
 last_activity: 2026-07-18
-last_activity_desc: Plan 21-06 complete (shared/ui sweep to common ns)
+last_activity_desc: Plan 21-07 complete (order/pool/payment feature cluster sweep to featOrders ns)
 progress:
   total_phases: 28
   completed_phases: 17
   total_plans: 133
-  completed_plans: 136
+  completed_plans: 137
   percent: 61
 ---
 
@@ -49,12 +49,13 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 21 (i18n-multi-language) — EXECUTING
-Plan: 7 of 13
-Status: Ready to execute 21-07
-Last activity: 2026-07-18 — Plan 21-06 complete (shared/ui sweep to common ns)
+Plan: 8 of 13
+Status: Ready to execute 21-08
+Last activity: 2026-07-18 — Plan 21-07 complete (order/pool/payment feature cluster sweep to featOrders ns)
 
 ## Session Log
 
+- 2026-07-18: **Phase 21 (i18n-multi-language) Plan 07 COMPLETE — order/pool/payment feature cluster sweep to featOrders ns** — Ran `npm run lint:i18n` against all 21 order/pool-timer/payment/refund/split/void/caja-entry feature folders across two commits (`cbbc10a`, `7d49987`): Task 1 fixed 191 violations across `process-payment`, `process-refund`, `split-tab`, `close-tab`, `open-tab`, `transfer-tab`, `void-order`, `add-item-to-tab`, `add-combo-to-tab`, `remove-tab-item`; Task 2 fixed 77 violations across `start-pool-timer`, `stop-pool-timer`, `stop-and-move-table`, `assign-pool-session-to-tab`, `edit-session-start-time`, `bump-kds-item`, `lookup-product-by-barcode`, `manager-pin-gate`, `print-precheque`, `register-caja-entry`. `featOrders.json` seeded (both locales, byte-identical) with 218 keys across 20 feature-scoped groups. `eslint.i18n.config.js` extended with `rpc`/`navigate` callee excludes (RPC names/route paths aren't UI copy — recurs across the whole codebase, benefits future 21-xx sweeps), `confirmClassName` jsx-attribute exclude (ConfirmDialog's Tailwind passthrough), and a test-file `no-explicit-any` override mirroring the committed gate. Found + fixed 2 real bugs: `OpenTabDialog` and `RegisterCajaEntryDialog` both had module-level zod `FormSchema` consts baking validation messages in whichever locale was active at first import — converted both to a `buildFormSchema()` function called fresh per validation so a runtime locale switch (Phase 21-03) is reflected immediately. Task 3 proved zero violations across the combined 21-folder command, reconciled the catalog (218/218 keys byte-identical both locales, 0 unused keys against the whole `src/**` tree), and re-confirmed `typecheck`/`lint`/full unit suite (1248 tests, zero regressions) — no code changes needed, already clean after Tasks 1-2. `gsd-tools state record-metric`/`add-decision` worked via named-flag syntax this session (`--phase`/`--plan`/`--summary`, not the positional syntax in execute-plan.md) — `roadmap update-plan-progress` also worked live; `requirements mark-complete SC-4` reported `REQUIREMENTS.md not found` (this project has no REQUIREMENTS.md file in `.planning/` — not a tool bug, the file is genuinely absent for this milestone).
 - 2026-07-18: **Phase 21 (i18n-multi-language) Plan 06 COMPLETE — shared/ui sweep to common ns** — Ran `npm run lint:i18n -- src/shared/ui` to enumerate the 222-violation baseline across 45 files, fixed every one across two commits (`c2fc2eb`, `af7af14`): 24 components migrated to `useTranslation('common')` (byte-identical es-MX values, 20 new component-scoped key groups + 3 shared `actions.*`/`loading.*` buckets seeded in both locales), `StatusBadge`'s config map switched to `labelKey` i18next dot-paths, and technical non-copy literals (Tailwind size-class lookup tables, a DOM-tag-selection ternary, a Radix `data-state` marker) excluded via config/eslint-disable instead of translated. Found + fixed 2 real bugs surfaced by the sweep: (1) shared/ui components calling `useTranslation()` rendered raw key strings in dozens of pre-existing test files that never imported the i18n singleton — fixed by adding a global `import '@shared/lib/i18n';` to `src/shared/lib/test-setup.ts`; (2) `ErrorBoundary`'s first attempt at `withTranslation()` HOC broke `LanguageSettingsTab.test.tsx`'s partial `react-i18next` mock — reverted to the i18n singleton's `.t()` called directly (class component, no hooks). `npm run lint:i18n -- src/shared/ui` exits 0; `npm run typecheck`/`npm run lint` exit 0 (only the 2 pre-existing unrelated typecheck errors); full unit suite 140 files/1248 tests pass, zero regressions. `gsd-tools query state.record-metric`/`state.add-decision`/`roadmap.update-plan-progress`/`requirements.mark-complete` all silently no-op'd in this environment (exit 0, zero stdout/stderr, no file diff) — STATE.md/ROADMAP.md updated manually to match the intended output instead.
 - 2026-07-14: **Phase 34 (visual-regression-baseline) Plan 02 COMPLETE — Task 3 checkpoint approved** — `e2e/visual/45-visual-baseline.spec.ts` (5 test blocks, admin 17 routes + bartender 11 + manager 14 accessible routes, denied-route URL assertions, `/audit` denied-toast screenshot) + `waitForPageReady()` content-readiness helper committed `70c7f4b`; local baseline seeded (43 PNGs, gitignored) with a genuine blank-screenshot bug found and fixed (`55470bc`, `e2986e1` — content wasn't awaited before `toHaveScreenshot()`, every `React.lazy()`+Suspense+TanStack-Query route captured blank); two consecutive `npm run test:e2e:visual` runs both exit 0 with zero diffs (VISUAL-03). Task 3's blocking `checkpoint:human-verify` was approved by the user ("Checked and confirmed i could see all the pNGs") after reviewing all 43 PNGs. VISUAL-02 + VISUAL-03 marked complete in REQUIREMENTS.md; ROADMAP.md Phase 34 marked Complete. **Phase 34 is now complete — 2/2 plans.**
 - 2026-07-10: **Phase 30 (shared-shell-primitive-extension) COMPLETE — verified passed** — 5/5 plans executed across 3 waves: 30-01 extended `PageContainer`/`SectionHeader` with `backTo`/`backLabel` (Wave-0 RED→GREEN test); 30-02/30-03/30-04 ran in parallel worktrees migrating all 15 non-exempt routes off `BackToHomeButton` (7 already-`PageContainer` pages, 5 first-time adoptions incl. `inventory`'s `LowStockBadge`+gated button and `reports`' 13-tab full-height layout, 3 special cases: `pos`/`payments` full-bleed `className` override + `pool-table-status`'s deliberate `backTo="/pool-tables"` non-default); 30-05 deleted dead `BackToHomeButton`/`AppShell`/`AppNav` + fixed `CLAUDE.md`'s routes table to all 17 rows. Initial verifier pass returned `gaps_found` (2 items): (1) SC#1's literal "all 17 routes" text vs the pre-planned D-02 exemption of `login`/`home` (no sensible back target for either) — user accepted this as an override; (2) 3 targeted E2E specs couldn't run (port 1420 held by a stray process). User asked to investigate rather than defer — freed the port and found a **real pre-existing bug**, unrelated to this phase: `src/pages/login/index.tsx`'s `isAuthenticated` guard redirected to `/pos`, racing `PINLoginForm.tsx`'s `navigate('/home')` after login, so `15-home-navigation.spec.ts`'s very first test failed on landing URL. Fixed (commit `b6e1729`, separate from the phase's plan commits) by aligning the guard to `/home`. Re-verified: `15-home-navigation` now green (bar one unrelated pre-existing item); `16-table-status`/`17-payment-pane` still have failures traced to live-Supabase RPC latency (120s timeout on a "Start Session" call) — confirmed via page snapshots that the shell/`PageContainer` code itself is correct in every failure, so this is pre-existing test-infra flakiness, not a regression. Full-repo `typecheck`/`lint`/unit suite re-confirmed clean throughout (2 pre-existing typecheck errors, lint exit 0, 1212 passed/1 pre-existing `useCloseTab.test.ts` failure/15 todo — exact baseline match, zero regressions). **Note: wave-2 worktree agents' SUMMARY.md files were lost on `git worktree remove --force`** (never committed — `.planning/` is gitignored and those files were never force-added before removal) — reconstructed from the orchestrator's retained task-notification text and committed after the fact; lesson for future worktree-isolated waves: force-add+commit any gitignored `.planning/` artifacts from inside the worktree BEFORE requesting removal.
@@ -247,6 +248,7 @@ Last activity: 2026-07-18 — Plan 21-06 complete (shared/ui sweep to common ns)
 - [Phase 21-i18n-multi-language 06]: eslint.i18n.config.js extended with data-slot/aria-invalid jsx-attribute excludes + displayName/className/labelKey object-property excludes + symbol/dot/circle/minus/asterisk word excludes; react-hooks/jsx-a11y/react plugins registered (inactive) so pre-existing eslint-disable comments resolve under the narrower standalone gate
 - [Phase 21-i18n-multi-language 06]: eslint.config.js mirror-registers the i18next plugin (inactive, reportUnusedDisableDirectives off) so the reverse eslint-disable comments this sweep introduced (Tailwind class-name lookup tables, DOM-tag-selection ternary) resolve under the committed lint gate
 - [Phase 21-i18n-multi-language 06]: ErrorBoundary (class component) uses the i18n singleton's i18n.t() directly instead of react-i18next's withTranslation() HOC -- the HOC's module-level side effect broke LanguageSettingsTab.test.tsx's partial react-i18next mock (no withTranslation export)
+- [Phase ?]: featOrders.json: 218 keys across 20 feature groups (payment/refund/split-tab/tab-lifecycle/pool-timer/kds/barcode/pin-gate/caja-entry), byte-identical es-MX/en-US
 
 ## Performance Metrics
 
@@ -307,10 +309,11 @@ Last activity: 2026-07-18 — Plan 21-06 complete (shared/ui sweep to common ns)
 | Phase 21-i18n-multi-language P04 | 20min | 2 tasks | 7 files |
 | Phase 21-i18n-multi-language P05 | ~45min | 3 tasks | 13 files |
 | Phase 21-i18n-multi-language P06 | ~90min | 2 tasks | 34 files |
+| Phase 21-i18n-multi-language P07 | 105min | 3 tasks | 36 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 21-05-PLAN.md
+- **Stopped at:** Completed 21-07-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -327,8 +330,8 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-18T17:14:59.961Z
-**Stopped at:** Completed 21-06-PLAN.md
+**Last session:** 2026-07-18T18:04:30.081Z
+**Stopped at:** Completed 21-07-PLAN.md
 **Resume file:** None
 
 ## Operator Next Steps
