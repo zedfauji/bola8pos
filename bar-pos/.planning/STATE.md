@@ -6,7 +6,7 @@ current_phase: 21
 current_phase_name: i18n-multi-language
 status: executing
 stopped_at: Milestone switched from v2.2 (shipped) back to v2.1 (in progress)
-last_updated: "2026-07-18T18:04:30.090Z"
+last_updated: "2026-07-18T22:46:42.252Z"
 last_activity: 2026-07-18
 last_activity_desc: Plan 21-07 complete (order/pool/payment feature cluster sweep to featOrders ns)
 progress:
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 21 (i18n-multi-language) — EXECUTING
-Plan: 8 of 13
+Plan: 9 of 13
 Status: Ready to execute 21-08
 Last activity: 2026-07-18 — Plan 21-07 complete (order/pool/payment feature cluster sweep to featOrders ns)
 
@@ -249,6 +249,7 @@ Last activity: 2026-07-18 — Plan 21-07 complete (order/pool/payment feature cl
 - [Phase 21-i18n-multi-language 06]: eslint.config.js mirror-registers the i18next plugin (inactive, reportUnusedDisableDirectives off) so the reverse eslint-disable comments this sweep introduced (Tailwind class-name lookup tables, DOM-tag-selection ternary) resolve under the committed lint gate
 - [Phase 21-i18n-multi-language 06]: ErrorBoundary (class component) uses the i18n singleton's i18n.t() directly instead of react-i18next's withTranslation() HOC -- the HOC's module-level side effect broke LanguageSettingsTab.test.tsx's partial react-i18next mock (no withTranslation export)
 - [Phase ?]: featOrders.json: 218 keys across 20 feature groups (payment/refund/split-tab/tab-lifecycle/pool-timer/kds/barcode/pin-gate/caja-entry), byte-identical es-MX/en-US
+- [Phase ?]: eslint.i18n.config.js multi-line Supabase chain plugin quirk worked around with scoped eslint-disable blocks (config-exclude alone insufficient); agent-chat's Spanish source strings got genuine en-US translations
 
 ## Performance Metrics
 
@@ -310,10 +311,11 @@ Last activity: 2026-07-18 — Plan 21-07 complete (order/pool/payment feature cl
 | Phase 21-i18n-multi-language P05 | ~45min | 3 tasks | 13 files |
 | Phase 21-i18n-multi-language P06 | ~90min | 2 tasks | 34 files |
 | Phase 21-i18n-multi-language P07 | 105min | 3 tasks | 36 files |
+| Phase 21 P08 | ~150min | 3 tasks | 31 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 21-07-PLAN.md
+- **Stopped at:** Plan 21-08 complete (management/staff/inventory/waitlist feature cluster sweep to featMgmt ns)
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -330,7 +332,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-18T18:04:30.081Z
+**Last session:** 2026-07-18T22:46:42.243Z
 **Stopped at:** Completed 21-07-PLAN.md
 **Resume file:** None
 
