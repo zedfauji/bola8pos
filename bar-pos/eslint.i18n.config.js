@@ -6,6 +6,7 @@
 // Usage: npm run lint:i18n -- <path glob>
 import tseslint from 'typescript-eslint'
 import i18next from 'eslint-plugin-i18next'
+import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default tseslint.config({
   // Matches every ts/tsx file so files outside the i18next-scoped block below
@@ -19,6 +20,17 @@ export default tseslint.config({
       projectService: true,
       tsconfigRootDir: import.meta.dirname,
     },
+  },
+  // Registered (not enabled) so eslint-disable comments scoped to the wider
+  // committed eslint.config.js's rule set (react-refresh/only-export-components,
+  // e.g. pdf.tsx) resolve as known-but-inactive rules instead of erroring with
+  // "Definition for rule ... was not found" under this narrower standalone gate.
+  plugins: { 'react-refresh': reactRefresh },
+  linterOptions: {
+    // Same rationale — a disable comment for a rule this gate doesn't enable
+    // (@typescript-eslint/no-unsafe-argument, react-refresh/only-export-components)
+    // is legitimately "unused" here without being a real problem in the file.
+    reportUnusedDisableDirectives: 'off',
   },
 }, {
   files: [

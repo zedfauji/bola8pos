@@ -6,6 +6,7 @@ import type {
   ComboMixRow,
   CategoryRevenueRow,
   HourlyRow,
+  Locale,
   ProductSalesRow,
   RecipeVarianceRow,
   RefundRegisterRow,
@@ -14,6 +15,7 @@ import type {
   VoidRefundRow,
   WaitlistMetricsRow,
 } from '@shared/lib/domain';
+import i18n, { getCurrentLocale } from '@shared/lib/i18n';
 
 const DARK_HEADER = '#1e293b';
 
@@ -41,35 +43,42 @@ function fmt(n: number): string {
   return `$${n.toFixed(2)}`;
 }
 
-function ReportHeader({ title, date }: { title: string; date: string }) {
+/** Resolves a locale-scoped translator for the `receipt` catalog namespace (Pattern 3 — pdf() renders outside the I18nextProvider tree, so useTranslation() cannot be used here). */
+function pdfT(locale: Locale) {
+  return i18n.getFixedT(locale, 'receipt');
+}
+
+function ReportHeader({ title, date, locale }: { title: string; date: string; locale: Locale }) {
+  const tr = pdfT(locale);
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>{'Bar & Pool Parlor POS'}</Text>
+      <Text style={styles.title}>{tr('pdf.appTitle')}</Text>
       <Text style={styles.subtitle}>{title}</Text>
       <Text style={styles.subtitle}>{date}</Text>
     </View>
   );
 }
 
-function CajaReportDoc({ report }: { report: CajaReport }) {
-  const date = report.cajaSession.openedAt.toLocaleDateString();
+function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale }) {
+  const tr = pdfT(locale);
+  const date = report.cajaSession.openedAt.toLocaleDateString(locale);
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Daily Caja Report" date={date} />
+        <ReportHeader title={tr('pdf.caja.title')} date={date} locale={locale} />
 
-        <Text style={styles.sectionTitle}>Summary</Text>
+        <Text style={styles.sectionTitle}>{tr('pdf.caja.summary')}</Text>
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Metric</Text>
-          <Text style={styles.cellRight}>Value</Text>
+          <Text style={styles.cell}>{tr('pdf.caja.metric')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.caja.value')}</Text>
         </View>
         {[
-          ['Total Revenue', fmt(report.summary.totalRevenue)],
-          ['Cash Sales', fmt(report.summary.cashSales)],
-          ['Card Sales', fmt(report.summary.cardSales)],
-          ['Rappi Sales', fmt(report.summary.rappiSales)],
-          ['Order Count', String(report.summary.orderCount)],
-          ['Tab Count', String(report.summary.tabCount)],
+          [tr('pdf.caja.totalRevenue'), fmt(report.summary.totalRevenue)],
+          [tr('pdf.caja.cashSales'), fmt(report.summary.cashSales)],
+          [tr('pdf.caja.cardSales'), fmt(report.summary.cardSales)],
+          [tr('pdf.caja.rappiSales'), fmt(report.summary.rappiSales)],
+          [tr('pdf.caja.orderCount'), String(report.summary.orderCount)],
+          [tr('pdf.caja.tabCount'), String(report.summary.tabCount)],
         ].map(([label, value], i) => (
           <View key={label} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
             <Text style={styles.cell}>{label}</Text>
@@ -77,23 +86,23 @@ function CajaReportDoc({ report }: { report: CajaReport }) {
           </View>
         ))}
 
-        <Text style={styles.sectionTitle}>Cash Reconciliation</Text>
+        <Text style={styles.sectionTitle}>{tr('pdf.caja.cashReconciliation')}</Text>
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Item</Text>
-          <Text style={styles.cellRight}>Amount</Text>
+          <Text style={styles.cell}>{tr('pdf.caja.item')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.caja.amount')}</Text>
         </View>
         {[
-          ['Opening Cash', fmt(report.cashReconciliation.openingCash)],
-          ['Cash Sales', fmt(report.cashReconciliation.cashSales)],
-          ['Expected Cash', fmt(report.cashReconciliation.expectedCash)],
+          [tr('pdf.caja.openingCash'), fmt(report.cashReconciliation.openingCash)],
+          [tr('pdf.caja.cashSales'), fmt(report.cashReconciliation.cashSales)],
+          [tr('pdf.caja.expectedCash'), fmt(report.cashReconciliation.expectedCash)],
           [
-            'Closing Cash',
+            tr('pdf.caja.closingCash'),
             report.cashReconciliation.closingCash !== null
               ? fmt(report.cashReconciliation.closingCash)
               : '—',
           ],
           [
-            'Variance',
+            tr('pdf.caja.variance'),
             report.cashReconciliation.variance !== null
               ? fmt(report.cashReconciliation.variance)
               : '—',
@@ -105,11 +114,11 @@ function CajaReportDoc({ report }: { report: CajaReport }) {
           </View>
         ))}
 
-        <Text style={styles.sectionTitle}>Top Products</Text>
+        <Text style={styles.sectionTitle}>{tr('pdf.caja.topProducts')}</Text>
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Product</Text>
-          <Text style={styles.cellRight}>Qty</Text>
-          <Text style={styles.cellRight}>Revenue</Text>
+          <Text style={styles.cell}>{tr('pdf.caja.product')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.caja.qty')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.caja.revenue')}</Text>
         </View>
         {report.topProducts.map((p, i) => (
           <View key={p.productName} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
@@ -119,11 +128,11 @@ function CajaReportDoc({ report }: { report: CajaReport }) {
           </View>
         ))}
 
-        <Text style={styles.sectionTitle}>Staff Performance</Text>
+        <Text style={styles.sectionTitle}>{tr('pdf.caja.staffPerformance')}</Text>
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Staff</Text>
-          <Text style={styles.cellRight}>Orders</Text>
-          <Text style={styles.cellRight}>Sales Total</Text>
+          <Text style={styles.cell}>{tr('pdf.caja.staff')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.caja.orders')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.caja.salesTotal')}</Text>
         </View>
         {report.staffSummary.map((s, i) => (
           <View key={s.staffId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
@@ -140,20 +149,23 @@ function CajaReportDoc({ report }: { report: CajaReport }) {
 function ProductSalesDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: ProductSalesRow[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Product Sales Report" date={dateLabel} />
+        <ReportHeader title={tr('pdf.productSales.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Product</Text>
-          <Text style={styles.cell}>Category</Text>
-          <Text style={styles.cellRight}>Units</Text>
-          <Text style={styles.cellRight}>Revenue</Text>
+          <Text style={styles.cell}>{tr('pdf.productSales.product')}</Text>
+          <Text style={styles.cell}>{tr('pdf.productSales.category')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.productSales.units')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.productSales.revenue')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.productName} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
@@ -168,15 +180,20 @@ function ProductSalesDoc({
   );
 }
 
-function HourlySalesDoc({ rows }: { rows: HourlyRow[] }) {
+function HourlySalesDoc({ rows, locale }: { rows: HourlyRow[]; locale: Locale }) {
+  const tr = pdfT(locale);
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Hourly Sales Report" date={new Date().toLocaleDateString()} />
+        <ReportHeader
+          title={tr('pdf.hourlySales.title')}
+          date={new Date().toLocaleDateString(locale)}
+          locale={locale}
+        />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Hour</Text>
-          <Text style={styles.cellRight}>Orders</Text>
-          <Text style={styles.cellRight}>Revenue</Text>
+          <Text style={styles.cell}>{tr('pdf.hourlySales.hour')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.hourlySales.orders')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.hourlySales.revenue')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.hour} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
@@ -200,41 +217,47 @@ async function docToBytes(doc: React.ReactElement): Promise<Uint8Array> {
 }
 
 export async function cajaReportToPdfBytes(report: CajaReport): Promise<Uint8Array> {
-  return docToBytes(React.createElement(CajaReportDoc, { report }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(CajaReportDoc, { report, locale }));
 }
 
 export async function productSalesToPdfBytes(
   rows: ProductSalesRow[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(ProductSalesDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(ProductSalesDoc, { rows, dateRange, locale }));
 }
 
 export async function hourlySalesToPdfBytes(rows: HourlyRow[]): Promise<Uint8Array> {
-  return docToBytes(React.createElement(HourlySalesDoc, { rows }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(HourlySalesDoc, { rows, locale }));
 }
 
 function VoidRefundDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: VoidRefundRow[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Voids & Refunds Report" date={dateLabel} />
+        <ReportHeader title={tr('pdf.voidRefund.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Timestamp</Text>
-          <Text style={styles.cell}>Staff</Text>
-          <Text style={styles.cellRight}>Amount</Text>
-          <Text style={styles.cell}>Reason</Text>
+          <Text style={styles.cell}>{tr('pdf.voidRefund.timestamp')}</Text>
+          <Text style={styles.cell}>{tr('pdf.voidRefund.staff')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.voidRefund.amount')}</Text>
+          <Text style={styles.cell}>{tr('pdf.voidRefund.reason')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.orderId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
-            <Text style={styles.cell}>{r.voidedAt.toLocaleString()}</Text>
+            <Text style={styles.cell}>{r.voidedAt.toLocaleString(locale)}</Text>
             <Text style={styles.cell}>{r.staffName}</Text>
             <Text style={styles.cellRight}>{fmt(r.amount)}</Text>
             <Text style={styles.cell}>{r.reason}</Text>
@@ -249,27 +272,31 @@ export async function voidRefundToPdfBytes(
   rows: VoidRefundRow[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(VoidRefundDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(VoidRefundDoc, { rows, dateRange, locale }));
 }
 
 function CategoryRevenueDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: CategoryRevenueRow[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Revenue by Category" date={dateLabel} />
+        <ReportHeader title={tr('pdf.categoryRevenue.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Category</Text>
-          <Text style={styles.cellRight}>Units</Text>
-          <Text style={styles.cellRight}>Orders</Text>
-          <Text style={styles.cellRight}>Revenue</Text>
-          <Text style={styles.cellRight}>% of Total</Text>
+          <Text style={styles.cell}>{tr('pdf.categoryRevenue.category')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.categoryRevenue.units')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.categoryRevenue.orders')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.categoryRevenue.revenue')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.categoryRevenue.pctTotal')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.categoryId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
@@ -289,27 +316,31 @@ export async function categoryRevenueToPdfBytes(
   rows: CategoryRevenueRow[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(CategoryRevenueDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(CategoryRevenueDoc, { rows, dateRange, locale }));
 }
 
 function StaffMetricsDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: StaffMetric[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Staff Performance Report" date={dateLabel} />
+        <ReportHeader title={tr('pdf.staffMetrics.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Staff Member</Text>
-          <Text style={styles.cellRight}>Revenue</Text>
-          <Text style={styles.cellRight}>Transactions</Text>
-          <Text style={styles.cellRight}>Avg Check</Text>
-          <Text style={styles.cellRight}>Voids</Text>
+          <Text style={styles.cell}>{tr('pdf.staffMetrics.staffMember')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.staffMetrics.revenue')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.staffMetrics.transactions')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.staffMetrics.avgCheck')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.staffMetrics.voids')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.staffId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
@@ -329,24 +360,28 @@ export async function staffMetricsToPdfBytes(
   rows: StaffMetric[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(StaffMetricsDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(StaffMetricsDoc, { rows, dateRange, locale }));
 }
 
 function StaffTipsDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: StaffTips[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Tip Distribution Report" date={dateLabel} />
+        <ReportHeader title={tr('pdf.staffTips.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Staff Member</Text>
-          <Text style={styles.cellRight}>Total Tips</Text>
+          <Text style={styles.cell}>{tr('pdf.staffTips.staffMember')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.staffTips.totalTips')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.staffId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
@@ -363,7 +398,8 @@ export async function staffTipsToPdfBytes(
   rows: StaffTips[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(StaffTipsDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(StaffTipsDoc, { rows, dateRange, locale }));
 }
 
 // Phase 8 S6-08 PDF builders
@@ -371,25 +407,31 @@ export async function staffTipsToPdfBytes(
 function ComboMixDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: ComboMixRow[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Combo Mix Report" date={dateLabel} />
+        <ReportHeader title={tr('pdf.comboMix.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Date</Text>
-          <Text style={styles.cell}>Combo</Text>
-          <Text style={styles.cellRight}>Units</Text>
-          <Text style={styles.cellRight}>Revenue</Text>
-          <Text style={styles.cellRight}>Avg Price</Text>
-          <Text style={styles.cellRight}>Overrides</Text>
+          <Text style={styles.cell}>{tr('pdf.comboMix.date')}</Text>
+          <Text style={styles.cell}>{tr('pdf.comboMix.combo')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.comboMix.units')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.comboMix.revenue')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.comboMix.avgPrice')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.comboMix.overrides')}</Text>
         </View>
         {rows.map((r, i) => (
-          <View key={`${r.date}-${r.comboProductId}`} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+          <View
+            key={`${r.date}-${r.comboProductId}`}
+            style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}
+          >
             <Text style={styles.cell}>{r.date}</Text>
             <Text style={styles.cell}>{r.comboName}</Text>
             <Text style={styles.cellRight}>{String(r.qtySold)}</Text>
@@ -407,30 +449,37 @@ export async function comboMixToPdfBytes(
   rows: ComboMixRow[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(ComboMixDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(ComboMixDoc, { rows, dateRange, locale }));
 }
 
 function RecipeVarianceDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: RecipeVarianceRow[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Recipe Variance Report" date={dateLabel} />
+        <ReportHeader title={tr('pdf.recipeVariance.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Date</Text>
-          <Text style={styles.cell}>Ingredient</Text>
-          <Text style={styles.cellRight}>Theoretical</Text>
-          <Text style={styles.cellRight}>Delta</Text>
-          <Text style={styles.cellRight}>Variance %</Text>
+          <Text style={styles.cell}>{tr('pdf.recipeVariance.date')}</Text>
+          <Text style={styles.cell}>{tr('pdf.recipeVariance.ingredient')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.recipeVariance.theoretical')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.recipeVariance.delta')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.recipeVariance.variancePct')}</Text>
         </View>
         {rows.map((r, i) => (
-          <View key={`${r.date}-${r.ingredientId}`} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+          <View
+            key={`${r.date}-${r.ingredientId}`}
+            style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}
+          >
             <Text style={styles.cell}>{r.date}</Text>
             <Text style={styles.cell}>{r.ingredientName}</Text>
             <Text style={styles.cellRight}>{String(r.theoreticalUsed)}</Text>
@@ -447,35 +496,45 @@ export async function recipeVarianceToPdfBytes(
   rows: RecipeVarianceRow[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(RecipeVarianceDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(RecipeVarianceDoc, { rows, dateRange, locale }));
 }
 
 function WaitlistMetricsDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: WaitlistMetricsRow[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Waitlist Analytics Report" date={dateLabel} />
+        <ReportHeader title={tr('pdf.waitlistMetrics.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Date</Text>
-          <Text style={styles.cellRight}>Parties Seated</Text>
-          <Text style={styles.cellRight}>Avg Quoted (min)</Text>
-          <Text style={styles.cellRight}>Avg Actual (min)</Text>
-          <Text style={styles.cellRight}>No-Show %</Text>
+          <Text style={styles.cell}>{tr('pdf.waitlistMetrics.date')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.waitlistMetrics.partiesSeated')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.waitlistMetrics.avgQuoted')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.waitlistMetrics.avgActual')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.waitlistMetrics.noShowRate')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.date} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
             <Text style={styles.cell}>{r.date}</Text>
             <Text style={styles.cellRight}>{String(r.partiesSeated)}</Text>
-            <Text style={styles.cellRight}>{r.avgQuotedWait !== null ? String(r.avgQuotedWait) : '—'}</Text>
-            <Text style={styles.cellRight}>{r.avgActualWait !== null ? String(r.avgActualWait) : '—'}</Text>
-            <Text style={styles.cellRight}>{r.noShowRate !== null ? String(r.noShowRate) : '—'}</Text>
+            <Text style={styles.cellRight}>
+              {r.avgQuotedWait !== null ? String(r.avgQuotedWait) : '—'}
+            </Text>
+            <Text style={styles.cellRight}>
+              {r.avgActualWait !== null ? String(r.avgActualWait) : '—'}
+            </Text>
+            <Text style={styles.cellRight}>
+              {r.noShowRate !== null ? String(r.noShowRate) : '—'}
+            </Text>
           </View>
         ))}
       </Page>
@@ -487,31 +546,35 @@ export async function waitlistMetricsToPdfBytes(
   rows: WaitlistMetricsRow[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(WaitlistMetricsDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(WaitlistMetricsDoc, { rows, dateRange, locale }));
 }
 
 function RefundsRegisterDoc({
   rows,
   dateRange,
+  locale,
 }: {
   rows: RefundRegisterRow[];
   dateRange: { from: Date; to: Date };
+  locale: Locale;
 }) {
-  const dateLabel = `${dateRange.from.toLocaleDateString()} – ${dateRange.to.toLocaleDateString()}`;
+  const tr = pdfT(locale);
+  const dateLabel = `${dateRange.from.toLocaleDateString(locale)} – ${dateRange.to.toLocaleDateString(locale)}`;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <ReportHeader title="Refunds Register" date={dateLabel} />
+        <ReportHeader title={tr('pdf.refundsRegister.title')} date={dateLabel} locale={locale} />
         <View style={styles.tableHeader}>
-          <Text style={styles.cell}>Date</Text>
-          <Text style={styles.cell}>Operator</Text>
-          <Text style={styles.cellRight}>Amount</Text>
-          <Text style={styles.cell}>Reason</Text>
-          <Text style={styles.cellRight}>Restock</Text>
+          <Text style={styles.cell}>{tr('pdf.refundsRegister.date')}</Text>
+          <Text style={styles.cell}>{tr('pdf.refundsRegister.operator')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.refundsRegister.amount')}</Text>
+          <Text style={styles.cell}>{tr('pdf.refundsRegister.reason')}</Text>
+          <Text style={styles.cellRight}>{tr('pdf.refundsRegister.restock')}</Text>
         </View>
         {rows.map((r, i) => (
           <View key={r.id} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
-            <Text style={styles.cell}>{new Date(r.date).toLocaleDateString()}</Text>
+            <Text style={styles.cell}>{new Date(r.date).toLocaleDateString(locale)}</Text>
             <Text style={styles.cell}>{r.operatorName}</Text>
             <Text style={styles.cellRight}>{fmt(r.amount)}</Text>
             <Text style={styles.cell}>{r.reason}</Text>
@@ -527,5 +590,6 @@ export async function refundsRegisterToPdfBytes(
   rows: RefundRegisterRow[],
   dateRange: { from: Date; to: Date }
 ): Promise<Uint8Array> {
-  return docToBytes(React.createElement(RefundsRegisterDoc, { rows, dateRange }));
+  const locale = getCurrentLocale();
+  return docToBytes(React.createElement(RefundsRegisterDoc, { rows, dateRange, locale }));
 }
