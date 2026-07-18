@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationUpdateSetting, useSettings } from '@entities/settings';
 import type { UserRole } from '@shared/lib/domain';
@@ -25,6 +26,7 @@ const DEFAULT_FORM: GeneralForm = {
 };
 
 export function GeneralSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data } = useSettings();
   const updateSetting = useMutationUpdateSetting();
   const [form, setForm] = useState<GeneralForm>(DEFAULT_FORM);
@@ -59,7 +61,7 @@ export function GeneralSettingsTab({ currentRole }: Props) {
       return;
     }
     setDirty(false);
-    toast.success('General settings saved.');
+    toast.success(t('generalSettingsTab.saved'));
   };
 
   return (
@@ -69,10 +71,10 @@ export function GeneralSettingsTab({ currentRole }: Props) {
       disabled={updateSetting.isPending}
     >
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">General</h2>
+        <h2 className="text-lg font-semibold">{t('generalSettingsTab.title')}</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="settings-bar-name">Bar name</Label>
+            <Label htmlFor="settings-bar-name">{t('generalSettingsTab.barNameLabel')}</Label>
             <Input
               id="settings-bar-name"
               value={form.barName}
@@ -83,7 +85,7 @@ export function GeneralSettingsTab({ currentRole }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="settings-currency">Currency</Label>
+            <Label htmlFor="settings-currency">{t('generalSettingsTab.currencyLabel')}</Label>
             <Input
               id="settings-currency"
               value={form.currency}
@@ -95,7 +97,7 @@ export function GeneralSettingsTab({ currentRole }: Props) {
             />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="settings-address">Address</Label>
+            <Label htmlFor="settings-address">{t('generalSettingsTab.addressLabel')}</Label>
             <Input
               id="settings-address"
               value={form.address}
@@ -106,7 +108,7 @@ export function GeneralSettingsTab({ currentRole }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="settings-timezone">Timezone</Label>
+            <Label htmlFor="settings-timezone">{t('generalSettingsTab.timezoneLabel')}</Label>
             <Input
               id="settings-timezone"
               value={form.timezone}
@@ -117,7 +119,9 @@ export function GeneralSettingsTab({ currentRole }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="settings-receipt-footer">Receipt footer text</Label>
+            <Label htmlFor="settings-receipt-footer">
+              {t('generalSettingsTab.receiptFooterLabel')}
+            </Label>
             <Input
               id="settings-receipt-footer"
               value={form.receiptFooterText}
@@ -136,7 +140,7 @@ export function GeneralSettingsTab({ currentRole }: Props) {
             void save();
           }}
         >
-          {updateSetting.isPending ? 'Saving...' : 'Save General'}
+          {updateSetting.isPending ? t('generalSettingsTab.saving') : t('generalSettingsTab.saveGeneral')}
         </POSButton>
       </div>
     </ProtectedAction>

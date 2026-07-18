@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { LogoUploader } from '@features/upload-logo';
 import { useSettings, useMutationUpdateSetting } from '@entities/settings';
@@ -20,6 +21,7 @@ const PAPER_OPTIONS = [
 ] as const;
 
 export function HardwareSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const [printing, setPrinting] = useState(false);
   const [openingDrawer, setOpeningDrawer] = useState(false);
   const { data: settings } = useSettings();
@@ -61,7 +63,7 @@ export function HardwareSettingsTab({ currentRole }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Test print sent.');
+    toast.success(t('hardwareSettingsTab.testPrintSent'));
   };
 
   const runOpenDrawer = async () => {
@@ -72,7 +74,7 @@ export function HardwareSettingsTab({ currentRole }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Cash drawer command sent.');
+    toast.success(t('hardwareSettingsTab.cashDrawerSent'));
   };
 
   return (
@@ -83,7 +85,7 @@ export function HardwareSettingsTab({ currentRole }: Props) {
     >
       <div className="space-y-6">
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Hardware</h2>
+          <h2 className="text-lg font-semibold">{t('hardwareSettingsTab.title')}</h2>
           <div className="grid gap-2 sm:grid-cols-2">
             <POSButton
               type="button"
@@ -93,7 +95,7 @@ export function HardwareSettingsTab({ currentRole }: Props) {
                 void runTestPrint();
               }}
             >
-              {printing ? 'Printing...' : 'Test Print'}
+              {printing ? t('hardwareSettingsTab.printing') : t('hardwareSettingsTab.testPrint')}
             </POSButton>
             <POSButton
               type="button"
@@ -104,7 +106,9 @@ export function HardwareSettingsTab({ currentRole }: Props) {
                 void runOpenDrawer();
               }}
             >
-              {openingDrawer ? 'Opening...' : 'Open Cash Drawer'}
+              {openingDrawer
+                ? t('hardwareSettingsTab.opening')
+                : t('hardwareSettingsTab.openCashDrawer')}
             </POSButton>
           </div>
         </div>
@@ -113,10 +117,10 @@ export function HardwareSettingsTab({ currentRole }: Props) {
 
         {receipt && (
           <div className="space-y-4 rounded-lg border p-4">
-            <h3 className="font-medium">Receipt Settings</h3>
+            <h3 className="font-medium">{t('hardwareSettingsTab.receiptSettingsTitle')}</h3>
 
             <div className="space-y-1">
-              <Label htmlFor="paper-width">Paper width</Label>
+              <Label htmlFor="paper-width">{t('hardwareSettingsTab.paperWidthLabel')}</Label>
               <select
                 id="paper-width"
                 value={receipt.paperWidthChars}
@@ -136,12 +140,21 @@ export function HardwareSettingsTab({ currentRole }: Props) {
             <div className="space-y-3">
               {(
                 [
-                  { key: 'showCashierName', label: 'Show cashier name' },
-                  { key: 'showCustomerName', label: 'Show customer name' },
-                  { key: 'showReceiptNumber', label: 'Show receipt number' },
-                  { key: 'boldTotals', label: 'Bold totals line' },
-                  { key: 'printOnStart', label: 'Print start ticket' },
-                  { key: 'autoCut', label: 'Auto-cut paper after each receipt' },
+                  {
+                    key: 'showCashierName',
+                    label: t('hardwareSettingsTab.showCashierName'),
+                  },
+                  {
+                    key: 'showCustomerName',
+                    label: t('hardwareSettingsTab.showCustomerName'),
+                  },
+                  {
+                    key: 'showReceiptNumber',
+                    label: t('hardwareSettingsTab.showReceiptNumber'),
+                  },
+                  { key: 'boldTotals', label: t('hardwareSettingsTab.boldTotals') },
+                  { key: 'printOnStart', label: t('hardwareSettingsTab.printOnStart') },
+                  { key: 'autoCut', label: t('hardwareSettingsTab.autoCut') },
                 ] as const
               ).map(({ key, label }) => (
                 <div key={key} className="flex items-center gap-3">

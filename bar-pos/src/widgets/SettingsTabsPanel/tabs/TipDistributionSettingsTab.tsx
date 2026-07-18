@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationUpdateSetting, useSettings } from '@entities/settings';
 import type { TipDistributionSettings } from '@entities/settings';
@@ -26,6 +27,7 @@ function toNumber(raw: string): number {
 }
 
 export function TipDistributionSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data } = useSettings();
   const updateSetting = useMutationUpdateSetting();
   const [form, setForm] = useState<TipDistributionSettings>(DEFAULT_FORM);
@@ -54,7 +56,7 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
       return;
     }
     setDirty(false);
-    toast.success('Tip split saved.');
+    toast.success(t('tipDistributionSettingsTab.saved'));
 
     // Best-effort audit — never blocks the save (19-RESEARCH.md Pattern 2).
     // p_user_id not yet threaded from staff store — mirrors staff.role_change/
@@ -82,14 +84,13 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
       disabled={updateSetting.isPending}
     >
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Tip Split</h2>
+        <h2 className="text-lg font-semibold">{t('tipDistributionSettingsTab.title')}</h2>
         <p className="text-xs text-muted-foreground">
-          Configure how tips are split between floor, bar, and kitchen staff when a caja
-          session is closed.
+          {t('tipDistributionSettingsTab.description')}
         </p>
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="tip-split-floor">Floor %</Label>
+            <Label htmlFor="tip-split-floor">{t('tipDistributionSettingsTab.floorLabel')}</Label>
             <Input
               id="tip-split-floor"
               type="number"
@@ -104,7 +105,7 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tip-split-bar">Bar %</Label>
+            <Label htmlFor="tip-split-bar">{t('tipDistributionSettingsTab.barLabel')}</Label>
             <Input
               id="tip-split-bar"
               type="number"
@@ -119,7 +120,9 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tip-split-kitchen">Kitchen %</Label>
+            <Label htmlFor="tip-split-kitchen">
+              {t('tipDistributionSettingsTab.kitchenLabel')}
+            </Label>
             <Input
               id="tip-split-kitchen"
               type="number"
@@ -137,15 +140,18 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
 
         {sumIsOff && (
           <p className="text-sm text-amber-500">
-            Percentages total {sum}% — not 100%. You can still save.
+            {t('tipDistributionSettingsTab.percentagesOff', { sum })}
           </p>
         )}
 
         <div className="rounded-lg border p-4 text-sm">
-          <p className="font-medium">Example — $100.00 in tips splits to:</p>
+          <p className="font-medium">{t('tipDistributionSettingsTab.exampleTitle')}</p>
           <p className="mt-1 text-muted-foreground">
-            Floor ${preview.floor.toFixed(2)} / Bar ${preview.bar.toFixed(2)} / Kitchen $
-            {preview.kitchen.toFixed(2)}
+            {t('tipDistributionSettingsTab.exampleBreakdown', {
+              floor: preview.floor.toFixed(2),
+              bar: preview.bar.toFixed(2),
+              kitchen: preview.kitchen.toFixed(2),
+            })}
           </p>
         </div>
 
@@ -157,7 +163,9 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
             void save();
           }}
         >
-          {updateSetting.isPending ? 'Saving...' : 'Save Tip Split'}
+          {updateSetting.isPending
+            ? t('tipDistributionSettingsTab.saving')
+            : t('tipDistributionSettingsTab.saveTipSplit')}
         </POSButton>
       </div>
     </ProtectedAction>

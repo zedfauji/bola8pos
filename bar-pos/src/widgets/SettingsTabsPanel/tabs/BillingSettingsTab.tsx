@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationUpdateSetting, useSettings } from '@entities/settings';
 import type { PaymentMethodLabels } from '@entities/settings';
@@ -46,6 +47,7 @@ const DEFAULT_LABELS: PaymentMethodLabels = {
 };
 
 export function BillingSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data } = useSettings();
   const updateSetting = useMutationUpdateSetting();
   const [form, setForm] = useState<BillingForm>(DEFAULT_FORM);
@@ -88,11 +90,11 @@ export function BillingSettingsTab({ currentRole }: Props) {
     const tips = parseTipPercentages(form.tipPercentagesCsv);
     const taxRatePercent = Number(form.taxRatePercent);
     if (tips == null) {
-      toast.error('Tip percentages must be 1-4 comma-separated values between 0 and 100.');
+      toast.error(t('billingSettingsTab.tipPercentagesInvalid'));
       return;
     }
     if (!Number.isFinite(taxRatePercent) || taxRatePercent < 0 || taxRatePercent > 100) {
-      toast.error('Tax rate must be between 0 and 100.');
+      toast.error(t('billingSettingsTab.taxRateInvalid'));
       return;
     }
 
@@ -110,7 +112,7 @@ export function BillingSettingsTab({ currentRole }: Props) {
       return;
     }
     setDirty(false);
-    toast.success('Billing settings saved.');
+    toast.success(t('billingSettingsTab.billingSaved'));
   };
 
   return (
@@ -120,10 +122,10 @@ export function BillingSettingsTab({ currentRole }: Props) {
       disabled={updateSetting.isPending}
     >
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Billing</h2>
+        <h2 className="text-lg font-semibold">{t('billingSettingsTab.title')}</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="settings-tax-rate">Tax rate (IVA %)</Label>
+            <Label htmlFor="settings-tax-rate">{t('billingSettingsTab.taxRateLabel')}</Label>
             <Input
               id="settings-tax-rate"
               value={form.taxRatePercent}
@@ -134,11 +136,13 @@ export function BillingSettingsTab({ currentRole }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="settings-tip-defaults">Default tip percentages</Label>
+            <Label htmlFor="settings-tip-defaults">
+              {t('billingSettingsTab.tipDefaultsLabel')}
+            </Label>
             <Input
               id="settings-tip-defaults"
               value={form.tipPercentagesCsv}
-              placeholder="10, 15, 18, 20"
+              placeholder={t('billingSettingsTab.tipDefaultsPlaceholder')}
               onChange={event => {
                 setDirty(true);
                 setForm(current => ({ ...current, tipPercentagesCsv: event.target.value }));
@@ -148,7 +152,7 @@ export function BillingSettingsTab({ currentRole }: Props) {
         </div>
 
         <div className="space-y-2">
-          <Label>Enabled payment methods</Label>
+          <Label>{t('billingSettingsTab.enabledPaymentMethods')}</Label>
           <div className="grid gap-2 sm:grid-cols-3">
             {paymentMethodButtons.map(button => (
               <POSButton
@@ -174,23 +178,27 @@ export function BillingSettingsTab({ currentRole }: Props) {
         </div>
 
         <div className="space-y-2">
-          <Label>First hour billing mode</Label>
+          <Label>{t('billingSettingsTab.firstHourModeLabel')}</Label>
           <p className="text-xs text-muted-foreground">
-            Controls how sessions under 60 minutes are billed.
+            {t('billingSettingsTab.firstHourModeDescription')}
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
-            {[
-              {
-                value: 'prorated' as const,
-                label: 'Prorated',
-                description: 'Bill in 15-minute blocks (default)',
-              },
-              {
-                value: 'full' as const,
-                label: 'Full Hour',
-                description: 'Charge minimum 1 full hour for short sessions',
-              },
-            ].map(option => (
+            {/* eslint-disable i18next/no-literal-string -- 'value' is a data enum key, not UI copy */}
+            {(
+              [
+                {
+                  value: 'prorated' as const,
+                  label: t('billingSettingsTab.proratedLabel'),
+                  description: t('billingSettingsTab.proratedDescription'),
+                },
+                {
+                  value: 'full' as const,
+                  label: t('billingSettingsTab.fullHourLabel'),
+                  description: t('billingSettingsTab.fullHourDescription'),
+                },
+              ]
+            ).map(option => (
+              /* eslint-enable i18next/no-literal-string */
               <POSButton
                 key={option.value}
                 type="button"
@@ -218,19 +226,19 @@ export function BillingSettingsTab({ currentRole }: Props) {
             void save();
           }}
         >
-          {updateSetting.isPending ? 'Saving...' : 'Save Billing'}
+          {updateSetting.isPending ? t('billingSettingsTab.saving') : t('billingSettingsTab.saveBilling')}
         </POSButton>
 
         <div className="space-y-3 rounded-lg border p-4">
-          <h3 className="font-medium">Payment button labels</h3>
+          <h3 className="font-medium">{t('billingSettingsTab.paymentButtonLabelsTitle')}</h3>
           <p className="text-xs text-muted-foreground">
-            Customize the label shown on payment buttons in the POS and on receipts.
+            {t('billingSettingsTab.paymentButtonLabelsDescription')}
           </p>
           {(
             [
-              { key: 'cash', placeholder: 'Efectivo' },
-              { key: 'card', placeholder: 'Terminal BBVA' },
-              { key: 'rappi', placeholder: 'Rappi' },
+              { key: 'cash', placeholder: t('billingSettingsTab.placeholderCash') },
+              { key: 'card', placeholder: t('billingSettingsTab.placeholderCard') },
+              { key: 'rappi', placeholder: t('billingSettingsTab.placeholderRappi') },
             ] as const
           ).map(({ key, placeholder }) => (
             <div key={key} className="flex items-center gap-3">
@@ -263,13 +271,13 @@ export function BillingSettingsTab({ currentRole }: Props) {
                       return;
                     }
                     setLabelsDirty(false);
-                    toast.success('Payment labels saved.');
+                    toast.success(t('billingSettingsTab.paymentLabelsSaved'));
                   },
                 }
               );
             }}
           >
-            {updateSetting.isPending ? 'Saving...' : 'Save Labels'}
+            {updateSetting.isPending ? t('billingSettingsTab.saving') : t('billingSettingsTab.saveLabels')}
           </POSButton>
         </div>
       </div>

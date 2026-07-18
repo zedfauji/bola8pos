@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useEmailSettingsStatus,
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function EmailReceiptsSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data } = useSettings();
   const emailStatus = useEmailSettingsStatus();
   const updateSetting = useMutationUpdateSetting();
@@ -44,7 +46,7 @@ export function EmailReceiptsSettingsTab({ currentRole }: Props) {
       return;
     }
     setDirty(false);
-    toast.success('Email receipt settings saved.');
+    toast.success(t('emailReceiptsSettingsTab.saved'));
   };
 
   const sendTestEmail = async () => {
@@ -53,7 +55,7 @@ export function EmailReceiptsSettingsTab({ currentRole }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Test email sent.');
+    toast.success(t('emailReceiptsSettingsTab.testEmailSent'));
   };
 
   return (
@@ -63,9 +65,11 @@ export function EmailReceiptsSettingsTab({ currentRole }: Props) {
       disabled={updateSetting.isPending}
     >
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Email Receipts</h2>
+        <h2 className="text-lg font-semibold">{t('emailReceiptsSettingsTab.title')}</h2>
         <div className="space-y-2">
-          <Label htmlFor="settings-receipt-from-email">From email address</Label>
+          <Label htmlFor="settings-receipt-from-email">
+            {t('emailReceiptsSettingsTab.fromEmailLabel')}
+          </Label>
           <Input
             id="settings-receipt-from-email"
             value={fromEmail}
@@ -76,11 +80,15 @@ export function EmailReceiptsSettingsTab({ currentRole }: Props) {
           />
         </div>
         <div className="rounded-md border bg-muted/30 p-3 text-sm">
-          <span className="font-medium">Resend API key:</span>{' '}
-          {emailStatus.data?.resendConfigured ? 'configured' : 'not set'}
+          <span className="font-medium">{t('emailReceiptsSettingsTab.resendApiKeyLabel')}</span>{' '}
+          {emailStatus.data?.resendConfigured
+            ? t('emailReceiptsSettingsTab.configured')
+            : t('emailReceiptsSettingsTab.notSet')}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="settings-test-email-recipient">Test recipient</Label>
+          <Label htmlFor="settings-test-email-recipient">
+            {t('emailReceiptsSettingsTab.testRecipientLabel')}
+          </Label>
           <Input
             id="settings-test-email-recipient"
             value={testRecipient}
@@ -98,7 +106,9 @@ export function EmailReceiptsSettingsTab({ currentRole }: Props) {
               void save();
             }}
           >
-            {updateSetting.isPending ? 'Saving...' : 'Save Email Settings'}
+            {updateSetting.isPending
+              ? t('emailReceiptsSettingsTab.saving')
+              : t('emailReceiptsSettingsTab.saveEmailSettings')}
           </POSButton>
           <POSButton
             type="button"
@@ -109,7 +119,9 @@ export function EmailReceiptsSettingsTab({ currentRole }: Props) {
               void sendTestEmail();
             }}
           >
-            {sendTest.isPending ? 'Sending...' : 'Send Test Email'}
+            {sendTest.isPending
+              ? t('emailReceiptsSettingsTab.sending')
+              : t('emailReceiptsSettingsTab.sendTestEmail')}
           </POSButton>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Database } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useMutationCreateSettingsBackup,
@@ -14,14 +15,19 @@ type Props = {
 };
 
 export function BackupSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const backupsQuery = useSettingsBackups();
   const createBackup = useMutationCreateSettingsBackup();
   const restoreBackup = useMutationRestoreSettingsBackup();
   const [restoreTarget, setRestoreTarget] = useState<SettingsBackupSummary | null>(null);
 
   const defaultLabel = useMemo(
-    () => `Manual backup ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`,
-    []
+    () =>
+      t('backupSettingsTab.defaultLabel', {
+        // eslint-disable-next-line i18next/no-literal-string -- date-formatting call, not UI copy
+        timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      }),
+    [t]
   );
 
   const handleCreateBackup = async () => {
@@ -30,7 +36,7 @@ export function BackupSettingsTab({ currentRole }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Backup created.');
+    toast.success(t('backupSettingsTab.backupCreated'));
   };
 
   const handleRestoreBackup = async () => {
@@ -41,7 +47,7 @@ export function BackupSettingsTab({ currentRole }: Props) {
       return;
     }
     setRestoreTarget(null);
-    toast.success('Backup restored.');
+    toast.success(t('backupSettingsTab.backupRestored'));
   };
 
   return (
@@ -51,7 +57,7 @@ export function BackupSettingsTab({ currentRole }: Props) {
       disabled={restoreBackup.isPending}
     >
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Backup</h2>
+        <h2 className="text-lg font-semibold">{t('backupSettingsTab.title')}</h2>
         <POSButton
           type="button"
           touchSize="large"
@@ -60,16 +66,18 @@ export function BackupSettingsTab({ currentRole }: Props) {
             void handleCreateBackup();
           }}
         >
-          {createBackup.isPending ? 'Creating backup...' : 'Create Manual Backup'}
+          {createBackup.isPending
+            ? t('backupSettingsTab.creatingBackup')
+            : t('backupSettingsTab.createManualBackup')}
         </POSButton>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">Backup history</h3>
+          <h3 className="text-sm font-semibold">{t('backupSettingsTab.backupHistory')}</h3>
           {backupsQuery.data == null || backupsQuery.data.length === 0 ? (
             <EmptyState
               icon={Database}
-              title="No backups yet"
-              description="Create a manual backup to start history."
+              title={t('backupSettingsTab.emptyTitle')}
+              description={t('backupSettingsTab.emptyDescription')}
             />
           ) : (
             <div className="space-y-2">
@@ -81,8 +89,14 @@ export function BackupSettingsTab({ currentRole }: Props) {
                   <div>
                     <p className="font-medium">{backup.label}</p>
                     <p className="text-sm text-muted-foreground">
-                      Created {backup.createdAt.toLocaleString()}
-                      {backup.restoredAt ? ` · Restored ${backup.restoredAt.toLocaleString()}` : ''}
+                      {t('backupSettingsTab.createdAt', {
+                        date: backup.createdAt.toLocaleString(),
+                      })}
+                      {backup.restoredAt
+                        ? t('backupSettingsTab.restoredAtSuffix', {
+                            date: backup.restoredAt.toLocaleString(),
+                          })
+                        : ''}
                     </p>
                   </div>
                   <POSButton
@@ -94,7 +108,7 @@ export function BackupSettingsTab({ currentRole }: Props) {
                       setRestoreTarget(backup);
                     }}
                   >
-                    Restore
+                    {t('backupSettingsTab.restore')}
                   </POSButton>
                 </div>
               ))}
@@ -104,9 +118,13 @@ export function BackupSettingsTab({ currentRole }: Props) {
 
         <ConfirmDialog
           open={restoreTarget != null}
-          title="Restore backup?"
-          description="This applies backup data to settings and catalog. Continue only if you trust this snapshot."
-          confirmLabel={restoreBackup.isPending ? 'Restoring...' : 'Restore backup'}
+          title={t('backupSettingsTab.restoreConfirmTitle')}
+          description={t('backupSettingsTab.restoreConfirmDescription')}
+          confirmLabel={
+            restoreBackup.isPending
+              ? t('backupSettingsTab.restoring')
+              : t('backupSettingsTab.restoreBackupLabel')
+          }
           isLoading={restoreBackup.isPending}
           onCancel={() => {
             setRestoreTarget(null);

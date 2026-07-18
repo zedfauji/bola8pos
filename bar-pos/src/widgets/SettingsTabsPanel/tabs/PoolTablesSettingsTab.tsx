@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useMutationAddPoolTable,
@@ -20,6 +21,7 @@ type EditDraft = {
 };
 
 export function PoolTablesSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data: tables } = usePoolTables();
   const addTable = useMutationAddPoolTable();
   const updateTable = useMutationUpdatePoolTable();
@@ -65,19 +67,19 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Pool table added.');
+    toast.success(t('poolTablesSettingsTab.tableAdded'));
   };
 
   const handleSaveTable = async (table: PoolTable) => {
     const draft = getDraft(table);
     const ratePerHour = Number(draft.ratePerHour);
     if (!Number.isFinite(ratePerHour) || ratePerHour <= 0) {
-      toast.error('Rate per hour must be greater than zero.');
+      toast.error(t('poolTablesSettingsTab.rateMustBeGreaterThanZero'));
       return;
     }
     const label = draft.label.trim();
     if (label.length === 0) {
-      toast.error('Table label is required.');
+      toast.error(t('poolTablesSettingsTab.labelRequired'));
       return;
     }
     const result = await updateTable.mutateAsync({
@@ -90,7 +92,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success(`Updated ${label}.`);
+    toast.success(t('poolTablesSettingsTab.tableUpdated', { label }));
   };
 
   const handleDeleteTable = async () => {
@@ -101,7 +103,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
       return;
     }
     setDeleteTarget(null);
-    toast.success('Pool table removed.');
+    toast.success(t('poolTablesSettingsTab.tableRemoved'));
   };
 
   return (
@@ -112,7 +114,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
     >
       <div className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold">Pool Tables</h2>
+          <h2 className="text-lg font-semibold">{t('poolTablesSettingsTab.title')}</h2>
           <POSButton
             type="button"
             touchSize="default"
@@ -122,7 +124,9 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
               void handleAddTable();
             }}
           >
-            {addTable.isPending ? 'Adding...' : 'Add Table'}
+            {addTable.isPending
+              ? t('poolTablesSettingsTab.adding')
+              : t('poolTablesSettingsTab.addTable')}
           </POSButton>
         </div>
         <div className="space-y-3">
@@ -131,11 +135,16 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
             return (
               <div key={table.id} className="rounded-md border p-3">
                 <div className="mb-3 text-sm font-medium text-muted-foreground">
-                  Table {table.number} · Current status: {table.status}
+                  {t('poolTablesSettingsTab.tableStatusLine', {
+                    number: table.number,
+                    status: table.status,
+                  })}
                 </div>
                 <div className="grid gap-3 md:grid-cols-4">
                   <div className="space-y-1">
-                    <Label htmlFor={`table-label-${table.id}`}>Label</Label>
+                    <Label htmlFor={`table-label-${table.id}`}>
+                      {t('poolTablesSettingsTab.labelLabel')}
+                    </Label>
                     <Input
                       id={`table-label-${table.id}`}
                       value={draft.label}
@@ -145,7 +154,9 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor={`table-rate-${table.id}`}>Rate per hour</Label>
+                    <Label htmlFor={`table-rate-${table.id}`}>
+                      {t('poolTablesSettingsTab.ratePerHourLabel')}
+                    </Label>
                     <Input
                       id={`table-rate-${table.id}`}
                       value={draft.ratePerHour}
@@ -155,7 +166,9 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor={`table-type-${table.id}`}>Type</Label>
+                    <Label htmlFor={`table-type-${table.id}`}>
+                      {t('poolTablesSettingsTab.typeLabel')}
+                    </Label>
                     <select
                       id={`table-type-${table.id}`}
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -166,9 +179,11 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                         });
                       }}
                     >
-                      <option value="pool">Pool</option>
-                      <option value="carom">Carom</option>
-                      <option value="consumption">Consumption</option>
+                      <option value="pool">{t('poolTablesSettingsTab.typePool')}</option>
+                      <option value="carom">{t('poolTablesSettingsTab.typeCarom')}</option>
+                      <option value="consumption">
+                        {t('poolTablesSettingsTab.typeConsumption')}
+                      </option>
                     </select>
                   </div>
                   <div className="flex items-end gap-2">
@@ -180,7 +195,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                         void handleSaveTable(table);
                       }}
                     >
-                      Save
+                      {t('poolTablesSettingsTab.save')}
                     </POSButton>
                     <POSButton
                       type="button"
@@ -191,7 +206,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                         setDeleteTarget(table);
                       }}
                     >
-                      Remove
+                      {t('poolTablesSettingsTab.remove')}
                     </POSButton>
                   </div>
                 </div>
@@ -201,13 +216,17 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
         </div>
         <ConfirmDialog
           open={deleteTarget != null}
-          title="Remove pool table?"
+          title={t('poolTablesSettingsTab.removeConfirmTitle')}
           description={
             deleteTarget
-              ? `Remove ${deleteTarget.label}. Only available tables can be removed.`
-              : 'Remove this table.'
+              ? t('poolTablesSettingsTab.removeConfirmDescription', { label: deleteTarget.label })
+              : t('poolTablesSettingsTab.removeThisTable')
           }
-          confirmLabel={deleteTable.isPending ? 'Removing...' : 'Remove table'}
+          confirmLabel={
+            deleteTable.isPending
+              ? t('poolTablesSettingsTab.removing')
+              : t('poolTablesSettingsTab.removeTableLabel')
+          }
           variant="destructive"
           isLoading={deleteTable.isPending}
           onCancel={() => {

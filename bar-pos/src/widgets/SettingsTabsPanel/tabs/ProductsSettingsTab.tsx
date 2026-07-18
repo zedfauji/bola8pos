@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { CategoryTreeEditor } from '@features/manage-categories';
 import { ModifierGroupEditor } from '@features/manage-modifier-groups';
 import { CatalogModifiersTab, CatalogProductsTab } from '@features/manage-products';
@@ -10,22 +11,24 @@ type Props = {
 };
 
 export function ProductsSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   return (
     <ProtectedAction action="manage_products" currentRole={currentRole}>
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold">Product Management</h2>
+          <h2 className="text-lg font-semibold">{t('productsSettingsTab.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            Manage products, categories, modifiers, and modifier groups. Changes are applied
-            immediately after save.
+            {t('productsSettingsTab.description')}
           </p>
         </div>
         <Tabs defaultValue="products" className="w-full">
           <TabsList className="mb-4">
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="modifiers">Modifiers</TabsTrigger>
-            <TabsTrigger value="modifier-groups">Modifier Groups</TabsTrigger>
+            <TabsTrigger value="products">{t('productsSettingsTab.tabProducts')}</TabsTrigger>
+            <TabsTrigger value="categories">{t('productsSettingsTab.tabCategories')}</TabsTrigger>
+            <TabsTrigger value="modifiers">{t('productsSettingsTab.tabModifiers')}</TabsTrigger>
+            <TabsTrigger value="modifier-groups">
+              {t('productsSettingsTab.tabModifierGroups')}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="products">
             <CatalogProductsTab />

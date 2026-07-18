@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useMutationSyncRappiMenu,
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function RappiSettingsTab({ currentRole }: Props) {
+  const { t } = useTranslation('wAdmin');
   const { data } = useSettings();
   const updateSetting = useMutationUpdateSetting();
   const syncMenu = useMutationSyncRappiMenu();
@@ -28,14 +30,14 @@ export function RappiSettingsTab({ currentRole }: Props) {
 
   const lastSyncLabel = useMemo(() => {
     const raw = data?.rappi.lastSyncAt ?? null;
-    if (!raw) return 'Never synced';
+    if (!raw) return t('rappiSettingsTab.neverSynced');
     const date = new Date(raw);
-    if (Number.isNaN(date.getTime())) return 'Invalid date';
+    if (Number.isNaN(date.getTime())) return t('rappiSettingsTab.invalidDate');
     return date.toLocaleString();
-  }, [data?.rappi.lastSyncAt]);
+  }, [data?.rappi.lastSyncAt, t]);
 
   const webhookSecret = import.meta.env.VITE_RAPPI_WEBHOOK_SECRET ?? '';
-  const webhookDisplay = webhookSecret.length > 0 ? webhookSecret : 'not set';
+  const webhookDisplay = webhookSecret.length > 0 ? webhookSecret : t('rappiSettingsTab.notSet');
 
   const saveStoreId = async () => {
     const result = await updateSetting.mutateAsync({
@@ -50,7 +52,7 @@ export function RappiSettingsTab({ currentRole }: Props) {
       return;
     }
     setDirty(false);
-    toast.success('Rappi settings saved.');
+    toast.success(t('rappiSettingsTab.saved'));
   };
 
   const runSyncMenu = async () => {
@@ -59,7 +61,7 @@ export function RappiSettingsTab({ currentRole }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Menu synced to Rappi.');
+    toast.success(t('rappiSettingsTab.menuSynced'));
   };
 
   return (
@@ -69,9 +71,9 @@ export function RappiSettingsTab({ currentRole }: Props) {
       disabled={updateSetting.isPending}
     >
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Rappi</h2>
+        <h2 className="text-lg font-semibold">{t('rappiSettingsTab.title')}</h2>
         <div className="space-y-2">
-          <Label htmlFor="settings-rappi-store-id">Rappi Store ID</Label>
+          <Label htmlFor="settings-rappi-store-id">{t('rappiSettingsTab.storeIdLabel')}</Label>
           <Input
             id="settings-rappi-store-id"
             value={storeId}
@@ -82,11 +84,14 @@ export function RappiSettingsTab({ currentRole }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="settings-rappi-webhook-secret">Webhook secret (env)</Label>
+          <Label htmlFor="settings-rappi-webhook-secret">
+            {t('rappiSettingsTab.webhookSecretLabel')}
+          </Label>
           <Input id="settings-rappi-webhook-secret" value={webhookDisplay} readOnly />
         </div>
         <div className="rounded-md border bg-muted/30 p-3 text-sm">
-          <span className="font-medium">Menu sync status:</span> Last sync {lastSyncLabel}
+          <span className="font-medium">{t('rappiSettingsTab.menuSyncStatusLabel')}</span>{' '}
+          {t('rappiSettingsTab.lastSync', { label: lastSyncLabel })}
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           <POSButton
@@ -97,7 +102,7 @@ export function RappiSettingsTab({ currentRole }: Props) {
               void saveStoreId();
             }}
           >
-            {updateSetting.isPending ? 'Saving...' : 'Save Rappi'}
+            {updateSetting.isPending ? t('rappiSettingsTab.saving') : t('rappiSettingsTab.saveRappi')}
           </POSButton>
           <POSButton
             type="button"
@@ -108,7 +113,9 @@ export function RappiSettingsTab({ currentRole }: Props) {
               void runSyncMenu();
             }}
           >
-            {syncMenu.isPending ? 'Syncing...' : 'Sync Menu to Rappi'}
+            {syncMenu.isPending
+              ? t('rappiSettingsTab.syncing')
+              : t('rappiSettingsTab.syncMenuToRappi')}
           </POSButton>
         </div>
       </div>
