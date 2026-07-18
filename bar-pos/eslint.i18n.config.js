@@ -41,7 +41,11 @@ export default tseslint.config({
       },
       // 'can(...)' is the RBAC permission check (usePermissions().can) — its
       // string argument is a fixed RBACAction identifier, not UI copy.
-      callees: { exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can'] },
+      // 'logger.error/.warn/.info/.debug(...)' first args are internal
+      // telemetry event names (e.g. 'staff.update_locale.failed'), not UI copy.
+      callees: {
+        exclude: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+'],
+      },
       // Object literal property named `key` (React list keys, internal tab
       // identifiers) is structural data, not UI copy.
       'object-properties': { exclude: ['key'] },

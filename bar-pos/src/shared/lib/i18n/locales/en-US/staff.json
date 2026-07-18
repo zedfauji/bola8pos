@@ -1,1 +1,10 @@
-{}
+{
+  "table": {
+    "locale": "Language"
+  },
+  "locale": {
+    "editTrigger": "Change language",
+    "updateSuccess": "{{name}}'s language updated to {{locale}}.",
+    "updateError": "Couldn't update {{name}}'s language."
+  }
+}
