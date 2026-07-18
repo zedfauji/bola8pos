@@ -3,6 +3,7 @@
  */
 
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { getCurrentLocale } from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { buildThermalReceiptText } from '@shared/lib/receipt-format';
 import type { Result } from '@shared/lib/result';
@@ -12,39 +13,17 @@ function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI__' in window;
 }
 
-/** Maps app receipt to JSON consumed by Rust `print_receipt`. */
-export function receiptDataToPrinterJson(data: ReceiptData): string {
-  const dt =
-    data.processedAt instanceof Date
-      ? data.processedAt
-      : new Date(data.processedAt as unknown as string);
-  const processedAt = dt.toLocaleString();
-  const payload = {
-    barName: data.barName,
-    barAddress: data.barAddress,
-    receiptNumber: data.receiptNumber,
-    customerName: data.customerName,
-    cashierName: data.cashierName,
-    processedAt,
-    items: data.items.map(i => ({
-      name: i.name,
-      quantity: i.quantity,
-      lineTotal: i.lineTotal,
-    })),
-    subtotal: data.subtotal,
-    tipAmount: data.tipAmount,
-    total: data.total,
-    paymentMethod: data.paymentMethod,
-    tenderedAmount: data.tenderedAmount ?? null,
-    changeAmount: data.changeAmount ?? null,
-    terminalReference: data.terminalReference ?? null,
-    footerText: null as string | null,
-  };
-  return JSON.stringify(payload);
+/**
+ * Builds fully-translated (acting staff's locale) receipt lines for Rust
+ * `print_receipt`, which only ESC/POS-encodes them (no label strings in Rust).
+ */
+export function receiptDataToPrinterLines(data: ReceiptData): string[] {
+  const locale = getCurrentLocale();
+  return buildThermalReceiptText(data, locale).split('\n');
 }
 
 function printReceiptWebFallback(data: ReceiptData): void {
-  const text = buildThermalReceiptText(data);
+  const text = buildThermalReceiptText(data, getCurrentLocale());
   const w = window.open('', '_blank', 'noopener,noreferrer,width=400,height=600');
   if (!w) {
     logger.warn('printer.web.fallback', { reason: 'popup_blocked' });
@@ -71,7 +50,7 @@ export async function printReceipt(data: ReceiptData): Promise<Result<void>> {
   if (isTauri()) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('print_receipt', { receiptJson: receiptDataToPrinterJson(data) });
+      await invoke('print_receipt', { lines: receiptDataToPrinterLines(data) });
       return ok(undefined);
     } catch (e) {
       logger.warn('printer.receipt.failed', { raw: String(e) });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { getCurrentLocale } from '@shared/lib/i18n';
 import { printReceipt } from '@shared/lib/pos-printer';
 import { buildThermalReceiptText } from '@shared/lib/receipt-format';
 import { POSButton } from '@shared/ui';
@@ -13,7 +14,7 @@ export interface ReceiptPreviewProps {
 export function ReceiptPreview({ receipt, onDone }: ReceiptPreviewProps) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [printBusy, setPrintBusy] = useState(false);
-  const text = buildThermalReceiptText(receipt);
+  const text = buildThermalReceiptText(receipt, getCurrentLocale());
 
   return (
     <div className="space-y-4">

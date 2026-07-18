@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab, PoolSession, PoolTable } from '@shared/lib/domain';
+import { getCurrentLocale } from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { computePoolSessionBilling } from '@shared/lib/pool-billing';
 import { printRawText } from '@shared/lib/pos-printer';
@@ -88,19 +89,22 @@ export function usePrintPreCheque() {
       const poolTotal = poolCharge?.amount ?? 0;
       const subtotal = Math.round((itemsTotal + poolTotal) * 100) / 100;
 
-      const text = buildPreChequeText({
-        barName,
-        tableLabel: table.label,
-        customerName: tab.customerName,
-        cashierName,
-        // Always false — happy hour retired (Phase 20); promotions are server-applied
-        // and already reflected in each item's lineTotal above.
-        happyHourActive: false,
-        items,
-        poolCharge,
-        subtotal,
-        generatedAt: new Date(),
-      });
+      const text = buildPreChequeText(
+        {
+          barName,
+          tableLabel: table.label,
+          customerName: tab.customerName,
+          cashierName,
+          // Always false — happy hour retired (Phase 20); promotions are server-applied
+          // and already reflected in each item's lineTotal above.
+          happyHourActive: false,
+          items,
+          poolCharge,
+          subtotal,
+          generatedAt: new Date(),
+        },
+        getCurrentLocale()
+      );
 
       logger.info('precheque.print.start', { tabId: tab.id, tableId: table.id });
 

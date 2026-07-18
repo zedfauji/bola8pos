@@ -1,5 +1,7 @@
+import type { Locale } from '@shared/lib/domain';
 import { formatMoney } from '@shared/lib/domain-helpers';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import i18n from '@shared/lib/i18n';
 
 const LINE = 32;
 
@@ -25,10 +27,16 @@ function divider(): string {
   return '-'.repeat(LINE);
 }
 
-function paymentMethodLabel(method: ReceiptData['paymentMethod']): string {
-  if (method === 'cash') return 'Cash';
-  if (method === 'card') return 'Card (BBVA Terminal)';
-  return 'Rappi';
+/** Resolves a locale-scoped translator for the `receipt` catalog namespace. */
+function receiptT(locale: Locale) {
+  return i18n.getFixedT(locale, 'receipt');
+}
+
+function paymentMethodLabel(method: ReceiptData['paymentMethod'], locale: Locale): string {
+  const tr = receiptT(locale);
+  if (method === 'cash') return tr('receipt.method.cash');
+  if (method === 'card') return tr('receipt.method.card');
+  return tr('receipt.method.rappi');
 }
 
 // ============================================================================
@@ -60,50 +68,52 @@ export type PreChequeData = {
 };
 
 /** Pre-cheque for 58mm thermal printer (32 columns). Shows balance due before final payment. */
-export function buildPreChequeText(data: PreChequeData): string {
+export function buildPreChequeText(data: PreChequeData, locale: Locale): string {
+  const tr = receiptT(locale);
   const lines: string[] = [];
 
   lines.push(centerLine(data.barName || 'Bar'));
-  lines.push(centerLine('CUENTA PREVIA'));
-  lines.push(centerLine('PRE-CHEQUE'));
+  lines.push(centerLine(tr('precheque.title')));
+  lines.push(centerLine(tr('precheque.subtitle')));
   lines.push(divider());
-  lines.push(lineLeftRight('Fecha', data.generatedAt.toLocaleString()));
-  lines.push(lineLeftRight('Cajero', data.cashierName));
-  lines.push(lineLeftRight('Cliente', data.customerName));
-  lines.push(lineLeftRight('Mesa', data.tableLabel));
+  lines.push(lineLeftRight(tr('precheque.date'), data.generatedAt.toLocaleString(locale)));
+  lines.push(lineLeftRight(tr('precheque.cashier'), data.cashierName));
+  lines.push(lineLeftRight(tr('precheque.customer'), data.customerName));
+  lines.push(lineLeftRight(tr('precheque.table'), data.tableLabel));
   if (data.happyHourActive) {
-    lines.push(centerLine('\u2605 HORA FELIZ ACTIVA \u2605'));
+    lines.push(centerLine(tr('precheque.happyHour')));
   }
   lines.push(divider());
 
   for (const item of data.items) {
-    const left = `${String(item.quantity)}\u00d7 ${item.name}`;
+    const left = `${String(item.quantity)}× ${item.name}`;
     lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
     for (const mod of item.modifierNames) {
       lines.push(`  + ${mod}`);
     }
     if (item.notes) {
-      lines.push(`  Nota: ${item.notes}`);
+      lines.push(`  ${tr('precheque.note')}: ${item.notes}`);
     }
   }
 
   if (data.poolCharge !== null) {
     lines.push(divider());
-    const label = `Billar ${String(data.poolCharge.billedMinutes)}m @ $${String(data.poolCharge.ratePerHour)}/h`;
+    const label = `${tr('precheque.pool')} ${String(data.poolCharge.billedMinutes)}m @ $${String(data.poolCharge.ratePerHour)}/h`;
     lines.push(lineLeftRight(label, formatMoney(data.poolCharge.amount)));
   }
 
   lines.push(divider());
-  lines.push(lineLeftRight('SUBTOTAL', formatMoney(data.subtotal)));
+  lines.push(lineLeftRight(tr('precheque.subtotal'), formatMoney(data.subtotal)));
   lines.push('');
-  lines.push(centerLine('** PENDIENTE DE PAGO **'));
+  lines.push(centerLine(tr('precheque.pending')));
   lines.push('');
 
   return lines.join('\n');
 }
 
-/** Plain text for 58mm thermal printer (32 columns). Keep aligned with Rust `commands/printer.rs`. */
-export function buildThermalReceiptText(receipt: ReceiptData): string {
+/** Plain text for 58mm thermal printer (32 columns). Keep aligned with Rust `commands/printer.rs` ESC/POS encoder. */
+export function buildThermalReceiptText(receipt: ReceiptData, locale: Locale): string {
+  const tr = receiptT(locale);
   const lines: string[] = [];
   const dt =
     receipt.processedAt instanceof Date
@@ -118,9 +128,9 @@ export function buildThermalReceiptText(receipt: ReceiptData): string {
     }
   }
   lines.push(divider());
-  lines.push(lineLeftRight('Date', dt.toLocaleString()));
-  lines.push(lineLeftRight('Cashier', receipt.cashierName));
-  lines.push(lineLeftRight('Customer', receipt.customerName));
+  lines.push(lineLeftRight(tr('receipt.date'), dt.toLocaleString(locale)));
+  lines.push(lineLeftRight(tr('receipt.cashier'), receipt.cashierName));
+  lines.push(lineLeftRight(tr('receipt.customer'), receipt.customerName));
   lines.push(divider());
 
   for (const item of receipt.items) {
@@ -130,18 +140,18 @@ export function buildThermalReceiptText(receipt: ReceiptData): string {
   }
 
   lines.push(divider());
-  lines.push(lineLeftRight('Subtotal', formatMoney(receipt.subtotal)));
-  lines.push(lineLeftRight('Tip', formatMoney(receipt.tipAmount)));
-  lines.push(lineLeftRight('Total', formatMoney(receipt.total)));
-  lines.push(lineLeftRight('Payment', paymentMethodLabel(receipt.paymentMethod)));
+  lines.push(lineLeftRight(tr('receipt.subtotal'), formatMoney(receipt.subtotal)));
+  lines.push(lineLeftRight(tr('receipt.tip'), formatMoney(receipt.tipAmount)));
+  lines.push(lineLeftRight(tr('receipt.total'), formatMoney(receipt.total)));
+  lines.push(lineLeftRight(tr('receipt.payment'), paymentMethodLabel(receipt.paymentMethod, locale)));
 
   if (receipt.paymentMethod === 'cash' && receipt.tenderedAmount != null) {
-    lines.push(lineLeftRight('Tendered', formatMoney(receipt.tenderedAmount)));
-    lines.push(lineLeftRight('Change', formatMoney(receipt.changeAmount ?? 0)));
+    lines.push(lineLeftRight(tr('receipt.tendered'), formatMoney(receipt.tenderedAmount)));
+    lines.push(lineLeftRight(tr('receipt.change'), formatMoney(receipt.changeAmount ?? 0)));
   }
 
   if (receipt.terminalReference) {
-    lines.push(lineLeftRight('Ref', receipt.terminalReference));
+    lines.push(lineLeftRight(tr('receipt.ref'), receipt.terminalReference));
   }
 
   lines.push(divider());

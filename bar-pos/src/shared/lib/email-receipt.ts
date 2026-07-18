@@ -1,5 +1,6 @@
 import { callSendReceiptEmail, type ReceiptData } from '@shared/lib/edge-function-contracts';
 import { ReceiptEmailSchema } from '@shared/lib/email-schema';
+import { getCurrentLocale } from '@shared/lib/i18n';
 import { buildThermalReceiptText } from '@shared/lib/receipt-format';
 import type { Result } from '@shared/lib/result';
 import { err } from '@shared/lib/result';
@@ -20,6 +21,6 @@ export async function sendReceiptByEmail(
 
   return callSendReceiptEmail({
     email: parsed.data,
-    receiptPlainText: buildThermalReceiptText(data),
+    receiptPlainText: buildThermalReceiptText(data, getCurrentLocale()),
   });
 }

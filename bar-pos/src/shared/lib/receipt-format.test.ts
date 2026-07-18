@@ -26,14 +26,16 @@ function baseReceipt(overrides: Partial<ReceiptData> = {}): ReceiptData {
 
 describe('buildThermalReceiptText', () => {
   it('centers bar name and uses Bar fallback when barName empty', () => {
-    const firstLine = buildThermalReceiptText(baseReceipt({ barName: '' })).split('\n')[0];
+    const firstLine = buildThermalReceiptText(baseReceipt({ barName: '' }), 'es-MX').split(
+      '\n'
+    )[0];
     expect(firstLine?.trim()).toBe('Bar');
     expect(firstLine?.length).toBe(32);
   });
 
   it('wraps long barAddress in 32-char chunks', () => {
     const addr = 'A'.repeat(70);
-    const text = buildThermalReceiptText(baseReceipt({ barAddress: addr }));
+    const text = buildThermalReceiptText(baseReceipt({ barAddress: addr }), 'es-MX');
     expect(text).toContain('A'.repeat(32));
     expect(text).toContain('A'.repeat(6));
   });
@@ -44,7 +46,8 @@ describe('buildThermalReceiptText', () => {
         paymentMethod: 'card',
         tenderedAmount: null,
         changeAmount: null,
-      })
+      }),
+      'es-MX'
     );
     expect(text).toContain('Card (BBVA Terminal)');
   });
@@ -57,13 +60,14 @@ describe('buildThermalReceiptText', () => {
         total: 90,
         tenderedAmount: null,
         changeAmount: null,
-      })
+      }),
+      'es-MX'
     );
     expect(text).toContain('Rappi');
   });
 
   it('shows tendered and change for cash when tenderedAmount set', () => {
-    const text = buildThermalReceiptText(baseReceipt());
+    const text = buildThermalReceiptText(baseReceipt(), 'es-MX');
     expect(text).toContain('Tendered');
     expect(text).toContain('Change');
     expect(text).toContain('$200.00');
@@ -77,7 +81,8 @@ describe('buildThermalReceiptText', () => {
         tenderedAmount: null,
         changeAmount: null,
         terminalReference: 'BBVA-99',
-      })
+      }),
+      'es-MX'
     );
     expect(text).toContain('Ref');
     expect(text).toContain('BBVA-99');
@@ -87,7 +92,8 @@ describe('buildThermalReceiptText', () => {
     const text = buildThermalReceiptText(
       baseReceipt({
         processedAt: '2026-01-15T12:30:00.000Z' as unknown as Date,
-      })
+      }),
+      'es-MX'
     );
     expect(text).toContain('Date');
   });
@@ -102,14 +108,40 @@ describe('buildThermalReceiptText', () => {
         total: 1,
         tenderedAmount: 5,
         changeAmount: 4,
-      })
+      }),
+      'es-MX'
     );
     expect(text).toContain('~');
   });
 
   it('includes receipt number footer', () => {
-    const text = buildThermalReceiptText(baseReceipt({ receiptNumber: 'ABCD12' }));
+    const text = buildThermalReceiptText(baseReceipt({ receiptNumber: 'ABCD12' }), 'es-MX');
     expect(text).toContain('#ABCD12');
+  });
+
+  // ---------------------------------------------------------------------
+  // Locale-awareness (21-05, D-06)
+  // ---------------------------------------------------------------------
+
+  it('es-MX output is byte-identical to the pre-migration (English) labels', () => {
+    const text = buildThermalReceiptText(baseReceipt(), 'es-MX');
+    expect(text).toContain('Date');
+    expect(text).toContain('Cashier');
+    expect(text).toContain('Customer');
+    expect(text).toContain('Subtotal');
+    expect(text).toContain('Tip');
+    expect(text).toContain('Total');
+    expect(text).toContain('Payment');
+    expect(text).toContain('Tendered');
+    expect(text).toContain('Change');
+  });
+
+  it('en-US output uses the same English labels as es-MX (thermal receipt was already English)', () => {
+    const text = buildThermalReceiptText(baseReceipt(), 'en-US');
+    expect(text).toContain('Date');
+    expect(text).toContain('Cashier');
+    expect(text).toContain('Customer');
+    expect(text).toContain('Subtotal');
   });
 });
 
@@ -143,17 +175,17 @@ function basePreCheque(overrides: Partial<PreChequeData> = {}): PreChequeData {
 
 describe('buildPreChequeText', () => {
   it('header contains PRE-CHEQUE', () => {
-    const text = buildPreChequeText(basePreCheque());
+    const text = buildPreChequeText(basePreCheque(), 'es-MX');
     expect(text).toContain('PRE-CHEQUE');
   });
 
   it('footer contains PENDIENTE DE PAGO', () => {
-    const text = buildPreChequeText(basePreCheque());
+    const text = buildPreChequeText(basePreCheque(), 'es-MX');
     expect(text).toContain('PENDIENTE DE PAGO');
   });
 
   it('does not include Billar line when poolCharge is null', () => {
-    const text = buildPreChequeText(basePreCheque({ poolCharge: null }));
+    const text = buildPreChequeText(basePreCheque({ poolCharge: null }), 'es-MX');
     expect(text).not.toContain('Billar');
   });
 
@@ -167,7 +199,8 @@ describe('buildPreChequeText', () => {
           amount: 30,
         },
         subtotal: 120,
-      })
+      }),
+      'es-MX'
     );
     expect(text).toContain('Billar');
     expect(text).toContain('30m');
@@ -183,14 +216,15 @@ describe('buildPreChequeText', () => {
           amount: 30,
         },
         subtotal: 120,
-      })
+      }),
+      'es-MX'
     );
     // subtotal line should show 120.00
     expect(text).toContain('$120.00');
   });
 
   it('handles empty items array without crashing and still renders header/footer', () => {
-    const text = buildPreChequeText(basePreCheque({ items: [], subtotal: 0 }));
+    const text = buildPreChequeText(basePreCheque({ items: [], subtotal: 0 }), 'es-MX');
     expect(text).toContain('PRE-CHEQUE');
     expect(text).toContain('PENDIENTE DE PAGO');
   });
@@ -201,8 +235,18 @@ describe('buildPreChequeText', () => {
         barName: 'A very long bar name that might overflow the line',
         cashierName: 'A very long cashier name',
         customerName: 'A very long customer name',
-        items: [{ name: 'X'.repeat(40), quantity: 10, lineTotal: 999.99, orderedAt: new Date(), modifierNames: [], notes: null }],
-      })
+        items: [
+          {
+            name: 'X'.repeat(40),
+            quantity: 10,
+            lineTotal: 999.99,
+            orderedAt: new Date(),
+            modifierNames: [],
+            notes: null,
+          },
+        ],
+      }),
+      'es-MX'
     );
     const lines = text.split('\n');
     for (const line of lines) {
@@ -211,27 +255,57 @@ describe('buildPreChequeText', () => {
   });
 
   it('happyHourActive true → output contains HORA FELIZ', () => {
-    const text = buildPreChequeText(basePreCheque({ happyHourActive: true }));
+    const text = buildPreChequeText(basePreCheque({ happyHourActive: true }), 'es-MX');
     expect(text).toContain('HORA FELIZ');
   });
 
   it('happyHourActive false → output does NOT contain HORA FELIZ', () => {
-    const text = buildPreChequeText(basePreCheque({ happyHourActive: false }));
+    const text = buildPreChequeText(basePreCheque({ happyHourActive: false }), 'es-MX');
     expect(text).not.toContain('HORA FELIZ');
   });
 
   it('uses Bar fallback when barName is empty', () => {
-    const text = buildPreChequeText(basePreCheque({ barName: '' }));
+    const text = buildPreChequeText(basePreCheque({ barName: '' }), 'es-MX');
     expect(text).toContain('Bar');
   });
 
   it('renders item name and quantity in output', () => {
     const text = buildPreChequeText(
       basePreCheque({
-        items: [{ name: 'Tequila', quantity: 3, lineTotal: 150, orderedAt: new Date(), modifierNames: [], notes: null }],
-      })
+        items: [
+          {
+            name: 'Tequila',
+            quantity: 3,
+            lineTotal: 150,
+            orderedAt: new Date(),
+            modifierNames: [],
+            notes: null,
+          },
+        ],
+      }),
+      'es-MX'
     );
     expect(text).toContain('Tequila');
     expect(text).toContain('3');
+  });
+
+  // ---------------------------------------------------------------------
+  // Locale-awareness (21-05, D-06)
+  // ---------------------------------------------------------------------
+
+  it('en-US pre-cheque renders English labels (PRE-CHEQUE/Date/Cashier)', () => {
+    const text = buildPreChequeText(basePreCheque(), 'en-US');
+    expect(text).toContain('PRE-CHEQUE');
+    expect(text).toContain('Date');
+    expect(text).toContain('Cashier');
+    expect(text).not.toContain('Fecha');
+    expect(text).not.toContain('Cajero');
+  });
+
+  it('es-MX pre-cheque keeps the current Spanish labels (CUENTA PREVIA/Fecha/Cajero)', () => {
+    const text = buildPreChequeText(basePreCheque(), 'es-MX');
+    expect(text).toContain('CUENTA PREVIA');
+    expect(text).toContain('Fecha');
+    expect(text).toContain('Cajero');
   });
 });

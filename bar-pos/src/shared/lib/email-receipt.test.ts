@@ -44,7 +44,7 @@ describe('sendReceiptByEmail', () => {
 
     const result = await sendReceiptByEmail(receipt, '  a@b.co  ');
     expect(result.ok).toBe(true);
-    expect(buildSpy).toHaveBeenCalledWith(receipt);
+    expect(buildSpy).toHaveBeenCalledWith(receipt, expect.any(String));
     expect(spy).toHaveBeenCalledWith({
       email: 'a@b.co',
       receiptPlainText: 'PLAIN\n',

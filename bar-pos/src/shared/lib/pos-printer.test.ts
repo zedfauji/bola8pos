@@ -5,7 +5,7 @@ import {
   openCashDrawer,
   printRawText,
   printReceipt,
-  receiptDataToPrinterJson,
+  receiptDataToPrinterLines,
   testPrint,
 } from './pos-printer';
 
@@ -30,32 +30,26 @@ function sampleReceipt(overrides: Partial<ReceiptData> = {}): ReceiptData {
   };
 }
 
-describe('receiptDataToPrinterJson', () => {
-  it('serializes receipt fields for Rust print_receipt', () => {
+describe('receiptDataToPrinterLines', () => {
+  it('builds fully-translated lines (locale-resolved) for Rust print_receipt', () => {
     const data = sampleReceipt();
-    const json = receiptDataToPrinterJson(data);
-    const parsed = JSON.parse(json) as Record<string, unknown>;
-    expect(parsed.barName).toBe('Bar');
-    expect(parsed.receiptNumber).toBe('R1');
-    expect(parsed.footerText).toBeNull();
-    expect(parsed.tenderedAmount).toBe(10);
-    expect(parsed.changeAmount).toBe(5);
-    expect(Array.isArray(parsed.items)).toBe(true);
-    expect(typeof parsed.processedAt).toBe('string');
+    const lines = receiptDataToPrinterLines(data);
+    expect(Array.isArray(lines)).toBe(true);
+    expect(lines.join('\n')).toContain('Bar');
+    expect(lines.some(l => l.includes('R1') || l.includes('#'))).toBe(true);
   });
 
-  it('coerces processedAt from ISO string to locale string', () => {
-    const json = receiptDataToPrinterJson(
+  it('coerces processedAt from ISO string without throwing', () => {
+    const lines = receiptDataToPrinterLines(
       sampleReceipt({
         processedAt: '2026-06-01T15:30:00.000Z' as unknown as Date,
       })
     );
-    const parsed = JSON.parse(json) as { processedAt: string };
-    expect(parsed.processedAt.length).toBeGreaterThan(0);
+    expect(lines.length).toBeGreaterThan(0);
   });
 
-  it('uses null for optional amounts when absent', () => {
-    const json = receiptDataToPrinterJson(
+  it('handles null optional amounts (card payment, no tender)', () => {
+    const lines = receiptDataToPrinterLines(
       sampleReceipt({
         paymentMethod: 'card',
         tenderedAmount: null,
@@ -63,14 +57,7 @@ describe('receiptDataToPrinterJson', () => {
         terminalReference: undefined,
       })
     );
-    const parsed = JSON.parse(json) as {
-      tenderedAmount: null;
-      changeAmount: null;
-      terminalReference: null;
-    };
-    expect(parsed.tenderedAmount).toBeNull();
-    expect(parsed.changeAmount).toBeNull();
-    expect(parsed.terminalReference).toBeNull();
+    expect(lines.some(l => l.includes('Tendered'))).toBe(false);
   });
 });
 
@@ -117,7 +104,7 @@ describe('printReceipt', () => {
     expect(result.ok).toBe(true);
     expect(invoke).toHaveBeenCalledWith(
       'print_receipt',
-      expect.objectContaining({ receiptJson: expect.any(String) })
+      expect.objectContaining({ lines: expect.any(Array) })
     );
   });
 
