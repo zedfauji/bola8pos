@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationClockIn } from '@entities/staff/model/queries';
 import { useStaffStore } from '@entities/staff/model/store';
@@ -23,6 +24,7 @@ export type ClockInModalProps = {
 };
 
 export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
+  const { t } = useTranslation('featMgmt');
   const [phase, setPhase] = useState<Phase>('pin');
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
@@ -49,7 +51,7 @@ export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
       setPhase('opening_cash');
       setOpeningCash(0);
     } else {
-      setPinError('Incorrect PIN. Try again.');
+      setPinError(t('clockInStaff.incorrectPin'));
       setPin('');
     }
   };
@@ -66,7 +68,7 @@ export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
       if (currentStaffId === staff.id) {
         useStaffStore.getState().login(staff, result.data);
       }
-      toast.success(`${staff.name} is clocked in.`);
+      toast.success(t('clockInStaff.clockedIn', { name: staff.name }));
       onOpenChange(false);
     } finally {
       setBusy(false);
@@ -77,9 +79,9 @@ export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Clock in</DialogTitle>
+          <DialogTitle>{t('clockInStaff.dialogTitle')}</DialogTitle>
           <DialogDescription>
-            Verify PIN and enter opening drawer float for {staff.name}.
+            {t('clockInStaff.dialogDescription', { name: staff.name })}
           </DialogDescription>
         </DialogHeader>
 
@@ -95,7 +97,7 @@ export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
                 if (pinError) setPinError('');
               }}
               onComplete={handlePinComplete}
-              label="Enter PIN"
+              label={t('clockInStaff.enterPinLabel')}
               error={pinError}
             />
           </div>
@@ -103,10 +105,10 @@ export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
 
         <ConfirmDialog
           open={phase === 'opening_cash'}
-          title="Opening cash"
-          description="Enter the cash drawer float for this shift. Use zero if not counted yet."
-          confirmLabel="Start shift"
-          cancelLabel="Back"
+          title={t('clockInStaff.openingCashTitle')}
+          description={t('clockInStaff.openingCashDescription')}
+          confirmLabel={t('clockInStaff.startShift')}
+          cancelLabel={t('clockInStaff.back')}
           onConfirm={() => {
             void handleOpeningConfirm();
           }}
@@ -119,7 +121,7 @@ export function ClockInModal({ open, onOpenChange, staff }: ClockInModalProps) {
         >
           <div className="py-4">
             <MoneyInput
-              label="Drawer float"
+              label={t('clockInStaff.drawerFloatLabel')}
               value={openingCash}
               onChange={setOpeningCash}
               disabled={busy}

@@ -451,5 +451,81 @@
     "notesPlaceholder": "e.g. Morning batch — double yield",
     "discardBatch": "Discard batch",
     "recordBatch": "Record batch"
+  },
+  "clockInStaff": {
+    "incorrectPin": "Incorrect PIN. Try again.",
+    "clockedIn": "{{name}} is clocked in.",
+    "dialogTitle": "Clock in",
+    "dialogDescription": "Verify PIN and enter opening drawer float for {{name}}.",
+    "enterPinLabel": "Enter PIN",
+    "openingCashTitle": "Opening cash",
+    "openingCashDescription": "Enter the cash drawer float for this shift. Use zero if not counted yet.",
+    "startShift": "Start shift",
+    "back": "Back",
+    "drawerFloatLabel": "Drawer float"
+  },
+  "clockOutStaff": {
+    "durationMinutes": "{{minutes}}m",
+    "durationHoursMinutes": "{{hours}}h {{minutes}}m",
+    "clockedOut": "{{name}} clocked out.",
+    "endShiftTitle": "End shift?",
+    "closeShiftFor": "Close shift for {{name}}.",
+    "clockOutButton": "Clock out",
+    "shiftDuration": "Shift duration",
+    "clockInLabel": "Clock in",
+    "loadingTotals": "Loading shift totals…",
+    "ordersTaken": "Orders taken",
+    "salesPayments": "Sales (payments)",
+    "closingCashLabel": "Closing cash count"
+  },
+  "addWaitlistEntry": {
+    "addedToast": "{{name}} added to the waitlist.",
+    "genericError": "Something went wrong. Check your connection and try again.",
+    "dialogTitle": "Add to waitlist",
+    "dialogDescription": "Record a walk-in party waiting for a pool table.",
+    "partyNameLabel": "Party name",
+    "partyNamePlaceholder": "e.g. García",
+    "partySizeLabel": "Party size",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "e.g. 55 1234 5678",
+    "phoneHelp": "MX/US number. Used to send WhatsApp notification.",
+    "phoneInvalid": "Not a valid MX or US phone number.",
+    "discard": "Discard",
+    "addToWaitlist": "Add to waitlist"
+  },
+  "markWaitlistCancelled": {
+    "errorToast": "Could not cancel entry. Try again or refresh the waitlist.",
+    "successToast": "Entry for {{name}} cancelled."
+  },
+  "markWaitlistNoShow": {
+    "errorToast": "Could not mark no-show. Try again or refresh the waitlist.",
+    "successToast": "{{name}} marked as no-show."
+  },
+  "notifyWaitlist": {
+    "partyReadyTitle": "Party ready",
+    "partyReadyBody": "{{name}} is ready to be seated.",
+    "errorToast": "Could not send notification for {{name}}. Check notification history.",
+    "whatsappSentToast": "WhatsApp sent to {{name}}.",
+    "managerNotifiedToast": "Manager notified for {{name}}. No phone on file.",
+    "sendWhatsappAria": "Send WhatsApp notification",
+    "sendManagerAria": "Send manager notification",
+    "notifyViaWhatsapp": "Notify via WhatsApp",
+    "notifyManager": "Notify manager"
+  },
+  "seatWaitlistParty": {
+    "errorToast": "Could not seat party. Try again or refresh the waitlist.",
+    "successToast": "{{name}} seated at {{table}}.",
+    "tableLabel": "Table {{number}} – {{label}}",
+    "oneGuest": "1 guest",
+    "nGuests": "{{count}} guests",
+    "dialogTitle": "Seat party",
+    "assignDescription": "Assign {{name}} ({{guestLabel}}) to a table.",
+    "availableTables": "Available tables",
+    "noTablesAvailable": "No tables available right now.",
+    "occupiedTables": "Occupied tables",
+    "occupiedTableAria": "Table {{number}} – {{label}}: occupied",
+    "occupied": "Occupied",
+    "close": "Close",
+    "seatParty": "Seat party"
   }
 }

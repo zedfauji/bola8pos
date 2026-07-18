@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useMutationClockOut, useShiftClosePreview } from '@entities/staff/model/queries';
 import type { Shift, Staff } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { ConfirmDialog, MoneyDisplay, MoneyInput } from '@shared/ui';
 
@@ -16,11 +18,12 @@ function formatDurationMs(ms: number): string {
   const totalM = Math.floor(ms / 60000);
   const h = Math.floor(totalM / 60);
   const m = totalM % 60;
-  if (h <= 0) return `${String(m)}m`;
-  return `${String(h)}h ${String(m)}m`;
+  if (h <= 0) return i18n.t('featMgmt:clockOutStaff.durationMinutes', { minutes: m });
+  return i18n.t('featMgmt:clockOutStaff.durationHoursMinutes', { hours: h, minutes: m });
 }
 
 export function ClockOutDialog({ open, onOpenChange, staff, shift }: ClockOutDialogProps) {
+  const { t } = useTranslation('featMgmt');
   const [closingCash, setClosingCash] = useState(0);
   const [durationMs, setDurationMs] = useState(() =>
     shift ? Date.now() - shift.clockIn.getTime() : 0
@@ -53,7 +56,7 @@ export function ClockOutDialog({ open, onOpenChange, staff, shift }: ClockOutDia
       toast.error(result.error.message);
       return;
     }
-    toast.success(`${staff.name} clocked out.`);
+    toast.success(t('clockOutStaff.clockedOut', { name: staff.name }));
     onOpenChange(false);
     setClosingCash(0);
   };
@@ -61,9 +64,9 @@ export function ClockOutDialog({ open, onOpenChange, staff, shift }: ClockOutDia
   return (
     <ConfirmDialog
       open={effectiveOpen}
-      title="End shift?"
-      description={staff && shift ? `Close shift for ${staff.name}.` : ''}
-      confirmLabel="Clock out"
+      title={t('clockOutStaff.endShiftTitle')}
+      description={staff && shift ? t('clockOutStaff.closeShiftFor', { name: staff.name }) : ''}
+      confirmLabel={t('clockOutStaff.clockOutButton')}
       variant="destructive"
       onConfirm={() => {
         void handleConfirm();
@@ -77,32 +80,32 @@ export function ClockOutDialog({ open, onOpenChange, staff, shift }: ClockOutDia
       {staff && shift ? (
         <div className="space-y-4 py-2 text-sm">
           <div className="flex justify-between gap-2">
-            <span className="text-muted-foreground">Shift duration</span>
+            <span className="text-muted-foreground">{t('clockOutStaff.shiftDuration')}</span>
             <span className="font-medium tabular-nums">{formatDurationMs(durationMs)}</span>
           </div>
           <div className="flex justify-between gap-2">
-            <span className="text-muted-foreground">Clock in</span>
+            <span className="text-muted-foreground">{t('clockOutStaff.clockInLabel')}</span>
             <span className="font-medium tabular-nums">
               {shift.clockIn.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
             </span>
           </div>
           {previewQuery.isIdleOrLoading && (
-            <p className="text-muted-foreground text-xs">Loading shift totals…</p>
+            <p className="text-muted-foreground text-xs">{t('clockOutStaff.loadingTotals')}</p>
           )}
           {summary && (
             <>
               <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">Orders taken</span>
+                <span className="text-muted-foreground">{t('clockOutStaff.ordersTaken')}</span>
                 <span className="font-medium">{String(summary.orderCount)}</span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">Sales (payments)</span>
+                <span className="text-muted-foreground">{t('clockOutStaff.salesPayments')}</span>
                 <MoneyDisplay amount={summary.totalSales} size="sm" />
               </div>
             </>
           )}
           <MoneyInput
-            label="Closing cash count"
+            label={t('clockOutStaff.closingCashLabel')}
             value={closingCash}
             onChange={setClosingCash}
             disabled={clockOut.isPending}
