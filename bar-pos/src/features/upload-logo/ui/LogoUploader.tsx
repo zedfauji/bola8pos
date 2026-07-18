@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { ReceiptSettings } from '@entities/settings';
 import { logger } from '@shared/lib/logger-instance';
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function LogoUploader({ receipt }: Props) {
+  const { t } = useTranslation('featMgmt');
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { apply, isPending } = useUploadLogo();
   const [processing, setProcessing] = useState(false);
@@ -35,7 +37,7 @@ export function LogoUploader({ receipt }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Logo updated.');
+    toast.success(t('uploadLogo.updatedToast'));
     if (inputRef.current) inputRef.current.value = '';
   }
 
@@ -45,16 +47,14 @@ export function LogoUploader({ receipt }: Props) {
       toast.error(result.error.message);
       return;
     }
-    toast.success('Logo removed.');
+    toast.success(t('uploadLogo.removedToast'));
     if (inputRef.current) inputRef.current.value = '';
   }
 
   return (
     <div className="space-y-4 rounded-lg border p-4">
-      <h3 className="font-medium">Branding / Logo</h3>
-      <p className="text-sm text-muted-foreground">
-        Upload a PNG or JPEG logo. It appears on the Home, Login, and printed receipt headers.
-      </p>
+      <h3 className="font-medium">{t('uploadLogo.title')}</h3>
+      <p className="text-sm text-muted-foreground">{t('uploadLogo.description')}</p>
 
       <div className="flex items-start gap-4">
         <div
@@ -64,16 +64,16 @@ export function LogoUploader({ receipt }: Props) {
           {hasLogo ? (
             <img
               src={receipt.logoDataUrl ?? ''}
-              alt="Current logo"
+              alt={t('uploadLogo.currentLogoAlt')}
               className="max-h-full max-w-full object-contain"
             />
           ) : (
-            <span className="text-xs text-muted-foreground">No logo</span>
+            <span className="text-xs text-muted-foreground">{t('uploadLogo.noLogo')}</span>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="logo-upload-input">Logo file</Label>
+          <Label htmlFor="logo-upload-input">{t('uploadLogo.logoFileLabel')}</Label>
           <input
             ref={inputRef}
             id="logo-upload-input"
@@ -98,7 +98,7 @@ export function LogoUploader({ receipt }: Props) {
                 void onRemove();
               }}
             >
-              Remove logo
+              {t('uploadLogo.removeLogo')}
             </Button>
           ) : null}
         </div>

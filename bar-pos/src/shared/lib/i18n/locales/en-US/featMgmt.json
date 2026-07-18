@@ -557,5 +557,29 @@
   "togglePermission": {
     "enableFailed": "Failed to enable permission",
     "disableFailed": "Failed to disable permission"
+  },
+  "exportReport": {
+    "excelWorkbookLabel": "Excel Workbook",
+    "pdfDocumentLabel": "PDF Document",
+    "successToast": "Report exported successfully.",
+    "errorToast": "Export failed. Please try again.",
+    "exportButton": "Export",
+    "downloadAs": "Download as",
+    "excelOption": "Excel (.xlsx)",
+    "pdfOption": "PDF (.pdf)"
+  },
+  "uploadLogo": {
+    "unsupportedType": "Only PNG or JPEG images are supported.",
+    "canvasUnavailable": "Canvas unavailable.",
+    "oversize": "Logo exceeds {{kb}} KB after resize.",
+    "decodeFailed": "Could not decode image.",
+    "updatedToast": "Logo updated.",
+    "removedToast": "Logo removed.",
+    "title": "Branding / Logo",
+    "description": "Upload a PNG or JPEG logo. It appears on the Home, Login, and printed receipt headers.",
+    "currentLogoAlt": "Current logo",
+    "noLogo": "No logo",
+    "logoFileLabel": "Logo file",
+    "removeLogo": "Remove logo"
   }
 }

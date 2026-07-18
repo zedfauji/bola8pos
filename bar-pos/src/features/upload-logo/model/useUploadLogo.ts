@@ -1,4 +1,5 @@
 import { useMutationUpdateSetting, type ReceiptSettings } from '@entities/settings';
+import i18n from '@shared/lib/i18n';
 
 export const LOGO_MAX_BYTES = 200 * 1024;
 export const LOGO_MAX_WIDTH = 384;
@@ -15,6 +16,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
       resolve(img);
     };
     img.onerror = () => {
+      // eslint-disable-next-line i18next/no-literal-string -- internal marker, never shown to the user
       reject(new Error('image decode failed'));
     };
     img.src = url;
@@ -27,7 +29,10 @@ export async function encodeLogoDataUrl(
   if (!/^image\/(png|jpeg)$/.test(file.type)) {
     return {
       ok: false,
-      error: { code: 'UNSUPPORTED_TYPE', message: 'Only PNG or JPEG images are supported.' },
+      error: {
+        code: 'UNSUPPORTED_TYPE',
+        message: i18n.t('featMgmt:uploadLogo.unsupportedType'),
+      },
     };
   }
 
@@ -42,9 +47,13 @@ export async function encodeLogoDataUrl(
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      return { ok: false, error: { code: 'DECODE_FAILED', message: 'Canvas unavailable.' } };
+      return {
+        ok: false,
+        error: { code: 'DECODE_FAILED', message: i18n.t('featMgmt:uploadLogo.canvasUnavailable') },
+      };
     }
     ctx.drawImage(img, 0, 0, width, height);
+    // eslint-disable-next-line i18next/no-literal-string -- MIME type identifiers, not UI copy
     const mime = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
     const dataUrl = canvas.toDataURL(mime, mime === 'image/jpeg' ? 0.85 : undefined);
     const approxBytes = Math.ceil((dataUrl.length * 3) / 4);
@@ -53,13 +62,18 @@ export async function encodeLogoDataUrl(
         ok: false,
         error: {
           code: 'OVERSIZE',
-          message: `Logo exceeds ${String(Math.round(LOGO_MAX_BYTES / 1024))} KB after resize.`,
+          message: i18n.t('featMgmt:uploadLogo.oversize', {
+            kb: Math.round(LOGO_MAX_BYTES / 1024),
+          }),
         },
       };
     }
     return { ok: true, dataUrl };
   } catch {
-    return { ok: false, error: { code: 'DECODE_FAILED', message: 'Could not decode image.' } };
+    return {
+      ok: false,
+      error: { code: 'DECODE_FAILED', message: i18n.t('featMgmt:uploadLogo.decodeFailed') },
+    };
   } finally {
     URL.revokeObjectURL(objectUrl);
   }

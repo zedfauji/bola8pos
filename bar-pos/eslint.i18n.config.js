@@ -94,8 +94,9 @@ export default tseslint.config({
           'confirmClassName',
         ],
       },
-      // 'can(...)' is the RBAC permission check (usePermissions().can) — its
-      // string argument is a fixed RBACAction identifier, not UI copy.
+      // 'can(...)'/'canAccess(...)' are the RBAC permission checks (usePermissions().can,
+      // @shared/lib/rbac's canAccess(role, action)) — their string argument is a fixed
+      // RBACAction identifier, not UI copy.
       // 'logger.error/.warn/.info/.debug(...)' first args are internal
       // telemetry event names (e.g. 'staff.update_locale.failed'), not UI copy.
       // '.rpc(...)' (db.rpc/supabase.rpc, mutation hooks across the order/
@@ -121,7 +122,7 @@ export default tseslint.config({
       // in this plan's scope.
       callees: {
         exclude: [
-          'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'logger\\.\\w+',
+          'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'canAccess', 'logger\\.\\w+',
           'rpc', 'navigate', 'from', 'select', 'eq', 'order', 'insert', 'update', 'delete',
         ],
       },

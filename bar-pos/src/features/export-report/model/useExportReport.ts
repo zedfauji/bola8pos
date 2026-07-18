@@ -44,6 +44,7 @@ import {
   voidRefundToPdfBytes,
   waitlistMetricsToPdfBytes,
 } from '@shared/lib/exporters/pdf.tsx';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { ok, err, exportCancelledError, exportFailedError, type Result } from '@shared/lib/result';
 
@@ -176,10 +177,15 @@ export function useExportReport() {
   async function exportReport(type: ExportType, data: unknown): Promise<Result<void>> {
     setIsExporting(true);
     try {
+      /* eslint-disable i18next/no-literal-string -- technical values: ExportType
+         suffix check, file extension, ISO-date split delimiter/fallback — not UI copy */
       const isExcel = type.endsWith('-excel');
       const ext = isExcel ? 'xlsx' : 'pdf';
-      const mimeLabel = isExcel ? 'Excel Workbook' : 'PDF Document';
       const dateStr = new Date().toISOString().split('T')[0] ?? 'report';
+      /* eslint-enable i18next/no-literal-string */
+      const mimeLabel = isExcel
+        ? i18n.t('featMgmt:exportReport.excelWorkbookLabel')
+        : i18n.t('featMgmt:exportReport.pdfDocumentLabel');
 
       let bytes: Uint8Array;
 
@@ -324,12 +330,12 @@ export function useExportReport() {
 
       await writeFile(filePath, bytes);
 
-      toast.success('Report exported successfully.');
+      toast.success(i18n.t('featMgmt:exportReport.successToast'));
       logger.info('export.report.success', { type });
       return ok(undefined);
     } catch (e) {
       logger.error('export.report.failed', { type, raw: e });
-      toast.error('Export failed. Please try again.');
+      toast.error(i18n.t('featMgmt:exportReport.errorToast'));
       return err(exportFailedError(undefined, e));
     } finally {
       setIsExporting(false);

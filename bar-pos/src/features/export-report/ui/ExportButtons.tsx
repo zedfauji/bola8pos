@@ -1,4 +1,5 @@
 import { Download, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useStaffStore } from '@entities/staff/model/store';
 import type {
   CajaReport,
@@ -101,6 +102,7 @@ type Props =
   | ComboOverridesProps;
 
 export function ExportButtons(props: Props) {
+  const { t } = useTranslation('featMgmt');
   const role = useStaffStore(s => s.currentStaff?.role);
   const { exportReport, isExporting } = useExportReport();
 
@@ -108,6 +110,8 @@ export function ExportButtons(props: Props) {
     return null;
   }
 
+  /* eslint-disable i18next/no-literal-string -- ExportType literal-union branches
+     (e.g. 'caja-excel'), not UI copy */
   function handleExport(format: 'excel' | 'pdf') {
     void (async () => {
       if (props.reportType === 'caja') {
@@ -149,6 +153,7 @@ export function ExportButtons(props: Props) {
       }
     })();
   }
+  /* eslint-enable i18next/no-literal-string */
 
   return (
     <DropdownMenu>
@@ -159,11 +164,11 @@ export function ExportButtons(props: Props) {
           ) : (
             <Download className="mr-2 size-4" />
           )}
-          Export
+          {t('exportReport.exportButton')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel inset={undefined}>Download as</DropdownMenuLabel>
+        <DropdownMenuLabel inset={undefined}>{t('exportReport.downloadAs')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           inset={undefined}
@@ -172,7 +177,7 @@ export function ExportButtons(props: Props) {
             handleExport('excel');
           }}
         >
-          Excel (.xlsx)
+          {t('exportReport.excelOption')}
         </DropdownMenuItem>
         <DropdownMenuItem
           inset={undefined}
@@ -181,7 +186,7 @@ export function ExportButtons(props: Props) {
             handleExport('pdf');
           }}
         >
-          PDF (.pdf)
+          {t('exportReport.pdfOption')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
