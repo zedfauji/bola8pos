@@ -5,6 +5,8 @@ import { supabase } from '@shared/lib/supabase';
 import type { Tables } from '@shared/lib/supabase.types';
 import { mapRappiOrderRow } from './map-row';
 
+/* eslint-disable i18next/no-literal-string -- TanStack Query cache-key
+   namespace strings below are not UI copy. */
 export const rappiOrderKeys = {
   all: ['rappi-orders'] as const,
   list: () => [...rappiOrderKeys.all, 'list'] as const,

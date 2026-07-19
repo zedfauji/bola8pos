@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, i18next/no-literal-string */
+// i18next/no-literal-string: query-key namespace strings + multi-line Supabase
+// chain args below are wire-protocol identifiers, not UI copy (plugin doesn't
+// resolve excluded callees across a multi-line method chain — 21-08 quirk).
 /**
  * entities/refund/model/queries.ts
  *

@@ -1,10 +1,11 @@
 /**
  * POOL TABLE ILLUSTRATION
  *
- * Pure SVG component — no side effects, no hooks.
+ * Pure SVG component — no side effects.
  * Renders a top-down pool table illustration with state-specific visuals.
  */
 
+import { useTranslation } from 'react-i18next';
 import type { PoolTable } from '@shared/lib/domain';
 import { formatMoney } from '@shared/lib/domain-helpers';
 
@@ -121,6 +122,7 @@ function NineBallRack() {
 }
 
 function MaintenanceSash() {
+  const { t } = useTranslation('entities');
   return (
     <g transform="translate(150 85) rotate(-6)">
       <rect x={-72} y={-11} width={144} height={22} rx={3} fill="#eab308" />
@@ -135,7 +137,7 @@ function MaintenanceSash() {
         fill="#111"
         letterSpacing={1}
       >
-        OUT OF SERVICE
+        {t('poolTableIllustration.outOfService')}
       </text>
     </g>
   );
@@ -149,6 +151,7 @@ export function PoolTableIllustration({
   timer,
   ratePerHour,
 }: PoolTableIllustrationProps) {
+  const { t } = useTranslation('entities');
   const { felt: feltColor, cushion: cushionColor } = getFeltColors(status, isOvertime);
   const isMaintenance = status === 'maintenance';
 
@@ -317,7 +320,7 @@ export function PoolTableIllustration({
       {status === 'available' && ratePerHour !== undefined && (
         <div className="pointer-events-none absolute bottom-2 right-3">
           <span className="font-mono text-[11px] text-white/70">
-            ${formatMoney(ratePerHour)}/hr
+            {t('poolTableIllustration.ratePerHour', { amount: formatMoney(ratePerHour) })}
           </span>
         </div>
       )}

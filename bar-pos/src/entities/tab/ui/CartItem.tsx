@@ -1,4 +1,5 @@
 import { X, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { CartItem as CartItemType } from '@shared/lib/domain';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { QuantityControl } from '@shared/ui/QuantityControl';
@@ -14,6 +15,7 @@ export interface CartItemProps {
 }
 
 export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartItemProps) {
+  const { t } = useTranslation('entities');
   return (
     <div className="flex gap-3 rounded-lg border bg-card p-3">
       <div className="min-w-0 flex-1">
@@ -25,7 +27,7 @@ export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartI
             size="icon"
             className="h-8 w-8 shrink-0"
             onClick={onRemove}
-            aria-label={`Remove ${item.product.name}`}
+            aria-label={t('cartItem.remove', { name: item.product.name })}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -46,7 +48,7 @@ export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartI
           <QuantityControl value={item.quantity} min={1} max={99} onChange={onQuantitySet} />
           <div className="flex shrink-0 items-center gap-1">
             {item.unitPrice !== item.product.basePrice && (
-              <Zap className="h-3.5 w-3.5 text-amber-400" aria-label="Happy hour price" />
+              <Zap className="h-3.5 w-3.5 text-amber-400" aria-label={t('cartItem.happyHourPrice')} />
             )}
             <MoneyDisplay amount={item.lineTotal} size="lg" />
           </div>
@@ -55,14 +57,14 @@ export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartI
         <Input
           data-testid={`cart-item-notes-${item.product.id}`}
           type="text"
-          placeholder="Note (e.g. no celery)"
+          placeholder={t('cartItem.notesPlaceholder')}
           value={item.notes}
           maxLength={200}
           className="mt-2 h-7 text-xs"
           onChange={e => {
             onNotesChange(e.target.value);
           }}
-          aria-label={`Note for ${item.product.name}`}
+          aria-label={t('cartItem.notesFor', { name: item.product.name })}
         />
       </div>
     </div>

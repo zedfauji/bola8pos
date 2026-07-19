@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, i18next/no-literal-string */
+// i18next/no-literal-string: the multi-line Supabase chain below carries table/
+// column-name wire-protocol identifiers, not UI copy (plugin doesn't resolve
+// excluded 'from'/'eq' callees across a multi-line method chain — 21-08 quirk).
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';

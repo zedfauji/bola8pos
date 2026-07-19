@@ -16,8 +16,14 @@ import type {
   WaitlistNotification,
 } from '@shared/lib/domain';
 import { WaitlistEntrySchema, WaitlistNotificationSchema } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   multi-line Supabase chain args below are wire-protocol identifiers, not UI
+   copy (plugin doesn't resolve excluded callees across a multi-line method
+   chain — 21-08 quirk); genuine user-facing validation-error messages are
+   translated via i18n.t() below regardless of this disable. */
 import { supabase } from '@shared/lib/supabase';
 
 // Pre-regen cast: waitlist_entries not yet in supabase.types.ts
@@ -203,7 +209,7 @@ export function useMutationAddWaitlistEntry() {
 
       const parsed = WaitlistEntrySchema.safeParse(mapRow(data as Record<string, unknown>));
       if (!parsed.success) {
-        return err({ code: 'VALIDATION_ERROR' as const, message: 'Invalid waitlist entry returned' });
+        return err({ code: 'VALIDATION_ERROR' as const, message: i18n.t('entities:waitlist.invalidEntryReturned') });
       }
       return ok(parsed.data);
     },
@@ -249,7 +255,7 @@ export function useMutationUpdateWaitlistStatus() {
 
       const parsed = WaitlistEntrySchema.safeParse(mapRow(data as Record<string, unknown>));
       if (!parsed.success) {
-        return err({ code: 'VALIDATION_ERROR' as const, message: 'Invalid waitlist entry returned' });
+        return err({ code: 'VALIDATION_ERROR' as const, message: i18n.t('entities:waitlist.invalidEntryReturned') });
       }
       return ok(parsed.data);
     },

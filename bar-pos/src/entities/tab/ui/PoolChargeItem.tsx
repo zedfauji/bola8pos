@@ -1,4 +1,5 @@
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { PoolSessionSummary } from '@shared/lib/domain';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 
@@ -14,15 +15,16 @@ function formatBilledTime(billedMinutes: number): string {
 }
 
 export function PoolChargeItem({ charge }: PoolChargeItemProps) {
+  const { t } = useTranslation('entities');
   const duration = formatBilledTime(charge.billedMinutes);
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed bg-muted/40 p-3">
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <Clock className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
         <p className="text-sm font-medium leading-snug">
-          Pool Table #{charge.tableNumber} — {duration} @{' '}
+          {t('poolChargeItem.tableAndDuration', { tableNumber: charge.tableNumber, duration })}{' '}
           <MoneyDisplay amount={charge.ratePerHour} size="sm" className="inline align-baseline" />
-          /hr ={' '}
+          {t('poolChargeItem.perHourEquals')}{' '}
           <MoneyDisplay amount={charge.totalCharge} size="sm" className="inline align-baseline" />
         </p>
       </div>

@@ -24,6 +24,7 @@ import type { Tab, OrderItem } from '@shared/lib/domain';
 // =====================================================
 // MOCK DATA FOR STORYBOOK
 // =====================================================
+/* eslint-disable i18next/no-literal-string -- Storybook fixture data, not UI copy. */
 
 export const mockTabItem: OrderItem = {
   id: '123e4567-e89b-12d3-a456-426614174010',

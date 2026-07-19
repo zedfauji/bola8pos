@@ -1,7 +1,12 @@
 // src/entities/audit-log/model/queries.ts
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment,
-   @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+   @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, i18next/no-literal-string */
 // Pre-regen cast: audit_logs table added in Phase 14; supabase.types.ts extended manually.
+// i18next/no-literal-string: query-key namespace strings + multi-line Supabase
+// chain args (table names, column filters) below are wire-protocol identifiers,
+// not UI copy — same category as the config's excluded 'from'/'select'/'eq'
+// callees, but the plugin doesn't resolve callee names across a multi-line
+// method chain (recurring quirk since 21-08).
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { AuditLogSchema } from '@shared/lib/domain';

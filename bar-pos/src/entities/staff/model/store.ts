@@ -4,6 +4,8 @@ import type { Staff, Shift } from '@shared/lib/domain';
 import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
+/* eslint-disable i18next/no-literal-string -- zustand persist store name below
+   is a localStorage key, not UI copy. */
 
 interface StaffState {
   currentStaff: Staff | null;

@@ -1,6 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, i18next/no-literal-string */
+// i18next/no-literal-string: query-key namespace strings + multi-line Supabase
+// chain args below are wire-protocol identifiers, not UI copy (plugin doesn't
+// resolve excluded callees across a multi-line method chain — 21-08 quirk).
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -94,7 +98,7 @@ export function useKdsItems(routing: 'KITCHEN' | 'BAR') {
           id: row.id as string,
           orderId: row.order_id as string,
           productId: row.product_id as string,
-          productName: (row.products?.name as string | undefined) ?? 'Unknown',
+          productName: (row.products?.name as string | undefined) ?? i18n.t('entities:common.unknownProduct'),
           categoryId: (row.products?.categories?.id as string | undefined) ?? '',
           routing: categoryRouting,
           quantity: row.quantity as number,

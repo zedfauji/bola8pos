@@ -1,8 +1,13 @@
 import type { RappiOrder } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { RAPPI_LINE_ITEM_PRODUCT_ID } from '@shared/lib/rappi-constants';
 import { err, ok, supabaseMutation, supabaseQuery, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 import type { Json, TablesInsert } from '@shared/lib/supabase.types';
+/* eslint-disable i18next/no-literal-string -- multi-line Supabase chain args
+   + internal RPC payload fields (p_notes DB default note) below are
+   wire-protocol identifiers, not UI copy (plugin doesn't resolve excluded
+   callees across a multi-line method chain — 21-08 quirk). */
 
 type RpcPayload = {
   p_tab_id: string;
@@ -33,7 +38,7 @@ export async function acceptRappiOrder(
   shiftId: string
 ): Promise<Result<{ tabId: string }>> {
   if (order.status !== 'pending_acceptance') {
-    return err({ code: 'VALIDATION_ERROR', message: 'Order is not awaiting acceptance' });
+    return err({ code: 'VALIDATION_ERROR', message: i18n.t('entities:rappiOrder.notAwaitingAcceptance') });
   }
 
   const customerName = `Rappi — ${order.customerName}`.slice(0, 100);
@@ -57,7 +62,7 @@ export async function acceptRappiOrder(
 
   const row = tabRes.data;
   if (row == null) {
-    return err({ code: 'SUPABASE_ERROR', message: 'Tab insert returned no row' });
+    return err({ code: 'SUPABASE_ERROR', message: i18n.t('entities:rappiOrder.tabInsertNoRow') });
   }
   const tabId = row.id;
 
@@ -90,7 +95,7 @@ export async function acceptRappiOrder(
   );
 
   if (!upd.ok) {
-    return err({ code: 'SUPABASE_ERROR', message: 'Failed to link Rappi order to tab' });
+    return err({ code: 'SUPABASE_ERROR', message: i18n.t('entities:rappiOrder.linkFailed') });
   }
 
   return ok({ tabId });

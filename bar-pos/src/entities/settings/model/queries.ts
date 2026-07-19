@@ -7,6 +7,9 @@ import {
   callSettingsEmailStatus,
 } from '@shared/lib/edge-function-contracts';
 import { logger } from '@shared/lib/logger-instance';
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   settings-table row-key lookups below (Map.get('general') etc.) are internal
+   config identifiers, not UI copy. */
 import {
   err,
   ok,

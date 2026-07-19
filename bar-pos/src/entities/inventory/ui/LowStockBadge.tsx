@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@shared/ui/badge';
 import { useInventoryAlerts } from '../model/queries';
 
@@ -6,13 +7,14 @@ import { useInventoryAlerts } from '../model/queries';
  * Renders nothing when there are no low-stock alerts.
  */
 export function LowStockBadge() {
+  const { t } = useTranslation('entities');
   const { data: alerts, isLoading } = useInventoryAlerts();
 
   if (isLoading || !alerts || alerts.length === 0) return null;
 
   return (
     <Badge variant="destructive" className="ml-3 tabular-nums" data-testid="low-stock-badge">
-      {alerts.length} low stock
+      {t('lowStockBadge.count', { count: alerts.length })}
     </Badge>
   );
 }

@@ -109,8 +109,8 @@ export function InventoryPagePanel() {
   const [batchDelta, setBatchDelta] = useState<string>('1');
 
   const columns = useMemo(
-    () => inventoryRowColumns(staffId || '00000000-0000-0000-0000-000000000001'),
-    [staffId]
+    () => inventoryRowColumns(t, staffId || '00000000-0000-0000-0000-000000000001'),
+    [t, staffId]
   );
 
   const uniqueCategories = useMemo(() => {

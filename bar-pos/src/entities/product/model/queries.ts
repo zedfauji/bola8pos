@@ -12,6 +12,9 @@ import type {
   ProductUpdate,
 } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings
+   below are not UI copy; unknownError(...) codes are internal debug
+   metadata, not the user-visible AppError.message. */
 import {
   err,
   ok,

@@ -18,6 +18,8 @@ import { buildCategoryTree, type CategoryNode } from './types';
 // ============================================================================
 // QUERY KEYS
 // ============================================================================
+/* eslint-disable i18next/no-literal-string -- TanStack Query cache-key
+   namespace strings below are not UI copy. */
 
 export const CATEGORY_QUERY_KEY = ['categories'] as const;
 

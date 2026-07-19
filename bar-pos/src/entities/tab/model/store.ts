@@ -6,8 +6,11 @@ import {
   type OfflineActionType,
   type Tab,
 } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { ok, err, type Result } from '@shared/lib/result';
+/* eslint-disable i18next/no-literal-string -- the zustand persist store name
+   below is a localStorage key, not UI copy. */
 
 // ============================================================================
 // OFFLINE ACTION QUEUE
@@ -104,7 +107,10 @@ export const useTabStore = create<TabsStore>()(
       openTab: tab => {
         if (get().tabs.some(t => t.id === tab.id)) {
           logger.warn('tabs.open.duplicate', { tabId: tab.id });
-          return err({ code: 'DUPLICATE_ENTRY', message: 'Tab already exists in store.' });
+          // eslint-disable-next-line i18next/no-literal-string -- real
+          // UI-facing error message, must stay translated despite the
+          // file's technical-noise disable above.
+          return err({ code: 'DUPLICATE_ENTRY', message: i18n.t('entities:tab.alreadyExistsInStore') });
         }
         logger.info('tabs.opened', { tabId: tab.id, customerName: tab.customerName });
         set(state => ({ tabs: [tab, ...state.tabs] }));
@@ -119,7 +125,10 @@ export const useTabStore = create<TabsStore>()(
       updateTabStatus: (id, status) => {
         if (!get().tabs.some(t => t.id === id)) {
           logger.warn('tabs.updateStatus.notFound', { tabId: id });
-          return err({ code: 'NOT_FOUND', message: 'Tab not found.' });
+          // eslint-disable-next-line i18next/no-literal-string -- real
+          // UI-facing error message, must stay translated despite the
+          // file's technical-noise disable above.
+          return err({ code: 'NOT_FOUND', message: i18n.t('entities:tab.notFoundInStore') });
         }
         logger.info('tabs.status.updated', { tabId: id, status });
         set(state => ({

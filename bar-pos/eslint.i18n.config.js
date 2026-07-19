@@ -42,6 +42,17 @@ export default tseslint.config({
     // is legitimately "unused" here without being a real problem in the file.
     reportUnusedDisableDirectives: 'off',
   },
+  rules: {
+    // Mirrors eslint.config.js's argsIgnorePattern: '^_' (line 90) — this
+    // standalone i18n gate's tseslint.configs.recommended base otherwise
+    // enables the rule with no ignore pattern, so pre-existing
+    // underscore-prefixed intentionally-unused params (e.g. zustand persist's
+    // `migrate: (persisted, _persistedVersion) => ...`) fail this narrower
+    // gate even though the committed `npm run lint` gate already permits
+    // them. 21-11 is the first plan to sweep entities/model/*.ts, where this
+    // convention recurs.
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+  },
 }, {
   // Mirrors eslint.config.js's test-file override — tseslint.configs.recommended
   // (registered above) enables @typescript-eslint/no-explicit-any repo-wide,
@@ -52,6 +63,12 @@ export default tseslint.config({
   files: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx', '**/mocks.ts'],
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
+    // Mirrors eslint.config.js's argsIgnorePattern: '^_' — this standalone gate's
+    // tseslint.configs.recommended base enables the rule with no ignore pattern,
+    // so pre-existing `_reject`-style intentionally-unused Promise executor args
+    // (unrelated to string migration) fail this narrower gate even though the
+    // committed `npm run lint` gate already permits them.
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
 }, {
   files: [
@@ -139,6 +156,18 @@ export default tseslint.config({
       // carry DB payload objects/enum values, not UI copy — same rationale as 'from'/
       // 'select'/'eq'/'order'; recurs across the waitlist mark-* hooks + toggle-permission
       // in this plan's scope.
+      // 'neq'/'gte'/'lte'/'not'/'in'/'is'/'single' (the remaining Supabase
+      // query-builder filter/terminal verbs, e.g. db.from('orders').neq('status',
+      // 'voided'), .gte('created_at', from.toISOString()), .not('status', 'in',
+      // '("seated","cancelled")'), .is('deleted_at', null)) carry DB column
+      // names/enum values/date strings, not UI copy — same category as 'eq'/
+      // 'order'; this plan (21-11) is the first to sweep entities/model/*.ts,
+      // where every report/list query chains these verbs.
+      // 'channel'/'on' (Supabase Realtime subscription builders, e.g.
+      // supabase.channel('kds:order_items').on('postgres_changes', { event:
+      // '*', schema: 'public', table: 'order_items' }, cb)) take fixed
+      // channel-name/event-type wire-protocol identifiers as their first
+      // arg, not UI copy — same category as 'rpc'.
       // 'logHardwareFail' (PaymentForm.tsx's locally-defined post-payment hardware
       // error logger, wrapping logger.warn + toast.error) takes a fixed telemetry
       // event name as its first arg (e.g. 'cash_drawer.failed') — same category as
@@ -157,6 +186,7 @@ export default tseslint.config({
           'rpc', 'navigate', 'from', 'select', 'eq', 'order', 'insert', 'update', 'delete',
           'executeTool', 'logHardwareFail', 'toLocaleDateString', 'toLocaleTimeString',
           'toLocaleString', 'usePersistedBool',
+          'neq', 'gte', 'lte', 'not', 'in', 'is', 'single', 'channel', 'on',
         ],
       },
       // Object literal properties named `key`/`id`/`accessorKey` (React list
@@ -176,10 +206,18 @@ export default tseslint.config({
       // text goes through StatusBadge's `labelKey` mapping instead.
       // `maxHeight` is a CSS style-object value (e.g. `style={{ maxHeight:
       // 'calc(100vh - 200px)' }}`), same category as `className`, not UI copy.
+      // `event`/`schema`/`table` are Supabase Realtime `.on('postgres_changes',
+      // { event: '*', schema: 'public', table: 'order_items' }, cb)` filter
+      // config keys — wire-protocol identifiers, not UI copy, same category
+      // as `status`.
+      // `count` is the Supabase `.select('id', { count: 'exact', head: true })`
+      // query-option key — a fixed API option name, not UI copy.
+      // `onConflict` is the Supabase `.upsert(payload, { onConflict:
+      // 'product_id' })` option key — a DB column name, not UI copy.
       'object-properties': {
         exclude: [
           'key', 'id', 'accessorKey', 'displayName', 'className', 'aria-invalid', 'labelKey',
-          'status', 'maxHeight',
+          'status', 'maxHeight', 'event', 'schema', 'table', 'count', 'onConflict',
         ],
       },
       // Em dash ('—') is a standalone symbol used as an empty-value
@@ -187,8 +225,15 @@ export default tseslint.config({
       // The filled/empty PIN dot markers ('●'/'○'), the diff-viewer's
       // removed-line minus sign ('−', U+2212, distinct from ASCII '-'), and
       // en/em dashes are likewise decorative status glyphs, not UI copy.
+      // Up/down sort-indicator arrows ('↑'/'↓', DataTable column headers)
+      // are the same category of decorative status glyph.
+      // Hex color literals (e.g. '#7a3f1f', PoolTableIllustration's felt/
+      // cushion/ball fill colors) are SVG presentation values, not UI copy.
       words: {
-        exclude: ['^[0-9.,$%:@#/x×+*-]+$', '^[A-Z_]{2,}$', '^—$', '^[●○−–]+$'],
+        exclude: [
+          '^[0-9.,$%:@#/x×+*-]+$', '^[A-Z_]{2,}$', '^—$', '^[●○−–]+$', '^[↑↓]+$',
+          '^#[0-9a-fA-F]{3,8}$',
+        ],
       },
     }],
   },

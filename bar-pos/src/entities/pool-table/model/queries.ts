@@ -13,6 +13,11 @@ import {
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   multi-line Supabase chain args below are wire-protocol identifiers, not UI
+   copy (plugin doesn't resolve excluded callees across a multi-line method
+   chain — 21-08 quirk); unknownError(...) codes below are internal debug
+   metadata, not the user-visible AppError.message. */
 import type { Json } from '@shared/lib/supabase.types';
 import type { Tables, TablesInsert, TablesUpdate } from '@shared/lib/supabase.types';
 import { handleVersionError } from '@shared/lib/version-error';

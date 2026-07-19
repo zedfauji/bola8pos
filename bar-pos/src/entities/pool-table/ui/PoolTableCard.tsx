@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
 import { POSButton, StatusBadge } from '@shared/ui';
@@ -27,10 +28,11 @@ export interface PoolTableCardProps {
   firstHourMode: 'full' | 'prorated';
 }
 
-const TABLE_TYPE_LABEL: Record<PoolTableType, string> = {
-  pool: 'Pool',
-  carom: 'Carom',
-  consumption: 'Consumption',
+// eslint-disable-next-line i18next/no-literal-string -- object keys (PoolTableType enum values), not UI copy
+const TABLE_TYPE_LABEL_KEY: Record<PoolTableType, string> = {
+  pool: 'poolTableCard.tableType.pool',
+  carom: 'poolTableCard.tableType.carom',
+  consumption: 'poolTableCard.tableType.consumption',
 };
 
 const TABLE_TYPE_VARIANT: Record<PoolTableType, 'default' | 'secondary' | 'outline'> = {
@@ -39,10 +41,11 @@ const TABLE_TYPE_VARIANT: Record<PoolTableType, 'default' | 'secondary' | 'outli
   consumption: 'outline',
 };
 
-const statusMessage: Record<string, string> = {
-  available: 'Ready for the next game.',
-  reserved: 'Held for a customer.',
-  maintenance: 'Temporarily out of service.',
+// eslint-disable-next-line i18next/no-literal-string -- object keys (table status enum values), not UI copy
+const STATUS_MESSAGE_KEY: Record<string, string> = {
+  available: 'poolTableCard.statusMessage.available',
+  reserved: 'poolTableCard.statusMessage.reserved',
+  maintenance: 'poolTableCard.statusMessage.maintenance',
 };
 
 export function PoolTableCard({
@@ -59,6 +62,7 @@ export function PoolTableCard({
   stopDisabledTitle,
   firstHourMode,
 }: PoolTableCardProps) {
+  const { t } = useTranslation('entities');
   const isOccupied = table.status === 'occupied';
   const startDisabledVal = startDisabled ?? false;
   const stopDisabledVal = stopDisabled ?? false;
@@ -86,14 +90,16 @@ export function PoolTableCard({
     >
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-muted-foreground">Table {table.number}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('poolTableCard.tableNumber', { number: table.number })}
+          </p>
           <CardTitle className="truncate text-lg font-bold">{table.label}</CardTitle>
           <Badge
             data-testid="table-type-badge"
             variant={TABLE_TYPE_VARIANT[table.tableType]}
             className="mt-1 text-xs"
           >
-            {TABLE_TYPE_LABEL[table.tableType]}
+            {t(TABLE_TYPE_LABEL_KEY[table.tableType])}
           </Badge>
         </div>
         <StatusBadge status={table.status} />
@@ -118,14 +124,19 @@ export function PoolTableCard({
         {isOccupied && session ? (
           <div className="flex items-center justify-between gap-2">
             <Badge variant="secondary" className="max-w-full truncate text-xs">
-              {linkedCustomerName ?? 'No tab'}
+              {linkedCustomerName ?? t('poolTableCard.noTab')}
             </Badge>
             <span className="shrink-0 text-xs text-muted-foreground">
-              {Math.floor(timer.elapsedMinutes)} min
+              {t('poolTableCard.elapsedMinutes', { minutes: Math.floor(timer.elapsedMinutes) })}
             </span>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">{statusMessage[table.status] ?? ''}</p>
+          <p className="text-sm text-muted-foreground">
+            {(() => {
+              const key = STATUS_MESSAGE_KEY[table.status];
+              return key ? t(key) : '';
+            })()}
+          </p>
         )}
       </CardContent>
 
@@ -143,7 +154,7 @@ export function PoolTableCard({
               onStartSession();
             }}
           >
-            Start Session
+            {t('poolTableCard.startSession')}
           </POSButton>
         )}
 
@@ -160,7 +171,7 @@ export function PoolTableCard({
               onStopSession();
             }}
           >
-            Stop Session
+            {t('poolTableCard.stopSession')}
           </POSButton>
         )}
 
@@ -175,13 +186,13 @@ export function PoolTableCard({
               onReleaseReserved();
             }}
           >
-            Release
+            {t('poolTableCard.release')}
           </POSButton>
         )}
 
         {table.status === 'maintenance' && (
           <POSButton type="button" touchSize="large" className="w-full" disabled>
-            Unavailable
+            {t('poolTableCard.unavailable')}
           </POSButton>
         )}
       </CardFooter>

@@ -1,6 +1,7 @@
+import type { TFunction } from 'i18next';
 import { BellRing, CheckSquare, Clock, Phone, PhoneOff, UserX, Users, X } from 'lucide-react';
 import type { ReactNode } from 'react';
-
+import { useTranslation } from 'react-i18next';
 
 import type { WaitlistEntry, WaitlistNotification } from '@entities/waitlist/model/types';
 import { Badge } from '@shared/ui';
@@ -8,24 +9,28 @@ import { Button } from '@shared/ui';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Helpers
+// `t` is threaded in explicitly (module-scope functions, not components —
+// cannot call the useTranslation() hook themselves).
 // ────────────────────────────────────────────────────────────────────────────
 
-function formatWait(minutes: number): string {
-  if (minutes > 120) return '>2 hr wait';
-  return '~' + String(minutes) + ' min wait';
+function formatWait(t: TFunction<'entities'>, minutes: number): string {
+  if (minutes > 120) return t('waitlistEntryCard.waitOver2hr');
+  return t('waitlistEntryCard.waitMinutes', { minutes });
 }
 
-function formatTimeAgo(date: Date): string {
+function formatTimeAgo(t: TFunction<'entities'>, date: Date): string {
   const diffMs = Date.now() - date.getTime();
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return 'just now';
-  if (diffMin === 1) return '1 min ago';
-  if (diffMin < 60) return String(diffMin) + ' min ago';
+  if (diffMin < 1) return t('waitlistEntryCard.justNow');
+  if (diffMin === 1) return t('waitlistEntryCard.oneMinAgo');
+  if (diffMin < 60) return t('waitlistEntryCard.minutesAgo', { minutes: diffMin });
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr === 1) return '1 hr ago';
-  return String(diffHr) + ' hr ago';
+  if (diffHr === 1) return t('waitlistEntryCard.oneHourAgo');
+  return t('waitlistEntryCard.hoursAgo', { hours: diffHr });
 }
 
+/* eslint-disable i18next/no-literal-string -- computed Tailwind class name
+   strings, not UI copy. */
 function getCardBorderClass(status: WaitlistEntry['status']): string {
   switch (status) {
     case 'waiting':
@@ -40,23 +45,28 @@ function getCardBorderClass(status: WaitlistEntry['status']): string {
       return 'border-border opacity-60';
   }
 }
+/* eslint-enable i18next/no-literal-string */
 
 // ────────────────────────────────────────────────────────────────────────────
 // StatusBadge
 // ────────────────────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: WaitlistEntry['status'] }) {
+  const { t } = useTranslation('entities');
   if (status === 'notified') {
     return (
       <span className="inline-flex items-center rounded-full border border-pos-accent/30 bg-pos-accent/20 px-2 py-0.5 text-xs font-medium text-pos-accent">
-        notified
+        {t('waitlistEntryCard.status.notified')}
       </span>
     );
   }
   if (status === 'no_show') {
-    return <Badge variant="destructive">no show</Badge>;
+    return <Badge variant="destructive">{t('waitlistEntryCard.status.noShow')}</Badge>;
   }
-  return <Badge variant="secondary">{status.replace('_', ' ')}</Badge>;
+  // eslint-disable-next-line i18next/no-literal-string -- fallback for
+  // 'waiting'/'seated'/'cancelled', all covered by explicit catalog keys below
+  const fallbackKey = `waitlistEntryCard.status.${status}`;
+  return <Badge variant="secondary">{t(fallbackKey, status.replace('_', ' '))}</Badge>;
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -68,11 +78,12 @@ function NotificationStatusRow({
 }: {
   lastNotification: WaitlistNotification | null;
 }) {
+  const { t } = useTranslation('entities');
   if (!lastNotification) {
     return (
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
         <BellRing className="h-3 w-3" aria-hidden="true" />
-        <span>Notified via manager terminal</span>
+        <span>{t('waitlistEntryCard.notifiedViaManager')}</span>
       </div>
     );
   }
@@ -81,7 +92,7 @@ function NotificationStatusRow({
     return (
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
         <BellRing className="h-3 w-3" aria-hidden="true" />
-        <span>Notified via manager terminal</span>
+        <span>{t('waitlistEntryCard.notifiedViaManager')}</span>
       </div>
     );
   }
@@ -91,7 +102,7 @@ function NotificationStatusRow({
     return (
       <div className="flex items-center gap-1 text-sm text-pos-accent">
         <BellRing className="h-3 w-3" aria-hidden="true" />
-        <span>Notified via WhatsApp</span>
+        <span>{t('waitlistEntryCard.notifiedViaWhatsapp')}</span>
       </div>
     );
   }
@@ -99,7 +110,7 @@ function NotificationStatusRow({
   return (
     <div className="flex items-center gap-1 text-sm text-destructive">
       <BellRing className="h-3 w-3" aria-hidden="true" />
-      <span>Notification failed</span>
+      <span>{t('waitlistEntryCard.notificationFailed')}</span>
     </div>
   );
 }
@@ -139,9 +150,10 @@ export function WaitlistEntryCard({
   onCancel,
   isSeating,
 }: WaitlistEntryCardProps) {
+  const { t } = useTranslation('entities');
   const isActive = entry.status === 'waiting' || entry.status === 'notified';
   const displayWait = Math.max(5, quotedWait);
-  const waitLabel = formatWait(displayWait);
+  const waitLabel = formatWait(t, displayWait);
 
   return (
     <div
@@ -157,12 +169,12 @@ export function WaitlistEntryCard({
           {entry.phoneE164 ? (
             <>
               <Phone className="h-3 w-3" aria-hidden="true" />
-              <span>WhatsApp</span>
+              <span>{t('waitlistEntryCard.whatsapp')}</span>
             </>
           ) : (
             <>
               <PhoneOff className="h-3 w-3" aria-hidden="true" />
-              <span>No phone</span>
+              <span>{t('waitlistEntryCard.noPhone')}</span>
             </>
           )}
         </div>
@@ -172,15 +184,15 @@ export function WaitlistEntryCard({
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
           <Users className="h-3 w-3" aria-hidden="true" />
-          <span>
-            {entry.partySize} {entry.partySize === 1 ? 'guest' : 'guests'}
-          </span>
+          <span>{t('waitlistEntryCard.partySize', { count: entry.partySize })}</span>
         </div>
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3" aria-hidden="true" />
           <span className="font-mono tabular-nums">{waitLabel}</span>
         </div>
-        <span className="text-sm">added {formatTimeAgo(entry.createdAt)}</span>
+        <span className="text-sm">
+          {t('waitlistEntryCard.addedTimeAgo', { timeAgo: formatTimeAgo(t, entry.createdAt) })}
+        </span>
       </div>
 
       {/* Notification status — only when status = 'notified' */}
@@ -200,10 +212,10 @@ export function WaitlistEntryCard({
             size="sm"
             disabled={isSeating}
             onClick={() => { onSeat(entry.id); }}
-            aria-label="Seat party"
+            aria-label={t('waitlistEntryCard.seatPartyAriaLabel')}
           >
             <CheckSquare className="h-4 w-4 mr-1" aria-hidden="true" />
-            Seat party
+            {t('waitlistEntryCard.seatParty')}
           </Button>
 
           {/* No-show button — icon only */}
@@ -211,7 +223,7 @@ export function WaitlistEntryCard({
             variant="ghost"
             size="icon"
             onClick={() => { onNoShow(entry.id); }}
-            aria-label="Mark as no-show"
+            aria-label={t('waitlistEntryCard.markNoShowAriaLabel')}
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <UserX className="h-4 w-4" aria-hidden="true" />
@@ -223,7 +235,7 @@ export function WaitlistEntryCard({
               variant="ghost"
               size="icon"
               onClick={() => { onCancel(entry.id); }}
-              aria-label="Cancel entry"
+              aria-label={t('waitlistEntryCard.cancelEntryAriaLabel')}
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <X className="h-4 w-4" aria-hidden="true" />

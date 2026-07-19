@@ -2,9 +2,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import type { Inventory } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 import { inventoryKeys } from './queries';
+/* eslint-disable i18next/no-literal-string -- the Realtime channel name below
+   is a wire-protocol identifier, not UI copy. */
 
 export type LowStockAlertItem = {
   productId: string;
@@ -94,7 +97,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       .inventory.filter(item => item.quantityOnHand <= item.lowStockThreshold)
       .map(item => ({
         productId: item.productId,
-        name: item.product?.name ?? 'Unknown',
+        name: item.product?.name ?? i18n.t('entities:common.unknownProduct'),
         quantityOnHand: item.quantityOnHand,
       }));
 

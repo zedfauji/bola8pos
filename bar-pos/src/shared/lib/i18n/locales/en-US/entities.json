@@ -1,1 +1,174 @@
-{}
+{
+  "common": {
+    "unknownError": "Unknown error",
+    "unknownProduct": "Unknown",
+    "unknownStaff": "Unknown"
+  },
+  "caja": {
+    "closeFailed": "Failed to close caja."
+  },
+  "prep": {
+    "invalidData": "Invalid prep production data returned"
+  },
+  "promotion": {
+    "newPromotionDefaultName": "New Promotion"
+  },
+  "rappiOrder": {
+    "notAwaitingAcceptance": "Order is not awaiting acceptance",
+    "tabInsertNoRow": "Tab insert returned no row",
+    "linkFailed": "Failed to link Rappi order to tab",
+    "markReadyFirst": "Mark ready for pickup first.",
+    "noTabLinked": "No tab linked.",
+    "newOrderNotificationTitle": "New Rappi order"
+  },
+  "recipe": {
+    "invalidData": "Invalid recipe data returned from DB"
+  },
+  "reports": {
+    "uncategorized": "Uncategorized",
+    "unknownProduct": "Unknown Product",
+    "dateRangeExceeded": "Date range exceeds 365 days. Please select a shorter range."
+  },
+  "staff": {
+    "unsupportedLocale": "Unsupported locale"
+  },
+  "tab": {
+    "cajaNotOpen": "No caja is open. Ask a manager to open the caja first.",
+    "alreadyExistsInStore": "Tab already exists in store.",
+    "notFoundInStore": "Tab not found."
+  },
+  "waitlist": {
+    "invalidEntryReturned": "Invalid waitlist entry returned"
+  },
+  "cartItem": {
+    "remove": "Remove {{name}}",
+    "happyHourPrice": "Happy hour price",
+    "notesPlaceholder": "Note (e.g. no celery)",
+    "notesFor": "Note for {{name}}"
+  },
+  "categoryTabs": {
+    "showAll": "Show all categories",
+    "all": "All",
+    "filterBy": "Filter by {{category}}"
+  },
+  "inventoryRow": {
+    "low": "Low",
+    "columns": {
+      "product": "Product",
+      "category": "Category",
+      "price": "Price",
+      "status": "Status",
+      "onHand": "On hand",
+      "unit": "Unit",
+      "threshold": "Threshold"
+    }
+  },
+  "lowStockBadge": {
+    "count": "{{count}} low stock"
+  },
+  "poolChargeItem": {
+    "tableAndDuration": "Pool Table #{{tableNumber}} — {{duration}} @",
+    "perHourEquals": "/hr ="
+  },
+  "poolTableCard": {
+    "tableType": {
+      "pool": "Pool",
+      "carom": "Carom",
+      "consumption": "Consumption"
+    },
+    "statusMessage": {
+      "available": "Ready for the next game.",
+      "reserved": "Held for a customer.",
+      "maintenance": "Temporarily out of service."
+    },
+    "tableNumber": "Table {{number}}",
+    "noTab": "No tab",
+    "elapsedMinutes": "{{minutes}} min",
+    "startSession": "Start Session",
+    "stopSession": "Stop Session",
+    "release": "Release",
+    "unavailable": "Unavailable"
+  },
+  "poolTableIllustration": {
+    "ratePerHour": "{{amount}}/hr",
+    "outOfService": "OUT OF SERVICE"
+  },
+  "prepOnHandCard": {
+    "stockLevel": "Stock level"
+  },
+  "productCard": {
+    "selectRegularPrice": "Select {{name}}, Regular price",
+    "outOfStock": "Out of stock"
+  },
+  "recipePreviewPanel": {
+    "loading": "Loading recipe…",
+    "noRecipeYet": "No recipe yet",
+    "willDeplete": "Will deplete per sale:"
+  },
+  "tabCard": {
+    "ariaLabel": "Tab for {{customerName}}",
+    "ariaLabelWithTable": "Tab for {{customerName}}, table {{tableNumber}}",
+    "tableNumber": "Table {{number}}",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items"
+  },
+  "tabDetail": {
+    "errorLoadingTab": "Error loading tab",
+    "tabNotFound": "Tab not found",
+    "tabNotFoundDescription": "The requested tab could not be found",
+    "unknownProductFallback": "Product {{id}}…",
+    "poolTimerRunning": "Pool timer still running.",
+    "poolTimerRunningOnTable": "Pool timer still running on table {{tableNumber}}.",
+    "stopPoolBeforeClosing": "Stop the pool session before closing this tab.",
+    "tableNumber": "Table {{number}}",
+    "drinksSubtotal": "Drinks subtotal",
+    "orderHistory": "Order History",
+    "noItemsYet": "No items yet",
+    "noItemsYetDescription": "Add items to this tab to get started",
+    "modifierCount": "{{count}} modifier(s)",
+    "order": "Order",
+    "void": "Void",
+    "poolCharges": "Pool charges",
+    "totals": "Totals",
+    "drinks": "Drinks",
+    "pool": "Pool",
+    "subtotalDrinksPool": "Subtotal (drinks + pool)",
+    "estimatedTip": "Estimated tip",
+    "estTotalWithTip": "Est. total with tip",
+    "tip": "Tip",
+    "custom": "Custom",
+    "enter": "Enter",
+    "customTip": "Custom tip",
+    "addItems": "Add Items",
+    "closeTab": "Close Tab",
+    "transferTab": "Transfer Tab"
+  },
+  "waitlistEntryCard": {
+    "waitOver2hr": ">2 hr wait",
+    "waitMinutes": "~{{minutes}} min wait",
+    "justNow": "just now",
+    "oneMinAgo": "1 min ago",
+    "minutesAgo": "{{minutes}} min ago",
+    "oneHourAgo": "1 hr ago",
+    "hoursAgo": "{{hours}} hr ago",
+    "addedTimeAgo": "added {{timeAgo}}",
+    "status": {
+      "notified": "notified",
+      "noShow": "no show",
+      "waiting": "waiting",
+      "seated": "seated",
+      "cancelled": "cancelled"
+    },
+    "notifiedViaManager": "Notified via manager terminal",
+    "notifiedViaWhatsapp": "Notified via WhatsApp",
+    "notificationFailed": "Notification failed",
+    "whatsapp": "WhatsApp",
+    "noPhone": "No phone",
+    "partySize_one": "{{count}} guest",
+    "partySize_other": "{{count}} guests",
+    "seatParty": "Seat party",
+    "seatPartyAriaLabel": "Seat party",
+    "markNoShowAriaLabel": "Mark as no-show",
+    "cancelEntryAriaLabel": "Cancel entry"
+  }
+}

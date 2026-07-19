@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, i18next/no-literal-string */
+// i18next/no-literal-string: query-key namespace strings + multi-line Supabase
+// chain args below are wire-protocol identifiers, not UI copy (plugin doesn't
+// resolve excluded callees across a multi-line method chain — 21-08 quirk).
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type {
@@ -14,6 +17,7 @@ import {
   CajaSessionSchema,
   TipDistributionEntrySchema,
 } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import {
   ok,
@@ -256,7 +260,7 @@ export function useMutationCloseCaja() {
         const e = result.error;
         const appErr: AppError = {
           code: (e?.code ?? 'UNKNOWN_ERROR') as AppError['code'],
-          message: e?.message ?? 'Failed to close caja.',
+          message: e?.message ?? i18n.t('entities:caja.closeFailed'),
         };
         logger.warn('caja.close.blocked', { code: appErr.code });
         return err(appErr);

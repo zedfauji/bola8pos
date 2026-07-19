@@ -16,6 +16,7 @@ import {
   type Tab,
 } from '@shared/lib/domain';
 import { generateIdempotencyKey } from '@shared/lib/domain-helpers';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
@@ -41,6 +42,10 @@ import {
   type CreateOrderItem,
 } from './types';
 
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   unknownError(...) internal debug codes + multi-line Supabase chain args
+   below are not UI copy (plugin doesn't resolve excluded callees across a
+   multi-line method chain — 21-08 quirk). */
 export const tabKeys = {
   all: ['tabs'] as const,
   lists: () => [...tabKeys.all, 'list'] as const,
@@ -431,7 +436,10 @@ export function useMutationOpenTab() {
       if (!cajaState.isCajaOpen || !cajaState.currentCaja) {
         const cajaErr: AppError = {
           code: 'CAJA_CLOSED',
-          message: 'No caja is open. Ask a manager to open the caja first.',
+          // eslint-disable-next-line i18next/no-literal-string -- real
+          // UI-facing error message, must stay translated despite the
+          // file's technical-noise disable above.
+          message: i18n.t('entities:tab.cajaNotOpen'),
         };
         return err(cajaErr);
       }

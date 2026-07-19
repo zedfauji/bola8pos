@@ -5,6 +5,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PrepProductionSchema, RecipeItemSchema, RecipeWithItemsSchema } from '@shared/lib/domain';
 import type { PrepProduction, PrepProductionCreate, RecipeWithItems } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -14,6 +15,10 @@ const TERMINAL_ID =
 
 const db = supabase as any;
 
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   multi-line Supabase chain args below are wire-protocol identifiers, not UI
+   copy (plugin doesn't resolve excluded callees across a multi-line method
+   chain — 21-08 quirk). */
 export const prepKeys = {
   all: ['prep_productions'] as const,
   lists: () => [...prepKeys.all, 'list'] as const,
@@ -100,7 +105,7 @@ export function useMutationCreatePrepProduction() {
 
       const parsed = PrepProductionSchema.safeParse(mapPrepProductionRow(data as Record<string, unknown>));
       if (!parsed.success) {
-        return err({ code: 'VALIDATION_ERROR', message: 'Invalid prep production data returned' });
+        return err({ code: 'VALIDATION_ERROR', message: i18n.t('entities:prep.invalidData') });
       }
       return ok(parsed.data);
     },

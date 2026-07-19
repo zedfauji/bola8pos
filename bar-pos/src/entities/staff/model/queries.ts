@@ -3,6 +3,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type { Shift, Staff, StaffMetric, StaffTips } from '@shared/lib/domain';
 import { LocaleSchema, StaffMetricSchema, StaffTipsSchema } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
@@ -20,6 +21,10 @@ import { ShiftSchema, StaffSchema } from './types';
 
 const TERMINAL_ID = (import.meta.env.VITE_TERMINAL_ID as string | undefined) ?? 'POS-1';
 
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   unknownError(...) internal debug codes + multi-line Supabase chain args
+   below are not UI copy (plugin doesn't resolve excluded callees across a
+   multi-line method chain — 21-08 quirk). */
 export const staffKeys = {
   all: ['staff'] as const,
   list: () => [...staffKeys.all, 'list'] as const,
@@ -503,7 +508,12 @@ export function useMutationSetOwnLocale() {
     mutationFn: async ({ locale }): Promise<Result<null>> => {
       const parsed = LocaleSchema.safeParse(locale);
       if (!parsed.success) {
-        return err({ code: 'VALIDATION_ERROR' as AppErrorCode, message: 'Unsupported locale' });
+        return err({
+          code: 'VALIDATION_ERROR' as AppErrorCode,
+          // eslint-disable-next-line i18next/no-literal-string -- real UI-facing
+          // error message, must stay translated despite the file's technical-noise disable above.
+          message: i18n.t('entities:staff.unsupportedLocale'),
+        });
       }
 
       const res = await supabaseMutation(() =>

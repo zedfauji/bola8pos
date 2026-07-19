@@ -9,6 +9,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RecipeItemSchema, RecipeWithItemsSchema } from '@shared/lib/domain';
 import type { RecipeItemCreate, RecipeWithItems } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -19,6 +20,10 @@ const db = supabase as any;
 // ============================================================================
 // Query key factory
 // ============================================================================
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   multi-line Supabase chain args below are wire-protocol identifiers, not UI
+   copy (plugin doesn't resolve excluded callees across a multi-line method
+   chain — 21-08 quirk). */
 
 export const recipeKeys = {
   all: ['recipes'] as const,
@@ -153,7 +158,7 @@ export function useMutationSaveRecipe() {
         mapRecipeRow(freshData as Record<string, unknown>),
       );
       if (!parsed.success) {
-        return err({ code: 'VALIDATION_ERROR', message: 'Invalid recipe data returned from DB' });
+        return err({ code: 'VALIDATION_ERROR', message: i18n.t('entities:recipe.invalidData') });
       }
       return ok(parsed.data);
     },

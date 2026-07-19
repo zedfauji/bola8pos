@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Category } from '@entities/product/model/types';
 import { cn } from '@shared/lib/utils';
 
@@ -21,6 +22,7 @@ export function CategoryTabs({
   onChange,
   className,
 }: CategoryTabsProps) {
+  const { t } = useTranslation('entities');
   const allRef = React.useRef<HTMLButtonElement>(null);
   const categoryRefs = React.useRef<Map<string, HTMLButtonElement>>(new Map());
 
@@ -61,10 +63,10 @@ export function CategoryTabs({
             handleKeyDown(e, null);
           }}
           className={pillClass(activeCategory === null)}
-          aria-label="Show all categories"
+          aria-label={t('categoryTabs.showAll')}
           aria-pressed={activeCategory === null}
         >
-          All
+          {t('categoryTabs.all')}
         </button>
 
         {categories.map(category => (
@@ -81,7 +83,7 @@ export function CategoryTabs({
               handleKeyDown(e, category.id);
             }}
             className={pillClass(activeCategory === category.id)}
-            aria-label={`Filter by ${category.name}`}
+            aria-label={t('categoryTabs.filterBy', { category: category.name })}
             aria-pressed={activeCategory === category.id}
           >
             <div

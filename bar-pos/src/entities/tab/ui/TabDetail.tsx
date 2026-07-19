@@ -6,6 +6,7 @@
 
 import { AlertCircle, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStaffStore } from '@entities/staff/model/store';
 import { useTab } from '@entities/tab/model/queries';
 import type { Order, OrderItem } from '@entities/tab/model/types';
@@ -63,6 +64,18 @@ function durationBadgeStatus(
 
 type TipMode = 'pct10' | 'pct15' | 'pct18' | 'pct20' | 'custom';
 
+// 'pctNN' are internal TipMode state identifiers, not UI copy; the '%' labels
+// are already exempt via the plugin's numeric/symbol regex — this const
+// array is module-scope (not inside JSX) so a regular eslint-disable comment
+// attaches correctly.
+// eslint-disable-next-line i18next/no-literal-string
+const TIP_SUGGESTION_MODES = [
+  ['pct10', '10%'],
+  ['pct15', '15%'],
+  ['pct18', '18%'],
+  ['pct20', '20%'],
+] as const satisfies ReadonlyArray<readonly [Exclude<TipMode, 'custom'>, string]>;
+
 export function TabDetail({
   tabId,
   onAddItems,
@@ -71,9 +84,10 @@ export function TabDetail({
   onVoidOrderRequested,
   className,
 }: TabDetailProps) {
+  const { t } = useTranslation('entities');
   const { data: tab, isLoading, isError, error, resultError } = useTab(tabId);
   const hasError = isError || Boolean(resultError);
-  const errorMessage = resultError?.message ?? error?.message ?? 'Unknown error';
+  const errorMessage = resultError?.message ?? error?.message ?? t('common.unknownError');
   const currentStaff = useStaffStore(state => state.currentStaff);
 
   const [tipMode, setTipMode] = useState<TipMode>('pct15');
@@ -109,7 +123,11 @@ export function TabDetail({
   if (hasError) {
     return (
       <div className={className}>
-        <EmptyState icon={AlertCircle} title="Error loading tab" description={errorMessage} />
+        <EmptyState
+          icon={AlertCircle}
+          title={t('tabDetail.errorLoadingTab')}
+          description={errorMessage}
+        />
       </div>
     );
   }
@@ -119,8 +137,8 @@ export function TabDetail({
       <div className={className}>
         <EmptyState
           icon={FileText}
-          title="Tab not found"
-          description="The requested tab could not be found"
+          title={t('tabDetail.tabNotFound')}
+          description={t('tabDetail.tabNotFoundDescription')}
         />
       </div>
     );
@@ -134,7 +152,7 @@ export function TabDetail({
   );
 
   const itemLabel = (item: OrderItem) =>
-    item.product?.name ?? `Product ${item.productId.slice(0, 8)}…`;
+    item.product?.name ?? t('tabDetail.unknownProductFallback', { id: item.productId.slice(0, 8) });
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -143,11 +161,10 @@ export function TabDetail({
           className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100"
           role="status"
         >
-          Pool timer still running
           {tab.activePoolTableNumber != null
-            ? ` on table ${String(tab.activePoolTableNumber)}.`
-            : '.'}{' '}
-          Stop the pool session before closing this tab.
+            ? t('tabDetail.poolTimerRunningOnTable', { tableNumber: tab.activePoolTableNumber })
+            : t('tabDetail.poolTimerRunning')}{' '}
+          {t('tabDetail.stopPoolBeforeClosing')}
         </div>
       )}
 
@@ -157,7 +174,9 @@ export function TabDetail({
             <div>
               <h2 className="text-2xl font-bold">{tab.customerName}</h2>
               {tab.tableNumber !== null && (
-                <p className="text-muted-foreground">Table {tab.tableNumber}</p>
+                <p className="text-muted-foreground">
+                  {t('tabDetail.tableNumber', { number: tab.tableNumber })}
+                </p>
               )}
             </div>
             <div className="text-right space-y-1">
@@ -172,7 +191,7 @@ export function TabDetail({
                   critical={tier === 'critical'}
                 />
                 <MoneyDisplay amount={drinksSubtotal} size="sm" />
-                <span className="text-xs">Drinks subtotal</span>
+                <span className="text-xs">{t('tabDetail.drinksSubtotal')}</span>
               </div>
             </div>
           </div>
@@ -181,14 +200,14 @@ export function TabDetail({
 
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold">Order History</h3>
+          <h3 className="text-lg font-semibold">{t('tabDetail.orderHistory')}</h3>
         </CardHeader>
         <CardContent>
           {tab.items.length === 0 ? (
             <EmptyState
               icon={FileText}
-              title="No items yet"
-              description="Add items to this tab to get started"
+              title={t('tabDetail.noItemsYet')}
+              description={t('tabDetail.noItemsYetDescription')}
             />
           ) : sortedOrders.length === 0 ? (
             <ul className="space-y-2">
@@ -204,7 +223,7 @@ export function TabDetail({
                     </div>
                     {item.modifierIds.length > 0 && (
                       <p className="text-sm text-muted-foreground">
-                        {item.modifierIds.length} modifier(s)
+                        {t('tabDetail.modifierCount', { count: item.modifierIds.length })}
                       </p>
                     )}
                     {item.notes && (
@@ -221,7 +240,7 @@ export function TabDetail({
                 <div key={order.id} className="space-y-2">
                   <div className="flex items-center gap-2 border-b pb-1">
                     <Badge variant="secondary">{formatOrderTime(order.createdAt)}</Badge>
-                    <span className="text-xs text-muted-foreground">Order</span>
+                    <span className="text-xs text-muted-foreground">{t('tabDetail.order')}</span>
                     <ProtectedAction action="void_order" currentRole={currentStaff?.role}>
                       <Button
                         type="button"
@@ -232,7 +251,7 @@ export function TabDetail({
                           onVoidOrderRequested?.(order);
                         }}
                       >
-                        Void
+                        {t('tabDetail.void')}
                       </Button>
                     </ProtectedAction>
                   </div>
@@ -249,7 +268,7 @@ export function TabDetail({
                           </div>
                           {item.modifierIds.length > 0 && (
                             <p className="text-sm text-muted-foreground">
-                              {item.modifierIds.length} modifier(s)
+                              {t('tabDetail.modifierCount', { count: item.modifierIds.length })}
                             </p>
                           )}
                           {item.notes && (
@@ -270,7 +289,7 @@ export function TabDetail({
       {tab.poolCharges.length > 0 && (
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold">Pool charges</h3>
+            <h3 className="text-lg font-semibold">{t('tabDetail.poolCharges')}</h3>
           </CardHeader>
           <CardContent className="space-y-2">
             {tab.poolCharges.map(c => (
@@ -282,29 +301,29 @@ export function TabDetail({
 
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold">Totals</h3>
+          <h3 className="text-lg font-semibold">{t('tabDetail.totals')}</h3>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span>Drinks</span>
+            <span>{t('tabDetail.drinks')}</span>
             <MoneyDisplay amount={drinksSubtotal} size="sm" />
           </div>
           {poolTotal > 0 && (
             <div className="flex justify-between">
-              <span>Pool</span>
+              <span>{t('tabDetail.pool')}</span>
               <MoneyDisplay amount={poolTotal} size="sm" />
             </div>
           )}
           <div className="flex justify-between border-t pt-2 text-base font-semibold">
-            <span>Subtotal (drinks + pool)</span>
+            <span>{t('tabDetail.subtotalDrinksPool')}</span>
             <MoneyDisplay amount={grandSubtotal} size="md" />
           </div>
           <div className="flex justify-between text-muted-foreground">
-            <span>Estimated tip</span>
+            <span>{t('tabDetail.estimatedTip')}</span>
             <MoneyDisplay amount={tipAmount} size="sm" />
           </div>
           <div className="flex justify-between text-lg font-bold">
-            <span>Est. total with tip</span>
+            <span>{t('tabDetail.estTotalWithTip')}</span>
             <MoneyDisplay amount={totalWithTip} size="lg" />
           </div>
         </CardContent>
@@ -312,31 +331,34 @@ export function TabDetail({
 
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold">Tip</h3>
+          <h3 className="text-lg font-semibold">{t('tabDetail.tip')}</h3>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {(
-              [
-                ['pct10', '10%', tipSuggestions.tip10],
-                ['pct15', '15%', tipSuggestions.tip15],
-                ['pct18', '18%', tipSuggestions.tip18],
-                ['pct20', '20%', tipSuggestions.tip20],
-              ] as const
-            ).map(([mode, label, amt]) => (
-              <Button
-                key={mode}
-                type="button"
-                variant={tipMode === mode ? 'default' : 'outline'}
-                className="flex h-auto flex-col gap-1 py-3"
-                onClick={() => {
-                  setTipMode(mode);
-                }}
-              >
-                <span className="text-xs text-muted-foreground">{label}</span>
-                <MoneyDisplay amount={amt} size="sm" />
-              </Button>
-            ))}
+            {TIP_SUGGESTION_MODES.map(([mode, label]) => {
+              const amt =
+                mode === 'pct10'
+                  ? tipSuggestions.tip10
+                  : mode === 'pct15'
+                    ? tipSuggestions.tip15
+                    : mode === 'pct18'
+                      ? tipSuggestions.tip18
+                      : tipSuggestions.tip20;
+              return (
+                <Button
+                  key={mode}
+                  type="button"
+                  variant={tipMode === mode ? 'default' : 'outline'}
+                  className="flex h-auto flex-col gap-1 py-3"
+                  onClick={() => {
+                    setTipMode(mode);
+                  }}
+                >
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                  <MoneyDisplay amount={amt} size="sm" />
+                </Button>
+              );
+            })}
             <Button
               type="button"
               variant={tipMode === 'custom' ? 'default' : 'outline'}
@@ -345,13 +367,13 @@ export function TabDetail({
                 setTipMode('custom');
               }}
             >
-              <span className="text-xs text-muted-foreground">Custom</span>
-              <span className="text-sm font-medium">Enter</span>
+              <span className="text-xs text-muted-foreground">{t('tabDetail.custom')}</span>
+              <span className="text-sm font-medium">{t('tabDetail.enter')}</span>
             </Button>
           </div>
           {tipMode === 'custom' && (
             <MoneyInput
-              label="Custom tip"
+              label={t('tabDetail.customTip')}
               value={customTip}
               onChange={v => {
                 setCustomTip(v);
@@ -364,16 +386,16 @@ export function TabDetail({
 
       <div className="flex flex-col gap-3">
         <Button size="lg" variant="default" onClick={onAddItems} className="w-full">
-          Add Items
+          {t('tabDetail.addItems')}
         </Button>
         <ProtectedAction action="close_tab" currentRole={currentStaff?.role}>
           <Button size="lg" variant="default" onClick={onCloseTab} className="w-full">
-            Close Tab
+            {t('tabDetail.closeTab')}
           </Button>
         </ProtectedAction>
         {canTransferTab && onTransferTab && (
           <Button size="lg" variant="outline" onClick={onTransferTab} className="w-full">
-            Transfer Tab
+            {t('tabDetail.transferTab')}
           </Button>
         )}
       </div>

@@ -3,6 +3,7 @@
 // Pre-regen cast: role_permissions table added in Phase 13; supabase.types.ts extended manually.
 import { useQuery } from '@tanstack/react-query';
 
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import type { StaffAction, StaffRole } from '@shared/lib/rbac';
 import { err, ok, type Result } from '@shared/lib/result';
@@ -10,10 +11,13 @@ import { supabase } from '@shared/lib/supabase';
 
 const db = supabase as any;
 
+/* eslint-disable i18next/no-literal-string -- TanStack Query cache-key
+   namespace strings, not UI copy. */
 export const rbacKeys = {
   all: ['role_permissions'] as const,
   list: () => [...rbacKeys.all, 'list'] as const,
 };
+/* eslint-enable i18next/no-literal-string */
 
 export function useRolePermissions() {
   return useQuery({
@@ -24,7 +28,7 @@ export function useRolePermissions() {
         logger.error('useRolePermissions: query failed', { error });
         return err({
           code: 'SUPABASE_ERROR' as const,
-          message: (error as { message?: string }).message ?? 'Unknown error',
+          message: (error as { message?: string }).message ?? i18n.t('entities:common.unknownError'),
         });
       }
       const map = new Map<StaffRole, Set<StaffAction>>();

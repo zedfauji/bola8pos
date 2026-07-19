@@ -16,9 +16,16 @@ import type {
   RefundRegisterRow,
   ComboOverrideRow,
 } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { err, ok, unknownError, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
+/* eslint-disable i18next/no-literal-string -- internal map-grouping-key
+   fallbacks ('unknown') + query-key namespace strings + multi-line Supabase
+   chain args below are wire-protocol identifiers, not UI copy (plugin
+   doesn't resolve excluded callees across a multi-line method chain — 21-08
+   quirk); genuine user-facing report fallback labels ('Uncategorized' etc.)
+   are translated via i18n.t() below regardless of this disable. */
 
 export type {
   HourlyRow,
@@ -165,7 +172,7 @@ export function aggregateCategoryRevenue(
 
   for (const item of items) {
     const categoryId: string = item.products?.categories?.id ?? 'unknown';
-    const categoryName: string = item.products?.categories?.name ?? 'Uncategorized';
+    const categoryName: string = item.products?.categories?.name ?? i18n.t('entities:reports.uncategorized');
     const quantity: number = typeof item.quantity === 'number' ? item.quantity : 0;
     const unitPrice: number = typeof item.unit_price === 'number' ? item.unit_price : 0;
     const modDelta: number =
@@ -235,8 +242,8 @@ export function useProductSalesReport(from: Date, to: Date) {
 
       for (const item of data) {
         const productId: string = item.products?.id ?? 'unknown';
-        const productName: string = item.products?.name ?? 'Unknown Product';
-        const categoryName: string = item.products?.categories?.name ?? 'Uncategorized';
+        const productName: string = item.products?.name ?? i18n.t('entities:reports.unknownProduct');
+        const categoryName: string = item.products?.categories?.name ?? i18n.t('entities:reports.uncategorized');
         const quantity: number = typeof item.quantity === 'number' ? item.quantity : 0;
         const unitPrice: number = typeof item.unit_price === 'number' ? item.unit_price : 0;
         const modDelta: number =
@@ -373,7 +380,7 @@ export function useVoidRefundReport(from: Date, to: Date) {
         const rawUpdatedAt: string = order.updated_at ?? new Date().toISOString();
         const voidedAt = new Date(rawVoidedAt ?? rawUpdatedAt);
 
-        const staffName: string = order.profiles?.name ?? 'Unknown';
+        const staffName: string = order.profiles?.name ?? i18n.t('entities:common.unknownStaff');
         const reason: string = order.void_reason ?? order.notes ?? '';
 
         const items: Array<{ quantity: number; unit_price: number; modifier_price_delta: number }> =
@@ -469,7 +476,7 @@ export function useCategoryRevenueReport(from: Date, to: Date) {
 export function assertDateRangeValid(from: Date, to: Date): void {
   const daysDiff = Math.abs((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
   if (daysDiff > 365) {
-    throw new Error('Date range exceeds 365 days. Please select a shorter range.');
+    throw new Error(i18n.t('entities:reports.dateRangeExceeded'));
   }
 }
 

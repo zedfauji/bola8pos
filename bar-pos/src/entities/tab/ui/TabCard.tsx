@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Tab } from '@shared/lib/domain';
 import { getTabDurationTier } from '@shared/lib/domain-helpers';
 import { cn } from '@shared/lib/utils';
@@ -29,6 +30,7 @@ function durationBadgeStatus(
 }
 
 export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
+  const { t } = useTranslation('entities');
   const runningTotal = calculateRunningTotal(tab.items);
   const itemCount = tab.items.length;
   const now = new Date();
@@ -50,7 +52,14 @@ export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
       onClick={handleClick}
       role="button"
       tabIndex={0}
-      aria-label={`Tab for ${tab.customerName}${tab.tableNumber ? `, table ${String(tab.tableNumber)}` : ''}`}
+      aria-label={
+        tab.tableNumber
+          ? t('tabCard.ariaLabelWithTable', {
+              customerName: tab.customerName,
+              tableNumber: tab.tableNumber,
+            })
+          : t('tabCard.ariaLabel', { customerName: tab.customerName })
+      }
       onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -63,7 +72,9 @@ export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-base truncate">{tab.customerName}</h3>
             {tab.tableNumber !== null && (
-              <p className="text-sm text-muted-foreground">Table {tab.tableNumber}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('tabCard.tableNumber', { number: tab.tableNumber })}
+              </p>
             )}
           </div>
           {tab.status === 'open' && <StatusBadge status={badgeStatus} />}
@@ -77,9 +88,7 @@ export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
             warning={tier === 'warn'}
             critical={tier === 'critical'}
           />
-          <span>
-            {itemCount} {itemCount === 1 ? 'item' : 'items'}
-          </span>
+          <span>{t('tabCard.itemCount', { count: itemCount })}</span>
         </div>
         <div className="pt-2 border-t">
           <MoneyDisplay amount={runningTotal} size="lg" />

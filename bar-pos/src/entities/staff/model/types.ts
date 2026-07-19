@@ -27,6 +27,7 @@ export {
 export type { Staff, StaffCreate, StaffUpdate, Shift, ShiftCreate, ShiftUpdate };
 
 // Re-export mock data if needed, but ideally move to shared mocks
+/* eslint-disable i18next/no-literal-string -- Storybook fixture data, not UI copy. */
 export const mockStaff: Staff[] = [
   {
     id: '11111111-1111-1111-1111-111111111111',

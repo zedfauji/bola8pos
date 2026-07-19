@@ -1,4 +1,6 @@
 import { createColumnHelper, type Column } from '@tanstack/react-table';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { type Inventory, InventoryAdjustReason } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
@@ -61,10 +63,11 @@ function StatusCell({ inventory }: { inventory: Inventory }) {
 }
 
 function LowBadgeCell({ inventory }: { inventory: Inventory }) {
+  const { t } = useTranslation('entities');
   if (!isLowStock(inventory)) return null;
   return (
     <Badge variant="destructive" className="ml-2 shrink-0 text-xs">
-      Low
+      {t('inventoryRow.low')}
     </Badge>
   );
 }
@@ -154,13 +157,21 @@ export function InventoryRow({ inventory, staffId, className }: InventoryRowProp
   );
 }
 
-/** Column definitions for `DataTable` — matches `InventoryRow` layout. */
+/**
+ * Column definitions for `DataTable` — matches `InventoryRow` layout.
+ * `t` is the caller's `entities`-namespace TFunction (e.g. via
+ * `useTranslation('entities')` or an explicit `'entities:...'`-prefixed key
+ * off any other namespace's `t`) — this factory is a module-scope function,
+ * not a component, so it cannot call the `useTranslation()` hook itself.
+ */
 /* eslint-disable react-refresh/only-export-components -- non-component export paired with entity row */
-export function inventoryRowColumns(staffId: string) {
+export function inventoryRowColumns(t: TFunction<'entities'>, staffId: string) {
   return [
     ch.accessor(row => row.product?.name ?? '', {
       id: 'productName',
-      header: ({ column }) => <SortHeader column={column} title="Product" />,
+      header: ({ column }) => (
+        <SortHeader column={column} title={t('inventoryRow.columns.product')} />
+      ),
       cell: ({ row }) => (
         <div className="flex flex-wrap items-center gap-1">
           <ProductCell inventory={row.original} />
@@ -171,7 +182,9 @@ export function inventoryRowColumns(staffId: string) {
     }),
     ch.accessor(row => row.product?.category?.name ?? '', {
       id: 'categoryName',
-      header: ({ column }) => <SortHeader column={column} title="Category" />,
+      header: ({ column }) => (
+        <SortHeader column={column} title={t('inventoryRow.columns.category')} />
+      ),
       cell: ({ row }) => <CategoryCell inventory={row.original} />,
       filterFn: (row, _columnId, filterValue: string) => {
         if (!filterValue || filterValue === '__all__') return true;
@@ -181,27 +194,31 @@ export function inventoryRowColumns(staffId: string) {
     }),
     ch.display({
       id: 'basePrice',
-      header: 'Price',
+      header: t('inventoryRow.columns.price'),
       cell: ({ row }) => <PriceCell inventory={row.original} />,
     }),
     ch.display({
       id: 'stockStatus',
-      header: 'Status',
+      header: t('inventoryRow.columns.status'),
       cell: ({ row }) => <StatusCell inventory={row.original} />,
     }),
     ch.accessor('quantityOnHand', {
       id: 'quantityOnHand',
-      header: ({ column }) => <SortHeader column={column} title="On hand" />,
+      header: ({ column }) => (
+        <SortHeader column={column} title={t('inventoryRow.columns.onHand')} />
+      ),
       cell: ({ row }) => <QuantityAdjustCell inventory={row.original} staffId={staffId} />,
       sortingFn: 'basic',
     }),
     ch.accessor('unit', {
-      header: ({ column }) => <SortHeader column={column} title="Unit" />,
+      header: ({ column }) => <SortHeader column={column} title={t('inventoryRow.columns.unit')} />,
       cell: ({ row }) => <UnitCell inventory={row.original} />,
       sortingFn: 'alphanumeric',
     }),
     ch.accessor('lowStockThreshold', {
-      header: ({ column }) => <SortHeader column={column} title="Threshold" />,
+      header: ({ column }) => (
+        <SortHeader column={column} title={t('inventoryRow.columns.threshold')} />
+      ),
       cell: ({ row }) => <ThresholdCell inventory={row.original} />,
       sortingFn: 'basic',
     }),

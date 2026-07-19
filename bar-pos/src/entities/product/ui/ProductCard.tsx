@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Product, Category } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
@@ -14,6 +15,7 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product, category, onSelect, className }: ProductCardProps) {
+  const { t } = useTranslation('entities');
   const displayPrice = product.basePrice;
   const unavailable = !product.isActive;
 
@@ -35,12 +37,12 @@ export function ProductCard({ product, category, onSelect, className }: ProductC
         unavailable && 'cursor-not-allowed opacity-60',
         className
       )}
-      aria-label={`Select ${product.name}, Regular price`}
+      aria-label={t('productCard.selectRegularPrice', { name: product.name })}
       aria-disabled={unavailable}
     >
       {unavailable && (
         <Badge variant="secondary" className="absolute right-2 top-2">
-          Out of stock
+          {t('productCard.outOfStock')}
         </Badge>
       )}
       <div className="flex items-center gap-2">

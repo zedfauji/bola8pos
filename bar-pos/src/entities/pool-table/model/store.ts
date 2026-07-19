@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { PoolTable, PoolSession } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
+/* eslint-disable i18next/no-literal-string -- zustand persist store name below
+   is a localStorage key, not UI copy. */
 
 interface PoolTableState {
   tables: PoolTable[];

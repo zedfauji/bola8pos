@@ -39,6 +39,8 @@ export type UpdatePayment = z.infer<typeof UpdatePaymentSchema>;
 // =====================================================
 // MOCK DATA
 // =====================================================
+/* eslint-disable i18next/no-literal-string -- Storybook fixture IDs/Square
+   sandbox URLs/legacy idempotency keys, not UI copy. */
 
 const mockTabId1 = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const mockTabId2 = '88888888-8888-8888-8888-888888888888';

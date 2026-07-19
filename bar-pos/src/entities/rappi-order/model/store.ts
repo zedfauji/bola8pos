@@ -2,9 +2,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { create } from 'zustand';
 import type { RappiOrder } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { processRappiPayment } from '@shared/lib/payment-processor';
 import { supabase } from '@shared/lib/supabase';
+/* eslint-disable i18next/no-literal-string -- Realtime channel/event names +
+   Supabase Realtime filter config below are wire-protocol identifiers, not UI
+   copy. */
 import {
   acceptRappiOrder,
   markRappiOrderCompleted,
@@ -68,11 +72,17 @@ export const useRappiOrderStore = create<RappiOrderStore>((set, get) => ({
     if (order.status !== 'ready_for_pickup') {
       return {
         ok: false as const,
-        error: { code: 'VALIDATION_ERROR', message: 'Mark ready for pickup first.' },
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: i18n.t('entities:rappiOrder.markReadyFirst'),
+        },
       };
     }
     if (!order.tabId) {
-      return { ok: false as const, error: { code: 'VALIDATION_ERROR', message: 'No tab linked.' } };
+      return {
+        ok: false as const,
+        error: { code: 'VALIDATION_ERROR', message: i18n.t('entities:rappiOrder.noTabLinked') },
+      };
     }
     const amount = order.subtotal;
     const r = await processRappiPayment(order.tabId, amount, order.rappiOrderId);
@@ -119,7 +129,7 @@ export function useRappiOrdersRealtimeBridge() {
               void Notification.requestPermission();
             }
             if (Notification.permission === 'granted') {
-              notifyBrowser('New Rappi order', m.data.customerName);
+              notifyBrowser(i18n.t('entities:rappiOrder.newOrderNotificationTitle'), m.data.customerName);
             }
           }
         }

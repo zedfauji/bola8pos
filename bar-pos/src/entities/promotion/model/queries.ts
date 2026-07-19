@@ -10,12 +10,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PromotionSchema, PromotionAvailabilitySchema } from '@shared/lib/domain';
 import type { Promotion, PromotionAvailability, PromotionUpdate } from '@shared/lib/domain';
+import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 
 // Pre-regen cast — remove once supabase.types.ts is regenerated after promotions migrations (Plan 20-06)
 const db = supabase as any;
 
+/* eslint-disable i18next/no-literal-string -- query-key namespace strings +
+   DB enum values (discount_type/target_type) + multi-line Supabase chain args
+   below are wire-protocol identifiers, not UI copy (plugin doesn't resolve
+   excluded callees across a multi-line method chain — 21-08 quirk). */
 export const promotionKeys = {
   all: ['promotions'] as const,
   lists: () => [...promotionKeys.all, 'list'] as const,
@@ -88,7 +93,10 @@ export function useMutationCreatePromotion() {
       const { data, error } = await db
         .from('promotions')
         .insert({
-          name: 'New Promotion',
+          // eslint-disable-next-line i18next/no-literal-string -- default row
+          // value that flows into the UI as an editable promotion name; must
+          // stay translated (not covered by the file's technical-noise disable).
+          name: i18n.t('entities:promotion.newPromotionDefaultName'),
           discount_type: 'percentage',
           discount_value: 0,
           target_type: 'item',
