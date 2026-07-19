@@ -44,21 +44,16 @@ export default tseslint.config({
     import: importPlugin,
     'no-relative-import-paths': noRelativeImportPaths,
     boundaries,
-    // Registered (not enabled) so eslint-disable comments targeting the
-    // standalone eslint.i18n.config.js gate's `i18next/no-literal-string`
-    // rule (e.g. shared/ui's Tailwind class-name lookup tables) resolve as
-    // known-but-inactive here instead of "Definition for rule ... was not
-    // found" — mirrors the reverse registration already present in
-    // eslint.i18n.config.js for react-refresh/react-hooks/jsx-a11y/react.
-    // 21-12 folds an equivalent enabled rule block into this file and
-    // deletes the standalone helper.
+    // Registered here too (not just the scoped i18next block below) so
+    // eslint-disable comments for `i18next/no-literal-string` in files
+    // outside the 5-layer scope (e.g. src/shared/lib, src/app) resolve as
+    // known-but-inactive instead of "Definition for rule ... was not found".
     i18next,
   },
   linterOptions: {
     // A disable comment for `i18next/no-literal-string` is legitimately
-    // "unused" here (the rule is registered but never enabled in this
-    // committed gate — see the `i18next` plugin registration comment
-    // above) without being a real problem in the file.
+    // "unused" for files matched by this object but not by the scoped
+    // i18next block below (the rule isn't enabled here).
     reportUnusedDisableDirectives: 'off',
   },
   settings: {
@@ -211,4 +206,65 @@ export default tseslint.config({
     '@typescript-eslint/restrict-template-expressions': 'off',
     'boundaries/dependencies': 'off',
   }
+},
+{
+  // 21-12: committed, strict, no-grandfather i18next/no-literal-string
+  // enforcement (D-05) — folded in from the now-deleted standalone
+  // eslint.i18n.config.js once every scoped layer's sweep (21-06..21-11)
+  // reported string-clean. Mirrors the tailwindcss block's file-scoping
+  // shape above. Deliberately does NOT set `no-restricted-syntax` (see the
+  // REPLACE gotcha comment on the tailwindcss block) so the barrel-export
+  // ban restated there for pages/widgets/features is not silently wiped for
+  // files also matched here.
+  files: [
+    'src/shared/ui/**/*.tsx',
+    'src/entities/**/*.{ts,tsx}',
+    'src/features/**/*.{ts,tsx}',
+    'src/widgets/**/*.{ts,tsx}',
+    'src/pages/**/*.tsx',
+  ],
+  ignores: ['**/*.test.tsx', '**/*.test.ts', '**/*.stories.tsx', '**/mocks.ts'],
+  plugins: { i18next },
+  rules: {
+    'i18next/no-literal-string': ['error', {
+      mode: 'all', // catches JSX text, JSX attributes, AND call arguments (Pitfall 5)
+      'jsx-attributes': {
+        exclude: [
+          'data-testid', 'className', 'to', 'type', 'key', 'role', 'variant',
+          'size', 'name', 'htmlFor', 'id', 'value', 'defaultValue', 'aria-hidden',
+          'data-slot', 'aria-invalid',
+          'aria-describedby',
+          'aria-labelledby',
+          'step',
+          'accept',
+          'height',
+          'confirmClassName',
+          'highlight',
+          'stackId',
+          'backTo',
+        ],
+      },
+      callees: {
+        exclude: [
+          'cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv', 't', 'can', 'canAccess', 'logger\\.\\w+',
+          'rpc', 'navigate', 'from', 'select', 'eq', 'order', 'insert', 'update', 'delete',
+          'executeTool', 'logHardwareFail', 'toLocaleDateString', 'toLocaleTimeString',
+          'toLocaleString', 'usePersistedBool',
+          'neq', 'gte', 'lte', 'not', 'in', 'is', 'single', 'channel', 'on',
+        ],
+      },
+      'object-properties': {
+        exclude: [
+          'key', 'id', 'accessorKey', 'displayName', 'className', 'aria-invalid', 'labelKey',
+          'status', 'maxHeight', 'event', 'schema', 'table', 'count', 'onConflict',
+        ],
+      },
+      words: {
+        exclude: [
+          '^[0-9.,$%:@#/x×+*-]+$', '^[A-Z_]{2,}$', '^—$', '^[●○−–]+$', '^[↑↓]+$',
+          '^#[0-9a-fA-F]{3,8}$',
+        ],
+      },
+    }],
+  },
 }, storybook.configs["flat/recommended"]);
