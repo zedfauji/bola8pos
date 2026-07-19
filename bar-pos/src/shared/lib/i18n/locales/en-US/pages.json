@@ -5,6 +5,9 @@
   "audit": {
     "title": "Audit Log"
   },
+  "editHistory": {
+    "title": "Edit History"
+  },
   "home": {},
   "inventory": {
     "title": "Inventory",

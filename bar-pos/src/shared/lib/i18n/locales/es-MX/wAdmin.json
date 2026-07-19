@@ -30,6 +30,23 @@
     "noActivityDescription": "Audit entries appear here as staff process payments, refunds, and other tracked actions.",
     "loadMoreEntries": "Load more entries"
   },
+  "editHistoryTable": {
+    "columnAction": "Acción",
+    "viewDiffAriaLabel": "Ver diferencias de {{action}} el {{date}}",
+    "viewDiff": "Ver diferencias",
+    "columnEntityType": "Tipo de entidad",
+    "columnReason": "Motivo",
+    "columnTicket": "Ticket",
+    "columnActor": "Responsable",
+    "system": "Sistema",
+    "columnTimestamp": "Fecha y hora",
+    "columnSource": "Origen",
+    "loadErrorTitle": "No se pudo cargar el historial de ediciones",
+    "loadErrorDescription": "No se pudo cargar el historial de ediciones — revisa tu conexión e inténtalo de nuevo.",
+    "noActivityTitle": "Aún no hay ediciones",
+    "noActivityDescription": "Las correcciones hechas a tickets pagados aparecerán aquí en cuanto un gerente guarde una.",
+    "loadMoreEntries": "Cargar más registros"
+  },
   "categoryRevenuePanel": {
     "emptyTitle": "No category data",
     "emptyDescription": "No revenue recorded in this date range.",

@@ -336,6 +336,7 @@
       "waitlist": "Waitlist",
       "rolesAndPermissions": "Roles & Permissions",
       "auditLog": "Audit Log",
+      "editHistory": "Edit History",
       "kitchenDisplay": "Kitchen Display",
       "barDisplay": "Bar Display"
     },

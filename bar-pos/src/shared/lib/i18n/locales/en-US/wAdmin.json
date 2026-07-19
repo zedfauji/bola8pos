@@ -30,6 +30,23 @@
     "noActivityDescription": "Audit entries appear here as staff process payments, refunds, and other tracked actions.",
     "loadMoreEntries": "Load more entries"
   },
+  "editHistoryTable": {
+    "columnAction": "Action",
+    "viewDiffAriaLabel": "View diff for {{action}} on {{date}}",
+    "viewDiff": "View diff",
+    "columnEntityType": "Entity type",
+    "columnReason": "Reason",
+    "columnTicket": "Ticket",
+    "columnActor": "Actor",
+    "system": "System",
+    "columnTimestamp": "Timestamp",
+    "columnSource": "Source",
+    "loadErrorTitle": "Couldn't load edit history",
+    "loadErrorDescription": "Couldn't load edit history — check your connection and try again.",
+    "noActivityTitle": "No edits yet",
+    "noActivityDescription": "Corrections made to paid tickets will appear here once a manager saves one.",
+    "loadMoreEntries": "Load more entries"
+  },
   "categoryRevenuePanel": {
     "emptyTitle": "No category data",
     "emptyDescription": "No revenue recorded in this date range.",

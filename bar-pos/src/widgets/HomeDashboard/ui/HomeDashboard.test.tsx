@@ -151,8 +151,8 @@ describe('HomeDashboard', () => {
     renderWithProviders(<HomeDashboard />);
     const lockIcons = screen.getAllByTestId('lock-icon');
     // Reports, Inventory, Settings, Kitchen Prep, Waitlist, Roles & Permissions,
-    // Audit Log, Bar Display are gated for bartender
-    expect(lockIcons.length).toBe(8);
+    // Audit Log, Edit History, Bar Display are gated for bartender
+    expect(lockIcons.length).toBe(9);
   });
 
   it('logout button calls logout and navigates to /login', async () => {
