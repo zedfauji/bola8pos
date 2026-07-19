@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       agent_audit_log: {
@@ -2535,6 +2560,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      edit_paid_tab: {
+        Args: {
+          p_expected_version: number
+          p_notes: string
+          p_order_item_patches: Json
+          p_reason: string
+          p_tab_id: string
+        }
+        Returns: Json
+      }
       evaluate_promotions_for_item: {
         Args: { p_order_item_id: string }
         Returns: undefined
@@ -2873,6 +2908,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       category_routing: ["KITCHEN", "BAR", "NONE"],
