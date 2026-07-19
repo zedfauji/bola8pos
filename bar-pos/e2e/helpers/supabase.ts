@@ -122,6 +122,14 @@ export async function resetTestState(): Promise<void> {
   if (bud?.id) {
     await admin.from('inventory').update({ quantity_on_hand: 100 }).eq('product_id', bud.id);
   }
+
+  // Phase 21 (i18n): profiles.locale is a persistent per-staff preference
+  // (D-02, default 'es-MX') that a locale-switching spec can leave at
+  // 'en-US' if it errors before its own reset step runs. Force every
+  // profile back to the documented default here so every spec starts from
+  // a deterministic locale baseline, not whatever a prior run's failure
+  // left behind.
+  await admin.from('profiles').update({ locale: 'es-MX' }).neq('locale', 'es-MX');
 }
 
 /**
