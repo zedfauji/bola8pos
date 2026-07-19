@@ -618,7 +618,7 @@ Plans:
 **Goal:** Add multi-language support via `react-i18next`, with `es-MX`/`en-US` catalogs, a `profiles.locale` preference, and an ESLint rule banning hard-coded UI strings going forward.
 **Requirements:** TBD (POS-COMPARISON.md §21 — source doc no longer present; scope locked in 21-CONTEXT.md)
 **Depends on:** —
-**Plans:** 11/13 plans executed
+**Plans:** 12/13 plans executed
 
 Plans:
 **Wave 1**
@@ -646,7 +646,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 21-12-PLAN.md — ESLint enforcement gate: commit no-literal-string repo-wide + full lint green + remove helper (Wave 5) (SC-3, SC-4, D-05)
+- [x] 21-12-PLAN.md — ESLint enforcement gate: commit no-literal-string repo-wide + full lint green + remove helper (Wave 5) (SC-3, SC-4, D-05)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
