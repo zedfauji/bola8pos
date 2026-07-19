@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { LowStockAlert } from '@widgets/LowStockAlert';
 import { ActiveTabSelector, CartPanel } from '@widgets/OrderPanel';
@@ -18,6 +19,7 @@ import { usePersistedBool } from '@shared/lib/usePersistedBool';
 import { PageContainer, POSButton, ProtectedAction } from '@shared/ui';
 
 export default function POSPage() {
+  const { t } = useTranslation('pages');
   const queryClient = useQueryClient();
   const activeTabId = useTabStore(s => s.activeTabId);
   const currentStaff = useStaffStore(s => s.currentStaff);
@@ -36,18 +38,18 @@ export default function POSPage() {
     onScan: code => {
       void lookup(code).then(product => {
         if (!product) {
-          toast.error(`No product found for barcode ${code}`);
+          toast.error(t('pos.barcodeNotFound', { code }));
           return;
         }
         addToCart(product, [], undefined);
-        toast.success(`Added ${product.name}`);
+        toast.success(t('pos.addedToCart', { name: product.name }));
       });
     },
   });
 
   return (
     <PageContainer
-      title="POS"
+      title={t('pos.title')}
       backTo="/home"
       className="mx-0 flex h-screen max-w-none flex-col space-y-0 bg-background p-0"
     >
@@ -59,7 +61,9 @@ export default function POSPage() {
               variant="ghost"
               touchSize="default"
               data-testid="pos-order-panel-toggle"
-              aria-label={orderPanelCollapsed ? 'Show order panel' : 'Hide order panel'}
+              aria-label={
+                orderPanelCollapsed ? t('pos.showOrderPanel') : t('pos.hideOrderPanel')
+              }
               aria-pressed={orderPanelCollapsed}
               onClick={() => {
                 setOrderPanelCollapsed(prev => !prev);
@@ -94,9 +98,11 @@ export default function POSPage() {
                         setPaymentTab(tab ?? null);
                         setPaymentOpen(true);
                       }}
-                      aria-label={`Close tab and process payment for ${tab?.customerName ?? 'customer'}`}
+                      aria-label={t('pos.closeTabAndPayAriaLabel', {
+                        customerName: tab?.customerName ?? t('pos.customerFallback'),
+                      })}
                     >
-                      Close Tab / Pay
+                      {t('pos.closeTabAndPay')}
                     </POSButton>
                   </ProtectedAction>
                 </div>

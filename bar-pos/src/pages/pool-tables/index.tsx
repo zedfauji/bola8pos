@@ -1,11 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { PoolTableGrid } from '@widgets/PoolTableGrid';
 import { LiveTimeDisplay, PageContainer } from '@shared/ui';
 
 export default function PoolTablesPage() {
+  const { t } = useTranslation('pages');
   return (
     <div className="flex h-screen flex-col">
       <main className="flex-1 overflow-auto">
-        <PageContainer title="Pool Tables" backTo="/home" actions={<LiveTimeDisplay />}>
+        <PageContainer title={t('poolTables.title')} backTo="/home" actions={<LiveTimeDisplay />}>
           <PoolTableGrid />
         </PageContainer>
       </main>

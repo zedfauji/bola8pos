@@ -1,1 +1,80 @@
-{}
+{
+  "common": {
+    "logoAlt": "Bar logo"
+  },
+  "audit": {
+    "title": "Audit Log"
+  },
+  "home": {},
+  "inventory": {
+    "title": "Inventory",
+    "physicalCount": "Physical Count",
+    "lowStockToast": "Low stock: {{productName}} — {{currentStock}} remaining (threshold: {{threshold}})"
+  },
+  "kdsBar": {
+    "title": "Bar Display"
+  },
+  "kds": {
+    "title": "Kitchen Display"
+  },
+  "kitchenPrep": {
+    "title": "Kitchen Prep"
+  },
+  "payments": {
+    "title": "Payments",
+    "tabs": {
+      "payments": "Payments",
+      "refunds": "Refunds"
+    }
+  },
+  "poolTableStatus": {
+    "title": "Table Status",
+    "backLabel": "Pool Tables"
+  },
+  "poolTables": {
+    "title": "Pool Tables"
+  },
+  "pos": {
+    "title": "POS",
+    "showOrderPanel": "Show order panel",
+    "hideOrderPanel": "Hide order panel",
+    "barcodeNotFound": "No product found for barcode {{code}}",
+    "addedToCart": "Added {{name}}",
+    "closeTabAndPay": "Close Tab / Pay",
+    "closeTabAndPayAriaLabel": "Close tab and process payment for {{customerName}}",
+    "customerFallback": "customer"
+  },
+  "rappi": {
+    "title": "Rappi delivery"
+  },
+  "rbac": {
+    "title": "Roles & Permissions"
+  },
+  "reports": {
+    "title": "Reports",
+    "tabs": {
+      "session": "Session View",
+      "products": "Product Sales",
+      "hourly": "Hourly Breakdown",
+      "voids": "Voids & Refunds",
+      "categories": "Revenue by Category",
+      "staff": "Staff Performance",
+      "tips": "Tip Distribution",
+      "tipSplit": "Tip Split",
+      "combos": "Combo Mix",
+      "variance": "Recipe Variance",
+      "waitlist": "Waitlist",
+      "refundsReg": "Refunds Register",
+      "overrides": "Overrides"
+    }
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "staff": {
+    "title": "Staff"
+  },
+  "waitlist": {
+    "title": "Waitlist"
+  }
+}

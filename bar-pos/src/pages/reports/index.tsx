@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CajaReportPanel } from '@widgets/CajaReportPanel';
 import { CategoryRevenuePanel } from '@widgets/CategoryRevenuePanel';
 import { ComboMixReport } from '@widgets/ComboMixReport';
@@ -30,6 +31,7 @@ function fromDateStr(s: string, endOfDay: boolean): Date {
 }
 
 export default function ReportsPage() {
+  const { t } = useTranslation('pages');
   const today = toDateStr(new Date());
   const [fromStr, setFromStr] = useState(today);
   const [toStr, setToStr] = useState(today);
@@ -47,22 +49,22 @@ export default function ReportsPage() {
   return (
     <div className="flex h-screen flex-col">
       <main className="flex-1 overflow-auto">
-        <PageContainer title="Reports" backTo="/home">
+        <PageContainer title={t('reports.title')} backTo="/home">
           <Tabs defaultValue="session">
             <TabsList className="mb-4 flex flex-wrap">
-              <TabsTrigger value="session">Session View</TabsTrigger>
-              <TabsTrigger value="products">Product Sales</TabsTrigger>
-              <TabsTrigger value="hourly">Hourly Breakdown</TabsTrigger>
-              <TabsTrigger value="voids">Voids &amp; Refunds</TabsTrigger>
-              <TabsTrigger value="categories">Revenue by Category</TabsTrigger>
-              <TabsTrigger value="staff">Staff Performance</TabsTrigger>
-              <TabsTrigger value="tips">Tip Distribution</TabsTrigger>
-              <TabsTrigger value="tip-split">Tip Split</TabsTrigger>
-              <TabsTrigger value="combos">Combo Mix</TabsTrigger>
-              <TabsTrigger value="variance">Recipe Variance</TabsTrigger>
-              <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
-              <TabsTrigger value="refunds-reg">Refunds Register</TabsTrigger>
-              <TabsTrigger value="overrides">Overrides</TabsTrigger>
+              <TabsTrigger value="session">{t('reports.tabs.session')}</TabsTrigger>
+              <TabsTrigger value="products">{t('reports.tabs.products')}</TabsTrigger>
+              <TabsTrigger value="hourly">{t('reports.tabs.hourly')}</TabsTrigger>
+              <TabsTrigger value="voids">{t('reports.tabs.voids')}</TabsTrigger>
+              <TabsTrigger value="categories">{t('reports.tabs.categories')}</TabsTrigger>
+              <TabsTrigger value="staff">{t('reports.tabs.staff')}</TabsTrigger>
+              <TabsTrigger value="tips">{t('reports.tabs.tips')}</TabsTrigger>
+              <TabsTrigger value="tip-split">{t('reports.tabs.tipSplit')}</TabsTrigger>
+              <TabsTrigger value="combos">{t('reports.tabs.combos')}</TabsTrigger>
+              <TabsTrigger value="variance">{t('reports.tabs.variance')}</TabsTrigger>
+              <TabsTrigger value="waitlist">{t('reports.tabs.waitlist')}</TabsTrigger>
+              <TabsTrigger value="refunds-reg">{t('reports.tabs.refundsReg')}</TabsTrigger>
+              <TabsTrigger value="overrides">{t('reports.tabs.overrides')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="session">

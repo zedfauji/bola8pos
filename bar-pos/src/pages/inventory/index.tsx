@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { InventoryPagePanel } from '@widgets/InventoryPagePanel';
 import { PhysicalCountForm } from '@features/physical-count';
@@ -13,6 +14,7 @@ import { PageContainer, POSButton } from '@shared/ui';
  * to detect genuinely new entries (avoids toasting on mount).
  */
 function useLowStockToast() {
+  const { t } = useTranslation('pages');
   const { data: alerts } = useInventoryAlerts();
   const prevIdsRef = useRef<Set<string> | null>(null);
 
@@ -31,16 +33,21 @@ function useLowStockToast() {
     for (const alert of alerts) {
       if (!prevIdsRef.current.has(alert.productId)) {
         toast.warning(
-          `Low stock: ${alert.productName} — ${String(alert.currentStock)} remaining (threshold: ${String(alert.threshold)})`
+          t('inventory.lowStockToast', {
+            productName: alert.productName,
+            currentStock: alert.currentStock,
+            threshold: alert.threshold,
+          })
         );
       }
     }
 
     prevIdsRef.current = currentIds;
-  }, [alerts]);
+  }, [alerts, t]);
 }
 
 function InventoryPageInner() {
+  const { t } = useTranslation('pages');
   // Mount the Realtime bridge once for this page
   useInventoryRealtimeBridge();
   // Fire toasts on new low-stock alerts
@@ -54,7 +61,7 @@ function InventoryPageInner() {
     <div className="flex h-screen flex-col">
       <main className="flex-1 overflow-auto">
         <PageContainer
-          title="Inventory"
+          title={t('inventory.title')}
           backTo="/home"
           actions={
             <>
@@ -68,7 +75,7 @@ function InventoryPageInner() {
                     setPhysicalCountOpen(true);
                   }}
                 >
-                  Physical Count
+                  {t('inventory.physicalCount')}
                 </POSButton>
               )}
             </>

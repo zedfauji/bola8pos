@@ -125,6 +125,11 @@ export default tseslint.config({
           // stackId="a" in ComboMixReport's day-of-week stacked bar chart)
           // — a chart-library technical grouping key, not UI copy.
           'stackId',
+          // 'backTo' is PageContainer's back-navigation route path (e.g.
+          // backTo="/pool-tables") — same category as the already-excluded
+          // 'to' (react-router Link), not UI copy. 21-11 is the first plan
+          // to sweep src/pages, where every route container uses this prop.
+          'backTo',
         ],
       },
       // 'can(...)'/'canAccess(...)' are the RBAC permission checks (usePermissions().can,
