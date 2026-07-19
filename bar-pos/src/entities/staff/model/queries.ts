@@ -527,8 +527,14 @@ export function useMutationSetOwnLocale() {
 
       return ok(null);
     },
-    onSuccess: () => {
+    onSuccess: (_result, { locale }) => {
       void queryClient.invalidateQueries({ queryKey: staffKeys.list() });
+      // CR-01: keep the persisted currentStaff.locale in sync — otherwise
+      // onRehydrateStorage re-applies the stale locale on next app reload.
+      const current = useStaffStore.getState().currentStaff;
+      if (current) {
+        useStaffStore.setState({ currentStaff: { ...current, locale } });
+      }
     },
   });
 }
