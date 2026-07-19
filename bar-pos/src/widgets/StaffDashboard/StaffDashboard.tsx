@@ -223,6 +223,7 @@ export function StaffDashboard() {
       />
 
       <EditLocaleDialog
+        key={localeTarget?.id ?? 'locale-idle'}
         staff={localeTarget}
         open={localeTarget !== null}
         onOpenChange={next => {

@@ -108,6 +108,28 @@ describe('EditLocaleDialog', () => {
     expect(changeLanguageMock).not.toHaveBeenCalled();
   });
 
+  it('WR-01 regression: remounting with a different staff.id shows that staff\'s own locale, not a carried-over selection', () => {
+    const otherStaff: Staff = {
+      ...targetStaff,
+      id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      name: 'Sam',
+      locale: 'en-US',
+    };
+    const { rerender } = render(
+      <EditLocaleDialog key={targetStaff.id} open onOpenChange={vi.fn()} staff={targetStaff} />
+    );
+    expect(screen.getByRole('combobox')).toHaveTextContent('es-MX');
+
+    // StaffDashboard remounts EditLocaleDialog per target (key={staff.id}) so
+    // that a caller-provided different `staff` prop is never carried over —
+    // this is the fix for WR-01 (the dialog was previously mounted once and
+    // reused across targets, leaking the last-selected locale).
+    rerender(
+      <EditLocaleDialog key={otherStaff.id} open onOpenChange={vi.fn()} staff={otherStaff} />
+    );
+    expect(screen.getByRole('combobox')).toHaveTextContent('en-US');
+  });
+
   it('on failure, fires an error toast and the dialog stays open', async () => {
     mutateAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: 'nope' } });
     const onOpenChange = vi.fn();
