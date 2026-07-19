@@ -2,6 +2,35 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Codebase Knowledge Graph (query before you grep)
+
+A knowledge graph of this codebase already exists at `graphify-out/graph.json` (built via the `graphify` skill — 5309 nodes, 13496 edges, 394 communities). **Before using Glob/Grep/Read to explore unfamiliar code** ("where is X defined", "what calls Y", "how does Z connect to W", "what depends on this table/RPC"), check the graph first:
+
+- `graphify query "<question>"` — BFS/DFS traversal, returns relevant nodes/edges with `source_location` citations
+- `graphify path "<A>" "<B>"` — shortest relationship path between two named things
+- `graphify explain "<name>"` — plain-language summary of one node
+
+Only fall back to raw file traversal (Glob/Grep/Read) when the graph doesn't have an answer (e.g. brand-new files not yet extracted) or when you need to actually edit the file — the graph is for **locating and understanding**, not for reading full file contents. After editing files, or when the graph looks stale, run `/graphify . --update` to re-extract only changed files (cheap — incremental, code-only changes skip the LLM step entirely).
+
+## Session Memory (claude-mem — check before re-deriving)
+
+`claude-mem` is installed and auto-active (hooks fire on SessionStart/UserPromptSubmit/PostToolUse — it already captures observations and injects prior context automatically, no manual save step needed). **Prefer it over rebuilding context from scratch:**
+
+- At session start, read the injected `<claude-mem-context>` block before asking the user "what were we doing" or re-reading multiple planning docs to reconstruct state.
+- Before investigating "why was X built this way" / "what did we decide about Y" / "have we hit this bug before", use the `mem-search` skill (or the `mcp-search` MCP tools directly) to query prior sessions instead of grepping through `.planning/` or old commit messages.
+- Use `smart-explore` / `knowledge-agent` skills for "how does this codebase work" questions that are really about accumulated project understanding, not live code structure (for live code structure, use the graphify graph above instead — they're complementary: graphify answers "what connects to what in the code right now", claude-mem answers "what did we learn/decide across sessions").
+- Only fall back to manually reading historical files/docs when claude-mem has no relevant memory (e.g. very first session, or memory was cleared).
+
+## GSD Workflow State (don't re-scan `.planning/` by hand)
+
+This project uses GSD for phase planning — `.planning/STATE.md`, `ROADMAP.md`, `PROJECT.md`, `REQUIREMENTS.md` are already the source of truth for "what phase are we on / what's next / what's been decided". **Enter through the GSD situational commands instead of manually reading and cross-referencing those files:**
+
+- `/gsd-progress` — the unified entry point: reports current state and can dispatch the right next action (discuss/plan/execute/verify) in one call.
+- `/gsd-resume-work` — resume mid-phase work with full context restoration after a break, instead of re-reading the last few phase docs to reconstruct where things left off.
+- Only open `.planning/phases/**` files directly when actively planning/executing a specific phase (i.e. when a GSD skill would open them anyway) — not as a first move to "catch up."
+
+Do not enable GSD's MemPalace integration (`gsd-mempalace-*`) on top of this — it would run a third overlapping memory system alongside claude-mem and GSD's own `.planning/STATE.md`. claude-mem covers cross-session recall; `.planning/` covers phase/roadmap state. That's sufficient.
+
 ## Project Overview
 
 A bar/restaurant POS system built as a Tauri 2 desktop app (Windows, WebView2). Frontend is React 19 + TypeScript + Vite. Backend is Supabase (PostgreSQL + Auth + Realtime + RLS).
@@ -147,6 +176,7 @@ All routes are registered in `src/app/router.tsx`. Protected by `<ProtectedRoute
 - `tip-distribution-config` — admin-configurable floor/bar/kitchen tip split (`settings` key=`'tip_distribution'`, floor/bar/kitchen percentages, default 34/33/33, warn-but-allow if the sum isn't 100%); `tip_distribution_entries` is an append-only per-caja-close snapshot computed inside `close_caja_session` via largest-remainder allocation (floor > bar > kitchen tiebreak), pooling `payments.tip_amount` across all payment methods for the session; admin-only `'Tip Split'` Settings tab (`TipDistributionSettingsTab`) + read-only `'Tip Split'` Reports tab (`TipBucketDistributionPanel`), both named apart from the pre-existing per-staff `'Tip Distribution'` tab; this migration also bundles the missed `version + 1` bump fix for `close_caja_session` (Phase 15's version trigger was rejecting every caja close with `STALE_VERSION` before this fix) (Phase 19)
 - Touch-target & focus-visible sweep — `focusEmphasis` CVA variant (`default | high`) on the base `Button`/`POSButton`; `touchSize` (44/56/72px) rollout across the pool-tables, pool-table-status, inventory, kitchen-prep, kds, and kds-bar pages; `ConfirmDialog`'s opt-in `confirmClassName` passthrough powering the two 72px/ring-4 destructive confirms (Stop pool session, Stop & Move); `e2e/44-focus-tab-order.spec.ts` regression-tests Tab order on ManagerPinDialog, the inventory filter/sort-header row, and the Batch Adjustment form (Phase 32)
 - Payment-critical page sweep — the 7 payment-critical surfaces (`pos/index.tsx` panel toggle, `CartPanel` Clear Cart, `PaymentForm` Process Payment + Remove-payment-N + Reset-to-computed, `TabPaymentCard`, `RefundSheet`, `SplitTabSheet`, `VoidOrderDialog`) standardized to `POSButton`/`touchSize`/`focusEmphasis`/`confirmClassName` with zero behavior change, each landing as its own isolated commit and verified against the 5 required gate E2E specs (`05-payments`, `41-split-payment`, `42-tip-distribution`, `06-transfer`, `09-rbac`) (COMPONENT-04, Phase 33)
+- i18n / multi-language (es-MX default, en-US) — `react-i18next` big-bang migration across every FSD layer, a self-service Language tab in Settings (all roles, including bartender), an admin per-staff locale field on `/staff`, locale-aware receipts/PDFs, and a committed `i18next/no-literal-string` lint gate preventing regression (SC-1..SC-4, Phase 21) — see "i18n / Multi-Language" section below
 
 ## Key DB Tables (Remote Supabase)
 
@@ -188,10 +218,35 @@ Realtime subscriptions are initialized in Zustand stores, not React components. 
 
 ## E2E Test Suite (`bar-pos/e2e/`)
 
-23 spec files — all must pass before release:
-`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`, `44-focus-tab-order`
+24 spec files — all must pass before release:
+`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`, `44-focus-tab-order`, `46-i18n-locale-switch`
 
 Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')` — admin PIN is `0000`.
+
+## i18n / Multi-Language
+
+Stack: `react-i18next` + `i18next`, singleton at `src/shared/lib/i18n/index.ts` (lives in the `shared` FSD layer — every layer imports it, no layer above `shared` may be a dependency). No `i18next-http-backend`/`i18next-browser-languagedetector` — this is an offline, statically-bundled Tauri app; all catalogs ship in the signed binary and locale is staff-driven (`profiles.locale`), not browser/OS-driven.
+
+**Namespace scheme** (10 namespaces, one JSON file per locale under `src/shared/lib/i18n/locales/{es-MX,en-US}/`), one per FSD layer/concern:
+
+| Namespace | Layer / concern |
+|-----------|------------------|
+| `common` | `shared/ui` — cross-cutting buttons, loading states, shared component copy |
+| `featOrders` | `features/` — order/pool-timer/payment/refund/split/void/caja-entry actions |
+| `featMgmt` | `features/` — management-action features (products, staff, RBAC-adjacent) |
+| `wPanels` | `widgets/` — operational panels (POS, payments, pool, KDS, caja, rappi, waitlist, inventory, home) |
+| `wAdmin` | `widgets/` — report/analytics/audit/RBAC/inventory/settings-tab admin widgets |
+| `entities` | `entities/` — domain model hooks + `ui/` cards/rows |
+| `pages` | `pages/` — route container titles/labels |
+| `settings` | Settings tabs (incl. the Language tab itself) |
+| `staff` | Staff management page |
+| `receipt` | Printed receipts / PDF exports |
+
+**Locale is a per-staff preference** (`profiles.locale`, `LocaleSchema` = `'es-MX' | 'en-US'`, default `es-MX`), not a terminal/browser setting — it persists across devices/logins. Two write paths: (1) self-service via Settings → Language, open to every authenticated role including bartender (`LanguageSettingsTab`, role-agnostic, always the first/default Settings tab); (2) admin override of another staff member's locale on `/staff`, gated by the existing `manage_staff` RBAC action. Switching your own locale calls `i18n.changeLanguage()` on save, re-rendering the whole app immediately with no page reload.
+
+**Catalog rule for this phase:** es-MX values are byte-identical to the pre-migration hardcoded literal (the migration only changed the *source* of each string, not its content); en-US values are genuine English translations. Full Spanish-content translation (i.e., changing the es-MX values themselves) is out of scope / future work.
+
+**Enforcement (D-05):** `i18next/no-literal-string: error` is committed in `eslint.config.js`, scoped to `shared/ui`, `entities`, `features`, `widgets`, and `pages`, `mode: 'all'`, no grandfather/ignore list — any new hardcoded UI string in those layers fails `npm run lint`.
 
 ## TypeScript Gotchas
 
