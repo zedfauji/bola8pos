@@ -40,6 +40,7 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - ✓ Tip distribution config — Phase 19
 - ✓ Promotions engine — Phase 20
 - ✓ App-wide UI consistency: shared shell, `shared/ui` primitives, design tokens, touch/focus targets, visual-regression baseline, drift lint — v2.2 (Phases 29-35, +33.1)
+- ✓ i18n multi-language: `react-i18next` + es-MX/en-US catalogs, `profiles.locale` preference, no-grandfather ESLint gate banning hardcoded UI strings — Phase 21
 
 ### Active
 
@@ -52,7 +53,6 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - [ ] Operator analytics reports + E2E flake cleanup — Phase 8
 - [ ] Tauri auto-update service (GitHub Releases) — Phase 9
 - [ ] AI slob technical debt audit — Phase 10
-- [ ] i18n (es-MX/en-US) — Phase 21
 - [ ] Edit paid ticket + history — Phase 22
 - [ ] Reopen closed ticket — Phase 23
 - [ ] Operational reports suite + CSV export — Phase 24
@@ -113,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-17 after v2.2 milestone — UI Standardization shipped (22/22 requirements); PROJECT.md full evolution review completed*
+*Last updated: 2026-07-19 after Phase 21 (i18n Multi-Language) — react-i18next + es-MX/en-US catalogs, profiles.locale preference, no-grandfather ESLint gate; 13/13 plans, 4/4 verification criteria passed*
