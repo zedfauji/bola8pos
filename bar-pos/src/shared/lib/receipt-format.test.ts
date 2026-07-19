@@ -259,6 +259,13 @@ describe('buildPreChequeText', () => {
     expect(text).toContain('HORA FELIZ');
   });
 
+  it('WR-02 regression: multi-byte ★ happy-hour line is padded to exactly 32 UTF-8 bytes, not 32 UTF-16 code units', () => {
+    const text = buildPreChequeText(basePreCheque({ happyHourActive: true }), 'es-MX');
+    const happyHourLine = text.split('\n').find(l => l.includes('HORA FELIZ'));
+    expect(happyHourLine).toBeDefined();
+    expect(new TextEncoder().encode(happyHourLine ?? '').length).toBe(32);
+  });
+
   it('happyHourActive false → output does NOT contain HORA FELIZ', () => {
     const text = buildPreChequeText(basePreCheque({ happyHourActive: false }), 'es-MX');
     expect(text).not.toContain('HORA FELIZ');

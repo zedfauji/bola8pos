@@ -5,22 +5,62 @@ import i18n from '@shared/lib/i18n';
 
 const LINE = 32;
 
+// WR-02: `printer.rs` sends `line.as_bytes()` — raw UTF-8 bytes — with no
+// codepage transcoding, so column math here must be measured in UTF-8 bytes,
+// not UTF-16 code units (`.length`), or accented/multi-byte characters (e.g.
+// `★`, `á/é/í/ó/ú/ñ`) silently misalign the physical receipt.
+function byteWidth(s: string): number {
+  return new TextEncoder().encode(s).length;
+}
+
+/** Truncates by whole characters until `s` fits within `width` UTF-8 bytes — never splits a multi-byte character. */
+function truncateToByteWidth(s: string, width: number): string {
+  if (byteWidth(s) <= width) return s;
+  let out = '';
+  let w = 0;
+  for (const ch of s) {
+    const cw = byteWidth(ch);
+    if (w + cw > width) break;
+    out += ch;
+    w += cw;
+  }
+  return out;
+}
+
+/** Same as {@link truncateToByteWidth} but keeps the trailing bytes (mirrors the old `.slice(-width)`). */
+function truncateFromEndToByteWidth(s: string, width: number): string {
+  if (byteWidth(s) <= width) return s;
+  let out = '';
+  let w = 0;
+  for (const ch of Array.from(s).reverse()) {
+    const cw = byteWidth(ch);
+    if (w + cw > width) break;
+    out = ch + out;
+    w += cw;
+  }
+  return out;
+}
+
 function padRight(s: string, width: number): string {
-  const t = s.length > width ? s.slice(0, width) : s;
-  return t + ' '.repeat(Math.max(0, width - t.length));
+  const t = truncateToByteWidth(s, width);
+  return t + ' '.repeat(Math.max(0, width - byteWidth(t)));
 }
 
 function lineLeftRight(left: string, right: string): string {
-  const r = right.length >= LINE ? right.slice(-LINE) : right;
-  const maxLeft = LINE - r.length;
-  const l = left.length > maxLeft ? `${left.slice(0, Math.max(0, maxLeft - 1))}~` : left;
-  return padRight(l, LINE - r.length) + r;
+  const r = byteWidth(right) >= LINE ? truncateFromEndToByteWidth(right, LINE) : right;
+  const maxLeft = LINE - byteWidth(r);
+  const l =
+    byteWidth(left) > maxLeft
+      ? `${truncateToByteWidth(left, Math.max(0, maxLeft - 1))}~`
+      : left;
+  return padRight(l, LINE - byteWidth(r)) + r;
 }
 
 function centerLine(text: string): string {
-  if (text.length >= LINE) return text.slice(0, LINE);
-  const pad = Math.floor((LINE - text.length) / 2);
-  return ' '.repeat(pad) + text + ' '.repeat(LINE - pad - text.length);
+  const tw = byteWidth(text);
+  if (tw >= LINE) return truncateToByteWidth(text, LINE);
+  const pad = Math.floor((LINE - tw) / 2);
+  return ' '.repeat(pad) + text + ' '.repeat(LINE - pad - tw);
 }
 
 function divider(): string {
