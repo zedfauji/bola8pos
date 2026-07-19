@@ -36,12 +36,12 @@ vi.mock('@shared/lib/logger-instance', () => ({
 }));
 
 describe('PermissionMatrix', () => {
-  it('renders 24 action rows (one per STAFF_ACTIONS entry)', () => {
+  it('renders 25 action rows (one per STAFF_ACTIONS entry)', () => {
     render(<PermissionMatrix />);
     for (const action of STAFF_ACTIONS) {
       expect(screen.getByText(action)).toBeInTheDocument();
     }
-    expect(STAFF_ACTIONS).toHaveLength(24);
+    expect(STAFF_ACTIONS).toHaveLength(25);
   });
 
   it('renders 4 role columns (Bartender, Manager, Admin, Kitchen)', () => {
@@ -53,10 +53,10 @@ describe('PermissionMatrix', () => {
     expect(STAFF_ROLES).toHaveLength(4);
   });
 
-  it('renders 96 switch elements (24 rows × 4 columns)', () => {
+  it('renders 100 switch elements (25 rows × 4 columns)', () => {
     render(<PermissionMatrix />);
     const switches = screen.getAllByRole('switch');
-    expect(switches).toHaveLength(24 * 4);
+    expect(switches).toHaveLength(25 * 4);
   });
 
   it('shows switches as enabled (not disabled) for admin user', () => {
