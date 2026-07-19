@@ -669,10 +669,18 @@ Plans:
 **Plans:** 5 plans (4 waves)
 
 Plans:
+**Wave 1**
+
 - [ ] 22-01-PLAN.md — Enum additions (`tab.edit_paid`, `edit_paid_tab`) + Wave-0 test scaffolds (SC-1..SC-4)
 - [ ] 22-02-PLAN.md — `edit_paid_tab` RPC + BLOCKING db push + integration test (SC-1, SC-2)
-- [ ] 22-03-PLAN.md — `edit-paid-tab` feature slice (hook + dialog) + PaymentPane trigger (SC-3)
 - [ ] 22-04-PLAN.md — `/edit-history` view (widget + page + route + Home tile) (SC-4)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 22-03-PLAN.md — `edit-paid-tab` feature slice (hook + dialog) + PaymentPane trigger (SC-3)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 22-05-PLAN.md — Activate E2E spec 47 + full phase gate (SC-3, SC-4)
 
 **Success Criteria:**
