@@ -76,8 +76,9 @@ void i18n.use(initReactI18next).init({
 
 // ponytail: skipped `declare module 'i18next'` t()-key type augmentation — strict
 // per-key typing would churn on every sweep as keys are added across 21-03..21-11;
-// the runtime + lint:i18n rule enforce correctness instead. Add when key stability
-// (post-migration) makes the augmentation worth the churn.
+// the runtime + eslint-plugin-i18next's committed no-literal-string rule (eslint.config.js,
+// 21-12) enforce correctness instead. Add when key stability (post-migration) makes
+// the augmentation worth the churn.
 
 /**
  * Resolves the currently-active i18next language to a typed {@link Locale}.
