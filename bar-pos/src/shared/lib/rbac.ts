@@ -35,6 +35,7 @@ export const STAFF_ACTIONS = [
   'produce_prep_batch',
   'manage_waitlist',
   'view_audit_log',
+  'edit_paid_tab',
 ] as const;
 
 export type StaffAction = (typeof STAFF_ACTIONS)[number];
@@ -63,6 +64,7 @@ const MANAGER_EXTRA: ReadonlySet<StaffAction> = new Set([
   'produce_prep_batch',
   'manage_waitlist', // manage waitlist entries — manager+ only per PRD
   'view_audit_log', // view /audit page — manager+ only
+  'edit_paid_tab', // correct a paid tab after the fact — manager+ only
 ]);
 
 const KITCHEN_ACTIONS: ReadonlySet<StaffAction> = new Set([

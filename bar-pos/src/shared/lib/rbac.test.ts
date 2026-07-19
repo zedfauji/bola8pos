@@ -41,6 +41,7 @@ const ALLOWED: Record<StaffRole, ReadonlySet<string>> = {
     'produce_prep_batch',
     'manage_waitlist',
     'view_audit_log',
+    'edit_paid_tab',
     'view_kds_bar',
   ]),
   admin: new Set(STAFF_ACTIONS),
