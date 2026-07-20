@@ -41,7 +41,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 19: Tip Distribution Config** — Singleton `tip_distribution_config` (floor/bar/kitchen %) + `tip_distribution_entries` + close-caja allocation + Settings panel (completed 2026-07-09)
 - [x] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin (completed 2026-07-10)
 - [x] **Phase 21: i18n Multi-Language** — `react-i18next` + `es-MX`/`en-US` catalogs + `profiles.locale` + ESLint rule banning hard-coded strings (completed 2026-07-19)
-- [ ] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)*
+- [x] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)* (completed 2026-07-20)
 - [ ] **Phase 23: Reopen Closed Ticket** — `reopen_tab` RPC + payment status `reopened_void` + caja offsetting entries + 24h/2x cap *(depends Phases 14, 15)*
 - [ ] **Phase 24: Operational Reports Suite + CSV** — 6 new RPCs (peak-hours, voids, deletions×2, modifier popularity, payment methods, charts-data) + generic CSV export action + Recharts widgets *(depends Phase 14)*
 - [ ] **Phase 25: Receipt Item Grouping (2-Level)** — Extend `receipt-format.ts` + Tauri Rust printer payload + PDF + KDS card all share `groupOrderItemsForReceipt`
@@ -666,7 +666,7 @@ Plans:
 **Goal:** Allow managers to edit an already-paid ticket via a whitelisted-field `edit_paid_tab` RPC (manager PIN + mandatory reason), with an `EditPaidTabDialog` and a `/edit-history` view to audit changes.
 **Requirements:** TBD (POS-COMPARISON.md §22 — source doc no longer present; scope locked in 22-CONTEXT.md)
 **Depends on:** Phase 14, Phase 15
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 **Wave 1**
@@ -681,7 +681,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 22-05-PLAN.md — Activate E2E spec 47 + full phase gate (SC-3, SC-4)
+- [x] 22-05-PLAN.md — Activate E2E spec 47 + full phase gate (SC-3, SC-4)
 
 **Success Criteria:**
 
