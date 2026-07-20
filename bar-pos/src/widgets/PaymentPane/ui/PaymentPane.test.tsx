@@ -15,6 +15,16 @@ import { PaymentPane } from './PaymentPane';
 
 vi.mock('@entities/tab/model/queries', () => ({
   useTabs: vi.fn(),
+  // EditPaidTabDialog (rendered unconditionally by PaymentPane since 22-03)
+  // calls useTab(tabId ?? '') — stub it so mounting the dialog with a null
+  // target doesn't hit the real Supabase client.
+  useTab: vi.fn().mockReturnValue({
+    data: undefined,
+    isLoading: false,
+    resultError: undefined,
+    isEmpty: false,
+    isIdleOrLoading: false,
+  }),
   tabKeys: {
     all: ['tabs'] as const,
     lists: () => ['tabs', 'list'] as const,
@@ -22,6 +32,13 @@ vi.mock('@entities/tab/model/queries', () => ({
     details: () => ['tabs', 'detail'] as const,
     detail: (id: string) => ['tabs', 'detail', id] as const,
   },
+}));
+
+// EditPaidTabDialog (rendered unconditionally by PaymentPane since 22-03)
+// calls useProducts() for the "Add item" picker — stub it so mounting the
+// dialog with a null target doesn't hit the real Supabase client.
+vi.mock('@entities/product', () => ({
+  useProducts: vi.fn().mockReturnValue({ data: [], isLoading: false }),
 }));
 
 vi.mock('@entities/staff/model/store', () => ({

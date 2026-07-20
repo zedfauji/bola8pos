@@ -141,6 +141,7 @@
   },
   "paymentPane": {
     "refund": "Refund",
+    "editTicket": "Edit ticket",
     "loadingPayments": "Loading payments…",
     "noPaymentRecords": "No payment records found.",
     "recentPayments": "Recent Payments",

@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentForm } from '@widgets/PaymentModal';
+import { EditPaidTabDialog } from '@features/edit-paid-tab';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
 import { RefundSheet } from '@features/process-refund';
 import type { Payment } from '@entities/payment';
@@ -41,7 +42,36 @@ function RefundButton({ payment, onRefund }: RefundButtonProps) {
   );
 }
 
-function PaymentHistoryList({ onRefund }: { onRefund: (paymentId: string) => void }) {
+interface EditTicketButtonProps {
+  payment: Payment;
+  onEdit: (tabId: string) => void;
+}
+
+function EditTicketButton({ payment, onEdit }: EditTicketButtonProps) {
+  const { t } = useTranslation('wPanels');
+
+  if (payment.isRefund === true) return null;
+
+  return (
+    <POSButton
+      variant="outline"
+      size="sm"
+      onClick={() => {
+        onEdit(payment.tabId);
+      }}
+    >
+      {t('paymentPane.editTicket')}
+    </POSButton>
+  );
+}
+
+function PaymentHistoryList({
+  onRefund,
+  onEdit,
+}: {
+  onRefund: (paymentId: string) => void;
+  onEdit: (tabId: string) => void;
+}) {
   const { t } = useTranslation('wPanels');
   const { data: payments, isLoading } = usePayments();
 
@@ -88,7 +118,10 @@ function PaymentHistoryList({ onRefund }: { onRefund: (paymentId: string) => voi
                 })}
               </span>
             </div>
-            <RefundButton payment={payment} onRefund={onRefund} />
+            <div className="flex items-center gap-2">
+              <EditTicketButton payment={payment} onEdit={onEdit} />
+              <RefundButton payment={payment} onRefund={onRefund} />
+            </div>
           </div>
         ))}
       </div>
@@ -105,6 +138,7 @@ export function PaymentPane() {
   const [pinVerified, setPinVerified] = useState(false);
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [refundTarget, setRefundTarget] = useState<string | null>(null);
+  const [editTarget, setEditTarget] = useState<string | null>(null);
 
   function handleSelectTab(tab: Tab) {
     setSelectedTab(tab);
@@ -146,7 +180,7 @@ export function PaymentPane() {
       {/* Right panel — payment area or payment history */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {selectedTab == null ? (
-          <PaymentHistoryList onRefund={setRefundTarget} />
+          <PaymentHistoryList onRefund={setRefundTarget} onEdit={setEditTarget} />
         ) : (
           <>
             {/* Right panel header */}
@@ -232,6 +266,15 @@ export function PaymentPane() {
         paymentId={refundTarget}
         onOpenChange={open => {
           if (!open) setRefundTarget(null);
+        }}
+      />
+
+      {/* Edit paid ticket dialog — opened from payment history rows */}
+      <EditPaidTabDialog
+        open={editTarget !== null}
+        tabId={editTarget}
+        onOpenChange={open => {
+          if (!open) setEditTarget(null);
         }}
       />
     </div>
