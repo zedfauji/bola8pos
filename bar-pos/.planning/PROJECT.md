@@ -41,6 +41,7 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - ✓ Promotions engine — Phase 20
 - ✓ App-wide UI consistency: shared shell, `shared/ui` primitives, design tokens, touch/focus targets, visual-regression baseline, drift lint — v2.2 (Phases 29-35, +33.1)
 - ✓ i18n multi-language: `react-i18next` + es-MX/en-US catalogs, `profiles.locale` preference, no-grandfather ESLint gate banning hardcoded UI strings — Phase 21
+- ✓ Edit paid ticket + history: whitelisted-field `edit_paid_tab` RPC (manager PIN + reason + inventory-correct), `EditPaidTabDialog`, `/edit-history` audit view — Phase 22
 
 ### Active
 
@@ -53,7 +54,6 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - [ ] Operator analytics reports + E2E flake cleanup — Phase 8
 - [ ] Tauri auto-update service (GitHub Releases) — Phase 9
 - [ ] AI slob technical debt audit — Phase 10
-- [ ] Edit paid ticket + history — Phase 22
 - [ ] Reopen closed ticket — Phase 23
 - [ ] Operational reports suite + CSV export — Phase 24
 - [ ] Receipt item grouping (2-level) — Phase 25
@@ -71,7 +71,7 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 
 - Feature-Sliced Design (FSD) architecture, enforced via `eslint-plugin-boundaries`
 - Cross-pollination phases 14–28 were derived from comparing this codebase against a sibling project `billar-pos` (`.planning/comparison/POS-COMPARISON.md`)
-- Phases 1, 2, 4, 5, 7, 11-20, 29-35 (+33.1) are complete (27/36 total phase directories); Phases 3, 6, 8, 9, 10, 21-28 remain unstarted backlog
+- Phases 1, 2, 4, 5, 7, 11-22, 29-35 (+33.1) are complete (28/36 total phase directories); Phases 3, 6, 8, 9, 10, 23-28 remain unstarted backlog
 - Auto-updater (Phase 9) targets GitHub Releases; signing key pair already generated and wired into CI, frontend hook + dialog not yet built
 - 27-file drift-lint (`eslint-rules/no-ui-drift.js`) now guards `src/pages|widgets|features` against raw `<button>`/`<input>`, hardcoded hex/rgb, and arbitrary-value Tailwind spacing — any future phase touching these layers must stay conformant or add a documented exemption comment
 
@@ -113,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-19 after Phase 21 (i18n Multi-Language) — react-i18next + es-MX/en-US catalogs, profiles.locale preference, no-grandfather ESLint gate; 13/13 plans, 4/4 verification criteria passed*
+*Last updated: 2026-07-20 after Phase 22 (Edit Paid Ticket + History) — edit_paid_tab RPC (manager PIN + reason + inventory-correct), EditPaidTabDialog, /edit-history audit view; 5/5 plans, 4/4 verification criteria passed*
