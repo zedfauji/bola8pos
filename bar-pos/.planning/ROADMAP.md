@@ -700,11 +700,25 @@ Plans:
 **Plans:** 6 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 23-01-PLAN.md — Foundations: register `tab.reopen` audit action + `reopen_tab` RBAC action, extend PaymentSchema/TabSchema, map payment status, Wave-0 test scaffolds (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 23-02-PLAN.md — Additive migrations: `payments.status`, `tabs.reopen_count`/`last_reopened_at`, and the `reopen_tab` RPC (Wave 2)
 - [ ] 23-03-PLAN.md — Payment-sum correctness sweep: exclude `reopened_void` from process_payment_atomic/process_split_payment_atomic/get_caja_report/close_caja_session/process_refund (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 23-04-PLAN.md — [BLOCKING] db push + regen types + SC-1..SC-4 & double-count integration tests (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 23-05-PLAN.md — Feature slice: `useReopenTab` + PIN-gated `ReopenTabDialog` + PaymentPane wiring (Wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 23-06-PLAN.md — E2E spec `48-reopen-closed-ticket` + CLAUDE.md registration + phase gate (Wave 5)
 
 **Success Criteria:**
