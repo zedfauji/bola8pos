@@ -218,8 +218,8 @@ Realtime subscriptions are initialized in Zustand stores, not React components. 
 
 ## E2E Test Suite (`bar-pos/e2e/`)
 
-24 spec files — all must pass before release:
-`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`, `44-focus-tab-order`, `46-i18n-locale-switch`
+25 spec files — all must pass before release:
+`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`, `44-focus-tab-order`, `46-i18n-locale-switch`, `47-edit-paid-tab`
 
 Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')` — admin PIN is `0000`.
 
