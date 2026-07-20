@@ -45,6 +45,10 @@ describe.skipIf(skip)('edit_paid_tab RPC (integration)', () => {
   let productId: string;
   let cajaId: string;
   let cajaCreatedByTest = false;
+  // CR-01 fix regression: a dedicated product WITH a known `inventory` row
+  // (the shared `productId` above is "any active product" and may not have
+  // one), so inventory.quantity_on_hand deltas are deterministic.
+  let inventoryProductId: string;
 
   const cleanupTabIds: string[] = [];
   const cleanupCajaEntryConcepts: string[] = [];
@@ -93,7 +97,11 @@ describe.skipIf(skip)('edit_paid_tab RPC (integration)', () => {
   }
 
   /** Seeds a status='paid' tab (owned by the manager) with one order_item. */
-  async function seedPaidTab(unitPrice: number, quantity = 1): Promise<SeedTabResult> {
+  async function seedPaidTab(
+    unitPrice: number,
+    quantity = 1,
+    productOverride?: string
+  ): Promise<SeedTabResult> {
     const { data: tab, error: tabErr } = await db
       .from('tabs')
       .insert({
@@ -118,7 +126,7 @@ describe.skipIf(skip)('edit_paid_tab RPC (integration)', () => {
       .from('order_items')
       .insert({
         order_id: order.id,
-        product_id: productId,
+        product_id: productOverride ?? productId,
         quantity,
         unit_price: unitPrice,
       })
@@ -152,6 +160,30 @@ describe.skipIf(skip)('edit_paid_tab RPC (integration)', () => {
     const { data: product } = await db.from('products').select('id').eq('is_active', true).limit(1).single();
     if (!product) throw new Error('no active product found for seeding');
     productId = product.id as string;
+
+    // CR-01 regression fixture: a fresh product + inventory row with a known
+    // starting quantity_on_hand, so the RPC's inventory adjustment is testable
+    // deterministically (not dependent on whatever stock an arbitrary existing
+    // product happens to have).
+    const { data: cat } = await db.from('categories').select('id').limit(1).single();
+    if (!cat) throw new Error('no category found for inventory-product seeding');
+    const { data: invProduct, error: invProductErr } = await db
+      .from('products')
+      .insert({
+        name: `__edit_paid_tab_inventory_test_${String(Date.now())}__`,
+        base_price: 10.0,
+        category_id: cat.id,
+        is_active: true,
+      })
+      .select('id')
+      .single();
+    if (invProductErr || !invProduct) throw new Error(`inventory product seed failed: ${invProductErr?.message}`);
+    inventoryProductId = invProduct.id as string;
+
+    const { error: invRowErr } = await db
+      .from('inventory')
+      .insert({ product_id: inventoryProductId, quantity_on_hand: 100 });
+    if (invRowErr) throw new Error(`inventory row seed failed: ${invRowErr.message}`);
 
     // Ensure an open caja session exists (caja_sessions_one_open allows at
     // most one open at a time) — reuse an existing one if present, otherwise
@@ -197,6 +229,11 @@ describe.skipIf(skip)('edit_paid_tab RPC (integration)', () => {
     if (bartenderId) {
       await safe(db.from('profiles').delete().eq('id', bartenderId));
       await safe(db.auth.admin.deleteUser(bartenderId));
+    }
+    if (inventoryProductId) {
+      await safe(db.from('stock_movements').delete().eq('product_id', inventoryProductId));
+      await safe(db.from('inventory').delete().eq('product_id', inventoryProductId));
+      await safe(db.from('products').delete().eq('id', inventoryProductId));
     }
   });
 
@@ -373,5 +410,163 @@ describe.skipIf(skip)('edit_paid_tab RPC (integration)', () => {
     expect(rows[0]?.before).not.toBeNull();
     expect(rows[0]?.after).not.toBeNull();
     expect(rows[0]?.after['reason']).toBe(reason);
+  });
+
+  // ── CR-01 regression: inventory.quantity_on_hand + stock_movements ────────
+  // (22-REVIEW.md CR-01 — quantity/delete corrections previously never
+  // touched inventory.quantity_on_hand or wrote a stock_movements row.)
+
+  it('CR-01: a quantity-decreasing edit restores inventory.quantity_on_hand and writes a correction stock_movements row', async () => {
+    const seed = await seedPaidTab(10.0, 3, inventoryProductId); // starts at qty=3
+
+    const { data: before } = await db
+      .from('inventory')
+      .select('quantity_on_hand')
+      .eq('product_id', inventoryProductId)
+      .single();
+    const startQty = before.quantity_on_hand as number;
+
+    const { data, error } = await managerClient.rpc('edit_paid_tab', {
+      p_tab_id: seed.tabId,
+      p_expected_version: seed.version,
+      p_order_item_patches: [{ id: seed.orderItemId, op: 'update', quantity: 1 }], // 3 -> 1, restore 2
+      p_notes: null,
+      p_reason: 'Integration test: CR-01 quantity decrease restores inventory',
+    });
+
+    expect(error).toBeNull();
+    expect(data.ok).toBe(true);
+    if (data.cajaAdjustmentRecorded) {
+      const { data: entries } = await db
+        .from('caja_entries')
+        .select('concept')
+        .eq('caja_session_id', cajaId)
+        .ilike('concept', '%CR-01 quantity decrease%');
+      for (const row of (entries ?? []) as { concept: string }[]) {
+        cleanupCajaEntryConcepts.push(row.concept);
+      }
+    }
+
+    const { data: after } = await db
+      .from('inventory')
+      .select('quantity_on_hand')
+      .eq('product_id', inventoryProductId)
+      .single();
+    expect(after?.quantity_on_hand).toBe(startQty + 2);
+
+    const { data: movements } = await db
+      .from('stock_movements')
+      .select('quantity_delta, reason, ref_type, ref_id')
+      .eq('ref_type', 'order_item')
+      .eq('ref_id', seed.orderItemId);
+    const movementRows = (movements ?? []) as { quantity_delta: number; reason: string }[];
+    expect(movementRows).toHaveLength(1);
+    expect(movementRows[0]?.reason).toBe('correction');
+    expect(movementRows[0]?.quantity_delta).toBe(2);
+  });
+
+  it('CR-01: a quantity-increasing edit depletes inventory.quantity_on_hand and writes a correction stock_movements row', async () => {
+    const seed = await seedPaidTab(10.0, 1, inventoryProductId); // starts at qty=1
+
+    const { data: before } = await db
+      .from('inventory')
+      .select('quantity_on_hand')
+      .eq('product_id', inventoryProductId)
+      .single();
+    const startQty = before.quantity_on_hand as number;
+
+    const { data, error } = await managerClient.rpc('edit_paid_tab', {
+      p_tab_id: seed.tabId,
+      p_expected_version: seed.version,
+      p_order_item_patches: [{ id: seed.orderItemId, op: 'update', quantity: 4 }], // 1 -> 4, deplete 3 more
+      p_notes: null,
+      p_reason: 'Integration test: CR-01 quantity increase depletes inventory',
+    });
+
+    expect(error).toBeNull();
+    expect(data.ok).toBe(true);
+    if (data.cajaAdjustmentRecorded) {
+      const { data: entries } = await db
+        .from('caja_entries')
+        .select('concept')
+        .eq('caja_session_id', cajaId)
+        .ilike('concept', '%CR-01 quantity increase%');
+      for (const row of (entries ?? []) as { concept: string }[]) {
+        cleanupCajaEntryConcepts.push(row.concept);
+      }
+    }
+
+    const { data: after } = await db
+      .from('inventory')
+      .select('quantity_on_hand')
+      .eq('product_id', inventoryProductId)
+      .single();
+    expect(after?.quantity_on_hand).toBe(startQty - 3);
+
+    const { data: movements } = await db
+      .from('stock_movements')
+      .select('quantity_delta, reason')
+      .eq('ref_type', 'order_item')
+      .eq('ref_id', seed.orderItemId);
+    const movementRows = (movements ?? []) as { quantity_delta: number; reason: string }[];
+    expect(movementRows).toHaveLength(1);
+    expect(movementRows[0]?.reason).toBe('correction');
+    expect(movementRows[0]?.quantity_delta).toBe(-3);
+  });
+
+  it('CR-01: a soft-delete restores the item quantity to inventory.quantity_on_hand and writes a correction stock_movements row', async () => {
+    const seed = await seedPaidTab(10.0, 5, inventoryProductId); // starts at qty=5
+
+    const { data: before } = await db
+      .from('inventory')
+      .select('quantity_on_hand')
+      .eq('product_id', inventoryProductId)
+      .single();
+    const startQty = before.quantity_on_hand as number;
+
+    const { data, error } = await managerClient.rpc('edit_paid_tab', {
+      p_tab_id: seed.tabId,
+      p_expected_version: seed.version,
+      p_order_item_patches: [{ id: seed.orderItemId, op: 'delete' }],
+      p_notes: null,
+      p_reason: 'Integration test: CR-01 soft-delete restores inventory',
+    });
+
+    expect(error).toBeNull();
+    expect(data.ok).toBe(true);
+    if (data.cajaAdjustmentRecorded) {
+      const { data: entries } = await db
+        .from('caja_entries')
+        .select('concept')
+        .eq('caja_session_id', cajaId)
+        .ilike('concept', '%CR-01 soft-delete%');
+      for (const row of (entries ?? []) as { concept: string }[]) {
+        cleanupCajaEntryConcepts.push(row.concept);
+      }
+    }
+
+    const { data: item } = await db
+      .from('order_items')
+      .select('is_deleted, quantity')
+      .eq('id', seed.orderItemId)
+      .single();
+    expect(item?.is_deleted).toBe(true);
+
+    const { data: after } = await db
+      .from('inventory')
+      .select('quantity_on_hand')
+      .eq('product_id', inventoryProductId)
+      .single();
+    expect(after?.quantity_on_hand).toBe(startQty + 5);
+
+    const { data: movements } = await db
+      .from('stock_movements')
+      .select('quantity_delta, reason')
+      .eq('ref_type', 'order_item')
+      .eq('ref_id', seed.orderItemId);
+    const movementRows = (movements ?? []) as { quantity_delta: number; reason: string }[];
+    expect(movementRows).toHaveLength(1);
+    expect(movementRows[0]?.reason).toBe('correction');
+    expect(movementRows[0]?.quantity_delta).toBe(5);
   });
 });
