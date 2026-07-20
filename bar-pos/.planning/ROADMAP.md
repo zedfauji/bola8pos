@@ -666,7 +666,7 @@ Plans:
 **Goal:** Allow managers to edit an already-paid ticket via a whitelisted-field `edit_paid_tab` RPC (manager PIN + mandatory reason), with an `EditPaidTabDialog` and a `/edit-history` view to audit changes.
 **Requirements:** TBD (POS-COMPARISON.md §22 — source doc no longer present; scope locked in 22-CONTEXT.md)
 **Depends on:** Phase 14, Phase 15
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 **Wave 1**
@@ -677,7 +677,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 22-03-PLAN.md — `edit-paid-tab` feature slice (hook + dialog) + PaymentPane trigger (SC-3)
+- [x] 22-03-PLAN.md — `edit-paid-tab` feature slice (hook + dialog) + PaymentPane trigger (SC-3)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
