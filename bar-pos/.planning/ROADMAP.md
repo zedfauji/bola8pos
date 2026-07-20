@@ -697,7 +697,15 @@ Plans:
 **Goal:** Let managers reopen a closed ticket via a `reopen_tab` RPC, introducing a `reopened_void` payment status, offsetting caja entries, and a cap (24h window, max 2 reopens per tab).
 **Requirements:** TBD (POS-COMPARISON.md §23 — source doc no longer present; scope locked in 23-CONTEXT.md)
 **Depends on:** Phase 14, Phase 15
-**Plans:** Not yet planned
+**Plans:** 6 plans
+
+Plans:
+- [ ] 23-01-PLAN.md — Foundations: register `tab.reopen` audit action + `reopen_tab` RBAC action, extend PaymentSchema/TabSchema, map payment status, Wave-0 test scaffolds (Wave 1)
+- [ ] 23-02-PLAN.md — Additive migrations: `payments.status`, `tabs.reopen_count`/`last_reopened_at`, and the `reopen_tab` RPC (Wave 2)
+- [ ] 23-03-PLAN.md — Payment-sum correctness sweep: exclude `reopened_void` from process_payment_atomic/process_split_payment_atomic/get_caja_report/close_caja_session/process_refund (Wave 2)
+- [ ] 23-04-PLAN.md — [BLOCKING] db push + regen types + SC-1..SC-4 & double-count integration tests (Wave 3)
+- [ ] 23-05-PLAN.md — Feature slice: `useReopenTab` + PIN-gated `ReopenTabDialog` + PaymentPane wiring (Wave 4)
+- [ ] 23-06-PLAN.md — E2E spec `48-reopen-closed-ticket` + CLAUDE.md registration + phase gate (Wave 5)
 
 **Success Criteria:**
 
