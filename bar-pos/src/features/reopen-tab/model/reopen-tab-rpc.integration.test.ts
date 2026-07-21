@@ -634,4 +634,91 @@ describe.skipIf(skip)('reopen_tab RPC (integration)', () => {
       expect(tabAfterFinal?.status).toBe('paid');
     }
   );
+
+  // ── CR-01 regression: second reopen must not double-count the first ────────
+  // reopen's already-voided total (23-REVIEW.md CR-01).
+
+  it(
+    'CR-01: reopening the SAME tab a second time (after a full repayment) reports ' +
+      "voidedPaymentTotal and a caja expense equal to ONLY the second payment's amount, " +
+      'not the sum of both the first and second voided payments',
+    async () => {
+      const seed = await seedTab({ unitPrice: 20.0 }); // payment A = $20, completed
+
+      // Reopen #1: voids payment A ($20).
+      const { data: reopen1, error: reopen1Err } = await managerClient.rpc('reopen_tab', {
+        p_tab_id: seed.tabId,
+        p_expected_version: seed.version,
+        p_reason: 'Integration test: CR-01 first reopen',
+      });
+      expect(reopen1Err).toBeNull();
+      expect(reopen1.ok).toBe(true);
+      expect(reopen1.voidedPaymentTotal).toBe(20.0);
+
+      const { data: entries1 } = await db
+        .from('caja_entries')
+        .select('concept')
+        .eq('caja_session_id', cajaId)
+        .ilike('concept', '%CR-01 first reopen%');
+      for (const row of (entries1 ?? []) as { concept: string }[]) {
+        cleanupCajaEntryConcepts.push(row.concept);
+      }
+
+      const { data: tabAfterReopen1 } = await db
+        .from('tabs')
+        .select('version')
+        .eq('id', seed.tabId)
+        .single();
+
+      // Re-pay in full: payment B = $20, completed. Tab closes again.
+      const { data: payRes, error: payErr } = await db.rpc('process_payment_atomic', {
+        p_tab_id: seed.tabId,
+        p_staff_id: managerId,
+        p_amount: 20.0,
+        p_tip_amount: 0,
+        p_method: 'cash',
+        p_idempotency_key: idKey('__reopen_tab_cr01_repay'),
+        p_tendered_amount: 20.0,
+        p_expected_version: tabAfterReopen1?.version as number,
+      });
+      expect(payErr).toBeNull();
+      expect(payRes.ok).toBe(true);
+
+      const { data: tabAfterRepay } = await db
+        .from('tabs')
+        .select('status, version')
+        .eq('id', seed.tabId)
+        .single();
+      expect(tabAfterRepay?.status).toBe('paid');
+
+      // Reopen #2: must void ONLY payment B ($20), not A + B ($40).
+      const { data: reopen2, error: reopen2Err } = await managerClient.rpc('reopen_tab', {
+        p_tab_id: seed.tabId,
+        p_expected_version: tabAfterRepay?.version as number,
+        p_reason: 'Integration test: CR-01 second reopen',
+      });
+      expect(reopen2Err).toBeNull();
+      expect(reopen2.ok).toBe(true);
+      expect(reopen2.voidedPaymentTotal).toBe(20.0);
+
+      const { data: entries2 } = await db
+        .from('caja_entries')
+        .select('type, amount, concept')
+        .eq('caja_session_id', cajaId)
+        .ilike('concept', '%CR-01 second reopen%');
+      const rows2 = (entries2 ?? []) as { type: string; amount: number; concept: string }[];
+      expect(rows2).toHaveLength(1);
+      expect(rows2[0]?.type).toBe('expense');
+      expect(rows2[0]?.amount).toBe(20.0);
+      if (rows2[0]) cleanupCajaEntryConcepts.push(rows2[0].concept);
+
+      const { data: tabAfterReopen2 } = await db
+        .from('tabs')
+        .select('status, reopen_count')
+        .eq('id', seed.tabId)
+        .single();
+      expect(tabAfterReopen2?.status).toBe('open');
+      expect(tabAfterReopen2?.reopen_count).toBe(2);
+    }
+  );
 });
