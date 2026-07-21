@@ -6,14 +6,14 @@ current_phase: 24
 current_phase_name: operational-reports-suite-csv
 status: executing
 stopped_at: Completed 24-03-PLAN.md
-last_updated: "2026-07-21T16:35:42.166Z"
+last_updated: "2026-07-21T16:40:22.414Z"
 last_activity: 2026-07-21
 last_activity_desc: Phase 24 Plan 03 complete
 progress:
   total_phases: 28
   completed_phases: 20
   total_plans: 154
-  completed_plans: 147
+  completed_plans: 148
   percent: 71
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 24 (operational-reports-suite-csv) — EXECUTING
-Plan: 4 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
+Plan: 5 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
 Status: Ready to execute
 Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 
@@ -300,6 +300,8 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 - [Phase ?]: No separate get_charts_data RPC built — resolves RESEARCH.md Open Question 1, the 3 chart-bearing report RPCs (peak-hours, modifier-popularity, payment-methods) satisfy chart data needs directly
 - [Phase ?]: 24-02: CSV-only ExportButtons hide Excel/PDF items for the 5 net-new report types instead of rendering non-functional buttons
 - [Phase ?]: 24-02: caja-csv exports the Summary metric/value pairs (CajaReport isn't a rows array)
+- [Phase ?]: remove_tab_item deliberately omits any manager/admin role gate -- item removal stays bartender-accessible (D-07)
+- [Phase ?]: get_deletions_post_report derives fieldsChanged via a before/after jsonb key diff excluding updated_at/version/items -- Claude's-discretion resolution, no prior precedent
 
 ## Performance Metrics
 
@@ -385,10 +387,11 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 | Phase 24 P01 | 45min | 3 tasks | 13 files |
 | Phase 24 P03 | 20min | 3 tasks | 3 files |
 | Phase 24 P02 | 20min | 3 tasks | 12 files |
+| Phase 24 P04 | 25min | 2 tasks | 2 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 24-02-PLAN.md
+- **Stopped at:** Completed 24-04-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -405,7 +408,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T16:35:42.152Z
+**Last session:** 2026-07-21T16:40:22.403Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 
