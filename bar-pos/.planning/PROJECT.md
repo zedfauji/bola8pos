@@ -42,6 +42,7 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - ✓ App-wide UI consistency: shared shell, `shared/ui` primitives, design tokens, touch/focus targets, visual-regression baseline, drift lint — v2.2 (Phases 29-35, +33.1)
 - ✓ i18n multi-language: `react-i18next` + es-MX/en-US catalogs, `profiles.locale` preference, no-grandfather ESLint gate banning hardcoded UI strings — Phase 21
 - ✓ Edit paid ticket + history: whitelisted-field `edit_paid_tab` RPC (manager PIN + reason + inventory-correct), `EditPaidTabDialog`, `/edit-history` audit view — Phase 22
+- ✓ Reopen closed ticket: manager-only `reopen_tab` RPC (`reopened_void` payment status, offsetting caja entry, 24h/2x-reopen cap, `tab.reopen` audit action), `ReopenTabDialog` + PaymentPane wiring — Phase 23
 
 ### Active
 
@@ -54,7 +55,6 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - [ ] Operator analytics reports + E2E flake cleanup — Phase 8
 - [ ] Tauri auto-update service (GitHub Releases) — Phase 9
 - [ ] AI slob technical debt audit — Phase 10
-- [ ] Reopen closed ticket — Phase 23
 - [ ] Operational reports suite + CSV export — Phase 24
 - [ ] Receipt item grouping (2-level) — Phase 25
 - [ ] Floating tables (`is_temp` resources) — Phase 26
@@ -71,7 +71,7 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 
 - Feature-Sliced Design (FSD) architecture, enforced via `eslint-plugin-boundaries`
 - Cross-pollination phases 14–28 were derived from comparing this codebase against a sibling project `billar-pos` (`.planning/comparison/POS-COMPARISON.md`)
-- Phases 1, 2, 4, 5, 7, 11-22, 29-35 (+33.1) are complete (28/36 total phase directories); Phases 3, 6, 8, 9, 10, 23-28 remain unstarted backlog
+- Phases 1, 2, 4, 5, 7, 11-23, 29-35 (+33.1) are complete (29/36 total phase directories); Phases 3, 6, 8, 9, 10, 24-28 remain unstarted backlog
 - Auto-updater (Phase 9) targets GitHub Releases; signing key pair already generated and wired into CI, frontend hook + dialog not yet built
 - 27-file drift-lint (`eslint-rules/no-ui-drift.js`) now guards `src/pages|widgets|features` against raw `<button>`/`<input>`, hardcoded hex/rgb, and arbitrary-value Tailwind spacing — any future phase touching these layers must stay conformant or add a documented exemption comment
 
@@ -94,6 +94,7 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 | v2.2 UI Standardization risk-tiered rollout (audit → shell → non-payment sweep → touch/focus → payment-critical sweep → visual baseline → guardrails) | Payment-critical surfaces are highest blast-radius; prove the fix pattern on low-risk pages first | ✓ Good — zero regressions across all 5 required + 3 secondary E2E gate specs |
 | Phase 33's human visual/focus-ring parity spot-check deferred at milestone close rather than blocking | User explicitly chose to verify later; automated E2E gate for the same surfaces already passes | ⚠️ Revisit — run the spot-check manually, then update `33-UAT.md`/`33-VERIFICATION.md` |
 | Milestone-close artifact audit surfaced 6 pre-v2.2 phases (01, 03, 06, 07, 09, 12) with unresolved verification/UAT gaps | This was the project's first formal milestone close — nothing had gated on these before | ⚠️ Revisit — resolve or formally accept before the next milestone close, tracked in `.planning/STATE.md` Deferred Items |
+| Phase 23 CR-01 (reopen_tab double-counted its offsetting caja expense on a tab's 2nd reopen) fixed via a new migration (`CREATE OR REPLACE FUNCTION`), not an edit to the already-pushed original migration | The buggy migration was already live on remote Supabase before code review caught it — editing it in place would drift migration history from remote state | ✓ Good — same pattern as Phase 22's post-review CR-01 fix; regression test added and passing |
 
 ## Evolution
 
@@ -113,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-20 after Phase 22 (Edit Paid Ticket + History) — edit_paid_tab RPC (manager PIN + reason + inventory-correct), EditPaidTabDialog, /edit-history audit view; 5/5 plans, 4/4 verification criteria passed*
+*Last updated: 2026-07-21 after Phase 23 (Reopen Closed Ticket) — reopen_tab RPC (reopened_void status, offsetting caja entry, 24h/2x cap), ReopenTabDialog + PaymentPane wiring; 6/6 plans, 5/5 verification criteria passed; post-review CR-01 double-count fix shipped via follow-up migration*
