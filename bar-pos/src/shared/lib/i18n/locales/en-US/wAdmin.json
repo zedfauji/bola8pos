@@ -101,16 +101,26 @@
     "hourRevenueValue": "{{hour}} (${{revenue}})",
     "columnHour": "Hour",
     "columnOrders": "Orders",
-    "columnRevenue": "Revenue"
+    "columnRevenue": "Revenue",
+    "columnDayOfWeek": "Day"
   },
   "modifierPopularityReport": {
     "emptyTitle": "No modifier data",
     "emptyDescription": "No modifiers were applied in this date range.",
-    "top20Note": "Showing the top 20. Export the report to see all records."
+    "top20Note": "Showing the top 20. Export the report to see all records.",
+    "columnModifier": "Modifier",
+    "columnAttachCount": "Times applied",
+    "columnRevenue": "Revenue"
   },
   "paymentMethodsReport": {
     "emptyTitle": "No payments recorded",
-    "emptyDescription": "No payments were recorded in this date range."
+    "emptyDescription": "No payments were recorded in this date range.",
+    "columnSession": "Session",
+    "columnMethod": "Method",
+    "columnLegCount": "Payments",
+    "columnGrossAmount": "Gross amount",
+    "columnTipAmount": "Tip",
+    "rollupLabel": "Day total"
   },
   "productSalesPanel": {
     "columnProduct": "Product",

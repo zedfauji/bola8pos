@@ -101,16 +101,26 @@
     "hourRevenueValue": "{{hour}} (${{revenue}})",
     "columnHour": "Hour",
     "columnOrders": "Orders",
-    "columnRevenue": "Revenue"
+    "columnRevenue": "Revenue",
+    "columnDayOfWeek": "Día"
   },
   "modifierPopularityReport": {
     "emptyTitle": "Sin datos de modificadores",
     "emptyDescription": "No se registraron modificadores aplicados en este rango de fechas.",
-    "top20Note": "Mostrando los 20 principales. Exporta el reporte para ver todos los registros."
+    "top20Note": "Mostrando los 20 principales. Exporta el reporte para ver todos los registros.",
+    "columnModifier": "Modificador",
+    "columnAttachCount": "Veces aplicado",
+    "columnRevenue": "Ingresos"
   },
   "paymentMethodsReport": {
     "emptyTitle": "Sin pagos registrados",
-    "emptyDescription": "No se registraron pagos en este rango de fechas."
+    "emptyDescription": "No se registraron pagos en este rango de fechas.",
+    "columnSession": "Sesión",
+    "columnMethod": "Método",
+    "columnLegCount": "Pagos",
+    "columnGrossAmount": "Monto bruto",
+    "columnTipAmount": "Propina",
+    "rollupLabel": "Total del día"
   },
   "productSalesPanel": {
     "columnProduct": "Product",
