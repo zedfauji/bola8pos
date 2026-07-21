@@ -15,6 +15,18 @@ import type {
   WaitlistMetricsRow,
   RefundRegisterRow,
   ComboOverrideRow,
+  DeletionsPreRow,
+  DeletionsPostRow,
+  ModifierPopularityRow,
+  PaymentMethodRow,
+} from '@shared/lib/domain';
+import {
+  HourlyRowSchema,
+  VoidRefundRowSchema,
+  DeletionsPreRowSchema,
+  DeletionsPostRowSchema,
+  ModifierPopularityRowSchema,
+  PaymentMethodRowSchema,
 } from '@shared/lib/domain';
 import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
@@ -37,6 +49,10 @@ export type {
   WaitlistMetricsRow,
   RefundRegisterRow,
   ComboOverrideRow,
+  DeletionsPreRow,
+  DeletionsPostRow,
+  ModifierPopularityRow,
+  PaymentMethodRow,
 };
 
 // Intermediate type used during aggregation before pctTotal is computed
@@ -70,12 +86,14 @@ type HourlyItem = {
  * Exported as a pure function so hourly bucketing can be unit-tested independently.
  */
 export function aggregateHourlyRevenue(items: HourlyItem[]): HourlyRow[] {
-  const map = new Map<number, { orderCount: number; revenue: number }>();
+  const map = new Map<number, { orderCount: number; revenue: number; dayOfWeek: number }>();
 
   for (const item of items) {
     const orderCreatedAt: string = item.orders?.created_at ?? '';
     if (!orderCreatedAt) continue;
-    const hour = new Date(orderCreatedAt).getHours();
+    const createdDate = new Date(orderCreatedAt);
+    const hour = createdDate.getHours();
+    const dayOfWeek = createdDate.getDay();
     const quantity: number = typeof item.quantity === 'number' ? item.quantity : 0;
     const unitPrice: number = typeof item.unit_price === 'number' ? item.unit_price : 0;
     const modDelta: number =
@@ -86,15 +104,21 @@ export function aggregateHourlyRevenue(items: HourlyItem[]): HourlyRow[] {
     if (existing) {
       existing.orderCount += 1;
       existing.revenue += lineRev;
+      existing.dayOfWeek = dayOfWeek;
     } else {
-      map.set(hour, { orderCount: 1, revenue: lineRev });
+      map.set(hour, { orderCount: 1, revenue: lineRev, dayOfWeek });
     }
   }
 
+  // D-04: dayOfWeek/isBusiest are required on HourlyRow post-24-01. isBusiest
+  // is always derived client-side by findPeakHour (see useHourlyBreakdown)
+  // rather than computed here, so it defaults to false in this pure helper.
   return Array.from(map.entries()).map(([hour, v]) => ({
     hour,
     orderCount: v.orderCount,
     revenue: Math.round(v.revenue * 100) / 100,
+    dayOfWeek: v.dayOfWeek,
+    isBusiest: false,
   }));
 }
 
@@ -108,7 +132,7 @@ export function fillMissingHours(rows: HourlyRow[]): HourlyRow[] {
 
   const result: HourlyRow[] = [];
   for (let h = 0; h < 24; h++) {
-    result.push(byHour.get(h) ?? { hour: h, orderCount: 0, revenue: 0 });
+    result.push(byHour.get(h) ?? { hour: h, orderCount: 0, revenue: 0, dayOfWeek: 0, isBusiest: false });
   }
   return result;
 }
@@ -283,39 +307,48 @@ export function useProductSalesReport(from: Date, to: Date) {
 // HOURLY BREAKDOWN REPORT
 // ============================================================================
 
+// RPC row shape before the client-derived `isBusiest` flag is attached
+// (get_peak_hours_report returns hour/dayOfWeek/orderCount/revenue only —
+// "busiest" stays a client-side derivation via findPeakHour, D-03).
+const RawHourlyRowSchema = HourlyRowSchema.omit({ isBusiest: true });
+
 /**
- * Fetches hourly revenue breakdown for the given date range.
- * Groups order_items by the hour of orders.created_at.
- * Missing hours are filled with zeros client-side.
+ * Fetches peak-hours revenue breakdown for the given date range via the
+ * bounded `get_peak_hours_report` RPC (D-01/D-03/SC-4 — replaces the prior
+ * unbounded order_items join). Missing hours are filled with zeros and the
+ * busiest hour is derived client-side, exactly as before the migration.
  */
 export function useHourlyBreakdown(from: Date, to: Date) {
   return useQuery({
     queryKey: ['reports', 'hourly-breakdown', from.toISOString(), to.toISOString()] as const,
     queryFn: async (): Promise<Result<HourlyRow[]>> => {
-      // Fetch order_items with order created_at to extract hour
-      const { data, error } = await db
-        .from('order_items')
-        .select(
-          `
-          quantity,
-          unit_price,
-          modifier_price_delta,
-          orders!inner(created_at, status, tabs!inner(created_at))
-          `
-        )
-        .neq('orders.status', 'voided')
-        .gte('orders.tabs.created_at', from.toISOString())
-        .lte('orders.tabs.created_at', to.toISOString());
+      const { data, error } = await db.rpc('get_peak_hours_report', {
+        p_from: from.toISOString(),
+        p_to: to.toISOString(),
+      });
 
       if (error) {
         logger.error('reports.hourly_breakdown.fetch_failed', { message: error.message });
         return err(unknownError(error));
       }
 
-      if (!data || !Array.isArray(data)) return ok(fillMissingHours([]));
+      const parsed = data as { ok: boolean; rows?: unknown[] } | null;
+      if (!parsed?.ok) {
+        return err(unknownError('get_peak_hours_report returned ok:false'));
+      }
 
-      const sparse = aggregateHourlyRevenue(data as HourlyItem[]);
-      return ok(fillMissingHours(sparse));
+      try {
+        const raw = (parsed.rows ?? []).map(r => RawHourlyRowSchema.parse(r));
+        const filled = fillMissingHours(raw.map(r => ({ ...r, isBusiest: false })));
+        const peak = findPeakHour(filled);
+        const rows: HourlyRow[] = filled.map(r => ({
+          ...r,
+          isBusiest: peak !== null && r.hour === peak.hour,
+        }));
+        return ok(rows);
+      } catch (e) {
+        return err(unknownError(e));
+      }
     },
     staleTime: 60_000,
   });
@@ -339,71 +372,35 @@ export function filterVoidRefundRows(rows: VoidRefundRow[], from: Date, to: Date
 }
 
 /**
- * Fetches all voided orders for the given date range (filtered by voided_at,
- * falling back to updated_at when voided_at is null).
- * Joins profiles for staff name and order_items for computing amount.
+ * Fetches all voided orders for the given date range via the bounded
+ * `get_voids_report` RPC (D-01/D-02/SC-4 — replaces the prior unbounded
+ * orders+order_items join). Row shape (orderId/voidedAt/staffName/amount/
+ * reason) is unchanged so the voids-excel/voids-pdf exporters need no edits.
  */
 export function useVoidRefundReport(from: Date, to: Date) {
   return useQuery({
     queryKey: ['reports', 'void-refund', from.toISOString(), to.toISOString()] as const,
     queryFn: async (): Promise<Result<VoidRefundRow[]>> => {
-      const { data, error } = await db
-        .from('orders')
-        .select(
-          `
-          id,
-          void_reason,
-          voided_at,
-          updated_at,
-          notes,
-          profiles!orders_staff_id_fkey(name),
-          order_items(quantity, unit_price, modifier_price_delta)
-          `
-        )
-        .eq('status', 'voided')
-        .gte('updated_at', from.toISOString())
-        .lte('updated_at', to.toISOString())
-        .order('updated_at', { ascending: false });
+      const { data, error } = await db.rpc('get_voids_report', {
+        p_from: from.toISOString(),
+        p_to: to.toISOString(),
+      });
 
       if (error) {
         logger.error('reports.void_refund.fetch_failed', { message: error.message });
         return err(unknownError(error));
       }
 
-      if (!data || !Array.isArray(data)) return ok([]);
-
-      const rows: VoidRefundRow[] = [];
-
-      for (const order of data) {
-        const orderId: string = order.id ?? '';
-        const rawVoidedAt: string | null = order.voided_at ?? null;
-        const rawUpdatedAt: string = order.updated_at ?? new Date().toISOString();
-        const voidedAt = new Date(rawVoidedAt ?? rawUpdatedAt);
-
-        const staffName: string = order.profiles?.name ?? i18n.t('entities:common.unknownStaff');
-        const reason: string = order.void_reason ?? order.notes ?? '';
-
-        const items: Array<{ quantity: number; unit_price: number; modifier_price_delta: number }> =
-          Array.isArray(order.order_items) ? order.order_items : [];
-
-        const amount = items.reduce((sum: number, item) => {
-          const qty: number = typeof item.quantity === 'number' ? item.quantity : 0;
-          const price: number = typeof item.unit_price === 'number' ? item.unit_price : 0;
-          const mod: number =
-            typeof item.modifier_price_delta === 'number' ? item.modifier_price_delta : 0;
-          return sum + qty * (price + mod);
-        }, 0);
-
-        rows.push({
-          orderId,
-          voidedAt,
-          staffName,
-          amount: Math.round(amount * 100) / 100,
-          reason,
-        });
+      const parsed = data as { ok: boolean; rows?: unknown[] } | null;
+      if (!parsed?.ok) {
+        return err(unknownError('get_voids_report returned ok:false'));
       }
 
-      return ok(rows);
+      try {
+        return ok((parsed.rows ?? []).map(r => VoidRefundRowSchema.parse(r)));
+      } catch (e) {
+        return err(unknownError(e));
+      }
     },
     staleTime: 60_000,
   });
@@ -651,4 +648,78 @@ export function useComboOverrides(from: Date, to: Date) {
       );
     },
   });
+}
+
+// ============================================================================
+// Phase 24 Plan 06: deletions-pre / deletions-post / modifier-popularity /
+// payment-methods report hooks — all follow the same bounded RPC shape
+// ({ok, rows} → Zod-parse per row) as useVoidRefundReport above (Pattern 2).
+// ============================================================================
+
+/** Shared body for the 4 report RPCs below — fetch, unwrap {ok, rows}, Zod-parse. */
+function useReportRpc<T>(
+  reportName: string,
+  rpcName: string,
+  from: Date,
+  to: Date,
+  schema: { parse: (v: unknown) => T }
+) {
+  return useQuery({
+    queryKey: ['reports', reportName, from.toISOString(), to.toISOString()] as const,
+    queryFn: async (): Promise<Result<T[]>> => {
+      const { data, error } = await db.rpc(rpcName, {
+        p_from: from.toISOString(),
+        p_to: to.toISOString(),
+      });
+
+      if (error) {
+        logger.error(`reports.${reportName}.fetch_failed`, { message: error.message });
+        return err(unknownError(error));
+      }
+
+      const parsed = data as { ok: boolean; rows?: unknown[] } | null;
+      if (!parsed?.ok) {
+        return err(unknownError(`${rpcName} returned ok:false`));
+      }
+
+      try {
+        return ok((parsed.rows ?? []).map(r => schema.parse(r)));
+      } catch (e) {
+        return err(unknownError(e));
+      }
+    },
+    staleTime: 60_000,
+  });
+}
+
+/** D-05 variant A: pre-send order-item removals (remove_tab_item audit rows). */
+export function useDeletionsPreReport(from: Date, to: Date) {
+  return useReportRpc('deletions-pre', 'get_deletions_pre_report', from, to, DeletionsPreRowSchema);
+}
+
+/** D-05 variant B: post-close corrections (edit_paid_tab audit rows). */
+export function useDeletionsPostReport(from: Date, to: Date) {
+  return useReportRpc('deletions-post', 'get_deletions_post_report', from, to, DeletionsPostRowSchema);
+}
+
+/** D-09: modifier attach-count + revenue-attributable, ranked by attach count. */
+export function useModifierPopularityReport(from: Date, to: Date) {
+  return useReportRpc(
+    'modifier-popularity',
+    'get_modifier_popularity_report',
+    from,
+    to,
+    ModifierPopularityRowSchema
+  );
+}
+
+/** D-08: per-caja-session rows + one day-level rollup row per payment method. */
+export function usePaymentMethodsReport(from: Date, to: Date) {
+  return useReportRpc(
+    'payment-methods',
+    'get_payment_methods_report',
+    from,
+    to,
+    PaymentMethodRowSchema
+  );
 }

@@ -74,26 +74,36 @@ describe('computePctTotals', () => {
 describe('fillMissingHours', () => {
   it('produces exactly 24 entries from 3-hour sparse input', () => {
     const sparse: HourlyRow[] = [
-      { hour: 0, orderCount: 5, revenue: 100 },
-      { hour: 8, orderCount: 3, revenue: 60 },
-      { hour: 21, orderCount: 10, revenue: 200 },
+      { hour: 0, orderCount: 5, revenue: 100, dayOfWeek: 0, isBusiest: false },
+      { hour: 8, orderCount: 3, revenue: 60, dayOfWeek: 0, isBusiest: false },
+      { hour: 21, orderCount: 10, revenue: 200, dayOfWeek: 0, isBusiest: false },
     ];
     const result = fillMissingHours(sparse);
     expect(result).toHaveLength(24);
   });
 
   it('fills missing hours with revenue 0 and orderCount 0', () => {
-    const sparse: HourlyRow[] = [{ hour: 12, orderCount: 2, revenue: 50 }];
+    const sparse: HourlyRow[] = [
+      { hour: 12, orderCount: 2, revenue: 50, dayOfWeek: 0, isBusiest: false },
+    ];
     const result = fillMissingHours(sparse);
     const hour0 = result.find(r => r.hour === 0);
-    expect(hour0).toEqual({ hour: 0, orderCount: 0, revenue: 0 });
+    expect(hour0).toEqual({ hour: 0, orderCount: 0, revenue: 0, dayOfWeek: 0, isBusiest: false });
   });
 
   it('preserves existing hour data', () => {
-    const sparse: HourlyRow[] = [{ hour: 21, orderCount: 10, revenue: 200 }];
+    const sparse: HourlyRow[] = [
+      { hour: 21, orderCount: 10, revenue: 200, dayOfWeek: 0, isBusiest: false },
+    ];
     const result = fillMissingHours(sparse);
     const hour21 = result.find(r => r.hour === 21);
-    expect(hour21).toEqual({ hour: 21, orderCount: 10, revenue: 200 });
+    expect(hour21).toEqual({
+      hour: 21,
+      orderCount: 10,
+      revenue: 200,
+      dayOfWeek: 0,
+      isBusiest: false,
+    });
   });
 
   it('returns sorted hours 0–23', () => {
@@ -114,6 +124,8 @@ describe('fillMissingHours', () => {
             hour: h,
             orderCount: 1,
             revenue: 50,
+            dayOfWeek: 0,
+            isBusiest: false,
           }));
           const result = fillMissingHours(sparse);
 
@@ -134,9 +146,9 @@ describe('fillMissingHours', () => {
 describe('findPeakHour', () => {
   it('returns the hour with highest revenue', () => {
     const rows: HourlyRow[] = [
-      { hour: 8, orderCount: 2, revenue: 100 },
-      { hour: 21, orderCount: 5, revenue: 400 },
-      { hour: 14, orderCount: 3, revenue: 200 },
+      { hour: 8, orderCount: 2, revenue: 100, dayOfWeek: 0, isBusiest: false },
+      { hour: 21, orderCount: 5, revenue: 400, dayOfWeek: 0, isBusiest: false },
+      { hour: 14, orderCount: 3, revenue: 200, dayOfWeek: 0, isBusiest: false },
     ];
     const peak = findPeakHour(rows);
     expect(peak?.hour).toBe(21);
@@ -154,8 +166,8 @@ describe('findPeakHour', () => {
 
   it('returns the single non-zero row when only one row has revenue', () => {
     const rows: HourlyRow[] = [
-      { hour: 0, orderCount: 0, revenue: 0 },
-      { hour: 15, orderCount: 3, revenue: 90 },
+      { hour: 0, orderCount: 0, revenue: 0, dayOfWeek: 0, isBusiest: false },
+      { hour: 15, orderCount: 3, revenue: 90, dayOfWeek: 0, isBusiest: false },
     ];
     const peak = findPeakHour(rows);
     expect(peak?.hour).toBe(15);
@@ -169,9 +181,9 @@ describe('findPeakHour', () => {
 describe('findSlowestHour', () => {
   it('returns the lowest revenue NON-ZERO hour', () => {
     const rows: HourlyRow[] = [
-      { hour: 8, orderCount: 2, revenue: 50 },
-      { hour: 21, orderCount: 5, revenue: 400 },
-      { hour: 14, orderCount: 3, revenue: 200 },
+      { hour: 8, orderCount: 2, revenue: 50, dayOfWeek: 0, isBusiest: false },
+      { hour: 21, orderCount: 5, revenue: 400, dayOfWeek: 0, isBusiest: false },
+      { hour: 14, orderCount: 3, revenue: 200, dayOfWeek: 0, isBusiest: false },
     ];
     const slowest = findSlowestHour(rows);
     expect(slowest?.hour).toBe(8);
@@ -180,9 +192,9 @@ describe('findSlowestHour', () => {
 
   it('skips zero-revenue hours', () => {
     const rows: HourlyRow[] = [
-      { hour: 0, orderCount: 0, revenue: 0 },
-      { hour: 8, orderCount: 2, revenue: 50 },
-      { hour: 21, orderCount: 5, revenue: 400 },
+      { hour: 0, orderCount: 0, revenue: 0, dayOfWeek: 0, isBusiest: false },
+      { hour: 8, orderCount: 2, revenue: 50, dayOfWeek: 0, isBusiest: false },
+      { hour: 21, orderCount: 5, revenue: 400, dayOfWeek: 0, isBusiest: false },
     ];
     const slowest = findSlowestHour(rows);
     // hour 0 is zero — should be skipped; hour 8 is lowest non-zero
@@ -200,8 +212,8 @@ describe('findSlowestHour', () => {
 
   it('returns the only non-zero row when only one has revenue', () => {
     const rows: HourlyRow[] = [
-      { hour: 2, orderCount: 0, revenue: 0 },
-      { hour: 9, orderCount: 1, revenue: 75 },
+      { hour: 2, orderCount: 0, revenue: 0, dayOfWeek: 0, isBusiest: false },
+      { hour: 9, orderCount: 1, revenue: 75, dayOfWeek: 0, isBusiest: false },
     ];
     const slowest = findSlowestHour(rows);
     expect(slowest?.hour).toBe(9);
