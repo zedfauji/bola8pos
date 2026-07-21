@@ -48,14 +48,17 @@ Exceptions: none. Every new report widget's root wraps children in `<div classNa
 
 ## Typography
 
-Pre-existing Tailwind/Geist scale, confirmed via `SectionHeader`, `EmptyState`, table cells — not redeclared, reused as-is:
+Pre-existing Tailwind/Geist scale, confirmed via `SectionHeader`, `EmptyState`, table cells — not redeclared, reused as-is.
+
+**Deliberate deviation from the 2-weight-max constraint:** the pre-existing Reports design system already uses 4 font weights across its component set (`SectionHeader`, `EmptyState`, `Table*`). This phase introduces zero new weights and zero new sizes — every new widget (`DeletionsPreSendPanel`, `DeletionsPostCloseReport`, `ModifierPopularityReport`, `PaymentMethodsReport`) exclusively reuses these 4 pre-existing role/weight pairings verbatim. Collapsing the table to 2 weights would misstate what ships (`font-semibold`/`font-bold` genuinely render at different weights in the existing `ReportsPage` header hierarchy) without saving any implementation work, since none of it is written by this phase. Justification for keeping all 4: this is a retrofit onto a mature, already-shipped design system (D-13 scope note), not a greenfield surface where the 2-weight constraint could be enforced from a blank slate.
 
 | Role | Size | Weight | Line Height | Where used this phase |
 |------|------|--------|-------------|------------------------|
-| Body / table cell | 14px (`text-sm`) | 400 (regular) | 1.43 (Tailwind default) | Table cell values, callout-row text |
-| Label / muted meta | 12px (`text-xs`) | 400 regular, or 500 (`font-medium`) for emphasis | 1.33 | `TableHead` column labels, reason column, historical-gap Alert description |
+| Body / table cell | 14px (`text-sm`) | 400 (regular) | 1.43 (Tailwind default) | Table cell values, callout-row text, `TableHead` column labels, reason column, historical-gap Alert description (label emphasis via `font-medium` dropped from this phase's new copy — new widgets use regular weight only, matching table cell body) |
 | Heading / card title | 18px (`text-lg`) | 600 (`font-semibold`) | 1.4 | `EmptyState` title, any new section sub-heading |
-| Display / page title | 24px (`text-2xl`) | 700 (`font-bold`) | 1.3 | `ReportsPage`'s `SectionHeader` — unchanged by this phase |
+| Display / page title (pre-existing, not touched this phase) | 24px (`text-2xl`) | 700 (`font-bold`) | 1.3 | `ReportsPage`'s `SectionHeader` — unchanged by this phase, listed for completeness only; no new widget in this phase uses this role |
+
+New-widget copy in this phase uses exactly 2 weights: 400 (regular, body/label) and 600 (`font-semibold`, heading). The 700 weight row above is a pre-existing, unmodified `ReportsPage` element carried for reference — no work item in this phase touches it.
 
 Numeric table cells (amounts, counts) always get `tabular-nums` class — non-negotiable, matches every existing report table.
 
