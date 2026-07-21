@@ -6,7 +6,11 @@ import type {
   CategoryRevenueRow,
   ComboMixRow,
   ComboOverrideRow,
+  DeletionsPostRow,
+  DeletionsPreRow,
   HourlyRow,
+  ModifierPopularityRow,
+  PaymentMethodRow,
   ProductSalesRow,
   RecipeVarianceRow,
   RefundRegisterRow,
@@ -25,7 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu';
-import { useExportReport } from '../model/useExportReport';
+import { useExportReport, type TipSplitRow } from '../model/useExportReport';
 
 type CajaProps = {
   reportType: 'caja';
@@ -87,6 +91,31 @@ type ComboOverridesProps = {
   data: { rows: ComboOverrideRow[]; dateRange: { from: Date; to: Date } };
 };
 
+type TipSplitProps = {
+  reportType: 'tip-split';
+  data: { rows: TipSplitRow[] };
+};
+
+type DeletionsPreProps = {
+  reportType: 'deletions-pre';
+  data: { rows: DeletionsPreRow[]; dateRange: { from: Date; to: Date } };
+};
+
+type DeletionsPostProps = {
+  reportType: 'deletions-post';
+  data: { rows: DeletionsPostRow[]; dateRange: { from: Date; to: Date } };
+};
+
+type ModifierPopularityProps = {
+  reportType: 'modifier-popularity';
+  data: { rows: ModifierPopularityRow[]; dateRange: { from: Date; to: Date } };
+};
+
+type PaymentMethodsProps = {
+  reportType: 'payment-methods';
+  data: { rows: PaymentMethodRow[]; dateRange: { from: Date; to: Date } };
+};
+
 type Props =
   | CajaProps
   | ProductsProps
@@ -99,7 +128,12 @@ type Props =
   | RecipeVarianceProps
   | WaitlistAnalyticsProps
   | RefundsRegisterProps
-  | ComboOverridesProps;
+  | ComboOverridesProps
+  | TipSplitProps
+  | DeletionsPreProps
+  | DeletionsPostProps
+  | ModifierPopularityProps
+  | PaymentMethodsProps;
 
 export function ExportButtons(props: Props) {
   const { t } = useTranslation('featMgmt');
@@ -112,47 +146,105 @@ export function ExportButtons(props: Props) {
 
   /* eslint-disable i18next/no-literal-string -- ExportType literal-union branches
      (e.g. 'caja-excel'), not UI copy */
-  function handleExport(format: 'excel' | 'pdf') {
+  function handleExport(format: 'excel' | 'pdf' | 'csv') {
     void (async () => {
       if (props.reportType === 'caja') {
-        const type = format === 'excel' ? 'caja-excel' : 'caja-pdf';
+        const type = format === 'excel' ? 'caja-excel' : format === 'pdf' ? 'caja-pdf' : 'caja-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'products') {
-        const type = format === 'excel' ? 'products-excel' : 'products-pdf';
+        const type =
+          format === 'excel'
+            ? 'products-excel'
+            : format === 'pdf'
+              ? 'products-pdf'
+              : 'products-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'hourly') {
-        const type = format === 'excel' ? 'hourly-excel' : 'hourly-pdf';
+        const type =
+          format === 'excel' ? 'hourly-excel' : format === 'pdf' ? 'hourly-pdf' : 'hourly-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'voids') {
-        const type = format === 'excel' ? 'voids-excel' : 'voids-pdf';
+        const type =
+          format === 'excel' ? 'voids-excel' : format === 'pdf' ? 'voids-pdf' : 'voids-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'staff') {
-        const type = format === 'excel' ? 'staff-excel' : 'staff-pdf';
+        const type =
+          format === 'excel' ? 'staff-excel' : format === 'pdf' ? 'staff-pdf' : 'staff-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'tips') {
-        const type = format === 'excel' ? 'tips-excel' : 'tips-pdf';
+        const type = format === 'excel' ? 'tips-excel' : format === 'pdf' ? 'tips-pdf' : 'tips-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'combo-mix') {
-        const type = format === 'excel' ? 'combo-mix-excel' : 'combo-mix-pdf';
+        const type =
+          format === 'excel'
+            ? 'combo-mix-excel'
+            : format === 'pdf'
+              ? 'combo-mix-pdf'
+              : 'combo-mix-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'recipe-variance') {
-        const type = format === 'excel' ? 'recipe-variance-excel' : 'recipe-variance-pdf';
+        const type =
+          format === 'excel'
+            ? 'recipe-variance-excel'
+            : format === 'pdf'
+              ? 'recipe-variance-pdf'
+              : 'recipe-variance-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'waitlist-analytics') {
-        const type = format === 'excel' ? 'waitlist-analytics-excel' : 'waitlist-analytics-pdf';
+        const type =
+          format === 'excel'
+            ? 'waitlist-analytics-excel'
+            : format === 'pdf'
+              ? 'waitlist-analytics-pdf'
+              : 'waitlist-analytics-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'refunds-register') {
-        const type = format === 'excel' ? 'refunds-register-excel' : 'refunds-register-pdf';
+        const type =
+          format === 'excel'
+            ? 'refunds-register-excel'
+            : format === 'pdf'
+              ? 'refunds-register-pdf'
+              : 'refunds-register-csv';
         await exportReport(type, props.data);
       } else if (props.reportType === 'combo-overrides') {
-        // PDF not supported for overrides — Excel only
-        await exportReport('combo-overrides-excel', props.data);
+        // PDF not supported for overrides — Excel only; CSV still applies (D-11/D-12)
+        await exportReport(
+          format === 'csv' ? 'combo-overrides-csv' : 'combo-overrides-excel',
+          props.data
+        );
+      } else if (props.reportType === 'tip-split') {
+        await exportReport('tip-split-csv', props.data);
+      } else if (props.reportType === 'deletions-pre') {
+        await exportReport('deletions-pre-csv', props.data);
+      } else if (props.reportType === 'deletions-post') {
+        await exportReport('deletions-post-csv', props.data);
+      } else if (props.reportType === 'modifier-popularity') {
+        await exportReport('modifier-popularity-csv', props.data);
+      } else if (props.reportType === 'payment-methods') {
+        await exportReport('payment-methods-csv', props.data);
       } else {
-        const type = format === 'excel' ? 'categories-excel' : 'categories-pdf';
+        const type =
+          format === 'excel'
+            ? 'categories-excel'
+            : format === 'pdf'
+              ? 'categories-pdf'
+              : 'categories-csv';
         await exportReport(type, props.data);
       }
     })();
   }
+  /* eslint-enable i18next/no-literal-string */
+
+  // The 5 net-new report types are CSV-only for now (no Excel/PDF ExportType
+  // literal exists for them yet, D-11/D-12) — showing Excel/PDF buttons that
+  // silently produce a CSV would be a misleading toolbar.
+  /* eslint-disable i18next/no-literal-string -- reportType literal comparisons, not UI copy */
+  const isCsvOnly =
+    props.reportType === 'tip-split' ||
+    props.reportType === 'deletions-pre' ||
+    props.reportType === 'deletions-post' ||
+    props.reportType === 'modifier-popularity' ||
+    props.reportType === 'payment-methods';
   /* eslint-enable i18next/no-literal-string */
 
   return (
@@ -170,23 +262,36 @@ export function ExportButtons(props: Props) {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel inset={undefined}>{t('exportReport.downloadAs')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {!isCsvOnly && (
+          <>
+            <DropdownMenuItem
+              inset={undefined}
+              variant={undefined}
+              onSelect={() => {
+                handleExport('excel');
+              }}
+            >
+              {t('exportReport.excelOption')}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              inset={undefined}
+              variant={undefined}
+              onSelect={() => {
+                handleExport('pdf');
+              }}
+            >
+              {t('exportReport.pdfOption')}
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuItem
           inset={undefined}
           variant={undefined}
           onSelect={() => {
-            handleExport('excel');
+            handleExport('csv');
           }}
         >
-          {t('exportReport.excelOption')}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          inset={undefined}
-          variant={undefined}
-          onSelect={() => {
-            handleExport('pdf');
-          }}
-        >
-          {t('exportReport.pdfOption')}
+          {t('exportReport.csvOption')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

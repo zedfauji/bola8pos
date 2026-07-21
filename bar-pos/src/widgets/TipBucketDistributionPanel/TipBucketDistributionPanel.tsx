@@ -1,6 +1,7 @@
 import { PieChart } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ExportButtons } from '@features/export-report';
 import { useCajaList, useTipDistributionEntry } from '@entities/caja';
 import type { CajaSession } from '@shared/lib/domain';
 import { EmptyState } from '@shared/ui/EmptyState';
@@ -48,10 +49,18 @@ export function TipBucketDistributionPanel() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <SectionHeader
-        title={t('tipBucketDistributionPanel.title')}
-        description={t('tipBucketDistributionPanel.description')}
-      />
+      <div className="flex items-start justify-between gap-4">
+        <SectionHeader
+          title={t('tipBucketDistributionPanel.title')}
+          description={t('tipBucketDistributionPanel.description')}
+        />
+        {entry && (
+          <ExportButtons
+            reportType="tip-split"
+            data={{ rows: buckets.map(b => ({ bucket: b.label, pct: b.pct, amount: b.amount })) }}
+          />
+        )}
+      </div>
 
       {listLoading && <LoadingSpinner />}
 
