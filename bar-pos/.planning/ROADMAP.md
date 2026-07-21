@@ -42,7 +42,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 20: Promotions Engine** — `promotions` + `applied_promotions` tables + `evaluate_promotions` RPC (HH windows, item/category/pool-time targeting, auto-apply) + Settings → Promotions admin (completed 2026-07-10)
 - [x] **Phase 21: i18n Multi-Language** — `react-i18next` + `es-MX`/`en-US` catalogs + `profiles.locale` + ESLint rule banning hard-coded strings (completed 2026-07-19)
 - [x] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)* (completed 2026-07-20)
-- [ ] **Phase 23: Reopen Closed Ticket** — `reopen_tab` RPC + payment status `reopened_void` + caja offsetting entries + 24h/2x cap *(depends Phases 14, 15)*
+- [x] **Phase 23: Reopen Closed Ticket** — `reopen_tab` RPC + payment status `reopened_void` + caja offsetting entries + 24h/2x cap *(depends Phases 14, 15)* (completed 2026-07-21)
 - [ ] **Phase 24: Operational Reports Suite + CSV** — 6 new RPCs (peak-hours, voids, deletions×2, modifier popularity, payment methods, charts-data) + generic CSV export action + Recharts widgets *(depends Phase 14)*
 - [ ] **Phase 25: Receipt Item Grouping (2-Level)** — Extend `receipt-format.ts` + Tauri Rust printer payload + PDF + KDS card all share `groupOrderItemsForReceipt`
 - [ ] **Phase 26: Floating Tables (`is_temp`)** — Generalize pool_tables → `resources` w/ FLOATING type + auto-deactivate trigger + waitlist auto-create flow
@@ -697,7 +697,7 @@ Plans:
 **Goal:** Let managers reopen a closed ticket via a `reopen_tab` RPC, introducing a `reopened_void` payment status, offsetting caja entries, and a cap (24h window, max 2 reopens per tab).
 **Requirements:** TBD (POS-COMPARISON.md §23 — source doc no longer present; scope locked in 23-CONTEXT.md)
 **Depends on:** Phase 14, Phase 15
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 **Wave 1**
@@ -719,7 +719,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 23-06-PLAN.md — E2E spec `48-reopen-closed-ticket` + CLAUDE.md registration + phase gate (Wave 5)
+- [x] 23-06-PLAN.md — E2E spec `48-reopen-closed-ticket` + CLAUDE.md registration + phase gate (Wave 5)
 
 **Success Criteria:**
 
