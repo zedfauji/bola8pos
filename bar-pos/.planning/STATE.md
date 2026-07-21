@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.1
-milestone_name: — Cross-Pollination from billar-pos
+milestone_name: Cross-Pollination from billar-pos
 current_phase: 24
-current_phase_name: Operational Reports Suite + CSV
-status: planned
+current_phase_name: operational-reports-suite-csv
+status: executing
 stopped_at: Phase 24 planned — 10 plans (6 waves), plan-checker passed, ready to execute
-last_updated: "2026-07-21T15:30:00.000Z"
+last_updated: "2026-07-21T16:07:16.398Z"
 last_activity: 2026-07-21
-last_activity_desc: Phase 24 planning complete — 10 plans ready to execute
+last_activity_desc: Phase 24 execution started
 progress:
   total_phases: 28
   completed_phases: 20
-  total_plans: 144
-  completed_plans: 154
+  total_plans: 154
+  completed_plans: 145
   percent: 71
 ---
 
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Phase 24 — Operational Reports Suite + CSV
+**Current focus:** Phase 24 — operational-reports-suite-csv
 
 ## Current Position
 
-Phase: 24 — Operational Reports Suite + CSV
-Plan: 0 of 10 (planned, not yet executed)
-Status: Phase 24 fully planned — research + pattern-map + 10 plans/6 waves + independent plan-checker all passed, ready to execute
-Last activity: 2026-07-21 — Phase 24 planning complete
+Phase: 24 (operational-reports-suite-csv) — EXECUTING
+Plan: 2 of 10
+Status: Ready to execute
+Last activity: 2026-07-21 — Phase 24 execution started
 
 ## Session Log
 
@@ -291,6 +291,8 @@ Last activity: 2026-07-21 — Phase 24 planning complete
 - [Phase 23]: reopen-tab feature slice: useReopenTab hook + PIN-gated reason-only ReopenTabDialog + PaymentPane wiring (ReopenTabButton gated on payment-level fields only, no per-row tab fetch)
 - [Phase 23]: Plan 06: dropped the reopen-cap UI test.fixme scaffold (out of scope per plan Task 1 action) rather than converting it - cap/window enforcement already proven at integration layer (Plan 04)
 - [Phase 23]: Plan 06: fixed bartender-negative E2E assertion to use an aria-hidden-agnostic locator instead of getByRole, since Radix marks the Sheet aria-hidden while ManagerPinDialog is modally open on top of it
+- [Phase ?]: TARGET_RPCS pending flag lets order_item.remove be registered ahead of Plan 24-04's migration without failing the CI grep gate
+- [Phase ?]: HourlyRow converted from a hand-written TS type to a Zod-inferred type (HourlyRowSchema) per D-04, matching the domain.ts single-source-of-truth convention
 
 ## Performance Metrics
 
@@ -369,10 +371,15 @@ Last activity: 2026-07-21 — Phase 24 planning complete
 | Phase 23 P04 | 9min | 3 tasks | 2 files |
 | Phase 23 P05 | 12min | 3 tasks | 8 files |
 | Phase 23 P06 | 55min | 2 tasks | 2 files |
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 24 P01 | 45min | 3 tasks | 13 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 24 UI-SPEC approved
+- **Stopped at:** Completed 24-01-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -389,9 +396,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T06:57:04.144Z
+**Last session:** 2026-07-21T16:07:16.387Z
 **Stopped at:** Completed 23-04-PLAN.md
-**Resume file:** .planning/phases/24-operational-reports-suite-csv/24-UI-SPEC.md
+**Resume file:** None
 
 ## Operator Next Steps
 

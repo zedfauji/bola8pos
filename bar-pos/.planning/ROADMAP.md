@@ -735,29 +735,35 @@ Plans:
 **Goal:** Add 6 new reporting RPCs (peak-hours, voids, deletions ×2, modifier popularity, payment methods, charts-data), a generic CSV export action, and Recharts-based report widgets.
 **Requirements:** TBD (POS-COMPARISON.md §24 — source doc no longer present; scope locked in 24-CONTEXT.md; SC-1..SC-4 below are the coverage requirement set)
 **Depends on:** Phase 14
-**Plans:** 10 plans (6 waves)
+**Plans:** 1/10 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 24-01-PLAN.md — Contract foundation: register `order_item.remove` audit action, extend HourlyRowSchema (D-04) + 4 new report-row schemas, seed all new i18n keys both locales (SC-1, SC-2, SC-3)
+
+- [x] 24-01-PLAN.md — Contract foundation: register `order_item.remove` audit action, extend HourlyRowSchema (D-04) + 4 new report-row schemas, seed all new i18n keys both locales (SC-1, SC-2, SC-3)
 - [ ] 24-03-PLAN.md — Read-only report RPC migrations: peak-hours + voids (D-01..D-03), modifier-popularity (D-09, unnest-CTE), payment-methods (D-08, reopened_void exclusion); "charts-data" resolved as no separate endpoint (SC-1, SC-4)
 
 **Wave 2**
+
 - [ ] 24-02-PLAN.md — Generic CSV serializer (csv.ts, xlsx reuse) + CSV wired to all 17 report tabs (D-11/D-12) + D-04 hourly exporter extension (SC-2)
 - [ ] 24-04-PLAN.md — Deletions RPCs + audited atomic `remove_tab_item` RPC (D-05/D-06/D-07, restore-before-delete, no role gate, audit_logs plural) (SC-1, SC-4)
 
 **Wave 3**
+
 - [ ] 24-05-PLAN.md — [BLOCKING] `supabase db push` (5 migrations) + regenerate supabase.types.ts (SC-1, SC-4)
 
 **Wave 4**
+
 - [ ] 24-06-PLAN.md — Report query hooks: migrate hourly/voids bodies to RPC + 4 new use*Report hooks + 4 live integration tests (SC-1, SC-4)
 - [ ] 24-07-PLAN.md — remove-tab-item feature: hook → RPC + required reason dialog, no PIN gate (SC-1, D-06/D-07)
 
 **Wave 5**
+
 - [ ] 24-08-PLAN.md — Deletions tabular widgets: DeletionsPreSendPanel (standing historical-gap Alert) + DeletionsPostCloseReport (D-05/D-16) (SC-3)
 - [ ] 24-09-PLAN.md — Chart widgets: ModifierPopularityReport (bar + top-20) + PaymentMethodsReport (donut + 2-grain) + HourlyBreakdownPanel extension (D-13/D-14/D-15/D-03) (SC-3)
 
 **Wave 6**
+
 - [ ] 24-10-PLAN.md — ReportsPage 4-tab wiring + reports E2E (new tabs + CSV export + bartender reason removal) + CLAUDE.md + phase gate (SC-1..SC-4)
 
 **Success Criteria:**
