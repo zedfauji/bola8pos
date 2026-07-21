@@ -6,6 +6,7 @@ import { PaymentForm } from '@widgets/PaymentModal';
 import { EditPaidTabDialog } from '@features/edit-paid-tab';
 import { ManagerPinDialog } from '@features/manager-pin-gate';
 import { RefundSheet } from '@features/process-refund';
+import { ReopenTabDialog } from '@features/reopen-tab';
 import type { Payment } from '@entities/payment';
 import { usePayments } from '@entities/payment';
 import { useRefundsByPayment } from '@entities/refund';
@@ -65,12 +66,38 @@ function EditTicketButton({ payment, onEdit }: EditTicketButtonProps) {
   );
 }
 
+interface ReopenTabButtonProps {
+  payment: Payment;
+  onReopen: (tabId: string) => void;
+}
+
+function ReopenTabButton({ payment, onReopen }: ReopenTabButtonProps) {
+  const { t } = useTranslation('wPanels');
+
+  if (payment.isRefund === true) return null;
+  if (payment.status === 'reopened_void') return null;
+
+  return (
+    <POSButton
+      variant="outline"
+      size="sm"
+      onClick={() => {
+        onReopen(payment.tabId);
+      }}
+    >
+      {t('paymentPane.reopenTab')}
+    </POSButton>
+  );
+}
+
 function PaymentHistoryList({
   onRefund,
   onEdit,
+  onReopen,
 }: {
   onRefund: (paymentId: string) => void;
   onEdit: (tabId: string) => void;
+  onReopen: (tabId: string) => void;
 }) {
   const { t } = useTranslation('wPanels');
   const { data: payments, isLoading } = usePayments();
@@ -120,6 +147,7 @@ function PaymentHistoryList({
             </div>
             <div className="flex items-center gap-2">
               <EditTicketButton payment={payment} onEdit={onEdit} />
+              <ReopenTabButton payment={payment} onReopen={onReopen} />
               <RefundButton payment={payment} onRefund={onRefund} />
             </div>
           </div>
@@ -139,6 +167,7 @@ export function PaymentPane() {
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [refundTarget, setRefundTarget] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<string | null>(null);
+  const [reopenTarget, setReopenTarget] = useState<string | null>(null);
 
   function handleSelectTab(tab: Tab) {
     setSelectedTab(tab);
@@ -180,7 +209,11 @@ export function PaymentPane() {
       {/* Right panel — payment area or payment history */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {selectedTab == null ? (
-          <PaymentHistoryList onRefund={setRefundTarget} onEdit={setEditTarget} />
+          <PaymentHistoryList
+            onRefund={setRefundTarget}
+            onEdit={setEditTarget}
+            onReopen={setReopenTarget}
+          />
         ) : (
           <>
             {/* Right panel header */}
@@ -275,6 +308,15 @@ export function PaymentPane() {
         tabId={editTarget}
         onOpenChange={open => {
           if (!open) setEditTarget(null);
+        }}
+      />
+
+      {/* Reopen tab dialog — opened from payment history rows */}
+      <ReopenTabDialog
+        open={reopenTarget !== null}
+        tabId={reopenTarget}
+        onOpenChange={open => {
+          if (!open) setReopenTarget(null);
         }}
       />
     </div>
