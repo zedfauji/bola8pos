@@ -242,6 +242,9 @@ function mapTabRow(row: TabRow): Result<Tab> {
         ...(typeof (row as { version?: number }).version === 'number'
           ? { version: (row as { version?: number }).version }
           : {}),
+        // Phase 23: reopen tracking (columns added by 20260720000003_tabs_reopen_columns)
+        ...(typeof row.reopen_count === 'number' ? { reopenCount: row.reopen_count } : {}),
+        ...(row.last_reopened_at ? { lastReopenedAt: new Date(row.last_reopened_at) } : {}),
       })
     );
   } catch (e) {
