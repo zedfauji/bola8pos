@@ -697,3 +697,386 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION process_refund(uuid, jsonb, text, text) TO authenticated;
+
+-- -----------------------------------------------------------------------
+-- 4. get_caja_report — add status exclusion to BOTH the top-level revenue
+--    aggregate AND the per-staff sales_total subquery. These queries
+--    currently have no is_refund filter at all (refunds net out as negative
+--    amounts) — a reopened_void row is NOT negative, so it MUST be excluded
+--    explicitly (Pitfall 4). Source body: 20260421000004_caja_report_entries.sql
+--    (latest).
+-- -----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_caja_report(p_caja_id UUID)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_caja            RECORD;
+  v_tab_ids         UUID[];
+  v_total_revenue   NUMERIC(12,2);
+  v_cash_sales      NUMERIC(12,2);
+  v_card_sales      NUMERIC(12,2);
+  v_rappi_sales     NUMERIC(12,2);
+  v_order_count     INT;
+  v_tab_count       INT;
+  v_top_products    JSON;
+  v_staff_summary   JSON;
+  v_opened_by_name  TEXT;
+  v_closed_by_name  TEXT;
+  v_entries         JSON;
+  v_total_expenses  NUMERIC(12,2) := 0;
+  v_total_income    NUMERIC(12,2) := 0;
+BEGIN
+  -- Fetch caja session
+  SELECT
+    cs.*,
+    op.name AS opened_by_name,
+    cp.name AS closed_by_name
+  INTO v_caja
+  FROM caja_sessions cs
+  LEFT JOIN profiles op ON op.id = cs.opened_by
+  LEFT JOIN profiles cp ON cp.id = cs.closed_by
+  WHERE cs.id = p_caja_id;
+
+  IF NOT FOUND THEN
+    RETURN json_build_object('ok', false, 'error', json_build_object(
+      'code', 'NOT_FOUND', 'message', 'Caja session not found.'
+    ));
+  END IF;
+
+  -- Collect tab ids for this caja
+  SELECT array_agg(id) INTO v_tab_ids
+  FROM tabs
+  WHERE caja_session_id = p_caja_id AND is_deleted = FALSE;
+
+  IF v_tab_ids IS NULL THEN
+    v_tab_ids := '{}';
+  END IF;
+
+  v_tab_count := coalesce(array_length(v_tab_ids, 1), 0);
+
+  -- Payment aggregates. Phase 23: exclude reopened_void rows so a voided
+  -- original payment (un-done by reopen_tab) does not inflate revenue.
+  SELECT
+    COALESCE(SUM(amount + tip_amount), 0),
+    COALESCE(SUM(CASE WHEN method = 'cash'  THEN amount + tip_amount ELSE 0 END), 0),
+    COALESCE(SUM(CASE WHEN method = 'card'  THEN amount + tip_amount ELSE 0 END), 0),
+    COALESCE(SUM(CASE WHEN method = 'rappi' THEN amount + tip_amount ELSE 0 END), 0)
+  INTO v_total_revenue, v_cash_sales, v_card_sales, v_rappi_sales
+  FROM payments
+  WHERE tab_id = ANY(v_tab_ids)
+    AND is_deleted = FALSE
+    AND status IS DISTINCT FROM 'reopened_void';
+
+  -- Order count
+  SELECT COUNT(*) INTO v_order_count
+  FROM orders
+  WHERE tab_id = ANY(v_tab_ids)
+    AND status <> 'voided'
+    AND is_deleted = FALSE;
+
+  -- Caja entry totals
+  SELECT
+    COALESCE(SUM(amount) FILTER (WHERE type = 'expense'), 0),
+    COALESCE(SUM(amount) FILTER (WHERE type = 'income'), 0)
+  INTO v_total_expenses, v_total_income
+  FROM caja_entries
+  WHERE caja_session_id = p_caja_id;
+
+  -- Caja entries list
+  SELECT COALESCE(json_agg(
+    json_build_object(
+      'id',             e.id,
+      'cajaSessionId',  e.caja_session_id,
+      'type',           e.type,
+      'amount',         e.amount,
+      'concept',        e.concept,
+      'createdAt',      e.created_at,
+      'staffId',        e.staff_id,
+      'staffName',      p.name
+    ) ORDER BY e.created_at ASC
+  ), '[]'::JSON)
+  INTO v_entries
+  FROM caja_entries e
+  JOIN profiles p ON p.id = e.staff_id
+  WHERE e.caja_session_id = p_caja_id;
+
+  -- Top 10 products by quantity sold
+  SELECT json_agg(row_to_json(t)) INTO v_top_products
+  FROM (
+    SELECT
+      p.name            AS product_name,
+      SUM(oi.quantity)  AS quantity,
+      SUM(oi.quantity * oi.unit_price) AS revenue
+    FROM order_items oi
+    JOIN orders o    ON o.id = oi.order_id
+    JOIN products p  ON p.id = oi.product_id
+    WHERE o.tab_id = ANY(v_tab_ids)
+      AND o.status <> 'voided'
+      AND o.is_deleted = FALSE
+      AND oi.is_deleted = FALSE
+    GROUP BY p.id, p.name
+    ORDER BY quantity DESC
+    LIMIT 10
+  ) t;
+
+  -- Staff performance summary. Phase 23: exclude reopened_void rows from
+  -- the per-staff sales_total, same reasoning as the top-level aggregate.
+  SELECT json_agg(row_to_json(s)) INTO v_staff_summary
+  FROM (
+    SELECT
+      pr.id             AS staff_id,
+      pr.name           AS staff_name,
+      COUNT(DISTINCT o.id) AS order_count,
+      COALESCE(SUM(pay.amount + pay.tip_amount), 0) AS sales_total
+    FROM profiles pr
+    LEFT JOIN orders o  ON o.staff_id = pr.id
+                        AND o.tab_id = ANY(v_tab_ids)
+                        AND o.status <> 'voided'
+                        AND o.is_deleted = FALSE
+    LEFT JOIN payments pay ON pay.tab_id = ANY(v_tab_ids)
+                           AND pay.processed_by = pr.id
+                           AND pay.is_deleted = FALSE
+                           AND pay.status IS DISTINCT FROM 'reopened_void'
+    WHERE o.id IS NOT NULL OR pay.id IS NOT NULL
+    GROUP BY pr.id, pr.name
+    ORDER BY sales_total DESC
+  ) s;
+
+  RETURN json_build_object(
+    'ok', true,
+    'cajaSession', json_build_object(
+      'id',           v_caja.id,
+      'openedAt',     v_caja.opened_at,
+      'closedAt',     v_caja.closed_at,
+      'openedBy',     v_caja.opened_by,
+      'openedByName', v_caja.opened_by_name,
+      'closedBy',     v_caja.closed_by,
+      'closedByName', v_caja.closed_by_name,
+      'openingCash',  v_caja.opening_cash,
+      'closingCash',  v_caja.closing_cash,
+      'notes',        v_caja.notes,
+      'status',       v_caja.status
+    ),
+    'summary', json_build_object(
+      'totalRevenue',   v_total_revenue,
+      'cashSales',      v_cash_sales,
+      'cardSales',      v_card_sales,
+      'rappiSales',     v_rappi_sales,
+      'orderCount',     v_order_count,
+      'tabCount',       v_tab_count,
+      'totalExpenses',  v_total_expenses,
+      'totalIncome',    v_total_income,
+      'netBalance',     v_cash_sales + v_card_sales + v_rappi_sales + v_total_income - v_total_expenses
+    ),
+    'cashReconciliation', json_build_object(
+      'openingCash',  v_caja.opening_cash,
+      'cashSales',    v_cash_sales,
+      'expectedCash', v_caja.opening_cash + v_cash_sales,
+      'closingCash',  v_caja.closing_cash,
+      'variance',     CASE
+        WHEN v_caja.closing_cash IS NOT NULL
+        THEN v_caja.closing_cash - (v_caja.opening_cash + v_cash_sales)
+        ELSE NULL
+      END
+    ),
+    'topProducts',    COALESCE(v_top_products, '[]'::json),
+    'staffSummary',   COALESCE(v_staff_summary, '[]'::json),
+    'cajaEntries',    COALESCE(v_entries, '[]'::json)
+  );
+END;
+$$;
+
+-- -----------------------------------------------------------------------
+-- 5. close_caja_session — add status exclusion to the tip-pooling
+--    SUM(tip_amount). Version-sensitive: existing version + 1 bump logic
+--    and every other line preserved exactly (Pitfall 5). Source body:
+--    20260709000002_close_caja_session_tip_distribution.sql (latest).
+-- -----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION close_caja_session(
+  p_caja_id      UUID,
+  p_closed_by    UUID,
+  p_closing_cash NUMERIC(12,2),
+  p_notes        TEXT DEFAULT NULL
+)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_open_tab_count INT;
+  v_caller_role TEXT;
+  v_before_row jsonb;
+  v_after_row  jsonb;
+  -- Tip distribution locals (Phase 19)
+  v_tab_ids        uuid[];
+  v_total_tips     numeric(10,2);
+  v_config         jsonb;
+  v_floor_pct      numeric(5,2);
+  v_bar_pct        numeric(5,2);
+  v_kitchen_pct    numeric(5,2);
+  v_floor_amount   numeric(10,2);
+  v_bar_amount     numeric(10,2);
+  v_kitchen_amount numeric(10,2);
+  v_remainder      numeric(10,2);
+  v_entry_id       uuid;
+BEGIN
+  -- Permission check
+  SELECT role INTO v_caller_role FROM profiles WHERE id = auth.uid();
+  IF v_caller_role NOT IN ('manager', 'admin') THEN
+    RETURN json_build_object('ok', false, 'error', json_build_object(
+      'code', 'PERMISSION_DENIED',
+      'message', 'Only managers and admins can close the caja.'
+    ));
+  END IF;
+
+  -- Hard block: no open tabs allowed
+  SELECT COUNT(*) INTO v_open_tab_count
+  FROM tabs
+  WHERE caja_session_id = p_caja_id
+    AND status = 'open'
+    AND is_deleted = FALSE;
+
+  IF v_open_tab_count > 0 THEN
+    RETURN json_build_object('ok', false, 'error', json_build_object(
+      'code', 'OPEN_TABS_EXIST',
+      'message', format(
+        'Cannot close the caja: %s tab(s) are still open. Close all tabs before closing the caja.',
+        v_open_tab_count
+      ),
+      'openTabCount', v_open_tab_count
+    ));
+  END IF;
+
+  -- Capture before state
+  SELECT to_jsonb(c) INTO v_before_row FROM caja_sessions c WHERE c.id = p_caja_id;
+
+  -- Perform close
+  UPDATE caja_sessions
+  SET
+    closed_at    = now(),
+    closed_by    = p_closed_by,
+    closing_cash = p_closing_cash,
+    notes        = COALESCE(p_notes, notes),
+    status       = 'closed',
+    version      = version + 1
+  WHERE id = p_caja_id AND status = 'open';
+
+  IF NOT FOUND THEN
+    RETURN json_build_object('ok', false, 'error', json_build_object(
+      'code', 'NOT_FOUND',
+      'message', 'Caja session not found or already closed.'
+    ));
+  END IF;
+
+  -- AUDIT: record successful caja close (Phase 14-03)
+  SELECT to_jsonb(c) INTO v_after_row FROM caja_sessions c WHERE c.id = p_caja_id;
+  PERFORM record_audit(
+    'caja.close',
+    'caja_session',
+    p_caja_id,
+    v_before_row,
+    v_after_row,
+    'rpc'
+  );
+
+  -- ---------------------------------------------------------------------
+  -- Phase 19: tip-bucket distribution (D-02, D-03) — same transaction
+  -- ---------------------------------------------------------------------
+
+  -- Collect this session's non-deleted tab ids (mirror get_caja_report)
+  SELECT array_agg(id) INTO v_tab_ids
+  FROM tabs
+  WHERE caja_session_id = p_caja_id AND is_deleted = FALSE;
+
+  IF v_tab_ids IS NULL THEN
+    v_tab_ids := '{}';
+  END IF;
+
+  -- Pool tips across ALL payment methods (A2 — no rappi exclusion, Pitfall 3).
+  -- Phase 23: exclude reopened_void rows so a voided payment's tip is not
+  -- distributed to floor/bar/kitchen staff (Pitfall 5).
+  SELECT COALESCE(SUM(tip_amount), 0) INTO v_total_tips
+  FROM payments
+  WHERE tab_id = ANY(v_tab_ids)
+    AND is_deleted = FALSE
+    AND status IS DISTINCT FROM 'reopened_void';
+
+  -- Read the distribution config, falling back to 34/33/33 if absent (Pitfall 4)
+  SELECT value INTO v_config FROM settings WHERE key = 'tip_distribution';
+  IF NOT FOUND OR v_config IS NULL THEN
+    v_config := '{"floorPct":34,"barPct":33,"kitchenPct":33}'::jsonb;
+  END IF;
+
+  v_floor_pct   := COALESCE((v_config->>'floorPct')::numeric, 34);
+  v_bar_pct     := COALESCE((v_config->>'barPct')::numeric, 33);
+  v_kitchen_pct := COALESCE((v_config->>'kitchenPct')::numeric, 33);
+
+  -- Largest-remainder split (D-02). No sum-to-100 rejection (D-01) — zero
+  -- tips naturally yield 0/0/0 with v_remainder = 0 (Pitfall 5).
+  v_floor_amount   := trunc(v_total_tips * v_floor_pct / 100, 2);
+  v_bar_amount     := trunc(v_total_tips * v_bar_pct / 100, 2);
+  v_kitchen_amount := trunc(v_total_tips * v_kitchen_pct / 100, 2);
+  v_remainder      := v_total_tips - (v_floor_amount + v_bar_amount + v_kitchen_amount);
+
+  IF v_remainder > 0 THEN
+    -- Tiebreak: assign the FULL remainder to the largest pct, floor > bar > kitchen
+    IF v_floor_pct >= v_bar_pct AND v_floor_pct >= v_kitchen_pct THEN
+      v_floor_amount := v_floor_amount + v_remainder;
+    ELSIF v_bar_pct >= v_kitchen_pct THEN
+      v_bar_amount := v_bar_amount + v_remainder;
+    ELSE
+      v_kitchen_amount := v_kitchen_amount + v_remainder;
+    END IF;
+  END IF;
+
+  -- Sole writer of tip_distribution_entries (D-04). ON CONFLICT DO NOTHING is
+  -- defense-in-depth against a re-close race — the WHERE status='open' guard
+  -- above already prevents normal re-close.
+  INSERT INTO tip_distribution_entries (
+    caja_session_id, floor_pct, bar_pct, kitchen_pct,
+    total_tips, floor_amount, bar_amount, kitchen_amount
+  ) VALUES (
+    p_caja_id, v_floor_pct, v_bar_pct, v_kitchen_pct,
+    v_total_tips, v_floor_amount, v_bar_amount, v_kitchen_amount
+  )
+  ON CONFLICT (caja_session_id) DO NOTHING
+  RETURNING id INTO v_entry_id;
+
+  PERFORM record_audit('tip_distribution.compute',
+    'tip_distribution_entry',
+    p_caja_id,
+    NULL,
+    jsonb_build_object(
+      'totalTips', v_total_tips,
+      'floorAmount', v_floor_amount,
+      'barAmount', v_bar_amount,
+      'kitchenAmount', v_kitchen_amount,
+      'floorPct', v_floor_pct,
+      'barPct', v_bar_pct,
+      'kitchenPct', v_kitchen_pct
+    ),
+    'rpc'
+  );
+
+  RETURN json_build_object('ok', true);
+END;
+$$;
+
+COMMIT;
+
+-- =============================================================================
+-- DOWN:
+-- Supabase Cloud has no automated rollback mechanism. To manually roll back
+-- each of the 5 functions patched by this migration, re-run its prior
+-- migration file to restore the pre-Phase-23 body:
+--   - process_payment_atomic        -> 20260512000002_rpc_versioned_group_a.sql
+--   - process_split_payment_atomic  -> 20260707000003_split_payment_columns_and_rpc.sql
+--   - process_refund                -> 20260708000003_fix_process_refund_audit_log_column.sql
+--   - get_caja_report                -> 20260421000004_caja_report_entries.sql
+--   - close_caja_session             -> 20260709000002_close_caja_session_tip_distribution.sql
+-- Re-running these DOES reintroduce the double-count/revenue-inflation/
+-- voided-tip-distribution/double-refund bugs this migration fixes — not
+-- recommended outside of an emergency rollback.
+-- =============================================================================
