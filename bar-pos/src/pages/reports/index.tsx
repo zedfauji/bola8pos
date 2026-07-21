@@ -4,7 +4,11 @@ import { CajaReportPanel } from '@widgets/CajaReportPanel';
 import { CategoryRevenuePanel } from '@widgets/CategoryRevenuePanel';
 import { ComboMixReport } from '@widgets/ComboMixReport';
 import { ComboOverrideReport } from '@widgets/ComboOverrideReport';
+import { DeletionsPostCloseReport } from '@widgets/DeletionsPostCloseReport';
+import { DeletionsPreSendPanel } from '@widgets/DeletionsPreSendPanel';
 import { HourlyBreakdownPanel } from '@widgets/HourlyBreakdownPanel';
+import { ModifierPopularityReport } from '@widgets/ModifierPopularityReport';
+import { PaymentMethodsReport } from '@widgets/PaymentMethodsReport';
 import { ProductSalesPanel } from '@widgets/ProductSalesPanel';
 import { RecipeVarianceReport } from '@widgets/RecipeVarianceReport';
 import { RefundsRegister } from '@widgets/RefundsRegister';
@@ -56,6 +60,10 @@ export default function ReportsPage() {
               <TabsTrigger value="products">{t('reports.tabs.products')}</TabsTrigger>
               <TabsTrigger value="hourly">{t('reports.tabs.hourly')}</TabsTrigger>
               <TabsTrigger value="voids">{t('reports.tabs.voids')}</TabsTrigger>
+              <TabsTrigger value="deletions-pre">{t('reports.tabs.deletionsPre')}</TabsTrigger>
+              <TabsTrigger value="deletions-post">{t('reports.tabs.deletionsPost')}</TabsTrigger>
+              <TabsTrigger value="modifier-popularity">{t('reports.tabs.modifierPopularity')}</TabsTrigger>
+              <TabsTrigger value="payment-methods">{t('reports.tabs.paymentMethods')}</TabsTrigger>
               <TabsTrigger value="categories">{t('reports.tabs.categories')}</TabsTrigger>
               <TabsTrigger value="staff">{t('reports.tabs.staff')}</TabsTrigger>
               <TabsTrigger value="tips">{t('reports.tabs.tips')}</TabsTrigger>
@@ -89,6 +97,34 @@ export default function ReportsPage() {
               <div className="space-y-4">
                 <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
                 <VoidRefundPanel dateRange={dateRange} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="deletions-pre">
+              <div className="space-y-4">
+                <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+                <DeletionsPreSendPanel dateRange={dateRange} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="deletions-post">
+              <div className="space-y-4">
+                <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+                <DeletionsPostCloseReport dateRange={dateRange} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="modifier-popularity">
+              <div className="space-y-4">
+                <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+                <ModifierPopularityReport dateRange={dateRange} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="payment-methods">
+              <div className="space-y-4">
+                <DateRangePicker fromStr={fromStr} toStr={toStr} onChange={handleDateChange} />
+                <PaymentMethodsReport dateRange={dateRange} />
               </div>
             </TabsContent>
 
