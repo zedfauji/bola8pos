@@ -6,14 +6,14 @@ current_phase: 23
 current_phase_name: Reopen Closed Ticket
 status: executing
 stopped_at: Completed 23-02-PLAN.md
-last_updated: "2026-07-21T03:28:06.212Z"
+last_updated: "2026-07-21T03:34:05.475Z"
 last_activity: 2026-07-21
 last_activity_desc: Phase 23 Plan 02 complete
 progress:
   total_phases: 28
   completed_phases: 19
   total_plans: 144
-  completed_plans: 150
+  completed_plans: 151
   percent: 68
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 23 (Reopen Closed Ticket) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute Plan 03
 Last activity: 2026-07-21 — Phase 23 Plan 02 complete
 
@@ -281,6 +281,7 @@ Last activity: 2026-07-21 — Phase 23 Plan 02 complete
 - [Phase ?]: Rewrote the bartender SC-3 test to match actual implementation: EditTicketButton has no role gate; manager+ enforcement lives entirely in ManagerPinDialog's PIN-eligibility check
 - [Phase ?]: entities/payment/model/types.ts has an un-consolidated duplicate PaymentSchema (not re-exported from domain.ts) that mapPaymentRow actually parses against — added Phase 23's status field to both schemas, not just domain.ts
 - [Phase ?]: Migrations written and grep-gate-verified this plan but NOT pushed to remote Supabase — Plan 04 owns the blocking db push
+- [Phase ?]: A3 re-grep confirmed the 5 payment-summing sites (process_payment_atomic, process_split_payment_atomic, get_caja_report, close_caja_session, process_refund) are the complete list; no 6th site found
 
 ## Performance Metrics
 
@@ -355,6 +356,7 @@ Last activity: 2026-07-21 — Phase 23 Plan 02 complete
 | Phase 22 P05 | 45min | 2 tasks | 2 files |
 | Phase 23 P01 | 12min | 3 tasks | 10 files |
 | Phase 23 P02 | 8min | 2 tasks | 3 files |
+| Phase 23 P03 | 5min | 2 tasks | 1 files |
 
 ## Last Session
 
@@ -375,7 +377,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T03:28:06.203Z
+**Last session:** 2026-07-21T03:33:32.939Z
 **Stopped at:** Completed 21-10-PLAN.md
 **Resume file:** .planning/phases/23-reopen-closed-ticket/23-CONTEXT.md
 

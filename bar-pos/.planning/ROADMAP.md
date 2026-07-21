@@ -697,7 +697,7 @@ Plans:
 **Goal:** Let managers reopen a closed ticket via a `reopen_tab` RPC, introducing a `reopened_void` payment status, offsetting caja entries, and a cap (24h window, max 2 reopens per tab).
 **Requirements:** TBD (POS-COMPARISON.md §23 — source doc no longer present; scope locked in 23-CONTEXT.md)
 **Depends on:** Phase 14, Phase 15
-**Plans:** 2/6 plans executed
+**Plans:** 3/6 plans executed
 
 Plans:
 **Wave 1**
@@ -707,7 +707,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 23-02-PLAN.md — Additive migrations: `payments.status`, `tabs.reopen_count`/`last_reopened_at`, and the `reopen_tab` RPC (Wave 2)
-- [ ] 23-03-PLAN.md — Payment-sum correctness sweep: exclude `reopened_void` from process_payment_atomic/process_split_payment_atomic/get_caja_report/close_caja_session/process_refund (Wave 2)
+- [x] 23-03-PLAN.md — Payment-sum correctness sweep: exclude `reopened_void` from process_payment_atomic/process_split_payment_atomic/get_caja_report/close_caja_session/process_refund (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
