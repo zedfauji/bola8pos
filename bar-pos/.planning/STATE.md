@@ -6,14 +6,14 @@ current_phase: 24
 current_phase_name: operational-reports-suite-csv
 status: executing
 stopped_at: Completed 24-03-PLAN.md
-last_updated: "2026-07-21T20:57:21.038Z"
+last_updated: "2026-07-21T21:13:15.385Z"
 last_activity: 2026-07-21
 last_activity_desc: Phase 24 Plan 03 complete
 progress:
   total_phases: 28
   completed_phases: 20
   total_plans: 154
-  completed_plans: 152
+  completed_plans: 153
   percent: 71
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 24 (operational-reports-suite-csv) — EXECUTING
-Plan: 9 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
+Plan: 10 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
 Status: Ready to execute
 Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 
@@ -309,6 +309,8 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 - [Phase ?]: notFoundError() called with no argument in useRemoveTabItem to satisfy the features-layer i18next/no-literal-string lint gate (D-05) rather than adding a new i18n key for a rare error path
 - [Phase ?]: Barrel-exported Alert/AlertTitle/AlertDescription/AlertAction from src/shared/ui — the primitive existed but was never wired into the shared/ui barrel.
 - [Phase ?]: Authored deletionsPreSendPanel/deletionsPostCloseReport column-header i18n keys (not specified in UI-SPEC) following the existing columnX naming convention.
+- [Phase ?]: recharts 3.8.1 deprecates Cell — per-bar highlighting via Bar shape+Rectangle, per-slice via Pie's native data.fill (no Cell anywhere in the 3 new/extended widgets).
+- [Phase ?]: PaymentMethodsReport's leading-method accent (emerald) is scoped to the single leading day-level rollup row only, not every session row sharing that method.
 
 ## Performance Metrics
 
@@ -399,10 +401,11 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 | Phase 24 P06 | 55min | 3 tasks | 8 files |
 | Phase 24 P07 | 12min | 2 tasks | 5 files |
 | Phase 24 P08 | 20min | 2 tasks | 7 files |
+| Phase 24 P09 | 45min | 3 tasks | 8 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 24-08-PLAN.md
+- **Stopped at:** Completed 24-09-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -419,7 +422,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T20:57:21.027Z
+**Last session:** 2026-07-21T21:13:15.362Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 

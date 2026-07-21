@@ -735,7 +735,7 @@ Plans:
 **Goal:** Add 6 new reporting RPCs (peak-hours, voids, deletions ×2, modifier popularity, payment methods, charts-data), a generic CSV export action, and Recharts-based report widgets.
 **Requirements:** TBD (POS-COMPARISON.md §24 — source doc no longer present; scope locked in 24-CONTEXT.md; SC-1..SC-4 below are the coverage requirement set)
 **Depends on:** Phase 14
-**Plans:** 8/10 plans executed
+**Plans:** 9/10 plans executed
 
 Plans:
 **Wave 1**
@@ -760,7 +760,7 @@ Plans:
 **Wave 5**
 
 - [x] 24-08-PLAN.md — Deletions tabular widgets: DeletionsPreSendPanel (standing historical-gap Alert) + DeletionsPostCloseReport (D-05/D-16) (SC-3)
-- [ ] 24-09-PLAN.md — Chart widgets: ModifierPopularityReport (bar + top-20) + PaymentMethodsReport (donut + 2-grain) + HourlyBreakdownPanel extension (D-13/D-14/D-15/D-03) (SC-3)
+- [x] 24-09-PLAN.md — Chart widgets: ModifierPopularityReport (bar + top-20) + PaymentMethodsReport (donut + 2-grain) + HourlyBreakdownPanel extension (D-13/D-14/D-15/D-03) (SC-3)
 
 **Wave 6**
 
