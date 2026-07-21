@@ -40,7 +40,7 @@ export function EmployeeSelector() {
             onClick={() => {
               setSelectedStaff(member);
             }}
-            className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 text-left hover:bg-accent transition-colors"
+            className="flex h-auto items-center justify-start gap-3 rounded-lg border border-border bg-card p-4 text-left hover:bg-accent transition-colors"
           >
             <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">
               {member.name.charAt(0).toUpperCase()}
