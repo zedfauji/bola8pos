@@ -5,15 +5,15 @@ milestone_name: Cross-Pollination from billar-pos
 current_phase: 24
 current_phase_name: operational-reports-suite-csv
 status: executing
-stopped_at: Phase 24 planned — 10 plans (6 waves), plan-checker passed, ready to execute
-last_updated: "2026-07-21T16:07:16.398Z"
+stopped_at: Completed 24-03-PLAN.md
+last_updated: "2026-07-21T16:12:14.191Z"
 last_activity: 2026-07-21
-last_activity_desc: Phase 24 execution started
+last_activity_desc: Phase 24 Plan 03 (peak-hours/voids/modifier-popularity/payment-methods report RPCs) complete
 progress:
   total_phases: 28
   completed_phases: 20
   total_plans: 154
-  completed_plans: 145
+  completed_plans: 146
   percent: 71
 ---
 
@@ -49,11 +49,13 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 24 (operational-reports-suite-csv) — EXECUTING
-Plan: 2 of 10
-Status: Ready to execute
-Last activity: 2026-07-21 — Phase 24 execution started
+Plan: 3 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
+Status: Executing
+Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 
 ## Session Log
+
+- 2026-07-21: **Phase 24 (operational-reports-suite-csv) Plan 03 COMPLETE — 4 bounded report RPCs authored (SC-1, SC-4)** — Wave 1 plan (parallel to 24-01, no file overlap — pure SQL migrations vs. TS/i18n). Task 1 (`e79d9ae`) added `get_peak_hours_report` (verbatim 24-PATTERNS.md template: EXTRACT(HOUR)+EXTRACT(DOW) grouped, bounded on orders.created_at, excludes voided/soft-deleted) and `get_voids_report` (server-side equivalent of the existing client-side voids query, unchanged VoidRefundRow shape, bounded on orders.updated_at to match the client's existing filter column exactly). Task 2 (`5583f6e`) added `get_modifier_popularity_report`, using an isolated `exploded`→`aggregated` CTE pair to safely GROUP BY on `unnest(modifier_ids)` before joining to `modifiers` (avoids RESEARCH.md Pitfall 4's flat-join double-count); revenue computed as `attach_count * modifiers.price_delta` (no separate per-attach revenue ledger exists). Task 3 (`f20418a`) added `get_payment_methods_report`, a single `UNION ALL` query returning both per-caja-session rows and a day-level rollup per method, carrying the mandatory Phase-23 `status IS DISTINCT FROM 'reopened_void'` + `is_deleted` + `is_refund` exclusions verbatim; bounded on the indexed `payments.processed_at`. Confirmed no separate `get_charts_data` RPC is needed (RESEARCH.md Open Question 1) — these 3 chart-bearing RPCs are consumed directly by their Recharts widgets in later plans. Zero deviations — all three migrations matched their `must_haves` on the first pass (SECURITY DEFINER, `SET search_path = public`, `GRANT EXECUTE TO authenticated`, `json_build_object('ok', true, 'rows', ...)`), verified via each task's structural grep gate. None of these RPCs are pushed to the database yet — the single blocking `npx supabase db push` for all of Phase 24's new migrations is Plan 05's scope; live integration testing against real rows is deferred to Plan 06. `requirements mark-complete SC-1 SC-4` skipped — `.planning/REQUIREMENTS.md` confirmed absent for this milestone (not a tool bug, consistent with every prior 21-xx/22-xx/23-xx session). Next: remaining Wave 1/2 plans (24-02 CSV serializer, 24-04 deletions RPCs + `remove_tab_item`) before Wave 3's blocking `24-05` db push.
 
 - 2026-07-21: **Phase 24 (operational-reports-suite-csv) PLANNED — 10 plans across 6 waves, plan-checker passed (research + pattern-map + plan + verify)** — Ran the full plan-phase pipeline from a fresh discuss-phase+UI-phase baseline (24-CONTEXT.md/24-UI-SPEC.md already existed from an earlier session; a prior gsd-phase-researcher launch at 1:04a had NOT produced a RESEARCH.md on disk, so research was re-run from scratch — user chose "Research first" when asked). `gsd-phase-researcher` found every needed pattern already has a direct analog in the codebase (`get_caja_report`, `edit_paid_tab`, `deplete_for_order_item`, `ComboMixReport`, `VoidRefundPanel`, `useExportReport`, `excel.ts`) — this is a copy-adjacent retrofit, not greenfield design; zero new npm packages needed (recharts + xlsx already installed); flagged the `audit_log` (singular, legacy) vs `audit_logs` (plural, canonical) trap and the `deplete_for_order_item` before-hard-delete ordering requirement for `remove_tab_item`. `gsd-pattern-mapper` then classified 20 files, found 18/20 with exact/role-match analogs. `gsd-planner` (opus) produced 10 plans/6 waves: Wave 1 (24-01 contract layer + 24-03 read-only RPCs) → Wave 2 (24-02 CSV + 24-04 deletions/remove_tab_item) → Wave 3 (24-05 `[BLOCKING]` `supabase db push`, `autonomous:false`) → Wave 4 (24-06 query hooks + 24-07 remove-tab-item feature) → Wave 5 (24-08 deletions widgets + 24-09 chart widgets) → Wave 6 (24-10 final wiring/E2E/gate); resolved "charts-data" as NOT a separate 7th RPC (the 3 chart-bearing report RPCs already satisfy it) and made `remove_tab_item` a single atomic RPC (resolves both the D-06 audit gap and the pre-existing inventory-restore TODO, no role gate per D-07). `gsd-plan-checker` returned `## VERIFICATION PASSED` on the first pass — all 4 ROADMAP success criteria and all 16 CONTEXT.md decisions traced to owning plans, wave/dependency graph acyclic and correctly sequenced, all 4 known-pitfall spot-checks (audit_logs plural, reopened_void exclusion, restore-before-delete ordering, no new packages) pass. `.planning/phases/24-operational-reports-suite-csv/24-VALIDATION.md` seeded as a draft by plan-phase (frontmatter-only) and then fully populated by the planner itself (24-task Per-Task Verification Map, 6 Wave-0 missing test files, 3 manual-only checks, `nyquist_compliant: true`). **Tooling note:** `state.planned-phase`/`roadmap.annotate-dependencies` are top-level `gsd-tools` subcommands (`state planned-phase --phase --name --plans`), not `query state.planned-phase` verbs — both ran successfully once invoked correctly, but `state planned-phase` reported `updated: []` because its body-field replacement is template-aware (only overwrites placeholder/default values, never executor-authored ones) — frontmatter `status`/`stopped_at`/`## Current Position` corrected manually here, consistent with the same manual-correction pattern noted in every prior 21-xx/22-xx/23-xx session. Decision-coverage gate: 16/16 CONTEXT.md decisions covered. Next: `/gsd-execute-phase 24` — Wave 3 (24-05) requires human-available `supabase db push` auth.
 - 2026-07-21: **Phase 23 (reopen-closed-ticket) Plan 06 COMPLETE — reopen-closed-ticket E2E gate, phase fully executed (SC-3)** — Task 1 (`4000d10`) converted `e2e/48-reopen-closed-ticket.spec.ts`'s Wave-0 3-`test.fixme` scaffold into 2 live tests: manager-positive (seeds a paid tab, clicks "Reabrir cuenta" from PaymentPane, passes the PIN gate, DB-verifies `tabs.status='open'`/`closed_at=null`/`reopen_count=1` and `payments.status='reopened_void'`, UI-verifies the Reopen button hides on the now-voided payment) and bartender-negative (D-04: bartender's own PIN rejected by `ManagerPinDialog`'s `eligibleStaff` filter, no DB write). The third scaffolded fixme (REOPEN_CAP_EXCEEDED UI surfacing) was dropped, not converted — out of this plan's scoped Task 1 action, already proven at the integration layer (Plan 04). Root-caused a deterministic (3/3 reproducible) false-negative in the bartender-negative test: `page.getByRole('dialog', {name:...})` failed to find the still-open `ReopenTabDialog` Sheet after the PIN error because Radix marks the Sheet's portal `aria-hidden` while `ManagerPinDialog` (an AlertDialog) is modally open on top of it (correct a11y behavior — the Sheet is still visually mounted, just excluded from the accessibility tree); confirmed via instrumented debug runs that `47-edit-paid-tab.spec.ts`'s structurally identical assertion only happens to pass because `EditPaidTabDialog`'s much larger Sheet incidentally re-renders during the PIN window and strips the ancestor's `aria-hidden`, not a deliberate pattern. Fixed by using `page.locator('[role="dialog"]', {hasText:...})` (a plain attribute selector bypassing accessibility-tree filtering) for that one assertion — test-side fix only, no product code touched. Task 2 (`5199eed`) registered the spec in CLAUDE.md's E2E Test Suite list (25→26) and added a one-line `reopen-tab` Implemented Features entry, then ran the full phase gate: `npm run typecheck` (2 pre-existing errors only), `npm run lint` (clean), `npm run test` (140/142 files, 1258/1273 tests, 0 failed on rerun — one `queries.clock.test.ts` flake observed on a single run, confirmed pre-existing/unrelated via isolation + rerun), and `npx playwright test e2e/48-reopen-closed-ticket.spec.ts` green across 2 consecutive full runs. This is the FINAL plan of Phase 23 — all 4 success criteria (SC-1..SC-4) are now proven at both the integration layer (Plan 04) and the UI/E2E layer (this plan). `gsd-tools state add-decision`/`record-metric` again required named-flag syntax (`--phase`/`--summary`/etc., not positional — consistent with every prior 21-xx/22-xx/23-xx session); `state advance-plan` correctly reported `status: "ready_for_verification"` (last plan of phase) but did not itself write that into STATE.md's frontmatter `status` field — corrected manually along with `stopped_at`/`last_activity_desc`/`## Current Position` (consistent with every prior 21-xx/22-xx/23-xx session's identical note); `state update-progress` again reported a stale global `completed: 154/total: 144 = 100%+` figure (not phase-23-specific, consistent with prior sessions — not corrected); `requirements mark-complete SC-3` skipped — `.planning/REQUIREMENTS.md` confirmed absent for this milestone (not a tool bug, consistent with every prior 21-xx/22-xx/23-xx session).
@@ -293,6 +295,9 @@ Last activity: 2026-07-21 — Phase 24 execution started
 - [Phase 23]: Plan 06: fixed bartender-negative E2E assertion to use an aria-hidden-agnostic locator instead of getByRole, since Radix marks the Sheet aria-hidden while ManagerPinDialog is modally open on top of it
 - [Phase ?]: TARGET_RPCS pending flag lets order_item.remove be registered ahead of Plan 24-04's migration without failing the CI grep gate
 - [Phase ?]: HourlyRow converted from a hand-written TS type to a Zod-inferred type (HourlyRowSchema) per D-04, matching the domain.ts single-source-of-truth convention
+- [Phase ?]: get_voids_report bounds on orders.updated_at (not created_at) to match the existing client-side voids query's filter column exactly (D-01/D-02)
+- [Phase ?]: Modifier revenue-attributable computed as attach_count * modifiers.price_delta — no separate per-attach revenue ledger exists
+- [Phase ?]: No separate get_charts_data RPC built — resolves RESEARCH.md Open Question 1, the 3 chart-bearing report RPCs (peak-hours, modifier-popularity, payment-methods) satisfy chart data needs directly
 
 ## Performance Metrics
 
@@ -376,10 +381,11 @@ Last activity: 2026-07-21 — Phase 24 execution started
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 24 P01 | 45min | 3 tasks | 13 files |
+| Phase 24 P03 | 20min | 3 tasks | 3 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 24-01-PLAN.md
+- **Stopped at:** Completed 24-03-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -396,7 +402,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T16:07:16.387Z
+**Last session:** 2026-07-21T16:12:14.181Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 

@@ -735,13 +735,13 @@ Plans:
 **Goal:** Add 6 new reporting RPCs (peak-hours, voids, deletions ×2, modifier popularity, payment methods, charts-data), a generic CSV export action, and Recharts-based report widgets.
 **Requirements:** TBD (POS-COMPARISON.md §24 — source doc no longer present; scope locked in 24-CONTEXT.md; SC-1..SC-4 below are the coverage requirement set)
 **Depends on:** Phase 14
-**Plans:** 1/10 plans executed
+**Plans:** 2/10 plans executed
 
 Plans:
 **Wave 1**
 
 - [x] 24-01-PLAN.md — Contract foundation: register `order_item.remove` audit action, extend HourlyRowSchema (D-04) + 4 new report-row schemas, seed all new i18n keys both locales (SC-1, SC-2, SC-3)
-- [ ] 24-03-PLAN.md — Read-only report RPC migrations: peak-hours + voids (D-01..D-03), modifier-popularity (D-09, unnest-CTE), payment-methods (D-08, reopened_void exclusion); "charts-data" resolved as no separate endpoint (SC-1, SC-4)
+- [x] 24-03-PLAN.md — Read-only report RPC migrations: peak-hours + voids (D-01..D-03), modifier-popularity (D-09, unnest-CTE), payment-methods (D-08, reopened_void exclusion); "charts-data" resolved as no separate endpoint (SC-1, SC-4)
 
 **Wave 2**
 
