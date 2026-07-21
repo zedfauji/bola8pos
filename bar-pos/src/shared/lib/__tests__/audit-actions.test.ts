@@ -19,7 +19,7 @@ const VALID_ACTIONS = new Set<string>(AuditActionSchema.options);
 // close_tab/produce_prep_batch/force_pin_change until their Wave-2/Wave-3
 // migration lands (14-03..14-09); driven GREEN incrementally; final GREEN
 // enforced at 14-14 gate.
-const TARGET_RPCS: { fn: string; action: string }[] = [
+const TARGET_RPCS: { fn: string; action: string; pending?: boolean }[] = [
   { fn: 'process_payment_atomic', action: 'payment.process' },
   { fn: 'process_refund', action: 'payment.refund' },
   { fn: 'close_caja_session', action: 'caja.close' },
@@ -30,6 +30,11 @@ const TARGET_RPCS: { fn: string; action: string }[] = [
   { fn: 'close_tab', action: 'tab.close' },
   { fn: 'produce_prep_batch', action: 'prep.produce' },
   { fn: 'force_pin_change', action: 'permission.force_pin_change' },
+  // Phase 24-01: order_item.remove is registered in AuditActionSchema here, ahead of
+  // the remove_tab_item RPC migration that calls PERFORM record_audit(...) for it
+  // (ships in Plan 24-04). `pending: true` lets the assertion below skip itself while
+  // the function is undefined, then self-upgrade to a full check once the migration lands.
+  { fn: 'remove_tab_item', action: 'order_item.remove', pending: true },
 ];
 
 describe('audit-actions enforcement', () => {
@@ -67,7 +72,7 @@ describe('audit-actions enforcement', () => {
   // TARGET_RPCS.
   it.each(TARGET_RPCS)(
     'every migration-wired target RPC calls record_audit: $fn -> $action',
-    ({ fn, action }) => {
+    ({ fn, action, pending }) => {
       const migrationFiles = readdirSync(MIGRATIONS_DIR)
         .filter(f => f.endsWith('.sql'))
         .map(f => join(MIGRATIONS_DIR, f));
@@ -83,6 +88,12 @@ describe('audit-actions enforcement', () => {
         `CREATE\\s+(OR\\s+REPLACE\\s+)?FUNCTION\\s+(public\\.)?${fn}\\s*\\(`,
         'i'
       ).test(concatenatedSql);
+
+      if (pending === true && !definesFn) {
+        // Migration not shipped yet (see the TARGET_RPCS comment for this entry) —
+        // skip enforcement until it lands, rather than failing this plan's gate.
+        return;
+      }
 
       const callsRecordAudit = new RegExp(
         `PERFORM\\s+record_audit\\s*\\(\\s*'${action.replace(/\./g, '\\.')}'`
