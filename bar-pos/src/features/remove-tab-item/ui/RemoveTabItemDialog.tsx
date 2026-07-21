@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import type { OrderItem } from '@shared/lib/domain';
-import { ConfirmDialog, MoneyDisplay } from '@shared/ui';
+import { ConfirmDialog, Input, MoneyDisplay } from '@shared/ui';
 
 import { useRemoveTabItem } from '../useRemoveTabItem';
 
@@ -34,11 +35,19 @@ export function RemoveTabItemDialog({
 }: RemoveTabItemDialogProps) {
   const { t } = useTranslation('featOrders');
   const { removeTabItem, isPending } = useRemoveTabItem();
+  const [reason, setReason] = useState('');
 
   if (!item) return null;
 
   const lineTotal = (item.unitPrice + item.modifierPriceDelta) * item.quantity;
   const productName = item.product?.name ?? t('removeTabItem.unknownItem');
+  const trimmedReason = reason.trim();
+  const canConfirm = trimmedReason.length > 0;
+
+  const handleClose = () => {
+    setReason('');
+    onClose();
+  };
 
   const handleConfirm = async () => {
     const result = await removeTabItem({
@@ -47,6 +56,7 @@ export function RemoveTabItemDialog({
       itemId: item.id,
       productId: item.productId,
       quantity: item.quantity,
+      reason: trimmedReason,
     });
 
     if (!result.ok) {
@@ -55,7 +65,7 @@ export function RemoveTabItemDialog({
     }
 
     toast.success(t('removeTabItem.removedFromOrder', { name: productName }));
-    onClose();
+    handleClose();
   };
 
   return (
@@ -66,15 +76,33 @@ export function RemoveTabItemDialog({
       confirmLabel={t('removeTabItem.confirmLabel')}
       variant="destructive"
       isLoading={isPending}
+      confirmDisabled={!canConfirm}
       onConfirm={handleConfirm}
-      onCancel={onClose}
+      onCancel={handleClose}
     >
-      <div className="rounded-md border border-border/70 p-3 text-sm">
-        <div className="flex items-center justify-between gap-3">
-          <span className="min-w-0 truncate text-muted-foreground">
-            {item.quantity}x {productName}
-          </span>
-          <MoneyDisplay amount={lineTotal} size="sm" />
+      <div className="space-y-4">
+        <div className="rounded-md border border-border/70 p-3 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <span className="min-w-0 truncate text-muted-foreground">
+              {item.quantity}x {productName}
+            </span>
+            <MoneyDisplay amount={lineTotal} size="sm" />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor="remove-tab-item-reason" className="text-sm font-medium">
+            {t('removeTabItem.reasonLabel')}
+          </label>
+          <Input
+            id="remove-tab-item-reason"
+            value={reason}
+            onChange={event => {
+              setReason(event.target.value);
+            }}
+            placeholder={t('removeTabItem.reasonPlaceholder')}
+            required
+          />
         </div>
       </div>
     </ConfirmDialog>
