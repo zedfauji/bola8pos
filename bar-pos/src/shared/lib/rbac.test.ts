@@ -43,6 +43,7 @@ const ALLOWED: Record<StaffRole, ReadonlySet<string>> = {
     'view_audit_log',
     'edit_paid_tab',
     'view_kds_bar',
+    'reopen_tab',
   ]),
   admin: new Set(STAFF_ACTIONS),
   kitchen: new Set(['view_kds', 'clock_in', 'clock_out', 'produce_prep_batch']),

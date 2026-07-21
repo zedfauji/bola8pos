@@ -25,6 +25,7 @@ export const AuditActionSchema = z.enum([
   'tab.void',
   'tab.split',
   'tab.edit_paid',
+  'tab.reopen',
   // Caja
   'caja.open',
   'caja.close',
@@ -66,6 +67,7 @@ export const AuditAction = {
   TAB_VOID: 'tab.void',
   TAB_SPLIT: 'tab.split',
   TAB_EDIT_PAID: 'tab.edit_paid',
+  TAB_REOPEN: 'tab.reopen',
   CAJA_OPEN: 'caja.open',
   CAJA_CLOSE: 'caja.close',
   CAJA_ENTRY: 'caja.entry',
