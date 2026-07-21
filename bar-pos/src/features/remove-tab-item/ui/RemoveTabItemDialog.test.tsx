@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createElement, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -116,10 +117,36 @@ describe('RemoveTabItemDialog', () => {
     expect(btn).toBeInTheDocument();
   });
 
-  it('calls removeTabItem mutation when confirm button is clicked', async () => {
+  it('disables the confirm button while the reason input is empty', () => {
+    renderDialog();
+    const btn = screen.getByRole('button', { name: /remove item/i });
+    expect(btn).toBeDisabled();
+  });
+
+  it('keeps the confirm button disabled for a whitespace-only reason', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.type(screen.getByLabelText(/motivo|reason/i), '   ');
+
+    expect(screen.getByRole('button', { name: /remove item/i })).toBeDisabled();
+  });
+
+  it('enables the confirm button once a non-empty reason is typed', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.type(screen.getByLabelText(/motivo|reason/i), 'Wrong item');
+
+    expect(screen.getByRole('button', { name: /remove item/i })).toBeEnabled();
+  });
+
+  it('calls removeTabItem mutation with the trimmed reason when confirm button is clicked', async () => {
+    const user = userEvent.setup();
     mockRemoveTabItem.mockResolvedValue({ ok: true, data: undefined });
     renderDialog();
 
+    await user.type(screen.getByLabelText(/motivo|reason/i), '  Wrong item  ');
     fireEvent.click(screen.getByRole('button', { name: /remove item/i }));
 
     await waitFor(() => {
@@ -129,14 +156,17 @@ describe('RemoveTabItemDialog', () => {
         itemId: baseItem.id,
         productId: baseItem.productId,
         quantity: baseItem.quantity,
+        reason: 'Wrong item',
       });
     });
   });
 
   it('calls onClose after successful mutation', async () => {
+    const user = userEvent.setup();
     mockRemoveTabItem.mockResolvedValue({ ok: true, data: undefined });
     const { onClose } = renderDialog();
 
+    await user.type(screen.getByLabelText(/motivo|reason/i), 'Wrong item');
     fireEvent.click(screen.getByRole('button', { name: /remove item/i }));
 
     await waitFor(() => {
@@ -146,12 +176,14 @@ describe('RemoveTabItemDialog', () => {
   });
 
   it('shows error toast when mutation fails', async () => {
+    const user = userEvent.setup();
     mockRemoveTabItem.mockResolvedValue({
       ok: false,
       error: { code: 'SUPABASE_ERROR', message: 'DB error' },
     });
     renderDialog();
 
+    await user.type(screen.getByLabelText(/motivo|reason/i), 'Wrong item');
     fireEvent.click(screen.getByRole('button', { name: /remove item/i }));
 
     await waitFor(() => {
@@ -159,6 +191,11 @@ describe('RemoveTabItemDialog', () => {
     });
     // Verify success toast was never called (dialog did not close on the happy path)
     expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it('renders no PIN dialog / manager-gate elements', () => {
+    renderDialog();
+    expect(screen.queryByText(/pin/i)).not.toBeInTheDocument();
   });
 
   it('dialog is hidden (returns null) when open=false and item=null', () => {
