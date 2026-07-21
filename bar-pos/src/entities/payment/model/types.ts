@@ -21,6 +21,9 @@ export const PaymentSchema = z.object({
   processedBy: z.uuid(),
   isRefund: z.boolean().optional(),
   refundId: z.uuid().nullable().optional(),
+  // Phase 23: 'reopened_void' when the parent tab was reopened and this payment
+  // reversed. Default keeps pre-migration rows (no `status` column yet) parsing cleanly.
+  status: z.enum(['completed', 'reopened_void']).default('completed'),
 });
 
 export type Payment = z.infer<typeof PaymentSchema>;
@@ -59,6 +62,7 @@ export const mockPayments: Payment[] = [
     idempotencyKey: 'legacy_cccccccc',
     processedAt: new Date('2025-01-15T21:00:00Z'),
     processedBy: mockStaffId,
+    status: 'completed',
   },
   {
     id: 'dddddddd-4444-5555-6666-777777777777',
@@ -72,6 +76,7 @@ export const mockPayments: Payment[] = [
     idempotencyKey: 'legacy_dddddddd',
     processedAt: new Date('2025-01-15T19:45:00Z'),
     processedBy: mockStaffId,
+    status: 'completed',
   },
   {
     id: 'eeeeeeee-5555-6666-7777-888888888888',
@@ -84,5 +89,6 @@ export const mockPayments: Payment[] = [
     idempotencyKey: 'legacy_eeeeeeee',
     processedAt: new Date('2025-01-15T22:30:00Z'),
     processedBy: mockStaffId,
+    status: 'completed',
   },
 ];

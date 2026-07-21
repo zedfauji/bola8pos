@@ -24,6 +24,7 @@ function createPayment(partial: Partial<Payment> & Pick<Payment, 'id' | 'tabId'>
     squareReceiptUrl: null,
     processedBy: staff1,
     processedAt: new Date('2026-04-17T14:00:00.000Z'),
+    status: 'completed',
     ...partial,
   };
 }
@@ -50,6 +51,7 @@ describe('usePaymentStore', () => {
       squarePaymentId: null,
       squareReceiptUrl: null,
       processedBy: staff1,
+      status: 'completed',
     };
     usePaymentStore.getState().recordPayment(data);
 

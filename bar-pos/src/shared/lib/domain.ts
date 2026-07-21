@@ -455,6 +455,10 @@ export const TabSchema = z.object({
   splitLabel: z.string().max(50).nullable().optional(),
   /** Phase 15: optimistic-concurrency version. Server bumps on every UPDATE. */
   version: z.number().int().nonnegative().optional(),
+  /** Phase 23: number of times this tab has been reopened (capped at 2). */
+  reopenCount: z.number().int().nonnegative().optional(),
+  /** Phase 23: timestamp of the most recent reopen (drives the 24h reopen window). */
+  lastReopenedAt: TimestampSchema.nullable().optional(),
 });
 
 export const TabCreateSchema = TabSchema.omit({
@@ -637,6 +641,8 @@ export const PaymentSchema = z.object({
   paymentGroupId: UuidSchema.nullable().optional(),
   /** Position (0-3) of this payment within its split-payment group */
   splitIndex: z.number().int().min(0).max(3).nullable().optional(),
+  /** Phase 23: 'reopened_void' when the parent tab was reopened and this payment reversed */
+  status: z.enum(['completed', 'reopened_void']).default('completed'),
 });
 
 export const PaymentCreateSchema = PaymentSchema.omit({

@@ -43,6 +43,7 @@ function mapPaymentRow(row: Record<string, unknown>): Payment {
     processedBy: row['processed_by'],
     isRefund: row['is_refund'] ?? false,
     refundId: row['refund_id'] ?? null,
+    status: row['status'] ?? 'completed',
   });
 }
 
