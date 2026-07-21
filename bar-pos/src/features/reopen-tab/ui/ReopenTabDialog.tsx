@@ -71,14 +71,14 @@ export function ReopenTabDialog({ open, tabId, onOpenChange }: ReopenTabDialogPr
           terminalId: TERMINAL_ID,
         })
       ) {
-        onOpenChange(false);
+        handleOpenChange(false);
         return;
       }
       toast.error(result.error.message !== "" ? result.error.message : t("reopenTab.genericError"));
       return;
     }
     toast.success(t("reopenTab.reopenSuccess"));
-    onOpenChange(false);
+    handleOpenChange(false);
   }
 
   function handleOpenChange(nextOpen: boolean) {
@@ -122,7 +122,7 @@ export function ReopenTabDialog({ open, tabId, onOpenChange }: ReopenTabDialogPr
               variant="outline"
               touchSize="large"
               className="flex-1"
-              onClick={() => { onOpenChange(false); }}
+              onClick={() => { handleOpenChange(false); }}
             >
               {t("reopenTab.cancel")}
             </POSButton>
