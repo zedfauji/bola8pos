@@ -561,12 +561,14 @@
   "exportReport": {
     "excelWorkbookLabel": "Excel Workbook",
     "pdfDocumentLabel": "PDF Document",
+    "csvFileLabel": "CSV File",
     "successToast": "Report exported successfully.",
     "errorToast": "Export failed. Please try again.",
     "exportButton": "Export",
     "downloadAs": "Download as",
     "excelOption": "Excel (.xlsx)",
-    "pdfOption": "PDF (.pdf)"
+    "pdfOption": "PDF (.pdf)",
+    "csvOption": "CSV"
   },
   "uploadLogo": {
     "unsupportedType": "Only PNG or JPEG images are supported.",

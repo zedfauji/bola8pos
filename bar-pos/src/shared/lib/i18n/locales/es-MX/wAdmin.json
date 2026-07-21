@@ -73,6 +73,16 @@
     "columnCombo": "Combo",
     "columnReason": "Reason"
   },
+  "deletionsPostCloseReport": {
+    "emptyTitle": "Sin correcciones registradas",
+    "emptyDescription": "No se registraron correcciones a cuentas cerradas en este rango de fechas."
+  },
+  "deletionsPreSendPanel": {
+    "emptyTitle": "Sin eliminaciones registradas",
+    "emptyDescription": "No se registraron eliminaciones de artículos en este rango de fechas.",
+    "historicalGapTitle": "Historial parcial",
+    "historicalGapDescription": "Este reporte solo incluye eliminaciones registradas desde la activación de esta auditoría. Las eliminaciones anteriores no están disponibles."
+  },
   "hourlyBreakdownPanel": {
     "emptyTitle": "No hourly data",
     "emptyDescription": "No revenue recorded in this date range.",
@@ -82,6 +92,15 @@
     "columnHour": "Hour",
     "columnOrders": "Orders",
     "columnRevenue": "Revenue"
+  },
+  "modifierPopularityReport": {
+    "emptyTitle": "Sin datos de modificadores",
+    "emptyDescription": "No se registraron modificadores aplicados en este rango de fechas.",
+    "top20Note": "Mostrando los 20 principales. Exporta el reporte para ver todos los registros."
+  },
+  "paymentMethodsReport": {
+    "emptyTitle": "Sin pagos registrados",
+    "emptyDescription": "No se registraron pagos en este rango de fechas."
   },
   "productSalesPanel": {
     "columnProduct": "Product",

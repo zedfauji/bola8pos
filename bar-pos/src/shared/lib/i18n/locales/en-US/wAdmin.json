@@ -73,6 +73,16 @@
     "columnCombo": "Combo",
     "columnReason": "Reason"
   },
+  "deletionsPostCloseReport": {
+    "emptyTitle": "No corrections recorded",
+    "emptyDescription": "No corrections to closed tabs were recorded in this date range."
+  },
+  "deletionsPreSendPanel": {
+    "emptyTitle": "No deletions recorded",
+    "emptyDescription": "No item deletions were recorded in this date range.",
+    "historicalGapTitle": "Partial history",
+    "historicalGapDescription": "This report only includes deletions recorded since this audit was activated. Earlier deletions are not available."
+  },
   "hourlyBreakdownPanel": {
     "emptyTitle": "No hourly data",
     "emptyDescription": "No revenue recorded in this date range.",
@@ -82,6 +92,15 @@
     "columnHour": "Hour",
     "columnOrders": "Orders",
     "columnRevenue": "Revenue"
+  },
+  "modifierPopularityReport": {
+    "emptyTitle": "No modifier data",
+    "emptyDescription": "No modifiers were applied in this date range.",
+    "top20Note": "Showing the top 20. Export the report to see all records."
+  },
+  "paymentMethodsReport": {
+    "emptyTitle": "No payments recorded",
+    "emptyDescription": "No payments were recorded in this date range."
   },
   "productSalesPanel": {
     "columnProduct": "Product",

@@ -86,7 +86,10 @@
     "removedFromOrder": "{{name}} removed from order.",
     "title": "Remove item?",
     "description": "This item will be permanently removed from the order. This cannot be undone.",
-    "confirmLabel": "Remove item"
+    "confirmLabel": "Remove item",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "E.g. Wrong item, customer changed their mind…",
+    "reasonRequired": "Reason is required"
   },
   "splitTab": {
     "parentTabPaid": "This tab has already been paid and cannot be split.",
