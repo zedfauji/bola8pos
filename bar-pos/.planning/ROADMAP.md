@@ -735,7 +735,7 @@ Plans:
 **Goal:** Add 6 new reporting RPCs (peak-hours, voids, deletions ×2, modifier popularity, payment methods, charts-data), a generic CSV export action, and Recharts-based report widgets.
 **Requirements:** TBD (POS-COMPARISON.md §24 — source doc no longer present; scope locked in 24-CONTEXT.md; SC-1..SC-4 below are the coverage requirement set)
 **Depends on:** Phase 14
-**Plans:** 4/10 plans executed
+**Plans:** 5/10 plans executed
 
 Plans:
 **Wave 1**
@@ -750,7 +750,7 @@ Plans:
 
 **Wave 3**
 
-- [ ] 24-05-PLAN.md — [BLOCKING] `supabase db push` (5 migrations) + regenerate supabase.types.ts (SC-1, SC-4)
+- [x] 24-05-PLAN.md — [BLOCKING] `supabase db push` (5 migrations) + regenerate supabase.types.ts (SC-1, SC-4)
 
 **Wave 4**
 
