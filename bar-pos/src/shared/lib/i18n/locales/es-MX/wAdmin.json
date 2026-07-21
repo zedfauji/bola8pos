@@ -74,10 +74,20 @@
     "columnReason": "Reason"
   },
   "deletionsPostCloseReport": {
+    "columnTabId": "ID de cuenta",
+    "columnEditedAt": "Editado",
+    "columnStaffName": "Personal",
+    "columnReason": "Motivo",
+    "columnFieldsChanged": "Campos modificados",
     "emptyTitle": "Sin correcciones registradas",
     "emptyDescription": "No se registraron correcciones a cuentas cerradas en este rango de fechas."
   },
   "deletionsPreSendPanel": {
+    "columnOrderId": "ID de orden",
+    "columnItemName": "Artículo",
+    "columnRemovedAt": "Eliminado",
+    "columnStaffName": "Personal",
+    "columnReason": "Motivo",
     "emptyTitle": "Sin eliminaciones registradas",
     "emptyDescription": "No se registraron eliminaciones de artículos en este rango de fechas.",
     "historicalGapTitle": "Historial parcial",

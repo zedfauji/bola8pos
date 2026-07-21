@@ -87,6 +87,7 @@ export { Input } from './input';
 export type { InputProps } from './input';
 export { Label } from './label';
 export { Skeleton } from './skeleton';
+export { Alert, AlertTitle, AlertDescription, AlertAction } from './alert';
 export {
   AlertDialog,
   AlertDialogPortal,

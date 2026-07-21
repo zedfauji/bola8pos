@@ -74,10 +74,20 @@
     "columnReason": "Reason"
   },
   "deletionsPostCloseReport": {
+    "columnTabId": "Tab ID",
+    "columnEditedAt": "Edited At",
+    "columnStaffName": "Staff",
+    "columnReason": "Reason",
+    "columnFieldsChanged": "Fields Changed",
     "emptyTitle": "No corrections recorded",
     "emptyDescription": "No corrections to closed tabs were recorded in this date range."
   },
   "deletionsPreSendPanel": {
+    "columnOrderId": "Order ID",
+    "columnItemName": "Item",
+    "columnRemovedAt": "Removed At",
+    "columnStaffName": "Staff",
+    "columnReason": "Reason",
     "emptyTitle": "No deletions recorded",
     "emptyDescription": "No item deletions were recorded in this date range.",
     "historicalGapTitle": "Partial history",
