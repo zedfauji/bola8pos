@@ -6,14 +6,14 @@ current_phase: 24
 current_phase_name: operational-reports-suite-csv
 status: executing
 stopped_at: Completed 24-03-PLAN.md
-last_updated: "2026-07-21T20:42:43.171Z"
+last_updated: "2026-07-21T20:51:11.639Z"
 last_activity: 2026-07-21
 last_activity_desc: Phase 24 Plan 03 complete
 progress:
   total_phases: 28
   completed_phases: 20
   total_plans: 154
-  completed_plans: 150
+  completed_plans: 151
   percent: 71
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 24 (operational-reports-suite-csv) — EXECUTING
-Plan: 7 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
+Plan: 8 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
 Status: Ready to execute
 Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 
@@ -305,6 +305,8 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 - [Phase ?]: npx supabase db push [Y/n] prompt did not require an auth-gate checkpoint (5th consecutive precedent-confirming instance after Phase 17/22/23-04)
 - [Phase ?]: get_peak_hours_report bucketed HOUR/DOW in UTC instead of the bar's local timezone — fixed via a new AT TIME ZONE 'America/Mexico_City' migration
 - [Phase ?]: vitest integration project environment changed node -> jsdom to support renderHook-based integration tests
+- [Phase ?]: Added TAB_NOT_OPEN AppErrorCode + tabNotOpenError() factory (remove_tab_item RPC's defense-in-depth guard fires on voided tabs too, so TAB_ALREADY_CLOSED's message would misdescribe it)
+- [Phase ?]: notFoundError() called with no argument in useRemoveTabItem to satisfy the features-layer i18next/no-literal-string lint gate (D-05) rather than adding a new i18n key for a rare error path
 
 ## Performance Metrics
 
@@ -393,10 +395,11 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 | Phase 24 P04 | 25min | 2 tasks | 2 files |
 | Phase 24 P05 | 5min | 2 tasks | 1 files |
 | Phase 24 P06 | 55min | 3 tasks | 8 files |
+| Phase 24 P07 | 12min | 2 tasks | 5 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 24-06-PLAN.md
+- **Stopped at:** Completed 24-07-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -413,7 +416,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T20:42:43.160Z
+**Last session:** 2026-07-21T20:51:11.628Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 
