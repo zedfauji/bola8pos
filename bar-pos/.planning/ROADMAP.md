@@ -697,7 +697,7 @@ Plans:
 **Goal:** Let managers reopen a closed ticket via a `reopen_tab` RPC, introducing a `reopened_void` payment status, offsetting caja entries, and a cap (24h window, max 2 reopens per tab).
 **Requirements:** TBD (POS-COMPARISON.md §23 — source doc no longer present; scope locked in 23-CONTEXT.md)
 **Depends on:** Phase 14, Phase 15
-**Plans:** 4/6 plans executed
+**Plans:** 5/6 plans executed
 
 Plans:
 **Wave 1**
@@ -715,7 +715,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 23-05-PLAN.md — Feature slice: `useReopenTab` + PIN-gated `ReopenTabDialog` + PaymentPane wiring (Wave 4)
+- [x] 23-05-PLAN.md — Feature slice: `useReopenTab` + PIN-gated `ReopenTabDialog` + PaymentPane wiring (Wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
