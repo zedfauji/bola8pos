@@ -28,7 +28,7 @@ function RefundButton({ payment, onRefund }: RefundButtonProps) {
   const refundedTotal = (refunds ?? []).reduce((sum, r) => sum + r.amount, 0);
   const isFullyRefunded = refundedTotal >= payment.amount;
 
-  if (payment.isRefund === true || isFullyRefunded) return null;
+  if (payment.isRefund === true || payment.status === 'reopened_void' || isFullyRefunded) return null;
 
   return (
     <POSButton
@@ -51,7 +51,7 @@ interface EditTicketButtonProps {
 function EditTicketButton({ payment, onEdit }: EditTicketButtonProps) {
   const { t } = useTranslation('wPanels');
 
-  if (payment.isRefund === true) return null;
+  if (payment.isRefund === true || payment.status === 'reopened_void') return null;
 
   return (
     <POSButton
