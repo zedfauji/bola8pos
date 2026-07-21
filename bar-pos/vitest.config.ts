@@ -83,7 +83,10 @@ export default defineConfig(async () => {
           test: {
             name: 'integration',
             globals: true,
-            environment: 'node',
+            // jsdom (not 'node') — several *.integration.test.ts files use
+            // @testing-library/react's renderHook against real Supabase RPCs
+            // and need `document`; jsdom doesn't block the real network calls.
+            environment: 'jsdom',
             // Real-Supabase integration tests only. Not part of `npm run test`
             // (unit project excludes these) — run explicitly via `npm run
             // test:integration` or `npx vitest run <path>.integration.test.ts`.
