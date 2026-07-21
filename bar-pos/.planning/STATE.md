@@ -4,17 +4,17 @@ milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
 current_phase: 24
 current_phase_name: operational-reports-suite-csv
-status: executing
+status: verifying
 stopped_at: Completed 24-03-PLAN.md
-last_updated: "2026-07-21T21:13:15.385Z"
+last_updated: "2026-07-21T22:11:30.843Z"
 last_activity: 2026-07-21
 last_activity_desc: Phase 24 Plan 03 complete
 progress:
   total_phases: 28
-  completed_phases: 20
+  completed_phases: 21
   total_plans: 154
-  completed_plans: 153
-  percent: 71
+  completed_plans: 154
+  percent: 75
 ---
 
 # Session State
@@ -50,7 +50,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 
 Phase: 24 (operational-reports-suite-csv) — EXECUTING
 Plan: 10 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 
 ## Session Log
@@ -311,6 +311,7 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 - [Phase ?]: Authored deletionsPreSendPanel/deletionsPostCloseReport column-header i18n keys (not specified in UI-SPEC) following the existing columnX naming convention.
 - [Phase ?]: recharts 3.8.1 deprecates Cell — per-bar highlighting via Bar shape+Rectangle, per-slice via Pie's native data.fill (no Cell anywhere in the 3 new/extended widgets).
 - [Phase ?]: PaymentMethodsReport's leading-method accent (emerald) is scoped to the single leading day-level rollup row only, not every session row sharing that method.
+- [Phase ?]: 24-10: Fixed remove_tab_item RPC deplete_for_order_item smallint cast bug (broken since Plan 04, discovered by this plan's E2E) and 16-table-status.spec.ts T7/T8/T9 regression from Plan 07's required-reason field
 
 ## Performance Metrics
 
@@ -402,10 +403,11 @@ Last activity: 2026-07-21 — Phase 24 Plan 03 complete
 | Phase 24 P07 | 12min | 2 tasks | 5 files |
 | Phase 24 P08 | 20min | 2 tasks | 7 files |
 | Phase 24 P09 | 45min | 3 tasks | 8 files |
+| Phase 24 P10 | 56min | 3 tasks | 7 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 24-09-PLAN.md
+- **Stopped at:** Completed 24-10-PLAN.md (phase 24 complete)
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -422,7 +424,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T21:13:15.362Z
+**Last session:** 2026-07-21T22:11:30.832Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 
