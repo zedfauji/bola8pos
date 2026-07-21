@@ -59,7 +59,7 @@ export function useRemoveTabItem() {
           code: parsed.code,
         });
         if (parsed.code === 'NOT_FOUND') {
-          return err(notFoundError('Order item'));
+          return err(notFoundError());
         }
         if (parsed.code === 'TAB_NOT_OPEN') {
           return err(tabNotOpenError());
