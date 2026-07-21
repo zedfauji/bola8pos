@@ -735,7 +735,7 @@ Plans:
 **Goal:** Add 6 new reporting RPCs (peak-hours, voids, deletions ×2, modifier popularity, payment methods, charts-data), a generic CSV export action, and Recharts-based report widgets.
 **Requirements:** TBD (POS-COMPARISON.md §24 — source doc no longer present; scope locked in 24-CONTEXT.md; SC-1..SC-4 below are the coverage requirement set)
 **Depends on:** Phase 14
-**Plans:** 2/10 plans executed
+**Plans:** 3/10 plans executed
 
 Plans:
 **Wave 1**
@@ -745,7 +745,7 @@ Plans:
 
 **Wave 2**
 
-- [ ] 24-02-PLAN.md — Generic CSV serializer (csv.ts, xlsx reuse) + CSV wired to all 17 report tabs (D-11/D-12) + D-04 hourly exporter extension (SC-2)
+- [x] 24-02-PLAN.md — Generic CSV serializer (csv.ts, xlsx reuse) + CSV wired to all 17 report tabs (D-11/D-12) + D-04 hourly exporter extension (SC-2)
 - [ ] 24-04-PLAN.md — Deletions RPCs + audited atomic `remove_tab_item` RPC (D-05/D-06/D-07, restore-before-delete, no role gate, audit_logs plural) (SC-1, SC-4)
 
 **Wave 3**
