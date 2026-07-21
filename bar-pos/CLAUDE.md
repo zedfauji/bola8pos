@@ -177,6 +177,7 @@ All routes are registered in `src/app/router.tsx`. Protected by `<ProtectedRoute
 - Touch-target & focus-visible sweep — `focusEmphasis` CVA variant (`default | high`) on the base `Button`/`POSButton`; `touchSize` (44/56/72px) rollout across the pool-tables, pool-table-status, inventory, kitchen-prep, kds, and kds-bar pages; `ConfirmDialog`'s opt-in `confirmClassName` passthrough powering the two 72px/ring-4 destructive confirms (Stop pool session, Stop & Move); `e2e/44-focus-tab-order.spec.ts` regression-tests Tab order on ManagerPinDialog, the inventory filter/sort-header row, and the Batch Adjustment form (Phase 32)
 - Payment-critical page sweep — the 7 payment-critical surfaces (`pos/index.tsx` panel toggle, `CartPanel` Clear Cart, `PaymentForm` Process Payment + Remove-payment-N + Reset-to-computed, `TabPaymentCard`, `RefundSheet`, `SplitTabSheet`, `VoidOrderDialog`) standardized to `POSButton`/`touchSize`/`focusEmphasis`/`confirmClassName` with zero behavior change, each landing as its own isolated commit and verified against the 5 required gate E2E specs (`05-payments`, `41-split-payment`, `42-tip-distribution`, `06-transfer`, `09-rbac`) (COMPONENT-04, Phase 33)
 - i18n / multi-language (es-MX default, en-US) — `react-i18next` big-bang migration across every FSD layer, a self-service Language tab in Settings (all roles, including bartender), an admin per-staff locale field on `/staff`, locale-aware receipts/PDFs, and a committed `i18next/no-literal-string` lint gate preventing regression (SC-1..SC-4, Phase 21) — see "i18n / Multi-Language" section below
+- `reopen-tab` — manager+ PIN-gated `reopen_tab` RPC flips a closed/paid tab back to `open` (fully normal, no special "reopened mode" UI, D-06), voids its completed payment(s) via `payments.status='reopened_void'`, writes an offsetting `caja_entries` expense, enforces a 24h-rolling-window/2x-total reopen cap, and audit-logs `tab.reopen`; reachable from a `ReopenTabButton` on PaymentPane's payment-history rows (SC-1..SC-4, Phase 23)
 
 ## Key DB Tables (Remote Supabase)
 
@@ -218,8 +219,8 @@ Realtime subscriptions are initialized in Zustand stores, not React components. 
 
 ## E2E Test Suite (`bar-pos/e2e/`)
 
-25 spec files — all must pass before release:
-`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`, `44-focus-tab-order`, `46-i18n-locale-switch`, `47-edit-paid-tab`
+26 spec files — all must pass before release:
+`01-ci`, `02-caja`, `03-tab-order`, `04-pool-timer`, `05-payments`, `06-transfer`, `07-reports`, `08-settings-receipt`, `09-rbac`, `10-inventory`, `11-offline`, `12-infrastructure`, `13-tauri-build`, `14-manual-stubs`, `15-home-navigation`, `16-table-status`, `17-payment-pane`, `38-audit-logs`, `39-concurrent-edits`, `40-kds-bar`, `41-split-payment`, `42-tip-distribution`, `44-focus-tab-order`, `46-i18n-locale-switch`, `47-edit-paid-tab`, `48-reopen-closed-ticket`
 
 Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')` — admin PIN is `0000`.
 
