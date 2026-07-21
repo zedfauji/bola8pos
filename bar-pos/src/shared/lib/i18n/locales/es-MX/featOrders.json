@@ -248,6 +248,22 @@
     "conceptPlaceholder": "Describe this entry…",
     "saveEntry": "Save Entry"
   },
+  "reopenTab": {
+    "title": "Reabrir cuenta",
+    "description": "Reabre esta cuenta cerrada o pagada. El pago original quedará anulado y la cuenta volverá a estar abierta.",
+    "summary": "Reabrir la cuenta de {{name}} anulará el pago original y la reabrirá para su edición.",
+    "reasonLabel": "Motivo",
+    "reasonPlaceholder": "Describe el motivo para reabrir...",
+    "cancel": "Cancelar",
+    "requestApproval": "Solicitar aprobación",
+    "reopenSuccess": "Cuenta reabierta correctamente.",
+    "capExceeded": "Esta cuenta ya se reabrió el número máximo de veces permitido.",
+    "windowExpired": "El plazo para reabrir esta cuenta ha expirado.",
+    "noOpenCaja": "No hay una sesión de caja abierta — se requiere una caja abierta para reabrir esta cuenta.",
+    "authForbidden": "Se requiere la aprobación de un gerente para reabrir una cuenta.",
+    "notReopenable": "Esta cuenta no se puede reabrir.",
+    "genericError": "No se pudo reabrir la cuenta. Verifica tu conexión e intenta de nuevo."
+  },
   "startPoolTimer": {
     "tableUnavailable": "This table is not available to start a session.",
     "noActiveStaffOrShift": "No active staff or shift.",

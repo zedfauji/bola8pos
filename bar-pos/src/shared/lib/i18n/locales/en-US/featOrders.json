@@ -248,6 +248,22 @@
     "conceptPlaceholder": "Describe this entry…",
     "saveEntry": "Save Entry"
   },
+  "reopenTab": {
+    "title": "Reopen ticket",
+    "description": "Reopen this closed or paid ticket. The original payment will be voided and the ticket will become open again.",
+    "summary": "Reopening {{name}}'s ticket will void the original payment and reopen it for editing.",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "Describe the reason for reopening...",
+    "cancel": "Cancel",
+    "requestApproval": "Request approval",
+    "reopenSuccess": "Ticket reopened successfully.",
+    "capExceeded": "This ticket has already been reopened the maximum number of times allowed.",
+    "windowExpired": "The window to reopen this ticket has expired.",
+    "noOpenCaja": "No caja session is open — an open caja is required to reopen this ticket.",
+    "authForbidden": "Manager approval is required to reopen a ticket.",
+    "notReopenable": "This ticket cannot be reopened.",
+    "genericError": "Could not reopen the ticket. Check your connection and try again."
+  },
   "startPoolTimer": {
     "tableUnavailable": "This table is not available to start a session.",
     "noActiveStaffOrShift": "No active staff or shift.",
