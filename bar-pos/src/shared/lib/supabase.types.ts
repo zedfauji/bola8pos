@@ -2563,6 +2563,22 @@ export type Database = {
         Returns: Json
       }
       get_caja_report: { Args: { p_caja_id: string }; Returns: Json }
+      get_deletions_post_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
+      get_deletions_pre_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
+      get_modifier_popularity_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
+      get_payment_methods_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       get_payments_split_columns: {
         Args: never
         Returns: {
@@ -2571,9 +2587,17 @@ export type Database = {
           is_nullable: string
         }[]
       }
+      get_peak_hours_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_voids_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
       }
       is_combo_available: {
         Args: { p_combo_id: string; p_ts: string }
@@ -2705,6 +2729,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      remove_tab_item: {
+        Args: { p_item_id: string; p_reason: string }
+        Returns: Json
       }
       reopen_tab: {
         Args: { p_expected_version: number; p_reason: string; p_tab_id: string }
