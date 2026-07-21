@@ -133,3 +133,6 @@ None - no external service configuration required. (The db push itself is Plan 0
 ---
 *Phase: 23-reopen-closed-ticket*
 *Completed: 2026-07-21*
+
+## Self-Check: PASSED
+All 3 created migration files and this SUMMARY.md verified present; both task commit hashes (`bb18eaa`, `8aa1fa5`) verified present in git log.
