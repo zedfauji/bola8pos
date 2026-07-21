@@ -68,8 +68,11 @@
     "hourlySales": {
       "title": "Hourly Sales Report",
       "hour": "Hour",
+      "dayOfWeek": "Day of Week",
       "orders": "Orders",
-      "revenue": "Revenue"
+      "revenue": "Revenue",
+      "busiest": "Busiest",
+      "busiestMarker": "Yes"
     },
     "voidRefund": {
       "title": "Voids & Refunds Report",

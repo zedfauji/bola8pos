@@ -192,14 +192,23 @@ function HourlySalesDoc({ rows, locale }: { rows: HourlyRow[]; locale: Locale })
         />
         <View style={styles.tableHeader}>
           <Text style={styles.cell}>{tr('pdf.hourlySales.hour')}</Text>
+          <Text style={styles.cell}>{tr('pdf.hourlySales.dayOfWeek')}</Text>
           <Text style={styles.cellRight}>{tr('pdf.hourlySales.orders')}</Text>
           <Text style={styles.cellRight}>{tr('pdf.hourlySales.revenue')}</Text>
+          <Text style={styles.cell}>{tr('pdf.hourlySales.busiest')}</Text>
         </View>
         {rows.map((r, i) => (
-          <View key={r.hour} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+          <View
+            key={`${String(r.hour)}-${String(r.dayOfWeek)}`}
+            style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}
+          >
             <Text style={styles.cell}>{String(r.hour)}:00</Text>
+            <Text style={styles.cell}>{String(r.dayOfWeek)}</Text>
             <Text style={styles.cellRight}>{String(r.orderCount)}</Text>
             <Text style={styles.cellRight}>{fmt(r.revenue)}</Text>
+            <Text style={styles.cell}>
+              {r.isBusiest ? tr('pdf.hourlySales.busiestMarker') : ''}
+            </Text>
           </View>
         ))}
       </Page>

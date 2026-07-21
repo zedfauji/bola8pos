@@ -119,13 +119,14 @@ export function productSalesToWorkbook(
 export function hourlySalesToWorkbook(rows: HourlyRow[]): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
 
+  // D-04: day-of-week + busiest-hour indicator carried into the export, not just on screen.
   const header = [
-    ['Hour', 'Orders', 'Revenue'],
-    ...rows.map(r => [r.hour, r.orderCount, r.revenue]),
+    ['Hour', 'Day of Week', 'Orders', 'Revenue', 'Busiest'],
+    ...rows.map(r => [r.hour, r.dayOfWeek, r.orderCount, r.revenue, r.isBusiest ? 'Yes' : '']),
   ];
   const ws = XLSX.utils.aoa_to_sheet(header);
   rows.forEach((r, i) => {
-    ws[cellAddr('C', i + 2)] = moneyCell(r.revenue);
+    ws[cellAddr('D', i + 2)] = moneyCell(r.revenue);
   });
   XLSX.utils.book_append_sheet(wb, ws, 'Hourly Sales');
 

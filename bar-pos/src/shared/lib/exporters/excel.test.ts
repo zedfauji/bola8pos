@@ -82,6 +82,8 @@ function makeHourlyRows(count = 24): HourlyRow[] {
     hour: i,
     orderCount: i * 2,
     revenue: i * 50,
+    dayOfWeek: i % 7,
+    isBusiest: i === count - 1,
   }));
 }
 
@@ -189,7 +191,7 @@ describe('hourlySalesToWorkbook', () => {
     expect(data.length - 1).toBe(24);
   });
 
-  it('header has Hour, Orders, Revenue columns', () => {
+  it('header has Hour, Day of Week, Orders, Revenue, Busiest columns', () => {
     const rows = makeHourlyRows(1);
     const wb = hourlySalesToWorkbook(rows);
 
@@ -197,8 +199,10 @@ describe('hourlySalesToWorkbook', () => {
     const data = XLSX.utils.sheet_to_json<string[]>(ws, { header: 1 });
     const headerRow = data[0] as string[];
     expect(headerRow).toContain('Hour');
+    expect(headerRow).toContain('Day of Week');
     expect(headerRow).toContain('Orders');
     expect(headerRow).toContain('Revenue');
+    expect(headerRow).toContain('Busiest');
   });
 });
 
