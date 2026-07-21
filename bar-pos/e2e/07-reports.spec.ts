@@ -1,7 +1,195 @@
-import { expect, test } from './fixtures';
+import { expect, test, type Page } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
-import { openCaja, resetTestState } from './helpers/supabase';
+import { getServiceClient, openCaja, resetTestState } from './helpers/supabase';
+
+// --------------------------------------------------------------------------
+// Phase 24 (operational-reports-suite-csv) — Wave 6 helpers
+// --------------------------------------------------------------------------
+
+/** Inject a fake `__TAURI_INTERNALS__` so CSV export (save + write_file) resolves
+ * without a real Tauri runtime. Mirrors e2e/25-export-reports.spec.ts. */
+async function injectTauriMocks(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    (window as unknown as Record<string, unknown>)['__exportMockState'] = {
+      saveDialogCalled: false,
+      savedPath: null as string | null,
+    };
+    (window as unknown as Record<string, unknown>)['__TAURI_INTERNALS__'] = {
+      invoke(cmd: string): Promise<unknown> {
+        const state = (window as unknown as Record<string, unknown>)['__exportMockState'] as {
+          saveDialogCalled: boolean;
+          savedPath: string | null;
+        };
+        if (cmd === 'plugin:dialog|save') {
+          state.saveDialogCalled = true;
+          state.savedPath = '/tmp/e2e-phase24-export.csv';
+          return Promise.resolve('/tmp/e2e-phase24-export.csv');
+        }
+        if (cmd === 'plugin:fs|write_file') {
+          return Promise.resolve(null);
+        }
+        return Promise.resolve(null);
+      },
+      transformCallback(callback: (arg: unknown) => void, _once: boolean): number {
+        const id = Math.floor(Math.random() * 1_000_000);
+        (window as unknown as Record<string, unknown>)[`_${String(id)}`] = callback;
+        return id;
+      },
+      unregisterCallback(id: number): void {
+        delete (window as unknown as Record<string, unknown>)[`_${String(id)}`];
+      },
+    };
+  });
+}
+
+/** Seed a single `cash` payment on a fresh tab so Payment Methods has a
+ * guaranteed non-empty rollup row (ExportButtons is hidden on empty state). */
+async function seedCashPayment(): Promise<void> {
+  const admin = getServiceClient();
+  const { data: staff, error: sErr } = await admin
+    .from('profiles')
+    .select('id')
+    .limit(1)
+    .single();
+  if (sErr || !staff) throw new Error(`seedCashPayment: no staff profile - ${sErr?.message}`);
+
+  let shiftId: string;
+  const { data: existingShift } = await admin
+    .from('shifts')
+    .select('id')
+    .eq('staff_id', staff.id)
+    .is('clock_out', null)
+    .limit(1)
+    .maybeSingle();
+  if (existingShift) {
+    shiftId = existingShift.id as string;
+  } else {
+    const { data: newShift, error: shiftErr } = await admin
+      .from('shifts')
+      .insert({ staff_id: staff.id, opening_cash: 0 })
+      .select('id')
+      .single();
+    if (shiftErr || !newShift) throw new Error(`seedCashPayment: shift create failed - ${shiftErr?.message}`);
+    shiftId = newShift.id as string;
+  }
+
+  const { data: tab, error: tabErr } = await admin
+    .from('tabs')
+    .insert({
+      customer_name: 'E2E Payment Methods Seed',
+      status: 'closed',
+      closed_at: new Date().toISOString(),
+      staff_id: staff.id,
+      shift_id: shiftId,
+      is_deleted: false,
+    })
+    .select('id')
+    .single();
+  if (tabErr || !tab) throw new Error(`seedCashPayment: tab insert failed - ${tabErr?.message}`);
+
+  const { error: payErr } = await admin.from('payments').insert({
+    tab_id: tab.id,
+    amount: 25,
+    method: 'cash',
+    processed_by: staff.id,
+    processed_at: new Date().toISOString(),
+    idempotency_key: `e2e-phase24-payment-methods-${String(Date.now())}`,
+  });
+  if (payErr) throw new Error(`seedCashPayment: payment insert failed - ${payErr.message}`);
+}
+
+/** Seed an occupied pool table with an open tab + one order item, matching the
+ * pattern in e2e/16-table-status.spec.ts's seedOccupiedTableDirect. */
+async function seedRemovableItem(customerName: string): Promise<{ tableId: string }> {
+  const admin = getServiceClient();
+
+  const { data: table, error: tErr } = await admin
+    .from('pool_tables')
+    .select('id')
+    .eq('status', 'available')
+    .limit(1)
+    .single();
+  if (tErr || !table) throw new Error(`seedRemovableItem: no available table - ${tErr?.message}`);
+
+  const { data: staff, error: sErr } = await admin
+    .from('profiles')
+    .select('id')
+    .limit(1)
+    .single();
+  if (sErr || !staff) throw new Error(`seedRemovableItem: no staff profile - ${sErr?.message}`);
+
+  let shiftId: string;
+  const { data: existingShift } = await admin
+    .from('shifts')
+    .select('id')
+    .eq('staff_id', staff.id)
+    .is('clock_out', null)
+    .limit(1)
+    .maybeSingle();
+  if (existingShift) {
+    shiftId = existingShift.id as string;
+  } else {
+    const { data: newShift, error: shiftErr } = await admin
+      .from('shifts')
+      .insert({ staff_id: staff.id, opening_cash: 0 })
+      .select('id')
+      .single();
+    if (shiftErr || !newShift) throw new Error(`seedRemovableItem: shift create failed - ${shiftErr?.message}`);
+    shiftId = newShift.id as string;
+  }
+
+  const { data: tab, error: tabErr } = await admin
+    .from('tabs')
+    .insert({ customer_name: customerName, status: 'open', staff_id: staff.id, shift_id: shiftId, is_deleted: false })
+    .select('id')
+    .single();
+  if (tabErr || !tab) throw new Error(`seedRemovableItem: tab insert failed - ${tabErr?.message}`);
+
+  const { data: session, error: sessErr } = await admin
+    .from('pool_sessions')
+    .insert({
+      table_id: table.id,
+      tab_id: tab.id,
+      started_at: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+    })
+    .select('id')
+    .single();
+  if (sessErr || !session) throw new Error(`seedRemovableItem: session insert failed - ${sessErr?.message}`);
+
+  await admin
+    .from('pool_tables')
+    .update({ status: 'occupied', current_session_id: session.id })
+    .eq('id', table.id);
+
+  const { data: products, error: pErr } = await admin.from('products').select('id, base_price').limit(2);
+  if (pErr || !products || products.length < 2) {
+    throw new Error('seedRemovableItem: need at least 2 seeded products');
+  }
+
+  const { data: order, error: orderErr } = await admin
+    .from('orders')
+    .insert({ tab_id: tab.id, status: 'pending', staff_id: staff.id })
+    .select('id')
+    .single();
+  if (orderErr || !order) throw new Error(`seedRemovableItem: order insert failed - ${orderErr?.message}`);
+
+  // Two items — after removing one, the order still has a remaining item.
+  const { error: itemErr } = await admin.from('order_items').insert([
+    { order_id: order.id, product_id: products[0]!.id, quantity: 1, unit_price: products[0]!.base_price },
+    { order_id: order.id, product_id: products[1]!.id, quantity: 1, unit_price: products[1]!.base_price },
+  ]);
+  if (itemErr) throw new Error(`seedRemovableItem: order_items insert failed - ${itemErr.message}`);
+
+  return { tableId: table.id as string };
+}
+
+async function enterManagerPin(page: Page, pin: string): Promise<void> {
+  for (const ch of pin) {
+    const label = ch === '0' ? 'Key 0' : `Key ${ch}`;
+    await page.getByRole('button', { name: label }).click();
+  }
+}
 
 test.describe('Reports Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -602,6 +790,137 @@ test.describe('Reports Page', () => {
       // No staff data today — EmptyState correctly hides ExportButtons, test passes
       await expect(tabPanel.getByText(/no staff activity/i)).toBeVisible({ timeout: 10_000 });
     }
+
+    await logout(page);
+  });
+
+  // --------------------------------------------------------------------------
+  // Phase 24 (operational-reports-suite-csv) — Wave 6: 4 new report tabs + CSV
+  // export + bartender-initiated reason-required removal (SC-1..SC-4)
+  // --------------------------------------------------------------------------
+
+  test('Phase 24: all 4 new report tabs render without crash', async ({ page }) => {
+    await loginAs(page, 'admin');
+    await page.goto('/reports');
+
+    await expect(page.getByRole('tab', { name: 'Eliminaciones' })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('tab', { name: 'Correcciones' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Modificadores' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Métodos de pago' })).toBeVisible();
+
+    // deletions-pre: the standing historical-gap Alert is always visible (not dismissible)
+    await page.getByRole('tab', { name: 'Eliminaciones' }).click();
+    const deletionsPrePanel = page.getByRole('tabpanel');
+    await expect(deletionsPrePanel).toBeVisible({ timeout: 20_000 });
+    await expect(deletionsPrePanel.getByText(/partial history|historial parcial/i)).toBeVisible({ timeout: 15_000 });
+
+    // deletions-post: table or empty state, never a crash
+    await page.getByRole('tab', { name: 'Correcciones' }).click();
+    const deletionsPostPanel = page.getByRole('tabpanel');
+    await expect(deletionsPostPanel).toBeVisible({ timeout: 20_000 });
+
+    // modifier-popularity: chart+table or empty state
+    await page.getByRole('tab', { name: 'Modificadores' }).click();
+    const modifierPanel = page.getByRole('tabpanel');
+    await expect(modifierPanel).toBeVisible({ timeout: 20_000 });
+
+    // payment-methods: chart+table or empty state
+    await page.getByRole('tab', { name: 'Métodos de pago' }).click();
+    const paymentMethodsPanel = page.getByRole('tabpanel');
+    await expect(paymentMethodsPanel).toBeVisible({ timeout: 20_000 });
+
+    await logout(page);
+  });
+
+  test('Phase 24: CSV export from Payment Methods report writes a file', async ({ page }) => {
+    await seedCashPayment();
+    await injectTauriMocks(page);
+
+    await loginAs(page, 'admin');
+    await page.goto('/reports');
+    await page.getByRole('tab', { name: 'Métodos de pago' }).click();
+
+    const tabPanel = page.getByRole('tabpanel');
+    await expect(tabPanel).toBeVisible({ timeout: 20_000 });
+
+    const exportBtn = tabPanel.getByRole('button', { name: /export/i });
+    await expect(exportBtn).toBeVisible({ timeout: 20_000 });
+    await exportBtn.click();
+
+    const csvItem = page.getByRole('menuitem', { name: /^csv$/i });
+    await expect(csvItem).toBeVisible({ timeout: 5_000 });
+    await csvItem.click();
+
+    await expect(page.getByText('Report exported successfully.')).toBeVisible({ timeout: 20_000 });
+
+    const mockState = await page.evaluate(() => {
+      return (window as unknown as Record<string, unknown>)['__exportMockState'] as {
+        saveDialogCalled: boolean;
+        savedPath: string | null;
+      };
+    });
+    expect(mockState.saveDialogCalled).toBe(true);
+    expect(mockState.savedPath).toMatch(/\.csv$/);
+
+    await logout(page);
+  });
+
+  // Note: RemoveTabItemDialog/useRemoveTabItem (24-04/24-07) carry no PIN gate or
+  // role check of their own (D-06/D-07) — but the only reachable UI caller,
+  // TableStatusPanel, wraps removal with its own PRE-EXISTING ManagerPinDialog
+  // (requiredAction="void_order"), unrelated to and unchanged by this phase — see
+  // its "full two-step orchestration" doc comment and the already-passing
+  // e2e/16-table-status.spec.ts "T7: Bartender removing an item requires manager
+  // PIN" regression test. This test proves the phase's actual delivery: the
+  // reason-required removal completes without AUTH_FORBIDDEN once past that
+  // existing gate, and the removal is attributed correctly in the deletions-pre
+  // report (SC-1).
+  test('Phase 24: bartender-initiated reason-required removal succeeds (no AUTH_FORBIDDEN) and appears in Eliminaciones', async ({ page }) => {
+    test.setTimeout(120_000);
+    const { tableId } = await seedRemovableItem('Phase24 Removal Test');
+
+    await loginAs(page, 'bartender');
+    await page.goto(`/pool-tables/${tableId}`);
+
+    const removeBtn = page.getByRole('button', { name: 'Remove item' }).first();
+    await expect(removeBtn).toBeVisible({ timeout: 20_000 });
+    await removeBtn.click();
+
+    // Step 1 — pre-existing manager-PIN gate on TableStatusPanel (unrelated to this phase)
+    const pinDialog = page.getByRole('alertdialog', { name: /manager access required/i });
+    await expect(pinDialog).toBeVisible({ timeout: 15_000 });
+    const managerPin = process.env['E2E_MANAGER_PIN'] ?? '';
+    await enterManagerPin(page, managerPin);
+
+    // Step 2 — RemoveTabItemDialog: required reason field, no additional PIN prompt
+    const confirmDialog = page.getByRole('alertdialog').filter({ hasText: /remove/i });
+    await expect(confirmDialog).toBeVisible({ timeout: 15_000 });
+    await expect(confirmDialog.getByRole('button', { name: 'Key 0' })).toHaveCount(0);
+
+    const confirmBtn = confirmDialog.getByRole('button', { name: /confirm|remove/i });
+    await expect(confirmBtn).toBeDisabled();
+
+    // Unique per-run so a re-run of this test (or a prior failed run's leftover
+    // audit row) never causes a strict-mode multi-match on the assertion below.
+    const uniqueReason = `Phase 24 E2E - wrong item ${String(Date.now())}`;
+    const reasonInput = confirmDialog.getByLabel(/reason|motivo/i);
+    await reasonInput.fill(uniqueReason);
+    await expect(confirmBtn).toBeEnabled();
+    await confirmBtn.click();
+
+    // No AUTH_FORBIDDEN — success toast confirms the RPC accepted the bartender-attributed removal
+    await expect(page.getByText(/removed from order/i)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/forbidden/i)).not.toBeVisible();
+
+    await logout(page);
+
+    // Verify attribution in the deletions-pre report
+    await loginAs(page, 'admin');
+    await page.goto('/reports');
+    await page.getByRole('tab', { name: 'Eliminaciones' }).click();
+    const deletionsPanel = page.getByRole('tabpanel');
+    await expect(deletionsPanel).toBeVisible({ timeout: 20_000 });
+    await expect(deletionsPanel.getByText(uniqueReason)).toBeVisible({ timeout: 20_000 });
 
     await logout(page);
   });
