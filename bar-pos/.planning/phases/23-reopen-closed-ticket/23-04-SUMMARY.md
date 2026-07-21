@@ -193,4 +193,4 @@ None was ultimately needed. The plan's `user_setup` entry (`SUPABASE_ACCESS_TOKE
 *Completed: 2026-07-21*
 
 ## Self-Check: PASSED
-Both modified files (`src/shared/lib/supabase.types.ts`, `src/features/reopen-tab/model/reopen-tab-rpc.integration.test.ts`) verified present; both task commit hashes (`2f56950`, `617832b`) verified present in git log; all 4 remote migrations verified applied via `npx supabase migration list`.
+Both modified files (`src/shared/lib/supabase.types.ts`, `src/features/reopen-tab/model/reopen-tab-rpc.integration.test.ts`) verified present; both task commit hashes (`2f56950`, `617832b`) verified present in git log; all 4 remote migrations verified applied via `npx supabase migration list`. SUMMARY.md itself and its commit (`16b6eb8`) also verified present post-write.

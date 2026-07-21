@@ -697,7 +697,7 @@ Plans:
 **Goal:** Let managers reopen a closed ticket via a `reopen_tab` RPC, introducing a `reopened_void` payment status, offsetting caja entries, and a cap (24h window, max 2 reopens per tab).
 **Requirements:** TBD (POS-COMPARISON.md §23 — source doc no longer present; scope locked in 23-CONTEXT.md)
 **Depends on:** Phase 14, Phase 15
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 **Wave 1**
@@ -711,7 +711,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 23-04-PLAN.md — [BLOCKING] db push + regen types + SC-1..SC-4 & double-count integration tests (Wave 3)
+- [x] 23-04-PLAN.md — [BLOCKING] db push + regen types + SC-1..SC-4 & double-count integration tests (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
