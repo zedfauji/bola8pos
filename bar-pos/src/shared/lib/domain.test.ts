@@ -32,6 +32,11 @@ import {
   PromotionSchema,
   PromotionCreateSchema,
   AppliedPromotionSchema,
+  HourlyRowSchema,
+  DeletionsPreRowSchema,
+  DeletionsPostRowSchema,
+  ModifierPopularityRowSchema,
+  PaymentMethodRowSchema,
 } from './domain';
 
 // ─── Shared test fixtures ────────────────────────────────────────────────────
@@ -619,5 +624,143 @@ describe('AppliedPromotionSchema', () => {
 describe('AuditActionSchema — promotion.apply', () => {
   it('parses the promotion.apply audit action', () => {
     expect(() => AuditActionSchema.parse('promotion.apply')).not.toThrow();
+  });
+});
+
+// ─── HourlyRowSchema (D-04 extension) ────────────────────────────────────────
+
+describe('HourlyRowSchema', () => {
+  it('accepts the original fields plus dayOfWeek and isBusiest', () => {
+    const result = HourlyRowSchema.safeParse({
+      hour: 18,
+      orderCount: 12,
+      revenue: 340.5,
+      dayOfWeek: 5,
+      isBusiest: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an object missing the new required fields', () => {
+    const result = HourlyRowSchema.safeParse({
+      hour: 18,
+      orderCount: 12,
+      revenue: 340.5,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ─── DeletionsPreRowSchema (D-05 variant A) ──────────────────────────────────
+
+describe('DeletionsPreRowSchema', () => {
+  it('accepts orderId/itemName/removedAt/staffName/reason', () => {
+    const result = DeletionsPreRowSchema.safeParse({
+      orderId: UUID,
+      itemName: 'Micheladas',
+      removedAt: NOW,
+      staffName: 'Ana',
+      reason: 'Wrong item',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a missing reason', () => {
+    const result = DeletionsPreRowSchema.safeParse({
+      orderId: UUID,
+      itemName: 'Micheladas',
+      removedAt: NOW,
+      staffName: 'Ana',
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ─── DeletionsPostRowSchema (D-05 variant B) ─────────────────────────────────
+
+describe('DeletionsPostRowSchema', () => {
+  it('accepts tabId/editedAt/staffName/reason/fieldsChanged', () => {
+    const result = DeletionsPostRowSchema.safeParse({
+      tabId: UUID,
+      editedAt: NOW,
+      staffName: 'Carlos',
+      reason: 'Customer dispute',
+      fieldsChanged: ['quantity', 'unitPrice'],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a non-array fieldsChanged', () => {
+    const result = DeletionsPostRowSchema.safeParse({
+      tabId: UUID,
+      editedAt: NOW,
+      staffName: 'Carlos',
+      reason: 'Customer dispute',
+      fieldsChanged: 'quantity',
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ─── ModifierPopularityRowSchema (D-09) ──────────────────────────────────────
+
+describe('ModifierPopularityRowSchema', () => {
+  it('accepts modifierId/modifierName/attachCount/revenue', () => {
+    const result = ModifierPopularityRowSchema.safeParse({
+      modifierId: UUID,
+      modifierName: 'Extra queso',
+      attachCount: 42,
+      revenue: 210,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a missing attachCount', () => {
+    const result = ModifierPopularityRowSchema.safeParse({
+      modifierId: UUID,
+      modifierName: 'Extra queso',
+      revenue: 210,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ─── PaymentMethodRowSchema (D-08) ───────────────────────────────────────────
+
+describe('PaymentMethodRowSchema', () => {
+  it('accepts a per-session row with a non-null cajaSessionId', () => {
+    const result = PaymentMethodRowSchema.safeParse({
+      cajaSessionId: UUID,
+      method: 'cash',
+      legCount: 6,
+      grossAmount: 1200,
+      tipAmount: 100,
+      isRollup: false,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a day-level rollup row with a null cajaSessionId', () => {
+    const result = PaymentMethodRowSchema.safeParse({
+      cajaSessionId: null,
+      method: 'card',
+      legCount: 20,
+      grossAmount: 5000,
+      tipAmount: 400,
+      isRollup: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an invalid payment method', () => {
+    const result = PaymentMethodRowSchema.safeParse({
+      cajaSessionId: null,
+      method: 'bitcoin',
+      legCount: 1,
+      grossAmount: 10,
+      tipAmount: 0,
+      isRollup: false,
+    });
+    expect(result.success).toBe(false);
   });
 });

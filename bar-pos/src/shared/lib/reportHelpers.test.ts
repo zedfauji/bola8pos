@@ -54,8 +54,8 @@ describe('computePctTotals — edge cases', () => {
 describe('findPeakHour — extra scenarios', () => {
   it('returns the correct peak when two rows have the same revenue (first wins / last wins deterministically)', () => {
     const rows: HourlyRow[] = [
-      { hour: 5, orderCount: 1, revenue: 200 },
-      { hour: 10, orderCount: 2, revenue: 200 },
+      { hour: 5, orderCount: 1, revenue: 200, dayOfWeek: 0, isBusiest: false },
+      { hour: 10, orderCount: 2, revenue: 200, dayOfWeek: 0, isBusiest: false },
     ];
     // The implementation uses reduce with strict >, so the first row stays as best
     const peak = findPeakHour(rows);
@@ -71,8 +71,8 @@ describe('findPeakHour — extra scenarios', () => {
 describe('findSlowestHour — extra scenarios', () => {
   it('does NOT return the same row as peak when only one non-zero row exists', () => {
     const rows: HourlyRow[] = [
-      { hour: 0, orderCount: 0, revenue: 0 },
-      { hour: 14, orderCount: 3, revenue: 120 },
+      { hour: 0, orderCount: 0, revenue: 0, dayOfWeek: 0, isBusiest: false },
+      { hour: 14, orderCount: 3, revenue: 120, dayOfWeek: 0, isBusiest: false },
     ];
     const peak = findPeakHour(rows);
     const slowest = findSlowestHour(rows);
@@ -85,8 +85,8 @@ describe('findSlowestHour — extra scenarios', () => {
 
   it('returns a different row from peak when two distinct non-zero rows exist', () => {
     const rows: HourlyRow[] = [
-      { hour: 6, orderCount: 1, revenue: 50 },
-      { hour: 20, orderCount: 5, revenue: 500 },
+      { hour: 6, orderCount: 1, revenue: 50, dayOfWeek: 0, isBusiest: false },
+      { hour: 20, orderCount: 5, revenue: 500, dayOfWeek: 0, isBusiest: false },
     ];
     const peak = findPeakHour(rows);
     const slowest = findSlowestHour(rows);
@@ -130,6 +130,8 @@ describe('property: findPeakHour returns non-null when at least one revenue > 0'
               hour: fc.integer({ min: 0, max: 23 }),
               orderCount: fc.integer({ min: 0, max: 50 }),
               revenue: fc.float({ min: Math.fround(0), max: Math.fround(1_000), noNaN: true }),
+              dayOfWeek: fc.integer({ min: 0, max: 6 }),
+              isBusiest: fc.boolean(),
             }),
             { minLength: 1, maxLength: 24 }
           )

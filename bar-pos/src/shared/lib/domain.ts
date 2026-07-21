@@ -1154,11 +1154,17 @@ export type ProductSalesRow = {
   pctTotal: number;
 };
 
-export type HourlyRow = {
-  hour: number;
-  orderCount: number;
-  revenue: number;
-};
+// D-04: extended with day-of-week + a per-row "busiest hour" indicator so the
+// Hourly tab reads as genuine peak-hours analysis (RPC-backed, Plan 24-02).
+export const HourlyRowSchema = z.object({
+  hour: z.number(),
+  orderCount: z.number(),
+  revenue: z.number(),
+  dayOfWeek: z.number(),
+  isBusiest: z.boolean(),
+});
+
+export type HourlyRow = z.infer<typeof HourlyRowSchema>;
 
 export const VoidRefundRowSchema = z.object({
   orderId: UuidSchema,
@@ -1169,6 +1175,51 @@ export const VoidRefundRowSchema = z.object({
 });
 
 export type VoidRefundRow = z.infer<typeof VoidRefundRowSchema>;
+
+// D-05 variant A: pre-send order-item removal (remove_tab_item, Plan 24-04).
+export const DeletionsPreRowSchema = z.object({
+  orderId: UuidSchema,
+  itemName: z.string(),
+  removedAt: TimestampSchema,
+  staffName: z.string(),
+  reason: z.string(),
+});
+
+export type DeletionsPreRow = z.infer<typeof DeletionsPreRowSchema>;
+
+// D-05 variant B: post-close correction via edit_paid_tab (tab.edit_paid audit rows).
+export const DeletionsPostRowSchema = z.object({
+  tabId: UuidSchema,
+  editedAt: TimestampSchema,
+  staffName: z.string(),
+  reason: z.string(),
+  fieldsChanged: z.array(z.string()),
+});
+
+export type DeletionsPostRow = z.infer<typeof DeletionsPostRowSchema>;
+
+// D-09: ranked by both attach-count and revenue-attributable columns.
+export const ModifierPopularityRowSchema = z.object({
+  modifierId: UuidSchema,
+  modifierName: z.string(),
+  attachCount: z.number(),
+  revenue: MoneySchema,
+});
+
+export type ModifierPopularityRow = z.infer<typeof ModifierPopularityRowSchema>;
+
+// D-08: per-caja-session rows (cajaSessionId set) plus one day-level rollup
+// row (cajaSessionId null, isRollup true) pinned to the table bottom.
+export const PaymentMethodRowSchema = z.object({
+  cajaSessionId: UuidSchema.nullable(),
+  method: PaymentMethodSchema,
+  legCount: z.number(),
+  grossAmount: MoneySchema,
+  tipAmount: MoneySchema,
+  isRollup: z.boolean(),
+});
+
+export type PaymentMethodRow = z.infer<typeof PaymentMethodRowSchema>;
 
 export type CategoryRevenueRow = {
   categoryId: string;
