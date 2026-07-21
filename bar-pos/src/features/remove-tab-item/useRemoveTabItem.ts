@@ -6,9 +6,11 @@ import { logger } from '@shared/lib/logger-instance';
 import {
   err,
   networkOfflineError,
+  notFoundError,
   ok,
-  supabaseMutation,
   supabaseError,
+  tabNotOpenError,
+  unknownError,
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -19,7 +21,10 @@ export interface RemoveTabItemInput {
   itemId: string;
   productId: string;
   quantity: number;
+  reason: string;
 }
+
+type RemoveTabItemRpcResult = { ok: boolean; code?: string; message?: string };
 
 export function useRemoveTabItem() {
   const queryClient = useQueryClient();
@@ -30,57 +35,37 @@ export function useRemoveTabItem() {
         return err(networkOfflineError());
       }
 
-      // Step 1: Delete the order_item row
-      const delRes = await supabaseMutation(() =>
-        supabase.from('order_items').delete().eq('id', input.itemId)
-      );
+      const { data, error } = await supabase.rpc('remove_tab_item', {
+        p_item_id: input.itemId,
+        p_reason: input.reason,
+      });
 
-      if (!delRes.ok) {
-        logger.error('tab.removeItem.delete_failed', {
+      if (error) {
+        logger.error('tab.removeItem.rpc_failed', {
           itemId: input.itemId,
           orderId: input.orderId,
           tabId: input.tabId,
-          message: delRes.error.message,
+          message: error.message,
         });
-        return err(supabaseError(delRes.error.message, undefined, delRes.error.raw));
+        return err(supabaseError(error.message, undefined, error));
       }
 
-      // Step 2: Check if the order has any remaining items
-      const remainingRes = await supabaseMutation(() =>
-        supabase.from('order_items').select('id').eq('order_id', input.orderId)
-      );
-
-      if (!remainingRes.ok) {
-        // Non-fatal: order status update is best-effort
-        logger.warn('tab.removeItem.check_remaining_failed', {
+      const parsed = data as RemoveTabItemRpcResult;
+      if (!parsed.ok) {
+        logger.error('tab.removeItem.rejected', {
+          itemId: input.itemId,
           orderId: input.orderId,
-          message: remainingRes.error.message,
+          tabId: input.tabId,
+          code: parsed.code,
         });
-        return ok(undefined);
-      }
-
-      // Step 3: If no items remain, mark the order as voided
-      const remaining = remainingRes.data as { id: string }[];
-      if (remaining.length === 0) {
-        const voidRes = await supabaseMutation(() =>
-          supabase.from('orders').update({ status: 'voided' }).eq('id', input.orderId)
-        );
-
-        if (!voidRes.ok) {
-          logger.warn('tab.removeItem.void_order_failed', {
-            orderId: input.orderId,
-            message: voidRes.error.message,
-          });
-          // Non-fatal: item was already deleted successfully
-        } else {
-          logger.info('tab.removeItem.order_voided', { orderId: input.orderId });
+        if (parsed.code === 'NOT_FOUND') {
+          return err(notFoundError('Order item'));
         }
+        if (parsed.code === 'TAB_NOT_OPEN') {
+          return err(tabNotOpenError());
+        }
+        return err(unknownError(parsed));
       }
-
-      // TODO: Restore inventory for the removed item. The current inventory
-      // restore flow is coupled to the void-order edge function which operates
-      // on a full order. A dedicated single-item inventory restore RPC would be
-      // needed here. Track as: restore +input.quantity units for input.productId.
 
       logger.info('tab.removeItem.succeeded', {
         itemId: input.itemId,

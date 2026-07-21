@@ -170,6 +170,7 @@ export type AppErrorCode =
   | 'VALIDATION_ERROR'
   | 'DUPLICATE_ENTRY'
   | 'TAB_ALREADY_CLOSED'
+  | 'TAB_NOT_OPEN' // action requires an open tab (e.g. item removal on a closed/voided tab)
   | 'SESSION_STILL_RUNNING' // trying to close tab with active pool session
   | 'PAYMENT_DECLINED'
   | 'PAYMENT_ALREADY_PROCESSED'
@@ -285,6 +286,16 @@ export const duplicateEntryError = (field: string = 'entry'): AppError => ({
 export const tabAlreadyClosedError = (): AppError => ({
   code: 'TAB_ALREADY_CLOSED',
   message: 'This tab has already been closed.',
+});
+
+/**
+ * Creates a tab-not-open error.
+ * Raised when an action requiring an open tab (e.g. item removal via
+ * `remove_tab_item`) targets a closed/voided tab (RPC code `TAB_NOT_OPEN`).
+ */
+export const tabNotOpenError = (): AppError => ({
+  code: 'TAB_NOT_OPEN',
+  message: 'This tab is no longer open.',
 });
 
 /**

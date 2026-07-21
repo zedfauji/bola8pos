@@ -28,6 +28,7 @@ const baseInput: RemoveTabItemInput = {
   itemId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
   productId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
   quantity: 1,
+  reason: 'Wrong item',
 };
 
 function makeWrapper(queryClient: QueryClient) {
@@ -45,35 +46,8 @@ function makeQueryClient() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Supabase mock helpers
-// ---------------------------------------------------------------------------
-
-/** Returns a chainable Supabase builder that resolves with the given result. */
-function makeBuilder(resolved: { data: unknown; error: unknown }) {
-  const builder = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    is: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue(resolved),
-    maybeSingle: vi.fn().mockResolvedValue(resolved),
-    then: (resolve: (v: typeof resolved) => void) => Promise.resolve(resolved).then(resolve),
-  };
-  return builder;
-}
-
-// supabase.from is already a vi.fn() from the global mock in test-setup.ts.
-// vi.mocked guarantees this is a mock function; the unbound-method warning does not apply.
 // eslint-disable-next-line @typescript-eslint/unbound-method
-const mockedFrom = vi.mocked(supabase).from;
+const mockedRpc = vi.mocked(supabase.rpc);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -94,19 +68,8 @@ describe('useRemoveTabItem', () => {
     queryClient.clear();
   });
 
-  it('returns ok and invalidates tab queries on successful delete', async () => {
-    // DELETE succeeds, remaining items check returns empty list → void order
-    const deleteBuilder = makeBuilder({ data: null, error: null });
-    const remainingBuilder = makeBuilder({ data: [], error: null });
-    const voidBuilder = makeBuilder({ data: null, error: null });
-
-    let callCount = 0;
-    mockedFrom.mockImplementation(() => {
-      callCount += 1;
-      if (callCount === 1) return deleteBuilder as unknown as ReturnType<typeof supabase.from>;
-      if (callCount === 2) return remainingBuilder as unknown as ReturnType<typeof supabase.from>;
-      return voidBuilder as unknown as ReturnType<typeof supabase.from>;
-    });
+  it('calls remove_tab_item RPC with p_item_id + p_reason, returns ok, invalidates tab queries', async () => {
+    mockedRpc.mockResolvedValue({ data: { ok: true }, error: null } as never);
 
     const wrapper = makeWrapper(queryClient);
     const { result } = renderHook(() => useRemoveTabItem(), { wrapper });
@@ -114,6 +77,10 @@ describe('useRemoveTabItem', () => {
     const res = await result.current.removeTabItem(baseInput);
 
     expect(res.ok).toBe(true);
+    expect(mockedRpc).toHaveBeenCalledWith('remove_tab_item', {
+      p_item_id: baseInput.itemId,
+      p_reason: baseInput.reason,
+    });
     expect(invalidateSpy).toHaveBeenCalledWith(
       expect.objectContaining({ queryKey: tabKeys.detail(baseInput.tabId) })
     );
@@ -122,63 +89,11 @@ describe('useRemoveTabItem', () => {
     );
   });
 
-  it('does NOT void order when items remain after removal', async () => {
-    const deleteBuilder = makeBuilder({ data: null, error: null });
-    // Remaining check returns 1 item → order should NOT be voided
-    const remainingBuilder = makeBuilder({
-      data: [{ id: 'item-still-there' }],
-      error: null,
-    });
-    const voidBuilder = makeBuilder({ data: null, error: null });
-
-    let callCount = 0;
-    mockedFrom.mockImplementation(() => {
-      callCount += 1;
-      if (callCount === 1) return deleteBuilder as unknown as ReturnType<typeof supabase.from>;
-      if (callCount === 2) return remainingBuilder as unknown as ReturnType<typeof supabase.from>;
-      return voidBuilder as unknown as ReturnType<typeof supabase.from>;
-    });
-
-    const wrapper = makeWrapper(queryClient);
-    const { result } = renderHook(() => useRemoveTabItem(), { wrapper });
-
-    const res = await result.current.removeTabItem(baseInput);
-
-    expect(res.ok).toBe(true);
-    // Void builder should NOT have been reached (only 2 from() calls)
-    expect(callCount).toBe(2);
-  });
-
-  it('voids order when last item is removed', async () => {
-    const deleteBuilder = makeBuilder({ data: null, error: null });
-    const remainingBuilder = makeBuilder({ data: [], error: null });
-    const voidBuilder = makeBuilder({ data: null, error: null });
-
-    let callCount = 0;
-    mockedFrom.mockImplementation(() => {
-      callCount += 1;
-      if (callCount === 1) return deleteBuilder as unknown as ReturnType<typeof supabase.from>;
-      if (callCount === 2) return remainingBuilder as unknown as ReturnType<typeof supabase.from>;
-      return voidBuilder as unknown as ReturnType<typeof supabase.from>;
-    });
-
-    const wrapper = makeWrapper(queryClient);
-    const { result } = renderHook(() => useRemoveTabItem(), { wrapper });
-
-    const res = await result.current.removeTabItem(baseInput);
-
-    expect(res.ok).toBe(true);
-    // void builder must have been called (3 from() calls total)
-    expect(callCount).toBe(3);
-  });
-
-  it('returns SUPABASE_ERROR when DELETE fails', async () => {
-    const failBuilder = makeBuilder({
+  it('returns SUPABASE_ERROR when the RPC call itself errors', async () => {
+    mockedRpc.mockResolvedValue({
       data: null,
-      error: { message: 'delete failed', code: '500', details: '', hint: '' },
-    });
-
-    mockedFrom.mockReturnValue(failBuilder as unknown as ReturnType<typeof supabase.from>);
+      error: { message: 'rpc failed', code: '500', details: '', hint: '' },
+    } as never);
 
     const wrapper = makeWrapper(queryClient);
     const { result } = renderHook(() => useRemoveTabItem(), { wrapper });
@@ -191,7 +106,38 @@ describe('useRemoveTabItem', () => {
     }
   });
 
-  it('returns NETWORK_OFFLINE error without calling Supabase when offline', async () => {
+  it('returns NOT_FOUND when the RPC envelope reports code NOT_FOUND', async () => {
+    mockedRpc.mockResolvedValue({ data: { ok: false, code: 'NOT_FOUND' }, error: null } as never);
+
+    const wrapper = makeWrapper(queryClient);
+    const { result } = renderHook(() => useRemoveTabItem(), { wrapper });
+
+    const res = await result.current.removeTabItem(baseInput);
+
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe('NOT_FOUND');
+    }
+  });
+
+  it('returns TAB_NOT_OPEN when the RPC envelope reports code TAB_NOT_OPEN', async () => {
+    mockedRpc.mockResolvedValue({
+      data: { ok: false, code: 'TAB_NOT_OPEN' },
+      error: null,
+    } as never);
+
+    const wrapper = makeWrapper(queryClient);
+    const { result } = renderHook(() => useRemoveTabItem(), { wrapper });
+
+    const res = await result.current.removeTabItem(baseInput);
+
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe('TAB_NOT_OPEN');
+    }
+  });
+
+  it('returns NETWORK_OFFLINE error without calling the RPC when offline', async () => {
     vi.mocked(connectivity.isOnline).mockReturnValue(false);
 
     const wrapper = makeWrapper(queryClient);
@@ -203,6 +149,6 @@ describe('useRemoveTabItem', () => {
     if (!res.ok) {
       expect(res.error.code).toBe('NETWORK_OFFLINE');
     }
-    expect(mockedFrom).not.toHaveBeenCalled();
+    expect(mockedRpc).not.toHaveBeenCalled();
   });
 });
