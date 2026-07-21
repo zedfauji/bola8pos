@@ -443,6 +443,8 @@ test.describe('Table Status Page', () => {
     // Removal confirm dialog should now appear
     const confirmDialog = page.getByRole('alertdialog').filter({ hasText: /remove/i });
     await expect(confirmDialog).toBeVisible({ timeout: 15_000 });
+    // Phase 24 (24-07): RemoveTabItemDialog now requires a reason before Confirm enables.
+    await confirmDialog.getByLabel(/reason|motivo/i).fill('E2E test removal');
     await confirmDialog.getByRole('button', { name: /confirm|remove/i }).click();
 
     // Item count decreases — one item section should remain
@@ -510,6 +512,8 @@ test.describe('Table Status Page', () => {
 
     const confirmDialog = page.getByRole('alertdialog').filter({ hasText: /remove/i });
     await expect(confirmDialog).toBeVisible({ timeout: 15_000 });
+    // Phase 24 (24-07): RemoveTabItemDialog now requires a reason before Confirm enables.
+    await confirmDialog.getByLabel(/reason|motivo/i).fill('E2E test removal');
     await confirmDialog.getByRole('button', { name: /confirm|remove/i }).click();
 
     await expect(
@@ -574,6 +578,8 @@ test.describe('Table Status Page', () => {
 
     const confirmDialog = page.getByRole('alertdialog').filter({ hasText: /remove/i });
     await expect(confirmDialog).toBeVisible({ timeout: 15_000 });
+    // Phase 24 (24-07): RemoveTabItemDialog now requires a reason before Confirm enables.
+    await confirmDialog.getByLabel(/reason|motivo/i).fill('E2E test removal');
     await confirmDialog.getByRole('button', { name: /confirm|remove/i }).click();
 
     // Order #1 section heading should disappear (no more active orders)
