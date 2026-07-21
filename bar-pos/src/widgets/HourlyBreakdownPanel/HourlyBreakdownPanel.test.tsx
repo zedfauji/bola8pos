@@ -32,8 +32,8 @@ vi.mock('@entities/tab/model/queries-reports', async importOriginal => {
 
 /** Sparse input: only hours 8 and 21 have data. */
 const sparseRows: HourlyRow[] = [
-  { hour: 8, orderCount: 3, revenue: 60 },
-  { hour: 21, orderCount: 10, revenue: 400 },
+  { hour: 8, orderCount: 3, revenue: 60, dayOfWeek: 1, isBusiest: false },
+  { hour: 21, orderCount: 10, revenue: 400, dayOfWeek: 1, isBusiest: false },
 ];
 
 /** Full 24-row data produced by fillMissingHours on the sparse input. */
@@ -120,8 +120,8 @@ describe('HourlyBreakdownPanel', () => {
   it('12-hour time format: hour 0 displays as "12:00 AM" and hour 13 displays as "1:00 PM"', () => {
     // Build filled rows that include hour 0 (already zero by default) and hour 13
     const rows = realFillMissingHours([
-      { hour: 13, orderCount: 4, revenue: 80 },
-      { hour: 21, orderCount: 10, revenue: 400 },
+      { hour: 13, orderCount: 4, revenue: 80, dayOfWeek: 1, isBusiest: false },
+      { hour: 21, orderCount: 10, revenue: 400, dayOfWeek: 1, isBusiest: false },
     ]);
 
     mockUseHourlyBreakdown.mockReturnValue({
@@ -157,7 +157,9 @@ describe('HourlyBreakdownPanel', () => {
     // The callout area shows both Peak and Slowest labels.
     // The table row guard: isSlowest = slowestHour !== null && row.hour === slowestHour.hour && !isPeak
     // → isPeak is true for hour 10, so isSlowest is false → no amber class on that row.
-    const rows = realFillMissingHours([{ hour: 10, orderCount: 2, revenue: 120 }]);
+    const rows = realFillMissingHours([
+      { hour: 10, orderCount: 2, revenue: 120, dayOfWeek: 1, isBusiest: false },
+    ]);
 
     mockUseHourlyBreakdown.mockReturnValue({
       data: { ok: true, data: rows },
