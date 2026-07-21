@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       agent_audit_log: {
@@ -971,6 +946,7 @@ export type Database = {
           split_index: number | null
           square_payment_id: string | null
           square_receipt_url: string | null
+          status: string
           tab_id: string
           tendered_amount: number | null
           tip_amount: number
@@ -997,6 +973,7 @@ export type Database = {
           split_index?: number | null
           square_payment_id?: string | null
           square_receipt_url?: string | null
+          status?: string
           tab_id: string
           tendered_amount?: number | null
           tip_amount?: number
@@ -1023,6 +1000,7 @@ export type Database = {
           split_index?: number | null
           square_payment_id?: string | null
           square_receipt_url?: string | null
+          status?: string
           tab_id?: string
           tendered_amount?: number | null
           tip_amount?: number
@@ -2199,10 +2177,12 @@ export type Database = {
           deleted_at: string | null
           id: string
           is_deleted: boolean
+          last_reopened_at: string | null
           notes: string | null
           opened_at: string
           parent_tab_id: string | null
           rappi_order_id: string | null
+          reopen_count: number
           shift_id: string
           split_label: string | null
           split_mode: string | null
@@ -2220,10 +2200,12 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           is_deleted?: boolean
+          last_reopened_at?: string | null
           notes?: string | null
           opened_at?: string
           parent_tab_id?: string | null
           rappi_order_id?: string | null
+          reopen_count?: number
           shift_id: string
           split_label?: string | null
           split_mode?: string | null
@@ -2241,10 +2223,12 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           is_deleted?: boolean
+          last_reopened_at?: string | null
           notes?: string | null
           opened_at?: string
           parent_tab_id?: string | null
           rappi_order_id?: string | null
+          reopen_count?: number
           shift_id?: string
           split_label?: string | null
           split_mode?: string | null
@@ -2722,6 +2706,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reopen_tab: {
+        Args: { p_expected_version: number; p_reason: string; p_tab_id: string }
+        Returns: Json
+      }
       set_own_locale: {
         Args: { p_locale: string; p_terminal_id?: string }
         Returns: Json
@@ -2908,9 +2896,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       category_routing: ["KITCHEN", "BAR", "NONE"],
