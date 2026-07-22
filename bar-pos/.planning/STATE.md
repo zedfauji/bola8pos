@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
-current_phase: 24
-current_phase_name: operational-reports-suite-csv
-status: verifying
-stopped_at: Completed 24-03-PLAN.md
-last_updated: "2026-07-21T22:11:30.843Z"
-last_activity: 2026-07-21
-last_activity_desc: Phase 24 Plan 03 complete
+current_phase: 25
+current_phase_name: 2-Level
+status: planning
+stopped_at: Completed 23-04-PLAN.md
+last_updated: "2026-07-22T15:03:49.195Z"
+last_activity: 2026-07-22
+last_activity_desc: Phase 24 complete, transitioned to Phase 25
 progress:
   total_phases: 28
   completed_phases: 21
@@ -48,13 +48,14 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 
 ## Current Position
 
-Phase: 24 (operational-reports-suite-csv) — EXECUTING
-Plan: 10 of 10 (24-01, 24-03 complete — both Wave 1; 24-02/24-04 Wave 2 pending)
-Status: Phase complete — ready for verification
-Last activity: 2026-07-21 — Phase 24 Plan 03 complete
+Phase: 25 — Receipt Item Grouping (2-Level)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-22 — Phase 24 complete, transitioned to Phase 25
 
 ## Session Log
 
+- 2026-07-22: **Phase 24 UAT complete (3/3 pass) — phase marked complete.** Test 1 (CSV formula-injection CR-01): decision was fix, not accept — patched `sanitizeCsvCell()` into the shared `rowsToCsv()` (prefixes `=,+,-,@,tab,CR`-leading cell values with a leading `'`), covering all 21 export types from one place; 13/13 csv.test.ts pass (`be37ec6`). Test 2 (Recharts visual check, done via headless Playwright since no interactive browser session was available): found and fixed 2 bugs in Hourly Breakdown — (a) `MoneyDisplay.tsx` was prepending a literal `$` in front of `formatMoney()`'s already-`$`-prefixed output, a latent bug affecting all 44 `MoneyDisplay` call sites app-wide, not just this tab; (b) `<Bar>` had no `fill` prop so recharts' `<Legend>` defaulted to a black swatch instead of the chart's own color — added `fill={chartColor(0)}` (`3735b88`). Test 3 (E2E): all 3 "Phase 24:" tests and table-status T7-T9 pass; first run's 14 failures were a midnight-rollover artifact (date flipped 07-21→07-22 mid-run), re-run after rollover showed only 9 pre-existing strict-mode-locator failures in unrelated Sprint-10/Cash-reconciliation tests, already-known debt. Gap G-24-2 resolved inline, no separate gap-closure plan needed. VERIFICATION.md canonicalized `human_needed`→`passed`; `phase.complete` advanced ROADMAP/STATE to Phase 25.
 - 2026-07-21: **Phase 24 (operational-reports-suite-csv) Plan 03 COMPLETE — 4 bounded report RPCs authored (SC-1, SC-4)** — Wave 1 plan (parallel to 24-01, no file overlap — pure SQL migrations vs. TS/i18n). Task 1 (`e79d9ae`) added `get_peak_hours_report` (verbatim 24-PATTERNS.md template: EXTRACT(HOUR)+EXTRACT(DOW) grouped, bounded on orders.created_at, excludes voided/soft-deleted) and `get_voids_report` (server-side equivalent of the existing client-side voids query, unchanged VoidRefundRow shape, bounded on orders.updated_at to match the client's existing filter column exactly). Task 2 (`5583f6e`) added `get_modifier_popularity_report`, using an isolated `exploded`→`aggregated` CTE pair to safely GROUP BY on `unnest(modifier_ids)` before joining to `modifiers` (avoids RESEARCH.md Pitfall 4's flat-join double-count); revenue computed as `attach_count * modifiers.price_delta` (no separate per-attach revenue ledger exists). Task 3 (`f20418a`) added `get_payment_methods_report`, a single `UNION ALL` query returning both per-caja-session rows and a day-level rollup per method, carrying the mandatory Phase-23 `status IS DISTINCT FROM 'reopened_void'` + `is_deleted` + `is_refund` exclusions verbatim; bounded on the indexed `payments.processed_at`. Confirmed no separate `get_charts_data` RPC is needed (RESEARCH.md Open Question 1) — these 3 chart-bearing RPCs are consumed directly by their Recharts widgets in later plans. Zero deviations — all three migrations matched their `must_haves` on the first pass (SECURITY DEFINER, `SET search_path = public`, `GRANT EXECUTE TO authenticated`, `json_build_object('ok', true, 'rows', ...)`), verified via each task's structural grep gate. None of these RPCs are pushed to the database yet — the single blocking `npx supabase db push` for all of Phase 24's new migrations is Plan 05's scope; live integration testing against real rows is deferred to Plan 06. `requirements mark-complete SC-1 SC-4` skipped — `.planning/REQUIREMENTS.md` confirmed absent for this milestone (not a tool bug, consistent with every prior 21-xx/22-xx/23-xx session). Next: remaining Wave 1/2 plans (24-02 CSV serializer, 24-04 deletions RPCs + `remove_tab_item`) before Wave 3's blocking `24-05` db push.
 
 - 2026-07-21: **Phase 24 (operational-reports-suite-csv) PLANNED — 10 plans across 6 waves, plan-checker passed (research + pattern-map + plan + verify)** — Ran the full plan-phase pipeline from a fresh discuss-phase+UI-phase baseline (24-CONTEXT.md/24-UI-SPEC.md already existed from an earlier session; a prior gsd-phase-researcher launch at 1:04a had NOT produced a RESEARCH.md on disk, so research was re-run from scratch — user chose "Research first" when asked). `gsd-phase-researcher` found every needed pattern already has a direct analog in the codebase (`get_caja_report`, `edit_paid_tab`, `deplete_for_order_item`, `ComboMixReport`, `VoidRefundPanel`, `useExportReport`, `excel.ts`) — this is a copy-adjacent retrofit, not greenfield design; zero new npm packages needed (recharts + xlsx already installed); flagged the `audit_log` (singular, legacy) vs `audit_logs` (plural, canonical) trap and the `deplete_for_order_item` before-hard-delete ordering requirement for `remove_tab_item`. `gsd-pattern-mapper` then classified 20 files, found 18/20 with exact/role-match analogs. `gsd-planner` (opus) produced 10 plans/6 waves: Wave 1 (24-01 contract layer + 24-03 read-only RPCs) → Wave 2 (24-02 CSV + 24-04 deletions/remove_tab_item) → Wave 3 (24-05 `[BLOCKING]` `supabase db push`, `autonomous:false`) → Wave 4 (24-06 query hooks + 24-07 remove-tab-item feature) → Wave 5 (24-08 deletions widgets + 24-09 chart widgets) → Wave 6 (24-10 final wiring/E2E/gate); resolved "charts-data" as NOT a separate 7th RPC (the 3 chart-bearing report RPCs already satisfy it) and made `remove_tab_item` a single atomic RPC (resolves both the D-06 audit gap and the pre-existing inventory-restore TODO, no role gate per D-07). `gsd-plan-checker` returned `## VERIFICATION PASSED` on the first pass — all 4 ROADMAP success criteria and all 16 CONTEXT.md decisions traced to owning plans, wave/dependency graph acyclic and correctly sequenced, all 4 known-pitfall spot-checks (audit_logs plural, reopened_void exclusion, restore-before-delete ordering, no new packages) pass. `.planning/phases/24-operational-reports-suite-csv/24-VALIDATION.md` seeded as a draft by plan-phase (frontmatter-only) and then fully populated by the planner itself (24-task Per-Task Verification Map, 6 Wave-0 missing test files, 3 manual-only checks, `nyquist_compliant: true`). **Tooling note:** `state.planned-phase`/`roadmap.annotate-dependencies` are top-level `gsd-tools` subcommands (`state planned-phase --phase --name --plans`), not `query state.planned-phase` verbs — both ran successfully once invoked correctly, but `state planned-phase` reported `updated: []` because its body-field replacement is template-aware (only overwrites placeholder/default values, never executor-authored ones) — frontmatter `status`/`stopped_at`/`## Current Position` corrected manually here, consistent with the same manual-correction pattern noted in every prior 21-xx/22-xx/23-xx session. Decision-coverage gate: 16/16 CONTEXT.md decisions covered. Next: `/gsd-execute-phase 24` — Wave 3 (24-05) requires human-available `supabase db push` auth.
