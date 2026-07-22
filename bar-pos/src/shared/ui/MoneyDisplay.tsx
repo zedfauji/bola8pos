@@ -59,7 +59,8 @@ export function MoneyDisplay({
       )}
       aria-label={`${isNegative ? t('moneyDisplay.negativePrefix') : ''}${formatted} dollars`}
     >
-      {isNegative && '−'}${formatted}
+      {isNegative && '−'}
+      {formatted}
     </span>
   );
 }

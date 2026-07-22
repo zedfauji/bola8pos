@@ -122,6 +122,7 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
             <Bar
               dataKey="revenue"
               name={t('hourlyBreakdownPanel.columnRevenue')}
+              fill={chartColor(0)}
               shape={(props: BarShapeProps) => {
                 const row = props.payload as HourlyRow;
                 const isPeak = peakHour !== null && row.hour === peakHour.hour;
