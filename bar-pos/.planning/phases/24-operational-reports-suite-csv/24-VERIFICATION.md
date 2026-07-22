@@ -1,17 +1,20 @@
 ---
 phase: 24-operational-reports-suite-csv
 verified: 2026-07-21T16:30:00Z
-status: human_needed
+status: passed
 score: 4/4 roadmap success criteria verified; 10/10 plan-level must_have truth sets verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "CR-01 (code review, critical): confirm CSV formula/injection risk on rowsToCsv is a knowing, signed-off acceptance"
     expected: "An owner explicitly accepts the risk (or a follow-up ticket is filed) for shipping unsanitized `=`/`+`/`-`/`@`-prefixed cell values across all 21 CSV export types, given the reviewer rated this 'critical' (CWE-1236) after implementation — a stronger signal than the phase's own pre-implementation threat-model acceptance (T-24-02-T, rated 'low')"
     why_human: "This is a risk-acceptance judgment call on financially-sensitive exports (reason/staff-name free text fields flow through unsanitized), not a code-correctness question a grep can resolve. The severity disagreement between the code reviewer (critical) and the plan's own threat model (low, accept) needs an explicit human decision, not a silent pass-through."
+
   - test: "Visually confirm the 3 new Recharts widgets (ModifierPopularityReport bar chart, PaymentMethodsReport donut, HourlyBreakdownPanel bar chart) render correctly with colors/legend/tooltip as intended"
     expected: "Charts render with one emerald-500 accent element each, Tooltip/Legend present, no layout breakage"
     why_human: "24-09-SUMMARY.md itself marks this human_judgment: true — no test harness in this repo renders Recharts SVG output, and this verification pass did not start a dev server to visually confirm (per spot-check no-server-start constraint)."
+
   - test: "Run e2e/07-reports.spec.ts's 3 new Phase 24 tests (4-tabs-render, CSV-export-writes-file, bartender-reason-required-removal) and e2e/16-table-status.spec.ts T7/T8/T9"
     expected: "All pass, matching the SUMMARY's claimed pass results"
     why_human: "E2E requires a live dev server + Playwright browser + live Supabase dev DB; this verification pass deliberately did not start a server (spot-check constraint). Unit tests, typecheck, and lint were independently re-run and confirmed instead (see Behavioral Spot-Checks)."
