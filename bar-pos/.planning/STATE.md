@@ -1,17 +1,20 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.2
-milestone_name: — UI Standardization
+milestone_name: UI Standardization
+current_phase: 31
+current_phase_name: Phase 20 promotions-engine also COMPLETE, merged from parallel branch
 status: completed
-stopped_at: Phase 31 UI-SPEC approved (merged with Phase 20 promotions-engine — both branches reconciled)
-last_updated: "2026-07-12T17:35:08.000Z"
-last_activity: 2026-07-12 -- merged Phase 19-20 (promotions engine) work with Phase 21-31 (UI standardization) work
+stopped_at: Phase 25 context gathered
+last_updated: "2026-07-22T00:46:20.231Z"
+last_activity: 2026-07-11
+last_activity_desc: Phase 31 marked complete
 progress:
   total_phases: 35
-  completed_phases: 19
-  total_plans: 134
-  completed_plans: 143
-  percent: 54
+  completed_phases: 4
+  total_plans: 41
+  completed_plans: 37
+  percent: 11
 ---
 
 # Session State
@@ -243,7 +246,7 @@ Last activity: 2026-07-11 -- Phase 31 marked complete
 
 ## Last Session
 
-- **Stopped at:** Phase 31 UI-SPEC approved; Phase 20 (promotions-engine) COMPLETE — 11/11 plans, verification passed 4/4, post-verify cleanup fix applied. Both merged into main 2026-07-12.
+- **Stopped at:** Phase 25 context gathered
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -256,3 +259,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 ### Blockers
 
 - Manual follow-up: run e2e/15-home-navigation.spec.ts, e2e/16-table-status.spec.ts, e2e/17-payment-pane.spec.ts once port 1420 is freed of the stray non-Vite process occupying it
+
+## Session
+
+**Last session:** 2026-07-22T00:46:20.204Z
+**Stopped at:** Phase 25 context gathered
+**Resume file:** .planning/phases/25-receipt-item-grouping-2-level/25-CONTEXT.md
