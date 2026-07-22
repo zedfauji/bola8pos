@@ -44,6 +44,19 @@ describe('rowsToCsv', () => {
     expect(csv.startsWith('A,B')).toBe(true);
   });
 
+  it.each(['=cmd', '+1+1', '-1', '@SUM(A1)', '\tevil', '\revil'])(
+    'prefixes formula-injection value %s with a single quote (CWE-1236)',
+    formulaValue => {
+      const csv = rowsToCsv<Row>([{ a: 1, b: formulaValue }], COLUMNS);
+      expect(csv).toContain(`'${formulaValue}`);
+    }
+  );
+
+  it('leaves a normal value untouched', () => {
+    const csv = rowsToCsv<Row>([{ a: 1, b: 'Refund - no stock' }], COLUMNS);
+    expect(csv).toContain('Refund - no stock');
+  });
+
   it('follows column order in config, not object key order', () => {
     const reversedColumns: CsvColumn<Row>[] = [
       { key: 'b', header: 'B' },
