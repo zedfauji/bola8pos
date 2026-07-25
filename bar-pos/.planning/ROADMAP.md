@@ -43,7 +43,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 21: i18n Multi-Language** — `react-i18next` + `es-MX`/`en-US` catalogs + `profiles.locale` + ESLint rule banning hard-coded strings (completed 2026-07-19)
 - [x] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)* (completed 2026-07-20)
 - [x] **Phase 23: Reopen Closed Ticket** — `reopen_tab` RPC + payment status `reopened_void` + caja offsetting entries + 24h/2x cap *(depends Phases 14, 15)* (completed 2026-07-21)
-- [ ] **Phase 24: Operational Reports Suite + CSV** — 6 new RPCs (peak-hours, voids, deletions×2, modifier popularity, payment methods, charts-data) + generic CSV export action + Recharts widgets *(depends Phase 14)*
+- [x] **Phase 24: Operational Reports Suite + CSV** — 6 new RPCs (peak-hours, voids, deletions×2, modifier popularity, payment methods, charts-data) + generic CSV export action + Recharts widgets *(depends Phase 14)* (completed 2026-07-22)
 - [ ] **Phase 25: Receipt Item Grouping (2-Level)** — Extend `receipt-format.ts` + Tauri Rust printer payload + PDF + KDS card all share `groupOrderItemsForReceipt`
 - [ ] **Phase 26: Floating Tables (`is_temp`)** — Generalize pool_tables → `resources` w/ FLOATING type + auto-deactivate trigger + waitlist auto-create flow
 - [ ] **Phase 27: One-Shot Inventory (Cigarette-Box Pattern)** — `open_units` table + `consume_open_unit` SQL fn + admin Open-Units tab + reportable lifecycle *(depends Phases 14, 17)*
@@ -735,7 +735,7 @@ Plans:
 **Goal:** Add 6 new reporting RPCs (peak-hours, voids, deletions ×2, modifier popularity, payment methods, charts-data), a generic CSV export action, and Recharts-based report widgets.
 **Requirements:** TBD (POS-COMPARISON.md §24 — source doc no longer present; scope locked in 24-CONTEXT.md; SC-1..SC-4 below are the coverage requirement set)
 **Depends on:** Phase 14
-**Plans:** 10/10 plans executed
+**Plans:** 10/10 plans complete
 
 Plans:
 **Wave 1**
@@ -842,6 +842,21 @@ Plans:
 ### ✅ v2.2 — UI Standardization — SHIPPED 2026-07-17 (Phases 29-35, +33.1)
 
 Full phase detail (goals, requirements, plans, success criteria) archived to `.planning/milestones/v2.2-ROADMAP.md` — shipped 2026-07-17.
+
+### Phase 36: Migrate development environment from Windows to Ubuntu
+
+**Goal:** The local development workflow — build, test, lint, git hooks, and the native Tauri desktop shell — runs reliably on Ubuntu, with `npm run tauri dev` opening a working webkit2gtk window, backed by a committed setup script, a Linux CI build job, and onboarding docs written for any future contributor. The shipped product still targets Windows/WebView2 only.
+**Requirements**: TBD
+**Depends on:** Phase 35
+**Plans:** 4 plans
+**UI hint**: no
+
+Plans:
+
+- [ ] 36-01-PLAN.md — Tracer: `scripts/setup-ubuntu.sh` installs native deps + Rust, and `src-tauri/` links against webkit2gtk (D-03, D-07, D-08, D-09)
+- [ ] 36-02-PLAN.md — Git-hook and line-ending transport fix: `.gitattributes` for `*.sh`, CRLF/cwd repair of the local husky hooks (D-12)
+- [ ] 36-03-PLAN.md — Linux `tauri-build` CI job + Ubuntu-aware `CLAUDE.md` and `STACK.md` (D-05, D-10, D-11)
+- [ ] 36-04-PLAN.md — Human gate: native window opens, setup script is idempotent, pre-existing blockers get an owner (D-03, D-09, D-12)
 
 ---
 
