@@ -135,6 +135,13 @@ None beyond what already occurred during this execution — `sudo` was available
 - `node_modules` now carries Linux bindings; `dist/` (needed for a full `cargo tauri build`) was not produced in this plan since Task 1 deliberately used `cargo build` instead of `npm run tauri build` to avoid the 2 unrelated pre-existing `tsc` errors — this is consistent with the plan's stated scope and does not block later plans.
 - Ready for 36-02 (`.gitattributes` / line-ending normalization) and 36-03 (CI `tauri-build` job mirroring this exact package list and install order).
 
+## Self-Check: PASSED
+
+- FOUND: `scripts/setup-ubuntu.sh`
+- FOUND: `.planning/phases/36-migrate-development-environment-from-windows-to-ubuntu/36-01-SUMMARY.md`
+- FOUND: commit `3ec73e8`
+- FOUND: commit `f230937`
+
 ---
 *Phase: 36-migrate-development-environment-from-windows-to-ubuntu*
 *Completed: 2026-07-25*
