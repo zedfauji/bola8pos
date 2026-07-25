@@ -16,6 +16,8 @@ App-wide UI consistency pass across all 17 routes: single `PageContainer` shell 
 
 **Known gap (not part of v2.2, surfaced during its close):** This was the project's first-ever formal milestone close. Several earlier phases (01, 03, 06, 07, 09, 12) carry unresolved `human_needed`/`gaps_found` verification status or partial UAT scenarios that predate v2.2 and were never gated on a milestone close before now — acknowledged and logged in `.planning/STATE.md` under Deferred Items rather than blocking this close.
 
+**Phase 36 complete (2026-07-25):** Development environment migrated from Windows to Ubuntu — native Tauri shell builds, links, and runs on Ubuntu (human-verified), repeatable `scripts/setup-ubuntu.sh` bootstrap, D-12 CRLF/husky root cause fixed (`.gitattributes`, hook cwd guard), toolchain mirrored into a new `tauri-build` CI job, Ubuntu documented as a supported dev OS. 3 pre-existing, OS-independent issues surfaced during the migration (misplaced `.github/workflows/` directory, 2 pre-existing `tsc` errors, inert git hooks) were deliberately left unfixed as out of this phase's scope and captured as backlog todos in `.planning/todos/pending/`. Phase 37 (Windows VM for native WebView2 testing/release builds) depends on this phase and is next in the roadmap, though `/gsd-progress` may route to earlier incomplete phases first per its resume-invariant check.
+
 ## Next Milestone Goals
 
 No milestone is currently active. Candidates carried over from the pre-v2.2 backlog (unstarted, ROADMAP.md Phases 3, 6, 8, 9, 10, 21-28) — scope a new milestone with `/gsd-new-milestone` rather than resuming these as loose phases, since several (21 i18n, 28 money-formatter) have inter-dependencies worth re-validating before replanning.
