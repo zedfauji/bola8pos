@@ -848,7 +848,7 @@ Full phase detail (goals, requirements, plans, success criteria) archived to `.p
 **Goal:** The local development workflow — build, test, lint, git hooks, and the native Tauri desktop shell — runs reliably on Ubuntu, with `npm run tauri dev` opening a working webkit2gtk window, backed by a committed setup script, a Linux CI build job, and onboarding docs written for any future contributor. The shipped product still targets Windows/WebView2 only.
 **Requirements**: TBD
 **Depends on:** Phase 35
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 **UI hint**: no
 
 Plans:
@@ -859,7 +859,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 36-03-PLAN.md — Linux `tauri-build` CI job + Ubuntu-aware `CLAUDE.md` and `STACK.md` (D-05, D-10, D-11)
+- [x] 36-03-PLAN.md — Linux `tauri-build` CI job + Ubuntu-aware `CLAUDE.md` and `STACK.md` (D-05, D-10, D-11)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
