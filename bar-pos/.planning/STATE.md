@@ -6,7 +6,7 @@ current_phase: 36
 current_phase_name: migrate-development-environment-from-windows-to-ubuntu
 status: executing
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-25T20:18:21.312Z"
+last_updated: "2026-07-25T20:21:59.492Z"
 last_activity: 2026-07-25
 last_activity_desc: Phase 36 execution started
 progress:
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 36 (migrate-development-environment-from-windows-to-ubuntu) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-25 — Phase 36 execution started
 
@@ -316,6 +316,7 @@ Last activity: 2026-07-25 — Phase 36 execution started
 - [Phase ?]: PaymentMethodsReport's leading-method accent (emerald) is scoped to the single leading day-level rollup row only, not every session row sharing that method.
 - [Phase ?]: 24-10: Fixed remove_tab_item RPC deplete_for_order_item smallint cast bug (broken since Plan 04, discovered by this plan's E2E) and 16-table-status.spec.ts T7/T8/T9 regression from Plan 07's required-reason field
 - [Phase ?]: apt-cache policy rustup had no candidate on this machine; script correctly fell through to the TLS-pinned curl|sh rustup fallback, exercising both branches of T-36-01's mitigation
+- [Phase ?]: D-12 root cause: CRLF was real but secondary — the true blocker is a stale Windows core.hooksPath making all git hooks inert, plus .husky/ being gitignored and husky v9 unable to self-install from bar-pos/. Activation deferred to plan 36-04.
 
 ## Performance Metrics
 
@@ -409,10 +410,11 @@ Last activity: 2026-07-25 — Phase 36 execution started
 | Phase 24 P09 | 45min | 3 tasks | 8 files |
 | Phase 24 P10 | 56min | 3 tasks | 7 files |
 | Phase 36 P01 | 21min | 2 tasks | 2 files |
+| Phase 36 P02 | 12min | 2 tasks | 3 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 36-01-PLAN.md
+- **Stopped at:** Completed 36-02-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -429,7 +431,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-25T20:18:21.296Z
+**Last session:** 2026-07-25T20:21:59.476Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 

@@ -848,14 +848,14 @@ Full phase detail (goals, requirements, plans, success criteria) archived to `.p
 **Goal:** The local development workflow — build, test, lint, git hooks, and the native Tauri desktop shell — runs reliably on Ubuntu, with `npm run tauri dev` opening a working webkit2gtk window, backed by a committed setup script, a Linux CI build job, and onboarding docs written for any future contributor. The shipped product still targets Windows/WebView2 only.
 **Requirements**: TBD
 **Depends on:** Phase 35
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 **UI hint**: no
 
 Plans:
 **Wave 1**
 
 - [x] 36-01-PLAN.md — Tracer: `scripts/setup-ubuntu.sh` installs native deps + Rust, and `src-tauri/` links against webkit2gtk (D-03, D-07, D-08, D-09)
-- [ ] 36-02-PLAN.md — Git-hook and line-ending transport fix: `.gitattributes` for `*.sh`, CRLF/cwd repair of the local husky hooks (D-12)
+- [x] 36-02-PLAN.md — Git-hook and line-ending transport fix: `.gitattributes` for `*.sh`, CRLF/cwd repair of the local husky hooks (D-12)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
