@@ -852,10 +852,17 @@ Full phase detail (goals, requirements, plans, success criteria) archived to `.p
 **UI hint**: no
 
 Plans:
+**Wave 1**
 
 - [ ] 36-01-PLAN.md — Tracer: `scripts/setup-ubuntu.sh` installs native deps + Rust, and `src-tauri/` links against webkit2gtk (D-03, D-07, D-08, D-09)
 - [ ] 36-02-PLAN.md — Git-hook and line-ending transport fix: `.gitattributes` for `*.sh`, CRLF/cwd repair of the local husky hooks (D-12)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 36-03-PLAN.md — Linux `tauri-build` CI job + Ubuntu-aware `CLAUDE.md` and `STACK.md` (D-05, D-10, D-11)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 36-04-PLAN.md — Human gate: native window opens, setup script is idempotent, pre-existing blockers get an owner (D-03, D-09, D-12)
 
 ---
