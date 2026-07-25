@@ -4,11 +4,11 @@ milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
 current_phase: 36
 current_phase_name: migrate-development-environment-from-windows-to-ubuntu
-status: executing
-stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-25T20:28:00.443Z"
+status: verifying
+stopped_at: Completed 36-04-PLAN.md
+last_updated: "2026-07-25T20:48:29.306Z"
 last_activity: 2026-07-25
-last_activity_desc: Phase 36 execution started
+last_activity_desc: Phase 36 Plan 04 complete — human sign-off recorded, 3 pre-existing blockers routed to backlog todos
 progress:
   total_phases: 28
   completed_phases: 21
@@ -50,8 +50,8 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 
 Phase: 36 (migrate-development-environment-from-windows-to-ubuntu) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
-Last activity: 2026-07-25 — Phase 36 execution started
+Status: Phase complete — ready for verification
+Last activity: 2026-07-25 — Phase 36 Plan 04 complete — human sign-off recorded, 3 pre-existing blockers routed to backlog todos
 
 ## Session Log
 
@@ -318,6 +318,8 @@ Last activity: 2026-07-25 — Phase 36 execution started
 - [Phase ?]: apt-cache policy rustup had no candidate on this machine; script correctly fell through to the TLS-pinned curl|sh rustup fallback, exercising both branches of T-36-01's mitigation
 - [Phase ?]: D-12 root cause: CRLF was real but secondary — the true blocker is a stale Windows core.hooksPath making all git hooks inert, plus .husky/ being gitignored and husky v9 unable to self-install from bar-pos/. Activation deferred to plan 36-04.
 - [Phase ?]: 36-03: tauri-build CI job added but cannot run yet — workflow dir is not repo-root .github/workflows/; relocation + release.yml Windows signing interaction routed to user in 36-04
+- [Phase ?]: Phase 36 D-03/D-09/D-12 human sign-off: npm run tauri dev opened a native window, rendered, and was interactive on Ubuntu; repeat setup-ubuntu.sh exited 0 idempotent; husky hook files have no CRLF terminators.
+- [Phase ?]: Phase 36 Task 2: option-b (backlog todos) selected for the 3 pre-existing OS-independent blockers (misplaced .github/workflows/, 2 tsc errors, inert git hooks) — captured via /gsd-capture rather than a new phase or inline fix.
 
 ## Performance Metrics
 
@@ -413,10 +415,11 @@ Last activity: 2026-07-25 — Phase 36 execution started
 | Phase 36 P01 | 21min | 2 tasks | 2 files |
 | Phase 36 P02 | 12min | 2 tasks | 3 files |
 | Phase 36 P03 | 9min | 2 tasks | 3 files |
+| Phase 36 P04 | 5min | 2 tasks | 0 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 36-03-PLAN.md
+- **Stopped at:** Completed 36-04-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -433,7 +436,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-25T20:28:00.425Z
+**Last session:** 2026-07-25T20:48:29.293Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 
