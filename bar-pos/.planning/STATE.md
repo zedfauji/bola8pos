@@ -6,7 +6,7 @@ current_phase: 25
 current_phase_name: 2-Level
 status: executing
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-25T19:38:38.396Z"
+last_updated: "2026-07-25T19:57:15.512Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 24 complete, transitioned to Phase 25
 progress:
@@ -144,6 +144,7 @@ Last activity: 2026-07-22 — Phase 24 complete, transitioned to Phase 25
 - Phase 12 added: Full RBAC page, Remove the breadcrumbs of RBAC from other page, There should be only one page to manage RBAC and it should be Protected. Follow the project Navigation rule.
 - Phase 33.1 inserted after Phase 33: E2E Test/RBAC Drift Fixes — closes Phase 33's outstanding Success Criterion 3 gap (06-transfer T4/T5, 09-rbac T7/T-RP-01/T-RP-02, all pre-existing/out-of-scope) (URGENT)
 - Phase 36 added: Migrate development environment from Windows to Ubuntu
+- Phase 37 edited: expanded Goal with VM approach options + explicit open question (separate Windows machine or not) to preserve context for later /gsd-discuss-phase 37, per user request while Phase 36 executes
 
 ## Decisions
 

@@ -865,6 +865,19 @@ Plans:
 
 - [ ] 36-04-PLAN.md — Human gate: native window opens, setup script is idempotent, pre-existing blockers get an owner (D-03, D-09, D-12)
 
+### Phase 37: Windows VM for native WebView2 testing and release builds
+
+**Goal:** Provision a reproducible Windows VM (VirtualBox or KVM/QEMU) so the team can (a) test real WebView2 rendering/behavior — the one thing the Ubuntu dev environment from Phase 36 cannot verify, since Tauri builds are OS-native and a Linux-built binary will not run on Windows — and (b) still produce the actual Windows release build/code-signing artifact that ships to bar locations, now that the primary dev machine is Ubuntu. Candidate approaches to evaluate at discuss-phase: Microsoft's free prebuilt Windows 11 developer VM (Visual Studio 2022 + WebView2 SDK preinstalled, ~90-day eval, fastest start) vs. a clean Windows install with VS2022's "Desktop development with C++" workload + the WebView2 Runtime installed manually; VirtualBox (easier setup, good-enough performance) vs. KVM/QEMU (near-native performance, more setup); shared folders (edit code on the Ubuntu host, VM sees changes live) vs. SSH remote-build from the Ubuntu terminal via VS Code Remote-SSH. Cross-compiling Tauri/Rust from Linux to a Windows target was explicitly considered and rejected during Phase 36 discussion — this phase is a VM-based solution, not a cross-compile toolchain.
+**Open question for discuss-phase (unresolved as of Phase 36 planning):** Does a separate physical Windows machine still exist for release builds/signing, or is Ubuntu now the *only* dev machine — making this VM the sole remaining place release builds can happen? This determines whether the phase is a nice-to-have (better local WebView2 QA) or a hard blocker for shipping anything post-migration. Must be asked before scoping.
+**Requirements**: TBD
+**Depends on:** Phase 36
+**Plans:** 0 plans
+**UI hint**: no
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 37 to break down)
+
 ---
 
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
