@@ -386,17 +386,19 @@ npx @tauri-apps/cli info
 | A2 | `sudo apt-get install -y google-chrome-stable` is the correct package name/step to satisfy Playwright's `channel: 'chrome'` on Ubuntu | D-13 | Medium — if the exact repo-add steps for Google's apt repo differ, E2E on a fresh machine could still fail to launch Chrome; verify at implementation time with an actual `npx playwright test` run |
 | A3 | `Swatinem/rust-cache@v2` is the standard/current Rust caching action for GitHub Actions | Common Pitfalls #4 | Low — cosmetic if wrong, CI still functions, just slower; not a correctness risk |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the new Linux CI job also run E2E (Playwright) tests, or stay scoped to lint/typecheck/unit/native-build as D-11 literally states?**
    - What we know: D-11 explicitly lists "lint, typecheck, unit tests, native Tauri build" — it does not mention E2E.
    - What's unclear: Whether the user considers E2E part of "mirroring the Windows job" — though note there IS no existing Windows CI job to mirror; only `release.yml`'s Windows publish job exists, and it doesn't run E2E either.
    - Recommendation: Keep the new job scoped exactly to D-11's literal list (lint/typecheck/unit/native build). Playwright's headed-Chrome CI complications (Pitfall 3) make E2E-in-CI a separably-scoped follow-up, not a silent scope-creep into this phase.
+   - **RESOLVED:** 36-03 implements the job scoped exactly to lint/typecheck/unit/native-build, no E2E.
 
 2. **Does `setup-ubuntu.sh` need to also install/verify Node.js itself, or assume it's already present?**
    - What we know: no `.nvmrc`/`engines` field exists in `package.json`; CI pins Node 22 via `actions/setup-node`; this dev machine already has Node 24.
    - What's unclear: CONTEXT.md's D-09 describes the script as installing "native deps and the Rust toolchain" — Node is not explicitly named.
    - Recommendation: Scope `setup-ubuntu.sh` to native/Rust deps only per D-09's literal wording; add a `command -v node` pre-flight check that prints a clear error/nvm-install hint rather than silently assuming Node exists, but don't have the script install Node itself (that's a separate, well-solved problem — nvm/fnm — outside this phase's stated scope).
+   - **RESOLVED:** 36-01 scopes the script to native/Rust deps only, per the recommendation.
 
 ## Environment Availability
 
