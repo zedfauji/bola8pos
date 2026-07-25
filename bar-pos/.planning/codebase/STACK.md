@@ -78,7 +78,8 @@
 ## Platform Requirements
 
 **Development:**
-- Windows (primary target per `CLAUDE.md`), macOS/Linux plausible for Vite/web dev
+- Windows/WebView2 is the shipping target; Ubuntu is a verified, officially supported dev OS (Ubuntu 22.04 through 26.04, no version pinning) running the native shell via webkit2gtk
+- `scripts/setup-ubuntu.sh` installs the native prerequisites and the Rust toolchain on Ubuntu; `libwebkit2gtk-4.1-dev` is the webview backend — see RESEARCH.md `## D-07` for the full ten-package list
 - Rust toolchain via rustup for `cargo` / `tauri` native builds
 - Node + npm for frontend tooling
 

@@ -33,13 +33,16 @@ Do not enable GSD's MemPalace integration (`gsd-mempalace-*`) on top of this —
 
 ## Project Overview
 
-A bar/restaurant POS system built as a Tauri 2 desktop app (Windows, WebView2). Frontend is React 19 + TypeScript + Vite. Backend is Supabase (PostgreSQL + Auth + Realtime + RLS).
+A bar/restaurant POS system built as a Tauri 2 desktop app shipping to Windows/WebView2 end users. Ubuntu is an officially supported development OS, running the same native shell through webkit2gtk instead of WebView2. Frontend is React 19 + TypeScript + Vite. Backend is Supabase (PostgreSQL + Auth + Realtime + RLS).
 
 All source code lives in `bar-pos/`. Run all commands from `bar-pos/`.
 
 ## Commands
 
 ```bash
+# First-time setup (Ubuntu only)
+bash scripts/setup-ubuntu.sh   # Installs native Tauri deps + Rust toolchain
+
 # Development
 npm run dev          # Vite dev server (port 1420, Tauri mode)
 npm run tauri dev    # Full Tauri desktop app
@@ -73,6 +76,15 @@ npm run storybook    # Storybook on port 6006
 # Setup
 npm run setup:dev    # Create dev users + seed data
 ```
+
+### Ubuntu dev notes
+
+- `node_modules` is platform-specific. A checkout carried over from Windows has `@esbuild/win32-x64`, `@rollup/rollup-win32-x64-*` and `@tauri-apps/cli-win32-x64-msvc` and nothing Linux; fix with `rm -rf node_modules && npm ci`, not by deleting `package-lock.json`.
+- Native prerequisites and the Rust toolchain are installed by `scripts/setup-ubuntu.sh`; `npx @tauri-apps/cli info` is the one-command sanity check.
+- Git hooks are inert in this repo: `.husky/` is gitignored (absent on a fresh clone), and husky cannot self-install from `bar-pos/` because the git root is one level above.
+- Playwright E2E on Ubuntu needs a real display session and Google Chrome — `playwright.config.ts` sets `headless: false` with `channel: 'chrome'`, so a desktop session works while a headless runner does not, and `npx playwright install` does not supply the `chrome` channel (install `google-chrome-stable` separately). E2E is out of scope for the CI `tauri-build` job.
+- `npm run test:storybook` uses `@vitest/browser-playwright` with Playwright's own bundled Chromium, so it needs a one-time `npx playwright install` (optionally `--with-deps`); this is deliberately not in `scripts/setup-ubuntu.sh`, which is scoped to native Tauri prerequisites and the Rust toolchain.
+- Release builds and code signing stay on Windows.
 
 ## Architecture: Feature-Sliced Design (FSD)
 
