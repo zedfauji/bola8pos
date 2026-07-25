@@ -6,7 +6,7 @@ current_phase: 25
 current_phase_name: 2-Level
 status: planning
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-22T15:03:49.195Z"
+last_updated: "2026-07-25T18:34:10.402Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 24 complete, transitioned to Phase 25
 progress:
@@ -143,6 +143,7 @@ Last activity: 2026-07-22 — Phase 24 complete, transitioned to Phase 25
 
 - Phase 12 added: Full RBAC page, Remove the breadcrumbs of RBAC from other page, There should be only one page to manage RBAC and it should be Protected. Follow the project Navigation rule.
 - Phase 33.1 inserted after Phase 33: E2E Test/RBAC Drift Fixes — closes Phase 33's outstanding Success Criterion 3 gap (06-transfer T4/T5, 09-rbac T7/T-RP-01/T-RP-02, all pre-existing/out-of-scope) (URGENT)
+- Phase 36 added: Migrate development environment from Windows to Ubuntu
 
 ## Decisions
 
@@ -408,7 +409,7 @@ Last activity: 2026-07-22 — Phase 24 complete, transitioned to Phase 25
 
 ## Last Session
 
-- **Stopped at:** Completed 24-10-PLAN.md (phase 24 complete)
+- **Stopped at:** Phase 36 context gathered
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -425,9 +426,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-21T22:11:30.832Z
+**Last session:** 2026-07-25T18:34:10.372Z
 **Stopped at:** Completed 23-04-PLAN.md
-**Resume file:** None
+**Resume file:** .planning/phases/36-migrate-development-environment-from-windows-to-ubuntu/36-CONTEXT.md
 
 ## Operator Next Steps
 
