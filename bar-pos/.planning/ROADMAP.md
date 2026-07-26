@@ -777,10 +777,17 @@ Plans:
 
 ### Phase 25: Receipt Item Grouping (2-Level)
 
-**Goal:** Group receipt line items 2 levels deep (e.g. category → item) across every surface that prints or displays them — extend `receipt-format.ts`, the Tauri Rust printer payload, PDF export, and the KDS card — all sharing one `groupOrderItemsForReceipt` function.
-**Requirements:** TBD (POS-COMPARISON.md §25 — source doc no longer present; scope locked in 25-CONTEXT.md)
+**Goal:** Group receipt line items across every surface that prints or displays them — extend `receipt-format.ts` (both the final receipt and the pre-cheque), the Caja Report PDF export, and the KDS card — all sharing one `groupOrderItemsForReceipt` module. Per 25-CONTEXT.md D-01 the hierarchy is 3 levels (Category → Item → Modifiers), not the 2 originally worded here. Per D-03 "PDF export" means the existing Caja Report PDF; no new per-order PDF is in scope. `src-tauri/src/commands/printer.rs` needs no change — it is a dumb ESC/POS encoder holding zero receipt strings, so only the TypeScript-built lines array changes.
+**Requirements:** SC-1, SC-2, SC-2b, SC-3, SC-4 (no REQUIREMENTS.md for this milestone; POS-COMPARISON.md §25 no longer present — scope locked in 25-CONTEXT.md, IDs established in 25-RESEARCH.md)
 **Depends on:** —
-**Plans:** Not yet planned
+**Plans:** 4 plans
+
+Plans:
+
+- [ ] 25-01-PLAN.md — tracer: `groupByCategory`/`formatModifierLines` utility + `ReceiptDataSchema` fields + both receipt text builders (Wave 1) (SC-1, SC-2, SC-3)
+- [ ] 25-02-PLAN.md — `process-payment` Edge Function supplies category + batched modifier names to `ReceiptData` (Wave 2) (SC-2b)
+- [ ] 25-03-PLAN.md — `KdsCard` one line per modifier via the shared formatter, no category clustering (Wave 2) (SC-2)
+- [ ] 25-04-PLAN.md — `get_caja_report` migration (category dimension + camelCase key repair) + schema push + Caja Report PDF category sub-headers (Wave 2) (SC-2, SC-4)
 
 **Success Criteria:**
 
