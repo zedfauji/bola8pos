@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
-current_phase: 36
-current_phase_name: migrate-development-environment-from-windows-to-ubuntu
-status: verifying
-stopped_at: Completed 36-04-PLAN.md
-last_updated: "2026-07-25T20:48:29.306Z"
+current_phase: 3
+current_phase_name: Ingredient Foundation
+status: planning
+stopped_at: Completed 23-04-PLAN.md
+last_updated: "2026-07-26T22:35:36.137Z"
 last_activity: 2026-07-25
-last_activity_desc: Phase 36 Plan 04 complete — human sign-off recorded, 3 pre-existing blockers routed to backlog todos
+last_activity_desc: Phase 36 complete, transitioned to Phase 3
 progress:
   total_phases: 28
   completed_phases: 21
@@ -48,10 +48,10 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 
 ## Current Position
 
-Phase: 36 (migrate-development-environment-from-windows-to-ubuntu) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-07-25 — Phase 36 Plan 04 complete — human sign-off recorded, 3 pre-existing blockers routed to backlog todos
+Phase: 3 — Ingredient Foundation
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-25 — Phase 36 complete, transitioned to Phase 3
 
 ## Session Log
 
@@ -419,7 +419,7 @@ Last activity: 2026-07-25 — Phase 36 Plan 04 complete — human sign-off recor
 
 ## Last Session
 
-- **Stopped at:** Completed 36-04-PLAN.md
+- **Stopped at:** Phase 25 context gathered
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -436,9 +436,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-25T20:48:29.293Z
+**Last session:** 2026-07-26T22:35:35.718Z
 **Stopped at:** Completed 23-04-PLAN.md
-**Resume file:** None
+**Resume file:** .planning/phases/25-receipt-item-grouping-2-level/25-CONTEXT.md
 
 ## Operator Next Steps
 
