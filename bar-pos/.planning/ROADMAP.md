@@ -783,8 +783,12 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 25-01-PLAN.md — tracer: `groupByCategory`/`formatModifierLines` utility + `ReceiptDataSchema` fields + both receipt text builders (Wave 1) (SC-1, SC-2, SC-3)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 25-02-PLAN.md — `process-payment` Edge Function supplies category + batched modifier names to `ReceiptData` (Wave 2) (SC-2b)
 - [ ] 25-03-PLAN.md — `KdsCard` one line per modifier via the shared formatter, no category clustering (Wave 2) (SC-2)
 - [ ] 25-04-PLAN.md — `get_caja_report` migration (category dimension + camelCase key repair) + schema push + Caja Report PDF category sub-headers (Wave 2) (SC-2, SC-4)
