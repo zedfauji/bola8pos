@@ -97,6 +97,8 @@ export type PreChequeData = {
     orderedAt: Date;
     modifierNames: string[];
     notes: string | null;
+    categoryId: string | null;
+    categoryName: string | null;
   }>;
   poolCharge: {
     tableLabel: string;
@@ -126,14 +128,18 @@ export function buildPreChequeText(data: PreChequeData, locale: Locale): string 
   }
   lines.push(divider());
 
-  for (const item of data.items) {
-    const left = `${String(item.quantity)}× ${item.name}`;
-    lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
-    for (const mod of item.modifierNames) {
-      lines.push(`  + ${mod}`);
+  const preChequeGroups = groupByCategory(data.items);
+  for (const group of preChequeGroups) {
+    if (preChequeGroups.length > 1) {
+      lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));
     }
-    if (item.notes) {
-      lines.push(`  ${tr('precheque.note')}: ${item.notes}`);
+    for (const item of group.items) {
+      const left = `${String(item.quantity)}× ${item.name}`;
+      lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
+      lines.push(...formatModifierLines(item.modifierNames));
+      if (item.notes) {
+        lines.push(`  ${tr('precheque.note')}: ${item.notes}`);
+      }
     }
   }
 

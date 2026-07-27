@@ -49,6 +49,8 @@ export function usePrintPreCheque() {
               orderedAt: o.createdAt,
               modifierNames: item.modifiers.map(m => m.name),
               notes: item.notes,
+              categoryId: item.product?.category?.id ?? null,
+              categoryName: item.product?.category?.name ?? null,
             }))
         );
 
