@@ -14,6 +14,9 @@
       "cash": "Cash",
       "card": "Card (BBVA Terminal)",
       "rappi": "Rappi"
+    },
+    "category": {
+      "other": "Other"
     }
   },
   "precheque": {

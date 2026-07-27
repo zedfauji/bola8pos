@@ -1,6 +1,7 @@
 import type { Locale } from '@shared/lib/domain';
 import { formatMoney } from '@shared/lib/domain-helpers';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { formatModifierLines, groupByCategory } from '@shared/lib/groupOrderItemsForReceipt';
 import i18n from '@shared/lib/i18n';
 
 const LINE = 32;
@@ -173,10 +174,17 @@ export function buildThermalReceiptText(receipt: ReceiptData, locale: Locale): s
   lines.push(lineLeftRight(tr('receipt.customer'), receipt.customerName));
   lines.push(divider());
 
-  for (const item of receipt.items) {
-    const left = `${String(item.quantity)}× ${item.name}`;
-    const price = formatMoney(item.lineTotal);
-    lines.push(lineLeftRight(left, price));
+  const groups = groupByCategory(receipt.items);
+  for (const group of groups) {
+    if (groups.length > 1) {
+      lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));
+    }
+    for (const item of group.items) {
+      const left = `${String(item.quantity)}× ${item.name}`;
+      const price = formatMoney(item.lineTotal);
+      lines.push(lineLeftRight(left, price));
+      lines.push(...formatModifierLines(item.modifierNames ?? []));
+    }
   }
 
   lines.push(divider());
