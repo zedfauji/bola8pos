@@ -39,6 +39,9 @@ export const ReceiptDataSchema = z.object({
       quantity: z.number().int().positive(),
       unitPrice: MoneySchema,
       lineTotal: MoneySchema,
+      categoryId: UuidSchema.nullable().optional(),
+      categoryName: z.string().nullable().optional(),
+      modifierNames: z.array(z.string()).optional(),
     })
   ),
   subtotal: MoneySchema,

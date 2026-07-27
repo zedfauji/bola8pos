@@ -1,6 +1,7 @@
 import type { Locale } from '@shared/lib/domain';
 import { formatMoney } from '@shared/lib/domain-helpers';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { formatModifierLines, groupByCategory } from '@shared/lib/groupOrderItemsForReceipt';
 import i18n from '@shared/lib/i18n';
 
 const LINE = 32;
@@ -96,6 +97,8 @@ export type PreChequeData = {
     orderedAt: Date;
     modifierNames: string[];
     notes: string | null;
+    categoryId: string | null;
+    categoryName: string | null;
   }>;
   poolCharge: {
     tableLabel: string;
@@ -125,14 +128,18 @@ export function buildPreChequeText(data: PreChequeData, locale: Locale): string 
   }
   lines.push(divider());
 
-  for (const item of data.items) {
-    const left = `${String(item.quantity)}× ${item.name}`;
-    lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
-    for (const mod of item.modifierNames) {
-      lines.push(`  + ${mod}`);
+  const preChequeGroups = groupByCategory(data.items);
+  for (const group of preChequeGroups) {
+    if (preChequeGroups.length > 1) {
+      lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));
     }
-    if (item.notes) {
-      lines.push(`  ${tr('precheque.note')}: ${item.notes}`);
+    for (const item of group.items) {
+      const left = `${String(item.quantity)}× ${item.name}`;
+      lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
+      lines.push(...formatModifierLines(item.modifierNames));
+      if (item.notes) {
+        lines.push(`  ${tr('precheque.note')}: ${item.notes}`);
+      }
     }
   }
 
@@ -173,10 +180,17 @@ export function buildThermalReceiptText(receipt: ReceiptData, locale: Locale): s
   lines.push(lineLeftRight(tr('receipt.customer'), receipt.customerName));
   lines.push(divider());
 
-  for (const item of receipt.items) {
-    const left = `${String(item.quantity)}× ${item.name}`;
-    const price = formatMoney(item.lineTotal);
-    lines.push(lineLeftRight(left, price));
+  const groups = groupByCategory(receipt.items);
+  for (const group of groups) {
+    if (groups.length > 1) {
+      lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));
+    }
+    for (const item of group.items) {
+      const left = `${String(item.quantity)}× ${item.name}`;
+      const price = formatMoney(item.lineTotal);
+      lines.push(lineLeftRight(left, price));
+      lines.push(...formatModifierLines(item.modifierNames ?? []));
+    }
   }
 
   lines.push(divider());
