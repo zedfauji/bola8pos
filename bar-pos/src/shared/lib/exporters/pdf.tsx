@@ -15,6 +15,7 @@ import type {
   VoidRefundRow,
   WaitlistMetricsRow,
 } from '@shared/lib/domain';
+import { groupByCategory } from '@shared/lib/groupOrderItemsForReceipt';
 import i18n, { getCurrentLocale } from '@shared/lib/i18n';
 
 const DARK_HEADER = '#1e293b';
@@ -62,6 +63,8 @@ function ReportHeader({ title, date, locale }: { title: string; date: string; lo
 function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale }) {
   const tr = pdfT(locale);
   const date = report.cajaSession.openedAt.toLocaleDateString(locale);
+  const topProductGroups = groupByCategory(report.topProducts);
+  let topProductRowIndex = 0;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -120,12 +123,24 @@ function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale 
           <Text style={styles.cellRight}>{tr('pdf.caja.qty')}</Text>
           <Text style={styles.cellRight}>{tr('pdf.caja.revenue')}</Text>
         </View>
-        {report.topProducts.map((p, i) => (
-          <View key={p.productName} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
-            <Text style={styles.cell}>{p.productName}</Text>
-            <Text style={styles.cellRight}>{String(p.quantity)}</Text>
-            <Text style={styles.cellRight}>{fmt(p.revenue)}</Text>
-          </View>
+        {topProductGroups.map((group) => (
+          <React.Fragment key={group.categoryId ?? 'uncategorized'}>
+            {topProductGroups.length > 1 && (
+              <Text style={styles.sectionTitle}>
+                {group.categoryName ?? tr('pdf.caja.categoryOther')}
+              </Text>
+            )}
+            {group.items.map((p) => {
+              const i = topProductRowIndex++;
+              return (
+                <View key={p.productName} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
+                  <Text style={styles.cell}>{p.productName}</Text>
+                  <Text style={styles.cellRight}>{String(p.quantity)}</Text>
+                  <Text style={styles.cellRight}>{fmt(p.revenue)}</Text>
+                </View>
+              );
+            })}
+          </React.Fragment>
         ))}
 
         <Text style={styles.sectionTitle}>{tr('pdf.caja.staffPerformance')}</Text>
