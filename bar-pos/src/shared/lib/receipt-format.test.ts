@@ -143,6 +143,68 @@ describe('buildThermalReceiptText', () => {
     expect(text).toContain('Customer');
     expect(text).toContain('Subtotal');
   });
+
+  // ---------------------------------------------------------------------
+  // Category grouping + modifier lines (Phase 25, D-01/D-05)
+  // ---------------------------------------------------------------------
+
+  it('renders both category headers and indented modifier lines, all within 32 UTF-8 bytes', () => {
+    const text = buildThermalReceiptText(
+      baseReceipt({
+        items: [
+          {
+            name: 'Nachos',
+            quantity: 1,
+            unitPrice: 80,
+            lineTotal: 80,
+            categoryId: 'cat-food',
+            categoryName: 'Food',
+            modifierNames: ['Extra cheese'],
+          },
+          {
+            name: 'Cerveza',
+            quantity: 2,
+            unitPrice: 45,
+            lineTotal: 90,
+            categoryId: 'cat-drinks',
+            categoryName: 'Drinks',
+            modifierNames: [],
+          },
+        ],
+        subtotal: 170,
+      }),
+      'es-MX'
+    );
+    expect(text).toContain('Food');
+    expect(text).toContain('Drinks');
+    expect(text).toContain('  + Extra cheese');
+    const maxByteWidth = Math.max(
+      ...text.split('\n').map(l => new TextEncoder().encode(l).length)
+    );
+    expect(maxByteWidth).toBeLessThanOrEqual(32);
+  });
+
+  it('single-category items produce no category header line (SC-3 degenerate case)', () => {
+    const text = buildThermalReceiptText(
+      baseReceipt({
+        items: [
+          {
+            name: 'Nachos',
+            quantity: 1,
+            unitPrice: 80,
+            lineTotal: 80,
+            categoryId: 'cat-food',
+            categoryName: 'Food',
+            modifierNames: [],
+          },
+        ],
+        subtotal: 80,
+      }),
+      'es-MX'
+    );
+    const hasHeaderLine = text.split('\n').some(l => l.trim() === 'Food');
+    expect(hasHeaderLine).toBe(false);
+  });
 });
 
 // ============================================================================
