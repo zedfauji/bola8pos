@@ -780,12 +780,12 @@ Plans:
 **Goal:** Group receipt line items across every surface that prints or displays them — extend `receipt-format.ts` (both the final receipt and the pre-cheque), the Caja Report PDF export, and the KDS card — all sharing one `groupOrderItemsForReceipt` module. Per 25-CONTEXT.md D-01 the hierarchy is 3 levels (Category → Item → Modifiers), not the 2 originally worded here. Per D-03 "PDF export" means the existing Caja Report PDF; no new per-order PDF is in scope. `src-tauri/src/commands/printer.rs` needs no change — it is a dumb ESC/POS encoder holding zero receipt strings, so only the TypeScript-built lines array changes.
 **Requirements:** SC-1, SC-2, SC-2b, SC-3, SC-4 (no REQUIREMENTS.md for this milestone; POS-COMPARISON.md §25 no longer present — scope locked in 25-CONTEXT.md, IDs established in 25-RESEARCH.md)
 **Depends on:** —
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 25-01-PLAN.md — tracer: `groupByCategory`/`formatModifierLines` utility + `ReceiptDataSchema` fields + both receipt text builders (Wave 1) (SC-1, SC-2, SC-3)
+- [x] 25-01-PLAN.md — tracer: `groupByCategory`/`formatModifierLines` utility + `ReceiptDataSchema` fields + both receipt text builders (Wave 1) (SC-1, SC-2, SC-3)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

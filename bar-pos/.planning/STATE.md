@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
-current_phase: 3
-current_phase_name: Ingredient Foundation
+current_phase: 25
+current_phase_name: receipt-item-grouping-2-level
 status: executing
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-26T23:50:25.505Z"
-last_activity: 2026-07-25
-last_activity_desc: Phase 36 complete, transitioned to Phase 3
+last_updated: "2026-07-27T03:57:11.302Z"
+last_activity: 2026-07-26
+last_activity_desc: Phase 25 execution started
 progress:
   total_phases: 28
   completed_phases: 21
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Phase 36 — migrate-development-environment-from-windows-to-ubuntu
+**Current focus:** Phase 25 — receipt-item-grouping-2-level
 
 ## Current Position
 
-Phase: 3 — Ingredient Foundation
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-25 — Phase 36 complete, transitioned to Phase 3
+Phase: 25 (receipt-item-grouping-2-level) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 25
+Last activity: 2026-07-26 — Phase 25 execution started
 
 ## Session Log
 
