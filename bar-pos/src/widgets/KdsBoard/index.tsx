@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useBumpKdsItem } from '@features/bump-kds-item';
 import { useKdsItems, useKdsRealtimeBridge } from '@entities/kds';
 import type { KdsOrderItem } from '@entities/kds';
+import { formatModifierLines } from '@shared/lib/groupOrderItemsForReceipt';
 import { ComboBadge } from '@shared/ui/ComboBadge';
 import { POSButton } from '@shared/ui/POSButton';
 import { RoutingBadge } from '@shared/ui/RoutingBadge';
@@ -34,7 +35,7 @@ type KdsCardProps = {
   isBumping: boolean;
 };
 
-function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
+export function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
   const { t } = useTranslation('wPanels');
   const statusColor = statusColorFor(item.kdsStatus);
 
@@ -59,9 +60,13 @@ function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
           </div>
           <p className="text-sm opacity-80">{t('kdsBoard.qty', { quantity: item.quantity })}</p>
           {item.modifierNames.length > 0 && (
-            <p data-testid="kds-item-modifiers" className="mt-1 text-sm opacity-80">
-              {item.modifierNames.join(' / ')}
-            </p>
+            <div data-testid="kds-item-modifiers" className="mt-1">
+              {formatModifierLines(item.modifierNames).map(line => (
+                <p key={line} className="text-sm whitespace-pre opacity-80">
+                  {line}
+                </p>
+              ))}
+            </div>
           )}
           {item.notes && (
             <p className="mt-1 text-sm italic opacity-70">
