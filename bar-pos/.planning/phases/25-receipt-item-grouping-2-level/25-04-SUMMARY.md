@@ -139,6 +139,37 @@ None - no external service configuration required beyond the already-applied mig
 - **Task 4 (blocking human-verify checkpoint) is NOT yet approved.** It requires a human to walk through creating a tab with 2+ categories and a modifier, checking the pre-cheque, `/kds`, the final receipt, `/reports` (confirming the Caja Report loads at all — this was previously broken by the snake_case defect), and the exported PDF, per the plan's Task 4 `<how-to-verify>` steps. This plan cannot be marked fully complete until that checkpoint is approved.
 - `npm run test` / `npm run typecheck` / `npm run lint` all pass (typecheck/lint modulo the 2 pre-existing unrelated errors, which are zero-warning-clean per `max-warnings 0` since typecheck and lint are separate commands — typecheck errors are pre-existing and not part of the lint gate).
 
+## Task 4 Attempt — 2026-07-27 (session 3): BLOCKED before any walkthrough step
+
+**Status: NOT started, NOT approved.** No dev server was launched, no test data was seeded, no screenshots were captured. This session halted during pre-flight file verification, before touching the app, because the worktree does not contain the code Task 4 needs to test.
+
+### Pre-flight finding: this worktree only has 25-01 and 25-04 merged — 25-02 and 25-03 are absent
+
+The continuation prompt assumed plans 25-01, 25-02, and 25-03 were all merged into this worktree (`worktree-agent-aaa69a76c6a431d1f`, forked after 25-01). File-level inspection shows that assumption is false:
+
+| Plan | Claimed change | Present in this worktree? | Evidence |
+|------|-----------------|---------------------------|----------|
+| 25-01 | `groupByCategory`/`formatModifierLines` shared grouper, wired into pre-cheque + final receipt via `receipt-format.ts` | **Present** | `src/shared/lib/groupOrderItemsForReceipt.ts` exists; `src/shared/lib/receipt-format.ts:4,131,183` imports and calls `groupByCategory` for both the pre-cheque block and the final-receipt block |
+| 25-02 | `supabase/functions/process-payment/index.ts` extended to push `categoryId`/`categoryName`/`modifierNames` onto every receipt line | **Absent** | `grep -n "categoryId\|categoryName\|modifierNames" supabase/functions/process-payment/index.ts` returns nothing. `git merge-base --is-ancestor 57c9917 HEAD` (the 25-02 commit) → not an ancestor |
+| 25-03 | KDS card renders modifiers one-per-line via shared `formatModifierLines` | **Absent** | `src/widgets/KdsBoard/index.tsx:61-63` still renders `{item.modifierNames.join(' / ')}` on one line, not `formatModifierLines`. `git merge-base --is-ancestor 3c33bcd HEAD` (the 25-03 commit) → not an ancestor |
+| 25-04 | `get_caja_report` category dimension + camelCase fix, PDF category sub-headers | **Present** | `supabase/migrations/20260726000001_caja_report_top_products_category.sql` exists; `pdf.tsx` groups via `groupByCategory` (this plan's own Tasks 1-3) |
+
+`git log --oneline --all` confirms the branch point: this worktree's HEAD (`891894b`) descends from `8ce873f` ("chore: merge executor worktree" for 25-01) plus this plan's own 25-04 commits, but never merged `57c9917` (25-02) or `3c33bcd`/`9f7b192` (25-03) — those exist on `main` (current tip `f4a5958`, "docs(phase-25): update tracking after wave 2 (25-02, 25-03)") but were never pulled into this worktree branch.
+
+### Why this blocks Task 4 specifically (not a code defect)
+
+Task 4's `<how-to-verify>` requires all four surfaces to agree: pre-cheque, KDS card, final receipt, and Caja Report PDF. With 25-02 missing, `receiptData.items` from the live `process-payment` edge function carries no `categoryId`/`categoryName`/`modifierNames` — so the final receipt would fall entirely into the grouper's uncategorized bucket regardless of what the tab actually contains, which is not a real disagreement between surfaces, it's a missing feature in this branch. With 25-03 missing, the KDS card would show `BBQ / <other modifier>` joined on one line instead of one modifier per line — again not a defect Task 4 is meant to catch, just an artifact of an incomplete merge.
+
+Running the walkthrough now would produce two "failures" that look like cross-surface inconsistencies but are actually merge-state gaps. Per the continuation prompt's explicit instruction ("If any are missing, note it — do not attempt to merge/rebase yourself, just report what's actually present so the orchestrator can reconcile") and the fallback instruction for blocked steps ("HALT and report the exact error — do not fabricate screenshots or results"), this session stopped here rather than producing screenshots that would need to be discarded once 25-02/25-03 land.
+
+### What is needed before Task 4 can run
+
+The orchestrator needs to bring `57c9917` (25-02) and `3c33bcd` + `9f7b192` (25-03) — or their equivalent squashed merge commits already on `main` at `f4a5958` — into this worktree's branch (`worktree-agent-aaa69a76c6a431d1f`) before the cross-surface walkthrough can produce meaningful results. No merge/rebase was attempted by this session, per instruction.
+
+### Cleanup
+
+No dev server was started, no database rows were seeded, no files were modified outside this SUMMARY. `git status --short` is clean.
+
 ---
 *Phase: 25-receipt-item-grouping-2-level*
 *Completed: 2026-07-27 (Tasks 1-3; Task 4 pending human verification)*
