@@ -139,6 +139,17 @@ Last activity: 2026-07-26 — Phase 25 execution started
 
 ## Accumulated Context
 
+### Pending Todos
+
+6 pending todos in `.planning/todos/pending/` (see `/gsd-progress` or `/gsd-capture --list`):
+
+- Activate inert git hooks (husky gitignored, stale hooksPath) — tooling/minor
+- Fix 2 pre-existing tsc errors blocking tauri build CI job — tooling/major
+- Relocate misplaced GitHub workflows directory to git root — tooling/major
+- Payment total omits tax shown in pre-payment preview — payments/major (discovered during Phase 25 Task 4 verification, 2026-07-27 — real charge omits the tax line shown in the payment modal preview, $41.44 discrepancy on a real paid tab)
+- Print popup fallback hangs under Playwright automation — testing/major (`pos-printer.ts`'s browser-only print fallback; production Tauri printing unaffected)
+- Caja Report PDF export fails silently outside Tauri runtime — testing/major (`useExportReport.ts`'s save dialog needs Tauri; PDF content itself is correct)
+
 ### Roadmap Evolution
 
 - Phase 12 added: Full RBAC page, Remove the breadcrumbs of RBAC from other page, There should be only one page to manage RBAC and it should be Protected. Follow the project Navigation rule.
