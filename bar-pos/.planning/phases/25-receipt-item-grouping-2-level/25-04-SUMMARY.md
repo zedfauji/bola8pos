@@ -171,9 +171,75 @@ The orchestrator needs to bring `57c9917` (25-02) and `3c33bcd` + `9f7b192` (25-
 No dev server was started, no database rows were seeded, no files were modified outside this SUMMARY. `git status --short` is clean.
 
 ---
+
+## Task 4 Attempt — 2026-07-27 (session 4): Walkthrough completed, evidence captured, checkpoint STILL NOT approved
+
+**Status: walkthrough executed end-to-end. 5 screenshots + supporting text/JSON evidence saved to `/tmp/phase25-task4-screenshots/` on the machine that ran this session. This plan's Task 4 checkpoint is not self-approved by an agent — a human must review the screenshots and explicitly approve or reject.**
+
+### Pre-flight: confirmed prior blocker resolved
+
+Before touching the app, verified the orchestrator's merge landed correctly:
+- `git rev-parse --abbrev-ref HEAD` → `worktree-agent-aaa69a76c6a431d1f` (correct branch)
+- `git log --oneline -3` showed `67a27ba merge: bring 25-02 + 25-03 into 25-04 base for Task 4 cross-surface check` at HEAD
+- `grep -c "categoryId" supabase/functions/process-payment/index.ts` → 3 (was 0 in session 3)
+- `grep -c "formatModifierLines" src/widgets/KdsBoard/index.tsx` → 2 (was 0 in session 3)
+
+Both grep checks passed, so the walkthrough proceeded.
+
+### Test data
+
+Reused plan 25-02's combo: **Alitas (700gr)** (`4213e667-3156-4202-a485-c5822bdda71c`, category "Alitas") with modifier **BBQ** (`4c3149f3-ed75-4238-a0a7-9463b8e346c8`, price delta $0), plus **Budweiser** (`712d028b-7a71-48fe-a84a-d0f157659c36`, category "Cervezas Nacionales", no modifier). A temporary `product_modifiers` row linking Alitas 700gr → BBQ was seeded via the service-role client (same convention as 25-02/18-modifier-notes-kds.spec.ts) and deleted in a `finally` block after the walkthrough — confirmed deleted (`existing product_modifiers rows: []` re-checked after the run).
+
+Both products route to `BAR` (`categories.routing = 'BAR'` for both "Alitas" and "Cervezas Nacionales" categories), so the cross-surface walkthrough used `/kds-bar`, not `/kds` (kitchen board correctly showed nothing for this order — confirmed, not a defect).
+
+Driven via a temporary, uncommitted Playwright spec (`e2e/_tmp-phase25-task4.spec.ts`, deleted after this session — never part of the committed suite) run against `npm run dev` on port 1420 from this worktree, `DISPLAY=:0`, Google Chrome, using the existing `e2e/helpers/auth.ts` / `e2e/helpers/supabase.ts` conventions (`loginAs(page, 'manager')`, `openCaja`, `resetTestState`).
+
+### Two known environment limitations discovered (not phase-25 defects)
+
+1. **Pre-cheque browser-fallback popup is reproducibly blocked.** `src/shared/lib/pos-printer.ts`'s `printRawText()` browser fallback calls `window.open('', '_blank', ...)` from inside an async mutation handler (`usePrintPreCheque` → `printRawText`). Chromium revokes "transient user activation" across an `await` boundary, so the popup is silently blocked (`printer.raw_text.popup_blocked` logged) even with `--disable-popup-blocking` and a genuine prior click — confirmed reproducible across multiple attempts. `printRawText()` returns `ok(undefined)` in that case by design (never throws on a blocked popup), so clicking "Print Pre-cheque" shows a success toast with nothing actually printed in this browser-only test environment. This file is untouched by any 25-01..25-04 plan (pre-existing infrastructure).
+   - **Workaround used for evidence:** called the exact production `buildPreChequeText()` (same function plan 25-01 wrote and unit-tested) directly via a `tsx` subprocess, fed with REAL order/category/modifier/pool-charge data queried from the live DB for the actual tab created in this walkthrough, then rendered that text through the identical HTML template `pos-printer.ts`'s fallback uses (monospace `<pre>`, 11px) and screenshotted it. This is real production formatting logic + real data, not a fabricated screenshot — see `01-precheque.png` / `01-precheque.txt` / `01-precheque-NOTE.txt`.
+2. **In-app PDF export requires the Tauri desktop runtime.** `useExportReport.ts` calls `@tauri-apps/plugin-dialog`'s `save()` and `@tauri-apps/plugin-fs`'s `writeFile()`, both unavailable when the app runs as a plain Vite dev server (as opposed to `npm run tauri dev`). Clicking Export → PDF in `/reports` logged `export.report.failed {type: "caja-pdf"}` to the browser console — confirms the failure, though the (localized es-MX) toast text didn't match the automated English-regex check. Pre-existing infrastructure, not touched by any 25-01..25-04 plan.
+   - **Workaround used for evidence:** called the exact production `cajaReportToPdfBytes()` (same function plan 25-04 wrote and unit-tested in `pdf.test.ts`) directly via a `tsx` subprocess against a **live `get_caja_report` RPC call** for the real caja session closed in this walkthrough, parsed with the app's own `CajaReportSchema`, wrote the real PDF bytes to disk, and rendered page 1 to PNG via `pdftoppm`. See `05-caja-pdf-page.png` / `caja-report.pdf`.
+
+Both limitations are print/export **delivery mechanisms**, not the category/modifier grouping logic that is this phase's actual subject — the correctness evidence below comes from real production formatting functions running on real data either way.
+
+### Screenshots captured (`/tmp/phase25-task4-screenshots/`)
+
+| File | What it shows |
+|---|---|
+| `01-precheque.png` / `.txt` | Pre-cheque text: "Alitas" category header, `1× Alitas (700gr) $199.00`, indented `+ BBQ`, "Cervezas Nacionales" header, `1× Budweiser $45.00`, pool charge line, `SUBTOTAL $259.00` |
+| `02-kds.png` | `/kds-bar` Bar Display: 2 pending cards (Alitas 700gr with `+ BBQ` on its own line, Budweiser), **zero category section headers** (D-04, intentional) |
+| `02b-kds-kitchen-expected-empty.png` | `/kds` (kitchen board): empty, as expected — neither item routes to KITCHEN |
+| `03-receipt.png` / `.txt` | In-app post-payment Receipt dialog: same category headers + `+ BBQ` line as the pre-cheque, `Subtotal $259.00`, `Tip $45.07`, `Total $304.07` |
+| `04-caja-report.png` | `/reports` Daily Caja Report for the closed session: loads without error, `Total Revenue $304.07` (matches receipt Total exactly), Cash Reconciliation table populated |
+| `05-caja-pdf-page.png` / `caja-report.pdf` | Real exported PDF's Top Products table: "Alitas" sub-header over `Alitas (700gr) 1 $199.00`, "Cervezas Nacionales" sub-header over `Budweiser 1 $45.00` — 2 rows total, well under the 10-row cap |
+
+### Data checks (factual, no subjective verdict — human renders the actual approval)
+
+| Check | Result |
+|---|---|
+| Same category name string ("Alitas", "Cervezas Nacionales") across pre-cheque, KDS card, receipt | **Consistent** — identical strings on all three surfaces |
+| Same modifier name string ("BBQ") across pre-cheque, receipt (indented `+ BBQ` line); KDS card (`+ BBQ` on its own line, per plan 25-03) | **Consistent** |
+| KDS shows zero category headers | **Confirmed** (expected per D-04, not a discrepancy) |
+| Caja report loads without error; top-products rows ≤ 10 with category columns populated | **Confirmed** — 2 rows, both `categoryId`/`categoryName` populated (verified via direct RPC call: `topProducts` JSON shows `categoryName: "Alitas"` and `categoryName: "Cervezas Nacionales"`) |
+| Pre-cheque SUBTOTAL vs final receipt Subtotal | **Byte-identical**: `$259.00` both places |
+| Pre-cheque/receipt Total vs payment-form pre-submission Total | **MISMATCH, reported factually, not diagnosed further**: the Process Payment modal's pre-submission snapshot (captured via `modal.textContent()` right after opening, before submitting) showed `Subtotal $259.00 / Tax (16%) $41.44 / Tip $45.07 / Total $345.51`. The final receipt and the caja report both show `Total $304.07` (= Subtotal $259.00 + Tip $45.07, with **no separate tax line**). The actually-recorded/charged amount ($304.07) is internally consistent across the receipt and the caja report (`Total Revenue` matches exactly), so this is a display-time difference in the **payment modal's pre-submission preview** vs. what's actually charged — not a discrepancy between the pre-cheque and the receipt (which do match on Subtotal). This is a payment-form/tax-display question, not part of phase 25's category-grouping scope (25-01..25-04 never touch tax computation or `PaymentForm`'s total preview), so it is recorded here for visibility and left for the human reviewer to judge, not auto-fixed. |
+
+### Cleanup performed
+
+- Seeded `product_modifiers` row deleted (re-verified empty after the run).
+- No open tabs, no occupied pool tables, no open caja sessions remain (verified via direct queries after the walkthrough).
+- Dev server (`npm run dev`, started by Playwright's `webServer` on port 1420) killed; port 1420 confirmed down.
+- Temporary Playwright spec (`e2e/_tmp-phase25-task4.spec.ts`) and temporary `tsx` helper scripts (`.tmp-render-precheque.ts`, `.tmp-render-caja-pdf.ts`, `.tmp-inspect.ts`, `.tmp-precheque-test.ts`) deleted — `git status --short` is clean.
+
+### What is needed before this plan can be marked complete
+
+**Task 4's `checkpoint:human-verify` (`gate="blocking"`) has NOT been approved by a human.** Evidence is captured and objective data checks are recorded above; per this task's own instructions, an agent does not self-approve this checkpoint. A human needs to review the 5 screenshots at `/tmp/phase25-task4-screenshots/` (or a copy relocated before this worktree is removed — that directory is outside the worktree and survives worktree removal) and either approve or describe which surface disagrees.
+
+---
 *Phase: 25-receipt-item-grouping-2-level*
-*Completed: 2026-07-27 (Tasks 1-3; Task 4 pending human verification)*
+*Completed: 2026-07-27 (Tasks 1-3; Task 4 walkthrough executed session 4, evidence captured, still pending human approval)*
 
 ## Self-Check: PASSED
 
-All created/modified files and both task commits (`94cb093`, `14df313`) verified present in the worktree and git history.
+All created/modified files and both task commits (`94cb093`, `14df313`) verified present in the worktree and git history. Session 4's screenshot evidence files confirmed present on disk at `/tmp/phase25-task4-screenshots/` (01-precheque through 05-caja-pdf-page, plus supporting text/JSON).
