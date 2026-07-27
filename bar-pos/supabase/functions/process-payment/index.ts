@@ -210,7 +210,8 @@ Deno.serve(async (req: Request) => {
         quantity,
         unit_price,
         modifier_price_delta,
-        products ( name )
+        modifier_ids,
+        products ( name, category_id, categories ( name ) )
       )
     `
     )
@@ -224,7 +225,8 @@ Deno.serve(async (req: Request) => {
     quantity: number;
     unit_price: number;
     modifier_price_delta: number;
-    products: { name: string } | null;
+    modifier_ids: string[] | null;
+    products: { name: string; category_id: string | null; categories: { name: string } | null } | null;
   };
   type Or = {
     id: string;
@@ -232,15 +234,39 @@ Deno.serve(async (req: Request) => {
     order_items: Oi[] | null;
   };
 
+  const nonVoidedOrders = (orderRows ?? []).filter((order) => (order as Or).status !== 'voided') as Or[];
+
+  // Modifiers are stored as order_items.modifier_ids (uuid[]), not a junction
+  // table — batch-resolve names in one query rather than per-item.
+  const allModifierIds = Array.from(
+    new Set(nonVoidedOrders.flatMap((order) => (order.order_items ?? []).flatMap((oi) => oi.modifier_ids ?? [])))
+  );
+  const modifierNameById = new Map<string, string>();
+  if (allModifierIds.length > 0) {
+    const { data: modifierRows, error: modifierErr } = await admin
+      .from('modifiers')
+      .select('id, name')
+      .in('id', allModifierIds);
+    if (modifierErr) {
+      console.error('[process-payment] Failed to resolve modifier names:', modifierErr.message);
+    } else {
+      for (const m of (modifierRows ?? []) as { id: string; name: string }[]) {
+        modifierNameById.set(m.id, m.name);
+      }
+    }
+  }
+
   const items: {
     name: string;
     quantity: number;
     unitPrice: number;
     lineTotal: number;
+    categoryId: string | null;
+    categoryName: string | null;
+    modifierNames: string[];
   }[] = [];
 
-  for (const order of (orderRows ?? []) as Or[]) {
-    if (order.status === 'voided') continue;
+  for (const order of nonVoidedOrders) {
     for (const oi of order.order_items ?? []) {
       const name = oi.products?.name ?? 'Item';
       const lineTotal = (Number(oi.unit_price) + Number(oi.modifier_price_delta)) * Number(oi.quantity);
@@ -249,6 +275,11 @@ Deno.serve(async (req: Request) => {
         quantity: oi.quantity,
         unitPrice: Number(oi.unit_price) + Number(oi.modifier_price_delta),
         lineTotal: Math.round(lineTotal * 100) / 100,
+        categoryId: oi.products?.category_id ?? null,
+        categoryName: oi.products?.categories?.name ?? null,
+        modifierNames: (oi.modifier_ids ?? [])
+          .map((id) => modifierNameById.get(id))
+          .filter((n): n is string => typeof n === 'string'),
       });
     }
   }
@@ -273,6 +304,9 @@ Deno.serve(async (req: Request) => {
       quantity: 1,
       unitPrice: ps.total_charge,
       lineTotal: ps.total_charge,
+      categoryId: null,
+      categoryName: null,
+      modifierNames: [],
     });
   }
 
