@@ -34,7 +34,7 @@ type KdsCardProps = {
   isBumping: boolean;
 };
 
-function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
+export function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
   const { t } = useTranslation('wPanels');
   const statusColor = statusColorFor(item.kdsStatus);
 
