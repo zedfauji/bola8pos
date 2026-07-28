@@ -810,10 +810,20 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 26-01-PLAN.md — DB rename to `resources` + 3 PL/pgSQL function-body recreations + BLOCKING push/type regen (Wave 1, tracer; one-way decision checkpoint) (SC-1, SC-4)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 26-02-PLAN.md — domain schema rename, `entities/pool-table` → `entities/resource` move, source-wide call-site sweep back to green (Wave 2) (SC-1, SC-4)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 26-03-PLAN.md — `is_temp` column + `'floating'` CHECK value + auto-deactivate trigger + integration test (Wave 3) (SC-1, SC-2)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 26-04-PLAN.md — waitlist "seat at new temporary table" action + floating badge + i18n + E2E (Wave 4) (SC-1, SC-3)
 
 **Success Criteria:**
