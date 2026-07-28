@@ -805,9 +805,16 @@ Plans:
 ### Phase 26: Floating Tables (`is_temp`)
 
 **Goal:** Generalize `pool_tables` into a broader `resources` concept with a `FLOATING` type for temporary/ad-hoc tables (`is_temp`), an auto-deactivate trigger when no longer needed, and an auto-create flow from the waitlist.
-**Requirements:** TBD (POS-COMPARISON.md §26 — source doc no longer present; scope locked in 26-CONTEXT.md)
+**Requirements:** TBD (POS-COMPARISON.md §26 — source doc no longer present; scope locked in 26-CONTEXT.md). Planning used the spec-less fallback: `must_haves` derive from SC-1..SC-4 below plus D-01..D-06 in 26-CONTEXT.md, which serve as this phase's de facto requirement text.
 **Depends on:** —
-**Plans:** Not yet planned
+**Plans:** 4 plans
+
+Plans:
+
+- [ ] 26-01-PLAN.md — DB rename to `resources` + 3 PL/pgSQL function-body recreations + BLOCKING push/type regen (Wave 1, tracer; one-way decision checkpoint) (SC-1, SC-4)
+- [ ] 26-02-PLAN.md — domain schema rename, `entities/pool-table` → `entities/resource` move, source-wide call-site sweep back to green (Wave 2) (SC-1, SC-4)
+- [ ] 26-03-PLAN.md — `is_temp` column + `'floating'` CHECK value + auto-deactivate trigger + integration test (Wave 3) (SC-1, SC-2)
+- [ ] 26-04-PLAN.md — waitlist "seat at new temporary table" action + floating badge + i18n + E2E (Wave 4) (SC-1, SC-3)
 
 **Success Criteria:**
 
