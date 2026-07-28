@@ -44,7 +44,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 22: Edit Paid Ticket + History** — `edit_paid_tab` RPC (whitelisted patch + manager PIN + reason) + EditPaidTabDialog + `/edit-history` view *(depends Phases 14, 15)* (completed 2026-07-20)
 - [x] **Phase 23: Reopen Closed Ticket** — `reopen_tab` RPC + payment status `reopened_void` + caja offsetting entries + 24h/2x cap *(depends Phases 14, 15)* (completed 2026-07-21)
 - [x] **Phase 24: Operational Reports Suite + CSV** — 6 new RPCs (peak-hours, voids, deletions×2, modifier popularity, payment methods, charts-data) + generic CSV export action + Recharts widgets *(depends Phase 14)* (completed 2026-07-22)
-- [ ] **Phase 25: Receipt Item Grouping (2-Level)** — Extend `receipt-format.ts` + Tauri Rust printer payload + PDF + KDS card all share `groupOrderItemsForReceipt`
+- [x] **Phase 25: Receipt Item Grouping (2-Level)** — Extend `receipt-format.ts` + Tauri Rust printer payload + PDF + KDS card all share `groupOrderItemsForReceipt` (completed 2026-07-28)
 - [ ] **Phase 26: Floating Tables (`is_temp`)** — Generalize pool_tables → `resources` w/ FLOATING type + auto-deactivate trigger + waitlist auto-create flow
 - [ ] **Phase 27: One-Shot Inventory (Cigarette-Box Pattern)** — `open_units` table + `consume_open_unit` SQL fn + admin Open-Units tab + reportable lifecycle *(depends Phases 14, 17)*
 - [ ] **Phase 28: Money Formatter Utility** — Single `shared/lib/format.ts` (formatMoney/parseMoneyInput/formatPercent) backed by `Intl.NumberFormat` + codemod + ESLint rule `no-raw-money-format` *(depends Phase 21)*
@@ -780,7 +780,7 @@ Plans:
 **Goal:** Group receipt line items across every surface that prints or displays them — extend `receipt-format.ts` (both the final receipt and the pre-cheque), the Caja Report PDF export, and the KDS card — all sharing one `groupOrderItemsForReceipt` module. Per 25-CONTEXT.md D-01 the hierarchy is 3 levels (Category → Item → Modifiers), not the 2 originally worded here. Per D-03 "PDF export" means the existing Caja Report PDF; no new per-order PDF is in scope. `src-tauri/src/commands/printer.rs` needs no change — it is a dumb ESC/POS encoder holding zero receipt strings, so only the TypeScript-built lines array changes.
 **Requirements:** SC-1, SC-2, SC-2b, SC-3, SC-4 (no REQUIREMENTS.md for this milestone; POS-COMPARISON.md §25 no longer present — scope locked in 25-CONTEXT.md, IDs established in 25-RESEARCH.md)
 **Depends on:** —
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -791,7 +791,7 @@ Plans:
 
 - [x] 25-02-PLAN.md — `process-payment` Edge Function supplies category + batched modifier names to `ReceiptData` (Wave 2) (SC-2b)
 - [x] 25-03-PLAN.md — `KdsCard` one line per modifier via the shared formatter, no category clustering (Wave 2) (SC-2)
-- [ ] 25-04-PLAN.md — `get_caja_report` migration (category dimension + camelCase key repair) + schema push + Caja Report PDF category sub-headers (Wave 2) (SC-2, SC-4)
+- [x] 25-04-PLAN.md — `get_caja_report` migration (category dimension + camelCase key repair) + schema push + Caja Report PDF category sub-headers (Wave 2) (SC-2, SC-4)
 
 **Success Criteria:**
 
