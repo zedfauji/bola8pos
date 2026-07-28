@@ -61,8 +61,8 @@ export function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
           <p className="text-sm opacity-80">{t('kdsBoard.qty', { quantity: item.quantity })}</p>
           {item.modifierNames.length > 0 && (
             <div data-testid="kds-item-modifiers" className="mt-1">
-              {formatModifierLines(item.modifierNames).map(line => (
-                <p key={line} className="text-sm whitespace-pre opacity-80">
+              {formatModifierLines(item.modifierNames).map((line, i) => (
+                <p key={`${item.id}-mod-${i}`} className="text-sm whitespace-pre opacity-80">
                   {line}
                 </p>
               ))}
