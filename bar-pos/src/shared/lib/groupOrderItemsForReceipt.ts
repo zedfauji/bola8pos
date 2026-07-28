@@ -40,7 +40,8 @@ function sanitize(s: string): string {
 /**
  * Groups rows into category buckets, sorted by `categoryName` (locale
  * compare), with a single trailing uncategorized bucket (rows whose
- * `categoryId`/`categoryName` is null/undefined/empty) if any exist. Never
+ * `categoryId`/`categoryName` is null/undefined/empty, or whose
+ * `categoryName` is entirely control characters) if any exist. Never
  * mutates the input array; preserves input order within each group.
  */
 export function groupByCategory<T extends CategorizedRow>(rows: readonly T[]): CategoryGroup<T>[] {
@@ -48,14 +49,18 @@ export function groupByCategory<T extends CategorizedRow>(rows: readonly T[]): C
 
   for (const row of rows) {
     const catId = row.categoryId ?? null;
-    const trimmedName = row.categoryName?.trim() ?? '';
-    const key = catId == null || !trimmedName ? UNCATEGORIZED_KEY : catId;
+    // WR-01: sanitize before testing for emptiness — a raw `.trim()` doesn't
+    // strip C0/C1 control bytes, so a control-byte-only name (e.g. "\x01")
+    // would pass this check as non-empty even though sanitize() reduces it
+    // to '' below, breaking the uncategorized-last invariant.
+    const sanitizedName = sanitize(row.categoryName ?? '');
+    const key = catId == null || !sanitizedName ? UNCATEGORIZED_KEY : catId;
 
     let group = map.get(key);
     if (!group) {
       group = {
         categoryId: key === UNCATEGORIZED_KEY ? null : catId,
-        categoryName: key === UNCATEGORIZED_KEY ? null : sanitize(trimmedName),
+        categoryName: key === UNCATEGORIZED_KEY ? null : sanitizedName,
         items: [],
       };
       map.set(key, group);
