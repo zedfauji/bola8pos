@@ -33,8 +33,13 @@ export type CategoryGroup<T> = {
 /** Sentinel map key for rows with no usable category (never exposed to callers). */
 const UNCATEGORIZED_KEY = '__uncategorized__';
 
-/** Strips C0/C1 control characters (e.g. ESC/POS command bytes) and trims. */
-function sanitize(s: string): string {
+/**
+ * Strips C0/C1 control characters (e.g. ESC/POS command bytes) and trims.
+ * Exported (WR-04) so callers can sanitize the other free-text fields they
+ * print through the same functions this module protects (item name/notes,
+ * customer/cashier name, table label, bar name/address).
+ */
+export function sanitize(s: string): string {
   // eslint-disable-next-line no-control-regex -- deliberately stripping control bytes (T-25-01)
   return s.replace(/[\u0000-\u001F\u007F-\u009F]/g, '').trim();
 }

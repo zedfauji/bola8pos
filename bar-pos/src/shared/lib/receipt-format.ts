@@ -1,7 +1,7 @@
 import type { Locale } from '@shared/lib/domain';
 import { formatMoney } from '@shared/lib/domain-helpers';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
-import { formatModifierLines, groupByCategory } from '@shared/lib/groupOrderItemsForReceipt';
+import { formatModifierLines, groupByCategory, sanitize } from '@shared/lib/groupOrderItemsForReceipt';
 import i18n from '@shared/lib/i18n';
 
 const LINE = 32;
@@ -115,14 +115,14 @@ export function buildPreChequeText(data: PreChequeData, locale: Locale): string 
   const tr = receiptT(locale);
   const lines: string[] = [];
 
-  lines.push(centerLine(data.barName || 'Bar'));
+  lines.push(centerLine(sanitize(data.barName) || 'Bar'));
   lines.push(centerLine(tr('precheque.title')));
   lines.push(centerLine(tr('precheque.subtitle')));
   lines.push(divider());
   lines.push(lineLeftRight(tr('precheque.date'), data.generatedAt.toLocaleString(locale)));
-  lines.push(lineLeftRight(tr('precheque.cashier'), data.cashierName));
-  lines.push(lineLeftRight(tr('precheque.customer'), data.customerName));
-  lines.push(lineLeftRight(tr('precheque.table'), data.tableLabel));
+  lines.push(lineLeftRight(tr('precheque.cashier'), sanitize(data.cashierName)));
+  lines.push(lineLeftRight(tr('precheque.customer'), sanitize(data.customerName)));
+  lines.push(lineLeftRight(tr('precheque.table'), sanitize(data.tableLabel)));
   if (data.happyHourActive) {
     lines.push(centerLine(tr('precheque.happyHour')));
   }
@@ -134,11 +134,11 @@ export function buildPreChequeText(data: PreChequeData, locale: Locale): string 
       lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));
     }
     for (const item of group.items) {
-      const left = `${String(item.quantity)}× ${item.name}`;
+      const left = `${String(item.quantity)}× ${sanitize(item.name)}`;
       lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
       lines.push(...formatModifierLines(item.modifierNames));
       if (item.notes) {
-        lines.push(`  ${tr('precheque.note')}: ${item.notes}`);
+        lines.push(`  ${tr('precheque.note')}: ${sanitize(item.notes)}`);
       }
     }
   }
@@ -167,17 +167,17 @@ export function buildThermalReceiptText(receipt: ReceiptData, locale: Locale): s
       ? receipt.processedAt
       : new Date(receipt.processedAt as unknown as string);
 
-  lines.push(centerLine(receipt.barName || 'Bar'));
+  lines.push(centerLine(sanitize(receipt.barName) || 'Bar'));
   if (receipt.barAddress) {
-    const addr = receipt.barAddress;
+    const addr = sanitize(receipt.barAddress);
     for (let i = 0; i < addr.length; i += LINE) {
       lines.push(padRight(addr.slice(i, i + LINE), LINE));
     }
   }
   lines.push(divider());
   lines.push(lineLeftRight(tr('receipt.date'), dt.toLocaleString(locale)));
-  lines.push(lineLeftRight(tr('receipt.cashier'), receipt.cashierName));
-  lines.push(lineLeftRight(tr('receipt.customer'), receipt.customerName));
+  lines.push(lineLeftRight(tr('receipt.cashier'), sanitize(receipt.cashierName)));
+  lines.push(lineLeftRight(tr('receipt.customer'), sanitize(receipt.customerName)));
   lines.push(divider());
 
   const groups = groupByCategory(receipt.items, locale);
@@ -186,7 +186,7 @@ export function buildThermalReceiptText(receipt: ReceiptData, locale: Locale): s
       lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));
     }
     for (const item of group.items) {
-      const left = `${String(item.quantity)}× ${item.name}`;
+      const left = `${String(item.quantity)}× ${sanitize(item.name)}`;
       const price = formatMoney(item.lineTotal);
       lines.push(lineLeftRight(left, price));
       lines.push(...formatModifierLines(item.modifierNames ?? []));
