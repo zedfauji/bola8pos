@@ -128,7 +128,7 @@ export function buildPreChequeText(data: PreChequeData, locale: Locale): string 
   }
   lines.push(divider());
 
-  const preChequeGroups = groupByCategory(data.items);
+  const preChequeGroups = groupByCategory(data.items, locale);
   for (const group of preChequeGroups) {
     if (preChequeGroups.length > 1) {
       lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));
@@ -180,7 +180,7 @@ export function buildThermalReceiptText(receipt: ReceiptData, locale: Locale): s
   lines.push(lineLeftRight(tr('receipt.customer'), receipt.customerName));
   lines.push(divider());
 
-  const groups = groupByCategory(receipt.items);
+  const groups = groupByCategory(receipt.items, locale);
   for (const group of groups) {
     if (groups.length > 1) {
       lines.push(centerLine(group.categoryName ?? tr('receipt.category.other')));

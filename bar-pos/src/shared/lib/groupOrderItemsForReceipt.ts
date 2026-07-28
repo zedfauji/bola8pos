@@ -10,6 +10,8 @@
  * contract (grouping, ordering, sanitization).
  */
 
+import type { Locale } from '@shared/lib/domain';
+
 /**
  * Row shape accepted by {@link groupByCategory} — the category fields it groups on.
  * Optional (not just nullable) so callers with an untouched `ReceiptData['items']`
@@ -43,8 +45,14 @@ function sanitize(s: string): string {
  * `categoryId`/`categoryName` is null/undefined/empty, or whose
  * `categoryName` is entirely control characters) if any exist. Never
  * mutates the input array; preserves input order within each group.
+ *
+ * @param locale Optional locale for the category-name sort (`localeCompare`).
+ * Defaults to the runtime's default locale (current behavior) when omitted.
  */
-export function groupByCategory<T extends CategorizedRow>(rows: readonly T[]): CategoryGroup<T>[] {
+export function groupByCategory<T extends CategorizedRow>(
+  rows: readonly T[],
+  locale?: Locale
+): CategoryGroup<T>[] {
   const map = new Map<string, CategoryGroup<T>>();
 
   for (const row of rows) {
@@ -77,7 +85,7 @@ export function groupByCategory<T extends CategorizedRow>(rows: readonly T[]): C
       named.push(group);
     }
   }
-  named.sort((a, b) => (a.categoryName ?? '').localeCompare(b.categoryName ?? ''));
+  named.sort((a, b) => (a.categoryName ?? '').localeCompare(b.categoryName ?? '', locale));
 
   return uncategorized ? [...named, uncategorized] : named;
 }

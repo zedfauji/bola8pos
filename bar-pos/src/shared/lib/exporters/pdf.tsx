@@ -63,7 +63,7 @@ function ReportHeader({ title, date, locale }: { title: string; date: string; lo
 function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale }) {
   const tr = pdfT(locale);
   const date = report.cajaSession.openedAt.toLocaleDateString(locale);
-  const topProductGroups = groupByCategory(report.topProducts);
+  const topProductGroups = groupByCategory(report.topProducts, locale);
   let topProductRowIndex = 0;
   return (
     <Document>
