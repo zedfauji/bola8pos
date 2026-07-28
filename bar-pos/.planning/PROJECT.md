@@ -18,6 +18,8 @@ App-wide UI consistency pass across all 17 routes: single `PageContainer` shell 
 
 **Phase 36 complete (2026-07-25):** Development environment migrated from Windows to Ubuntu — native Tauri shell builds, links, and runs on Ubuntu (human-verified), repeatable `scripts/setup-ubuntu.sh` bootstrap, D-12 CRLF/husky root cause fixed (`.gitattributes`, hook cwd guard), toolchain mirrored into a new `tauri-build` CI job, Ubuntu documented as a supported dev OS. 3 pre-existing, OS-independent issues surfaced during the migration (misplaced `.github/workflows/` directory, 2 pre-existing `tsc` errors, inert git hooks) were deliberately left unfixed as out of this phase's scope and captured as backlog todos in `.planning/todos/pending/`. Phase 37 (Windows VM for native WebView2 testing/release builds) depends on this phase and is next in the roadmap, though `/gsd-progress` may route to earlier incomplete phases first per its resume-invariant check.
 
+**Phase 25 complete (2026-07-28):** Receipt item grouping — one shared `groupOrderItemsForReceipt.ts` utility (Category → Item → Modifiers, D-01) now backs the thermal receipt, pre-cheque, KDS card, and Caja Report PDF top-products table. `process-payment` edge function extended to supply category/modifier identity; `get_caja_report` migration adds the category dimension and fixes a pre-existing snake_case/camelCase mismatch that had been silently breaking every Caja Report load. Verification: 7/7 must-haves passed, full regression suite green (1325/1340), Task 4's cross-surface human-verify checkpoint approved from documented walkthrough evidence (screenshots not retained on this machine). Surfaced 3 out-of-scope todos during that walkthrough (payment-preview tax-line mismatch, print-popup fallback blocked by Chromium transient-activation rules, in-app PDF export requiring the Tauri runtime) — tracked separately in `.planning/todos/pending/`, not phase-25 gaps. Code review found 4 non-blocking warnings (control-byte sanitizer coverage, locale-unaware category sort, KDS React key stability); fix pass in progress.
+
 ## Next Milestone Goals
 
 No milestone is currently active. Candidates carried over from the pre-v2.2 backlog (unstarted, ROADMAP.md Phases 3, 6, 8, 9, 10, 21-28) — scope a new milestone with `/gsd-new-milestone` rather than resuming these as loose phases, since several (21 i18n, 28 money-formatter) have inter-dependencies worth re-validating before replanning.
@@ -45,6 +47,7 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - ✓ i18n multi-language: `react-i18next` + es-MX/en-US catalogs, `profiles.locale` preference, no-grandfather ESLint gate banning hardcoded UI strings — Phase 21
 - ✓ Edit paid ticket + history: whitelisted-field `edit_paid_tab` RPC (manager PIN + reason + inventory-correct), `EditPaidTabDialog`, `/edit-history` audit view — Phase 22
 - ✓ Reopen closed ticket: manager-only `reopen_tab` RPC (`reopened_void` payment status, offsetting caja entry, 24h/2x-reopen cap, `tab.reopen` audit action), `ReopenTabDialog` + PaymentPane wiring — Phase 23
+- ✓ Receipt item grouping (2-level, actually 3: Category → Item → Modifiers): shared `groupOrderItemsForReceipt.ts` utility consumed by thermal receipt, pre-cheque, KDS card, and Caja Report PDF top-products table; `process-payment` edge function extended with category/modifier data — Phase 25
 
 ### Active
 
@@ -58,7 +61,6 @@ No milestone is currently active. Candidates carried over from the pre-v2.2 back
 - [ ] Tauri auto-update service (GitHub Releases) — Phase 9
 - [ ] AI slob technical debt audit — Phase 10
 - [ ] Operational reports suite + CSV export — Phase 24
-- [ ] Receipt item grouping (2-level) — Phase 25
 - [ ] Floating tables (`is_temp` resources) — Phase 26
 - [ ] One-shot inventory (cigarette-box pattern) — Phase 27
 - [ ] Money formatter utility — Phase 28
@@ -116,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-21 after Phase 23 (Reopen Closed Ticket) — reopen_tab RPC (reopened_void status, offsetting caja entry, 24h/2x cap), ReopenTabDialog + PaymentPane wiring; 6/6 plans, 5/5 verification criteria passed; post-review CR-01 double-count fix shipped via follow-up migration*
+*Last updated: 2026-07-28 after Phase 25 (Receipt Item Grouping, 2-level) — shared groupOrderItemsForReceipt.ts utility across receipt/pre-cheque/KDS/Caja Report PDF; 4/4 plans, 7/7 verification criteria passed*
