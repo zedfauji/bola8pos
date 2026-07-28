@@ -89,6 +89,30 @@ function makeCajaReport(): CajaReport {
   };
 }
 
+/** Variant of {@link makeCajaReport} whose topProducts span two categories (D-03 grouping). */
+function makeCajaReportWithCategories(): CajaReport {
+  const report = makeCajaReport();
+  return {
+    ...report,
+    topProducts: [
+      {
+        productName: 'Corona',
+        quantity: 10,
+        revenue: 300,
+        categoryId: '00000000-0000-0000-0000-000000000010',
+        categoryName: 'Cervezas',
+      },
+      {
+        productName: 'Hot Dog',
+        quantity: 5,
+        revenue: 145,
+        categoryId: '00000000-0000-0000-0000-000000000011',
+        categoryName: 'Comida',
+      },
+    ],
+  };
+}
+
 // ============================================================================
 // Tests
 // ============================================================================
@@ -107,6 +131,14 @@ describe('cajaReportToPdfBytes', () => {
     const bytes = await cajaReportToPdfBytes(report);
 
     // Decode the first 4 bytes as ASCII text
+    const magic = String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!);
+    expect(magic).toBe('%PDF');
+  });
+
+  it('resolves to PDF bytes when topProducts span two categories', async () => {
+    const report = makeCajaReportWithCategories();
+    const bytes = await cajaReportToPdfBytes(report);
+
     const magic = String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!);
     expect(magic).toBe('%PDF');
   });

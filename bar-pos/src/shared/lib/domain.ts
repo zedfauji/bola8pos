@@ -1032,6 +1032,8 @@ export const CajaReportTopProductSchema = z.object({
   productName: z.string(),
   quantity: z.number().int(),
   revenue: MoneySchema,
+  categoryId: UuidSchema.nullable().optional(),
+  categoryName: z.string().nullable().optional(),
 });
 
 export const CajaReportStaffSchema = z.object({

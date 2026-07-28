@@ -59,7 +59,8 @@
       "staffPerformance": "Staff Performance",
       "staff": "Staff",
       "orders": "Orders",
-      "salesTotal": "Sales Total"
+      "salesTotal": "Sales Total",
+      "categoryOther": "Otros"
     },
     "productSales": {
       "title": "Product Sales Report",
