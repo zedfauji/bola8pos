@@ -62,6 +62,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
       number: nextNumber,
       label: `Table ${String(nextNumber)}`,
       ratePerHour: sortedTables[sortedTables.length - 1]?.ratePerHour ?? 12,
+      isTemp: undefined,
     });
     if (!result.ok) {
       toast.error(result.error.message);

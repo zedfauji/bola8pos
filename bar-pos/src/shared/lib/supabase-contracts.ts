@@ -105,6 +105,7 @@ export type Database = {
           status: 'available' | 'occupied' | 'reserved' | 'maintenance';
           current_session_id: string | null;
           table_type: string;
+          is_temp: boolean;
           is_deleted: boolean;
           deleted_at: string | null;
           created_at: string;

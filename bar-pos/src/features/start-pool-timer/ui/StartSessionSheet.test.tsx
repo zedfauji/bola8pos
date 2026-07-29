@@ -68,6 +68,7 @@ const testTable: Resource = {
   ratePerHour: 15,
   status: 'available',
   tableType: 'pool',
+  isTemp: false,
   currentSessionId: null,
 };
 

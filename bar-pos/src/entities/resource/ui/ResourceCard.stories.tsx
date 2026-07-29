@@ -9,6 +9,7 @@ const baseTable: Resource = {
   ratePerHour: 12,
   status: 'available',
   tableType: 'pool',
+  isTemp: false,
   currentSessionId: null,
 };
 

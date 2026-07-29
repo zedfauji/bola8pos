@@ -74,7 +74,8 @@
     "tableType": {
       "pool": "Pool",
       "carom": "Carom",
-      "consumption": "Consumption"
+      "consumption": "Consumption",
+      "floating": "Floating"
     },
     "statusMessage": {
       "available": "Ready for the next game.",

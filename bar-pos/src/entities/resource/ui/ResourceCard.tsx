@@ -33,12 +33,14 @@ const TABLE_TYPE_LABEL_KEY: Record<ResourceType, string> = {
   pool: 'poolTableCard.tableType.pool',
   carom: 'poolTableCard.tableType.carom',
   consumption: 'poolTableCard.tableType.consumption',
+  floating: 'poolTableCard.tableType.floating',
 };
 
 const TABLE_TYPE_VARIANT: Record<ResourceType, 'default' | 'secondary' | 'outline'> = {
   pool: 'default',
   carom: 'secondary',
   consumption: 'outline',
+  floating: 'outline',
 };
 
 // eslint-disable-next-line i18next/no-literal-string -- object keys (table status enum values), not UI copy

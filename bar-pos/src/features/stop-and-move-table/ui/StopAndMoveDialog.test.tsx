@@ -50,6 +50,7 @@ const baseTable: Resource = {
   status: 'occupied',
   ratePerHour: 60,
   tableType: 'pool',
+  isTemp: false,
   currentSessionId: baseSession.id,
   currentSession: undefined,
 };

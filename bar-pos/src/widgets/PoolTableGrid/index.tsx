@@ -84,6 +84,7 @@ export function PoolTableGrid() {
       number: nextNumber,
       label: `Table ${String(nextNumber)}`,
       ratePerHour: rate,
+      isTemp: undefined,
     });
     if (!result.ok) {
       toast.error(result.error.message);

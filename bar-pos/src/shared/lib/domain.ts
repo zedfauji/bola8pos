@@ -97,7 +97,7 @@ export type KdsStatus = z.infer<typeof KdsStatusSchema>;
 
 export const ResourceStatusSchema = z.enum(['available', 'occupied', 'reserved', 'maintenance']);
 
-export const ResourceTypeSchema = z.enum(['pool', 'carom', 'consumption']);
+export const ResourceTypeSchema = z.enum(['pool', 'carom', 'consumption', 'floating']);
 export type ResourceType = z.infer<typeof ResourceTypeSchema>;
 export const PoolTableStatus = {
   AVAILABLE: 'available',
@@ -571,6 +571,7 @@ export const ResourceSchema = z.object({
   ratePerHour: MoneySchema,
   status: ResourceStatusSchema,
   tableType: ResourceTypeSchema.default('pool'),
+  isTemp: z.boolean().default(false),
   currentSessionId: UuidSchema.nullable(),
   currentSession: PoolSessionBaseSchema.optional(),
 });

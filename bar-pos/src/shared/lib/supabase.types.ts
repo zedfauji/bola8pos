@@ -1875,6 +1875,7 @@ export type Database = {
           deleted_at: string | null
           id: string
           is_deleted: boolean
+          is_temp: boolean
           label: string
           number: number
           rate_per_hour: number
@@ -1888,6 +1889,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           is_deleted?: boolean
+          is_temp?: boolean
           label: string
           number: number
           rate_per_hour: number
@@ -1901,6 +1903,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           is_deleted?: boolean
+          is_temp?: boolean
           label?: string
           number?: number
           rate_per_hour?: number

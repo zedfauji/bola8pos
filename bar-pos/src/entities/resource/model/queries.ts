@@ -81,6 +81,7 @@ function mapResourceRow(row: ResourceRow): Result<Resource> {
         ratePerHour: row.rate_per_hour,
         status: row.status,
         tableType: row.table_type,
+        isTemp: row.is_temp,
         currentSessionId: row.current_session_id,
         currentSession: currentSession?.ok ? currentSession.data : undefined,
       })
@@ -611,6 +612,7 @@ export function useMutationAddResource() {
       label: string;
       ratePerHour: number;
       tableType?: ResourceType;
+      isTemp: boolean | undefined;
     }): Promise<Result<Resource>> => {
       const insert: TablesInsert<'resources'> = {
         number: input.number,
@@ -618,6 +620,7 @@ export function useMutationAddResource() {
         rate_per_hour: input.ratePerHour,
         status: 'available',
         table_type: input.tableType ?? 'pool',
+        is_temp: input.isTemp ?? false,
       };
       const res = await supabaseMutation<Tables<'resources'>>(() =>
         supabase.from('resources').insert(insert).select().single()

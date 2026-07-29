@@ -81,6 +81,7 @@ function makeTable(overrides: Partial<Resource> = {}): Resource {
     ratePerHour: 60,
     status: 'occupied',
     tableType: 'pool',
+    isTemp: false,
     currentSessionId: sessionId,
     currentSession: undefined,
     ...overrides,
