@@ -6,14 +6,14 @@ current_phase: 26
 current_phase_name: floating-tables-is-temp
 status: executing
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-29T04:17:38.027Z"
+last_updated: "2026-07-29T04:36:39.567Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 26 execution started
 progress:
   total_phases: 28
   completed_phases: 22
   total_plans: 162
-  completed_plans: 160
+  completed_plans: 161
   percent: 79
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 26 (floating-tables-is-temp) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 26 execution started
 
@@ -337,6 +337,9 @@ Last activity: 2026-07-28 — Phase 26 execution started
 - [Phase ?]: resourceKeys.all cache-key value is ['resources'] — Plan 04's fourth consumer must match this literal exactly
 - [Phase ?]: AI agent tool name/description contract (list_pool_tables, find_pool_table) preserved unchanged per D-02, causing the plan's own residual-reference grep gate to report 5 documented, intentional exception hits
 - [Phase ?]: Fixed 2 pre-existing unrelated tsc errors (tab/queries.ts:791, agent/rag.ts:60) as blocking (Rule 3) since they prevented Plan 26-02's own typecheck-exit-0 gate; backlog todo moved to completed
+- [Phase ?]: 26-03: resolved live table_type CHECK constraint name (pool_tables_table_type_check, unchanged by Plan 01's rename) before writing the DROP, per plan instruction rather than guessing.
+- [Phase ?]: 26-03: useMutationAddResource.isTemp typed boolean | undefined (mandatory key, no ?) per exactOptionalPropertyTypes convention; both existing Add Table callers updated to pass isTemp: undefined explicitly.
+- [Phase ?]: 26-03: integration tests mixing a service-role client with a signed-in anon client in this repo's jsdom-based integration vitest project must set persistSession:false/autoRefreshToken:false on the service-role client to avoid silent RLS leakage via shared localStorage GoTrue state.
 
 ## Performance Metrics
 
@@ -435,10 +438,11 @@ Last activity: 2026-07-28 — Phase 26 execution started
 | Phase 36 P04 | 5min | 2 tasks | 0 files |
 | Phase 26 P01 | 30min | 3 tasks | 3 files |
 | Phase 26 P02 | 40min | 2 tasks | 51 files |
+| Phase 26 P03 | 55min | 3 tasks | 16 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 26-02-PLAN.md
+- **Stopped at:** Completed 26-03-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -456,7 +460,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-29T04:17:38.011Z
+**Last session:** 2026-07-29T04:36:39.551Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 
