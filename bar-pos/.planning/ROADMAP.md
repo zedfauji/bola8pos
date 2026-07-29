@@ -843,14 +843,33 @@ Plans:
 **Plans:** 8 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 27-01-PLAN.md — checkpoint:decision reversibility gate on the `open_units`/`products` schema shape (D-01, D-07 one-way door) (SC-1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 27-02-PLAN.md — TRACER: `open_units` table + `products` linkage columns + `consume_open_unit` + `deplete_for_order_item` v5 + 6 audit actions, pushed and proven end-to-end (SC-1, SC-2, SC-4)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 27-03-PLAN.md — `consume_open_unit` hardening tests: last-piece race, unit-boundary crossing, zero-package block + override, refund credit-back (SC-2, SC-4)
 - [ ] 27-04-PLAN.md — lifecycle RPCs `open_open_unit` (bartender+) / `correct_open_unit` / `void_open_unit` (manager+), pushed and RBAC-proven (SC-1, SC-3, SC-4)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 27-05-PLAN.md — `OpenUnit*` Zod schemas + `ProductSchema` config fields + `@entities/open-unit` read/mutation hooks (SC-1, SC-3)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 27-06-PLAN.md — product open-unit configuration surface: entity mappers + units-per-package / parent-package fields on the product form (SC-1, SC-3)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [ ] 27-07-PLAN.md — three features: open (ungated, D-11), correct + void (manager PIN gated, D-12) (SC-3)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
 - [ ] 27-08-PLAN.md — Open Units tab inside `/inventory` via a Tabs wrapper + human verification of the full open-and-sell-through flow (SC-3, SC-4)
 
 **Success Criteria:**
