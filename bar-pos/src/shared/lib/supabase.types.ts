@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       agent_audit_log: {
@@ -1094,7 +1119,7 @@ export type Database = {
             foreignKeyName: "pool_sessions_previous_table_id_fkey"
             columns: ["previous_table_id"]
             isOneToOne: false
-            referencedRelation: "pool_tables"
+            referencedRelation: "resources"
             referencedColumns: ["id"]
           },
           {
@@ -1129,116 +1154,7 @@ export type Database = {
             foreignKeyName: "pool_sessions_table_id_fkey"
             columns: ["table_id"]
             isOneToOne: false
-            referencedRelation: "pool_tables"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pool_table_transfers: {
-        Row: {
-          from_pool_table_id: string
-          id: string
-          pool_session_id: string
-          reason: string | null
-          to_pool_table_id: string
-          transferred_at: string
-          transferred_by: string
-        }
-        Insert: {
-          from_pool_table_id: string
-          id?: string
-          pool_session_id: string
-          reason?: string | null
-          to_pool_table_id: string
-          transferred_at?: string
-          transferred_by: string
-        }
-        Update: {
-          from_pool_table_id?: string
-          id?: string
-          pool_session_id?: string
-          reason?: string | null
-          to_pool_table_id?: string
-          transferred_at?: string
-          transferred_by?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_table_transfers_from_pool_table_id_fkey"
-            columns: ["from_pool_table_id"]
-            isOneToOne: false
-            referencedRelation: "pool_tables"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_table_transfers_pool_session_id_fkey"
-            columns: ["pool_session_id"]
-            isOneToOne: false
-            referencedRelation: "pool_sessions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_table_transfers_to_pool_table_id_fkey"
-            columns: ["to_pool_table_id"]
-            isOneToOne: false
-            referencedRelation: "pool_tables"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_table_transfers_transferred_by_fkey"
-            columns: ["transferred_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pool_tables: {
-        Row: {
-          created_at: string
-          current_session_id: string | null
-          deleted_at: string | null
-          id: string
-          is_deleted: boolean
-          label: string
-          number: number
-          rate_per_hour: number
-          status: Database["public"]["Enums"]["pool_table_status"]
-          table_type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          current_session_id?: string | null
-          deleted_at?: string | null
-          id?: string
-          is_deleted?: boolean
-          label: string
-          number: number
-          rate_per_hour: number
-          status?: Database["public"]["Enums"]["pool_table_status"]
-          table_type?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          current_session_id?: string | null
-          deleted_at?: string | null
-          id?: string
-          is_deleted?: boolean
-          label?: string
-          number?: number
-          rate_per_hour?: number
-          status?: Database["public"]["Enums"]["pool_table_status"]
-          table_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_pool_tables_current_session"
-            columns: ["current_session_id"]
-            isOneToOne: false
-            referencedRelation: "pool_sessions"
+            referencedRelation: "resources"
             referencedColumns: ["id"]
           },
         ]
@@ -1893,6 +1809,115 @@ export type Database = {
           },
         ]
       }
+      resource_transfers: {
+        Row: {
+          from_resource_id: string
+          id: string
+          pool_session_id: string
+          reason: string | null
+          to_resource_id: string
+          transferred_at: string
+          transferred_by: string
+        }
+        Insert: {
+          from_resource_id: string
+          id?: string
+          pool_session_id: string
+          reason?: string | null
+          to_resource_id: string
+          transferred_at?: string
+          transferred_by: string
+        }
+        Update: {
+          from_resource_id?: string
+          id?: string
+          pool_session_id?: string
+          reason?: string | null
+          to_resource_id?: string
+          transferred_at?: string
+          transferred_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_table_transfers_from_pool_table_id_fkey"
+            columns: ["from_resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_table_transfers_pool_session_id_fkey"
+            columns: ["pool_session_id"]
+            isOneToOne: false
+            referencedRelation: "pool_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_table_transfers_to_pool_table_id_fkey"
+            columns: ["to_resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_table_transfers_transferred_by_fkey"
+            columns: ["transferred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resources: {
+        Row: {
+          created_at: string
+          current_session_id: string | null
+          deleted_at: string | null
+          id: string
+          is_deleted: boolean
+          label: string
+          number: number
+          rate_per_hour: number
+          status: Database["public"]["Enums"]["resource_status"]
+          table_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_session_id?: string | null
+          deleted_at?: string | null
+          id?: string
+          is_deleted?: boolean
+          label: string
+          number: number
+          rate_per_hour: number
+          status?: Database["public"]["Enums"]["resource_status"]
+          table_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_session_id?: string | null
+          deleted_at?: string | null
+          id?: string
+          is_deleted?: boolean
+          label?: string
+          number?: number
+          rate_per_hour?: number
+          status?: Database["public"]["Enums"]["resource_status"]
+          table_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_resources_current_session"
+            columns: ["current_session_id"]
+            isOneToOne: false
+            referencedRelation: "pool_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           action: string
@@ -2362,7 +2387,7 @@ export type Database = {
             foreignKeyName: "waitlist_entries_table_id_fkey"
             columns: ["table_id"]
             isOneToOne: false
-            referencedRelation: "pool_tables"
+            referencedRelation: "resources"
             referencedColumns: ["id"]
           },
         ]
@@ -2789,7 +2814,6 @@ export type Database = {
       kds_status: "pending" | "in_progress" | "done"
       order_status: "pending" | "served" | "voided"
       payment_method: "cash" | "card" | "tab_transfer" | "rappi"
-      pool_table_status: "available" | "occupied" | "reserved" | "maintenance"
       rappi_order_status:
         | "pending_acceptance"
         | "accepted"
@@ -2797,6 +2821,7 @@ export type Database = {
         | "ready_for_pickup"
         | "completed"
         | "rejected"
+      resource_status: "available" | "occupied" | "reserved" | "maintenance"
       tab_status: "open" | "closed" | "paid" | "voided" | "split"
       user_role: "bartender" | "manager" | "admin" | "kitchen"
     }
@@ -2924,13 +2949,15 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       category_routing: ["KITCHEN", "BAR", "NONE"],
       kds_status: ["pending", "in_progress", "done"],
       order_status: ["pending", "served", "voided"],
       payment_method: ["cash", "card", "tab_transfer", "rappi"],
-      pool_table_status: ["available", "occupied", "reserved", "maintenance"],
       rappi_order_status: [
         "pending_acceptance",
         "accepted",
@@ -2939,6 +2966,7 @@ export const Constants = {
         "completed",
         "rejected",
       ],
+      resource_status: ["available", "occupied", "reserved", "maintenance"],
       tab_status: ["open", "closed", "paid", "voided", "split"],
       user_role: ["bartender", "manager", "admin", "kitchen"],
     },

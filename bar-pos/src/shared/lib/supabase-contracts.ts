@@ -96,7 +96,7 @@ export type Database = {
         Insert: unknown;
         Update: unknown;
       };
-      pool_tables: {
+      resources: {
         Row: {
           id: string;
           number: number;
@@ -104,6 +104,11 @@ export type Database = {
           rate_per_hour: number;
           status: 'available' | 'occupied' | 'reserved' | 'maintenance';
           current_session_id: string | null;
+          table_type: string;
+          is_deleted: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: unknown;
         Update: unknown;
@@ -252,12 +257,13 @@ export type TabWithOrders = Database['public']['Tables']['tabs']['Row'] & {
 };
 
 /**
- * Pool table with current session (used in pool table grid).
+ * Resource (pool/carom/consumption/floating table) with current session
+ * (used in the resource grid).
  *
  * Query example:
  * ```typescript
  * supabase
- *   .from('pool_tables')
+ *   .from('resources')
  *   .select(`
  *     *,
  *     current_session:pool_sessions!current_session_id (*),
@@ -265,7 +271,7 @@ export type TabWithOrders = Database['public']['Tables']['tabs']['Row'] & {
  *   `)
  * ```
  */
-export type PoolTableWithSession = Database['public']['Tables']['pool_tables']['Row'] & {
+export type ResourceWithSession = Database['public']['Tables']['resources']['Row'] & {
   current_session: Database['public']['Tables']['pool_sessions']['Row'] | null;
   tab: Database['public']['Tables']['tabs']['Row'] | null;
 };
