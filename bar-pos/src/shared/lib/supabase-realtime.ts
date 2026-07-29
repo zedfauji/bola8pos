@@ -7,7 +7,7 @@
 
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from './supabase';
-import type { TabRow, OrderRow, PoolTableRow, PoolSessionRow } from './supabase';
+import type { TabRow, OrderRow, ResourceRow, PoolSessionRow } from './supabase';
 
 // Store update functions will be imported from entity stores
 // For now, we'll define the interface they should implement
@@ -19,7 +19,7 @@ interface RealtimeUpdateHandler<T> {
 // Placeholder store references (will be replaced with actual stores)
 let tabStore: RealtimeUpdateHandler<TabRow> | null = null;
 let orderStore: RealtimeUpdateHandler<OrderRow> | null = null;
-let poolTableStore: RealtimeUpdateHandler<PoolTableRow> | null = null;
+let poolTableStore: RealtimeUpdateHandler<ResourceRow> | null = null;
 let poolSessionStore: RealtimeUpdateHandler<PoolSessionRow> | null = null;
 
 /**
@@ -29,7 +29,7 @@ let poolSessionStore: RealtimeUpdateHandler<PoolSessionRow> | null = null;
 export function registerRealtimeHandlers(handlers: {
   tabs?: RealtimeUpdateHandler<TabRow>;
   orders?: RealtimeUpdateHandler<OrderRow>;
-  poolTables?: RealtimeUpdateHandler<PoolTableRow>;
+  poolTables?: RealtimeUpdateHandler<ResourceRow>;
   poolSessions?: RealtimeUpdateHandler<PoolSessionRow>;
 }) {
   if (handlers.tabs) tabStore = handlers.tabs;
@@ -105,15 +105,15 @@ export function setupRealtimeSubscriptions(): () => void {
 
   channels.push(ordersChannel);
 
-  // Subscribe to pool_tables table
+  // Subscribe to resources table
   const poolTablesChannel = supabase
-    .channel('pool-tables-changes')
+    .channel('resources-changes')
     .on(
       'postgres_changes',
       {
         event: '*',
         schema: 'public',
-        table: 'pool_tables',
+        table: 'resources',
       },
       payload => {
         if (!poolTableStore) return;
@@ -121,11 +121,11 @@ export function setupRealtimeSubscriptions(): () => void {
         switch (payload.eventType) {
           case 'INSERT':
           case 'UPDATE':
-            poolTableStore.updateFromRealtime(payload.new as PoolTableRow);
+            poolTableStore.updateFromRealtime(payload.new as ResourceRow);
             break;
           case 'DELETE':
             if (poolTableStore.removeFromRealtime) {
-              poolTableStore.removeFromRealtime((payload.old as PoolTableRow).id);
+              poolTableStore.removeFromRealtime((payload.old as ResourceRow).id);
             }
             break;
         }

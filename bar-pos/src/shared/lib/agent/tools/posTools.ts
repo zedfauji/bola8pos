@@ -463,7 +463,7 @@ export async function listPoolTables(
 ): Promise<Result<unknown>> {
   const t0 = Date.now();
   const { data, error } = await supabase
-    .from('pool_tables')
+    .from('resources')
     .select(`
       id, label, status, rate_per_hour, current_session_id,
       pool_sessions ( id, started_at, tab_id, stopped_at )
@@ -484,7 +484,7 @@ export async function startPoolSession(
 ): Promise<Result<unknown>> {
   const t0 = Date.now();
 
-  const tableMissing = await assertExists('pool_tables', args.table_id);
+  const tableMissing = await assertExists('resources', args.table_id);
   if (tableMissing) return err({ code: 'NOT_FOUND' as const, message: tableMissing });
 
   if (args.tab_id) {
@@ -502,7 +502,7 @@ export async function startPoolSession(
     if (!cajaId) return err({ code: 'CAJA_CLOSED' as const, message: 'No open caja session. Open caja first.' });
 
     const { data: tableRow } = await supabase
-      .from('pool_tables')
+      .from('resources')
       .select('label')
       .eq('id', args.table_id)
       .single();
@@ -541,7 +541,7 @@ export async function startPoolSession(
   }
 
   const { error: tableErr } = await supabase
-    .from('pool_tables')
+    .from('resources')
     .update({ status: 'occupied', current_session_id: session.id })
     .eq('id', args.table_id);
 
@@ -566,7 +566,7 @@ export async function _executeStopPoolSession(
   // stop_pool_session is the sole authoritative writer of pool_sessions.total_charge/
   // billed_minutes (server reads rate_per_hour/firstHourMode itself and bumps `version`
   // atomically — bump_version_on_update rejects any raw client update that doesn't).
-  // See useMutationStopSession in entities/pool-table/model/queries.ts for the sibling
+  // See useMutationStopSession in entities/resource/model/queries.ts for the sibling
   // call site this mirrors.
   const { data: rpcData, error: rpcErr } = await supabase.rpc('stop_pool_session', {
     p_session_id: session_id,
@@ -578,7 +578,7 @@ export async function _executeStopPoolSession(
   }
 
   const { error: tableErr } = await supabase
-    .from('pool_tables')
+    .from('resources')
     .update({ status: 'available', current_session_id: null })
     .eq('id', table_id);
 
@@ -599,7 +599,7 @@ export async function stopPoolSession(
   const sessionMissing = await assertExists('pool_sessions', args.session_id);
   if (sessionMissing) return err({ code: 'NOT_FOUND' as const, message: sessionMissing });
 
-  const tableMissing = await assertExists('pool_tables', args.table_id);
+  const tableMissing = await assertExists('resources', args.table_id);
   if (tableMissing) return err({ code: 'NOT_FOUND' as const, message: tableMissing });
 
   const { data: session } = await supabase

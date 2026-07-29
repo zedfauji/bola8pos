@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import {
   useMutationStartSession,
   useMutationStopSession,
-} from '@entities/pool-table/model/queries';
+} from '@entities/resource/model/queries';
 import { useMutationOpenTab } from '@entities/tab/model/queries';
 import { useMutationAddOrder } from '@entities/tab/model/queries';
 import { useTabStore, type OfflineAction } from '@entities/tab/model/store';

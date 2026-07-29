@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
+import { resourceKeys } from '@entities/resource/model/queries';
 import { waitlistKeys } from '@entities/waitlist/model/queries';
 import { supabase } from '@shared/lib/supabase';
 
@@ -9,7 +10,7 @@ import { supabase } from '@shared/lib/supabase';
  *
  * Subscribes to:
  *  - waitlist_entries postgres_changes → invalidates waitlistKeys
- *  - pool_tables postgres_changes → invalidates pool_tables cache
+ *  - resources postgres_changes → invalidates resources cache
  *  - broadcast 'notified' event (from send-waitlist-notification edge fn) → invalidates waitlistKeys
  *
  * ONE channel ('waitlist:pos-sync') with multiple .on() handlers.
@@ -25,8 +26,7 @@ export function WaitlistRealtimeListener() {
     };
 
     const invalidateTables = () => {
-      // pool_tables entity key — inline constant (poolTableKeys not yet defined in this codebase)
-      void queryClient.invalidateQueries({ queryKey: ['pool_tables'] });
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
     };
 
     // ONE channel, multiple .on() handlers — do NOT create two separate channels
@@ -39,7 +39,7 @@ export function WaitlistRealtimeListener() {
       )
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'pool_tables' },
+        { event: '*', schema: 'public', table: 'resources' },
         invalidateTables,
       )
       .on('broadcast', { event: 'notified' }, invalidateWaitlist)

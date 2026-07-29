@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import type { PoolSession, Resource } from '@shared/lib/domain';
 import { ConfirmDialog, Input } from '@shared/ui';
 import { useStopAndMoveSession } from '../useStopAndMoveSession';
 
 export interface StopAndMoveDialogProps {
   open: boolean;
   session: PoolSession;
-  table: PoolTable;
+  table: Resource;
   tabId: string;
   onClose: () => void;
   onSuccess: () => void;

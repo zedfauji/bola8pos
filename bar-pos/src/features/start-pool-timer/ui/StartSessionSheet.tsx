@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useMutationStartSession } from '@entities/pool-table/model/queries';
+import { useMutationStartSession } from '@entities/resource/model/queries';
 import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@entities/tab';
 import { useMutationOpenTab } from '@entities/tab/model/queries';
 import { buildStartTicketText } from '@shared/lib/buildStartTicketText';
-import type { PoolTable } from '@shared/lib/domain';
+import type { Resource } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import { printRawText } from '@shared/lib/pos-printer';
 import {
@@ -28,7 +28,7 @@ const NEW_TAB = '__new_tab__';
 export interface StartSessionSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  table: PoolTable | null;
+  table: Resource | null;
   openTabs: Tab[];
 }
 

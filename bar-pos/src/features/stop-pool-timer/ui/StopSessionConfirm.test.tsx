@@ -9,11 +9,11 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as poolTableQueries from '@entities/pool-table/model/queries';
+import * as poolTableQueries from '@entities/resource/model/queries';
 import * as settingsEntity from '@entities/settings';
 import * as usePermissionsModule from '@entities/staff/model/usePermissions';
 import type * as tabStoreModule from '@entities/tab/model/store';
-import type { PoolSession, PoolTable, Tab } from '@shared/lib/domain';
+import type { PoolSession, Resource, Tab } from '@shared/lib/domain';
 import { renderWithProviders } from '@shared/lib/test-utils';
 
 import { StopSessionConfirm } from './StopSessionConfirm';
@@ -29,7 +29,7 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock('@entities/pool-table/model/queries', () => ({
+vi.mock('@entities/resource/model/queries', () => ({
   useMutationStopSession: vi.fn(),
 }));
 
@@ -73,7 +73,7 @@ const sessionId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const tableId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const tabId = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
-function makeTable(overrides: Partial<PoolTable> = {}): PoolTable {
+function makeTable(overrides: Partial<Resource> = {}): Resource {
   return {
     id: tableId,
     number: 1,
@@ -180,7 +180,7 @@ function mockSettings() {
   } as unknown as ReturnType<typeof settingsEntity.useSettings>);
 }
 
-function renderConfirm(table: PoolTable | null, session: PoolSession | null, openTabs: Tab[] = []) {
+function renderConfirm(table: Resource | null, session: PoolSession | null, openTabs: Tab[] = []) {
   return renderWithProviders(
     <StopSessionConfirm
       open={true}

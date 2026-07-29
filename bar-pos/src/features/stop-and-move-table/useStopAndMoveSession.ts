@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { poolTableKeys } from '@entities/pool-table/model/queries';
-import { usePoolTableStore } from '@entities/pool-table/model/store';
+import { resourceKeys } from '@entities/resource/model/queries';
+import { useResourceStore } from '@entities/resource/model/store';
 import { ok, supabaseMutation, supabaseQuery, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 
@@ -22,7 +22,7 @@ export function useStopAndMoveSession() {
       // Step 1/2: Stop the pool session via the server-authoritative RPC —
       // it computes billing and bumps `version` atomically (bump_version_on_update
       // trigger rejects any pool_sessions UPDATE that doesn't advance version by 1;
-      // see useMutationStopSession in entities/pool-table/model/queries.ts for the
+      // see useMutationStopSession in entities/resource/model/queries.ts for the
       // sibling call site this mirrors).
       const rpcRes = await supabaseQuery(() =>
         supabase.rpc('stop_pool_session', {
@@ -36,7 +36,7 @@ export function useStopAndMoveSession() {
       // Step 3: Mark pool table as available and clear session reference
       const tableRes = await supabaseMutation(() =>
         supabase
-          .from('pool_tables')
+          .from('resources')
           .update({ status: 'available', current_session_id: null })
           .eq('id', input.tableId)
       );
@@ -68,15 +68,15 @@ export function useStopAndMoveSession() {
     },
 
     onMutate: ({ tableId }) => {
-      usePoolTableStore.getState().updateTableStatus(tableId, 'available');
+      useResourceStore.getState().updateTableStatus(tableId, 'available');
     },
 
     onSuccess: (result, input) => {
       if (!result.ok) {
-        usePoolTableStore.getState().updateTableStatus(input.tableId, 'occupied');
+        useResourceStore.getState().updateTableStatus(input.tableId, 'occupied');
         return;
       }
-      void qc.invalidateQueries({ queryKey: poolTableKeys.all });
+      void qc.invalidateQueries({ queryKey: resourceKeys.all });
       // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache keys, not UI copy
       void qc.invalidateQueries({ queryKey: ['pool-sessions'] });
       // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache key, not UI copy
@@ -84,7 +84,7 @@ export function useStopAndMoveSession() {
     },
 
     onError: (_e, input) => {
-      usePoolTableStore.getState().updateTableStatus(input.tableId, 'occupied');
+      useResourceStore.getState().updateTableStatus(input.tableId, 'occupied');
     },
   });
 }

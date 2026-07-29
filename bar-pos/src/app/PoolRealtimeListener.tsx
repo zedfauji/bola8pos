@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { poolTableKeys } from '@entities/pool-table/model/queries';
+import { resourceKeys } from '@entities/resource/model/queries';
 import { tabKeys } from '@entities/tab/model/queries';
 import { supabase } from '@shared/lib/supabase';
 
@@ -12,14 +12,14 @@ export function PoolRealtimeListener() {
 
   useEffect(() => {
     const invalidate = () => {
-      void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       void queryClient.invalidateQueries({ queryKey: tabKeys.all });
       void queryClient.invalidateQueries({ queryKey: ['pool-sessions'] });
     };
 
     const channel = supabase
       .channel('pool-pos-sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pool_tables' }, invalidate)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'resources' }, invalidate)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pool_sessions' }, invalidate)
       .subscribe();
 

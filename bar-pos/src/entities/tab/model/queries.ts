@@ -76,14 +76,14 @@ interface OrderRow extends Tables<'orders'> {
   order_items?: OrderItemRow[] | null;
 }
 
-interface PoolTableEmbed {
+interface ResourceEmbed {
   number: number;
   label: string;
   rate_per_hour: number;
 }
 
 interface PoolSessionRow extends Tables<'pool_sessions'> {
-  pool_tables?: PoolTableEmbed | null;
+  resources?: ResourceEmbed | null;
 }
 
 interface TabRow extends Tables<'tabs'> {
@@ -141,7 +141,7 @@ function mapPoolSessionsRow(sessions: PoolSessionRow[] | null | undefined): {
   const poolCharges: PoolSessionSummary[] = [];
 
   for (const s of sessions ?? []) {
-    const table = s.pool_tables ?? undefined;
+    const table = s.resources ?? undefined;
     if (s.stopped_at === null) {
       hasActivePoolSession = true;
       if (table != null && activePoolTableNumber === undefined) {
@@ -275,7 +275,7 @@ const tabListSelect = `
     stopped_at,
     billed_minutes,
     total_charge,
-    pool_tables!pool_sessions_table_id_fkey(number, label, rate_per_hour)
+    resources!pool_sessions_table_id_fkey(number, label, rate_per_hour)
   )
 `;
 
@@ -788,7 +788,7 @@ export function useMutationUpdateTabStatus() {
         supabase.rpc('close_tab', {
           p_tab_id: tabId,
           p_status: status,
-          p_expected_version: expected ?? null,
+          ...(expected !== undefined ? { p_expected_version: expected } : {}),
           p_terminal_id: TERMINAL_ID,
         })
       );

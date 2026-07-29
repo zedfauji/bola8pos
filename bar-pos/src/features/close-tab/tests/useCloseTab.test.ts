@@ -46,7 +46,7 @@ describe('useCloseTab', () => {
     });
 
     // Get a real pool table ID from the cloud DB for pool session tests
-    const { data } = await testDb.from('pool_tables').select('id').limit(1).single();
+    const { data } = await testDb.from('resources').select('id').limit(1).single();
     poolTableId = data?.id ?? '';
 
     // Create a test shift (service role bypasses RLS)
@@ -129,7 +129,7 @@ describe('useCloseTab', () => {
   it('returns error message containing the pool table number', async () => {
     // Get the actual table number for the pool table we're using
     const { data: pt } = await testDb
-      .from('pool_tables')
+      .from('resources')
       .select('*')
       .eq('id', poolTableId)
       .single();

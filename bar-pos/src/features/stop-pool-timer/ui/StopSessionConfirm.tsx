@@ -2,12 +2,12 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useMutationStopSession } from '@entities/pool-table/model/queries';
+import { useMutationStopSession } from '@entities/resource/model/queries';
 import { useSettings } from '@entities/settings';
 import { usePermissions } from '@entities/staff/model/usePermissions';
 import type { Tab } from '@entities/tab';
 import { useTabStore } from '@entities/tab/model/store';
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import type { PoolSession, Resource } from '@shared/lib/domain';
 import { computePoolSessionBilling } from '@shared/lib/pool-billing';
 import { ConfirmDialog, MoneyDisplay, TimerDisplay } from '@shared/ui';
 
@@ -16,7 +16,7 @@ const FIFTEEN_MIN_MS = 15 * 60 * 1000;
 export interface StopSessionConfirmProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  table: PoolTable | null;
+  table: Resource | null;
   session: PoolSession | null;
   /** Open tabs list (same source as grid) to resolve tab status / name. */
   openTabs: Tab[];

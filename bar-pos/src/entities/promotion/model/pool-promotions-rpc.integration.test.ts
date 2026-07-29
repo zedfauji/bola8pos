@@ -89,7 +89,7 @@ describe.skipIf(hasE2eEnv)('stop_pool_session RPC — pool_billing + pool_grant 
   async function seedPoolTable(): Promise<string> {
     const number = 900000 + Math.floor(Math.random() * 99999);
     const { data, error } = await db
-      .from('pool_tables')
+      .from('resources')
       .insert({
         number,
         label: `__pool_promo_rpc_table_${String(number)}__`,
@@ -98,7 +98,7 @@ describe.skipIf(hasE2eEnv)('stop_pool_session RPC — pool_billing + pool_grant 
       })
       .select('id')
       .single();
-    if (error || !data) throw new Error(`pool_tables insert: ${error?.message ?? 'no row'}`);
+    if (error || !data) throw new Error(`resources insert: ${error?.message ?? 'no row'}`);
     return (data as { id: string }).id;
   }
 
@@ -224,7 +224,7 @@ describe.skipIf(hasE2eEnv)('stop_pool_session RPC — pool_billing + pool_grant 
       await db.from('tabs').delete().eq('id', id);
     }
     for (const id of poolTableIds) {
-      await db.from('pool_tables').delete().eq('id', id);
+      await db.from('resources').delete().eq('id', id);
     }
     for (const id of productIds) {
       await db.from('products').delete().eq('id', id);

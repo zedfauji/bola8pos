@@ -4,7 +4,7 @@ import { createElement, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import type { PoolSession, Resource } from '@shared/lib/domain';
 
 import { StopAndMoveDialog } from './StopAndMoveDialog';
 
@@ -43,7 +43,7 @@ const baseSession: PoolSession = {
   previousTableNumber: null,
 };
 
-const baseTable: PoolTable = {
+const baseTable: Resource = {
   id: 'pppppppp-pppp-4ppp-8ppp-pppppppppppp',
   number: 3,
   label: 'Billar 3',

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { usePoolTables } from '@entities/pool-table';
+import { useResources } from '@entities/resource';
 import { useStaffStore } from '@entities/staff/model/store';
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
+import type { PoolSession, Resource } from '@shared/lib/domain';
 import { POSButton } from '@shared/ui/POSButton';
 import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/ui/dialog';
@@ -19,13 +19,13 @@ export type TransferPoolDialogProps = {
 export function TransferPoolDialog({ open, onOpenChange, session }: TransferPoolDialogProps) {
   const { t } = useTranslation('featOrders');
   const currentStaff = useStaffStore(s => s.currentStaff);
-  const { data: tables } = usePoolTables();
+  const { data: tables } = useResources();
   const transferMut = useTransferPoolSession();
 
   const [targetTableId, setTargetTableId] = useState('');
 
   const availableTables = (tables ?? []).filter(
-    (tbl: PoolTable) => tbl.status === 'available' && tbl.id !== session?.tableId
+    (tbl: Resource) => tbl.status === 'available' && tbl.id !== session?.tableId
   );
 
   function handleSubmit() {
@@ -78,7 +78,7 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">{t('transferTab.selectTableOption')}</option>
-              {availableTables.map((tbl: PoolTable) => (
+              {availableTables.map((tbl: Resource) => (
                 <option key={tbl.id} value={tbl.id}>
                   {t('transferTab.tableOption', { number: tbl.number })}
                 </option>

@@ -379,9 +379,9 @@ export function isTabWithOrders(data: unknown): data is TabWithOrders {
 }
 
 /**
- * Type guard for PoolTableWithSession.
+ * Type guard for ResourceWithSession.
  */
-export function isPoolTableWithSession(data: unknown): data is PoolTableWithSession {
+export function isResourceWithSession(data: unknown): data is ResourceWithSession {
   if (!data || typeof data !== 'object') return false;
   const table = data as Record<string, unknown>;
   return (

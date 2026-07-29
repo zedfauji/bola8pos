@@ -4,7 +4,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type * as poolTableQueries from '@entities/pool-table/model/queries';
+import type * as poolTableQueries from '@entities/resource/model/queries';
 import type { PoolSession } from '@shared/lib/domain';
 import { err, ok } from '@shared/lib/result';
 
@@ -15,7 +15,7 @@ import { err, ok } from '@shared/lib/result';
 const mockMutateAsync = vi.fn();
 let mockIsPending = false;
 
-vi.mock('@entities/pool-table/model/queries', async importOriginal => {
+vi.mock('@entities/resource/model/queries', async importOriginal => {
   const actual = await importOriginal<typeof poolTableQueries>();
   return {
     ...actual,

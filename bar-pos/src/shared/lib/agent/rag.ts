@@ -57,7 +57,9 @@ export async function retrieveContext(query: string, topK = 5): Promise<string> 
     const embedding = await generateEmbedding(query);
 
     const { data, error } = await supabase.rpc('match_codebase_chunks', {
-      query_embedding: embedding,
+      // pgvector RPC args are typed as `string` (PostgREST serializes the
+      // `vector` column type as its literal text form, e.g. "[0.1,0.2,...]").
+      query_embedding: JSON.stringify(embedding),
       match_count: topK,
       similarity_threshold: 0.5,
     });

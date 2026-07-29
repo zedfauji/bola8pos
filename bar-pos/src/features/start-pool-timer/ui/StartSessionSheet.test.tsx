@@ -10,12 +10,12 @@ import userEvent from '@testing-library/user-event';
 import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as poolTableQueries from '@entities/pool-table/model/queries';
+import * as poolTableQueries from '@entities/resource/model/queries';
 import * as settingsEntity from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import * as tabQueries from '@entities/tab/model/queries';
 import type { Tab } from '@entities/tab/model/types';
-import type { PoolTable, Shift } from '@shared/lib/domain';
+import type { Resource, Shift } from '@shared/lib/domain';
 import * as posPrinter from '@shared/lib/pos-printer';
 import { err, ok } from '@shared/lib/result';
 import { renderWithProviders } from '@shared/lib/test-utils';
@@ -30,7 +30,7 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock('@entities/pool-table/model/queries', () => ({
+vi.mock('@entities/resource/model/queries', () => ({
   useMutationStartSession: vi.fn(),
 }));
 
@@ -61,7 +61,7 @@ vi.mock('@shared/lib/pos-printer', async importOriginal => {
 const staffId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const shiftId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
-const testTable: PoolTable = {
+const testTable: Resource = {
   id: 'tttttttt-tttt-tttt-tttt-tttttttttttt',
   number: 1,
   label: 'Main',

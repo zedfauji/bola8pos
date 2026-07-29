@@ -6,21 +6,21 @@ import { toast } from 'sonner';
 import { StartSessionSheet } from '@features/start-pool-timer';
 import { StopSessionConfirm } from '@features/stop-pool-timer';
 import {
-  useMutationAddPoolTable,
-  useMutationReleasePoolTable,
-  usePoolTables,
-  PoolTableCard,
-} from '@entities/pool-table';
+  useMutationAddResource,
+  useMutationReleaseResource,
+  useResources,
+  ResourceCard,
+} from '@entities/resource';
 import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
 import { usePermissions } from '@entities/staff/model/usePermissions';
 import { useTabs } from '@entities/tab';
-import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
+import type { PoolSession, Resource, ResourceType } from '@shared/lib/domain';
 import { rbacDenialMessage } from '@shared/lib/rbac';
 import { usePersistedBool } from '@shared/lib/usePersistedBool';
 import { EmptyState, POSButton, PoolTableGridSkeleton, ProtectedAction } from '@shared/ui';
 
-type TypeFilter = 'all' | PoolTableType;
+type TypeFilter = 'all' | ResourceType;
 
 const TYPE_FILTER_LABELS: { value: TypeFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -34,15 +34,15 @@ export function PoolTableGrid() {
   const navigate = useNavigate();
   const currentStaff = useStaffStore(s => s.currentStaff);
   const { can } = usePermissions();
-  const { data: tables, isIdleOrLoading, isError, refetch, resultError, error } = usePoolTables();
+  const { data: tables, isIdleOrLoading, isError, refetch, resultError, error } = useResources();
   const { data: tabs } = useTabs();
   const { data: settings } = useSettings();
   const firstHourMode = settings?.billing.firstHourMode ?? 'prorated';
-  const addTable = useMutationAddPoolTable();
-  const releaseTable = useMutationReleasePoolTable();
+  const addTable = useMutationAddResource();
+  const releaseTable = useMutationReleaseResource();
 
-  const [startTable, setStartTable] = useState<PoolTable | null>(null);
-  const [stopTarget, setStopTarget] = useState<{ table: PoolTable; session: PoolSession } | null>(
+  const [startTable, setStartTable] = useState<Resource | null>(null);
+  const [stopTarget, setStopTarget] = useState<{ table: Resource; session: PoolSession } | null>(
     null
   );
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
@@ -177,7 +177,7 @@ export function PoolTableGrid() {
           {filteredTables.map(table => {
             const session = table.currentSession ?? null;
             return (
-              <PoolTableCard
+              <ResourceCard
                 key={table.id}
                 table={table}
                 session={session}

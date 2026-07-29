@@ -39,7 +39,7 @@ vi.mock('@shared/lib/supabase', () => ({
   },
 }));
 
-vi.mock('@entities/pool-table/model/queries', () => ({
+vi.mock('@entities/resource/model/queries', () => ({
   useMutationStartSession: () => startMutation,
   useMutationStopSession: () => stopMutation,
 }));

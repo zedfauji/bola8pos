@@ -9,19 +9,21 @@ import { cn } from '@shared/lib/utils';
 import { EmptyState } from '@shared/ui';
 
 // ────────────────────────────────────────────────────────────────────────────
-// Pool tables inline query (no @entities/pool-table entity yet)
+// Pool tables inline query (kept local to this widget)
 // ────────────────────────────────────────────────────────────────────────────
 const db = supabase as any;
 
 type PoolTable = { id: string; label: string; number: number; status: string };
 
 function usePoolTables() {
-  /* eslint-disable i18next/no-literal-string -- queryKey + Supabase query-builder chain, wire-protocol identifiers not UI copy */
+  /* eslint-disable i18next/no-literal-string -- queryKey (matches resourceKeys.all
+     from entities/resource) + Supabase query-builder chain, wire-protocol
+     identifiers not UI copy */
   return useQuery({
-    queryKey: ['pool_tables'],
+    queryKey: ['resources'],
     queryFn: async (): Promise<PoolTable[]> => {
       const { data, error } = await db
-        .from('pool_tables')
+        .from('resources')
         .select('id, label, number, status')
         .order('number', { ascending: true });
       if (error) throw error;

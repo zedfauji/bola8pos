@@ -156,7 +156,7 @@ export async function findPoolTable(
   const t0 = Date.now();
 
   let q = supabase
-    .from('pool_tables')
+    .from('resources')
     .select('id, label, status, rate_per_hour, current_session_id');
 
   if (args.label) q = q.ilike('label', `%${args.label}%`);

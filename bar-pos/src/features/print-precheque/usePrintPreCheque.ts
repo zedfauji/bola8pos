@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useSettings } from '@entities/settings';
 import { useStaffStore } from '@entities/staff/model/store';
-import type { Tab, PoolSession, PoolTable } from '@shared/lib/domain';
+import type { Tab, PoolSession, Resource } from '@shared/lib/domain';
 import i18n, { getCurrentLocale } from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { computePoolSessionBilling } from '@shared/lib/pool-billing';
@@ -12,7 +12,7 @@ import { ok, err, type Result } from '@shared/lib/result';
 export type PrintPreChequeInput = {
   tab: Tab;
   session: PoolSession;
-  table: PoolTable;
+  table: Resource;
 };
 
 /**

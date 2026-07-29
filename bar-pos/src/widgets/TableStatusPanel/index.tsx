@@ -11,8 +11,8 @@ import { RemoveTabItemDialog } from '@features/remove-tab-item/ui/RemoveTabItemD
 import { StopAndMoveDialog } from '@features/stop-and-move-table/ui/StopAndMoveDialog';
 import { StopSessionConfirm } from '@features/stop-pool-timer/ui/StopSessionConfirm';
 import { TransferPoolDialog } from '@features/transfer-tab/ui/TransferPoolDialog';
-import { usePoolTable } from '@entities/pool-table/model/queries';
-import { usePoolTimer } from '@entities/pool-table/model/usePoolTimer';
+import { useResource } from '@entities/resource/model/queries';
+import { usePoolTimer } from '@entities/resource/model/usePoolTimer';
 import { useSettings } from '@entities/settings';
 import { useTab, useTabs } from '@entities/tab';
 import { useTabStore } from '@entities/tab/model/store';
@@ -57,7 +57,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
     refetch,
     resultError,
     error,
-  } = usePoolTable(tableId);
+  } = useResource(tableId);
 
   const session = table?.currentSession ?? null;
 

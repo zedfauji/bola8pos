@@ -1,4 +1,4 @@
-import { useMutationUpdateSessionStartTime } from '@entities/pool-table/model/queries';
+import { useMutationUpdateSessionStartTime } from '@entities/resource/model/queries';
 import type { PoolSession } from '@shared/lib/domain';
 import i18n from '@shared/lib/i18n';
 import { err, validationError } from '@shared/lib/result';

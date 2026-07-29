@@ -20,7 +20,7 @@ import {
 import { useSeatWaitlistParty } from '../model/useSeatWaitlistParty';
 
 // ────────────────────────────────────────────────────────────────────────────
-// Pool table data (inline query — pool-table entity not in this FSD slice)
+// Pool table data (inline query, kept local to this feature slice)
 // ────────────────────────────────────────────────────────────────────────────
 
 type PoolTable = {
@@ -34,13 +34,13 @@ const db = supabase as any;
 
 function usePoolTables() {
   return useQuery({
-    // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache key, not UI copy
-    queryKey: ['pool_tables'],
+    // eslint-disable-next-line i18next/no-literal-string -- TanStack Query cache key (matches resourceKeys.all), not UI copy
+    queryKey: ['resources'],
     queryFn: async (): Promise<PoolTable[]> => {
       /* eslint-disable i18next/no-literal-string -- Supabase query-builder chain:
          table/column names, not UI copy */
       const { data, error } = await db
-        .from('pool_tables')
+        .from('resources')
         .select('id, label, number, status')
         .order('number', { ascending: true });
       /* eslint-enable i18next/no-literal-string */

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { poolTableKeys } from '@entities/pool-table/model/queries';
+import { resourceKeys } from '@entities/resource/model/queries';
 import { tabKeys } from '@entities/tab/model/queries';
 import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
@@ -86,7 +86,7 @@ export function useTransferPoolSession() {
 
     onSuccess: async result => {
       if (!result.ok) return;
-      await queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      await queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       await queryClient.invalidateQueries({ queryKey: tabKeys.lists() });
       logger.info('pool_session.transferred');
     },

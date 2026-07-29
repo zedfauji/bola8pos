@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
-  useMutationAddPoolTable,
-  useMutationDeletePoolTable,
-  useMutationUpdatePoolTable,
-  usePoolTables,
-} from '@entities/pool-table';
-import type { PoolTable, PoolTableType, UserRole } from '@shared/lib/domain';
+  useMutationAddResource,
+  useMutationDeleteResource,
+  useMutationUpdateResource,
+  useResources,
+} from '@entities/resource';
+import type { Resource, ResourceType, UserRole } from '@shared/lib/domain';
 import { ConfirmDialog, Input, Label, POSButton, ProtectedAction } from '@shared/ui';
 
 type Props = {
@@ -17,24 +17,24 @@ type Props = {
 type EditDraft = {
   label: string;
   ratePerHour: string;
-  tableType: PoolTableType;
+  tableType: ResourceType;
 };
 
 export function PoolTablesSettingsTab({ currentRole }: Props) {
   const { t } = useTranslation('wAdmin');
-  const { data: tables } = usePoolTables();
-  const addTable = useMutationAddPoolTable();
-  const updateTable = useMutationUpdatePoolTable();
-  const deleteTable = useMutationDeletePoolTable();
+  const { data: tables } = useResources();
+  const addTable = useMutationAddResource();
+  const updateTable = useMutationUpdateResource();
+  const deleteTable = useMutationDeleteResource();
   const [drafts, setDrafts] = useState<Record<string, EditDraft>>({});
-  const [deleteTarget, setDeleteTarget] = useState<PoolTable | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Resource | null>(null);
 
   const sortedTables = useMemo(
     () => [...(tables ?? [])].sort((a, b) => a.number - b.number),
     [tables]
   );
 
-  const getDraft = (table: PoolTable): EditDraft => {
+  const getDraft = (table: Resource): EditDraft => {
     return (
       drafts[table.id] ?? {
         label: table.label,
@@ -70,7 +70,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
     toast.success(t('poolTablesSettingsTab.tableAdded'));
   };
 
-  const handleSaveTable = async (table: PoolTable) => {
+  const handleSaveTable = async (table: Resource) => {
     const draft = getDraft(table);
     const ratePerHour = Number(draft.ratePerHour);
     if (!Number.isFinite(ratePerHour) || ratePerHour <= 0) {

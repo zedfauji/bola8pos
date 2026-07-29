@@ -12,7 +12,7 @@ import {
   TabSchema,
   OrderSchema,
   OrderItemSchema,
-  PoolTableSchema,
+  ResourceSchema,
   PoolSessionSchema,
   StaffSchema,
   ShiftSchema,
@@ -25,7 +25,7 @@ import type {
   Tab,
   Order,
   OrderItem,
-  PoolTable,
+  Resource,
   PoolSession,
   Staff,
   Shift,
@@ -113,7 +113,7 @@ const POOL_CLOSING = [
 
 type Scenario = {
   tabs: Tab[];
-  openTables: PoolTable[];
+  openTables: Resource[];
   lowStockItems: Inventory[];
 };
 
@@ -284,8 +284,8 @@ export function generateMockOrderItem(overrides?: Partial<OrderItem>): OrderItem
   });
 }
 
-export function generateMockPoolTable(overrides?: Partial<PoolTable>): PoolTable {
-  return PoolTableSchema.parse({
+export function generateMockPoolTable(overrides?: Partial<Resource>): Resource {
+  return ResourceSchema.parse({
     id: crypto.randomUUID(),
     number: 1,
     label: 'Table 1',
@@ -314,7 +314,7 @@ export function generateMockPoolSession(overrides?: Partial<PoolSession>): PoolS
 /**
  * Pool table in `occupied` state with a matching `currentSession` (base session shape).
  */
-export function generateMockOccupiedPoolTable(overrides?: Partial<PoolTable>): PoolTable {
+export function generateMockOccupiedPoolTable(overrides?: Partial<Resource>): Resource {
   const tableId = overrides?.id ?? crypto.randomUUID();
   const sessionId = overrides?.currentSessionId ?? crypto.randomUUID();
   const sessionBase = {
@@ -329,7 +329,7 @@ export function generateMockOccupiedPoolTable(overrides?: Partial<PoolTable>): P
   const currentSessionId = overrides?.currentSessionId ?? sessionId;
   const currentSession = overrides?.currentSession ?? sessionBase;
 
-  return PoolTableSchema.parse({
+  return ResourceSchema.parse({
     id: tableId,
     number: 3,
     label: 'Table 3',

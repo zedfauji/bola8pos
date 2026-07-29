@@ -14,7 +14,7 @@ import {
 import { supabase } from '@shared/lib/supabase';
 
 type PoolSessionRunningRow = {
-  pool_tables: { number: number } | null;
+  resources: { number: number } | null;
 };
 
 export function useCloseTab() {
@@ -26,7 +26,7 @@ export function useCloseTab() {
       const sessionsRes = await supabaseQuery<PoolSessionRunningRow[]>(() =>
         supabase
           .from('pool_sessions')
-          .select('pool_tables!pool_sessions_table_id_fkey(number)')
+          .select('resources!pool_sessions_table_id_fkey(number)')
           .eq('tab_id', tabId)
           .is('stopped_at', null)
       );
@@ -36,7 +36,7 @@ export function useCloseTab() {
       }
 
       if (sessionsRes.data.length > 0) {
-        const tableNumber = sessionsRes.data[0]?.pool_tables?.number ?? 1;
+        const tableNumber = sessionsRes.data[0]?.resources?.number ?? 1;
         return err(sessionStillRunningError(tableNumber));
       }
 
