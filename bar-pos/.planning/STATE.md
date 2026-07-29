@@ -6,14 +6,14 @@ current_phase: 26
 current_phase_name: floating-tables-is-temp
 status: executing
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-29T03:35:13.717Z"
+last_updated: "2026-07-29T04:17:38.027Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 26 execution started
 progress:
   total_phases: 28
   completed_phases: 22
   total_plans: 162
-  completed_plans: 159
+  completed_plans: 160
   percent: 79
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 26 (floating-tables-is-temp) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 26 execution started
 
@@ -334,6 +334,9 @@ Last activity: 2026-07-28 — Phase 26 execution started
 - [Phase ?]: Phase 26 Task 1: full rename scope (pool_table_status -> resource_status, pool_table_transfers -> resource_transfers) confirmed and applied in Plan 01's migration
 - [Phase ?]: Realtime publication coverage for resources was added to the rename migration pre-push (pool_tables was never a supabase_realtime member, a pre-existing gap unrelated to the rename)
 - [Phase ?]: supabase.types.ts regenerated via --linked (no local Supabase stack in this environment); migration + types + contracts shim committed together per T-26-02
+- [Phase ?]: resourceKeys.all cache-key value is ['resources'] — Plan 04's fourth consumer must match this literal exactly
+- [Phase ?]: AI agent tool name/description contract (list_pool_tables, find_pool_table) preserved unchanged per D-02, causing the plan's own residual-reference grep gate to report 5 documented, intentional exception hits
+- [Phase ?]: Fixed 2 pre-existing unrelated tsc errors (tab/queries.ts:791, agent/rag.ts:60) as blocking (Rule 3) since they prevented Plan 26-02's own typecheck-exit-0 gate; backlog todo moved to completed
 
 ## Performance Metrics
 
@@ -431,10 +434,11 @@ Last activity: 2026-07-28 — Phase 26 execution started
 | Phase 36 P03 | 9min | 2 tasks | 3 files |
 | Phase 36 P04 | 5min | 2 tasks | 0 files |
 | Phase 26 P01 | 30min | 3 tasks | 3 files |
+| Phase 26 P02 | 40min | 2 tasks | 51 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 26-01-PLAN.md
+- **Stopped at:** Completed 26-02-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -448,10 +452,11 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 - Manual follow-up: run e2e/15-home-navigation.spec.ts, e2e/16-table-status.spec.ts, e2e/17-payment-pane.spec.ts once port 1420 is freed of the stray non-Vite process occupying it
 - Phase 33.1 Plan 02: e2e/06-transfer.spec.ts D-03 gate (5/5 twice, isolated) not confirmed -- both isolated runs failed on T4/T5 with 'Test timeout exceeded' + 'Target page/context/browser closed', traced to execution-sandbox network/browser latency (not a code defect; page snapshots show correct UI state at failure time). Wave 1's other 2 fixes ARE confirmed (09-rbac T7 skips cleanly, T-RP-01/T-RP-02 pass). Recommend re-running the gate in a lower-latency environment before Task 2 (REQUIREMENTS.md COMPONENT-04 annotation).
+- e2e/04-pool-timer.spec.ts (Phase 26 Plan 02) not run to a pass/fail verdict — dev server returned net::ERR_CONNECTION_REFUSED on both attempts in this environment; typecheck/lint/unit-test all green. Re-run in a stable environment before phase gate close.
 
 ## Session
 
-**Last session:** 2026-07-29T03:35:13.697Z
+**Last session:** 2026-07-29T04:17:38.011Z
 **Stopped at:** Completed 23-04-PLAN.md
 **Resume file:** None
 

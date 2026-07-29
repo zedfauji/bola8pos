@@ -807,7 +807,7 @@ Plans:
 **Goal:** Generalize `pool_tables` into a broader `resources` concept with a `FLOATING` type for temporary/ad-hoc tables (`is_temp`), an auto-deactivate trigger when no longer needed, and an auto-create flow from the waitlist.
 **Requirements:** TBD (POS-COMPARISON.md §26 — source doc no longer present; scope locked in 26-CONTEXT.md). Planning used the spec-less fallback: `must_haves` derive from SC-1..SC-4 below plus D-01..D-06 in 26-CONTEXT.md, which serve as this phase's de facto requirement text.
 **Depends on:** —
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 **Wave 1**
@@ -816,7 +816,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 26-02-PLAN.md — domain schema rename, `entities/pool-table` → `entities/resource` move, source-wide call-site sweep back to green (Wave 2) (SC-1, SC-4)
+- [x] 26-02-PLAN.md — domain schema rename, `entities/pool-table` → `entities/resource` move, source-wide call-site sweep back to green (Wave 2) (SC-1, SC-4)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
