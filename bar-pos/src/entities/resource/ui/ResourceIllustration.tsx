@@ -1,18 +1,18 @@
 /**
- * POOL TABLE ILLUSTRATION
+ * RESOURCE ILLUSTRATION
  *
  * Pure SVG component — no side effects.
  * Renders a top-down pool table illustration with state-specific visuals.
  */
 
 import { useTranslation } from 'react-i18next';
-import type { PoolTable } from '@shared/lib/domain';
+import type { Resource } from '@shared/lib/domain';
 import { formatMoney } from '@shared/lib/domain-helpers';
 
-type PoolTableStatus = PoolTable['status'];
+type ResourceStatus = Resource['status'];
 
-export interface PoolTableIllustrationProps {
-  status: PoolTableStatus;
+export interface ResourceIllustrationProps {
+  status: ResourceStatus;
   /** ≥ 2h session → warm brown felt */
   isOvertime: boolean | undefined;
   /** Shows timer + charge overlay when occupied */
@@ -28,7 +28,7 @@ interface FeltColors {
   cushion: string;
 }
 
-function getFeltColors(status: PoolTableStatus, isOvertime: boolean | undefined): FeltColors {
+function getFeltColors(status: ResourceStatus, isOvertime: boolean | undefined): FeltColors {
   if (status === 'occupied' && isOvertime) {
     return { felt: '#7a3f1f', cushion: '#4f2814' };
   }
@@ -145,12 +145,12 @@ function MaintenanceSash() {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function PoolTableIllustration({
+export function ResourceIllustration({
   status,
   isOvertime,
   timer,
   ratePerHour,
-}: PoolTableIllustrationProps) {
+}: ResourceIllustrationProps) {
   const { t } = useTranslation('entities');
   const { felt: feltColor, cushion: cushionColor } = getFeltColors(status, isOvertime);
   const isMaintenance = status === 'maintenance';

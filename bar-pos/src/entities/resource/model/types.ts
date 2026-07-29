@@ -1,15 +1,15 @@
-// src/entities/pool-table/model/types.ts
+// src/entities/resource/model/types.ts
 export {
-  PoolTableSchema,
+  ResourceSchema,
   PoolSessionSchema,
   PoolSessionSummarySchema,
-  PoolTableTypeSchema,
+  ResourceTypeSchema,
 } from '@shared/lib/domain';
 
 export type {
-  PoolTable,
+  Resource,
   PoolSession,
   PoolTableStatus,
-  PoolTableType,
+  ResourceType,
   PoolSessionSummary,
 } from '@shared/lib/domain';

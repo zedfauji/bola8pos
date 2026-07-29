@@ -95,10 +95,10 @@ export const KdsStatus = {
 } as const;
 export type KdsStatus = z.infer<typeof KdsStatusSchema>;
 
-export const PoolTableStatusSchema = z.enum(['available', 'occupied', 'reserved', 'maintenance']);
+export const ResourceStatusSchema = z.enum(['available', 'occupied', 'reserved', 'maintenance']);
 
-export const PoolTableTypeSchema = z.enum(['pool', 'carom', 'consumption']);
-export type PoolTableType = z.infer<typeof PoolTableTypeSchema>;
+export const ResourceTypeSchema = z.enum(['pool', 'carom', 'consumption']);
+export type ResourceType = z.infer<typeof ResourceTypeSchema>;
 export const PoolTableStatus = {
   AVAILABLE: 'available',
   OCCUPIED: 'occupied',
@@ -543,7 +543,7 @@ export const RappiOrderSchema = z.object({
 export type RappiOrder = z.infer<typeof RappiOrderSchema>;
 
 // ============================================================================
-// POOL SESSION (base fields; `table` added below after PoolTableSchema)
+// POOL SESSION (base fields; `table` added below after ResourceSchema)
 // ============================================================================
 
 const PoolSessionBaseSchema = z.object({
@@ -561,34 +561,34 @@ const PoolSessionBaseSchema = z.object({
 });
 
 // ============================================================================
-// POOL TABLE
+// RESOURCE (formerly POOL TABLE)
 // ============================================================================
 
-export const PoolTableSchema = z.object({
+export const ResourceSchema = z.object({
   id: UuidSchema,
-  number: z.number().int().min(1).max(30),
+  number: z.number().int().min(1),
   label: z.string().min(1).max(50),
   ratePerHour: MoneySchema,
-  status: PoolTableStatusSchema,
-  tableType: PoolTableTypeSchema.default('pool'),
+  status: ResourceStatusSchema,
+  tableType: ResourceTypeSchema.default('pool'),
   currentSessionId: UuidSchema.nullable(),
   currentSession: PoolSessionBaseSchema.optional(),
 });
 
-export const PoolTableCreateSchema = PoolTableSchema.omit({ id: true, currentSession: true });
+export const ResourceCreateSchema = ResourceSchema.omit({ id: true, currentSession: true });
 
-export const PoolTableUpdateSchema = PoolTableSchema.partial().required({ id: true });
+export const ResourceUpdateSchema = ResourceSchema.partial().required({ id: true });
 
-export type PoolTable = z.infer<typeof PoolTableSchema>;
-export type PoolTableCreate = z.infer<typeof PoolTableCreateSchema>;
-export type PoolTableUpdate = z.infer<typeof PoolTableUpdateSchema>;
+export type Resource = z.infer<typeof ResourceSchema>;
+export type ResourceCreate = z.infer<typeof ResourceCreateSchema>;
+export type ResourceUpdate = z.infer<typeof ResourceUpdateSchema>;
 
 // ============================================================================
 // POOL SESSION
 // ============================================================================
 
 export const PoolSessionSchema = PoolSessionBaseSchema.extend({
-  table: z.lazy(() => PoolTableSchema).optional(),
+  table: z.lazy(() => ResourceSchema).optional(),
 });
 
 export const PoolSessionCreateSchema = PoolSessionSchema.omit({
@@ -1280,8 +1280,8 @@ export const domain = {
     TabStatus: TabStatusSchema,
     OrderStatus: OrderStatusSchema,
     KdsStatus: KdsStatusSchema,
-    PoolTableStatus: PoolTableStatusSchema,
-    PoolTableType: PoolTableTypeSchema,
+    ResourceStatus: ResourceStatusSchema,
+    ResourceType: ResourceTypeSchema,
     PaymentMethod: PaymentMethodSchema,
     InventoryAdjustReason: InventoryAdjustReasonSchema,
     StockMovementReason: StockMovementReasonSchema,
@@ -1323,9 +1323,9 @@ export const domain = {
     RappiOrderItem: RappiOrderItemSchema,
     RappiOrder: RappiOrderSchema,
 
-    PoolTable: PoolTableSchema,
-    PoolTableCreate: PoolTableCreateSchema,
-    PoolTableUpdate: PoolTableUpdateSchema,
+    Resource: ResourceSchema,
+    ResourceCreate: ResourceCreateSchema,
+    ResourceUpdate: ResourceUpdateSchema,
 
     PoolSession: PoolSessionSchema,
     PoolSessionCreate: PoolSessionCreateSchema,
@@ -1401,8 +1401,8 @@ export const domain = {
     TabStatus: z.infer<typeof TabStatusSchema>;
     OrderStatus: z.infer<typeof OrderStatusSchema>;
     KdsStatus: KdsStatus;
-    PoolTableStatus: z.infer<typeof PoolTableStatusSchema>;
-    PoolTableType: PoolTableType;
+    ResourceStatus: z.infer<typeof ResourceStatusSchema>;
+    ResourceType: ResourceType;
     PaymentMethod: z.infer<typeof PaymentMethodSchema>;
     InventoryAdjustReason: z.infer<typeof InventoryAdjustReasonSchema>;
     StockMovementReason: StockMovementReason;
@@ -1444,9 +1444,9 @@ export const domain = {
     RappiOrderItem: RappiOrderItem;
     RappiOrder: RappiOrder;
 
-    PoolTable: PoolTable;
-    PoolTableCreate: PoolTableCreate;
-    PoolTableUpdate: PoolTableUpdate;
+    Resource: Resource;
+    ResourceCreate: ResourceCreate;
+    ResourceUpdate: ResourceUpdate;
 
     PoolSession: PoolSession;
     PoolSessionCreate: PoolSessionCreate;

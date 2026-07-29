@@ -1,26 +1,26 @@
 /**
- * POOL TABLE ENTITY - BARREL EXPORT
+ * RESOURCE ENTITY - BARREL EXPORT
  */
 
 // Types & Schemas
 export {
-  PoolTableSchema,
+  ResourceSchema,
   PoolSessionSchema,
   PoolSessionSummarySchema,
-  PoolTableTypeSchema,
+  ResourceTypeSchema,
 } from './types';
 
 export type {
-  PoolTable,
+  Resource,
   PoolSession,
   PoolTableStatus,
-  PoolTableType,
+  ResourceType,
   PoolSessionSummary,
 } from './types';
 
 // State Management
 export {
-  usePoolTableStore,
+  useResourceStore,
   selectTableById,
   selectActiveSessionForTable,
   selectAvailableTableCount,
@@ -29,17 +29,17 @@ export {
 
 // Data Fetching
 export {
-  poolTableKeys,
-  usePoolTables,
-  usePoolTable,
+  resourceKeys,
+  useResources,
+  useResource,
   useMutationStartSession,
   useMutationStopSession,
   usePoolSessionsByTab,
   useMutationLinkPoolSessionToTab,
-  useMutationReleasePoolTable,
-  useMutationAddPoolTable,
-  useMutationUpdatePoolTable,
-  useMutationDeletePoolTable,
+  useMutationReleaseResource,
+  useMutationAddResource,
+  useMutationUpdateResource,
+  useMutationDeleteResource,
 } from './queries';
 
 export { usePoolTimer } from './usePoolTimer';

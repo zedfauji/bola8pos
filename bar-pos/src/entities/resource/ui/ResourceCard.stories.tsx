@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { PoolSession, PoolTable } from '@shared/lib/domain';
-import { PoolTableCard } from './PoolTableCard';
+import type { PoolSession, Resource } from '@shared/lib/domain';
+import { ResourceCard } from './ResourceCard';
 
-const baseTable: PoolTable = {
+const baseTable: Resource = {
   id: 'table-1',
   number: 3,
   label: 'Table 3',
@@ -23,8 +23,8 @@ const occupiedSession: PoolSession = {
 };
 
 const meta = {
-  title: 'Entities/PoolTable/PoolTableCard',
-  component: PoolTableCard,
+  title: 'Entities/Resource/ResourceCard',
+  component: ResourceCard,
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
   decorators: [
@@ -34,7 +34,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof PoolTableCard>;
+} satisfies Meta<typeof ResourceCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

@@ -63,7 +63,7 @@ function mockSessionFetch(row: Record<string, unknown> | null, error: unknown = 
         single: vi.fn().mockResolvedValue({ data: row, error }),
       } as unknown as ReturnType<typeof supabase.from>;
     }
-    if (table === 'pool_tables') {
+    if (table === 'resources') {
       return {
         update: vi.fn().mockReturnThis(),
         eq: vi.fn().mockResolvedValue({ data: null, error: null }),

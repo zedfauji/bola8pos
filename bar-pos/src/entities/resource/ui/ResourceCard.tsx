@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
+import type { PoolSession, Resource, ResourceType } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
 import { POSButton, StatusBadge } from '@shared/ui';
 import { Badge } from '@shared/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@shared/ui/card';
 import { usePoolTimer } from '../model/usePoolTimer';
-import { PoolTableIllustration } from './PoolTableIllustration';
+import { ResourceIllustration } from './ResourceIllustration';
 
-export interface PoolTableCardProps {
-  table: PoolTable;
+export interface ResourceCardProps {
+  table: Resource;
   /** Current session row from server; null when table has no embedded session. */
   session: PoolSession | null;
   /** Resolved customer name when `session.tabId` is set. */
@@ -28,14 +28,14 @@ export interface PoolTableCardProps {
   firstHourMode: 'full' | 'prorated';
 }
 
-// eslint-disable-next-line i18next/no-literal-string -- object keys (PoolTableType enum values), not UI copy
-const TABLE_TYPE_LABEL_KEY: Record<PoolTableType, string> = {
+// eslint-disable-next-line i18next/no-literal-string -- object keys (ResourceType enum values), not UI copy
+const TABLE_TYPE_LABEL_KEY: Record<ResourceType, string> = {
   pool: 'poolTableCard.tableType.pool',
   carom: 'poolTableCard.tableType.carom',
   consumption: 'poolTableCard.tableType.consumption',
 };
 
-const TABLE_TYPE_VARIANT: Record<PoolTableType, 'default' | 'secondary' | 'outline'> = {
+const TABLE_TYPE_VARIANT: Record<ResourceType, 'default' | 'secondary' | 'outline'> = {
   pool: 'default',
   carom: 'secondary',
   consumption: 'outline',
@@ -48,7 +48,7 @@ const STATUS_MESSAGE_KEY: Record<string, string> = {
   maintenance: 'poolTableCard.statusMessage.maintenance',
 };
 
-export function PoolTableCard({
+export function ResourceCard({
   table,
   session,
   linkedCustomerName,
@@ -61,7 +61,7 @@ export function PoolTableCard({
   stopDisabled,
   stopDisabledTitle,
   firstHourMode,
-}: PoolTableCardProps) {
+}: ResourceCardProps) {
   const { t } = useTranslation('entities');
   const isOccupied = table.status === 'occupied';
   const startDisabledVal = startDisabled ?? false;
@@ -107,7 +107,7 @@ export function PoolTableCard({
 
       {/* SVG illustration */}
       <div className="px-3 pb-2">
-        <PoolTableIllustration
+        <ResourceIllustration
           status={table.status}
           isOvertime={isOccupied ? timer.elapsedMinutes >= 120 : undefined}
           timer={

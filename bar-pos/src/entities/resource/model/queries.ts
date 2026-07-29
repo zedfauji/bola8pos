@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { tabKeys } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
-import type { PoolSession, PoolTable, PoolTableType } from '@shared/lib/domain';
+import type { PoolSession, Resource, ResourceType } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
 import {
   err,
@@ -21,19 +21,19 @@ import { supabase } from '@shared/lib/supabase';
 import type { Json } from '@shared/lib/supabase.types';
 import type { Tables, TablesInsert, TablesUpdate } from '@shared/lib/supabase.types';
 import { handleVersionError } from '@shared/lib/version-error';
-import { usePoolTableStore } from './store';
-import { PoolTableSchema, PoolSessionSchema } from './types';
+import { useResourceStore } from './store';
+import { ResourceSchema, PoolSessionSchema } from './types';
 
-export const poolTableKeys = {
-  all: ['pool-tables'] as const,
-  detail: (id: string) => [...poolTableKeys.all, 'detail', id] as const,
+export const resourceKeys = {
+  all: ['resources'] as const,
+  detail: (id: string) => [...resourceKeys.all, 'detail', id] as const,
 };
 
 type PoolSessionRowWithPrevious = Tables<'pool_sessions'> & {
   previous_table: { number: number } | null;
 };
 
-type PoolTableRow = Tables<'pool_tables'> & {
+type ResourceRow = Tables<'resources'> & {
   current_session: PoolSessionRowWithPrevious | null;
 };
 
@@ -67,14 +67,14 @@ function mapPoolSessionRow(
   }
 }
 
-function mapPoolTableRow(row: PoolTableRow): Result<PoolTable> {
+function mapResourceRow(row: ResourceRow): Result<Resource> {
   try {
     const currentSession =
       row.current_session != null ? mapPoolSessionRow(row.current_session) : null;
     if (currentSession && !currentSession.ok) return currentSession;
 
     return ok(
-      PoolTableSchema.parse({
+      ResourceSchema.parse({
         id: row.id,
         number: row.number,
         label: row.label,
@@ -90,19 +90,19 @@ function mapPoolTableRow(row: PoolTableRow): Result<PoolTable> {
   }
 }
 
-export function usePoolTables() {
+export function useResources() {
   const query = useQuery({
-    queryKey: poolTableKeys.all,
-    queryFn: async (): Promise<Result<PoolTable[]>> => {
+    queryKey: resourceKeys.all,
+    queryFn: async (): Promise<Result<Resource[]>> => {
       const res = await supabaseQuery(() =>
         supabase
-          .from('pool_tables')
+          .from('resources')
           .select(
             `
           *,
-          current_session:pool_sessions!fk_pool_tables_current_session(
+          current_session:pool_sessions!fk_resources_current_session(
             *,
-            previous_table:pool_tables!pool_sessions_previous_table_id_fkey(number)
+            previous_table:resources!pool_sessions_previous_table_id_fkey(number)
           )
         `
           )
@@ -110,18 +110,18 @@ export function usePoolTables() {
       );
 
       if (!res.ok) {
-        logger.error('pool_tables.fetch_failed', {
+        logger.error('resources.fetch_failed', {
           code: res.error.code,
           message: res.error.message,
         });
         return res;
       }
 
-      const tables: PoolTable[] = [];
-      for (const row of res.data as PoolTableRow[]) {
-        const m = mapPoolTableRow(row);
+      const tables: Resource[] = [];
+      for (const row of res.data as ResourceRow[]) {
+        const m = mapResourceRow(row);
         if (!m.ok) {
-          logger.error('pool_tables.map_failed', { message: m.error.message });
+          logger.error('resources.map_failed', { message: m.error.message });
           return m;
         }
         tables.push(m.data);
@@ -134,11 +134,11 @@ export function usePoolTables() {
   useEffect(() => {
     if (query.data?.ok) {
       const tables = query.data.data;
-      usePoolTableStore.getState().setTablesFromQuery(tables);
+      useResourceStore.getState().setTablesFromQuery(tables);
       const sessions = tables
         .map(t => t.currentSession)
         .filter((s): s is PoolSession => Boolean(s && s.stoppedAt == null));
-      usePoolTableStore.getState().setSessionsFromQuery(sessions);
+      useResourceStore.getState().setSessionsFromQuery(sessions);
     }
   }, [query.data]);
 
@@ -152,20 +152,20 @@ export function usePoolTables() {
   };
 }
 
-export function usePoolTable(id: string) {
+export function useResource(id: string) {
   const query = useQuery({
-    queryKey: poolTableKeys.detail(id),
+    queryKey: resourceKeys.detail(id),
     enabled: Boolean(id),
-    queryFn: async (): Promise<Result<PoolTable>> => {
+    queryFn: async (): Promise<Result<Resource>> => {
       const res = await supabaseQuery(() =>
         supabase
-          .from('pool_tables')
+          .from('resources')
           .select(
             `
           *,
-          current_session:pool_sessions!fk_pool_tables_current_session(
+          current_session:pool_sessions!fk_resources_current_session(
             *,
-            previous_table:pool_tables!pool_sessions_previous_table_id_fkey(number)
+            previous_table:resources!pool_sessions_previous_table_id_fkey(number)
           )
         `
           )
@@ -174,7 +174,7 @@ export function usePoolTable(id: string) {
       );
 
       if (!res.ok) {
-        logger.error('pool_tables.detail.fetch_failed', {
+        logger.error('resources.detail.fetch_failed', {
           tableId: id,
           code: res.error.code,
           message: res.error.message,
@@ -182,7 +182,7 @@ export function usePoolTable(id: string) {
         return res;
       }
 
-      return mapPoolTableRow(res.data as unknown as PoolTableRow);
+      return mapResourceRow(res.data as unknown as ResourceRow);
     },
   });
 
@@ -196,7 +196,7 @@ export function usePoolTable(id: string) {
   };
 }
 
-type PoolTablesSnapshot = Result<PoolTable[]> | undefined;
+type ResourcesSnapshot = Result<Resource[]> | undefined;
 
 // Shape of the jsonb payload returned by the `stop_pool_session` RPC
 // (supabase/migrations/20260710000006_stop_pool_session_rpc.sql, step 8).
@@ -242,7 +242,7 @@ export function useMutationStartSession() {
       );
 
       if (!sessionRes.ok) {
-        logger.error('pool_tables.session.start_insert_failed', {
+        logger.error('resources.session.start_insert_failed', {
           tableId,
           message: sessionRes.error.message,
         });
@@ -256,7 +256,7 @@ export function useMutationStartSession() {
 
       const tableRes = await supabaseMutation(() =>
         supabase
-          .from('pool_tables')
+          .from('resources')
           .update({
             status: 'occupied',
             current_session_id: insertedSession.id,
@@ -265,7 +265,7 @@ export function useMutationStartSession() {
       );
 
       if (!tableRes.ok) {
-        logger.error('pool_tables.session.start_table_update_failed', {
+        logger.error('resources.session.start_table_update_failed', {
           tableId,
           message: tableRes.error.message,
         });
@@ -278,10 +278,10 @@ export function useMutationStartSession() {
     },
 
     onMutate: async ({ tableId }) => {
-      await queryClient.cancelQueries({ queryKey: poolTableKeys.all });
-      const previous = queryClient.getQueryData<Result<PoolTable[]>>(poolTableKeys.all);
-      usePoolTableStore.getState().updateTableStatus(tableId, 'occupied');
-      queryClient.setQueryData<Result<PoolTable[]>>(poolTableKeys.all, old => {
+      await queryClient.cancelQueries({ queryKey: resourceKeys.all });
+      const previous = queryClient.getQueryData<Result<Resource[]>>(resourceKeys.all);
+      useResourceStore.getState().updateTableStatus(tableId, 'occupied');
+      queryClient.setQueryData<Result<Resource[]>>(resourceKeys.all, old => {
         if (!old?.ok) return old;
         return ok(
           old.data.map(t =>
@@ -291,7 +291,7 @@ export function useMutationStartSession() {
           )
         );
       });
-      return { previous } as { previous: PoolTablesSnapshot };
+      return { previous } as { previous: ResourcesSnapshot };
     },
 
     onSuccess: (result, variables, ctx) => {
@@ -307,26 +307,26 @@ export function useMutationStartSession() {
           // Keep the optimistic 'occupied' status; sync will confirm it.
           return;
         }
-        const prev = (ctx as { previous?: PoolTablesSnapshot } | undefined)?.previous;
+        const prev = (ctx as { previous?: ResourcesSnapshot } | undefined)?.previous;
         if (prev !== undefined) {
-          queryClient.setQueryData(poolTableKeys.all, prev);
-          if (prev.ok) usePoolTableStore.getState().setTablesFromQuery(prev.data);
+          queryClient.setQueryData(resourceKeys.all, prev);
+          if (prev.ok) useResourceStore.getState().setTablesFromQuery(prev.data);
         }
-        usePoolTableStore.getState().updateTableStatus(variables.tableId, 'available');
+        useResourceStore.getState().updateTableStatus(variables.tableId, 'available');
         return;
       }
-      void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       void queryClient.invalidateQueries({ queryKey: ['pool-sessions'] });
       void queryClient.invalidateQueries({ queryKey: ['tabs'] });
     },
 
     onError: (_e, variables, ctx) => {
-      const prev = (ctx as { previous?: PoolTablesSnapshot } | undefined)?.previous;
+      const prev = (ctx as { previous?: ResourcesSnapshot } | undefined)?.previous;
       if (prev !== undefined) {
-        queryClient.setQueryData(poolTableKeys.all, prev);
-        if (prev.ok) usePoolTableStore.getState().setTablesFromQuery(prev.data);
+        queryClient.setQueryData(resourceKeys.all, prev);
+        if (prev.ok) useResourceStore.getState().setTablesFromQuery(prev.data);
       }
-      usePoolTableStore.getState().updateTableStatus(variables.tableId, 'available');
+      useResourceStore.getState().updateTableStatus(variables.tableId, 'available');
     },
   });
 }
@@ -349,7 +349,7 @@ export function useMutationStopSession() {
       );
 
       if (!fetchRes.ok) {
-        logger.error('pool_tables.session.stop_fetch_failed', { message: fetchRes.error.message });
+        logger.error('resources.session.stop_fetch_failed', { message: fetchRes.error.message });
         return fetchRes;
       }
 
@@ -364,7 +364,7 @@ export function useMutationStopSession() {
           : undefined;
 
       // total_charge/billed_minutes are now server-authoritative (Pitfall 3):
-      // stop_pool_session reads rate_per_hour from pool_tables and
+      // stop_pool_session reads rate_per_hour from resources and
       // firstHourMode from settings server-side, consumes unconsumed
       // pool_grant minutes, and compounds pool_billing discounts atomically.
       // The client no longer computes or writes the charge itself.
@@ -376,7 +376,7 @@ export function useMutationStopSession() {
       );
 
       if (!rpcRes.ok) {
-        logger.error('pool_tables.session.stop_rpc_failed', {
+        logger.error('resources.session.stop_rpc_failed', {
           code: rpcRes.error.code,
           message: rpcRes.error.message,
         });
@@ -389,7 +389,7 @@ export function useMutationStopSession() {
 
       const tableRes = await supabaseMutation(() =>
         supabase
-          .from('pool_tables')
+          .from('resources')
           .update({
             status: 'available',
             current_session_id: null,
@@ -398,7 +398,7 @@ export function useMutationStopSession() {
       );
 
       if (!tableRes.ok) {
-        logger.error('pool_tables.session.stop_table_failed', { message: tableRes.error.message });
+        logger.error('resources.session.stop_table_failed', { message: tableRes.error.message });
         return tableRes;
       }
 
@@ -416,10 +416,10 @@ export function useMutationStopSession() {
     },
 
     onMutate: async ({ tableId }) => {
-      await queryClient.cancelQueries({ queryKey: poolTableKeys.all });
-      const previous = queryClient.getQueryData<Result<PoolTable[]>>(poolTableKeys.all);
-      usePoolTableStore.getState().updateTableStatus(tableId, 'available');
-      queryClient.setQueryData<Result<PoolTable[]>>(poolTableKeys.all, old => {
+      await queryClient.cancelQueries({ queryKey: resourceKeys.all });
+      const previous = queryClient.getQueryData<Result<Resource[]>>(resourceKeys.all);
+      useResourceStore.getState().updateTableStatus(tableId, 'available');
+      queryClient.setQueryData<Result<Resource[]>>(resourceKeys.all, old => {
         if (!old?.ok) return old;
         return ok(
           old.data.map(t =>
@@ -434,17 +434,17 @@ export function useMutationStopSession() {
           )
         );
       });
-      return { previous } as { previous: PoolTablesSnapshot };
+      return { previous } as { previous: ResourcesSnapshot };
     },
 
     onSuccess: (result, variables, ctx) => {
       if (!result.ok) {
         if (result.error.code === 'NETWORK_OFFLINE') {
           // Phase 15 Plan 04: capture cached pool_session.version at enqueue
-          // time. Look up the session via the pool_tables list cache (each
+          // time. Look up the session via the resources list cache (each
           // table embeds its current session including version).
           {
-            const tablesCache = queryClient.getQueryData<Result<PoolTable[]>>(poolTableKeys.all);
+            const tablesCache = queryClient.getQueryData<Result<Resource[]>>(resourceKeys.all);
             let expectedVersion = 0;
             if (tablesCache?.ok) {
               const t = tablesCache.data.find(
@@ -465,33 +465,33 @@ export function useMutationStopSession() {
         // Phase 15: STALE_VERSION on pool_sessions stop UPDATE
         handleVersionError(result.error, {
           queryClient,
-          queryKey: poolTableKeys.all,
+          queryKey: resourceKeys.all,
           entity: 'pool_sessions',
           entityId: variables.sessionId,
           expectedVersion: 0,
           supabase,
           terminalId: TERMINAL_ID,
         });
-        const prev = (ctx as { previous?: PoolTablesSnapshot } | undefined)?.previous;
+        const prev = (ctx as { previous?: ResourcesSnapshot } | undefined)?.previous;
         if (prev !== undefined) {
-          queryClient.setQueryData(poolTableKeys.all, prev);
-          if (prev.ok) usePoolTableStore.getState().setTablesFromQuery(prev.data);
+          queryClient.setQueryData(resourceKeys.all, prev);
+          if (prev.ok) useResourceStore.getState().setTablesFromQuery(prev.data);
         }
-        usePoolTableStore.getState().updateTableStatus(variables.tableId, 'occupied');
+        useResourceStore.getState().updateTableStatus(variables.tableId, 'occupied');
         return;
       }
-      void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       void queryClient.invalidateQueries({ queryKey: ['pool-sessions'] });
       void queryClient.invalidateQueries({ queryKey: ['tabs'] });
     },
 
     onError: (_e, variables, ctx) => {
-      const prev = (ctx as { previous?: PoolTablesSnapshot } | undefined)?.previous;
+      const prev = (ctx as { previous?: ResourcesSnapshot } | undefined)?.previous;
       if (prev !== undefined) {
-        queryClient.setQueryData(poolTableKeys.all, prev);
-        if (prev.ok) usePoolTableStore.getState().setTablesFromQuery(prev.data);
+        queryClient.setQueryData(resourceKeys.all, prev);
+        if (prev.ok) useResourceStore.getState().setTablesFromQuery(prev.data);
       }
-      usePoolTableStore.getState().updateTableStatus(variables.tableId, 'occupied');
+      useResourceStore.getState().updateTableStatus(variables.tableId, 'occupied');
     },
   });
 }
@@ -572,37 +572,37 @@ export function useMutationLinkPoolSessionToTab() {
       return res.ok ? ok(undefined) : res;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       void queryClient.invalidateQueries({ queryKey: tabKeys.all });
       void queryClient.invalidateQueries({ queryKey: ['pool-sessions'] });
     },
   });
 }
 
-export function useMutationReleasePoolTable() {
+export function useMutationReleaseResource() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ tableId }: { tableId: string }): Promise<Result<void>> => {
       const res = await supabaseMutation(() =>
         supabase
-          .from('pool_tables')
+          .from('resources')
           .update({ status: 'available' })
           .eq('id', tableId)
           .eq('status', 'reserved')
       );
       if (!res.ok) {
-        logger.error('pool_tables.release_failed', { tableId, message: res.error.message });
+        logger.error('resources.release_failed', { tableId, message: res.error.message });
       }
       return res.ok ? ok(undefined) : res;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
     },
   });
 }
 
-export function useMutationAddPoolTable() {
+export function useMutationAddResource() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -610,35 +610,35 @@ export function useMutationAddPoolTable() {
       number: number;
       label: string;
       ratePerHour: number;
-      tableType?: PoolTableType;
-    }): Promise<Result<PoolTable>> => {
-      const insert: TablesInsert<'pool_tables'> = {
+      tableType?: ResourceType;
+    }): Promise<Result<Resource>> => {
+      const insert: TablesInsert<'resources'> = {
         number: input.number,
         label: input.label,
         rate_per_hour: input.ratePerHour,
         status: 'available',
         table_type: input.tableType ?? 'pool',
       };
-      const res = await supabaseMutation<Tables<'pool_tables'>>(() =>
-        supabase.from('pool_tables').insert(insert).select().single()
+      const res = await supabaseMutation<Tables<'resources'>>(() =>
+        supabase.from('resources').insert(insert).select().single()
       );
       if (!res.ok) {
-        logger.error('pool_tables.insert_failed', { message: res.error.message });
+        logger.error('resources.insert_failed', { message: res.error.message });
         return res;
       }
       if (res.data === null) {
         return err(unknownError('no_row'));
       }
-      const row: PoolTableRow = { ...res.data, current_session: null };
-      return mapPoolTableRow(row);
+      const row: ResourceRow = { ...res.data, current_session: null };
+      return mapResourceRow(row);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
     },
   });
 }
 
-export function useMutationUpdatePoolTable() {
+export function useMutationUpdateResource() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
@@ -650,51 +650,51 @@ export function useMutationUpdatePoolTable() {
       tableId: string;
       label: string;
       ratePerHour: number;
-      tableType?: PoolTableType;
+      tableType?: ResourceType;
     }): Promise<Result<void>> => {
-      const updatePayload: TablesUpdate<'pool_tables'> = {
+      const updatePayload: TablesUpdate<'resources'> = {
         label,
         rate_per_hour: ratePerHour,
         ...(tableType !== undefined ? { table_type: tableType } : {}),
       };
       const res = await supabaseMutation(() =>
-        supabase.from('pool_tables').update(updatePayload).eq('id', tableId)
+        supabase.from('resources').update(updatePayload).eq('id', tableId)
       );
       if (!res.ok) {
-        logger.error('pool_tables.update_failed', { tableId, message: res.error.message });
+        logger.error('resources.update_failed', { tableId, message: res.error.message });
         return res;
       }
       return ok(undefined);
     },
     onSuccess: result => {
       if (result.ok) {
-        void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+        void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       }
     },
   });
 }
 
-export function useMutationDeletePoolTable() {
+export function useMutationDeleteResource() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ tableId }: { tableId: string }): Promise<Result<void>> => {
       const res = await supabaseMutation(() =>
         supabase
-          .from('pool_tables')
+          .from('resources')
           .delete()
           .eq('id', tableId)
           .eq('status', 'available')
           .is('current_session_id', null)
       );
       if (!res.ok) {
-        logger.error('pool_tables.delete_failed', { tableId, message: res.error.message });
+        logger.error('resources.delete_failed', { tableId, message: res.error.message });
         return res;
       }
       return ok(undefined);
     },
     onSuccess: result => {
       if (result.ok) {
-        void queryClient.invalidateQueries({ queryKey: poolTableKeys.all });
+        void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       }
     },
   });
@@ -731,7 +731,7 @@ export function useMutationUpdateSessionStartTime() {
     },
     onSuccess: result => {
       if (result.ok) {
-        void qc.invalidateQueries({ queryKey: poolTableKeys.all });
+        void qc.invalidateQueries({ queryKey: resourceKeys.all });
       }
     },
   });

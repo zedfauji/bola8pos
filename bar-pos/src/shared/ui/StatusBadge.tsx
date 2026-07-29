@@ -7,7 +7,7 @@
 
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
-import type { TabStatusSchema, PoolTableStatusSchema, OrderStatusSchema } from '@shared/lib/domain';
+import type { TabStatusSchema, ResourceStatusSchema, OrderStatusSchema } from '@shared/lib/domain';
 import { cn } from '@shared/lib/utils';
 import { Badge } from '@shared/ui/badge';
 
@@ -21,7 +21,7 @@ export type StatusBadgeProps = {
   /** Status value from domain types, or tab duration tier for open tabs */
   status:
     | z.infer<typeof TabStatusSchema>
-    | z.infer<typeof PoolTableStatusSchema>
+    | z.infer<typeof ResourceStatusSchema>
     | z.infer<typeof OrderStatusSchema>
     | TabOpenDurationBadgeStatus
     | InventoryStockBadgeStatus;

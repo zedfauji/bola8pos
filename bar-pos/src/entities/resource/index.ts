@@ -1,35 +1,35 @@
 export {
-  PoolTableSchema,
+  ResourceSchema,
   PoolSessionSchema,
   PoolSessionSummarySchema,
-  PoolTableTypeSchema,
-  usePoolTableStore,
+  ResourceTypeSchema,
+  useResourceStore,
   selectTableById,
   selectActiveSessionForTable,
   selectAvailableTableCount,
   selectSessionsByTabId,
-  poolTableKeys,
-  usePoolTables,
-  usePoolTable,
+  resourceKeys,
+  useResources,
+  useResource,
   useMutationStartSession,
   useMutationStopSession,
   usePoolSessionsByTab,
   useMutationLinkPoolSessionToTab,
-  useMutationReleasePoolTable,
-  useMutationAddPoolTable,
-  useMutationUpdatePoolTable,
-  useMutationDeletePoolTable,
+  useMutationReleaseResource,
+  useMutationAddResource,
+  useMutationUpdateResource,
+  useMutationDeleteResource,
   usePoolTimer,
 } from './model';
 
 export type {
-  PoolTable,
+  Resource,
   PoolSession,
   PoolTableStatus,
-  PoolTableType,
+  ResourceType,
   PoolSessionSummary,
   UsePoolTimerOptions,
 } from './model';
 
-export { PoolTableCard } from './ui/PoolTableCard';
-export type { PoolTableCardProps } from './ui/PoolTableCard';
+export { ResourceCard } from './ui/ResourceCard';
+export type { ResourceCardProps } from './ui/ResourceCard';
