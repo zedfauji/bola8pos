@@ -838,9 +838,20 @@ Plans:
 ### Phase 27: One-Shot Inventory (Cigarette-Box Pattern)
 
 **Goal:** Support "open one unit, sell individually" inventory (e.g. cigarette box opened → loose sticks) via an `open_units` table, a `consume_open_unit` SQL function, an admin Open-Units tab, and reportable lifecycle tracking.
-**Requirements:** TBD (POS-COMPARISON.md §27 — source doc no longer present; scope locked in 27-CONTEXT.md)
+**Requirements:** SC-1..SC-4 (the success criteria below are the requirement set — POS-COMPARISON.md §27 is absent from the repo; scope locked in 27-CONTEXT.md D-01..D-12)
 **Depends on:** Phase 14, Phase 17
-**Plans:** Not yet planned
+**Plans:** 8 plans
+
+Plans:
+
+- [ ] 27-01-PLAN.md — checkpoint:decision reversibility gate on the `open_units`/`products` schema shape (D-01, D-07 one-way door) (SC-1)
+- [ ] 27-02-PLAN.md — TRACER: `open_units` table + `products` linkage columns + `consume_open_unit` + `deplete_for_order_item` v5 + 6 audit actions, pushed and proven end-to-end (SC-1, SC-2, SC-4)
+- [ ] 27-03-PLAN.md — `consume_open_unit` hardening tests: last-piece race, unit-boundary crossing, zero-package block + override, refund credit-back (SC-2, SC-4)
+- [ ] 27-04-PLAN.md — lifecycle RPCs `open_open_unit` (bartender+) / `correct_open_unit` / `void_open_unit` (manager+), pushed and RBAC-proven (SC-1, SC-3, SC-4)
+- [ ] 27-05-PLAN.md — `OpenUnit*` Zod schemas + `ProductSchema` config fields + `@entities/open-unit` read/mutation hooks (SC-1, SC-3)
+- [ ] 27-06-PLAN.md — product open-unit configuration surface: entity mappers + units-per-package / parent-package fields on the product form (SC-1, SC-3)
+- [ ] 27-07-PLAN.md — three features: open (ungated, D-11), correct + void (manager PIN gated, D-12) (SC-3)
+- [ ] 27-08-PLAN.md — Open Units tab inside `/inventory` via a Tabs wrapper + human verification of the full open-and-sell-through flow (SC-3, SC-4)
 
 **Success Criteria:**
 
