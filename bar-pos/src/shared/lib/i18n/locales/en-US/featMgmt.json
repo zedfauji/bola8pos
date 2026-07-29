@@ -526,7 +526,8 @@
     "occupiedTableAria": "Table {{number}} – {{label}}: occupied",
     "occupied": "Occupied",
     "close": "Close",
-    "seatParty": "Seat party"
+    "seatParty": "Seat party",
+    "seatAtNewTable": "Seat at a new temporary table"
   },
   "editStaffRole": {
     "invalidRole": "Invalid role selected.",

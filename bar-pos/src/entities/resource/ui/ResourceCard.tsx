@@ -36,11 +36,13 @@ const TABLE_TYPE_LABEL_KEY: Record<ResourceType, string> = {
   floating: 'poolTableCard.tableType.floating',
 };
 
-const TABLE_TYPE_VARIANT: Record<ResourceType, 'default' | 'secondary' | 'outline'> = {
+const TABLE_TYPE_VARIANT: Record<ResourceType, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   pool: 'default',
   carom: 'secondary',
   consumption: 'outline',
-  floating: 'outline',
+  // Distinct from all 3 other types (not a reused variant) so a temporary
+  // table reads as visually different at a glance (D-05 marker requirement).
+  floating: 'destructive',
 };
 
 // eslint-disable-next-line i18next/no-literal-string -- object keys (table status enum values), not UI copy

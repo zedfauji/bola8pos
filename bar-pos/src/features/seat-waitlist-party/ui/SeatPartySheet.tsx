@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment,
    @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { useQuery } from '@tanstack/react-query';
-import { CheckSquare } from 'lucide-react';
+import { CheckSquare, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,17 +17,28 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@shared/ui';
-import { useSeatWaitlistParty } from '../model/useSeatWaitlistParty';
+import { useSeatAtNewTable, useSeatWaitlistParty } from '..';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Pool table data (inline query, kept local to this feature slice)
 // ────────────────────────────────────────────────────────────────────────────
+
+type PoolTableRow = {
+  id: string;
+  label: string;
+  number: number;
+  status: string;
+  rate_per_hour: number;
+  table_type: string;
+};
 
 type PoolTable = {
   id: string;
   label: string;
   number: number;
   status: string;
+  ratePerHour: number;
+  tableType: string;
 };
 
 const db = supabase as any;
@@ -41,12 +52,19 @@ function usePoolTables() {
          table/column names, not UI copy */
       const { data, error } = await db
         .from('resources')
-        .select('id, label, number, status')
+        .select('id, label, number, status, rate_per_hour, table_type')
         .order('number', { ascending: true });
       /* eslint-enable i18next/no-literal-string */
 
       if (error) throw error;
-      return (data ?? []) as PoolTable[];
+      return ((data ?? []) as PoolTableRow[]).map(row => ({
+        id: row.id,
+        label: row.label,
+        number: row.number,
+        status: row.status,
+        ratePerHour: row.rate_per_hour,
+        tableType: row.table_type,
+      }));
     },
     staleTime: 30 * 1000,
   });
@@ -75,6 +93,7 @@ export function SeatPartySheet({
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const { data: tables = [] } = usePoolTables();
   const { seatParty, isPending } = useSeatWaitlistParty();
+  const { seatAtNewTable, isPending: isSeatingNewTable } = useSeatAtNewTable();
 
   const availableTables = tables.filter((t) => t.status === 'available');
   const occupiedTables = tables.filter((t) => t.status !== 'available');
@@ -100,6 +119,19 @@ export function SeatPartySheet({
     // On error: stay open, toast shown by hook
   }
 
+  async function handleSeatAtNewTable() {
+    if (isSeatingNewTable) return;
+    const result = await seatAtNewTable({
+      entryId,
+      entryName,
+      tables: tables.map((table) => ({ number: table.number, ratePerHour: table.ratePerHour })),
+    });
+    if (result.ok) {
+      handleClose();
+    }
+    // On error: stay open, toast shown by the composed hook
+  }
+
   const guestLabel =
     partySize === 1
       ? t('seatWaitlistParty.oneGuest')
@@ -123,9 +155,26 @@ export function SeatPartySheet({
               {t('seatWaitlistParty.availableTables')}
             </p>
             {availableTables.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t('seatWaitlistParty.noTablesAvailable')}
-              </p>
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-muted-foreground">
+                  {t('seatWaitlistParty.noTablesAvailable')}
+                </p>
+                <Button
+                  type="button"
+                  size="lg"
+                  disabled={isSeatingNewTable}
+                  onClick={() => { void handleSeatAtNewTable(); }}
+                >
+                  {isSeatingNewTable ? (
+                    <LoadingSpinner size={16} className="p-0" />
+                  ) : (
+                    <>
+                      <Plus className="size-4 mr-1" aria-hidden="true" />
+                      {t('seatWaitlistParty.seatAtNewTable')}
+                    </>
+                  )}
+                </Button>
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {availableTables.map((table) => (
