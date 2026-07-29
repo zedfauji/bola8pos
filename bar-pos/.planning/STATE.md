@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
 current_phase: 26
-current_phase_name: "`is_temp`"
+current_phase_name: floating-tables-is-temp
 status: executing
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-28T23:48:11.247Z"
+last_updated: "2026-07-29T03:35:13.717Z"
 last_activity: 2026-07-28
-last_activity_desc: Phase 25 complete, transitioned to Phase 26
+last_activity_desc: Phase 26 execution started
 progress:
   total_phases: 28
   completed_phases: 22
   total_plans: 162
-  completed_plans: 158
+  completed_plans: 159
   percent: 79
 ---
 
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Phase 25 — receipt-item-grouping-2-level
+**Current focus:** Phase 26 — floating-tables-is-temp
 
 ## Current Position
 
-Phase: 26 — Floating Tables (`is_temp`)
-Plan: Not started
+Phase: 26 (floating-tables-is-temp) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-07-28 — Phase 25 complete, transitioned to Phase 26
+Last activity: 2026-07-28 — Phase 26 execution started
 
 ## Session Log
 
@@ -331,6 +331,9 @@ Last activity: 2026-07-28 — Phase 25 complete, transitioned to Phase 26
 - [Phase ?]: 36-03: tauri-build CI job added but cannot run yet — workflow dir is not repo-root .github/workflows/; relocation + release.yml Windows signing interaction routed to user in 36-04
 - [Phase ?]: Phase 36 D-03/D-09/D-12 human sign-off: npm run tauri dev opened a native window, rendered, and was interactive on Ubuntu; repeat setup-ubuntu.sh exited 0 idempotent; husky hook files have no CRLF terminators.
 - [Phase ?]: Phase 36 Task 2: option-b (backlog todos) selected for the 3 pre-existing OS-independent blockers (misplaced .github/workflows/, 2 tsc errors, inert git hooks) — captured via /gsd-capture rather than a new phase or inline fix.
+- [Phase ?]: Phase 26 Task 1: full rename scope (pool_table_status -> resource_status, pool_table_transfers -> resource_transfers) confirmed and applied in Plan 01's migration
+- [Phase ?]: Realtime publication coverage for resources was added to the rename migration pre-push (pool_tables was never a supabase_realtime member, a pre-existing gap unrelated to the rename)
+- [Phase ?]: supabase.types.ts regenerated via --linked (no local Supabase stack in this environment); migration + types + contracts shim committed together per T-26-02
 
 ## Performance Metrics
 
@@ -427,10 +430,11 @@ Last activity: 2026-07-28 — Phase 25 complete, transitioned to Phase 26
 | Phase 36 P02 | 12min | 2 tasks | 3 files |
 | Phase 36 P03 | 9min | 2 tasks | 3 files |
 | Phase 36 P04 | 5min | 2 tasks | 0 files |
+| Phase 26 P01 | 30min | 3 tasks | 3 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 26 context gathered
+- **Stopped at:** Completed 26-01-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -447,9 +451,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-28T20:27:07.249Z
+**Last session:** 2026-07-29T03:35:13.697Z
 **Stopped at:** Completed 23-04-PLAN.md
-**Resume file:** .planning/phases/26-floating-tables-is-temp/26-CONTEXT.md
+**Resume file:** None
 
 ## Operator Next Steps
 

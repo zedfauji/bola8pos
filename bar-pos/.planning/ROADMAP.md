@@ -807,12 +807,12 @@ Plans:
 **Goal:** Generalize `pool_tables` into a broader `resources` concept with a `FLOATING` type for temporary/ad-hoc tables (`is_temp`), an auto-deactivate trigger when no longer needed, and an auto-create flow from the waitlist.
 **Requirements:** TBD (POS-COMPARISON.md §26 — source doc no longer present; scope locked in 26-CONTEXT.md). Planning used the spec-less fallback: `must_haves` derive from SC-1..SC-4 below plus D-01..D-06 in 26-CONTEXT.md, which serve as this phase's de facto requirement text.
 **Depends on:** —
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 26-01-PLAN.md — DB rename to `resources` + 3 PL/pgSQL function-body recreations + BLOCKING push/type regen (Wave 1, tracer; one-way decision checkpoint) (SC-1, SC-4)
+- [x] 26-01-PLAN.md — DB rename to `resources` + 3 PL/pgSQL function-body recreations + BLOCKING push/type regen (Wave 1, tracer; one-way decision checkpoint) (SC-1, SC-4)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
