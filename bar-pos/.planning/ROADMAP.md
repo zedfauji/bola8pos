@@ -807,7 +807,7 @@ Plans:
 **Goal:** Generalize `pool_tables` into a broader `resources` concept with a `FLOATING` type for temporary/ad-hoc tables (`is_temp`), an auto-deactivate trigger when no longer needed, and an auto-create flow from the waitlist.
 **Requirements:** TBD (POS-COMPARISON.md §26 — source doc no longer present; scope locked in 26-CONTEXT.md). Planning used the spec-less fallback: `must_haves` derive from SC-1..SC-4 below plus D-01..D-06 in 26-CONTEXT.md, which serve as this phase's de facto requirement text.
 **Depends on:** —
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -824,7 +824,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 26-04-PLAN.md — waitlist "seat at new temporary table" action + floating badge + i18n + E2E (Wave 4) (SC-1, SC-3)
+- [x] 26-04-PLAN.md — waitlist "seat at new temporary table" action + floating badge + i18n + E2E (Wave 4) (SC-1, SC-3)
 
 **Success Criteria:**
 

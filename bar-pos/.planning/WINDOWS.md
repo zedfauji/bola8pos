@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 1
+open_count: 2
 waived_count: 0
 fixed_count: 0
-total_count: 1
-last_updated: 2026-07-29T04:16:30.587Z
+total_count: 2
+last_updated: 2026-07-29T06:56:28.946Z
 ---
 
 # Broken Windows Ledger
@@ -16,6 +16,7 @@ last_updated: 2026-07-29T04:16:30.587Z
 | id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 26 | unrun-verify | e2e/04-pool-timer.spec.ts |  | E2E pool-timer spec not run to a pass/fail verdict for Plan 26-02 — Playwright's managed dev server returned net::ERR_CONNECTION_REFUSED on both attempts before any page loaded (dev-server/environment issue, typecheck/lint/unit-test all green). | open |  | 2026-07-29T04:16:30.587Z |  |
+| 2 | 26 | unrun-verify | e2e/04-pool-timer.spec.ts |  | Plan 26-04 verification item 6 (npx playwright test e2e/04-pool-timer.spec.ts) and item 7 (deactivate-floating-resource.integration.test.ts) not re-run to completion — severe host filesystem/process contention during execution. Also: ~15 e2e specs (incl. this one, e2e/helpers/supabase.ts) still query .from('pool_tables'), the table Plan 01 renamed to resources — likely breaks these specs at the DB level regardless of dev-server health. | open |  | 2026-07-29T06:56:28.946Z |  |
 
 ````json
 [
@@ -29,6 +30,18 @@ last_updated: 2026-07-29T04:16:30.587Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-07-29T04:16:30.587Z",
+    "resolved_at": null
+  },
+  {
+    "id": 2,
+    "kind": "unrun-verify",
+    "phase": "26",
+    "file": "e2e/04-pool-timer.spec.ts",
+    "line": null,
+    "description": "Plan 26-04 verification item 6 (npx playwright test e2e/04-pool-timer.spec.ts) and item 7 (deactivate-floating-resource.integration.test.ts) not re-run to completion — severe host filesystem/process contention during execution. Also: ~15 e2e specs (incl. this one, e2e/helpers/supabase.ts) still query .from('pool_tables'), the table Plan 01 renamed to resources — likely breaks these specs at the DB level regardless of dev-server health.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-07-29T06:56:28.946Z",
     "resolved_at": null
   }
 ]
