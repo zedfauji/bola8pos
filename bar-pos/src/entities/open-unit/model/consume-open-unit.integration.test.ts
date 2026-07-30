@@ -36,10 +36,18 @@ const serviceKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 const skip = !url || !serviceKey || !anonKey;
 
 describe.skipIf(skip)('consume_open_unit integration (Phase 27 tracer spine)', () => {
-  // Service-role client: setup, teardown, direct table queries (bypasses RLS)
-  const db = createClient(url!, serviceKey!) as any;
+  // Service-role client: setup, teardown, direct table queries (bypasses RLS).
+  // persistSession/autoRefreshToken disabled so this client's Authorization
+  // header cannot be silently swapped to the anonClient's session (both
+  // clients share the same default GoTrueClient storage key against this
+  // project URL) — see locale-rls.integration.test.ts for the same pattern.
+  const db = createClient(url!, serviceKey!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  }) as any;
   // Authenticated client: used for the deplete_for_order_item RPC call (auth.uid())
-  const anonClient = createClient(url!, anonKey!) as any;
+  const anonClient = createClient(url!, anonKey!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  }) as any;
 
   let testUserId: string;
   let categoryId: string;
