@@ -840,12 +840,12 @@ Plans:
 **Goal:** Support "open one unit, sell individually" inventory (e.g. cigarette box opened → loose sticks) via an `open_units` table, a `consume_open_unit` SQL function, an admin Open-Units tab, and reportable lifecycle tracking.
 **Requirements:** SC-1..SC-4 (the success criteria below are the requirement set — POS-COMPARISON.md §27 is absent from the repo; scope locked in 27-CONTEXT.md D-01..D-12)
 **Depends on:** Phase 14, Phase 17
-**Plans:** 8 plans
+**Plans:** 1/8 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 27-01-PLAN.md — checkpoint:decision reversibility gate on the `open_units`/`products` schema shape (D-01, D-07 one-way door) (SC-1)
+- [x] 27-01-PLAN.md — checkpoint:decision reversibility gate on the `open_units`/`products` schema shape (D-01, D-07 one-way door) (SC-1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

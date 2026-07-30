@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
-current_phase: 26
-current_phase_name: floating-tables-is-temp
+current_phase: 27
+current_phase_name: one-shot-inventory-cigarette-box-pattern
 status: executing
 stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-29T21:47:52.314Z"
-last_activity: 2026-07-28
-last_activity_desc: Phase 26 execution started
+last_updated: "2026-07-30T03:12:16.714Z"
+last_activity: 2026-07-29
+last_activity_desc: Phase 27 execution started
 progress:
   total_phases: 28
   completed_phases: 23
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Phase 26 — floating-tables-is-temp
+**Current focus:** Phase 27 — one-shot-inventory-cigarette-box-pattern
 
 ## Current Position
 
-Phase: 26 (floating-tables-is-temp) — EXECUTING
-Plan: 4 of 4
-Status: Ready to execute
-Last activity: 2026-07-28 — Phase 26 execution started
+Phase: 27 (one-shot-inventory-cigarette-box-pattern) — EXECUTING
+Plan: 1 of 8
+Status: Executing Phase 27
+Last activity: 2026-07-29 — Phase 27 execution started
 
 ## Session Log
 
