@@ -707,11 +707,19 @@ describe.skipIf(skip)('consume_open_unit integration (Phase 27 tracer spine)', (
     const requiredActions = ['open_unit.open', 'open_unit.deplete', 'open_unit.exhaust', 'open_unit.override'];
 
     for (const action of requiredActions) {
+      // ORDER BY created_at DESC is required here: this is a shared live
+      // database that accumulates audit_logs rows across every test run ever
+      // executed against it (some 'open_unit.deplete' write-off rows have
+      // entity_id=NULL — e.g. R4's discarded-credit path above — so they can
+      // never be matched/cleaned up by any FK-based afterAll teardown).
+      // Without an explicit order, .limit(1) can nondeterministically surface
+      // an arbitrary historical row instead of one this run just created.
       const { data, error } = await db
         .from('audit_logs')
         .select('source, actor_id')
         .eq('entity_type', 'open_unit')
         .eq('action', action)
+        .order('created_at', { ascending: false })
         .limit(1);
       expect(error).toBeNull();
       expect((data as unknown[]).length).toBeGreaterThanOrEqual(1);
