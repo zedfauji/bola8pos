@@ -9,9 +9,9 @@ requires:
   - phase: 27-one-shot-inventory-cigarette-box-pattern
     provides: "27-02's live open_units/consume_open_unit/deplete_for_order_item v5 spine on the remote Supabase Cloud project"
 provides:
-  - "4 of 5 27-VALIDATION.md hardening scenarios green against the live remote schema (R1 concurrency, R2 unit-boundary crossing, R4 refund credit-back, plus the pre-existing tracer test)"
-  - "A found-and-authored (NOT YET PUSHED) migration fixing consume_open_unit's override-bypass path, which R3 proved violates inventory's pre-existing non-negative CHECK constraint"
-affects: ["27-03-completion (resume after migration push), 27-04-and-later (lifecycle RPCs building on this spine)"]
+  - "All 5 27-VALIDATION.md hardening scenarios (R1 concurrency, R2 unit-boundary crossing, R3 override floor, R4 refund credit-back) plus the SC-4 audit-coverage check green against the live remote schema"
+  - "20260730000001_consume_open_unit_fix_negative_inventory_floor.sql — fixes consume_open_unit's override-bypass path, which R3 proved violates inventory's pre-existing non-negative CHECK constraint — human-reviewed, approved, and PUSHED to the live remote project"
+affects: ["27-04-and-later (lifecycle RPCs building on this spine)"]
 
 # Tech tracking
 tech-stack:
@@ -27,13 +27,13 @@ key-files:
     - src/entities/open-unit/model/consume-open-unit.integration.test.ts
 
 key-decisions:
-  - "HALTED before pushing the new migration to the live remote Supabase Cloud project, per the same human-review precedent 27-02 established for schema/RPC-affecting changes. The fix is authored, committed, and diffed to exactly one changed line versus 20260729000003, but `npx supabase db push` has NOT been run."
   - "The fix floors the override-bypass decrement at GREATEST(quantity_on_hand - 1, 0) rather than dropping/altering the pre-existing quantity_on_hand_non_negative CHECK constraint — this keeps inventory.quantity_on_hand's non-negative invariant intact for every product in the catalog (not just BOX products) instead of loosening a shared, pre-Phase-27 constraint to accommodate one caller."
-  - "R3's fixture and assertions are unchanged from the plan text — the bug is in production code (20260729000003_consume_open_unit_rpc.sql), not in the test."
+  - "R3's fixture and assertions are unchanged from the plan text — the bug was in production code (20260729000003_consume_open_unit_rpc.sql), not in the test."
+  - "The SC-4 audit-coverage test's own query was the true cause of its intermittent failures, not the RPCs: `.limit(1)` with no `ORDER BY` on a shared live database that accumulates audit_logs rows across every test run ever executed (some open_unit.deplete write-off rows carry entity_id=NULL and can never be matched/cleaned by FK-based teardown) could nondeterministically surface an arbitrary historical row. Fixed by adding `.order('created_at', { ascending: false })`; verified stable across 4 repeated runs. Confirmed via diagnostic instrumentation that every production-created audit row already carries a correct actor_id in every observed case — this was purely a test-query bug."
 
 patterns-established: []
 
-requirements-completed: []  # SC-2/SC-4 partially proven (R1/R2/R4 + tracer test green); R3 and the audit-coverage test remain red pending the migration push — see Next Phase Readiness
+requirements-completed: [SC-2, SC-4]  # R1-R4 + audit-coverage all green against the live schema
 
 coverage:
   - id: D1
@@ -58,30 +58,32 @@ coverage:
         status: pass
     human_judgment: false
   - id: D4
-    description: "R3 (exhaustion with zero packages + the D-05 p_allow_negative override) and the downstream SC-4 audit-coverage test, both blocked on a live migration push the human must approve first"
+    description: "R3 (exhaustion with zero packages + the D-05 p_allow_negative override) and the downstream SC-4 audit-coverage test, both green after the migration below was human-reviewed, approved, and pushed"
     verification:
       - kind: integration
-        ref: "src/entities/open-unit/model/consume-open-unit.integration.test.ts#R3: exhaustion with zero packages rejects the sale — currently red (Postgres 23514, quantity_on_hand_non_negative) pending the migration below"
-        status: fail
-    human_judgment: true
-    rationale: "The fix requires pushing a CREATE OR REPLACE FUNCTION migration to the live remote Supabase Cloud project — a schema/RPC-affecting action that, per 27-02's established precedent and this plan's own explicit instructions, needs human review before push, not an automated check."
+        ref: "src/entities/open-unit/model/consume-open-unit.integration.test.ts#R3 + Audit coverage — 6/6 passed, stable across 4 repeated runs post-fix"
+        status: pass
+      - kind: other
+        ref: "npm run test (full local unit suite, post-push) — 145/147 files, 1331/1346 tests passed on a clean run; one unrelated pre-existing flaky test (queries.clock.test.ts) observed intermittently, confirmed via isolated re-run to pass on its own — not caused by this plan"
+        status: pass
+    human_judgment: false
 
 # Metrics
-duration: ~55min (test authoring, live-environment setup, root-cause diagnosis of the R3 failure, migration authoring)
+duration: ~55min (test authoring, live-environment setup, root-cause diagnosis) + ~30min (human review, live push, audit-coverage flakiness root-cause, verification)
 completed: 2026-07-30
-status: blocked
+status: complete
 ---
 
-# Phase 27 Plan 03: Concurrency/Boundary/Refund Hardening — HALTED AT CHECKPOINT
+# Phase 27 Plan 03: Concurrency/Boundary/Refund Hardening Summary
 
-**4 of 5 27-VALIDATION.md hardening scenarios (concurrency race, unit-boundary crossing, refund credit-back, plus the original tracer test) are green against the live remote schema; the 5th (D-05 override) found a genuine pre-existing bug in `consume_open_unit` — its override-bypass path violates `inventory`'s non-negative CHECK constraint — and a one-line fix is authored but not yet pushed, pending human review.**
+**All 5 27-VALIDATION.md hardening scenarios (concurrency race, unit-boundary crossing, override floor, refund credit-back) plus the SC-4 audit-coverage check are green against the live remote schema. R3 found a genuine pre-existing bug in `consume_open_unit`'s override-bypass path (violates `inventory`'s non-negative CHECK constraint); a one-line fix was human-reviewed, approved, and pushed. The audit-coverage test's own intermittent failures were separately root-caused to a missing `ORDER BY` on a shared, ever-accumulating live database — fixed in the test, not the RPC.**
 
 ## Performance
 
-- **Duration:** ~55 min (test authoring for all 5 scenarios + audit coverage, live-environment setup in this worktree, root-cause diagnosis, migration authoring and structural verification)
-- **Completed:** N/A — halted at checkpoint, not plan-complete
-- **Tasks:** 1 of 1 (Task 1) — 4/6 test cases in the file green, 2 red pending a live migration push
-- **Files modified:** 2 (1 test file extended, 1 new migration authored)
+- **Duration:** ~55 min (test authoring for all 5 scenarios + audit coverage, live-environment setup, root-cause diagnosis, migration authoring) + ~30 min (human review, live push, second root-cause on the audit-coverage flakiness, full verification)
+- **Completed:** 2026-07-30
+- **Tasks:** 1 of 1 complete — 6/6 test cases green
+- **Files modified:** 2 (1 test file extended and later fixed again, 1 new migration authored and pushed)
 
 ## Accomplishments
 
@@ -93,19 +95,22 @@ status: blocked
 - Authored (but did NOT push) `20260730000001_consume_open_unit_fix_negative_inventory_floor.sql`: `CREATE OR REPLACE FUNCTION consume_open_unit` with the decrement floored via `GREATEST(quantity_on_hand - 1, 0)`. Verified via `diff` against `20260729000003` that exactly one behavioral line changed (plus updated comments); re-verified the structural gates (3x `FOR UPDATE`, zero legacy `INSERT INTO audit_log` calls) still hold.
 - Set up a working test environment in this parallel worktree (it had neither `node_modules` nor `.env.local` by default): copied `.env.local` from the sibling checkout (same Supabase Cloud project, same dev credentials already in use elsewhere in this repo) and pointed `node_modules` at the sibling checkout's install via a symlink after a direct `npm ci` repeatedly stalled under this session's severe host memory/swap pressure (see Issues Encountered).
 - Ran `npm run lint` and `npx tsc --noEmit` clean on the extended test file after fixing two test-authoring mistakes (see Deviations).
-- Full test-file run: **4 passed, 2 failed** (`sells one loose piece...` tracer test, R1, R2, R4 green; R3 and the SC-4 audit-coverage test red, both traced to the single migration bug above, not to test logic).
+- Initial test-file run: **4 passed, 2 failed** (`sells one loose piece...` tracer test, R1, R2, R4 green; R3 and the SC-4 audit-coverage test red, both traced to the single migration bug above).
+- **After human review and approval:** pushed `20260730000001_consume_open_unit_fix_negative_inventory_floor.sql` to the live remote Supabase Cloud project (`npx supabase db push --yes`), confirmed via `npx supabase migration list` (LOCAL+REMOTE both show the new timestamp). Re-ran the test file: R3 passed, but the audit-coverage test still failed intermittently — root-caused (via targeted diagnostic instrumentation, not guesswork) to the test's own `.limit(1)` query having no `ORDER BY` on a shared live database that accumulates `audit_logs` rows across every run ever executed against it. Every actual RPC call already writes a correct `actor_id` — confirmed by inspecting the full row set for each action. Fixed by adding `.order('created_at', { ascending: false })`; verified stable (6/6 passing) across 4 repeated runs.
+- Full regression: `npm run test` — 145/147 files, 1331/1346 tests passed on a clean run. One unrelated pre-existing flaky test (`queries.clock.test.ts`) appeared intermittently across repeated full-suite runs but passes reliably in isolation — same pattern already observed and documented in this phase's Wave 1/2 gates, not caused by this plan.
 
 ## Task Commits
 
 1. **Task 1 (part 1/2): hardening test scenarios R1-R4 + audit coverage** - `f7a8d74` (test)
-2. **Task 1 (part 2/2): migration fix, authored/committed, NOT pushed** - `ed9c965` (fix)
+2. **Task 1 (part 2/2): migration fix, authored, human-reviewed, and pushed** - `ed9c965` (fix)
+3. **Task 1 (fix): order audit-coverage query to avoid nondeterministic stale-row selection** - `9039d68` (fix)
 
 **Plan metadata:** this SUMMARY.md commit (pending)
 
 ## Files Created/Modified
 
-- `src/entities/open-unit/model/consume-open-unit.integration.test.ts` - extended with Scenarios R1-R4 and the SC-4 audit-coverage check; also fixed two test-only mistakes discovered while running it live (see Deviations)
-- `supabase/migrations/20260730000001_consume_open_unit_fix_negative_inventory_floor.sql` - `CREATE OR REPLACE FUNCTION consume_open_unit` floors the override-bypass inventory decrement at 0; authored and committed, **not yet pushed to the live remote project**
+- `src/entities/open-unit/model/consume-open-unit.integration.test.ts` - extended with Scenarios R1-R4 and the SC-4 audit-coverage check; fixed two test-only mistakes discovered while running it live, plus a third (the audit-coverage query's missing `ORDER BY`) discovered after the migration push
+- `supabase/migrations/20260730000001_consume_open_unit_fix_negative_inventory_floor.sql` - `CREATE OR REPLACE FUNCTION consume_open_unit` floors the override-bypass inventory decrement at 0; authored, human-reviewed, approved, and **pushed to the live remote project**
 
 ## Decisions Made
 
@@ -132,43 +137,50 @@ status: blocked
 - **Files created:** `supabase/migrations/20260730000001_consume_open_unit_fix_negative_inventory_floor.sql`
 - **Commit:** `ed9c965`
 
+**3. [Rule 1 - Bug, found post-push] Fixed nondeterministic row selection in the SC-4 audit-coverage query**
+- **Found during:** re-running the full test file after the migration push — the audit-coverage test failed intermittently (sometimes on `open_unit.open`, sometimes `open_unit.exhaust`) even though R3 itself now passed.
+- **Issue:** `.from('audit_logs')...limit(1)` with no `ORDER BY` on a shared live database that accumulates rows across every test run ever executed. Rows with `entity_id=NULL` (e.g. R4's discarded-credit write-off) can never be matched/cleaned by any FK-based `afterAll` teardown, so stale historical rows persist indefinitely and `.limit(1)` can nondeterministically surface one of them instead of a row from the current run.
+- **Diagnosis method:** added temporary diagnostic instrumentation (dumped full matching row sets per action), confirmed every row actually created by real RPC calls carries a valid `actor_id` in every observed case — ruling out a production bug — then confirmed the nondeterminism reproduces even with the original unmodified query (3/3 fails), isolating it to row-selection order.
+- **Fix:** added `.order('created_at', { ascending: false })` before `.limit(1)`. Verified stable (6/6 passing) across 4 repeated full-file runs.
+- **Files modified:** `src/entities/open-unit/model/consume-open-unit.integration.test.ts`
+- **Commit:** `9039d68`
+
 No other Rule 1-4 auto-fixes were needed.
 
 ---
 
-**Total deviations:** 2 (1 Rule 1 auto-fixed test bug; 1 Rule 4 architectural fix authored but halted for human review before push)
-**Impact on plan:** The Rule 1 fix was necessary for the test itself to assert correctly and is fully resolved. The Rule 4 finding blocks 2 of 6 test cases (R3, and the SC-4 audit-coverage test that depends on R3 having produced an `open_unit.override` audit row) until the migration is reviewed and pushed.
+**Total deviations:** 3 (1 Rule 1 auto-fixed test bug found pre-push; 1 Rule 4 architectural fix — human-reviewed, approved, and pushed; 1 Rule 1 test-query bug found and fixed post-push)
+**Impact on plan:** All three are now resolved. The plan's full 6/6 test suite passes reliably.
 
 ## Issues Encountered
 
 - **This parallel worktree had neither `node_modules` nor `.env.local`.** A fresh `npm ci` stalled twice under this session's severe host memory/swap pressure (observed: ~21-22GiB of 29GiB RAM in use, 6.5-6.6GiB of 8GiB swap in use, `npm ci`'s Node process sitting in `ep_poll` with frozen `/proc/<pid>/io` counters and zero CPU time consumed for 10+ minutes on both attempts, independent of `UV_USE_IO_URING`). Resolved by copying `.env.local` from the sibling checkout (same Supabase Cloud project/credentials already used elsewhere in this repo) and symlinking `node_modules` to the sibling checkout's install after confirming both checkouts' `package-lock.json` files are byte-identical. This is an environment-setup workaround local to this worktree, not a code change.
-- See "Deviations from Plan" above for the two findings (one resolved, one halted for review).
+- **This worktree's local `supabase/migrations/` was briefly out of sync with the remote after a sibling plan (27-04) pushed its own migration first.** `supabase db push` correctly refused rather than guessing (`Remote migration versions not found in local migrations directory`). Resolved by merging the orchestrator's `main` (which by then included 27-04's merged migration file) into this worktree branch before retrying the push — not by following the CLI's suggested `migration repair --status reverted` (which would have falsely marked a legitimately-applied migration as reverted).
+- See "Deviations from Plan" above for all three findings, all now resolved.
 
 ## User Setup Required
 
-**A database migration requires human review before this plan can complete.** Before resuming:
-
-1. Review `supabase/migrations/20260730000001_consume_open_unit_fix_negative_inventory_floor.sql` — the diff against the already-live `20260729000003_consume_open_unit_rpc.sql` is exactly one behavioral line (`quantity_on_hand - 1` to `GREATEST(quantity_on_hand - 1, 0)`), verified via `diff`.
-2. If approved, push it to the live remote Supabase Cloud project: `npx supabase db push --yes` (requires the CLI to be linked in whichever checkout runs it — `npx supabase link --project-ref shsrhxleopmovzpzqmex` if not already linked, per 27-02's precedent).
-3. Re-run `npx vitest run --reporter=dot src/entities/open-unit/model/consume-open-unit.integration.test.ts` and confirm all 6 tests pass (currently 4/6).
-4. Re-run `npm run test` for the full regression suite.
+None remaining. The migration was reviewed and approved by the human operator, then pushed.
 
 ## Next Phase Readiness
 
-Not ready — this plan is halted at a checkpoint, not complete. Once the migration above is reviewed, pushed, and the full test file is confirmed green (6/6), this plan's Task 1 `<verify>`/`<acceptance_criteria>` will be satisfied and a final SUMMARY.md revision should replace this one, matching 27-02's own two-stage (halt-then-finalize) pattern.
+Ready. All 6 test cases pass against the live remote schema; the full regression suite is clean modulo one pre-existing, unrelated flaky test already documented in this phase's earlier waves.
 
 ---
 
 ## Self-Check: PASSED
 
-- `supabase/migrations/20260730000001_consume_open_unit_fix_negative_inventory_floor.sql` — FOUND
-- `src/entities/open-unit/model/consume-open-unit.integration.test.ts` — FOUND (extended)
+- `supabase/migrations/20260730000001_consume_open_unit_fix_negative_inventory_floor.sql` — FOUND, pushed to remote — CONFIRMED
+- `src/entities/open-unit/model/consume-open-unit.integration.test.ts` — FOUND (extended, then fixed again)
 - Commit `f7a8d74` — FOUND in `git log --oneline`
 - Commit `ed9c965` — FOUND in `git log --oneline`
-- `npx vitest run --reporter=verbose src/entities/open-unit/model/consume-open-unit.integration.test.ts` — 4 passed, 2 failed (R3, audit-coverage) — CONFIRMED, both failures traced to the single migration bug documented above
+- Commit `9039d68` — FOUND in `git log --oneline`
+- `npx supabase migration list` — `20260730000001` present in LOCAL and REMOTE — CONFIRMED
+- `npx vitest run --reporter=dot src/entities/open-unit/model/consume-open-unit.integration.test.ts` — 6/6 passed, stable across 4 repeated runs — CONFIRMED
+- `npm run test` (full unit suite, post-push) — 145/147 files, 1331/1346 tests passed on a clean run — CONFIRMED (one unrelated pre-existing flaky test noted above, not caused by this plan)
 - `npm run lint` on the extended test file — clean — CONFIRMED
 - `npx tsc --noEmit` — clean — CONFIRMED
 
 ---
 *Phase: 27-one-shot-inventory-cigarette-box-pattern*
-*Completed: N/A — halted at checkpoint*
+*Completed: 2026-07-30*
