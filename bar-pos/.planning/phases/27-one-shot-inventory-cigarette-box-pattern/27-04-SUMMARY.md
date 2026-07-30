@@ -2,7 +2,7 @@
 phase: 27-one-shot-inventory-cigarette-box-pattern
 plan: 04
 subsystem: database
-status: "checkpoint"
+status: "complete"
 tags: [supabase, postgres, rpc, row-locking, audit-log, open-units, rbac]
 
 # Dependency graph
@@ -10,8 +10,8 @@ requires:
   - phase: 27-one-shot-inventory-cigarette-box-pattern
     provides: "27-02's live open_units table, products.units_per_package/parent_product_id, consume_open_unit RPC, deplete_for_order_item v5 (all already pushed to the remote Supabase Cloud project)"
 provides:
-  - "supabase/migrations/20260729000005_open_unit_lifecycle_rpcs.sql — open_open_unit (bartender+), correct_open_unit / void_open_unit (manager+) — AUTHORED and COMMITTED, NOT YET PUSHED to the live remote project"
-  - "src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts — AUTHORED and COMMITTED, NOT YET RUN (requires the migration above to be pushed first)"
+  - "supabase/migrations/20260729000005_open_unit_lifecycle_rpcs.sql — open_open_unit (bartender+), correct_open_unit / void_open_unit (manager+) — AUTHORED, COMMITTED, and PUSHED to the live remote Supabase Cloud project (human-reviewed and approved before push)"
+  - "src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts — AUTHORED, COMMITTED, and RUN against the live schema — 8/8 passed"
 affects: ["27-07-and-27-08 (the admin Open-Units tab UI that will call these three RPCs)"]
 
 # Tech tracking
@@ -51,25 +51,30 @@ coverage:
     human_judgment: false
   - id: D2
     description: "open-unit-lifecycle.integration.test.ts authored, covering the open path, D-07/D-08 duplicate rejection, D-12/T-27-09 escalation rejection, D-10 correction with audit trail, correction validation, D-10 void, freed-index re-open, and voided-row-never-resurrected"
-    verification: []
-    human_judgment: true
-    rationale: "This test has NOT been executed — it requires migration 20260729000005 to be pushed to the live remote Supabase project first, and this plan deliberately halts before that push per the human operator's established review-before-push preference (same discipline as 27-02's checkpoint). A human must review the migration SQL, approve the push, and then a follow-up session runs this test against the live schema before SC-1/SC-3/SC-4 can be marked verified."
+    verification:
+      - kind: integration
+        ref: "npx vitest run --reporter=dot src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts (against live remote schema, post-push) — 8/8 passed"
+        status: pass
+      - kind: other
+        ref: "npm run test (full local unit suite, post-push) — 145/147 files, 1331/1346 tests passed on a clean run; two unrelated pre-existing flaky tests observed intermittently across repeated runs (queries.clock.test.ts, groupOrderItemsForReceipt.test.ts — both fail/pass nondeterministically across runs even with no phase-27 changes present, confirmed by isolated re-runs). Not caused by this plan; out of scope to fix here."
+        status: pass
+    human_judgment: false
 
 # Metrics
-duration: ~45min (Task 1 authoring + verification; Task 2 test authoring, deliberately not executed)
+duration: ~45min (Task 1 authoring + verification) + ~15min (human review + live push + verification)
 completed: 2026-07-30
-status: checkpoint
+status: complete
 ---
 
 # Phase 27 Plan 04: Open-Unit Lifecycle RPCs (open/correct/void) Summary
 
-**The three manual lifecycle RPCs the admin Open-Units tab will drive — `open_open_unit` (bartender+, D-11), `correct_open_unit` and `void_open_unit` (manager+, D-12) — are authored, committed, and pass every structural verification gate, plus a full integration test proving their RBAC split, D-08 rejection wording, and audit wiring is authored and committed; NEITHER has been run against the live remote database — this plan halts at a checkpoint for human review of the migration SQL before any push, per the established phase-27 discipline.**
+**The three manual lifecycle RPCs the admin Open-Units tab will drive — `open_open_unit` (bartender+, D-11), `correct_open_unit` and `void_open_unit` (manager+, D-12) — are authored, committed, human-reviewed, and pushed to the live remote Supabase Cloud project. The integration test proving their RBAC split, D-08 rejection wording, and audit wiring is authored, committed, and passes 8/8 against the live schema.**
 
 ## Performance
 
-- **Duration:** ~45 min
+- **Duration:** ~45 min (authoring) + ~15 min (review/push/verify)
 - **Completed:** 2026-07-30
-- **Tasks:** 1 of 2 complete (Task 1 fully done and verified; Task 2's test file is authored/committed but its live-push-and-run half is deliberately deferred to the checkpoint below)
+- **Tasks:** 2 of 2 complete
 - **Files modified:** 2 new files (1 migration, 1 integration test)
 
 ## Accomplishments
@@ -131,21 +136,26 @@ None beyond the two deviations documented above.
 
 ## User Setup Required
 
-**Live push and integration-test execution are deferred to a human-reviewed checkpoint — see below.** No other external service configuration is required; this plan reuses the same pre-linked Supabase CLI session and environment variables established in plan 27-02.
+None. This plan reused the same pre-linked Supabase CLI session and environment variables established in plan 27-02 (the worktree's own project link had to be re-established via `npx supabase link --project-ref shsrhxleopmovzpzqmex` — per-checkout state, not committed to git — before the push could run).
 
 ## Next Phase Readiness
 
-Not yet ready to hand off to 27-07/27-08 (the Open-Units tab UI) — those plans call these three RPCs as their write API, so the migration must be live on the remote project first. Once the human operator reviews and approves the migration SQL below and it is pushed (`npx supabase db push --yes` from `bar-pos/`), a follow-up session should: (1) confirm `npx supabase migration list` shows `20260729000005` in both LOCAL and REMOTE, (2) run `npx vitest run --reporter=dot src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts` and confirm all 8 tests pass, and (3) re-run `npm run test` to confirm no regressions — mirroring exactly how 27-02's equivalent checkpoint was resolved.
+Ready to hand off to 27-07/27-08 (the Open-Units tab UI) — `open_open_unit`, `correct_open_unit`, and `void_open_unit` are live on the remote project and covered by a passing integration test.
 
 ---
 
-## CHECKPOINT: Human review required before live push
+## Live Push and Verification (human-reviewed, approved 2026-07-30)
 
-**No migration has been pushed to the remote Supabase Cloud project. No integration test has been executed against it.** Per the hard constraint governing this plan's execution, both are deliberately withheld pending human review of the SQL below.
+The migration below was reviewed by the human operator and explicitly approved before any live action was taken.
 
-### What to review
+1. `npx supabase link --project-ref shsrhxleopmovzpzqmex` (worktree link re-established) then `npx supabase db push --yes` — applied cleanly.
+2. `npx supabase migration list` — `20260729000005` confirmed present in both LOCAL and REMOTE columns.
+3. `npx vitest run --reporter=dot src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts` — **8/8 passed**.
+4. `npm run test` (full local unit suite) — clean run: 145/147 files, 1331/1346 tests passed. Repeated runs surfaced two unrelated, pre-existing flaky tests (`queries.clock.test.ts`, `groupOrderItemsForReceipt.test.ts`) that fail/pass nondeterministically with no phase-27 files in their call path — confirmed via isolated re-runs and multiple full-suite repeats. Not a regression from this plan.
 
-The full contents of `supabase/migrations/20260729000005_open_unit_lifecycle_rpcs.sql` (three `SECURITY DEFINER` functions: `open_open_unit`, `correct_open_unit`, `void_open_unit`) — reproduced here in full for review without needing to open the repo:
+### Migration pushed
+
+The full contents of `supabase/migrations/20260729000005_open_unit_lifecycle_rpcs.sql` (three `SECURITY DEFINER` functions: `open_open_unit`, `correct_open_unit`, `void_open_unit`) — reproduced here for reference:
 
 ```sql
 -- =============================================================================
@@ -409,30 +419,20 @@ COMMIT;
 -- =============================================================================
 ```
 
-### How to verify (once approved)
-
-1. From `bar-pos/`, run `npx supabase db push --yes`.
-2. Confirm with `npx supabase migration list` that `20260729000005` appears in both LOCAL and REMOTE.
-3. Run `npx vitest run --reporter=dot src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts` and confirm all 8 tests pass.
-4. Re-run `npm run test` to confirm no regressions in the broader unit suite.
-
-### Awaiting
-
-Human review and explicit approval to proceed with the live push, exactly as was done for plan 27-02's equivalent checkpoint (resolved at commit `b4e7153` → `6961c4f` in that plan's history).
-
 ---
 
 ## Self-Check: PASSED
 
-- `supabase/migrations/20260729000005_open_unit_lifecycle_rpcs.sql` — FOUND
-- `src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts` — FOUND
+- `supabase/migrations/20260729000005_open_unit_lifecycle_rpcs.sql` — FOUND, pushed to remote — CONFIRMED
+- `src/entities/open-unit/model/open-unit-lifecycle.integration.test.ts` — FOUND, 8/8 passed against live schema — CONFIRMED
 - Commit `9513cf9` — FOUND in `git log --oneline`
 - Commit `55371b3` — FOUND in `git log --oneline`
+- `npx supabase migration list` — `20260729000005` present in LOCAL and REMOTE — CONFIRMED
 - `npx vitest run --project unit --reporter=dot src/shared/lib/__tests__/audit-actions.test.ts` — 13/13 passed — CONFIRMED
 - `npm run typecheck` — clean — CONFIRMED
 - `npm run lint` — clean — CONFIRMED
-- `npm run test` (project unit, excludes all `*.integration.test.ts`) — 145 files passed, 2 skipped, 1331 tests passed, 15 todo, 0 failed — CONFIRMED
+- `npm run test` (full unit suite, post-push) — 145/147 files, 1331/1346 tests passed on a clean run — CONFIRMED (two unrelated pre-existing flaky tests noted above, not caused by this plan)
 
 ---
 *Phase: 27-one-shot-inventory-cigarette-box-pattern*
-*Completed: 2026-07-30 (checkpoint — awaiting human review before live push)*
+*Completed: 2026-07-30*
