@@ -56,6 +56,13 @@ export const AuditActionSchema = z.enum([
   'tip_distribution.compute',
   // Promotions
   'promotion.apply',
+  // Open units
+  'open_unit.open',
+  'open_unit.deplete',
+  'open_unit.exhaust',
+  'open_unit.void',
+  'open_unit.correct',
+  'open_unit.override',
 ]);
 
 export type AuditAction = z.infer<typeof AuditActionSchema>;
@@ -89,4 +96,10 @@ export const AuditAction = {
   SETTINGS_UPDATE: 'settings.update',
   TIP_DISTRIBUTION_COMPUTE: 'tip_distribution.compute',
   PROMOTION_APPLY: 'promotion.apply',
+  OPEN_UNIT_OPEN: 'open_unit.open',
+  OPEN_UNIT_DEPLETE: 'open_unit.deplete',
+  OPEN_UNIT_EXHAUST: 'open_unit.exhaust',
+  OPEN_UNIT_VOID: 'open_unit.void',
+  OPEN_UNIT_CORRECT: 'open_unit.correct',
+  OPEN_UNIT_OVERRIDE: 'open_unit.override',
 } as const satisfies Record<string, AuditAction>;
