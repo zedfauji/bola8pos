@@ -840,7 +840,7 @@ Plans:
 **Goal:** Support "open one unit, sell individually" inventory (e.g. cigarette box opened → loose sticks) via an `open_units` table, a `consume_open_unit` SQL function, an admin Open-Units tab, and reportable lifecycle tracking.
 **Requirements:** SC-1..SC-4 (the success criteria below are the requirement set — POS-COMPARISON.md §27 is absent from the repo; scope locked in 27-CONTEXT.md D-01..D-12)
 **Depends on:** Phase 14, Phase 17
-**Plans:** 2/8 plans executed
+**Plans:** 4/8 plans executed
 
 Plans:
 **Wave 1**
@@ -853,8 +853,8 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 27-03-PLAN.md — `consume_open_unit` hardening tests: last-piece race, unit-boundary crossing, zero-package block + override, refund credit-back (SC-2, SC-4)
-- [ ] 27-04-PLAN.md — lifecycle RPCs `open_open_unit` (bartender+) / `correct_open_unit` / `void_open_unit` (manager+), pushed and RBAC-proven (SC-1, SC-3, SC-4)
+- [x] 27-03-PLAN.md — `consume_open_unit` hardening tests: last-piece race, unit-boundary crossing, zero-package block + override, refund credit-back (SC-2, SC-4)
+- [x] 27-04-PLAN.md — lifecycle RPCs `open_open_unit` (bartender+) / `correct_open_unit` / `void_open_unit` (manager+), pushed and RBAC-proven (SC-1, SC-3, SC-4)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
