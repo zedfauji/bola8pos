@@ -196,6 +196,8 @@ export function generateMockProduct(overrides?: Partial<Product>): Product {
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    unitsPerPackage: null,
+    parentProductId: null,
     modifiers: [],
     ...overrides,
     categoryId,
@@ -420,6 +422,8 @@ function productCorona(): Product {
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    unitsPerPackage: null,
+    parentProductId: null,
     modifiers: [],
     category: beerCategory(),
   });
@@ -436,6 +440,8 @@ function productTitos(): Product {
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    unitsPerPackage: null,
+    parentProductId: null,
     modifiers: [],
     category: spiritsCategory(),
   });
@@ -452,6 +458,8 @@ function productLime(): Product {
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    unitsPerPackage: null,
+    parentProductId: null,
     modifiers: [],
     category: mixersCategory(),
   });
@@ -468,6 +476,8 @@ function productGuinness(): Product {
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    unitsPerPackage: null,
+    parentProductId: null,
     modifiers: [],
     category: beerCategory(),
   });

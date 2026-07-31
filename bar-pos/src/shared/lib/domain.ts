@@ -257,6 +257,10 @@ export const ProductSchema = z.object({
   imageUrl: UrlSchema.nullable(),
   stock_threshold: z.number().nullable(),
   barcode: z.string().nullable().optional(),
+  /** Phase 27 D-02: set on the BOX (parent) product — pieces per package. Null = not open-unit-configured. */
+  unitsPerPackage: z.number().int().positive().nullable(),
+  /** Phase 27 D-01: set on the LOOSE (child) product — links it to its parent BOX product. */
+  parentProductId: UuidSchema.nullable(),
   /** True when this product can be used as a component in a combo product */
   comboEligible: z.boolean().optional().default(true),
   /** True when this product IS a combo (composed of other products) */
@@ -721,6 +725,38 @@ export const InventoryLogUpdateSchema = InventoryLogSchema.partial().required({ 
 export type InventoryLog = z.infer<typeof InventoryLogSchema>;
 export type InventoryLogCreate = z.infer<typeof InventoryLogCreateSchema>;
 export type InventoryLogUpdate = z.infer<typeof InventoryLogUpdateSchema>;
+
+// ============================================================================
+// OPEN UNITS (Phase 27 — cigarette-box pattern)
+// ============================================================================
+
+export const OpenUnitStatusSchema = z.enum(['active', 'exhausted', 'void']);
+export type OpenUnitStatus = z.infer<typeof OpenUnitStatusSchema>;
+
+export const OpenUnitSchema = z.object({
+  id: UuidSchema,
+  productId: UuidSchema,
+  remainingCount: z.number().int().nonnegative(),
+  status: OpenUnitStatusSchema,
+  openedBy: UuidSchema.nullable(),
+  openedAt: TimestampSchema,
+  closedBy: UuidSchema.nullable(),
+  closedAt: TimestampSchema.nullable(),
+  closedReason: z.string().nullable(),
+  createdAt: TimestampSchema,
+  updatedAt: TimestampSchema,
+  product: ProductSchema.optional(),
+});
+
+export type OpenUnit = z.infer<typeof OpenUnitSchema>;
+
+export const OpenUnitCorrectionSchema = z.object({
+  openUnitId: UuidSchema,
+  remainingCount: z.number().int().nonnegative(),
+  reason: z.string().trim().min(1),
+});
+
+export type OpenUnitCorrection = z.infer<typeof OpenUnitCorrectionSchema>;
 
 // ============================================================================
 // STOCK MOVEMENT (ledger table replacing inventory_log)
@@ -1346,6 +1382,10 @@ export const domain = {
     InventoryLogCreate: InventoryLogCreateSchema,
     InventoryLogUpdate: InventoryLogUpdateSchema,
 
+    OpenUnitStatus: OpenUnitStatusSchema,
+    OpenUnit: OpenUnitSchema,
+    OpenUnitCorrection: OpenUnitCorrectionSchema,
+
     StockMovement: StockMovementSchema,
     StockMovementCreate: StockMovementCreateSchema,
 
@@ -1467,6 +1507,10 @@ export const domain = {
     InventoryLogCreate: InventoryLogCreate;
     InventoryLogUpdate: InventoryLogUpdate;
 
+    OpenUnitStatus: OpenUnitStatus;
+    OpenUnit: OpenUnit;
+    OpenUnitCorrection: OpenUnitCorrection;
+
     StockMovement: StockMovement;
     StockMovementCreate: StockMovementCreate;
 
@@ -1535,6 +1579,8 @@ export const domain = {
       isActive: true,
       imageUrl: null,
       stock_threshold: null,
+      unitsPerPackage: null,
+      parentProductId: null,
       comboEligible: true,
       isCombo: false,
       modifiers: [],
@@ -1551,6 +1597,8 @@ export const domain = {
         isActive: true,
         imageUrl: null,
         stock_threshold: null,
+        unitsPerPackage: null,
+        parentProductId: null,
         comboEligible: true,
         isCombo: false,
         modifiers: [],

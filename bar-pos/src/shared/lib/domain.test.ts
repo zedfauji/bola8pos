@@ -126,6 +126,8 @@ describe('ProductSchema', () => {
     isActive: true,
     imageUrl: null,
     stock_threshold: null,
+    unitsPerPackage: null,
+    parentProductId: null,
     comboEligible: true,
     isCombo: false,
     modifiers: [],
@@ -151,6 +153,8 @@ describe('ProductSchema', () => {
       isActive: baseValid.isActive,
       imageUrl: baseValid.imageUrl,
       stock_threshold: baseValid.stock_threshold,
+      unitsPerPackage: baseValid.unitsPerPackage,
+      parentProductId: baseValid.parentProductId,
       isCombo: baseValid.isCombo,
       modifiers: baseValid.modifiers,
     };
@@ -172,6 +176,8 @@ describe('ProductSchema', () => {
       isActive: baseValid.isActive,
       imageUrl: baseValid.imageUrl,
       stock_threshold: baseValid.stock_threshold,
+      unitsPerPackage: baseValid.unitsPerPackage,
+      parentProductId: baseValid.parentProductId,
       comboEligible: baseValid.comboEligible,
       modifiers: baseValid.modifiers,
     };

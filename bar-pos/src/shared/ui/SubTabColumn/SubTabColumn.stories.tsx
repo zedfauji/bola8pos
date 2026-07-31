@@ -40,6 +40,8 @@ function mockItem(id: string, name: string, priceCents: number): OrderItem {
       isActive: true,
       imageUrl: null,
       stock_threshold: null,
+      unitsPerPackage: null,
+      parentProductId: null,
       comboEligible: true,
       isCombo: false,
       modifiers: [],

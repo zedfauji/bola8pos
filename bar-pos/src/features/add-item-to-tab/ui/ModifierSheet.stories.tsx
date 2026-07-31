@@ -34,6 +34,8 @@ const mockProduct: Product = {
   isActive: true,
   sku: 'COCKTAIL-MARG',
   stock_threshold: null,
+  unitsPerPackage: null,
+  parentProductId: null,
   comboEligible: true,
   isCombo: false,
   modifiers: [

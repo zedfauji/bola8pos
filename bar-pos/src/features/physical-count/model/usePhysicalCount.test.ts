@@ -61,6 +61,8 @@ function makeInventoryItem(
       isActive: true,
       imageUrl: null,
       stock_threshold: null,
+      unitsPerPackage: null,
+      parentProductId: null,
       comboEligible: true,
       isCombo: false,
       modifiers: [],

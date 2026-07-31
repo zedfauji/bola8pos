@@ -11,6 +11,8 @@ const baseProduct = {
   isActive: true,
   imageUrl: null,
   stock_threshold: null,
+  unitsPerPackage: null,
+  parentProductId: null,
 };
 
 describe('ProductSchema stock_threshold field', () => {
