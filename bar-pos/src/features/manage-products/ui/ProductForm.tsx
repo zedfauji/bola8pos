@@ -1,4 +1,4 @@
-import { useMemo, useState, type SyntheticEvent } from 'react';
+import { useEffect, useMemo, useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import type { Category, Modifier, Product } from '@shared/lib/domain';
@@ -63,6 +63,27 @@ export function ProductForm({
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // `categoryId`'s initializer above only runs once, at mount — if the
+  // dialog opens before the parent's `useCategories()` query has resolved
+  // (`categories` is still `[]` on that first render), categoryId is
+  // permanently stuck at `''` for the rest of this mount, since nothing
+  // else ever re-evaluates that default. Submitting then fails
+  // ProductCreateSchema's UUID check with no visible field error rendered
+  // anywhere a user would look (the Category select just silently shows the
+  // "No categories" placeholder for a moment, then a real category, while
+  // categoryId itself was never updated to match). Backfill once categories
+  // arrive, but only while still unset — never override an explicit choice.
+  useEffect(() => {
+    const firstCategoryId = categories[0]?.id;
+    if (categoryId === '' && firstCategoryId != null) {
+      // Syncing internal state from an async prop that can arrive after
+      // mount — same sanctioned pattern as shared/ui/MoneyInput.tsx's own
+      // display-value sync.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCategoryId(firstCategoryId);
+    }
+  }, [categories, categoryId]);
+
   const sortedModifiers = useMemo(
     () => [...modifiers].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name)),
     [modifiers]
@@ -112,6 +133,16 @@ export function ProductForm({
     // happyHourPrice is always null — happy-hour pricing is now managed in
     // Settings → Promotions (D-01); this vestigial nullable Zod field must
     // still be present in the parsed payload.
+    //
+    // stock_threshold has no input in this form (it's set via a separate
+    // low-stock-alert flow, not exposed here) but ProductSchema requires the
+    // key present (nullable, not optional) — omitting it entirely fails
+    // ProductCreateSchema.safeParse with a silent, invisible "expected
+    // number, received undefined" field error on a key this form has no
+    // control for, so every "Create product" submission was failing with no
+    // visible feedback. Preserve the existing value on edit; default to null
+    // (not tracked) on create, matching the low-stock-report query's own
+    // treatment of null as "not configured".
     if (initialProduct != null) {
       const parsed = ProductUpdateSchema.safeParse({
         id: initialProduct.id,
@@ -125,6 +156,7 @@ export function ProductForm({
         barcode: barcodeVal,
         unitsPerPackage,
         parentProductId,
+        stock_threshold: initialProduct.stock_threshold ?? null,
       });
       if (!parsed.success) {
         const flat = z.flattenError(parsed.error);
@@ -154,6 +186,7 @@ export function ProductForm({
       barcode: barcodeVal,
       unitsPerPackage,
       parentProductId,
+      stock_threshold: null,
     });
     if (!parsed.success) {
       const flat = z.flattenError(parsed.error);
@@ -173,7 +206,17 @@ export function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex max-h-[min(70vh,560px)] flex-col gap-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex max-h-[min(70vh,560px)] flex-col gap-4 overflow-y-auto"
+    >
+      {/* Phase 27 (27-08 fixup): the units-per-package/parent-product fields pushed
+          this form past its own max-height with no way to reach the submit button —
+          DialogContent is `position: fixed` with no scroll container of its own
+          (shared/ui/dialog.tsx), and this form had `max-height` without `overflow`,
+          which doesn't clip/scroll, just lets content visually spill past the fixed
+          dialog's bounds. `overflow-y-auto` makes the form itself the scroll region
+          so Save/Create stays reachable regardless of viewport height. */}
       {fieldErrors._form ? <p className="text-sm text-destructive">{fieldErrors._form}</p> : null}
 
       <FormField label={t('manageProducts.productForm.nameLabel')} required error={fieldErrors.name ?? ''}>
