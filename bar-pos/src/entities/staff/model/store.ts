@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Staff, Shift } from '@shared/lib/domain';
-import i18n from '@shared/lib/i18n';
+import i18n, { i18nReady } from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 /* eslint-disable i18next/no-literal-string -- zustand persist store name below
@@ -20,7 +20,7 @@ interface StaffState {
    * before this flag is true (e.g. ProtectedRoute) sees the pre-hydration
    * default (false) on every fresh page load and can redirect away before the
    * real persisted value is ever applied. Not persisted — reset to false on
-   * every load, flips true once by `onRehydrateStorage` below.
+   * every load, flips true once by `applyHydratedState` below.
    */
   hasHydrated: boolean;
   /**
@@ -74,7 +74,11 @@ export const useStaffStore = create<StaffStore>()(
         // D-01/D-02: locale is staff-attribute-driven, never navigator.language —
         // prevents one staff member's language leaking onto the next shift's
         // login on the same shared kiosk terminal.
-        void i18n.changeLanguage(staff.locale);
+        // Await i18nReady first — i18next.init() is async even with every
+        // resource provided synchronously (no backend); a changeLanguage()
+        // call issued before init's own `lng` assignment settles is silently
+        // overwritten once init resolves (see i18nReady's doc comment).
+        void i18nReady.then(() => i18n.changeLanguage(staff.locale));
       },
 
       logout: () => {
@@ -114,14 +118,53 @@ export const useStaffStore = create<StaffStore>()(
         isAuthenticated: state.isAuthenticated,
         // managerGrantedActions intentionally NOT persisted — session-only
       }),
-      onRehydrateStorage: () => state => {
-        useStaffStore.setState({ hasHydrated: true });
-        // Reloaded page / restored session: re-apply the persisted staff's
-        // locale (D-01) rather than defaulting to navigator.language.
-        if (state?.currentStaff) {
-          void i18n.changeLanguage(state.currentStaff.locale);
-        }
-      },
+      // No onRehydrateStorage here — see the onFinishHydration registration
+      // below, right after `useStaffStore` is assigned, for why.
     }
   )
 );
+
+// Registered as a separate statement AFTER `useStaffStore` exists (not via
+// the `persist()` config's `onRehydrateStorage` option) — that option's
+// callback runs asynchronously via zustand's own promise chain, but on a
+// microtask tick that can fire before this module's top-level
+// `export const useStaffStore = ...` binding has finished initializing.
+// Referencing `useStaffStore` from inside an `onRehydrateStorage` callback
+// then throws `ReferenceError: Cannot access 'useStaffStore' before
+// initialization` (TDZ), which zustand's persist middleware silently
+// swallows in its own internal `.catch()` — permanently stranding
+// `hasHydrated` at `false` and skipping every line after the throw,
+// including the locale-restoring `i18n.changeLanguage()` call below. That
+// silent failure is why a staff member's non-default (en-US) locale never
+// survived a page reload: this exact code, unmodified in behavior, worked
+// for es-MX only because es-MX already matched i18next's own `lng` default,
+// masking the bug. `onFinishHydration` fires from the identical internal
+// hydration-complete step, but is registered here — after `useStaffStore`'s
+// binding is fully live — so no TDZ reference is possible.
+function applyHydratedState(state: StaffStore): void {
+  useStaffStore.setState({ hasHydrated: true });
+  // Reloaded page / restored session: re-apply the persisted staff's locale
+  // (D-01) rather than defaulting to navigator.language. Await i18nReady
+  // first — i18next.init() is async even with every resource provided
+  // synchronously (no backend); a changeLanguage() call issued before
+  // init's own `lng` assignment settles is silently overwritten once init
+  // resolves.
+  const staffLocale = state.currentStaff?.locale;
+  if (staffLocale) {
+    void i18nReady.then(() => i18n.changeLanguage(staffLocale));
+  }
+}
+
+// zustand's persist middleware calls `hydrate()` synchronously during
+// `create()` above, but its completion (the point where
+// `finishHydrationListeners` fires) can resolve before this module's own
+// top-level execution reaches the `onFinishHydration` registration below —
+// observed empirically via `persist.hasHydrated()` already reading `true`
+// immediately after store creation. Registering unconditionally would then
+// silently miss the one-and-only hydration-finished event. Check first;
+// apply directly if hydration already finished, otherwise register.
+if (useStaffStore.persist.hasHydrated()) {
+  applyHydratedState(useStaffStore.getState());
+} else {
+  useStaffStore.persist.onFinishHydration(applyHydratedState);
+}

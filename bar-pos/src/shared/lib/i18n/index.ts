@@ -28,7 +28,16 @@ import esWPanels from './locales/es-MX/wPanels.json';
 // - i18next-http-backend (no CDN/server; resources ship in the signed binary)
 // - i18next-browser-languagedetector (locale is staff-driven via profiles.locale, not navigator-driven)
 
-void i18n.use(initReactI18next).init({
+// Exported so callers that need to call `i18n.changeLanguage()` immediately
+// on module load (staff-store login/rehydrate — see entities/staff/model/store.ts)
+// can await init settling first. `i18next.init()` is asynchronous even with
+// every resource provided synchronously here (no backend) — a
+// `changeLanguage()` call issued before init's own internal `lng` assignment
+// resolves is silently overwritten once init completes, reverting the
+// language back to the `lng` default below. This bit only the non-default
+// (en-US) locale, since a changeLanguage('es-MX') call racing against an
+// init default of 'es-MX' produces the same (correct) result either way.
+export const i18nReady: Promise<unknown> = i18n.use(initReactI18next).init({
   resources: {
     'es-MX': {
       common: esCommon,
