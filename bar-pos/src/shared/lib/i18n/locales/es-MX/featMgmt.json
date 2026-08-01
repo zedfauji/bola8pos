@@ -290,7 +290,13 @@
       "modifiersLabel": "Modifiers",
       "noModifiersDefined": "No modifiers defined.",
       "saveProduct": "Save product",
-      "createProduct": "Create product"
+      "createProduct": "Create product",
+      "unitsPerPackageLabel": "Piezas por paquete",
+      "unitsPerPackageHint": "Completa este campo para que el producto se pueda abrir y vender por pieza suelta.",
+      "unitsPerPackageMinError": "Debe ser al menos 1",
+      "parentProductLabel": "Paquete vinculado",
+      "parentProductHint": "Vincula este producto como la pieza suelta de un paquete ya configurado.",
+      "noParentProduct": "No es una pieza suelta"
     }
   },
   "managePromotions": {

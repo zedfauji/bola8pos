@@ -343,6 +343,7 @@ export function CatalogProductsTab() {
           <ProductForm
             categories={catList}
             modifiers={modList}
+            products={products ?? []}
             submitting={createMutation.isPending}
             onCancel={() => {
               setCreateOpen(false);
@@ -387,6 +388,7 @@ export function CatalogProductsTab() {
                   key={editProduct.id}
                   categories={catList}
                   modifiers={modList}
+                  products={products ?? []}
                   initialProduct={editProduct}
                   submitting={updateMutation.isPending}
                   onCancel={() => {

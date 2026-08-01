@@ -290,7 +290,13 @@
       "modifiersLabel": "Modifiers",
       "noModifiersDefined": "No modifiers defined.",
       "saveProduct": "Save product",
-      "createProduct": "Create product"
+      "createProduct": "Create product",
+      "unitsPerPackageLabel": "Units per package",
+      "unitsPerPackageHint": "Fill this in to make the product openable and sellable as loose pieces.",
+      "unitsPerPackageMinError": "Must be at least 1",
+      "parentProductLabel": "Linked package product",
+      "parentProductHint": "Link this product as the loose piece of an already-configured package product.",
+      "noParentProduct": "Not a loose piece"
     }
   },
   "managePromotions": {

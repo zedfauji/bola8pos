@@ -15,6 +15,8 @@ const ModifierIdsSchema = z.array(UuidSchema);
 export type ProductFormProps = {
   categories: Category[];
   modifiers: Modifier[];
+  /** All catalog products — used to populate the parent-package selector. */
+  products: Product[];
   /** When set, form is in edit mode */
   initialProduct?: Product | null;
   submitting?: boolean;
@@ -30,6 +32,7 @@ export type ProductFormProps = {
 export function ProductForm({
   categories,
   modifiers,
+  products,
   initialProduct,
   submitting = false,
   onSubmitCreate,
@@ -46,6 +49,12 @@ export function ProductForm({
   const [basePrice, setBasePrice] = useState(initialProduct?.basePrice ?? 0);
   const [sku, setSku] = useState(initialProduct?.sku ?? '');
   const [barcode, setBarcode] = useState(initialProduct?.barcode ?? '');
+  const [unitsPerPackageInput, setUnitsPerPackageInput] = useState(
+    initialProduct?.unitsPerPackage != null ? String(initialProduct.unitsPerPackage) : ''
+  );
+  const [parentProductIdInput, setParentProductIdInput] = useState(
+    initialProduct?.parentProductId ?? ''
+  );
   const [isActive, setIsActive] = useState(initialProduct?.isActive ?? true);
   const [imageUrl, setImageUrl] = useState(initialProduct?.imageUrl ?? '');
   const [modifierIds, setModifierIds] = useState<string[]>(
@@ -57,6 +66,16 @@ export function ProductForm({
   const sortedModifiers = useMemo(
     () => [...modifiers].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name)),
     [modifiers]
+  );
+
+  // Only a configured package product (units-per-package set) is a legal
+  // parent, and a product can never be its own parent (D-01/T-27-18).
+  const parentPackageOptions = useMemo(
+    () =>
+      products
+        .filter(p => p.unitsPerPackage != null && p.id !== initialProduct?.id)
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [products, initialProduct?.id]
   );
 
   function toggleModifier(id: string) {
@@ -76,6 +95,19 @@ export function ProductForm({
     const skuVal = sku.trim() === '' ? null : sku.trim();
     const imageVal = imageUrl.trim() === '' ? null : imageUrl.trim();
     const barcodeVal = barcode.trim() === '' ? null : barcode.trim();
+    const parentProductId = parentProductIdInput === '' ? null : parentProductIdInput;
+
+    let unitsPerPackage: number | null = null;
+    if (unitsPerPackageInput.trim() !== '') {
+      const parsedUnits = Number.parseInt(unitsPerPackageInput.trim(), 10);
+      if (!Number.isFinite(parsedUnits) || parsedUnits < 1) {
+        setFieldErrors({
+          unitsPerPackage: t('manageProducts.productForm.unitsPerPackageMinError'),
+        });
+        return;
+      }
+      unitsPerPackage = parsedUnits;
+    }
 
     // happyHourPrice is always null — happy-hour pricing is now managed in
     // Settings → Promotions (D-01); this vestigial nullable Zod field must
@@ -91,6 +123,8 @@ export function ProductForm({
         isActive,
         imageUrl: imageVal,
         barcode: barcodeVal,
+        unitsPerPackage,
+        parentProductId,
       });
       if (!parsed.success) {
         const flat = z.flattenError(parsed.error);
@@ -118,6 +152,8 @@ export function ProductForm({
       isActive,
       imageUrl: imageVal,
       barcode: barcodeVal,
+      unitsPerPackage,
+      parentProductId,
     });
     if (!parsed.success) {
       const flat = z.flattenError(parsed.error);
@@ -199,6 +235,45 @@ export function ProductForm({
           }}
           disabled={submitting}
         />
+      </FormField>
+
+      <FormField
+        label={t('manageProducts.productForm.unitsPerPackageLabel')}
+        hint={t('manageProducts.productForm.unitsPerPackageHint')}
+        error={fieldErrors.unitsPerPackage ?? ''}
+      >
+        <Input
+          type="number"
+          min={1}
+          step={1}
+          value={unitsPerPackageInput}
+          onChange={e => {
+            setUnitsPerPackageInput(e.target.value);
+          }}
+          disabled={submitting}
+        />
+      </FormField>
+
+      <FormField
+        label={t('manageProducts.productForm.parentProductLabel')}
+        hint={t('manageProducts.productForm.parentProductHint')}
+        error={fieldErrors.parentProductId ?? ''}
+      >
+        <select
+          className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm"
+          value={parentProductIdInput}
+          onChange={e => {
+            setParentProductIdInput(e.target.value);
+          }}
+          disabled={submitting}
+        >
+          <option value="">{t('manageProducts.productForm.noParentProduct')}</option>
+          {parentPackageOptions.map(p => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
       </FormField>
 
       <FormField label={t('manageProducts.productForm.imageUrlLabel')} error={fieldErrors.imageUrl ?? ''}>
