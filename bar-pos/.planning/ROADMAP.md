@@ -46,7 +46,7 @@ Phases 14-28 derived from `.planning/comparison/POS-COMPARISON.md` v2 cross-poll
 - [x] **Phase 24: Operational Reports Suite + CSV** — 6 new RPCs (peak-hours, voids, deletions×2, modifier popularity, payment methods, charts-data) + generic CSV export action + Recharts widgets *(depends Phase 14)* (completed 2026-07-22)
 - [x] **Phase 25: Receipt Item Grouping (2-Level)** — Extend `receipt-format.ts` + Tauri Rust printer payload + PDF + KDS card all share `groupOrderItemsForReceipt` (completed 2026-07-28)
 - [ ] **Phase 26: Floating Tables (`is_temp`)** — Generalize pool_tables → `resources` w/ FLOATING type + auto-deactivate trigger + waitlist auto-create flow
-- [ ] **Phase 27: One-Shot Inventory (Cigarette-Box Pattern)** — `open_units` table + `consume_open_unit` SQL fn + admin Open-Units tab + reportable lifecycle *(depends Phases 14, 17)*
+- [x] **Phase 27: One-Shot Inventory (Cigarette-Box Pattern)** — `open_units` table + `consume_open_unit` SQL fn + admin Open-Units tab + reportable lifecycle *(depends Phases 14, 17)* (completed 2026-08-01)
 - [ ] **Phase 28: Money Formatter Utility** — Single `shared/lib/format.ts` (formatMoney/parseMoneyInput/formatPercent) backed by `Intl.NumberFormat` + codemod + ESLint rule `no-raw-money-format` *(depends Phase 21)*
 
 **Suggested execution order** (respecting deps; foundations first):
@@ -840,7 +840,7 @@ Plans:
 **Goal:** Support "open one unit, sell individually" inventory (e.g. cigarette box opened → loose sticks) via an `open_units` table, a `consume_open_unit` SQL function, an admin Open-Units tab, and reportable lifecycle tracking.
 **Requirements:** SC-1..SC-4 (the success criteria below are the requirement set — POS-COMPARISON.md §27 is absent from the repo; scope locked in 27-CONTEXT.md D-01..D-12)
 **Depends on:** Phase 14, Phase 17
-**Plans:** 8/8 plans executed
+**Plans:** 8/8 plans complete
 
 Plans:
 **Wave 1**
