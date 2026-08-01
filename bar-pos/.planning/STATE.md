@@ -4,17 +4,17 @@ milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
 current_phase: 27
 current_phase_name: one-shot-inventory-cigarette-box-pattern
-status: executing
+status: verifying
 stopped_at: Completed 27-06-PLAN.md
-last_updated: "2026-08-01T05:17:00.577Z"
+last_updated: "2026-08-01T10:02:17.042Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 27 Plan 06 complete (product-admin open-unit fields)
 progress:
   total_phases: 28
-  completed_phases: 23
+  completed_phases: 24
   total_plans: 170
-  completed_plans: 169
-  percent: 82
+  completed_plans: 170
+  percent: 86
 ---
 
 # Session State
@@ -50,7 +50,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 
 Phase: 27 (one-shot-inventory-cigarette-box-pattern) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-01 — Phase 27 Plan 06 complete (product-admin open-unit fields)
 
 ## Session Log
@@ -342,6 +342,7 @@ Last activity: 2026-08-01 — Phase 27 Plan 06 complete (product-admin open-unit
 - [Phase ?]: 26-03: integration tests mixing a service-role client with a signed-in anon client in this repo's jsdom-based integration vitest project must set persistSession:false/autoRefreshToken:false on the service-role client to avoid silent RLS leakage via shared localStorage GoTrue state.
 - [Phase ?]: 27-06: useMutationCreateProduct's insertRow writes unitsPerPackage/parentProductId unconditionally (not undefined-guarded like the update mapper) since ProductCreate types both as required-but-nullable, not optional
 - [Phase ?]: 27-07: correct/void open-unit dialogs gate dispatch behind ManagerPinDialog requiredAction=adjust_inventory (D-12, per 27-RESEARCH.md Pitfall 4), not CartPanel's void_order precedent.
+- [Phase ?]: 27-08 Task 3: human authorized substituting a real automated Playwright spec (e2e/49-open-units.spec.ts) for the manual checkpoint; found and fixed 5 genuine pre-existing bugs along the way (i18n locale-persistence-on-reload, broken product-creation flow, whole-Stock-tab inventory failure, and a never-worked manager-PIN negative-stock override) — all client-side fixes, zero database/RPC schema changes
 
 ## Performance Metrics
 
@@ -444,10 +445,11 @@ Last activity: 2026-08-01 — Phase 27 Plan 06 complete (product-admin open-unit
 | Phase 26 P04 | ~2h40min | 3 tasks | 8 files |
 | Phase 27 P06 | 35min | 2 tasks | 5 files |
 | Phase 27 P07 | ~40min | 2 tasks | 12 files |
+| Phase 27 P08 | ~5h | 1 tasks | 7 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 27-07-PLAN.md
+- **Stopped at:** Completed 27-08-PLAN.md (Task 3 resolved via automated E2E substitution)
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -465,7 +467,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-08-01T05:17:00.562Z
+**Last session:** 2026-08-01T10:02:17.026Z
 **Stopped at:** Completed 27-06-PLAN.md
 **Resume file:** None
 
