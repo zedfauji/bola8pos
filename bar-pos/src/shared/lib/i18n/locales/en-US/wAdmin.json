@@ -452,5 +452,19 @@
     "exampleBreakdown": "Floor ${{floor}} / Bar ${{bar}} / Kitchen ${{kitchen}}",
     "saving": "Saving...",
     "saveTipSplit": "Save Tip Split"
+  },
+  "openUnitsTab": {
+    "title": "Open Units",
+    "description": "Packages currently open and being sold piece by piece.",
+    "columnProduct": "Product",
+    "columnRemaining": "Remaining",
+    "columnOpenedBy": "Opened by",
+    "columnOpenedAt": "Opened at",
+    "columnActions": "Actions",
+    "emptyState": "No active open units.",
+    "openNewUnitLabel": "Open a new unit",
+    "selectProductPlaceholder": "Select a product…",
+    "correctAction": "Correct count",
+    "voidAction": "Void"
   }
 }

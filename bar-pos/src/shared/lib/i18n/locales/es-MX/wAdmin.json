@@ -452,5 +452,19 @@
     "exampleBreakdown": "Floor ${{floor}} / Bar ${{bar}} / Kitchen ${{kitchen}}",
     "saving": "Saving...",
     "saveTipSplit": "Save Tip Split"
+  },
+  "openUnitsTab": {
+    "title": "Unidades abiertas",
+    "description": "Paquetes abiertos actualmente en venta pieza por pieza.",
+    "columnProduct": "Producto",
+    "columnRemaining": "Restante",
+    "columnOpenedBy": "Abierto por",
+    "columnOpenedAt": "Abierto el",
+    "columnActions": "Acciones",
+    "emptyState": "No hay unidades abiertas activas.",
+    "openNewUnitLabel": "Abrir una nueva unidad",
+    "selectProductPlaceholder": "Selecciona un producto…",
+    "correctAction": "Corregir conteo",
+    "voidAction": "Anular"
   }
 }
