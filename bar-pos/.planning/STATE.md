@@ -5,15 +5,15 @@ milestone_name: Cross-Pollination from billar-pos
 current_phase: 27
 current_phase_name: one-shot-inventory-cigarette-box-pattern
 status: executing
-stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-07-30T03:12:16.714Z"
-last_activity: 2026-07-29
-last_activity_desc: Phase 27 execution started
+stopped_at: Completed 27-06-PLAN.md
+last_updated: "2026-08-01T04:59:10.684Z"
+last_activity: 2026-08-01
+last_activity_desc: Phase 27 Plan 06 complete (product-admin open-unit fields)
 progress:
   total_phases: 28
   completed_phases: 23
   total_plans: 170
-  completed_plans: 162
+  completed_plans: 168
   percent: 82
 ---
 
@@ -49,9 +49,9 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 27 (one-shot-inventory-cigarette-box-pattern) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 27
-Last activity: 2026-07-29 — Phase 27 execution started
+Plan: 7 of 8
+Status: Ready to execute
+Last activity: 2026-08-01 — Phase 27 Plan 06 complete (product-admin open-unit fields)
 
 ## Session Log
 
@@ -340,6 +340,7 @@ Last activity: 2026-07-29 — Phase 27 execution started
 - [Phase ?]: 26-03: resolved live table_type CHECK constraint name (pool_tables_table_type_check, unchanged by Plan 01's rename) before writing the DROP, per plan instruction rather than guessing.
 - [Phase ?]: 26-03: useMutationAddResource.isTemp typed boolean | undefined (mandatory key, no ?) per exactOptionalPropertyTypes convention; both existing Add Table callers updated to pass isTemp: undefined explicitly.
 - [Phase ?]: 26-03: integration tests mixing a service-role client with a signed-in anon client in this repo's jsdom-based integration vitest project must set persistSession:false/autoRefreshToken:false on the service-role client to avoid silent RLS leakage via shared localStorage GoTrue state.
+- [Phase ?]: 27-06: useMutationCreateProduct's insertRow writes unitsPerPackage/parentProductId unconditionally (not undefined-guarded like the update mapper) since ProductCreate types both as required-but-nullable, not optional
 
 ## Performance Metrics
 
@@ -440,10 +441,11 @@ Last activity: 2026-07-29 — Phase 27 execution started
 | Phase 26 P02 | 40min | 2 tasks | 51 files |
 | Phase 26 P03 | 55min | 3 tasks | 16 files |
 | Phase 26 P04 | ~2h40min | 3 tasks | 8 files |
+| Phase 27 P06 | 35min | 2 tasks | 5 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 27 context gathered
+- **Stopped at:** Completed 27-06-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -461,9 +463,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-07-29T19:06:59.888Z
-**Stopped at:** Completed 23-04-PLAN.md
-**Resume file:** .planning/phases/27-one-shot-inventory-cigarette-box-pattern/27-CONTEXT.md
+**Last session:** 2026-08-01T04:59:10.667Z
+**Stopped at:** Completed 27-06-PLAN.md
+**Resume file:** None
 
 ## Operator Next Steps
 

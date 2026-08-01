@@ -840,7 +840,7 @@ Plans:
 **Goal:** Support "open one unit, sell individually" inventory (e.g. cigarette box opened → loose sticks) via an `open_units` table, a `consume_open_unit` SQL function, an admin Open-Units tab, and reportable lifecycle tracking.
 **Requirements:** SC-1..SC-4 (the success criteria below are the requirement set — POS-COMPARISON.md §27 is absent from the repo; scope locked in 27-CONTEXT.md D-01..D-12)
 **Depends on:** Phase 14, Phase 17
-**Plans:** 5/8 plans executed
+**Plans:** 6/8 plans executed
 
 Plans:
 **Wave 1**
@@ -862,7 +862,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 27-06-PLAN.md — product open-unit configuration surface: entity mappers + units-per-package / parent-package fields on the product form (SC-1, SC-3)
+- [x] 27-06-PLAN.md — product open-unit configuration surface: entity mappers + units-per-package / parent-package fields on the product form (SC-1, SC-3)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
