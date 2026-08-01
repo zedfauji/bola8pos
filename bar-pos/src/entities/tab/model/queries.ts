@@ -97,6 +97,9 @@ function mapProductRow(
   if (p == null) return undefined;
   try {
     const catEmbed = 'category' in p ? p.category : null;
+    // Pre-type-regen workaround (CLAUDE.md): units_per_package /
+    // parent_product_id aren't in supabase.types.ts yet.
+    const pRaw = p as unknown as Record<string, unknown>;
     return ProductSchema.parse({
       id: p.id,
       name: p.name,
@@ -109,6 +112,12 @@ function mapProductRow(
       isActive: p.is_active,
       imageUrl: p.image_url,
       stock_threshold: p.stock_threshold ?? null,
+      // Phase 27: ProductSchema requires these two keys present (nullable,
+      // not optional) — omitting them made ANY order item whose product had
+      // this field pattern silently drop its `product` (caught, returns
+      // undefined) instead of throwing loudly.
+      unitsPerPackage: (pRaw['units_per_package'] as number | null | undefined) ?? null,
+      parentProductId: (pRaw['parent_product_id'] as string | null | undefined) ?? null,
       modifiers: [],
       ...(catEmbed
         ? {

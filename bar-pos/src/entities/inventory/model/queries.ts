@@ -43,6 +43,11 @@ function mapInventoryRow(row: InventoryRow): Result<Inventory> {
   try {
     let product: Product | undefined;
     if (row.product) {
+      // Pre-type-regen workaround (CLAUDE.md): units_per_package /
+      // parent_product_id aren't in supabase.types.ts yet, so `Tables<'products'>`
+      // (ProductJoined's base) doesn't declare them even though the `products(*)`
+      // select above returns them at runtime.
+      const productRaw = row.product as unknown as Record<string, unknown>;
       const cat =
         row.product.category != null
           ? CategorySchema.parse({
@@ -69,6 +74,14 @@ function mapInventoryRow(row: InventoryRow): Result<Inventory> {
         isActive: row.product.is_active,
         imageUrl: row.product.image_url,
         stock_threshold: row.product.stock_threshold ?? null,
+        // Phase 27: ProductSchema requires these two keys present (nullable,
+        // not optional) — omitting them entirely (as this call site did
+        // before) makes `undefined` fail `.nullable()` validation, which
+        // throws inside mapInventoryRow's try/catch and poisons the WHOLE
+        // /inventory list (useInventory() bails out on the first row that
+        // fails to parse), not just rows for open-unit-configured products.
+        unitsPerPackage: (productRaw['units_per_package'] as number | null | undefined) ?? null,
+        parentProductId: (productRaw['parent_product_id'] as string | null | undefined) ?? null,
         modifiers: [],
         category: cat,
       });
