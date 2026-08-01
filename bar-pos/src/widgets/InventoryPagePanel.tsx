@@ -18,6 +18,8 @@ import { SectionHeader } from '@shared/ui/SectionHeader';
 import { Badge } from '@shared/ui/badge';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { OpenUnitsTab } from './OpenUnitsTab';
 
 function stockSortPriority(inv: Inventory): number {
   if (inv.quantityOnHand === 0) return 2;
@@ -200,201 +202,218 @@ export function InventoryPagePanel() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8">
-      {resultError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {resultError.message}
-        </p>
-      ) : null}
+    <Tabs defaultValue="stock" className="w-full">
+      <TabsList className="mb-4">
+        <TabsTrigger value="stock">{t('inventoryPagePanel.stockTabLabel')}</TabsTrigger>
+        <TabsTrigger value="open-units">{t('inventoryPagePanel.openUnitsTabLabel')}</TabsTrigger>
+      </TabsList>
+      <TabsContent value="stock">
+        <div className="mx-auto max-w-6xl space-y-8">
+          {resultError ? (
+            <p className="text-sm text-destructive" role="alert">
+              {resultError.message}
+            </p>
+          ) : null}
 
-      {!staffId ? (
-        <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100">
-          {t('inventoryPagePanel.signInBanner')}
-        </p>
-      ) : null}
+          {!staffId ? (
+            <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100">
+              {t('inventoryPagePanel.signInBanner')}
+            </p>
+          ) : null}
 
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="rounded-lg border bg-card px-4 py-3 text-center">
-          <div className="text-xs text-muted-foreground">{t('inventoryPagePanel.totalSkus')}</div>
-          <div className="text-2xl font-semibold tabular-nums">{stats.totalSkus}</div>
-        </div>
-        <div className="rounded-lg border bg-card px-4 py-3 text-center">
-          <div className="text-xs text-muted-foreground">{t('inventoryPagePanel.lowStock')}</div>
-          <Badge variant="destructive" className="mt-1 text-base tabular-nums">
-            {stats.lowStock}
-          </Badge>
-        </div>
-        <div className="rounded-lg border bg-card px-4 py-3 text-center">
-          <div className="text-xs text-muted-foreground">{t('inventoryPagePanel.outOfStock')}</div>
-          <Badge variant="destructive" className="mt-1 text-base tabular-nums">
-            {stats.outOfStock}
-          </Badge>
-        </div>
-        <div className="ml-auto flex flex-wrap gap-2">
-          <ProtectedAction action="adjust_inventory" currentRole={currentRole}>
-            <POSButton
-              type="button"
-              touchSize="large"
-              variant="secondary"
-              onClick={() => {
-                setBatchOpen(true);
-              }}
-            >
-              {t('inventoryPagePanel.adjust')}
-            </POSButton>
-          </ProtectedAction>
-          <ProtectedAction action="adjust_inventory" currentRole={currentRole}>
-            <POSButton
-              type="button"
-              touchSize="large"
-              variant="outline"
-              disabled={displayedRows.length === 0}
-              onClick={handleExportCsv}
-            >
-              {t('inventoryPagePanel.exportCsv')}
-            </POSButton>
-          </ProtectedAction>
-        </div>
-      </div>
-
-      <section>
-        <SectionHeader
-          title={t('inventoryPagePanel.onHandLevelsTitle')}
-          description={t('inventoryPagePanel.onHandLevelsDescription')}
-        />
-        <DataTable<Inventory>
-          columns={columns}
-          data={displayedRows}
-          isLoading={isLoading}
-          enableSorting
-          toolbar={toolbar}
-          getRowClassName={rowHighlightClass}
-          emptyState={
-            isEmpty ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                {t('inventoryPagePanel.noInventoryRecords')}
-              </p>
-            ) : (data?.length ?? 0) > 0 && displayedRows.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                {t('inventoryPagePanel.noRowsForCategory')}
-              </p>
-            ) : undefined
-          }
-        />
-      </section>
-
-      <section>
-        <SectionHeader
-          title={t('inventoryPagePanel.changeLogTitle')}
-          description={t('inventoryPagePanel.changeLogDescription')}
-        />
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('inventoryPagePanel.columnWhen')}</TableHead>
-                <TableHead>{t('inventoryPagePanel.columnProductId')}</TableHead>
-                <TableHead>{t('inventoryPagePanel.columnDelta')}</TableHead>
-                <TableHead>{t('inventoryPagePanel.columnReason')}</TableHead>
-                <TableHead>{t('inventoryPagePanel.columnStaffId')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logsLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
-                    {t('inventoryPagePanel.loading')}
-                  </TableCell>
-                </TableRow>
-              ) : !logs?.length ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
-                    {t('inventoryPagePanel.noLogEntries')}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                logs.map(log => (
-                  <TableRow key={log.id}>
-                    <TableCell className="whitespace-nowrap text-sm">
-                      {log.createdAt.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">{log.productId}</TableCell>
-                    <TableCell className="tabular-nums">{log.quantityDelta}</TableCell>
-                    <TableCell>{log.reason}</TableCell>
-                    <TableCell className="font-mono text-xs">{log.staffId}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
-
-      <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t('inventoryPagePanel.batchAdjustmentTitle')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <label htmlFor="batch-product" className="text-sm font-medium">
-                {t('inventoryPagePanel.productLabel')}
-              </label>
-              <select
-                id="batch-product"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                value={batchProductId}
-                onChange={e => {
-                  setBatchProductId(e.target.value);
-                }}
-              >
-                <option value="">{t('inventoryPagePanel.selectPlaceholder')}</option>
-                {(data ?? []).map(inv => (
-                  <option key={inv.productId} value={inv.productId}>
-                    {inv.product?.name ?? inv.productId}
-                  </option>
-                ))}
-              </select>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="rounded-lg border bg-card px-4 py-3 text-center">
+              <div className="text-xs text-muted-foreground">
+                {t('inventoryPagePanel.totalSkus')}
+              </div>
+              <div className="text-2xl font-semibold tabular-nums">{stats.totalSkus}</div>
             </div>
-            <FormField
-              label={t('inventoryPagePanel.quantityDeltaLabel')}
-              hint={t('inventoryPagePanel.quantityDeltaHint')}
-            >
-              {/* eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-06: signed-delta input, MoneyInput would clamp negatives */}
-              <input
-                type="number"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                value={batchDelta}
-                onChange={e => {
-                  setBatchDelta(e.target.value);
-                }}
-              />
-            </FormField>
+            <div className="rounded-lg border bg-card px-4 py-3 text-center">
+              <div className="text-xs text-muted-foreground">
+                {t('inventoryPagePanel.lowStock')}
+              </div>
+              <Badge variant="destructive" className="mt-1 text-base tabular-nums">
+                {stats.lowStock}
+              </Badge>
+            </div>
+            <div className="rounded-lg border bg-card px-4 py-3 text-center">
+              <div className="text-xs text-muted-foreground">
+                {t('inventoryPagePanel.outOfStock')}
+              </div>
+              <Badge variant="destructive" className="mt-1 text-base tabular-nums">
+                {stats.outOfStock}
+              </Badge>
+            </div>
+            <div className="ml-auto flex flex-wrap gap-2">
+              <ProtectedAction action="adjust_inventory" currentRole={currentRole}>
+                <POSButton
+                  type="button"
+                  touchSize="large"
+                  variant="secondary"
+                  onClick={() => {
+                    setBatchOpen(true);
+                  }}
+                >
+                  {t('inventoryPagePanel.adjust')}
+                </POSButton>
+              </ProtectedAction>
+              <ProtectedAction action="adjust_inventory" currentRole={currentRole}>
+                <POSButton
+                  type="button"
+                  touchSize="large"
+                  variant="outline"
+                  disabled={displayedRows.length === 0}
+                  onClick={handleExportCsv}
+                >
+                  {t('inventoryPagePanel.exportCsv')}
+                </POSButton>
+              </ProtectedAction>
+            </div>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <POSButton
-              type="button"
-              variant="outline"
-              touchSize="large"
-              onClick={() => {
-                setBatchOpen(false);
-              }}
-            >
-              {t('inventoryPagePanel.cancel')}
-            </POSButton>
-            <POSButton
-              type="button"
-              touchSize="large"
-              disabled={adjustMutation.isPending}
-              onClick={() => {
-                void handleBatchSubmit();
-              }}
-            >
-              {t('inventoryPagePanel.apply')}
-            </POSButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+
+          <section>
+            <SectionHeader
+              title={t('inventoryPagePanel.onHandLevelsTitle')}
+              description={t('inventoryPagePanel.onHandLevelsDescription')}
+            />
+            <DataTable<Inventory>
+              columns={columns}
+              data={displayedRows}
+              isLoading={isLoading}
+              enableSorting
+              toolbar={toolbar}
+              getRowClassName={rowHighlightClass}
+              emptyState={
+                isEmpty ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    {t('inventoryPagePanel.noInventoryRecords')}
+                  </p>
+                ) : (data?.length ?? 0) > 0 && displayedRows.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    {t('inventoryPagePanel.noRowsForCategory')}
+                  </p>
+                ) : undefined
+              }
+            />
+          </section>
+
+          <section>
+            <SectionHeader
+              title={t('inventoryPagePanel.changeLogTitle')}
+              description={t('inventoryPagePanel.changeLogDescription')}
+            />
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('inventoryPagePanel.columnWhen')}</TableHead>
+                    <TableHead>{t('inventoryPagePanel.columnProductId')}</TableHead>
+                    <TableHead>{t('inventoryPagePanel.columnDelta')}</TableHead>
+                    <TableHead>{t('inventoryPagePanel.columnReason')}</TableHead>
+                    <TableHead>{t('inventoryPagePanel.columnStaffId')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {logsLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-muted-foreground">
+                        {t('inventoryPagePanel.loading')}
+                      </TableCell>
+                    </TableRow>
+                  ) : !logs?.length ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-muted-foreground">
+                        {t('inventoryPagePanel.noLogEntries')}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    logs.map(log => (
+                      <TableRow key={log.id}>
+                        <TableCell className="whitespace-nowrap text-sm">
+                          {log.createdAt.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">{log.productId}</TableCell>
+                        <TableCell className="tabular-nums">{log.quantityDelta}</TableCell>
+                        <TableCell>{log.reason}</TableCell>
+                        <TableCell className="font-mono text-xs">{log.staffId}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </section>
+
+          <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t('inventoryPagePanel.batchAdjustmentTitle')}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="space-y-2">
+                  <label htmlFor="batch-product" className="text-sm font-medium">
+                    {t('inventoryPagePanel.productLabel')}
+                  </label>
+                  <select
+                    id="batch-product"
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={batchProductId}
+                    onChange={e => {
+                      setBatchProductId(e.target.value);
+                    }}
+                  >
+                    <option value="">{t('inventoryPagePanel.selectPlaceholder')}</option>
+                    {(data ?? []).map(inv => (
+                      <option key={inv.productId} value={inv.productId}>
+                        {inv.product?.name ?? inv.productId}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <FormField
+                  label={t('inventoryPagePanel.quantityDeltaLabel')}
+                  hint={t('inventoryPagePanel.quantityDeltaHint')}
+                >
+                  {/* eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-06: signed-delta input, MoneyInput would clamp negatives */}
+                  <input
+                    type="number"
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={batchDelta}
+                    onChange={e => {
+                      setBatchDelta(e.target.value);
+                    }}
+                  />
+                </FormField>
+              </div>
+              <DialogFooter className="gap-2 sm:gap-0">
+                <POSButton
+                  type="button"
+                  variant="outline"
+                  touchSize="large"
+                  onClick={() => {
+                    setBatchOpen(false);
+                  }}
+                >
+                  {t('inventoryPagePanel.cancel')}
+                </POSButton>
+                <POSButton
+                  type="button"
+                  touchSize="large"
+                  disabled={adjustMutation.isPending}
+                  onClick={() => {
+                    void handleBatchSubmit();
+                  }}
+                >
+                  {t('inventoryPagePanel.apply')}
+                </POSButton>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </TabsContent>
+      <TabsContent value="open-units">
+        <OpenUnitsTab />
+      </TabsContent>
+    </Tabs>
   );
 }

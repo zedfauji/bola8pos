@@ -250,7 +250,9 @@
     "quantityDeltaLabel": "Quantity delta",
     "quantityDeltaHint": "Use negative numbers to remove stock.",
     "cancel": "Cancel",
-    "apply": "Apply"
+    "apply": "Apply",
+    "stockTabLabel": "Existencias",
+    "openUnitsTabLabel": "Unidades abiertas"
   },
   "manageIngredientsTab": {
     "ingredientAdded": "Ingredient added",
