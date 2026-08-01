@@ -49,9 +49,18 @@ export function useOverrideNegativeStock() {
         modifier_ids: item.modifierIds,
       }));
 
+      // create_order_with_items has required p_status/p_notes params (added
+      // 20260428000003, before p_expected_version was ever appended) — this
+      // call never included them, so every override attempt 404'd
+      // ("Could not find the function ... with parameters p_items,
+      // p_skip_depletion, p_staff_id, p_tab_id") instead of placing the
+      // order. p_status mirrors the normal add-order path's fixed 'pending'
+      // (useMutationAddOrder); this override flow has no notes to carry.
       const { data: orderData, error: orderError } = await db.rpc('create_order_with_items', {
         p_tab_id: input.tabId,
         p_staff_id: input.staffId,
+        p_status: 'pending',
+        p_notes: '',
         p_items: rpcItems,
         p_skip_depletion: true,
       });
@@ -65,7 +74,15 @@ export function useOverrideNegativeStock() {
       }
 
       // 2. Deplete each inserted order_item with p_allow_negative=true
-      const orderItems = ((orderData as { order_items?: { id: string }[] }).order_items ?? []);
+      // create_order_with_items returns { order, items } (see
+      // mapRpcOrderPayload in entities/tab/model/queries.ts) — this read the
+      // wrong key (`order_items`, which is never present on the RPC
+      // response), so `orderItems` was always `[]` and the depletion loop
+      // below silently never ran. The order itself still got placed (step 1
+      // succeeds independently), which is why this failure mode produced no
+      // error anywhere — just an order with none of its open-unit/ingredient
+      // depletion applied.
+      const orderItems = (orderData as { items?: { id: string }[] }).items ?? [];
 
       for (const item of orderItems) {
         const { error: deplError } = await db.rpc('deplete_for_order_item', {
