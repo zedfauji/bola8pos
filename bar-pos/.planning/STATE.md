@@ -6,14 +6,14 @@ current_phase: 27
 current_phase_name: one-shot-inventory-cigarette-box-pattern
 status: executing
 stopped_at: Completed 27-06-PLAN.md
-last_updated: "2026-08-01T04:59:10.684Z"
+last_updated: "2026-08-01T05:17:00.577Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 27 Plan 06 complete (product-admin open-unit fields)
 progress:
   total_phases: 28
   completed_phases: 23
   total_plans: 170
-  completed_plans: 168
+  completed_plans: 169
   percent: 82
 ---
 
@@ -49,7 +49,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 27 (one-shot-inventory-cigarette-box-pattern) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 27 Plan 06 complete (product-admin open-unit fields)
 
@@ -341,6 +341,7 @@ Last activity: 2026-08-01 — Phase 27 Plan 06 complete (product-admin open-unit
 - [Phase ?]: 26-03: useMutationAddResource.isTemp typed boolean | undefined (mandatory key, no ?) per exactOptionalPropertyTypes convention; both existing Add Table callers updated to pass isTemp: undefined explicitly.
 - [Phase ?]: 26-03: integration tests mixing a service-role client with a signed-in anon client in this repo's jsdom-based integration vitest project must set persistSession:false/autoRefreshToken:false on the service-role client to avoid silent RLS leakage via shared localStorage GoTrue state.
 - [Phase ?]: 27-06: useMutationCreateProduct's insertRow writes unitsPerPackage/parentProductId unconditionally (not undefined-guarded like the update mapper) since ProductCreate types both as required-but-nullable, not optional
+- [Phase ?]: 27-07: correct/void open-unit dialogs gate dispatch behind ManagerPinDialog requiredAction=adjust_inventory (D-12, per 27-RESEARCH.md Pitfall 4), not CartPanel's void_order precedent.
 
 ## Performance Metrics
 
@@ -442,10 +443,11 @@ Last activity: 2026-08-01 — Phase 27 Plan 06 complete (product-admin open-unit
 | Phase 26 P03 | 55min | 3 tasks | 16 files |
 | Phase 26 P04 | ~2h40min | 3 tasks | 8 files |
 | Phase 27 P06 | 35min | 2 tasks | 5 files |
+| Phase 27 P07 | ~40min | 2 tasks | 12 files |
 
 ## Last Session
 
-- **Stopped at:** Completed 27-06-PLAN.md
+- **Stopped at:** Completed 27-07-PLAN.md
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -463,7 +465,7 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-08-01T04:59:10.667Z
+**Last session:** 2026-08-01T05:17:00.562Z
 **Stopped at:** Completed 27-06-PLAN.md
 **Resume file:** None
 
