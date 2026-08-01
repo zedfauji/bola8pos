@@ -591,6 +591,30 @@
     "logoFileLabel": "Logo file",
     "removeLogo": "Remove logo"
   },
+  "openOpenUnit": {
+    "openNewUnit": "Abrir unidad nueva",
+    "unitOpened": "Nueva unidad abierta para {{name}}."
+  },
+  "correctOpenUnit": {
+    "dialogTitle": "Corregir conteo — {{name}}",
+    "countLabel": "Conteo restante",
+    "countHint": "Ingresa el conteo real de piezas restantes tras un reconteo físico.",
+    "countOutOfRangeError": "El conteo debe estar entre 0 y {{max}}.",
+    "reasonLabel": "Motivo",
+    "reasonPlaceholder": "p. ej. Reconteo — faltan 2 piezas",
+    "reasonRequiredError": "El motivo es obligatorio.",
+    "confirmButton": "Corregir conteo",
+    "unitCorrected": "Conteo corregido para {{name}}."
+  },
+  "voidOpenUnit": {
+    "dialogTitle": "Anular unidad — {{name}}",
+    "confirmationBody": "Esto da de baja {{count}} pieza(s) restante(s). Esta acción no se puede deshacer desde aquí.",
+    "reasonLabel": "Motivo",
+    "reasonPlaceholder": "p. ej. Paquete dañado, desechado",
+    "reasonRequiredError": "El motivo es obligatorio.",
+    "confirmButton": "Anular unidad",
+    "unitVoided": "Unidad anulada para {{name}}."
+  },
   "agentChat": {
     "openAssistantAria": "Abrir asistente IA",
     "assistantAria": "Asistente IA",

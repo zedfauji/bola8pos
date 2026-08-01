@@ -591,6 +591,30 @@
     "logoFileLabel": "Logo file",
     "removeLogo": "Remove logo"
   },
+  "openOpenUnit": {
+    "openNewUnit": "Open new unit",
+    "unitOpened": "New unit opened for {{name}}."
+  },
+  "correctOpenUnit": {
+    "dialogTitle": "Correct count — {{name}}",
+    "countLabel": "Remaining count",
+    "countHint": "Enter the actual remaining piece count after a physical recount.",
+    "countOutOfRangeError": "Count must be between 0 and {{max}}.",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "e.g. Recounted — 2 pieces missing",
+    "reasonRequiredError": "Reason is required.",
+    "confirmButton": "Correct count",
+    "unitCorrected": "Count corrected for {{name}}."
+  },
+  "voidOpenUnit": {
+    "dialogTitle": "Void unit — {{name}}",
+    "confirmationBody": "This writes off {{count}} remaining piece(s). This cannot be undone from here.",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "e.g. Box damaged, discarded",
+    "reasonRequiredError": "Reason is required.",
+    "confirmButton": "Void unit",
+    "unitVoided": "Unit voided for {{name}}."
+  },
   "agentChat": {
     "openAssistantAria": "Open AI assistant",
     "assistantAria": "AI Assistant",
