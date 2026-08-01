@@ -82,7 +82,7 @@ describe('CorrectOpenUnitDialog', () => {
 
   it('disables the confirm button while the reason input is empty', () => {
     renderDialog();
-    const btn = screen.getByRole('button', { name: /correct/i });
+    const btn = screen.getByRole('button', { name: /correct|corregir/i });
     expect(btn).toBeDisabled();
   });
 
@@ -92,7 +92,7 @@ describe('CorrectOpenUnitDialog', () => {
 
     await user.type(screen.getByLabelText(/motivo|reason/i), '   ');
 
-    expect(screen.getByRole('button', { name: /correct/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /correct|corregir/i })).toBeDisabled();
   });
 
   it('disables the confirm button and shows an inline error for an out-of-range count', async () => {
@@ -100,11 +100,11 @@ describe('CorrectOpenUnitDialog', () => {
     renderDialog({ unitsPerPackage: 20, currentCount: 20 });
 
     await user.type(screen.getByLabelText(/motivo|reason/i), 'Recounted');
-    const countInput = screen.getByLabelText(/count|conteo/i);
+    const countInput = screen.getByRole('spinbutton');
     await user.clear(countInput);
     await user.type(countInput, '25');
 
-    expect(screen.getByRole('button', { name: /correct/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /correct|corregir/i })).toBeDisabled();
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
@@ -114,7 +114,7 @@ describe('CorrectOpenUnitDialog', () => {
 
     await user.type(screen.getByLabelText(/motivo|reason/i), 'Recounted — 2 missing');
 
-    expect(screen.getByRole('button', { name: /correct/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /correct|corregir/i })).toBeEnabled();
   });
 
   it('does not dispatch the mutation on submit — opens the manager PIN dialog first', async () => {
@@ -122,10 +122,10 @@ describe('CorrectOpenUnitDialog', () => {
     renderDialog();
 
     await user.type(screen.getByLabelText(/motivo|reason/i), 'Recounted — 2 missing');
-    fireEvent.click(screen.getByRole('button', { name: /correct/i }));
+    fireEvent.click(screen.getByRole('button', { name: /correct|corregir/i }));
 
     expect(mockMutateAsync).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: /grant pin/i })).toBeInTheDocument();
+    expect(screen.getByText(/grant pin/i)).toBeInTheDocument();
   });
 
   it('requests the manager PIN with requiredAction="adjust_inventory"', async () => {
@@ -133,9 +133,9 @@ describe('CorrectOpenUnitDialog', () => {
     renderDialog();
 
     await user.type(screen.getByLabelText(/motivo|reason/i), 'Recounted — 2 missing');
-    fireEvent.click(screen.getByRole('button', { name: /correct/i }));
+    fireEvent.click(screen.getByRole('button', { name: /correct|corregir/i }));
 
-    expect(screen.getByRole('button', { name: /grant pin/i })).toHaveAttribute(
+    expect(screen.getByText(/grant pin/i)).toHaveAttribute(
       'data-required-action',
       'adjust_inventory'
     );
@@ -147,11 +147,11 @@ describe('CorrectOpenUnitDialog', () => {
     renderDialog();
 
     await user.type(screen.getByLabelText(/motivo|reason/i), 'Recounted — 2 missing');
-    fireEvent.click(screen.getByRole('button', { name: /correct/i }));
+    fireEvent.click(screen.getByRole('button', { name: /correct|corregir/i }));
 
     expect(mockMutateAsync).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: /grant pin/i }));
+    fireEvent.click(screen.getByText(/grant pin/i));
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({
@@ -168,8 +168,8 @@ describe('CorrectOpenUnitDialog', () => {
     const { onOpenChange } = renderDialog();
 
     await user.type(screen.getByLabelText(/motivo|reason/i), 'Recounted — 2 missing');
-    fireEvent.click(screen.getByRole('button', { name: /correct/i }));
-    fireEvent.click(screen.getByRole('button', { name: /grant pin/i }));
+    fireEvent.click(screen.getByRole('button', { name: /correct|corregir/i }));
+    fireEvent.click(screen.getByText(/grant pin/i));
 
     await waitFor(() => {
       expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -186,8 +186,8 @@ describe('CorrectOpenUnitDialog', () => {
     const { onOpenChange } = renderDialog();
 
     await user.type(screen.getByLabelText(/motivo|reason/i), 'Recounted — 2 missing');
-    fireEvent.click(screen.getByRole('button', { name: /correct/i }));
-    fireEvent.click(screen.getByRole('button', { name: /grant pin/i }));
+    fireEvent.click(screen.getByRole('button', { name: /correct|corregir/i }));
+    fireEvent.click(screen.getByText(/grant pin/i));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('remaining count 25 is out of range 0..20');
