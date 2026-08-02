@@ -34,6 +34,7 @@ export type MoneyInputProps = {
  * Formats cents to dollar string (e.g., 1250 â†’ "12.50")
  */
 function formatCents(cents: number): string {
+  // eslint-disable-next-line no-restricted-syntax -- editable input's raw value (re-typed/re-parsed by parseToCents above), not a money display; a currency symbol here would corrupt the amount (T-28-06)
   return (cents / 100).toFixed(2);
 }
 
