@@ -5,6 +5,7 @@ import type { Message } from '@shared/lib/agent/brain';
 import { parseProductsCsv } from '@shared/lib/agent/csv-parser';
 import { executeTool } from '@shared/lib/agent/tools/index';
 import { extractProductsFromImage, extractProductsFromText } from '@shared/lib/agent/vision';
+import { formatMoney } from '@shared/lib/format';
 import { logger } from '@shared/lib/logger';
 import { useAgentStore } from './agentStore';
 
@@ -101,7 +102,7 @@ export function useAgent() {
         state.setPendingImportProducts(products);
         const preview = products
           .slice(0, 5)
-          .map((p) => `| ${p.name} | $${p.price.toFixed(2)} |`)
+          .map((p) => `| ${p.name} | ${formatMoney(p.price)} |`)
           .join('\n');
         const header = `| ${t('agentChat.nameHeader')} | ${t('agentChat.priceHeader')} |\n|--------|--------|`;
         const remaining = products.length - 5;
