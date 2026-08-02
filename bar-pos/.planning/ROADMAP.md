@@ -886,7 +886,7 @@ Plans:
 **Goal:** Consolidate money formatting into one `shared/lib/format.ts` (`formatMoney` / `parseMoneyInput` / `formatPercent`) backed by `Intl.NumberFormat`, respecting the Phase 21 locale, with a codemod to migrate existing call sites and an ESLint rule (`no-raw-money-format`) to prevent regressions.
 **Requirements:** SC-1..SC-4 below (no REQUIREMENTS.md for this milestone; POS-COMPARISON.md §28 no longer present — scope locked in 28-CONTEXT.md D-01..D-09)
 **Depends on:** Phase 21
-**Plans:** 1/9 plans executed
+**Plans:** 7/9 plans executed
 
 Plans:
 **Wave 1**
@@ -895,12 +895,12 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 28-02-PLAN.md — locale-parameterized receipt/PDF consumers, ResourceIllustration double-symbol fix, domain-helpers clean break (Wave 2) (SC-2, SC-4)
-- [ ] 28-03-PLAN.md — shared-layer ad-hoc formatters (start ticket, agent tools) + MoneyInput exemption (Wave 2) (SC-2, SC-4)
-- [ ] 28-04-PLAN.md — wPanels surface: CajaDashboard + PaymentForm + wPanels catalogs (Wave 2) (SC-2, SC-4)
-- [ ] 28-05-PLAN.md — reports/admin surface: 9 widgets + wAdmin catalogs + formatPercent consumer (Wave 2) (SC-1, SC-2, SC-4)
-- [ ] 28-06-PLAN.md — features confirmation copy: refund, caja entry, promotions, paid-tab edit, split tab + featOrders/featMgmt catalogs (Wave 2) (SC-2, SC-4)
-- [ ] 28-07-PLAN.md — order-entry price deltas via showSign, combos/agent-chat prices, prep quantity exemptions (Wave 2) (SC-2, SC-4)
+- [x] 28-02-PLAN.md — locale-parameterized receipt/PDF consumers, ResourceIllustration double-symbol fix, domain-helpers clean break (Wave 2) (SC-2, SC-4)
+- [x] 28-03-PLAN.md — shared-layer ad-hoc formatters (start ticket, agent tools) + MoneyInput exemption (Wave 2) (SC-2, SC-4)
+- [x] 28-04-PLAN.md — wPanels surface: CajaDashboard + PaymentForm + wPanels catalogs (Wave 2) (SC-2, SC-4)
+- [x] 28-05-PLAN.md — reports/admin surface: 9 widgets + wAdmin catalogs + formatPercent consumer (Wave 2) (SC-1, SC-2, SC-4)
+- [x] 28-06-PLAN.md — features confirmation copy: refund, caja entry, promotions, paid-tab edit, split tab + featOrders/featMgmt catalogs (Wave 2) (SC-2, SC-4)
+- [x] 28-07-PLAN.md — order-entry price deltas via showSign, combos/agent-chat prices, prep quantity exemptions (Wave 2) (SC-2, SC-4)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
