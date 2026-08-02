@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useMutationUpdateSetting, useSettings } from '@entities/settings';
 import type { TipDistributionSettings } from '@entities/settings';
 import type { UserRole } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
 import { computeTipDistribution } from '@shared/lib/tip-distribution-math';
@@ -148,9 +149,9 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
           <p className="font-medium">{t('tipDistributionSettingsTab.exampleTitle')}</p>
           <p className="mt-1 text-muted-foreground">
             {t('tipDistributionSettingsTab.exampleBreakdown', {
-              floor: preview.floor.toFixed(2),
-              bar: preview.bar.toFixed(2),
-              kitchen: preview.kitchen.toFixed(2),
+              floor: formatMoney(preview.floor),
+              bar: formatMoney(preview.bar),
+              kitchen: formatMoney(preview.kitchen),
             })}
           </p>
         </div>
