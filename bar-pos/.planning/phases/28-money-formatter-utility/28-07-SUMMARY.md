@@ -159,6 +159,14 @@ None - no external service configuration required.
 - D-06's `showSign` option is now exercised by four real production call sites (ModifierSheet, CartItem, OrderItemCard, ProductForm)
 - Plan 08 (money-formatter lint rule, same wave) can proceed independently — the four `no-restricted-syntax` exemption comments added in Task 3 are pre-positioned for whatever selector plan 08 lands, using the exact comment text from `28-RESEARCH.md` Pitfall 4's documented convention
 
+## Self-Check: PASSED
+
+- FOUND: `.planning/phases/28-money-formatter-utility/28-07-SUMMARY.md`
+- FOUND: commit `4052d58` (Task 1)
+- FOUND: commit `9bb2c2b` (Task 2)
+- FOUND: commit `9561f01` (Task 3)
+- FOUND: commit `b110afa` (SUMMARY.md)
+
 ---
 *Phase: 28-money-formatter-utility*
 *Completed: 2026-08-02*
