@@ -12,6 +12,7 @@ import { ManagerPinDialog } from "@features/manager-pin-gate";
 import { useOrderItemsByPayment } from "@entities/payment";
 import { useRefundsByPayment } from "@entities/refund";
 import type { RefundReason } from "@entities/refund";
+import { formatMoney } from '@shared/lib/format';
 import { MoneyDisplay, POSButton, QuantityControl } from "@shared/ui";
 import { Checkbox } from "@shared/ui/checkbox";
 import { Label } from "@shared/ui/label";
@@ -189,7 +190,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
     }
     toast.success(
       t("processRefund.refundProcessed", {
-        amount: (Math.round(refundTotal * 100) / 100).toFixed(2),
+        amount: formatMoney(Math.round(refundTotal * 100) / 100),
       })
     );
     onOpenChange(false);

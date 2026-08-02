@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useStaffStore } from '@entities/staff/model/store';
+import { formatMoney } from '@shared/lib/format';
 import i18n from '@shared/lib/i18n';
 import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@shared/ui/dialog';
@@ -88,7 +89,7 @@ export function RegisterCajaEntryDialog({ open, onOpenChange }: RegisterCajaEntr
 
     toast.success(
       t(type === 'expense' ? 'registerCajaEntry.expenseRecorded' : 'registerCajaEntry.incomeRecorded', {
-        amount: validation.data.amount.toFixed(2),
+        amount: formatMoney(validation.data.amount),
       })
     );
     resetForm();
