@@ -253,12 +253,13 @@ describe('CajaDashboard', () => {
     });
 
     const [printArg] = printSpy.mock.calls[0] as [string];
-    // The printed string must contain each method total and net total
-    expect(printArg).toContain('$500.00'); // cash
-    expect(printArg).toContain('$300.00'); // card
-    expect(printArg).toContain('$100.00'); // rappi
-    expect(printArg).toContain('$900.00'); // net = 500+300+100
-    expect(printArg).toContain('$150.00'); // open tabs pending
+    // The printed string must contain each method total and net total, formatted
+    // through the shared formatMoney() (es-MX default locale => "MX$" prefix)
+    expect(printArg).toContain('MX$500.00'); // cash
+    expect(printArg).toContain('MX$300.00'); // card
+    expect(printArg).toContain('MX$100.00'); // rappi
+    expect(printArg).toContain('MX$900.00'); // net = 500+300+100
+    expect(printArg).toContain('MX$150.00'); // open tabs pending
   });
 
   it('shows net revenue of $170.00 when cash=$100, card=$50, rappi=$20', () => {

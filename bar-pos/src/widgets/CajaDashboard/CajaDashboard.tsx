@@ -17,6 +17,7 @@ import { usePermissions } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
 import { useOpenTabsPendingTotal } from '@entities/tab';
 
+import { formatMoney } from '@shared/lib/format';
 import { printRawText } from '@shared/lib/pos-printer';
 import { LoadingSpinner, MoneyDisplay } from '@shared/ui';
 import { MoneyInput } from '@shared/ui/MoneyInput';
@@ -174,12 +175,12 @@ export function CajaDashboard() {
         ? t('cajaDashboard.printBy', { name: currentCaja.openedByName })
         : '',
       t('cajaDashboard.printThinDivider'),
-      t('cajaDashboard.printCash', { amount: cash.toFixed(2) }),
-      t('cajaDashboard.printCard', { amount: card.toFixed(2) }),
-      t('cajaDashboard.printRappi', { amount: rappi.toFixed(2) }),
+      t('cajaDashboard.printCash', { amount: formatMoney(cash) }),
+      t('cajaDashboard.printCard', { amount: formatMoney(card) }),
+      t('cajaDashboard.printRappi', { amount: formatMoney(rappi) }),
       t('cajaDashboard.printThinDivider'),
-      t('cajaDashboard.printNetTotal', { amount: net.toFixed(2) }),
-      t('cajaDashboard.printOpenTabs', { amount: pendingTotal.toFixed(2) }),
+      t('cajaDashboard.printNetTotal', { amount: formatMoney(net) }),
+      t('cajaDashboard.printOpenTabs', { amount: formatMoney(pendingTotal) }),
       t('cajaDashboard.printDivider'),
     ]
       .filter(l => l !== '')
@@ -227,7 +228,7 @@ export function CajaDashboard() {
             <div className="text-sm text-muted-foreground">
               {t('cajaDashboard.openingCashLabel')}{' '}
               <span className="text-foreground font-mono">
-                ${currentCaja.openingCash.toFixed(2)}
+                {formatMoney(currentCaja.openingCash)}
               </span>
             </div>
           </>
@@ -313,7 +314,9 @@ export function CajaDashboard() {
                             : 'text-green-400 font-mono'
                         }
                       >
-                        {entry.type === 'expense' ? '-' : '+'}${entry.amount.toFixed(2)}
+                        {formatMoney(entry.type === 'expense' ? -entry.amount : entry.amount, {
+                          showSign: true,
+                        })}
                       </span>
                       <Button
                         type="button"
@@ -343,12 +346,12 @@ export function CajaDashboard() {
               {totalExpenses > 0 && (
                 <p className="text-xs text-muted-foreground">
                   {t('cajaDashboard.totalExpensesLabel')}{' '}
-                  <span className="text-red-400">${totalExpenses.toFixed(2)}</span>
+                  <span className="text-red-400">{formatMoney(totalExpenses)}</span>
                   {totalIncome > 0 && (
                     <>
                       {' '}
                       {t('cajaDashboard.totalIncomeLabel')}{' '}
-                      <span className="text-green-400">${totalIncome.toFixed(2)}</span>
+                      <span className="text-green-400">{formatMoney(totalIncome)}</span>
                     </>
                   )}
                 </p>
