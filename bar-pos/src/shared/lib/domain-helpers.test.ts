@@ -12,7 +12,6 @@ import {
   calculateOrderItemLineTotal,
   calculateTabSubtotal,
   calculateTipAmount,
-  formatMoney,
   formatElapsed,
   isPromotionActive,
   generateIdempotencyKey,
@@ -423,36 +422,6 @@ describe('calculateTipAmount', () => {
   it('should handle large percentage tips', () => {
     const tip = calculateTipAmount(100.0, 100, null);
     expect(tip).toBe(100.0);
-  });
-});
-
-describe('formatMoney', () => {
-  it('should format positive amounts', () => {
-    expect(formatMoney(12.5)).toBe('$12.50');
-  });
-
-  it('should format negative amounts', () => {
-    expect(formatMoney(-3.0)).toBe('-$3.00');
-  });
-
-  it('should format zero', () => {
-    expect(formatMoney(0)).toBe('$0.00');
-  });
-
-  it('should always show 2 decimal places', () => {
-    expect(formatMoney(10)).toBe('$10.00');
-  });
-
-  it('should handle large amounts', () => {
-    expect(formatMoney(1234.56)).toBe('$1234.56');
-  });
-
-  it('should handle small amounts', () => {
-    expect(formatMoney(0.01)).toBe('$0.01');
-  });
-
-  it('should round to 2 decimal places', () => {
-    expect(formatMoney(12.555)).toBe('$12.55'); // toFixed uses banker's rounding
   });
 });
 

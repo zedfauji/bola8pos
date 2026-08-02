@@ -15,6 +15,7 @@ import type {
   VoidRefundRow,
   WaitlistMetricsRow,
 } from '@shared/lib/domain';
+import { formatMoneyIn } from '@shared/lib/format';
 import { groupByCategory } from '@shared/lib/groupOrderItemsForReceipt';
 import i18n, { getCurrentLocale } from '@shared/lib/i18n';
 
@@ -40,8 +41,8 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 11, fontWeight: 'bold', marginTop: 14, marginBottom: 4 },
 });
 
-function fmt(n: number): string {
-  return `$${n.toFixed(2)}`;
+function fmt(locale: Locale, n: number): string {
+  return formatMoneyIn(locale, n);
 }
 
 /** Resolves a locale-scoped translator for the `receipt` catalog namespace (Pattern 3 — pdf() renders outside the I18nextProvider tree, so useTranslation() cannot be used here). */
@@ -76,10 +77,10 @@ function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale 
           <Text style={styles.cellRight}>{tr('pdf.caja.value')}</Text>
         </View>
         {[
-          [tr('pdf.caja.totalRevenue'), fmt(report.summary.totalRevenue)],
-          [tr('pdf.caja.cashSales'), fmt(report.summary.cashSales)],
-          [tr('pdf.caja.cardSales'), fmt(report.summary.cardSales)],
-          [tr('pdf.caja.rappiSales'), fmt(report.summary.rappiSales)],
+          [tr('pdf.caja.totalRevenue'), fmt(locale, report.summary.totalRevenue)],
+          [tr('pdf.caja.cashSales'), fmt(locale, report.summary.cashSales)],
+          [tr('pdf.caja.cardSales'), fmt(locale, report.summary.cardSales)],
+          [tr('pdf.caja.rappiSales'), fmt(locale, report.summary.rappiSales)],
           [tr('pdf.caja.orderCount'), String(report.summary.orderCount)],
           [tr('pdf.caja.tabCount'), String(report.summary.tabCount)],
         ].map(([label, value], i) => (
@@ -95,19 +96,19 @@ function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale 
           <Text style={styles.cellRight}>{tr('pdf.caja.amount')}</Text>
         </View>
         {[
-          [tr('pdf.caja.openingCash'), fmt(report.cashReconciliation.openingCash)],
-          [tr('pdf.caja.cashSales'), fmt(report.cashReconciliation.cashSales)],
-          [tr('pdf.caja.expectedCash'), fmt(report.cashReconciliation.expectedCash)],
+          [tr('pdf.caja.openingCash'), fmt(locale, report.cashReconciliation.openingCash)],
+          [tr('pdf.caja.cashSales'), fmt(locale, report.cashReconciliation.cashSales)],
+          [tr('pdf.caja.expectedCash'), fmt(locale, report.cashReconciliation.expectedCash)],
           [
             tr('pdf.caja.closingCash'),
             report.cashReconciliation.closingCash !== null
-              ? fmt(report.cashReconciliation.closingCash)
+              ? fmt(locale, report.cashReconciliation.closingCash)
               : '—',
           ],
           [
             tr('pdf.caja.variance'),
             report.cashReconciliation.variance !== null
-              ? fmt(report.cashReconciliation.variance)
+              ? fmt(locale, report.cashReconciliation.variance)
               : '—',
           ],
         ].map(([label, value], i) => (
@@ -136,7 +137,7 @@ function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale 
                 <View key={p.productName} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
                   <Text style={styles.cell}>{p.productName}</Text>
                   <Text style={styles.cellRight}>{String(p.quantity)}</Text>
-                  <Text style={styles.cellRight}>{fmt(p.revenue)}</Text>
+                  <Text style={styles.cellRight}>{fmt(locale, p.revenue)}</Text>
                 </View>
               );
             })}
@@ -153,7 +154,7 @@ function CajaReportDoc({ report, locale }: { report: CajaReport; locale: Locale 
           <View key={s.staffId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
             <Text style={styles.cell}>{s.staffName}</Text>
             <Text style={styles.cellRight}>{String(s.orderCount)}</Text>
-            <Text style={styles.cellRight}>{fmt(s.salesTotal)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, s.salesTotal)}</Text>
           </View>
         ))}
       </Page>
@@ -187,7 +188,7 @@ function ProductSalesDoc({
             <Text style={styles.cell}>{r.productName}</Text>
             <Text style={styles.cell}>{r.categoryName}</Text>
             <Text style={styles.cellRight}>{String(r.units)}</Text>
-            <Text style={styles.cellRight}>{fmt(r.revenue)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.revenue)}</Text>
           </View>
         ))}
       </Page>
@@ -220,7 +221,7 @@ function HourlySalesDoc({ rows, locale }: { rows: HourlyRow[]; locale: Locale })
             <Text style={styles.cell}>{String(r.hour)}:00</Text>
             <Text style={styles.cell}>{String(r.dayOfWeek)}</Text>
             <Text style={styles.cellRight}>{String(r.orderCount)}</Text>
-            <Text style={styles.cellRight}>{fmt(r.revenue)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.revenue)}</Text>
             <Text style={styles.cell}>
               {r.isBusiest ? tr('pdf.hourlySales.busiestMarker') : ''}
             </Text>
@@ -283,7 +284,7 @@ function VoidRefundDoc({
           <View key={r.orderId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
             <Text style={styles.cell}>{r.voidedAt.toLocaleString(locale)}</Text>
             <Text style={styles.cell}>{r.staffName}</Text>
-            <Text style={styles.cellRight}>{fmt(r.amount)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.amount)}</Text>
             <Text style={styles.cell}>{r.reason}</Text>
           </View>
         ))}
@@ -327,7 +328,7 @@ function CategoryRevenueDoc({
             <Text style={styles.cell}>{r.categoryName}</Text>
             <Text style={styles.cellRight}>{String(r.unitsSold)}</Text>
             <Text style={styles.cellRight}>{String(r.orderCount)}</Text>
-            <Text style={styles.cellRight}>{fmt(r.revenue)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.revenue)}</Text>
             <Text style={styles.cellRight}>{String(r.pctTotal)}%</Text>
           </View>
         ))}
@@ -369,9 +370,9 @@ function StaffMetricsDoc({
         {rows.map((r, i) => (
           <View key={r.staffId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
             <Text style={styles.cell}>{r.staffName}</Text>
-            <Text style={styles.cellRight}>{fmt(r.revenue)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.revenue)}</Text>
             <Text style={styles.cellRight}>{String(r.transactionCount)}</Text>
-            <Text style={styles.cellRight}>{fmt(r.avgCheckSize)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.avgCheckSize)}</Text>
             <Text style={styles.cellRight}>{String(r.voidCount)}</Text>
           </View>
         ))}
@@ -410,7 +411,7 @@ function StaffTipsDoc({
         {rows.map((r, i) => (
           <View key={r.staffId} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
             <Text style={styles.cell}>{r.staffName}</Text>
-            <Text style={styles.cellRight}>{fmt(r.totalTips)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.totalTips)}</Text>
           </View>
         ))}
       </Page>
@@ -459,8 +460,8 @@ function ComboMixDoc({
             <Text style={styles.cell}>{r.date}</Text>
             <Text style={styles.cell}>{r.comboName}</Text>
             <Text style={styles.cellRight}>{String(r.qtySold)}</Text>
-            <Text style={styles.cellRight}>{fmt(r.netRevenue)}</Text>
-            <Text style={styles.cellRight}>{fmt(r.avgPrice)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.netRevenue)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.avgPrice)}</Text>
             <Text style={styles.cellRight}>{String(r.overrideCount)}</Text>
           </View>
         ))}
@@ -600,7 +601,7 @@ function RefundsRegisterDoc({
           <View key={r.id} style={[styles.row, i % 2 === 1 ? styles.rowAlt : {}]}>
             <Text style={styles.cell}>{new Date(r.date).toLocaleDateString(locale)}</Text>
             <Text style={styles.cell}>{r.operatorName}</Text>
-            <Text style={styles.cellRight}>{fmt(r.amount)}</Text>
+            <Text style={styles.cellRight}>{fmt(locale, r.amount)}</Text>
             <Text style={styles.cell}>{r.reason}</Text>
             <Text style={styles.cellRight}>{String(r.restockCount)}</Text>
           </View>

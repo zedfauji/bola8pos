@@ -1,6 +1,6 @@
 import type { Locale } from '@shared/lib/domain';
-import { formatMoney } from '@shared/lib/domain-helpers';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { formatMoneyIn } from '@shared/lib/format';
 import { formatModifierLines, groupByCategory, sanitize } from '@shared/lib/groupOrderItemsForReceipt';
 import i18n from '@shared/lib/i18n';
 
@@ -135,7 +135,7 @@ export function buildPreChequeText(data: PreChequeData, locale: Locale): string 
     }
     for (const item of group.items) {
       const left = `${String(item.quantity)}× ${sanitize(item.name)}`;
-      lines.push(lineLeftRight(left, formatMoney(item.lineTotal)));
+      lines.push(lineLeftRight(left, formatMoneyIn(locale, item.lineTotal)));
       lines.push(...formatModifierLines(item.modifierNames));
       if (item.notes) {
         lines.push(`  ${tr('precheque.note')}: ${sanitize(item.notes)}`);
@@ -145,12 +145,12 @@ export function buildPreChequeText(data: PreChequeData, locale: Locale): string 
 
   if (data.poolCharge !== null) {
     lines.push(divider());
-    const label = `${tr('precheque.pool')} ${String(data.poolCharge.billedMinutes)}m @ $${String(data.poolCharge.ratePerHour)}/h`;
-    lines.push(lineLeftRight(label, formatMoney(data.poolCharge.amount)));
+    const label = `${tr('precheque.pool')} ${String(data.poolCharge.billedMinutes)}m @ ${formatMoneyIn(locale, data.poolCharge.ratePerHour)}/h`;
+    lines.push(lineLeftRight(label, formatMoneyIn(locale, data.poolCharge.amount)));
   }
 
   lines.push(divider());
-  lines.push(lineLeftRight(tr('precheque.subtotal'), formatMoney(data.subtotal)));
+  lines.push(lineLeftRight(tr('precheque.subtotal'), formatMoneyIn(locale, data.subtotal)));
   lines.push('');
   lines.push(centerLine(tr('precheque.pending')));
   lines.push('');
@@ -187,21 +187,21 @@ export function buildThermalReceiptText(receipt: ReceiptData, locale: Locale): s
     }
     for (const item of group.items) {
       const left = `${String(item.quantity)}× ${sanitize(item.name)}`;
-      const price = formatMoney(item.lineTotal);
+      const price = formatMoneyIn(locale, item.lineTotal);
       lines.push(lineLeftRight(left, price));
       lines.push(...formatModifierLines(item.modifierNames ?? []));
     }
   }
 
   lines.push(divider());
-  lines.push(lineLeftRight(tr('receipt.subtotal'), formatMoney(receipt.subtotal)));
-  lines.push(lineLeftRight(tr('receipt.tip'), formatMoney(receipt.tipAmount)));
-  lines.push(lineLeftRight(tr('receipt.total'), formatMoney(receipt.total)));
+  lines.push(lineLeftRight(tr('receipt.subtotal'), formatMoneyIn(locale, receipt.subtotal)));
+  lines.push(lineLeftRight(tr('receipt.tip'), formatMoneyIn(locale, receipt.tipAmount)));
+  lines.push(lineLeftRight(tr('receipt.total'), formatMoneyIn(locale, receipt.total)));
   lines.push(lineLeftRight(tr('receipt.payment'), paymentMethodLabel(receipt.paymentMethod, locale)));
 
   if (receipt.paymentMethod === 'cash' && receipt.tenderedAmount != null) {
-    lines.push(lineLeftRight(tr('receipt.tendered'), formatMoney(receipt.tenderedAmount)));
-    lines.push(lineLeftRight(tr('receipt.change'), formatMoney(receipt.changeAmount ?? 0)));
+    lines.push(lineLeftRight(tr('receipt.tendered'), formatMoneyIn(locale, receipt.tenderedAmount)));
+    lines.push(lineLeftRight(tr('receipt.change'), formatMoneyIn(locale, receipt.changeAmount ?? 0)));
   }
 
   if (receipt.terminalReference) {

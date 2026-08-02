@@ -24,6 +24,10 @@ describe('formatMoney', () => {
     expect(formatMoney(0)).toBe('MX$0.00');
   });
 
+  it('formats a single-cent amount (ported from the superseded helper)', () => {
+    expect(formatMoney(0.01)).toBe('MX$0.01');
+  });
+
   it('groups the numeric portion for large amounts (intentional change from the superseded helper)', () => {
     expect(formatMoney(1234.5)).toBe('MX$1,234.50');
   });

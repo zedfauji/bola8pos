@@ -138,32 +138,6 @@ export function calculateTipAmount(
 }
 
 /**
- * Formats a money amount as a string.
- *
- * @param amount - The amount to format
- * @returns Formatted string like "$12.50" or "-$3.00"
- *
- * @example
- * formatMoney(12.5)
- * // Returns: "$12.50"
- *
- * @example
- * formatMoney(-3)
- * // Returns: "-$3.00"
- *
- * @example
- * formatMoney(0)
- * // Returns: "$0.00"
- */
-export function formatMoney(amount: number): string {
-  const isNegative = amount < 0;
-  const absAmount = Math.abs(amount);
-  const formatted = absAmount.toFixed(2);
-
-  return isNegative ? `-$${formatted}` : `$${formatted}`;
-}
-
-/**
  * Formats elapsed time in seconds to a readable string.
  *
  * @param totalSeconds - Total elapsed seconds
