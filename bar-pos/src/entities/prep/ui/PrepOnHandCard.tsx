@@ -37,6 +37,7 @@ export function PrepOnHandCard({ name, uom, qtyOnHand, reorderPoint }: PrepOnHan
         <ChefHatBadge />
       </div>
       <div className={qtyClass}>
+        {/* eslint-disable-next-line no-restricted-syntax -- quantity in a unit of measure, not money */}
         {qtyOnHand.toFixed(2)} {uom}
       </div>
       {reorderPoint !== null ? (

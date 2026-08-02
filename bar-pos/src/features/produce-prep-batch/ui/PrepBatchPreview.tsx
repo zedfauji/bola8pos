@@ -47,6 +47,7 @@ export function PrepBatchPreview({
                 isInsufficient
                   ? t('producePrepBatch.insufficientAria', {
                       label,
+                      // eslint-disable-next-line no-restricted-syntax -- quantity in a unit of measure, not money
                       need: need.toFixed(2),
                       have: stock ? String(stock.qty) : '0',
                     })
@@ -57,6 +58,7 @@ export function PrepBatchPreview({
               <span
                 className={`text-right font-mono tabular-nums ${isInsufficient ? 'text-pos-danger' : ''}`}
               >
+                {/* eslint-disable-next-line no-restricted-syntax -- quantity in a unit of measure, not money */}
                 {row.delta.toFixed(2)} {stock?.uom ?? ''}
               </span>
             </div>
@@ -65,6 +67,7 @@ export function PrepBatchPreview({
       </div>
       <div className="border-t pt-2 text-sm text-pos-accent font-mono tabular-nums">
         {t('producePrepBatch.yieldSummary', {
+          // eslint-disable-next-line no-restricted-syntax -- quantity in a unit of measure, not money
           qty: qtyProduced.toFixed(2),
           uom: prepIngredient.uom,
           name: prepIngredient.name,
