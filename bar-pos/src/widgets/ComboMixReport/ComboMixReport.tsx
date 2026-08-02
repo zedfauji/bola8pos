@@ -12,6 +12,7 @@ import {
 import { ExportButtons } from '@features/export-report';
 import { useComboMixReport } from '@entities/tab/model/queries-reports';
 import type { ComboMixRow } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { EmptyState, LoadingSpinner } from '@shared/ui';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 
@@ -108,8 +109,8 @@ export function ComboMixReport({ dateRange }: Props) {
               >
                 <TableCell>{row.comboName}</TableCell>
                 <TableCell className="tabular-nums">{row.qtySold}</TableCell>
-                <TableCell className="tabular-nums">${row.netRevenue.toFixed(2)}</TableCell>
-                <TableCell className="tabular-nums">${row.avgPrice.toFixed(2)}</TableCell>
+                <TableCell className="tabular-nums">{formatMoney(row.netRevenue)}</TableCell>
+                <TableCell className="tabular-nums">{formatMoney(row.avgPrice)}</TableCell>
                 <TableCell className="tabular-nums text-muted-foreground">
                   {row.overrideCount > 0 ? row.overrideCount : '—'}
                 </TableCell>

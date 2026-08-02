@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useRefundsRegister } from '@entities/tab/model/queries-reports';
 import type { RefundRegisterRow } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { EmptyState, LoadingSpinner } from '@shared/ui';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 
@@ -63,7 +64,7 @@ export function RefundsRegister({ dateRange }: Props) {
                   {t('refundsRegister.truncatedId', { id: row.originalPaymentId.slice(0, 8) })}
                 </TableCell>
                 <TableCell className="tabular-nums">{row.items.length}</TableCell>
-                <TableCell className="tabular-nums">${row.amount.toFixed(2)}</TableCell>
+                <TableCell className="tabular-nums">{formatMoney(row.amount)}</TableCell>
                 <TableCell className="text-muted-foreground">{row.reason}</TableCell>
                 <TableCell className="tabular-nums">
                   {row.restockCount > 0 ? row.restockCount : '—'}
@@ -75,7 +76,7 @@ export function RefundsRegister({ dateRange }: Props) {
               <TableCell>—</TableCell>
               <TableCell>—</TableCell>
               <TableCell className="tabular-nums">{totalItems}</TableCell>
-              <TableCell className="tabular-nums">${totalAmount.toFixed(2)}</TableCell>
+              <TableCell className="tabular-nums">{formatMoney(totalAmount)}</TableCell>
               <TableCell>—</TableCell>
               <TableCell>—</TableCell>
             </TableRow>
