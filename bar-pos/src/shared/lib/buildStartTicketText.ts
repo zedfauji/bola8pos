@@ -3,6 +3,8 @@
  * Pure function — no side effects, no imports from upper FSD layers.
  */
 
+import { formatMoney } from '@shared/lib/format';
+
 function centerLine(text: string, width: number): string {
   if (text.length >= width) return text.slice(0, width);
   const pad = Math.floor((width - text.length) / 2);
@@ -39,7 +41,7 @@ export function buildStartTicketText(opts: StartTicketOpts): string {
   lines.push(divider(w));
   lines.push(lineLeftRight('Mesa', tableLabel, w));
   lines.push(lineLeftRight('Inicio', startedAt.toLocaleString(), w));
-  lines.push(lineLeftRight('Tarifa', `$${String(ratePerHour)}/h`, w));
+  lines.push(lineLeftRight('Tarifa', `${formatMoney(ratePerHour)}/h`, w));
   lines.push(divider(w));
   lines.push('');
   lines.push('');

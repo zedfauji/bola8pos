@@ -1,3 +1,4 @@
+import { formatMoney } from '@shared/lib/format';
 import { ok, err } from '@shared/lib/result';
 import type { Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -610,7 +611,7 @@ export async function stopPoolSession(
 
   const startedAt = new Date((session as { started_at?: string } | null)?.started_at ?? Date.now());
   const elapsedMinutes = Math.ceil((Date.now() - startedAt.getTime()) / 60_000);
-  const estimatedCharge = ((elapsedMinutes / 60) * args.rate_per_hour).toFixed(2);
+  const estimatedCharge = formatMoney((elapsedMinutes / 60) * args.rate_per_hour);
 
   const preview = {
     action:            'stop_pool_session',
@@ -618,7 +619,7 @@ export async function stopPoolSession(
     table_id:          args.table_id,
     elapsed_minutes:   elapsedMinutes,
     rate_per_hour:     args.rate_per_hour,
-    estimated_charge:  `$${estimatedCharge}`,
+    estimated_charge:  estimatedCharge,
   };
 
   const token = createPendingAction('stop_pool_session', args as Record<string, unknown>, preview, _executeStopPoolSession);
@@ -731,14 +732,14 @@ export async function stopAndMoveTable(
 
   const startedAt = new Date((session as { started_at?: string } | null)?.started_at ?? Date.now());
   const elapsedMinutes = Math.ceil((Date.now() - startedAt.getTime()) / 60_000);
-  const estimatedCharge = ((elapsedMinutes / 60) * args.rate_per_hour).toFixed(2);
+  const estimatedCharge = formatMoney((elapsedMinutes / 60) * args.rate_per_hour);
 
   const preview = {
     action:           'stop_and_move_table',
     session_id:       args.session_id,
     tab_id:           args.tab_id,
     elapsed_minutes:  elapsedMinutes,
-    estimated_charge: `$${estimatedCharge}`,
+    estimated_charge: estimatedCharge,
     move_to_table:    args.new_table_number,
   };
 
