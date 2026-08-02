@@ -889,15 +889,25 @@ Plans:
 **Plans:** 9 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 28-01-PLAN.md — format.ts core (formatMoney/formatMoneyIn/formatPercent/parseMoneyInput) + tests + MoneyDisplay wiring (tracer, Wave 1) (SC-1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 28-02-PLAN.md — locale-parameterized receipt/PDF consumers, ResourceIllustration double-symbol fix, domain-helpers clean break (Wave 2) (SC-2, SC-4)
 - [ ] 28-03-PLAN.md — shared-layer ad-hoc formatters (start ticket, agent tools) + MoneyInput exemption (Wave 2) (SC-2, SC-4)
 - [ ] 28-04-PLAN.md — wPanels surface: CajaDashboard + PaymentForm + wPanels catalogs (Wave 2) (SC-2, SC-4)
 - [ ] 28-05-PLAN.md — reports/admin surface: 9 widgets + wAdmin catalogs + formatPercent consumer (Wave 2) (SC-1, SC-2, SC-4)
 - [ ] 28-06-PLAN.md — features confirmation copy: refund, caja entry, promotions, paid-tab edit, split tab + featOrders/featMgmt catalogs (Wave 2) (SC-2, SC-4)
 - [ ] 28-07-PLAN.md — order-entry price deltas via showSign, combos/agent-chat prices, prep quantity exemptions (Wave 2) (SC-2, SC-4)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 28-08-PLAN.md — no-raw-money-format rule module + eslint.config.js wiring + full typecheck/lint/test gate (Wave 3) (SC-3, SC-4)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 28-09-PLAN.md — human verification of on-screen and printed money rendering in both locales (Wave 4, blocking checkpoints) (SC-4)
 
 **Success Criteria:**
