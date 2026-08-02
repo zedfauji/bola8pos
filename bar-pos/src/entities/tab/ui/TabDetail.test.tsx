@@ -274,7 +274,7 @@ describe('TabDetail', () => {
 
         await waitFor(() => {
           expect(screen.getByText('Subtotal (drinks + pool)')).toBeInTheDocument();
-          expect(screen.getAllByLabelText('$38.00 dollars').length).toBeGreaterThanOrEqual(1);
+          expect(screen.getAllByLabelText('MX$38.00 dollars').length).toBeGreaterThanOrEqual(1);
         });
       } finally {
         vi.useRealTimers();
