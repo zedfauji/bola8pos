@@ -208,6 +208,12 @@ test.describe('i18n locale switch (SC-1/SC-4)', () => {
     await expect(page.getByRole('heading', { name: 'POS' })).toBeVisible({ timeout: 20_000 });
     await assertNoRawKeys(page, 'POS page');
 
+    // D-01/D-08: while the acting admin session is en-US, product-grid
+    // MoneyDisplay prices must render the bare '$' symbol, never the es-MX
+    // 'MX$' prefix (formatMoney reads getCurrentLocale() live — a stale
+    // symbol here would mean the switch didn't actually propagate).
+    await expect(page.getByText(/^\$\d/).first()).toBeVisible({ timeout: 15_000 });
+
     await page.getByRole('link', { name: /home/i }).click();
     await expect(page.getByText(/^Welcome, /)).toBeVisible({ timeout: 15_000 });
 
@@ -259,6 +265,15 @@ test.describe('i18n locale switch (SC-1/SC-4)', () => {
     // Reset the acting admin's own session back to es-MX so the shared
     // admin profile isn't left polluted for other specs.
     await switchOwnLocale(page, 'es-MX');
+
+    // D-01/D-08: back on es-MX, the same product-grid MoneyDisplay prices
+    // must now render the two-letter-prefixed 'MX$' symbol — the one place
+    // this spec exercises both locales' currency symbols end-to-end.
+    await page.getByRole('link', { name: /home/i }).click();
+    await expect(page.getByText(/^Welcome, /)).toBeVisible({ timeout: 15_000 });
+    await page.getByRole('button', { name: 'POS Register' }).click();
+    await expect(page.getByRole('heading', { name: 'POS' })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/^MX\$\d/).first()).toBeVisible({ timeout: 15_000 });
 
     await logout(page);
   });

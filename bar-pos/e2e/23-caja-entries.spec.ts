@@ -49,7 +49,9 @@ test.describe('Caja Entries (Expenses & Income)', () => {
 
     // Entry appears in the "Recent Entries" list
     await expect(page.getByText('Proveedor cerveza')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('-$500.00')).toBeVisible();
+    // es-MX (test default locale) renders the sign before the two-letter
+    // prefixed symbol: formatMoney(-500) => '-MX$500.00', not '-$500.00'.
+    await expect(page.getByText('-MX$500.00')).toBeVisible();
 
     await logout(page);
   });
@@ -137,7 +139,8 @@ test.describe('Caja Entries (Expenses & Income)', () => {
 
     // The entry row shows "Limpieza" concept and the amount
     await expect(page.getByText('Limpieza')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('-$50.00')).toBeVisible();
+    // es-MX (test default locale): formatMoney(-50) => '-MX$50.00'.
+    await expect(page.getByText('-MX$50.00')).toBeVisible();
 
     await logout(page);
   });
