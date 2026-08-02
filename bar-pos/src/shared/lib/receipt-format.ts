@@ -1,6 +1,6 @@
 import type { Locale } from '@shared/lib/domain';
-import { formatMoneyIn } from '@shared/lib/format';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { formatMoneyIn } from '@shared/lib/format';
 import { formatModifierLines, groupByCategory, sanitize } from '@shared/lib/groupOrderItemsForReceipt';
 import i18n from '@shared/lib/i18n';
 
