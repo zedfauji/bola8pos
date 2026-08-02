@@ -2,11 +2,11 @@
  * MONEY DISPLAY COMPONENT
  *
  * Displays formatted money amounts with proper styling.
- * Uses domain-helpers.formatMoney() for consistent formatting.
+ * Uses @shared/lib/format.formatMoney() for consistent, locale-aware formatting.
  */
 
 import { useTranslation } from 'react-i18next';
-import { formatMoney } from '@shared/lib/domain-helpers';
+import { formatMoney } from '@shared/lib/format';
 import { cn } from '@shared/lib/utils';
 
 export type MoneyDisplayProps = {
