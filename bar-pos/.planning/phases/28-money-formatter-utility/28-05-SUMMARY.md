@@ -145,3 +145,11 @@ None - plan executed exactly as written (the reworded lint-disable comment and t
 ---
 *Phase: 28-money-formatter-utility*
 *Completed: 2026-08-02*
+
+## Self-Check: PASSED
+
+- FOUND: `.planning/phases/28-money-formatter-utility/28-05-SUMMARY.md`
+- FOUND: commit `65dec38` (Task 1)
+- FOUND: commit `a4fff2b` (Task 2)
+- FOUND: commit `5e1ea81` (Task 3)
+- FOUND: commit `dc19ea1` (docs: SUMMARY)
