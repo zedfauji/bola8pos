@@ -302,9 +302,9 @@
   "managePromotions": {
     "tab": {
       "summaryPoolGrant": "+{{minutes}} min pool time",
-      "summaryPercentage": "{{value}}% off",
-      "summaryFixedAmount": "-${{value}}",
-      "summaryFixedPrice": "Fixed at ${{value}}",
+      "summaryPercentage": "{{value}} off",
+      "summaryFixedAmount": "-{{value}}",
+      "summaryFixedPrice": "Fixed at {{value}}",
       "failedToCreate": "Failed to create promotion",
       "promotionDeleted": "Promotion deleted",
       "failedToDelete": "Failed to delete promotion",
