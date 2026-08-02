@@ -886,12 +886,12 @@ Plans:
 **Goal:** Consolidate money formatting into one `shared/lib/format.ts` (`formatMoney` / `parseMoneyInput` / `formatPercent`) backed by `Intl.NumberFormat`, respecting the Phase 21 locale, with a codemod to migrate existing call sites and an ESLint rule (`no-raw-money-format`) to prevent regressions.
 **Requirements:** SC-1..SC-4 below (no REQUIREMENTS.md for this milestone; POS-COMPARISON.md §28 no longer present — scope locked in 28-CONTEXT.md D-01..D-09)
 **Depends on:** Phase 21
-**Plans:** 9 plans
+**Plans:** 1/9 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 28-01-PLAN.md — format.ts core (formatMoney/formatMoneyIn/formatPercent/parseMoneyInput) + tests + MoneyDisplay wiring (tracer, Wave 1) (SC-1)
+- [x] 28-01-PLAN.md — format.ts core (formatMoney/formatMoneyIn/formatPercent/parseMoneyInput) + tests + MoneyDisplay wiring (tracer, Wave 1) (SC-1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

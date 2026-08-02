@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
 current_phase: 28
-current_phase_name: Money Formatter Utility
-status: planning
+current_phase_name: money-formatter-utility
+status: executing
 stopped_at: Completed 27-06-PLAN.md
-last_updated: "2026-08-01T10:19:54.765Z"
-last_activity: 2026-08-01
-last_activity_desc: Phase 27 complete, transitioned to Phase 28
+last_updated: "2026-08-02T19:15:58.112Z"
+last_activity: 2026-08-02
+last_activity_desc: Phase 28 execution started
 progress:
   total_phases: 28
   completed_phases: 24
-  total_plans: 170
+  total_plans: 179
   completed_plans: 170
   percent: 86
 ---
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Phase 27 — one-shot-inventory-cigarette-box-pattern
+**Current focus:** Phase 28 — money-formatter-utility
 
 ## Current Position
 
-Phase: 28 — Money Formatter Utility
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-01 — Phase 27 complete, transitioned to Phase 28
+Phase: 28 (money-formatter-utility) — EXECUTING
+Plan: 1 of 9
+Status: Executing Phase 28
+Last activity: 2026-08-02 — Phase 28 execution started
 
 ## Session Log
 
