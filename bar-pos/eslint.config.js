@@ -13,6 +13,7 @@ import boundaries from 'eslint-plugin-boundaries'
 import tailwindcss from 'eslint-plugin-tailwindcss'
 import i18next from 'eslint-plugin-i18next'
 import { uiDriftSelectors } from './eslint-rules/no-ui-drift.js'
+import { rawMoneyFormatSelectors } from './eslint-rules/no-raw-money-format.js'
 import path from 'node:path'
 
 export default tseslint.config({
@@ -143,6 +144,7 @@ export default tseslint.config({
         selector: 'ExportAllDeclaration',
         message: 'Barrel exports (export *) are banned. Export only what you explicitly need.',
       },
+      ...rawMoneyFormatSelectors,
     ],
   },
 },
@@ -189,6 +191,39 @@ export default tseslint.config({
         message: 'Barrel exports (export *) are banned. Export only what you explicitly need.',
       },
       ...uiDriftSelectors,
+      ...rawMoneyFormatSelectors,
+    ],
+  },
+},
+{
+  // D-08/D-09: money-selector exemptions. Later and narrower than the base
+  // block and the pages/widgets/features block above, so per the REPLACE
+  // (not merge) gotcha documented on the tailwindcss block, this object's
+  // no-restricted-syntax fully overrides theirs for exactly this file set —
+  // restating only the barrel-export selector, with no UI-drift or money
+  // selectors. src/shared/lib/format.ts is exempt because it cannot be
+  // written without the raw constructs it bans; test/story/mocks/e2e-spec
+  // files are exempt because they legitimately assert on or construct raw
+  // money strings as fixtures, not production display code. Deliberately
+  // NOT exempt: src/shared/lib/receipt-format.ts and
+  // src/shared/lib/exporters/pdf.tsx (verified against real content in
+  // plan 08 — both had genuine hand-built currency strings, migrated in
+  // plan 02).
+  files: [
+    'src/shared/lib/format.ts',
+    '**/*.test.ts',
+    '**/*.test.tsx',
+    '**/*.stories.tsx',
+    '**/mocks.ts',
+    'e2e/**/*.spec.ts',
+  ],
+  rules: {
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'ExportAllDeclaration',
+        message: 'Barrel exports (export *) are banned. Export only what you explicitly need.',
+      },
     ],
   },
 },
