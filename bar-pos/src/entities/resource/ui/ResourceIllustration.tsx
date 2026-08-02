@@ -7,7 +7,7 @@
 
 import { useTranslation } from 'react-i18next';
 import type { Resource } from '@shared/lib/domain';
-import { formatMoney } from '@shared/lib/domain-helpers';
+import { formatMoney } from '@shared/lib/format';
 
 type ResourceStatus = Resource['status'];
 
@@ -312,7 +312,7 @@ export function ResourceIllustration({
           <span className="font-mono text-2xl tracking-wide text-white">
             {formatSeconds(timer.totalSeconds)}
           </span>
-          <span className="font-mono text-sm text-white">${formatMoney(timer.currentCharge)}</span>
+          <span className="font-mono text-sm text-white">{formatMoney(timer.currentCharge)}</span>
         </div>
       )}
 
