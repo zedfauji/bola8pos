@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useCombos, comboKeys } from '@entities/combo';
 import type { Product } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
 import { supabase } from '@shared/lib/supabase';
@@ -83,7 +84,7 @@ function useMutationDeleteCombo() {
 
 function formatPrice(product: Product): string {
   if (product.comboPriceOverride != null) {
-    return `$${product.comboPriceOverride.toFixed(2)}`;
+    return formatMoney(product.comboPriceOverride);
   }
   return i18n.t('featMgmt:manageCombos.tab.sumOfChildren');
 }

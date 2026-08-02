@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Product, Modifier } from '@entities/product/model/types';
+import { formatMoney } from '@shared/lib/format';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
@@ -88,11 +89,9 @@ export function ModifierSheet({ product, open, onConfirm, onClose }: ModifierShe
                 <Label htmlFor={modifier.id} className="flex flex-1 cursor-pointer justify-between">
                   <span>{modifier.name}</span>
                   <span className="font-medium">
-                    {modifier.priceDelta > 0
-                      ? `+$${modifier.priceDelta.toFixed(2)}`
-                      : modifier.priceDelta < 0
-                        ? `-$${Math.abs(modifier.priceDelta).toFixed(2)}`
-                        : t('addItem.free')}
+                    {modifier.priceDelta !== 0
+                      ? formatMoney(modifier.priceDelta, { showSign: true })
+                      : t('addItem.free')}
                   </span>
                 </Label>
               </div>

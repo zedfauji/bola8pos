@@ -7,6 +7,7 @@
 
 import { useTranslation } from 'react-i18next';
 import type { OrderItem } from '@entities/tab/model/types';
+import { formatMoney } from '@shared/lib/format';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { Badge } from '@shared/ui/badge';
 
@@ -47,7 +48,8 @@ export function OrderItemCard({ item }: OrderItemCardProps) {
             {item.modifiers.map(mod => (
               <Badge key={mod.id} variant="secondary" className="text-xs">
                 {mod.name}
-                {mod.priceDelta > 0 && ` +$${(mod.priceDelta / 100).toFixed(2)}`}
+                {mod.priceDelta > 0 &&
+                  ` ${formatMoney(mod.priceDelta / 100, { showSign: true })}`}
               </Badge>
             ))}
           </div>

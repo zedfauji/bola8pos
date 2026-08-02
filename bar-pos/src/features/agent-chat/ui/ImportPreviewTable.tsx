@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { formatMoney } from '@shared/lib/format';
 import { Button } from '@shared/ui/button';
 
 interface ImportPreviewTableProps {
@@ -45,7 +46,7 @@ export function ImportPreviewTable({
               <tr key={idx} className="border-b border-border/50 last:border-0">
                 <td className="py-1 text-left text-foreground">{p.name}</td>
                 <td className="py-1 text-right text-foreground">
-                  ${p.price.toFixed(2)}
+                  {formatMoney(p.price)}
                 </td>
               </tr>
             ))}

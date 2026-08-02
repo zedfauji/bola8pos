@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import type { Category, Modifier, Product } from '@shared/lib/domain';
 import { ProductCreateSchema, ProductUpdateSchema, UuidSchema } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { FormField } from '@shared/ui/FormField';
 import { MoneyInput } from '@shared/ui/MoneyInput';
 import { POSButton } from '@shared/ui/POSButton';
@@ -364,10 +365,9 @@ export function ProductForm({
                   />
                   <label htmlFor={`mod-${m.id}`} className="text-sm">
                     {m.name}{' '}
-                    {/* eslint-disable i18next/no-literal-string -- signed money formatting ('+'/parens), not UI copy */}
+                    {/* eslint-disable i18next/no-literal-string -- signed money formatting (parens), not UI copy */}
                     <span className="text-muted-foreground">
-                      ({m.priceDelta >= 0 ? '+' : ''}
-                      {m.priceDelta.toFixed(2)})
+                      ({formatMoney(m.priceDelta, { showSign: true })})
                     </span>
                     {/* eslint-enable i18next/no-literal-string */}
                   </label>

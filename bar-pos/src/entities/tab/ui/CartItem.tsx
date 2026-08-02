@@ -1,6 +1,7 @@
 import { X, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { CartItem as CartItemType } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
 import { QuantityControl } from '@shared/ui/QuantityControl';
 import { Badge } from '@shared/ui/badge';
@@ -38,7 +39,7 @@ export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartI
             {item.selectedModifiers.map(mod => (
               <Badge key={mod.id} variant="secondary" className="text-xs">
                 {mod.name}
-                {mod.priceDelta > 0 ? ` +$${mod.priceDelta.toFixed(2)}` : ''}
+                {mod.priceDelta > 0 ? ` ${formatMoney(mod.priceDelta, { showSign: true })}` : ''}
               </Badge>
             ))}
           </div>
