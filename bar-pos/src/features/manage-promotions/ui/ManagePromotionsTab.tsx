@@ -18,6 +18,7 @@ import {
   useMutationDeletePromotion,
 } from '@entities/promotion';
 import type { Promotion, PromotionTargetType } from '@shared/lib/domain';
+import { formatMoney, formatPercent } from '@shared/lib/format';
 import i18n from '@shared/lib/i18n';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { Button } from '@shared/ui/button';
@@ -58,15 +59,15 @@ function formatRowSummary(promo: Promotion): string {
   switch (promo.discountType) {
     case 'percentage':
       return i18n.t('featMgmt:managePromotions.tab.summaryPercentage', {
-        value: promo.discountValue,
+        value: formatPercent(promo.discountValue),
       });
     case 'fixed_amount':
       return i18n.t('featMgmt:managePromotions.tab.summaryFixedAmount', {
-        value: promo.discountValue.toFixed(2),
+        value: formatMoney(promo.discountValue),
       });
     case 'fixed_price':
       return i18n.t('featMgmt:managePromotions.tab.summaryFixedPrice', {
-        value: promo.discountValue.toFixed(2),
+        value: formatMoney(promo.discountValue),
       });
     default:
       return '';

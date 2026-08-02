@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import type { OrderItem, Tab } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { computeEvenSplit, toCents } from '@shared/lib/split-math';
 import { cn } from '@shared/lib/utils';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
@@ -219,7 +220,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
       toast.success(
         t('splitTab.evenlySplitSuccess', {
           n,
-          amount: evenSplit ? `$${(evenSplit.baseAmount / 100).toFixed(2)}` : '',
+          amount: evenSplit ? formatMoney(evenSplit.baseAmount / 100) : '',
         })
       );
       resetAllState();
