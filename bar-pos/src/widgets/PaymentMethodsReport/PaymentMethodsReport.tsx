@@ -4,6 +4,7 @@ import { Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { ExportButtons } from '@features/export-report';
 import { usePaymentMethodsReport } from '@entities/tab/model/queries-reports';
 import type { PaymentMethodRow } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { EmptyState, LoadingSpinner } from '@shared/ui';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 
@@ -114,8 +115,8 @@ export function PaymentMethodsReport({ dateRange }: Props) {
                   </TableCell>
                   <TableCell className="capitalize">{row.method}</TableCell>
                   <TableCell className="tabular-nums">{row.legCount}</TableCell>
-                  <TableCell className="tabular-nums">${row.grossAmount.toFixed(2)}</TableCell>
-                  <TableCell className="tabular-nums">${row.tipAmount.toFixed(2)}</TableCell>
+                  <TableCell className="tabular-nums">{formatMoney(row.grossAmount)}</TableCell>
+                  <TableCell className="tabular-nums">{formatMoney(row.tipAmount)}</TableCell>
                 </TableRow>
               );
             })}

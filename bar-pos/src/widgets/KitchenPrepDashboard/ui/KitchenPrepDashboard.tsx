@@ -54,6 +54,7 @@ export function KitchenPrepDashboard() {
           const uom = ingById.get(row.original.prepIngredientId)?.uom ?? '';
           return (
             <span className="font-mono text-sm tabular-nums">
+              {/* eslint-disable-next-line no-restricted-syntax -- quantity in a unit of measure (uom), not money; the money formatter would wrongly print a currency symbol here */}
               {row.original.qtyProduced.toFixed(2)} {uom}
             </span>
           );

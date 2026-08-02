@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useCajaList, useCajaReport } from '@entities/caja';
 import type { CajaEntry, CajaReport, CajaSession } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { DataTable } from '@shared/ui/DataTable';
 import { LoadingSpinner } from '@shared/ui/LoadingSpinner';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
@@ -63,7 +64,10 @@ function buildEntriesColumns(t: TFunction<'wPanels'>): ColumnDef<CajaEntry>[] {
       header: t('cajaReportPanel.amount'),
       cell: ({ row }) => (
         <span className={row.original.type === 'expense' ? 'text-red-400' : 'text-green-400'}>
-          {row.original.type === 'expense' ? '-' : '+'}${row.original.amount.toFixed(2)}
+          {formatMoney(
+            row.original.type === 'expense' ? -row.original.amount : row.original.amount,
+            { showSign: true }
+          )}
         </span>
       ),
     },
@@ -193,7 +197,7 @@ export function CajaReportPanel() {
                   <span className="text-muted-foreground">
                     {t('cajaReportPanel.incomeEntries')}
                   </span>
-                  <span className="text-green-400">${report.summary.totalIncome.toFixed(2)}</span>
+                  <span className="text-green-400">{formatMoney(report.summary.totalIncome)}</span>
                 </div>
               )}
               {report.summary.totalExpenses > 0 && (
@@ -201,7 +205,7 @@ export function CajaReportPanel() {
                   <span className="text-muted-foreground">
                     {t('cajaReportPanel.expenseEntries')}
                   </span>
-                  <span className="text-red-400">${report.summary.totalExpenses.toFixed(2)}</span>
+                  <span className="text-red-400">{formatMoney(report.summary.totalExpenses)}</span>
                 </div>
               )}
               {(report.summary.totalExpenses > 0 || report.summary.totalIncome > 0) && (
@@ -220,8 +224,7 @@ export function CajaReportPanel() {
                         : 'text-destructive'
                     }
                   >
-                    {report.cashReconciliation.variance > 0 ? '+' : ''}
-                    {report.cashReconciliation.variance.toFixed(2)}
+                    {formatMoney(report.cashReconciliation.variance, { showSign: true })}
                   </span>
                 ) : (
                   <span className="text-muted-foreground">—</span>
@@ -252,13 +255,13 @@ export function CajaReportPanel() {
                   <span>
                     {t('cajaReportPanel.totalExpensesLabel')}{' '}
                     <span className="text-red-400 font-mono">
-                      ${report.summary.totalExpenses.toFixed(2)}
+                      {formatMoney(report.summary.totalExpenses)}
                     </span>
                   </span>
                   <span>
                     {t('cajaReportPanel.totalIncomeLabel')}{' '}
                     <span className="text-green-400 font-mono">
-                      ${report.summary.totalIncome.toFixed(2)}
+                      {formatMoney(report.summary.totalIncome)}
                     </span>
                   </span>
                 </div>

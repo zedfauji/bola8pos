@@ -14,6 +14,7 @@ import {
 import { ExportButtons } from '@features/export-report';
 import { useModifierPopularityReport } from '@entities/tab/model/queries-reports';
 import type { ModifierPopularityRow } from '@shared/lib/domain';
+import { formatMoney } from '@shared/lib/format';
 import { EmptyState, LoadingSpinner } from '@shared/ui';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 
@@ -109,7 +110,7 @@ export function ModifierPopularityReport({ dateRange }: Props) {
               >
                 <TableCell>{row.modifierName}</TableCell>
                 <TableCell className="tabular-nums">{row.attachCount}</TableCell>
-                <TableCell className="tabular-nums">${row.revenue.toFixed(2)}</TableCell>
+                <TableCell className="tabular-nums">{formatMoney(row.revenue)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

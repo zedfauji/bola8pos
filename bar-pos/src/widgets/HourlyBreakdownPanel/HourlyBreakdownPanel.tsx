@@ -18,6 +18,7 @@ import {
   findSlowestHour,
   type HourlyRow,
 } from '@entities/tab/model/queries-reports';
+import { formatMoney } from '@shared/lib/format';
 import { EmptyState, LoadingSpinner, MoneyDisplay } from '@shared/ui';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 
@@ -92,7 +93,7 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
               <span className="font-semibold text-emerald-500">
                 {t('hourlyBreakdownPanel.hourRevenueValue', {
                   hour: formatHour(peakHour.hour),
-                  revenue: peakHour.revenue.toFixed(2),
+                  revenue: formatMoney(peakHour.revenue),
                 })}
               </span>
             </span>
@@ -103,7 +104,7 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
               <span className="font-semibold text-amber-400">
                 {t('hourlyBreakdownPanel.hourRevenueValue', {
                   hour: formatHour(slowestHour.hour),
-                  revenue: slowestHour.revenue.toFixed(2),
+                  revenue: formatMoney(slowestHour.revenue),
                 })}
               </span>
             </span>

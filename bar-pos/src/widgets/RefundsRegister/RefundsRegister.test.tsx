@@ -56,7 +56,7 @@ describe('RefundsRegister', () => {
     });
     renderWithProviders(<RefundsRegister dateRange={dateRange} />);
     // Total: 150.00 + 75.50 = 225.50
-    expect(screen.getByText('$225.50')).toBeInTheDocument();
+    expect(screen.getByText('MX$225.50')).toBeInTheDocument();
     // Totals row label
     expect(screen.getByText('Total')).toBeInTheDocument();
   });

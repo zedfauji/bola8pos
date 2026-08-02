@@ -98,7 +98,7 @@
     "emptyDescription": "No revenue recorded in this date range.",
     "peakLabel": "Peak:",
     "slowestLabel": "Slowest:",
-    "hourRevenueValue": "{{hour}} (${{revenue}})",
+    "hourRevenueValue": "{{hour}} ({{revenue}})",
     "columnHour": "Hour",
     "columnOrders": "Orders",
     "columnRevenue": "Revenue",
@@ -451,7 +451,7 @@
     "kitchenLabel": "Kitchen %",
     "percentagesOff": "Percentages total {{sum}}% — not 100%. You can still save.",
     "exampleTitle": "Example — $100.00 in tips splits to:",
-    "exampleBreakdown": "Floor ${{floor}} / Bar ${{bar}} / Kitchen ${{kitchen}}",
+    "exampleBreakdown": "Floor {{floor}} / Bar {{bar}} / Kitchen {{kitchen}}",
     "saving": "Saving...",
     "saveTipSplit": "Save Tip Split"
   },
