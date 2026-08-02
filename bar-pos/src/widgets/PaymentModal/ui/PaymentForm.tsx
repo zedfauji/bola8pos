@@ -14,6 +14,7 @@ import type { Tab } from '@entities/tab/model/types';
 import type { DiscountScope, DiscountType } from '@shared/lib/domain';
 import { getDiscountBase, calculateDiscountAmount } from '@shared/lib/domain-helpers';
 import type { ReceiptData } from '@shared/lib/edge-function-contracts';
+import { formatMoney } from '@shared/lib/format';
 import { groupOrderItems } from '@shared/lib/groupOrderItems';
 import { logger } from '@shared/lib/logger-instance';
 import {
@@ -656,7 +657,7 @@ export function PaymentForm({
                 />
                 {discountAmount > 0 && (
                   <p className="text-sm text-green-400" data-testid="discount-applied-label">
-                    {t('paymentForm.discountApplied', { amount: discountAmount.toFixed(2) })}
+                    {t('paymentForm.discountApplied', { amount: formatMoney(discountAmount) })}
                   </p>
                 )}
               </div>
@@ -871,7 +872,9 @@ export function PaymentForm({
                     )}
 
                     <p className="text-xs text-muted-foreground">
-                      {`Charges: $${(row.amount + row.tip).toFixed(2)}`}
+                      {t('paymentForm.splitRowCharges', {
+                        amount: formatMoney(row.amount + row.tip),
+                      })}
                     </p>
                   </div>
                 ))}
@@ -903,7 +906,9 @@ export function PaymentForm({
                         ? t('paymentForm.remainingToPay')
                         : splitRemaining === 0
                           ? t('paymentForm.fullyAllocated')
-                          : t('paymentForm.overBy', { amount: Math.abs(splitRemaining).toFixed(2) })}
+                          : t('paymentForm.overBy', {
+                              amount: formatMoney(Math.abs(splitRemaining)),
+                            })}
                     </span>
                     {splitRemaining >= 0 && <MoneyDisplay amount={splitRemaining} size="sm" />}
                   </div>
@@ -992,7 +997,7 @@ export function PaymentForm({
                     setCardChargeOverride(null);
                   }}
                 >
-                  {t('paymentForm.resetToComputed', { amount: runningTotal.toFixed(2) })}
+                  {t('paymentForm.resetToComputed', { amount: formatMoney(runningTotal) })}
                 </POSButton>
               )}
               <div className="space-y-2">
