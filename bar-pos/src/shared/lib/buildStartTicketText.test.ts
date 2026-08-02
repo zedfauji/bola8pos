@@ -4,8 +4,9 @@
  */
 
 import * as fc from 'fast-check';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { buildStartTicketText, type StartTicketOpts } from './buildStartTicketText';
+import i18n from './i18n/index';
 
 const baseOpts: StartTicketOpts = {
   barName: 'Bola 8',
@@ -16,13 +17,17 @@ const baseOpts: StartTicketOpts = {
 };
 
 describe('buildStartTicketText', () => {
+  afterEach(async () => {
+    await i18n.changeLanguage('es-MX'); // reset for other tests/consumers
+  });
+
   it('snapshot: known input produces expected formatted string', () => {
     const result = buildStartTicketText(baseOpts);
     // Check for presence of key elements
     expect(result).toContain('Bola 8');
     expect(result).toContain('START TICKET');
     expect(result).toContain('Main Table');
-    expect(result).toContain('$15/h');
+    expect(result).toContain('MX$15.00/h');
     // Snapshot the full result
     expect(result).toMatchSnapshot();
   });
