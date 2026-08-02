@@ -884,9 +884,21 @@ Plans:
 ### Phase 28: Money Formatter Utility
 
 **Goal:** Consolidate money formatting into one `shared/lib/format.ts` (`formatMoney` / `parseMoneyInput` / `formatPercent`) backed by `Intl.NumberFormat`, respecting the Phase 21 locale, with a codemod to migrate existing call sites and an ESLint rule (`no-raw-money-format`) to prevent regressions.
-**Requirements:** TBD (POS-COMPARISON.md §28 — source doc no longer present; scope locked in 28-CONTEXT.md)
+**Requirements:** SC-1..SC-4 below (no REQUIREMENTS.md for this milestone; POS-COMPARISON.md §28 no longer present — scope locked in 28-CONTEXT.md D-01..D-09)
 **Depends on:** Phase 21
-**Plans:** Not yet planned
+**Plans:** 9 plans
+
+Plans:
+
+- [ ] 28-01-PLAN.md — format.ts core (formatMoney/formatMoneyIn/formatPercent/parseMoneyInput) + tests + MoneyDisplay wiring (tracer, Wave 1) (SC-1)
+- [ ] 28-02-PLAN.md — locale-parameterized receipt/PDF consumers, ResourceIllustration double-symbol fix, domain-helpers clean break (Wave 2) (SC-2, SC-4)
+- [ ] 28-03-PLAN.md — shared-layer ad-hoc formatters (start ticket, agent tools) + MoneyInput exemption (Wave 2) (SC-2, SC-4)
+- [ ] 28-04-PLAN.md — wPanels surface: CajaDashboard + PaymentForm + wPanels catalogs (Wave 2) (SC-2, SC-4)
+- [ ] 28-05-PLAN.md — reports/admin surface: 9 widgets + wAdmin catalogs + formatPercent consumer (Wave 2) (SC-1, SC-2, SC-4)
+- [ ] 28-06-PLAN.md — features confirmation copy: refund, caja entry, promotions, paid-tab edit, split tab + featOrders/featMgmt catalogs (Wave 2) (SC-2, SC-4)
+- [ ] 28-07-PLAN.md — order-entry price deltas via showSign, combos/agent-chat prices, prep quantity exemptions (Wave 2) (SC-2, SC-4)
+- [ ] 28-08-PLAN.md — no-raw-money-format rule module + eslint.config.js wiring + full typecheck/lint/test gate (Wave 3) (SC-3, SC-4)
+- [ ] 28-09-PLAN.md — human verification of on-screen and printed money rendering in both locales (Wave 4, blocking checkpoints) (SC-4)
 
 **Success Criteria:**
 
