@@ -149,3 +149,7 @@ None - no external service configuration required.
 ---
 *Phase: 28-money-formatter-utility*
 *Completed: 2026-08-02*
+
+## Self-Check: PASSED
+
+All 9 modified source/catalog files and the SUMMARY.md itself confirmed present on disk. All 3 task commit hashes (`fe6ece4`, `f73e555`, `e46e523`) confirmed in `git log --oneline --all`.
