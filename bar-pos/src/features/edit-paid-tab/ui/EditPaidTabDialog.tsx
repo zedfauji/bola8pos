@@ -14,6 +14,7 @@ import { ManagerPinDialog } from "@features/manager-pin-gate";
 import { useProducts } from "@entities/product";
 import { tabKeys, useTab } from "@entities/tab";
 import { TERMINAL_ID } from "@shared/config/constants";
+import { formatMoney } from '@shared/lib/format';
 import { supabase } from "@shared/lib/supabase";
 import { handleVersionError } from "@shared/lib/version-error";
 import {
@@ -404,7 +405,7 @@ export function EditPaidTabDialog({ open, tabId, onOpenChange }: EditPaidTabDial
             </div>
             {totalDelta !== 0 && (
               <p className="text-xs text-muted-foreground">
-                {t("editPaidTab.totalDeltaHint", { amount: `$${Math.abs(totalDelta).toFixed(2)}` })}
+                {t("editPaidTab.totalDeltaHint", { amount: formatMoney(totalDelta, { showSign: true }) })}
               </p>
             )}
           </div>
