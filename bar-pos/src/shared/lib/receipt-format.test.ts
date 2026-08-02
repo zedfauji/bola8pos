@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReceiptData } from './edge-function-contracts';
+import i18n from './i18n';
 import type { PreChequeData } from './receipt-format';
 import { buildPreChequeText, buildThermalReceiptText } from './receipt-format';
 
@@ -144,6 +145,17 @@ describe('buildThermalReceiptText', () => {
     expect(text).toContain('Subtotal');
   });
 
+  it('28-02: building with en-US while the live i18n language is es-MX still yields the en-US symbol (no MX$ prefix)', async () => {
+    await i18n.changeLanguage('es-MX');
+    try {
+      const text = buildThermalReceiptText(baseReceipt(), 'en-US');
+      expect(text).not.toContain('MX$');
+      expect(text).toContain('$200.00');
+    } finally {
+      await i18n.changeLanguage('es-MX');
+    }
+  });
+
   // ---------------------------------------------------------------------
   // Category grouping + modifier lines (Phase 25, D-01/D-05)
   // ---------------------------------------------------------------------
@@ -268,6 +280,22 @@ describe('buildPreChequeText', () => {
     );
     expect(text).toContain('Billar');
     expect(text).toContain('30m');
+  });
+
+  it('28-02: pool-rate line renders the rate through formatMoneyIn (two-decimal, locale-symbol) instead of a hand-built currency string', () => {
+    const text = buildPreChequeText(
+      basePreCheque({
+        poolCharge: {
+          tableLabel: 'Mesa 5',
+          billedMinutes: 30,
+          ratePerHour: 60,
+          amount: 30,
+        },
+        subtotal: 120,
+      }),
+      'es-MX'
+    );
+    expect(text).toContain('MX$60.00/h');
   });
 
   it('subtotal includes pool amount when poolCharge present', () => {
