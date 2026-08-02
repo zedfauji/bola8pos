@@ -131,3 +131,13 @@ Both tasks in this plan carried `tdd="true"` in their frontmatter. Implementatio
 ---
 *Phase: 28-money-formatter-utility*
 *Completed: 2026-08-02*
+
+## Self-Check: PASSED
+
+- FOUND: src/shared/lib/format.ts
+- FOUND: src/shared/lib/format.test.ts
+- FOUND: src/shared/ui/MoneyDisplay.test.tsx
+- FOUND: .planning/phases/28-money-formatter-utility/28-01-SUMMARY.md
+- FOUND commit: 4a18c84
+- FOUND commit: 2d77c94
+- FOUND commit: d579663
