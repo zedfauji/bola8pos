@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useRecipeVarianceReport } from '@entities/tab/model/queries-reports';
 import type { RecipeVarianceRow } from '@shared/lib/domain';
+import { formatPercent } from '@shared/lib/format';
 import { EmptyState, LoadingSpinner } from '@shared/ui';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 
@@ -63,7 +64,7 @@ export function RecipeVarianceReport({ dateRange }: Props) {
                 <TableCell className="tabular-nums">{row.theoreticalUsed.toFixed(3)}</TableCell>
                 <TableCell className="tabular-nums">{row.physicalDelta.toFixed(3)}</TableCell>
                 <TableCell className="tabular-nums font-mono">
-                  {row.variancePct.toFixed(2)}%
+                  {formatPercent(row.variancePct, { decimals: 2 })}
                 </TableCell>
               </TableRow>
             ))}
