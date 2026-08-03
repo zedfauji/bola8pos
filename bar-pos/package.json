@@ -29,7 +29,8 @@
     "test:e2e:report": "playwright show-report",
     "test:e2e:visual": "playwright test --config=playwright.visual.config.ts",
     "index-codebase": "tsx scripts/indexCodebase.ts",
-    "docs:tokens": "npx tsx scripts/generate-design-tokens.ts"
+    "docs:tokens": "npx tsx scripts/generate-design-tokens.ts",
+    "audit:tech-debt": "bash scripts/run-tech-debt-audit.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
@@ -121,8 +122,11 @@
     "fast-check": "^4.6.0",
     "glob": "^13.0.6",
     "husky": "^9.1.7",
+    "jscpd": "^5.0.14",
     "jsdom": "^29.0.2",
+    "knip": "^6.31.0",
     "lint-staged": "^16.4.0",
+    "madge": "^8.0.0",
     "openai": "^6.34.0",
     "playwright": "^1.59.1",
     "postcss": "^8.5.10",

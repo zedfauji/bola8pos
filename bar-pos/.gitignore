@@ -60,6 +60,7 @@ tsc_errors.txt
 fix_lint.cjs
 docs/
 tickets/
+.audit-tmp/
 
 # Markdown docs (CLAUDE.md is the exception — it's project instructions)
 *.md
