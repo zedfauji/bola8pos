@@ -156,6 +156,7 @@ Last activity: 2026-08-02 — Phase 28 execution started
 - Phase 33.1 inserted after Phase 33: E2E Test/RBAC Drift Fixes — closes Phase 33's outstanding Success Criterion 3 gap (06-transfer T4/T5, 09-rbac T7/T-RP-01/T-RP-02, all pre-existing/out-of-scope) (URGENT)
 - Phase 36 added: Migrate development environment from Windows to Ubuntu
 - Phase 37 edited: expanded Goal with VM approach options + explicit open question (separate Windows machine or not) to preserve context for later /gsd-discuss-phase 37, per user request while Phase 36 executes
+- Phase 38 added: E2E Test Infrastructure & Seed Data Reliability — spun off from Phase 28's SC-4 checkpoint after automated e2e verification surfaced shared-test-DB pollution/isolation gaps, missing pool-tables and reports seed data, unrelated to money formatting
 
 ## Decisions
 

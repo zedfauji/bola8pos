@@ -958,6 +958,26 @@ Plans:
 
 - [ ] TBD (run /gsd-plan-phase 37 to break down)
 
+### Phase 38: E2E Test Infrastructure & Seed Data Reliability
+
+**Goal:** [To be planned]
+
+Make the e2e suite (`bar-pos/e2e/`) reliably runnable and re-runnable against the shared Supabase test database without manual cleanup between runs. Discovered during Phase 28's SC-4 checkpoint while validating money-formatting changes via automated e2e — found real, reproducible gaps unrelated to money formatting:
+
+1. **Shared test-DB pollution/isolation** — leftover open tabs and stale caja sessions from prior test runs block later tests. Example: `02-caja.spec.ts` "Manager closes caja" fails with `OPEN_TABS_EXIST` because the caja being closed is a stale one opened by an unrelated prior test run (`By: __pool_promo_rpc_test_...`); `forceCloseAllOpenTabs()` in `e2e/helpers/supabase.ts` force-voids all `status='open'` tabs table-wide but this wasn't sufficient. Repeated full-suite runs in a single session made failures *worse*, not better — evidence of accumulating pollution rather than flaky app code.
+2. **Pool-tables seed data** — no pool table is left in an "available" state for `04-pool-timer.spec.ts` to start a session against; all 5 tests in that file fail waiting on the "Start Session" button.
+3. **Reports seed data** — several `07-reports.spec.ts` tabs (Staff Performance, Tip Distribution) need specific seeded date-ranged data and show empty/failing states without it.
+
+Also fixed in-flight (unrelated pre-existing bugs, already committed on `main` — do not re-fix): a `getByRole('heading',{name:'POS'})` substring-match collision in `46-i18n-locale-switch.spec.ts`, and a `level:1` vs actual `level:2` + duplicate-heading ambiguity for the `/staff` page heading in `02-caja.spec.ts`/`23-caja-entries.spec.ts`.
+
+**Requirements**: TBD
+**Depends on:** Phase 37
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 38 to break down)
+
 ---
 
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
