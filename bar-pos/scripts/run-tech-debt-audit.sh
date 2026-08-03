@@ -15,4 +15,10 @@ mkdir -p "$OUT"
 npx knip --reporter json > "$OUT/knip-report.json" || true
 npx knip --production --reporter json > "$OUT/knip-production.json" || true
 
+npx jscpd . --reporters json --output "$OUT/jscpd-out" || true
+
+npx madge --circular --json --ts-config tsconfig.json --extensions ts,tsx \
+  --exclude '(graphify-out|supabase\.types\.ts|\.stories\.tsx|\.test\.tsx?)$' \
+  src > "$OUT/madge-circular.json" || true
+
 echo "Reports written to $OUT"
