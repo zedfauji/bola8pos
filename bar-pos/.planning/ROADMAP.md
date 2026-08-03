@@ -326,9 +326,16 @@ Plans:
 > Corrected 2026-08-03 during `/gsd-plan-phase 10`: this section previously claimed the phase had already executed via a `10-01-PLAN.md` dated 2026-04-27. No `10-*` phase directory ever existed on disk — that work was absorbed into Phase 11's combined `11-ai-slob-technical-debt-audit-remediation/` folder. The top-level checklist entry and `PROJECT.md`'s backlog list were always correct; this detailed section was the only stale copy.
 
 Plans:
+**Wave 1**
 
 - [ ] 10-01-PLAN.md — Audit pipeline: install knip/jscpd/madge devDeps + `knip.json`/`.jscpd.json` + `scripts/run-tech-debt-audit.sh` + `audit:tech-debt` npm script, all 8 checks wired (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 10-02-PLAN.md — Structural-smell probes (`as any` / TODO-FIXME / file sizes) + full whole-codebase audit run + per-report digests (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 10-03-PLAN.md — Write severity-grouped `10-CHECKLIST.md` + cross-check against the 5 pending todos and Phase 38 + count reconciliation (Wave 3)
 
 ---
