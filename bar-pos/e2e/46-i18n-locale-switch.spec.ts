@@ -205,7 +205,7 @@ test.describe('i18n locale switch (SC-1/SC-4)', () => {
 
     // Surface 1: POS page.
     await page.getByRole('button', { name: 'POS Register' }).click();
-    await expect(page.getByRole('heading', { name: 'POS' })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('heading', { name: 'POS', exact: true })).toBeVisible({ timeout: 20_000 });
     await assertNoRawKeys(page, 'POS page');
 
     // D-01/D-08: while the acting admin session is en-US, product-grid
@@ -272,7 +272,7 @@ test.describe('i18n locale switch (SC-1/SC-4)', () => {
     await page.getByRole('link', { name: /home/i }).click();
     await expect(page.getByText(/^Welcome, /)).toBeVisible({ timeout: 15_000 });
     await page.getByRole('button', { name: 'POS Register' }).click();
-    await expect(page.getByRole('heading', { name: 'POS' })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('heading', { name: 'POS', exact: true })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/^MX\$\d/).first()).toBeVisible({ timeout: 15_000 });
 
     await logout(page);

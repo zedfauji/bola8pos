@@ -13,7 +13,9 @@ test.describe('Caja Management', () => {
   test('Manager opens caja', async ({ page }) => {
     await loginAs(page, 'manager');
     await page.goto('/staff');
-    await expect(page.getByRole('heading', { name: 'Staff', level: 1 })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Staff', level: 2 }).first()
+    ).toBeVisible();
     await page.getByRole('button', { name: 'Open Caja' }).click();
     const openDlg = page.getByRole('dialog', { name: 'Open Caja' });
     await expect(openDlg).toBeVisible();

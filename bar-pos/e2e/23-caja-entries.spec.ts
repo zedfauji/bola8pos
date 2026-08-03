@@ -28,7 +28,7 @@ test.describe('Caja Entries (Expenses & Income)', () => {
     await page.goto('/');
     await loginAs(page, 'manager');
     await page.goto('/staff');
-    await expect(page.getByRole('heading', { name: 'Staff', level: 1 })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Staff', level: 2 }).first()).toBeVisible({
       timeout: 30_000,
     });
   });
