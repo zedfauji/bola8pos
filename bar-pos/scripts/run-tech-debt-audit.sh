@@ -21,6 +21,28 @@ npx madge --circular --json --ts-config tsconfig.json --extensions ts,tsx \
   --exclude '(graphify-out|supabase\.types\.ts|\.stories\.tsx|\.test\.tsx?)$' \
   src > "$OUT/madge-circular.json" || true
 
+# Unjustified `as any` probe (D-02). Emits file:line:content so a same-line
+# justification comment (CLAUDE.md: "No any without a justification comment
+# on the same line") is visible in the output without opening the file.
+# Classification of justified vs unjustified is Plan 03's job, not this
+# script's — the raw matched line carries the evidence either way.
+grep -rn --include='*.ts' --include='*.tsx' --exclude-dir=graphify-out \
+  -E '\bas any\b' src \
+  | grep -v '^src/shared/lib/supabase\.types\.ts:' > "$OUT/as-any.txt" || true
+
+# Stale TODO/FIXME probe (D-02). No git-blame age calculation here — Plan 03
+# only needs file:line at this tier.
+grep -rn --include='*.ts' --include='*.tsx' \
+  -E 'TODO|FIXME' src e2e > "$OUT/todo-fixme.txt" || true
+
+# Oversized-file probe (D-02). Line-counts every src .ts/.tsx file (excluding
+# the generated supabase.types.ts) and sorts descending so the head of the
+# file is the finding list; threshold application is Plan 03's job.
+find src -type f \( -name '*.ts' -o -name '*.tsx' \) \
+  -not -path 'src/graphify-out/*' \
+  -not -path 'src/shared/lib/supabase.types.ts' \
+  -print0 | xargs -0 wc -l | grep -v ' total$' | sort -rn > "$OUT/file-sizes.txt" || true
+
 npx eslint src --format json --max-warnings 0 > "$OUT/eslint-report.json" || true
 
 npx tsc --noEmit --pretty false > "$OUT/tsc-errors.txt" 2>&1 || true
