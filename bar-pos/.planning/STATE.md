@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
-current_phase: 28
-current_phase_name: money-formatter-utility
+current_phase: 10
+current_phase_name: ai-slob-technical-debt-checklist
 status: executing
 stopped_at: Completed 27-06-PLAN.md
-last_updated: "2026-08-03T16:31:14.465Z"
-last_activity: 2026-08-02
-last_activity_desc: Phase 28 execution started
+last_updated: "2026-08-03T16:36:11.146Z"
+last_activity: 2026-08-03
+last_activity_desc: Phase 10 execution started
 progress:
   total_phases: 28
   completed_phases: 24
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Phase 28 — money-formatter-utility
+**Current focus:** Phase 10 — ai-slob-technical-debt-checklist
 
 ## Current Position
 
-Phase: 28 (money-formatter-utility) — EXECUTING
-Plan: 1 of 9
-Status: Ready to execute
-Last activity: 2026-08-02 — Phase 28 execution started
+Phase: 10 (ai-slob-technical-debt-checklist) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 10
+Last activity: 2026-08-03 — Phase 10 execution started
 
 ## Session Log
 
