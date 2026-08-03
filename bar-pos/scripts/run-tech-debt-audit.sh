@@ -21,4 +21,17 @@ npx madge --circular --json --ts-config tsconfig.json --extensions ts,tsx \
   --exclude '(graphify-out|supabase\.types\.ts|\.stories\.tsx|\.test\.tsx?)$' \
   src > "$OUT/madge-circular.json" || true
 
+npx eslint src --format json --max-warnings 0 > "$OUT/eslint-report.json" || true
+
+npx tsc --noEmit --pretty false > "$OUT/tsc-errors.txt" 2>&1 || true
+
+npx vitest run --project unit --reporter json --outputFile "$OUT/vitest-results.json" || true
+
+# Playwright's json reporter is already wired in playwright.config.ts with a
+# fixed outputFile; PLAYWRIGHT_JSON_OUTPUT_FILE overrides that path so this
+# script's report lands in $OUT instead (verified: env var wins over the
+# config's own reporter outputFile option). Run last — by far the slowest
+# check, and every other report is already on disk if this is interrupted.
+PLAYWRIGHT_JSON_OUTPUT_FILE="$OUT/playwright-results.json" npx playwright test || true
+
 echo "Reports written to $OUT"
