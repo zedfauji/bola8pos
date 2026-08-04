@@ -44,9 +44,19 @@ A second environment gap surfaced at Task 2's `npm run test` verification step: 
 - Post-fix `npx knip --reporter json` `unlisted` count: **0** (down from 34 default-mode / 0 production-mode pre-fix).
 - All 34 `unlisted` findings: **RESOLVED — declared directly**.
 
+## Task 3 Resolution — `scripts/audit-ui-drift.ts` (whole-file deletion tracer)
+
+- Sanity check: `grep -rn "audit-ui-drift" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" --include="*.sh" --include="*.yml"` (excluding `node_modules/`, `.audit-tmp/`) — **2 hits, both inside the file being deleted itself** (a header comment and a self-referential string in its own generated-markdown output), plus **1 hit in `eslint-rules/no-ui-drift.js:13`**, a doc comment noting that rule's regex patterns were ported 1:1 from this script — confirmed by reading the file that it is a standalone ESM module with its own hardcoded copy of the patterns, not an import/require of `audit-ui-drift.ts`. Also explicitly checked `package.json` scripts, `.github/workflows/*.yml`, and `scripts/*.sh` for invocations — zero hits. **Total hit count outside the file itself with any functional (non-comment) dependency: 0.**
+- Disposition: **DELETED**.
+- `git rm scripts/audit-ui-drift.ts`.
+- `npm run typecheck`: clean, no errors.
+- `npm run lint`: clean (pre-existing `[boundaries]` legacy-selector-syntax warning, unrelated to this deletion, out of scope per SCOPE BOUNDARY).
+- `npm run test`: first run showed 1 flaky failure in `CajaDashboard.test.tsx` (parallel-run timing against the shared cloud Supabase test instance, per its `notifyManager`/timeout stack trace) — re-ran that file alone (14/14 passed) and re-ran the full suite (**1391 passed, 15 todo**, matching baseline exactly) to confirm it was pre-existing flakiness, not a regression from this deletion.
+- Post-deletion `npx knip --reporter json` and `--production --reporter json`: `scripts/audit-ui-drift.ts` no longer appears under either report's `files` array. Recomputed the full distinct-baseline set-union: **files 61→60, sum 982→981** (exports/types/duplicates all unchanged — confirms no new finding appeared in its place).
+
 ## Disposition Log
 
 | Finding | Category | Disposition | Task | Notes |
 |---|---|---|---|---|
 | `@testing-library/user-event` unlisted, 34 findings across 34 `*.test.tsx` files | Blocking / unlisted | **RESOLVED — declared directly** | 2 | `^14.6.1` devDependency added; `npx knip` unlisted count now 0; `npm run test` unchanged at 1391 passing |
-| `scripts/audit-ui-drift.ts` | High / unused file (both modes) | *pending — Task 3* | 3 | — |
+| `scripts/audit-ui-drift.ts` | High / unused file (both modes) | **DELETED** | 3 | Sanity-check command: `grep -rn "audit-ui-drift" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" --include="*.sh" --include="*.yml"`; hit count outside the file itself with functional dependency: 0 (1 doc-comment-only hit in `eslint-rules/no-ui-drift.js`, no import/invocation); typecheck/lint/test all green (1391 passing, matching baseline); knip no longer flags it in either mode; distinct baseline dropped 982→981 with no new findings appearing |
