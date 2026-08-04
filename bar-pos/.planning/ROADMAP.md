@@ -992,13 +992,13 @@ Plans:
 **Goal:** Remediate Phase 10's audit Blocking tier (181: E2E triage-and-fix + knip unlisted deps) and all knip dead-code findings (High 1917 + Medium 37, Medium skipped per false-positive review). jscpd, as-any, unused deps, and Low tier are split into separate future phases.
 **Requirements**: TBD (no REQUIREMENTS.md entries map to this phase — 39-CONTEXT.md decision IDs D-01..D-09 serve as the acceptance-criteria identifiers)
 **Depends on:** Phase 10 (audit source), overlaps Phase 38 (E2E infra root causes)
-**Plans:** 12 plans in 5 waves (two parallel tracks: A = E2E triage, B = knip dead-code)
+**Plans:** 2/12 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 39-01-PLAN.md — Track B tracer: knip baseline, `@testing-library/user-event` devDep (34 Blocking findings), one whole-file deletion end to end
-- [ ] 39-02-PLAN.md — Track A tracer: full triage of `e2e/16-table-status.spec.ts` (16 findings), establishes the ledger format
+- [x] 39-01-PLAN.md — Track B tracer: knip baseline, `@testing-library/user-event` devDep (34 Blocking findings), one whole-file deletion end to end
+- [x] 39-02-PLAN.md — Track A tracer: full triage of `e2e/16-table-status.spec.ts` (16 findings), establishes the ledger format
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
