@@ -987,6 +987,17 @@ Plans:
 
 - [ ] TBD (run /gsd-plan-phase 38 to break down)
 
+### Phase 39: AI Slob Technical Debt Remediation
+
+**Goal:** Remediate Phase 10's audit Blocking tier (181: E2E triage-and-fix + knip unlisted deps) and all knip dead-code findings (High 1917 + Medium 37, Medium skipped per false-positive review). jscpd, as-any, unused deps, and Low tier are split into separate future phases.
+**Requirements**: TBD
+**Depends on:** Phase 10 (audit source), overlaps Phase 38 (E2E infra root causes)
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 39 to break down)
+
 ---
 
 *Roadmap derived: 2026-04-23 from `.planning/feature-expansion-2026q2/sprints/` PRDs.*
