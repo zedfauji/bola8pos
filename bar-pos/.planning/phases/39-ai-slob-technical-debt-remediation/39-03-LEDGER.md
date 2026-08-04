@@ -49,4 +49,40 @@
 
 **Expected outcome confirmed:** 19 false-positive rows, zero deletions — matches the plan's stated expectation that none of these would also be flagged by a default-mode run.
 
-<!-- gsd:write-continue -->
+## Task 3 — Both-modes non-barrel deletion candidates (15 findings)
+
+Deviation from the plan's stated expectation: the repository-wide search surfaced **real dependents** for 4 of the 15 candidates that the plan's own file list did not anticipate — 3 seed scripts are documented manual preconditions for specific E2E specs, and one `.mjs` script is wired into `.cursor/environment.json`. Per the plan's own rule ("a nonzero external hit count blocks the deletion"), these 4 were spared rather than deleted.
+
+| File | Search command | Hit count (outside itself) | Outcome |
+|---|---|---|---|
+| `scripts/seed-combos.ts` | `grep -rn "seed-combos" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" --include="*.sh" --include="*.yml"` (excl. node_modules, .audit-tmp) | 3 — `e2e/32-combos.spec.ts` lines 245, 577, 745 document this script as a required manual seed step ("T2 requires running seed-combos.ts first", etc.) before specific combo-related E2E tests can pass | **FALSE POSITIVE — NOT DELETED** (documented E2E precondition dependency, not import-based but functional) |
+| `scripts/seed-ingredients.ts` | Same search pattern for `seed-ingredients` | 0 — no hits outside the file's own usage-comment header | **DELETED** |
+| `scripts/seed-prep.ts` | Same search pattern for `seed-prep` | 3 — `e2e/21-prep.spec.ts` lines 6, 14, 46 document it as a required seed step and reset-between-runs step; `e2e/helpers/supabase.ts:779` references its baseline stock values by name | **FALSE POSITIVE — NOT DELETED** (documented E2E precondition + referenced baseline values) |
+| `scripts/seed-recipes.ts` | Same search pattern for `seed-recipes` | 0 — no hits outside the file's own usage-comment header | **DELETED** |
+| `scripts/seed-reports.ts` | Same search pattern for `seed-reports` | 1 — `e2e/37-analytics-reports.spec.ts:13` documents it as an optional seed-data step | **FALSE POSITIVE — NOT DELETED** (documented E2E precondition dependency) |
+| `scripts/test-payment-auth.mjs` | `grep -rn "test-payment-auth" .` (same include filters) | 0 — no hits outside the file's own usage-comment header; not referenced in `package.json` `scripts` or any CI/workflow file | **DELETED** |
+| `scripts/write-env-local-from-cloud-secret.mjs` | `grep -rn "write-env-local-from-cloud-secret" .` (same include filters) | 1 — `.cursor/environment.json:7`: `"install": "cd bar-pos && HUSKY=0 npm ci && node scripts/write-env-local-from-cloud-secret.mjs"` — wired into the Cursor cloud-agent environment bootstrap | **FALSE POSITIVE — NOT DELETED** (invoked by `.cursor/environment.json`'s install step) |
+| `src/app/kitchen-prep-route.tsx` | `grep -n "kitchen-prep-route" src/app/router.tsx` (per 39-PATTERNS.md dynamic-route pattern requirement) + `grep -rn "KitchenPrepRoute" src/` repo-wide | 0 — `router.tsx:154-159` registers `/kitchen-prep` wrapped only in the generic `<ProtectedRoute>`, not this file's exported `<KitchenPrepRoute>` permission guard; the guard component has zero importers anywhere in `src/` (confirmed genuinely orphaned, unlike the sibling gated routes `KdsBarRoute`/`WaitlistRoute` which *are* wired at their route declarations) | **DELETED** |
+| `src/shared/lib/agent/index-status.ts` | `grep -rn "index-status" src/ scripts/ --include="*.ts" --include="*.tsx"` | 0 — no importer anywhere in `src/` or `scripts/` | **DELETED** |
+| `src/shared/lib/supabase-realtime.ts` | `grep -rn "supabase-realtime" src/ scripts/ --include="*.ts" --include="*.tsx"` | 0 — no importer anywhere; realtime subscriptions live directly in each entity's `model/store.ts` per CLAUDE.md, not through this module | **DELETED** |
+| `src/widgets/OrderPanel/CartSummary.tsx` | `grep -rn "CartSummary" src/ --include="*.ts" --include="*.tsx"` | 0 — no importer outside its own declaration | **DELETED** |
+| `src/widgets/OrderPanel/OrderItemCard.tsx` | `grep -rn "OrderItemCard" src/ --include="*.ts" --include="*.tsx"` | 0 — no importer outside its own declaration | **DELETED** |
+| `src/widgets/RappiOrderBadge/RappiOrderBadge.tsx` | `grep -rn "RappiOrderBadge" src/ --include="*.ts" --include="*.tsx"` | Non-zero — re-exported by sibling `src/widgets/RappiOrderBadge/index.ts` barrel (`export { RappiOrderBadge } from './RappiOrderBadge'`), confirmed by reading the barrel file. Barrel liveness is plan 39-08's ownership per this plan's explicit exclusion of `index.ts` barrels. | **DEFERRED TO 39-08** (barrel + component pair; deleting the component alone would leave the barrel re-exporting a missing module — T-39-12) |
+| `src/widgets/SettingsCatalogPanel.tsx` | `grep -rn "SettingsCatalogPanel" src/ --include="*.ts" --include="*.tsx"` | 0 — no importer outside its own declaration; catalog settings are composed through `SettingsTabsPanel/tabs/*` instead | **DELETED** |
+| `src/widgets/SettingsPagePanel.tsx` | `grep -rn "SettingsPagePanel" src/ --include="*.ts" --include="*.tsx"` | 0 — no importer outside its own declaration; the settings page composes `SettingsTabsPanel` directly | **DELETED** |
+
+**Deletion count: 10 of 15.** 4 candidates were spared with a nonzero external hit count (`seed-combos.ts`, `seed-prep.ts`, `seed-reports.ts`, `write-env-local-from-cloud-secret.mjs`), 1 deferred to plan 39-08 (`RappiOrderBadge.tsx`), 10 deleted (`seed-ingredients.ts`, `seed-recipes.ts`, `test-payment-auth.mjs`, `kitchen-prep-route.tsx`, `index-status.ts`, `supabase-realtime.ts`, `CartSummary.tsx`, `OrderItemCard.tsx`, `SettingsCatalogPanel.tsx`, `SettingsPagePanel.tsx`).
+
+**Post-sweep verify:**
+- `npm run typecheck && npm run lint && npm run test` all pass — 1391 passed, 15 todo (153 test files, 151 passed + 2 skipped), exact match to the pre-existing baseline, zero regression.
+- Fresh `npx knip --reporter json` / `--production --reporter json`: none of the 10 deleted files appear in either report's `files` array.
+- Distinct unused-file baseline (default ∪ production, excluding `src/shared/ui/**`, per 39-01-LEDGER.md's methodology): **60 → 50**, a reduction of exactly 10 — matching the 10 files deleted this plan, confirming no new finding appeared in their place. (Baseline of 60 taken from 39-01-LEDGER.md's post-Task-3 figure, after that plan's `audit-ui-drift.ts` deletion dropped the original 61-file baseline by one.)
+- No `index.ts` barrel file was deleted by this plan.
+
+## Summary
+
+- 14/14 `supabase/functions/**` findings: 13 FALSE POSITIVE, 1 NEEDS HUMAN TRIAGE (`create-staff`) — zero deletions, all 14 files intact.
+- 19/19 production-mode-only findings: all FALSE POSITIVE — zero deletions.
+- 15/15 both-modes candidates: 10 DELETED, 4 FALSE POSITIVE — NOT DELETED (real dependents the plan's file list didn't anticipate), 1 DEFERRED TO 39-08 (`RappiOrderBadge.tsx`, barrel-dependent pair, T-39-12).
+
+**Total findings covered: 48.** Total files deleted: **10**. Distinct knip unused-file count: 60 → 50.
