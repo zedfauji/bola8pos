@@ -23,4 +23,30 @@
 
 **Post-task check:** `ls supabase/functions/*/index.ts supabase/functions/_shared/audit.ts | wc -l` = 14. All 14 files confirmed present. `git status` shows no deletion under `supabase/functions/`.
 
+## Task 2 — Production-mode-only findings (19 findings)
+
+| File | Evidence | Disposition |
+|---|---|---|
+| `e2e/fixtures.ts` | `grep -rl "from '.*fixtures'" e2e/ \| wc -l` → 59 spec files import shared Playwright fixtures from this module. | FALSE POSITIVE — NOT DELETED (imported by 59 E2E spec files) |
+| `e2e/helpers/auth.ts` | `grep -rl "helpers/auth" e2e/ \| wc -l` → 56 spec files import `loginAs` from this helper (per CLAUDE.md: "Auth helpers are in `e2e/helpers/auth.ts`. Use `loginAs(page, 'admin')`"). | FALSE POSITIVE — NOT DELETED (imported by 56 E2E spec files) |
+| `e2e/helpers/requireEnv.ts` | Grepped alongside `e2e/helpers/supabase.ts` and `e2e/fixtures.ts` — combined importer search across `e2e/` found 59 files pulling in one or more of these three helpers/fixtures for `.env.local` E2E credential loading and shared Playwright setup. | FALSE POSITIVE — NOT DELETED (E2E env-credential guard, live in test runs) |
+| `e2e/helpers/supabase.ts` | Same combined importer search as above — imported by E2E specs for direct Supabase test-data setup/teardown. | FALSE POSITIVE — NOT DELETED (E2E Supabase test helper, live in test runs) |
+| `eslint-rules/no-raw-money-format.js` | `eslint.config.js:16` — `import { rawMoneyFormatSelectors } from './eslint-rules/no-raw-money-format.js'`. | FALSE POSITIVE — NOT DELETED (wired into `eslint.config.js`) |
+| `eslint-rules/no-ui-drift.js` | `eslint.config.js:15` — `import { uiDriftSelectors } from './eslint-rules/no-ui-drift.js'` (also cross-referenced from `39-01-LEDGER.md`'s deletion of `scripts/audit-ui-drift.ts`, whose patterns were ported here). | FALSE POSITIVE — NOT DELETED (wired into `eslint.config.js`) |
+| `scripts/generate-design-tokens.ts` | `package.json:32` — `"docs:tokens": "npx tsx scripts/generate-design-tokens.ts"`. | FALSE POSITIVE — NOT DELETED (invoked via npm script `docs:tokens`) |
+| `scripts/indexCodebase.ts` | `package.json:31` — `"index-codebase": "tsx scripts/indexCodebase.ts"`. | FALSE POSITIVE — NOT DELETED (invoked via npm script `index-codebase`) |
+| `src/entities/tab/ui/PoolChargeItem.tsx` | Imported by `src/entities/tab/ui/TabDetail.tsx` (confirmed via `grep -rln "PoolChargeItem" src/`), which is itself imported only by `TabDetail.test.tsx` and `TabDetail.stories.tsx` — a chain reachable from tests/stories but not from any production entry point, exactly matching a knip production-only signal. | FALSE POSITIVE — NOT DELETED (reachable via `TabDetail.tsx`, exercised by its test/story) |
+| `src/entities/tab/ui/TabDetail.tsx` | `grep -rln "TabDetail" src/` outside its own file returns only `TabDetail.test.tsx` and `TabDetail.stories.tsx` — confirmed zero production callers, confirmed live via test/story. | FALSE POSITIVE — NOT DELETED (imported by `TabDetail.test.tsx` and `TabDetail.stories.tsx`) |
+| `src/features/close-tab/index.ts` | This `index.ts` is the feature's actual implementation file (exports `useCloseTab`, not a re-export barrel). `src/features/close-tab/tests/useCloseTab.test.ts:11` — `import { useCloseTab } from '../index';` is its only importer repo-wide; no widget/page currently calls `useCloseTab` (a `queries.ts:879` doc comment references it by name but doesn't import it). Exercised by its own test suite, invisible to the production module graph. | FALSE POSITIVE — NOT DELETED (exercised by co-located test, zero production callers) |
+| `src/shared/lib/mocks.ts` | `grep -rl "mocks'" src/ --include="*.test.ts" --include="*.test.tsx" \| wc -l` → 2 test files import MSW mock handlers from this module. Also carries line-level unused-export findings — deferred to plan 39-11, unaffected by keeping the file. | FALSE POSITIVE — NOT DELETED (test-only mock module) |
+| `src/shared/lib/promotion-pricing.ts` | `grep -rl "promotion-pricing" src/ --include="*.test.ts" \| wc -l` → 1 test file imports this module for promotion pricing math tests. | FALSE POSITIVE — NOT DELETED (imported by test file) |
+| `src/shared/lib/rappi-webhook-payload.ts` | `src/shared/lib/rappi-webhook-payload.test.ts:8` — `from './rappi-webhook-payload'` (confirmed direct import). Also carries a line-level unused-export finding (`RappiWebhookBodySchema`) — deferred to plan 39-11. | FALSE POSITIVE — NOT DELETED (imported by its own test file) |
+| `src/shared/lib/supabase-test-client.ts` | `grep -rl "supabase-test-client" src/ --include="*.test.ts" \| wc -l` → 11 test files import `testDb` from this module to reach the real cloud Supabase test project. | FALSE POSITIVE — NOT DELETED (test-only Supabase client, imported by 11 test files) |
+| `src/shared/lib/test-setup.ts` | `vitest.config.ts:68` — `setupFiles: ['./src/shared/lib/test-setup.ts']`. | FALSE POSITIVE — NOT DELETED (wired into `vitest.config.ts` `setupFiles`) |
+| `src/shared/lib/test-utils.tsx` | `grep -rl "test-utils'" src/ --include="*.test.tsx" \| wc -l` → 39 test files import RTL render helpers from this module; also re-exports `act`/`cleanup`/`fireEvent` (line-level unused-export findings deferred to 39-11). | FALSE POSITIVE — NOT DELETED (imported by 39 test files) |
+| `src/shared/lib/uom.ts` | `grep -rl "'./uom'\|/uom'" src/ --include="*.test.ts" \| wc -l` → 1 test file imports unit-of-measure logic; also carries line-level unused-export findings — deferred to 39-11. | FALSE POSITIVE — NOT DELETED (imported by test file) |
+| `src/test/global-setup.ts` | `vitest.config.ts:54` — `globalSetup: './src/test/global-setup.ts'` (confirmed in 39-01-LEDGER.md: requires `VITE_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`). | FALSE POSITIVE — NOT DELETED (wired into `vitest.config.ts` `globalSetup`) |
+
+**Expected outcome confirmed:** 19 false-positive rows, zero deletions — matches the plan's stated expectation that none of these would also be flagged by a default-mode run.
+
 <!-- gsd:write-continue -->
