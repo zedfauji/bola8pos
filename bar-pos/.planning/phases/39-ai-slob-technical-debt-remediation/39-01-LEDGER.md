@@ -34,9 +34,19 @@
 
 This worktree was spawned without `node_modules` present (git worktrees do not carry over gitignored/untracked directories from the main checkout). The first `npx knip` invocation failed to load `playwright.config.ts` / `vite.config.ts` / `vitest.config.ts` (`Cannot find module '@playwright/test'` etc.) because dependencies were not yet installed. Ran `npm ci` (1365 packages, clean install, husky `prepare` script no-ops per CLAUDE.md's documented "git hooks are inert" note) before regenerating the baseline. This is Rule 3 (blocking-issue auto-fix, standard `npm ci` — not a new/foreign package) — no deviation entry needed since it's pure environment setup with zero code impact, but recorded here for anyone reproducing this ledger in a fresh worktree.
 
+A second environment gap surfaced at Task 2's `npm run test` verification step: the worktree also lacked `.env.local` (gitignored via `*.local`, so it does not carry over to a fresh worktree either), and `src/test/global-setup.ts` requires `VITE_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` to reach the project's real cloud Supabase instance before any unit test can run at all. Copied the existing `.env.local` from the sibling main checkout (`/mnt/ai/bola8pos-kiro/bar-pos/.env.local`) — same machine, same user, same project's own dev credentials, not a new/external secret — into this worktree so `npm run test` could execute. Also Rule 3 (missing env var is an explicit Rule 3 example); the file stays gitignored and was never staged/committed.
+
+## Task 2 Resolution — `@testing-library/user-event` (34 findings)
+
+- `npm install --save-dev @testing-library/user-event@14.6.1` (installed at the exact already-resolved version so npm's default save-prefix behavior wrote `^14.6.1`, not the newer `^14.6.3` it would have written from a `^14.6.1` range request — the plan's zero-behavior-delta requirement).
+- `package.json` `devDependencies["@testing-library/user-event"]` = `^14.6.1`; `npm ls @testing-library/user-event --all` confirms `14.6.1` resolved both directly and via `storybook` (deduped) — single resolved version, no dual-version risk.
+- `npm run test`: **1391 passed, 15 todo** (153 test files, 151 passed + 2 skipped) — exact match to the pre-existing 1391-passing baseline, zero regression.
+- Post-fix `npx knip --reporter json` `unlisted` count: **0** (down from 34 default-mode / 0 production-mode pre-fix).
+- All 34 `unlisted` findings: **RESOLVED — declared directly**.
+
 ## Disposition Log
 
 | Finding | Category | Disposition | Task | Notes |
 |---|---|---|---|---|
-| `@testing-library/user-event` unlisted, 34 findings across 34 `*.test.tsx` files | Blocking / unlisted | *pending — Task 2* | 2 | — |
+| `@testing-library/user-event` unlisted, 34 findings across 34 `*.test.tsx` files | Blocking / unlisted | **RESOLVED — declared directly** | 2 | `^14.6.1` devDependency added; `npx knip` unlisted count now 0; `npm run test` unchanged at 1391 passing |
 | `scripts/audit-ui-drift.ts` | High / unused file (both modes) | *pending — Task 3* | 3 | — |
