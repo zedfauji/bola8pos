@@ -321,7 +321,7 @@ Plans:
 ### Phase 10: AI Slob Technical Debt Checklist
 
 **Goal:** Audit and document all technical debt accumulated across the codebase, producing a categorized `10-CHECKLIST.md` grouped by severity with per-source sub-groups. Audit/documentation only — remediation is a future phase.
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans executed
 
 > Corrected 2026-08-03 during `/gsd-plan-phase 10`: this section previously claimed the phase had already executed via a `10-01-PLAN.md` dated 2026-04-27. No `10-*` phase directory ever existed on disk — that work was absorbed into Phase 11's combined `11-ai-slob-technical-debt-audit-remediation/` folder. The top-level checklist entry and `PROJECT.md`'s backlog list were always correct; this detailed section was the only stale copy.
 
@@ -336,7 +336,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 10-03-PLAN.md — Write severity-grouped `10-CHECKLIST.md` + cross-check against the 5 pending todos and Phase 38 + count reconciliation (Wave 3)
+- [x] 10-03-PLAN.md — Write severity-grouped `10-CHECKLIST.md` + cross-check against the 5 pending todos and Phase 38 + count reconciliation (Wave 3)
 
 ---
 
