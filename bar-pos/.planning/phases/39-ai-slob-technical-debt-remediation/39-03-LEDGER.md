@@ -1,0 +1,26 @@
+# Phase 39 Plan 03 — Knip Unused-File Sweep Disposition Ledger
+
+**Scope:** All 48 findings this plan covers — 14 `supabase/functions/**`, 19 production-mode-only, 15 both-modes non-barrel deletion candidates.
+
+## Task 1 — `supabase/functions/**` (14 findings)
+
+| Function | Evidence | Disposition |
+|---|---|---|
+| `create-staff/index.ts` | `grep -rn "create-staff" .` (excluding the file itself) finds **zero** `functions.invoke`/`fetch` call sites anywhere in `src/`. Only hits: `audit-edge-coverage.test.ts` (a sensitive-mutator allowlist for a coverage *test*, not an invocation) and an i18n string `"addStaffToastDescription": "Connect create-staff flow when ready."` in both locale files — the app's own copy states this flow is not yet wired to the UI. | **NEEDS HUMAN TRIAGE** — deployed edge function with zero client invocation evidence anywhere in the repo; the i18n string is a self-documented "not yet connected" gap. Not deleted per prohibitions (deleting any `supabase/functions/**` file is prohibited outright regardless of triage outcome). |
+| `get-server-time/index.ts` | `edge-function-contracts.ts:1255` — `supabase.functions.invoke<unknown>('get-server-time', ...)`; registry entry at line 1348. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `process-payment/index.ts` | `edge-function-contracts.ts:251` — `fetch(\`${supabaseUrl}/functions/v1/process-payment\`, ...)`; registry entry at line 1293. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `process-split-payment/index.ts` | `edge-function-contracts.ts:465` — `fetch(\`${supabaseUrl}/functions/v1/process-split-payment\`, ...)`; registry entry at line 1298. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `rappi-sync-menu/index.ts` | `edge-function-contracts.ts:952` — `supabase.functions.invoke<unknown>('rappi-sync-menu', ...)`; registry entry at line 1323. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `rappi-webhook/index.ts` | No `functions.invoke` call site exists in `src/` (expected — this is a public webhook invoked by Rappi's servers, not our own client). Evidence instead: `src/widgets/SettingsTabsPanel/tabs/RappiSettingsTab.tsx:39,87-90` reads and displays `VITE_RAPPI_WEBHOOK_SECRET` — the app manages the shared secret this deployed function validates incoming webhook requests against — plus `src/shared/lib/rappi-webhook-payload.ts:3` documents "Keep in sync with `supabase/functions/rappi-webhook/index.ts` body parsing," confirming a maintained contract with the deployed function. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL — external Rappi webhook, not by our client) |
+| `send-receipt-email/index.ts` | `edge-function-contracts.ts:868` — `supabase.functions.invoke<unknown>('send-receipt-email', ...)`; registry entry at line 1303. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `send-waitlist-notification/index.ts` | No `functions.invoke` call site in `src/` (invoked server-side, e.g. by a DB trigger/cron or from another function). Evidence: `src/app/WaitlistRealtimeListener.tsx:14` documents the client-side contract — "broadcast 'notified' event (from send-waitlist-notification edge fn) → invalidates waitlistKeys" — confirming the deployed function's output is consumed by a live Realtime listener. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL/server-side trigger; output consumed by `WaitlistRealtimeListener`) |
+| `settings-backup/index.ts` | `edge-function-contracts.ts:1015` — `supabase.functions.invoke<unknown>('settings-backup', ...)`; registry entry at line 1328. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `settings-email-status/index.ts` | `edge-function-contracts.ts:1139` — `supabase.functions.invoke<unknown>('settings-email-status', ...)`; registry entry at line 1338. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `settings-restore/index.ts` | `edge-function-contracts.ts:1078` — `supabase.functions.invoke<unknown>('settings-restore', ...)`; registry entry at line 1333. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `settings-test-email/index.ts` | `edge-function-contracts.ts:1193` — `supabase.functions.invoke<unknown>('settings-test-email', ...)`; registry entry at line 1343. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `void-order/index.ts` | `edge-function-contracts.ts:794` — `fetch('/functions/v1/void-order', ...)`; registry entry at line 1318. | FALSE POSITIVE — NOT DELETED (Deno HTTP entry point, invoked by URL) |
+| `_shared/audit.ts` | Relative Deno import from sibling function files: `supabase/functions/create-staff/index.ts`, `supabase/functions/void-order/index.ts`, `supabase/functions/settings-restore/index.ts` all import `recordAudit` from `'../_shared/audit.ts'` (confirmed via `grep -rln "_shared/audit" supabase/functions/`). | FALSE POSITIVE — NOT DELETED (imported by 3 sibling edge functions) |
+
+**Post-task check:** `ls supabase/functions/*/index.ts supabase/functions/_shared/audit.ts | wc -l` = 14. All 14 files confirmed present. `git status` shows no deletion under `supabase/functions/`.
+
+<!-- gsd:write-continue -->
