@@ -990,13 +990,24 @@ Plans:
 ### Phase 39: AI Slob Technical Debt Remediation
 
 **Goal:** Remediate Phase 10's audit Blocking tier (181: E2E triage-and-fix + knip unlisted deps) and all knip dead-code findings (High 1917 + Medium 37, Medium skipped per false-positive review). jscpd, as-any, unused deps, and Low tier are split into separate future phases.
-**Requirements**: TBD
+**Requirements**: TBD (no REQUIREMENTS.md entries map to this phase — 39-CONTEXT.md decision IDs D-01..D-09 serve as the acceptance-criteria identifiers)
 **Depends on:** Phase 10 (audit source), overlaps Phase 38 (E2E infra root causes)
-**Plans:** 0 plans
+**Plans:** 12 plans in 5 waves (two parallel tracks: A = E2E triage, B = knip dead-code)
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 39 to break down)
+- [ ] 39-01-PLAN.md — Track B tracer: knip baseline, `@testing-library/user-event` devDep (34 Blocking findings), one whole-file deletion end to end
+- [ ] 39-02-PLAN.md — Track A tracer: full triage of `e2e/16-table-status.spec.ts` (16 findings), establishes the ledger format
+- [ ] 39-03-PLAN.md — Unused-file sweep: 14 supabase/functions + 19 production-only false positives annotated, 15 candidates deleted
+- [ ] 39-04-PLAN.md — E2E triage, specs 01–14 (43 findings, incl. the 11 routed to Phase 38)
+- [ ] 39-05-PLAN.md — E2E triage, specs 15–22 (32 findings, incl. the void-order stale-skip cluster)
+- [ ] 39-06-PLAN.md — E2E triage, specs 23–26 (34 findings, pool billing + payment + validation)
+- [ ] 39-07-PLAN.md — E2E triage, specs 27–44 (22 findings, categories chain + focus/tab-order)
+- [ ] 39-08-PLAN.md — FSD barrel decision: one call covering 445 findings across 64 `index.ts` files, then republish the knip baseline
+- [ ] 39-09-PLAN.md — Registry review: per-export triage of `domain.ts` + `edge-function-contracts.ts`
+- [ ] 39-10-PLAN.md — `entities/` layer non-barrel export/type deletions
+- [ ] 39-11-PLAN.md — `shared/` + `features/` non-barrel export/type deletions (string-keyed blind spots first)
+- [ ] 39-12-PLAN.md — Phase gate: consolidated ledger, measured delta, full E2E suite run, scope-compliance check
 
 ---
 
