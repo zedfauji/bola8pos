@@ -34,15 +34,15 @@ Full list (`spec-file:line [status] title`), verbatim from `playwright-digest.tx
 e2e/01-ci.spec.ts:13 [failed] npm run typecheck exits 0
 e2e/01-ci.spec.ts:17 [failed] npm run lint exits 0
 e2e/01-ci.spec.ts:21 [failed] npm run test exits 0 (unit project)
-e2e/02-caja.spec.ts:61 [failed] Manager closes caja
+e2e/02-caja.spec.ts:61 [failed] Manager closes caja — already tracked: Phase 38 item 1 (test-DB pollution, OPEN_TABS_EXIST from a stale prior-run caja), ROADMAP.md
 e2e/03-tab-order.spec.ts:14 [failed] Bartender creates a tab
 e2e/03-tab-order.spec.ts:138 [skipped] T7: open tab with notes — notes visible in tab detail
 e2e/03-tab-order.spec.ts:163 [skipped] T8: per-item notes saved with order
-e2e/04-pool-timer.spec.ts:38 [failed] Start session on available table
-e2e/04-pool-timer.spec.ts:50 [failed] Timer ticks
-e2e/04-pool-timer.spec.ts:65 [failed] 15-minute minimum charge on stop
-e2e/04-pool-timer.spec.ts:81 [failed] Start session auto-creates a New Tab
-e2e/04-pool-timer.spec.ts:97 [failed] Charge recorded for linked tab after stop
+e2e/04-pool-timer.spec.ts:38 [failed] Start session on available table — already tracked: Phase 38 item 2 (no pool table left in "available" seed state), ROADMAP.md
+e2e/04-pool-timer.spec.ts:50 [failed] Timer ticks — already tracked: Phase 38 item 2, ROADMAP.md
+e2e/04-pool-timer.spec.ts:65 [failed] 15-minute minimum charge on stop — already tracked: Phase 38 item 2, ROADMAP.md
+e2e/04-pool-timer.spec.ts:81 [failed] Start session auto-creates a New Tab — already tracked: Phase 38 item 2, ROADMAP.md
+e2e/04-pool-timer.spec.ts:97 [failed] Charge recorded for linked tab after stop — already tracked: Phase 38 item 2, ROADMAP.md
 e2e/04-pool-timer.spec.ts:117 [skipped] T8: maintenance table — Start Session button absent or disabled
 e2e/04-pool-timer.spec.ts:160 [skipped] T9: reserved table — card shows Reserved badge or label
 e2e/04-pool-timer.spec.ts:189 [failed] T10: Start Session dialog shows rate as dollar amount pattern
@@ -52,11 +52,11 @@ e2e/06-transfer.spec.ts:60 [failed] Transfer pool session preserves started_at
 e2e/06-transfer.spec.ts:155 [failed] T5: transfer tab with pool session — pool charge preserved
 e2e/07-reports.spec.ts:247 [failed] Cash reconciliation variance displayed
 e2e/07-reports.spec.ts:320 [failed] Product Sales: date range filter to far past shows empty state
-e2e/07-reports.spec.ts:621 [failed] Sprint 10: Staff Performance tab shows column headers or empty state
-e2e/07-reports.spec.ts:647 [failed] Sprint 10: Staff Performance tab shows empty state for year 2020 date range
-e2e/07-reports.spec.ts:729 [failed] Sprint 10: Tip Distribution tab shows column headers or empty state
-e2e/07-reports.spec.ts:752 [failed] Sprint 10: Tip Distribution tab shows empty state for year 2020 date range
-e2e/07-reports.spec.ts:774 [failed] Sprint 10: Export button appears in Staff Performance tab when data rows exist
+e2e/07-reports.spec.ts:621 [failed] Sprint 10: Staff Performance tab shows column headers or empty state — already tracked: Phase 38 item 3 (reports need specific seeded date-ranged data), ROADMAP.md
+e2e/07-reports.spec.ts:647 [failed] Sprint 10: Staff Performance tab shows empty state for year 2020 date range — already tracked: Phase 38 item 3, ROADMAP.md
+e2e/07-reports.spec.ts:729 [failed] Sprint 10: Tip Distribution tab shows column headers or empty state — already tracked: Phase 38 item 3, ROADMAP.md
+e2e/07-reports.spec.ts:752 [failed] Sprint 10: Tip Distribution tab shows empty state for year 2020 date range — already tracked: Phase 38 item 3, ROADMAP.md
+e2e/07-reports.spec.ts:774 [failed] Sprint 10: Export button appears in Staff Performance tab when data rows exist — already tracked: Phase 38 item 3, ROADMAP.md
 e2e/07-reports.spec.ts:878 [failed] Phase 24: bartender-initiated reason-required removal succeeds (no AUTH_FORBIDDEN) and appears in Eliminaciones
 e2e/09-rbac.spec.ts:75 [skipped] Bartender B does not see Bartender A's tab in drawer
 e2e/09-rbac.spec.ts:91 [skipped] T7: admin deletes a tab — tab deleted toast, tab no longer in list
@@ -80,7 +80,7 @@ e2e/16-table-status.spec.ts:227 [failed] T2: "Moved from" badge visible when ses
 e2e/16-table-status.spec.ts:283 [skipped] T3: Happy Hour badge visible when current time is within happy hour window
 e2e/16-table-status.spec.ts:289 [failed] T4: Stop Timer opens confirmation dialog, confirm redirects to /pool-tables
 e2e/16-table-status.spec.ts:318 [failed] T5: Stop & Move to Table stops session and moves tab to new table number
-e2e/16-table-status.spec.ts:348 [failed] T6: Print Pre-cheque button triggers print flow without error dialog
+e2e/16-table-status.spec.ts:348 [failed] T6: Print Pre-cheque button triggers print flow without error dialog — plausibly related: 2026-07-27-print-popup-fallback-hangs-under-playwright-automation.md (window.print() hangs under Playwright/CDP)
 e2e/16-table-status.spec.ts:376 [failed] T7: Bartender removing an item requires manager PIN (wrong PIN → error, correct PIN → confirm)
 e2e/16-table-status.spec.ts:459 [failed] T8: Admin removing an item also requires manager PIN
 e2e/16-table-status.spec.ts:527 [failed] T9: Removing the last item in an order removes the entire order section
@@ -697,10 +697,40 @@ src/entities/tab/model/hourly-breakdown.integration.test.ts:403
 src/widgets/TabDrawer/TabDrawer.test.tsx:402
 ```
 
-**RESEARCH.md Assumption A4 — is 400 lines a meaningful cut in this codebase?** The oversized-file probe scanned 741 files with a 300-line floor (headroom above the 400-line Low-tier threshold). Actual distribution: **median file size (of the 74 files ≥300 lines the probe captured) = 475 lines**; **top-10 largest**: `domain.ts` (2164), `edge-function-contracts.ts` (1358), `entities/tab/model/queries.ts` (1139), `PaymentForm.tsx` (1077), `SplitTabSheet.tsx` (840), `domain.test.ts` (772), `entities/staff/model/queries.ts` (755), `agent/tools/posTools.ts` (748), `entities/resource/model/queries.ts` (741), `consume-open-unit.integration.test.ts` (731). Since the median of the captured tail (475) already sits above the 400-line cutoff, and the top of the distribution is dominated by two categories — (1) `domain.ts`/`edge-function-contracts.ts`, single-file Zod-schema/contract registries that are intentionally centralized per CLAUDE.md's "single source of truth" convention, and (2) `*.integration.test.ts`/`*.test.tsx` files, which grow with fixture/assertion volume rather than complexity — **400 lines reads as a real, non-arbitrary signal for the non-test, non-registry files in the list** (e.g. `PaymentForm.tsx` at 1077, `SplitTabSheet.tsx` at 840, `ComboBuilderForm.tsx` at 632, `ModifierGroupEditor.tsx` at 619 — all UI components mixing form state + validation + submission, plausible split candidates) but is a **weak signal for the registry and test files**, which should probably be evaluated on a different axis (schema count / assertion count) in a future pass rather than raw line count.
+**RESEARCH.md Assumption A4 — is 400 lines a meaningful cut in this codebase?** The oversized-file probe scanned 741 files with a 300-line floor (headroom above the 400-line Low-tier threshold). Actual distribution: **median file size (of the 73 files ≥300 lines the probe captured) = 478 lines**; **top-10 largest**: `domain.ts` (2164), `edge-function-contracts.ts` (1358), `entities/tab/model/queries.ts` (1139), `PaymentForm.tsx` (1077), `SplitTabSheet.tsx` (840), `domain.test.ts` (772), `entities/staff/model/queries.ts` (755), `agent/tools/posTools.ts` (748), `entities/resource/model/queries.ts` (741), `consume-open-unit.integration.test.ts` (731). Since the median of the captured tail (475) already sits above the 400-line cutoff, and the top of the distribution is dominated by two categories — (1) `domain.ts`/`edge-function-contracts.ts`, single-file Zod-schema/contract registries that are intentionally centralized per CLAUDE.md's "single source of truth" convention, and (2) `*.integration.test.ts`/`*.test.tsx` files, which grow with fixture/assertion volume rather than complexity — **400 lines reads as a real, non-arbitrary signal for the non-test, non-registry files in the list** (e.g. `PaymentForm.tsx` at 1077, `SplitTabSheet.tsx` at 840, `ComboBuilderForm.tsx` at 632, `ModifierGroupEditor.tsx` at 619 — all UI components mixing form state + validation + submission, plausible split candidates) but is a **weak signal for the registry and test files**, which should probably be evaluated on a different axis (schema count / assertion count) in a future pass rather than raw line count.
 
-23 additional files fall in the 300–400-line "headroom" band the probe captured but which do not cross the checklist's 400-line Low-tier threshold — informational only, not listed as findings (see "Stated exclusions" in the header).
+22 additional files fall in the 300–400-line "headroom" band the probe captured but which do not cross the checklist's 400-line Low-tier threshold — informational only, not listed as findings (see "Stated exclusions" in the header).
 
 ## Cross-check against existing trackers
 
-*(Populated by Task 2.)*
+D-05 required the audit to run fully independently first, with no pre-seeding from the existing trackers — that independence is now spent; this section is the cross-check D-05 deferred to this point. Per this task's rules: annotate, don't merge — nothing below was imported into the checklist above unless the audit independently surfaced it first (verdicts marked "NOT rediscovered" name the tracker for visibility but add no new checklist entries).
+
+| Tracker | Verdict | Detail |
+|---|---|---|
+| `2026-07-25-activate-inert-git-hooks-husky-gitignored-stale-hookspath.md` | **NOT rediscovered** | About `.husky/` being gitignored and a stale `core.hooksPath` — none of the 11 audit categories (lint/typecheck/unit/e2e/knip/jscpd/madge/as-any/todo-fixme/file-size) inspects git hook configuration. This is an audit blind spot, not a false negative in any specific probe. |
+| `2026-07-25-relocate-misplaced-github-workflows-directory-to-git-root.md` | **NOT rediscovered (but the file appears incidentally)** | `.github/workflows/ci.yml` and `release.yml` appear in the jscpd High-tier sample (e.g. `ci.yml:9-28 <-> 36-PATTERNS.md`), but that finding is about **content duplication** between the workflow YAML and a planning doc that quoted it — not about the workflow directory being one level below the git root (the actual bug). jscpd has no concept of "git root" or "where GitHub Actions looks for workflows," so this specific defect was not independently rediscovered. |
+| `2026-07-27-caja-report-pdf-export-fails-silently-outside-tauri-runtime.md` | **NOT rediscovered** | No E2E finding title in the Blocking → e2e list mentions PDF export or `useExportReport`. The audit's Playwright run does not appear to have exercised this path (or it passed/wasn't attempted in this run's 373 tests), so this known issue is invisible to this audit. |
+| `2026-07-27-payment-total-omits-tax-shown-in-pre-payment-preview.md` | **NOT rediscovered** | A business-logic/display bug (phantom tax line in the payment preview) with no static-analysis or dead-code signature — none of knip/jscpd/madge/as-any/todo-fixme/file-size would ever surface it, and no E2E finding title mentions tax. Confirms this class of bug is outside every probe's detection surface. |
+| `2026-07-27-print-popup-fallback-hangs-under-playwright-automation.md` | **Plausibly rediscovered** | `e2e/16-table-status.spec.ts:348` ("T6: Print Pre-cheque button triggers print flow without error dialog") failed in this run and is annotated inline above. The todo describes exactly this failure mode (`window.print()` hanging under Playwright/CDP automation in the non-Tauri browser fallback). Marked "plausibly" rather than "confirmed" because the digest only carries the test title, not its failure output — the correlation is strong (same feature, same spec file) but not proven byte-for-byte from digest data alone. |
+| Phase 38 (E2E Test Infrastructure & Seed Data Reliability, ROADMAP.md) | **Rediscovered — 11 of 147 Blocking e2e findings** | Phase 38's roadmap entry names three concrete root causes with example spec files. All three examples reproduced verbatim in this run's failures and are annotated inline in the Blocking → e2e list above: (1) `02-caja.spec.ts:61` "Manager closes caja" — stale test-DB pollution (`OPEN_TABS_EXIST`); (2) all 5 of `04-pool-timer.spec.ts`'s early tests (:38,:50,:65,:81,:97) — no pool table left in "available" seed state; (3) 5 of `07-reports.spec.ts`'s Staff-Performance/Tip-Distribution tests (:621,:647,:729,:752,:774) — missing seeded date-ranged data. **Not claimed for the remaining 83 failed + 53 skipped e2e findings** — Phase 38's description strongly suggests shared test-infrastructure/seed-data pollution is a systemic cause across many of the other spec files too (a 25% suite-wide failure rate spanning unrelated feature areas is itself circumstantial evidence for shared-cause rather than 94 independent app bugs), but confirming that per-test requires each failing test's actual error output, which is not captured by `playwright-digest.txt` (title + status only) and would require opening `.audit-tmp/e2e-per-spec/*.json` or re-running specs individually — out of this task's read scope. Remediation should treat the unannotated e2e failures as needing Phase-38-or-real-bug triage, not as 83 confirmed new app defects. |
+
+## Count reconciliation
+
+Every count in the header summary table and per-category totals was checked with `node -e` against the raw `.audit-tmp/*.json` reports (not the digests, and no `src/` file):
+
+| Category | Checklist/digest count | Raw report count | Match? |
+|---|---:|---:|---|
+| eslint errors+warnings | 0 | 0 (summed `errorCount`/`warningCount` across all files in `eslint-report.json`) | ✓ |
+| tsc errors | 0 | 0 (`tsc-errors.txt` empty) | ✓ |
+| vitest total/passed/failed/todo | 1406/1391/0/15 | 1406/1391/0/15 (`vitest-results.json` `numTotalTests`/`numPassedTests`/`numFailedTests`/`numTodoTests`) | ✓ |
+| madge cycles | 1 | 1 (`madge-circular.json`, single 2-file array) | ✓ |
+| knip default (files/deps/devDeps/duplicates/exports/types/unlisted/unresolved) | 43/10/5/3/518/273/34/0 = 886 | 43/10/5/3/518/273/34/0 = 886 (summed per-category across all 209 file entries in `knip-report.json`) | ✓ |
+| knip production (files/deps/duplicates/exports/types) | 63/11/3/685/340 = 1102 | 63/11/3/685/340 = 1102 (`knip-production.json`) | ✓ |
+| jscpd clones | 2657 | 2657 (`jscpd-out/jscpd-report.json` `.duplicates.length` and `.statistics.total.clones`) | ✓ |
+| as-any occurrences | 144 | 144 (`wc -l .audit-tmp/as-any.txt`) | ✓ |
+| todo-fixme occurrences | 9 | 9 (`wc -l .audit-tmp/todo-fixme.txt`) | ✓ |
+| file-sizes ≥300 lines | 73 | 73 (`awk '$1>=300' .audit-tmp/file-sizes.txt \| wc -l`) | ✓ — corrects an earlier miscount during Task 1 drafting (a stray trailing blank line in an intermediate `wc -l` pass briefly suggested 74; the corrected `grep -c .`/`awk` counts against both the digest and the raw probe output agree exactly at 73). Median (478) and the "22 files in the 300–400 headroom band" figure in the Low tier were corrected to match this clean recount. |
+| playwright total/passed/failed/skipped/flaky | digest header states "Total tests: 373" (226+94+53+1=374) | `playwright-results.json` `.stats`: `expected:226, unexpected:94, skipped:53, flaky:1` (sums to 374) | **Stated exclusion, not a checklist error** — the digest's own "Total tests: 373" header undercounts by exactly 1 because its total was computed as `expected+unexpected+skipped` (226+94+53=373), omitting the 1 flaky test. The checklist's Blocking → e2e count (147 = 94 failed + 53 skipped) does not depend on this total and is independently confirmed against `findings.length` (147) in the raw JSON. |
+| 10-02-SUMMARY.md's recorded knip total (891, devDeps:10) vs this run's 886 (devDeps:5) | — | — | **Stated exclusion, run-to-run difference, not a checklist error** — per the retry_context for this dispatch, `.audit-tmp/` was regenerated fresh after the first dispatch's checkpoint halt; this run's `knip-report.json` deterministically contains 5 unused devDependencies, not 10. Both numbers are real outputs of real runs; this checklist uses the current, live run per the retry_context's explicit instruction to treat it as authoritative. |
+
+All eleven audit categories reconcile exactly against their raw reports, with two explained exclusions (the as-any comment-vs-cast split and the file-size 300–400 headroom band, both documented in the header) and two explained digest-generation inconsistencies (the playwright total off-by-one, and the default-mode devDependencies count differing from the prior dispatch's recorded 10 vs. this run's 5).
