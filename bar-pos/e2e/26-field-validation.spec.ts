@@ -159,7 +159,19 @@ test.describe('Field Validation', () => {
 
     // Look for "Open Caja" button (may be on /staff or /home after caja is closed)
     // Since beforeEach already opens caja, we test via the modal if accessible without closing first
-    test.skip(true, 'UI not implemented — EXPECTED FAIL: negative opening cash validation requires closing first caja, complex state setup');
+    //
+    // 39-06 triage finding: the opening-cash field is a MoneyInput
+    // (src/shared/ui/MoneyInput.tsx), whose parseToCents() strips any
+    // non-digit/non-'.' character — including a leading '-' — before
+    // parsing, so a negative value can never actually be typed into this
+    // field; it silently coerces to 0/positive rather than surfacing a
+    // validation error. The boundary is enforced by input coercion, not by
+    // an error message, so this test's premise (a "form error shown" path)
+    // has no code path to exercise. Writing a full close-caja-then-reopen
+    // flow to assert the coercion behavior instead is more than a trivial
+    // same-root-cause fix (D-03), so left as a documented skip rather than
+    // implemented in this triage-only plan.
+    test.skip(true, 'Not implemented — MoneyInput silently strips a leading "-" (coerces to 0/positive) rather than showing a validation error, so no "form error shown" path exists to test; a close-caja-then-reopen flow to assert the coercion behavior is out of scope for this triage plan');
   });
 
   test('FV7: product form with empty name — error shown, not saved', async ({ page }) => {
@@ -208,8 +220,19 @@ test.describe('Field Validation', () => {
     await page.goto('/login');
     await expect(page.getByRole('heading', { name: /who are you/i })).toBeVisible({ timeout: 30_000 });
 
-    // Click on the first staff member
-    const firstStaffBtn = page.getByRole('button').filter({ hasText: /\w+/ }).first();
+    // Click on the first staff member — scoped to the EmployeeSelector's own
+    // container (the heading's nearest common ancestor with the button list),
+    // not a bare page-wide getByRole('button') (39-06 triage finding: the
+    // broad locator was resolving to the persistent AI-assistant panel's
+    // "Ver menú" toggle button, which sits outside the viewport and caused
+    // the 15s click timeout — same overlay documented in helpers/auth.ts's
+    // logout() and e2e/24-waitlist.spec.ts's T6/T7 dialog-title-filter
+    // comments).
+    const employeeSection = page
+      .locator('div')
+      .filter({ has: page.getByRole('heading', { name: /who are you/i }) })
+      .last();
+    const firstStaffBtn = employeeSection.getByRole('button').first();
     await firstStaffBtn.click();
 
     // Enter only 5 digits (not a full 6-digit PIN)
@@ -245,13 +268,23 @@ test.describe('Field Validation', () => {
     const dialog = page.getByRole('dialog', { name: /register expense|expense.*income/i });
     await expect(dialog).toBeVisible({ timeout: 10_000 });
 
-    await dialog.getByLabel(/amount/i).fill('0');
+    const amountInput = dialog.getByLabel(/amount/i);
+    await amountInput.fill('0');
     await dialog.locator('#entry-concept').fill('Zero test');
     await dialog.getByRole('button', { name: /save entry/i }).click();
 
-    await expect(
-      dialog.getByText(/amount must be greater than 0|positive/i)
-    ).toBeVisible({ timeout: 5_000 });
+    // The amount input has a native HTML5 `min="0.01"` constraint (see
+    // src/features/register-caja-entry/ui/RegisterCajaEntryDialog.tsx), so
+    // clicking the submit button triggers the browser's own constraint
+    // validation before the form's onSubmit/Zod handler ever runs — the
+    // custom "Amount must be greater than 0" paragraph is never rendered in
+    // that path (39-06 triage finding). Accept either signal, exactly the
+    // same and-alternative pattern FV1/FV7 already use for their own
+    // required-field checks in this file.
+    const hasError =
+      (await dialog.getByText(/amount must be greater than 0|positive/i).count()) > 0 ||
+      (await amountInput.evaluate(el => (el as HTMLInputElement).validity.valid === false));
+    expect(hasError).toBe(true);
     await expect(dialog).toBeVisible();
     await logout(page);
   });

@@ -117,11 +117,24 @@ test.describe('Rappi Orders', () => {
   test('RO5: accepted rappi order linked tab appears in /payments', async ({ page }) => {
     test.setTimeout(120_000);
 
-    // Seed a rappi order with an accepted status and linked tab
+    // Seed a rappi order with an accepted status and linked tab.
+    // 39-06 triage finding: this must pick the MANAGER profile (matching
+    // ensureOpenShift's convention in 23-payment-edge-cases.spec.ts and
+    // openCaja/resetTestState in helpers/supabase.ts), not an arbitrary
+    // first profile row — useTabs() scopes the payments list to the
+    // logged-in user's OWN currentShift.id, and loginAs(page, 'manager')
+    // below logs in as the manager account. Seeding the tab's shift_id under
+    // an unrelated staff member's shift meant the manager's /payments query
+    // would never see it (root cause of RO5's toBeVisible timeout).
     const admin = getServiceClient();
-    const { data: staff } = await admin.from('profiles').select('id').limit(1).single();
+    const { data: staff } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('role', 'manager')
+      .limit(1)
+      .maybeSingle();
     if (!staff) {
-      test.skip(true, 'No profile found for RO5 seed');
+      test.skip(true, 'No manager profile found for RO5 seed');
       return;
     }
 
