@@ -27,7 +27,7 @@
 import { expect, test } from './fixtures';
 import { loginAs, logout } from './helpers/auth';
 import { requireIntegrationEnv } from './helpers/requireEnv';
-import { forceCloseAllOpenTabs, getServiceClient, resetTestState } from './helpers/supabase';
+import { forceCloseAllOpenTabs, getServiceClient, openCaja, resetTestState } from './helpers/supabase';
 
 test.describe('Promotions', () => {
   test.beforeEach(async ({ page }) => {
@@ -131,6 +131,9 @@ test.describe('Promotions', () => {
     const promotionId = (promo as { id: string }).id;
 
     try {
+      // Opening a tab on POS requires an open caja session (39-07, harness —
+      // this beforeEach never opened one; see 39-07-LEDGER.md).
+      await openCaja(430);
       await loginAs(page, 'bartender');
       await page.goto('/pos');
       await page.getByRole('button', { name: /new tab/i }).click();
@@ -150,13 +153,37 @@ test.describe('Promotions', () => {
       await page.getByRole('button', { name: 'Place Order' }).click();
       await expect(page.getByText(/order placed successfully/i)).toBeVisible({ timeout: 20_000 });
 
-      // The order-history line now reflects the server-applied discount —
-      // 20% off Budweiser's base price — not the undiscounted base price the
-      // client submitted.
-      await expect(page.getByText(`$${discountedPrice.toFixed(2)}`, { exact: false })).toBeVisible({
-        timeout: 20_000,
-      });
-      await expect(page.getByText(`$${basePrice.toFixed(2)}`, { exact: false })).toHaveCount(0);
+      // Verify the server-applied discount via the DB (39-07, harness — the
+      // "Order history" panel this test used to search page text in
+      // (ActiveTabSelector.tsx) only ever renders a "Void {time}" button, no
+      // per-item price; it never surfaced this assertion's target text. The
+      // authoritative source for "was the discount actually applied" is the
+      // create_order_with_items RPC's own write, not any page text — verified
+      // directly against order_items, per this test's own file header note
+      // that the RPC "is the sole authority for the final charged price").
+      const { data: tab, error: tabErr } = await admin
+        .from('tabs')
+        .select('id')
+        .eq('customer_name', customerName)
+        .single();
+      if (tabErr || !tab) throw new Error(`T2 verify: tab lookup failed - ${tabErr?.message}`);
+      const { data: order, error: orderErr } = await admin
+        .from('orders')
+        .select('id')
+        .eq('tab_id', (tab as { id: string }).id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (orderErr || !order) throw new Error(`T2 verify: order lookup failed - ${orderErr?.message}`);
+      const { data: orderItem, error: itemErr } = await admin
+        .from('order_items')
+        .select('unit_price')
+        .eq('order_id', (order as { id: string }).id)
+        .eq('product_id', (bud as { id: string }).id)
+        .single();
+      if (itemErr || !orderItem) throw new Error(`T2 verify: order_items lookup failed - ${itemErr?.message}`);
+      expect(Number((orderItem as { unit_price: number }).unit_price)).toBe(discountedPrice);
+      expect(Number((orderItem as { unit_price: number }).unit_price)).not.toBe(basePrice);
 
       await logout(page);
     } finally {

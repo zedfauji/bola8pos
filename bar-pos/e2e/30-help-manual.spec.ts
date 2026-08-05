@@ -16,8 +16,13 @@ test.describe('Sprint 13 — F1 Help Manual', () => {
     await loginAs(page, 'admin');
     await page.goto('/pos');
 
-    // Focus body so F1 is not captured by an input
-    await page.locator('body').click({ position: { x: 10, y: 10 } });
+    // Focus a non-interactive element so F1 is not captured by an input. A
+    // raw {x:10,y:10} coordinate click collides with PosPage's "← Home"
+    // back-navigation link (src/pages/pos/index.tsx renders PageContainer
+    // with zero padding, so SectionHeader's back link sits at the literal
+    // top-left corner — see 39-07-LEDGER.md). Click the page's own heading
+    // text instead, which defocuses inputs without triggering navigation.
+    await page.getByRole('heading', { level: 2 }).first().click();
     await page.keyboard.press('F1');
 
     const sheet = page.getByTestId('help-sheet');

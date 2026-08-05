@@ -129,6 +129,30 @@ the test fails purely because `getByRole('button', { name: 'Product' })` can no 
 broken accessible name. No test assertion was relaxed. Once the i18n namespace bug is fixed, this
 test requires no changes and should pass as written.
 
+### Real regression #3 — `36-recipes.spec.ts` "can add ingredients to recipe and save": recipe save is broken
+
+Discovered mid-Task-3, one layer beneath the Settings-default-tab harness fix. Live console capture
+once the tab-click harness fix let the test reach "Save recipe":
+```
+useMutationSaveRecipe: upsert failed {
+  "error": { "code": "42P10", "message":
+    "there is no unique or exclusion constraint matching the ON CONFLICT specification" }
+}
+```
+`src/entities/recipe/model/queries.ts:109-114` upserts into `recipes` with
+`{ onConflict: 'product_id' }`, which requires a plain unique constraint on that column.
+`supabase/migrations/20260428000001_recipes_tables.sql:21` originally created one
+(`product_id uuid NOT NULL UNIQUE`), but `supabase/migrations/20260429000002_recipes_prep_extension.sql:14-22`
+(added later to support prep-ingredient-owned recipes) deliberately dropped it and replaced it with
+a **partial** unique index (`... WHERE product_id IS NOT NULL`, so multiple NULL-`product_id` rows
+can coexist for prep-owned recipes). PostgREST's `onConflict: 'product_id'` API can't express that
+partial index's `WHERE` predicate, so it can no longer resolve a matching constraint — every
+recipe save has failed since that migration shipped.
+
+**Classification: `real-regression`.** Filed as a todo per D-03. This is unrelated to the
+Settings-default-tab harness cause this row was originally grouped under — fixing the harness
+layer simply unmasked a real, independent bug one step further into the flow.
+
 ## Ledger
 
 | Spec Location | Test | Error Excerpt (from `error.message`, not title) | Root-Cause Group | Classification | Evidence | Action |
@@ -138,15 +162,15 @@ test requires no changes and should pass as written.
 | e2e/27-inventory-intelligence.spec.ts:236 | T6: variance report highlights negative rows with destructive styling | Runtime `test.skip(true, 'UI: Budweiser row not found in physical count form')` (fired at `27-inventory-intelligence.spec.ts:283`) | Group 2 | conditional | Skip reason is a seed-availability-shaped runtime condition (per 39-RESEARCH.md/39-02-LEDGER.md's playbook), not a hardcoded disable, and traces to the identical Group 2 cause as T1/T5 — surfaced as a self-skip instead of a thrown error because this call site checks row visibility before asserting. | Route to Phase 38 alongside T1/T5. No un-skip — condition is data-dependent (Pitfall 4). No code change. |
 | e2e/30-help-manual.spec.ts:15 | F1 opens route-specific help on POS | `Error: expect(locator).toContainText(expected) failed — Locator: getByTestId('help-sheet-title') ... Received string: "Home — Help"` | n/a (single-finding) | harness | Live run (2/2, including a fresh single-test isolation run) shows the page snapshot is genuinely the Home dashboard (`Welcome, Taylor Brooks`, big-box nav) after `page.goto('/pos')`, not `/pos`. Root-caused to `src/pages/pos/index.tsx:53` passing `backTo="/home"` with `className="...p-0"` (zero padding) to `PageContainer`, which renders `SectionHeader`'s "← Home" `<Link>` at the literal top-left corner (`src/shared/ui/SectionHeader.tsx:58-65`, `-ml-2.5`). The test's `page.locator('body').click({ position: { x: 10, y: 10 } })` — meant only to defocus any input — lands on that link instead, navigating away before F1 is pressed. `/pool-tables` (this file's other test, which passes) uses the same `backTo` prop but default `p-6` padding, so (10,10) misses it. | Fix (Task 3): move the defocus click to a coordinate that cannot collide with the back-link, e.g. click the page's own `<h2>` title text instead of a raw `{x:10,y:10}` coordinate. |
 | e2e/31-categories.spec.ts:169 | T2: admin creates root category "Beers" — visible in tree | `Error: expect(locator).not.toBeVisible() failed — Locator: getByRole('dialog') ... resolved to <div role="dialog" aria-label="Asistente IA" ... translate-x-full">` | Group 1 (AgentPanel `role="dialog"` collision) | harness | Live run confirms the actual create succeeds (Save closes the real dialog); the bare `getByRole('dialog')` locator re-resolves to the always-mounted AgentPanel. See Group 1 writeup above. | Fix (Task 3): scope dialog locator to exclude AgentPanel (filter on `[aria-modal="true"]`). |
-| e2e/31-categories.spec.ts:193 | T3: admin creates child "Regular" under Beers | Same signature as T2 (this test also creates the root "Beers" category first, hitting the identical `not.toBeVisible()` assertion). | Group 1 | harness | Same cause as T2 — this test's root-category-creation step is byte-identical code to T2's. Chain hypothesis (39-RESEARCH.md Pitfall 3) confirmed: T3/T4/T5 all fail at the exact same line pattern as T2 because they each redo the root-creation step inline (not because a prior test's state leaked). | Same fix as T2 (shared locator scoping) resolves this row too. |
-| e2e/31-categories.spec.ts:222 | T4: admin creates grandchild "Corona" under Regular | Same signature as T2/T3 (fails at the same `not.toBeVisible()` step, reached after redoing root+child creation inline). | Group 1 | harness | Same cause. | Same fix as T2 resolves this row. |
+| e2e/31-categories.spec.ts:193 | T3: admin creates child "Regular" under Beers | Same signature as T2 (this test also creates the root "Beers" category first, hitting the identical `not.toBeVisible()` assertion). | Group 1 | harness | Same cause as T2 — this test's root-category-creation step is byte-identical code to T2's. Chain hypothesis (39-RESEARCH.md Pitfall 3) confirmed: T3/T4/T5 all fail at the exact same line pattern as T2 because they each redo the root-creation step inline (not because a prior test's state leaked). **Second layer found after applying the T2 fix:** T3 also checked `getByText('Regular')` for visibility *before* clicking "Expand Beers" — the tree collapses the newly-created child by default, a second stale assumption T4/T5 already handled correctly for the same shape. | Fixed (Task 3): dialog locator scoping (shared with T2) + reordered T3 to expand Beers before asserting "Regular" is visible, matching T4/T5's existing pattern. Live-confirmed passing. |
+| e2e/31-categories.spec.ts:222 | T4: admin creates grandchild "Corona" under Regular | Same signature as T2/T3 (fails at the same `not.toBeVisible()` step, reached after redoing root+child creation inline). | Group 1 | harness | Same cause. **Two more layers found after applying the T2 fix, both structurally identical to T3's:** T4 also checked "Regular" visibility before expanding Beers, and separately checked "Corona" visibility before expanding Regular. | Fixed (Task 3): dialog locator scoping + reordered both expand-then-assert steps (Beers→Regular, Regular→Corona). Live-confirmed passing. |
 | e2e/31-categories.spec.ts:262 | T5: 4th-level creation blocked in UI — no "Add subcategory" button on grandchild | Same signature as T2/T3/T4 (fails while rebuilding the Beers→Regular→Corona tree inline before reaching the depth-gate assertion). | Group 1 | harness | Same cause. | Same fix as T2 resolves this row. |
 | e2e/31-categories.spec.ts:318 | T6: combo_eligible flag — DB column writable and readable (service-role) | `Error: expect(received).toBeNull() — Received: {"code":"PGRST204","message":"Could not find the 'combo_eligible' column of 'categories' in the schema cache"}` (live re-check via direct query returned Postgres-native `42703: column categories.combo_eligible does not exist`) | n/a (single-finding) | obsolete | `supabase/migrations/20260424000004_product_combo_flags.sql:7-10` adds `combo_eligible`/`is_combo` to the **`products`** table only — `categories` has never had this column. The test's own header comment ("S1-01/S1-06... proves the migration column and schema are correct") appears to have targeted the wrong table from authoring; no migration ever added this to `categories`, so this is not a regression, it is an incorrect assumption baked into the test since it was written. | Justify + remove (Task 3): `categories.combo_eligible` was never implemented; this row asserts a schema shape that doesn't exist and never did. Product-level `combo_eligible` coverage is out of this spec's scope (it belongs to a products-focused spec, not touched here). |
 | e2e/31-categories.spec.ts:363 | T7: bartender cannot write to modifier_groups (RLS) | Runtime `test.skip(true, 'Set E2E_BARTENDER_EMAIL and E2E_BARTENDER_PASSWORD to enable RLS test...')` | n/a | conditional | Skip fires only when `E2E_BARTENDER_EMAIL`/`E2E_BARTENDER_PASSWORD` env vars are absent — verified these are in fact unset in this worktree's `.env.local`. Runtime-conditional on env config, not a hardcoded disable. | No un-skip (would require provisioning bartender Auth credentials, out of this plan's scope). No code change. |
 | e2e/31-categories.spec.ts:385 | T8: bartender cannot access Settings — redirected to /home | `Error: expect(page).toHaveURL(expected) failed — Expected pattern: /\/home/ — Received string: "http://localhost:1420/settings"` | n/a (single-finding, one of the two access-control findings requiring an explicit verdict) | obsolete | Live run + page snapshot: bartender **does** land on and stay at `/settings`, but the rendered page shows **exactly one tab** — "Idioma" (Language) — and its panel contains only the self-service language selector; no Categories/Products/Modifier-Groups/Hardware/etc. surface is present or reachable. `src/widgets/SettingsTabsPanel/index.tsx:33-43` deliberately pushes the `language` tab first and *outside* both the `canManageSettings`/`canManageProducts` permission gates specifically so "every authenticated role (incl. bartender) always has a non-empty tab list" (inline code comment) — this is Phase 21's documented, committed self-service-locale decision (CLAUDE.md "i18n / Multi-Language" section: "open to every authenticated role including bartender... always the first/default Settings tab"), not an accidental gate removal. **Written verdict:** the category/product-management access-control property this test aims to protect *still holds* (per-tab RBAC gating is intact and verified live — bartender sees zero sensitive tabs); only the outer route-level full-page redirect was deliberately replaced by per-tab gating in Phase 21, and this test predates that change. | Justify + remove/update (Task 3): update to assert the Phase 21 contract instead (bartender lands on `/settings`, sees only the Language tab, Products/Categories tab is absent) rather than an unconditional redirect that no longer matches an intentional, documented product decision. |
 | e2e/36-recipes.spec.ts:21 | can open Recipe tab in product edit dialog | `Error: expect(locator).toBeVisible() failed — Locator: getByRole('button', { name: /edit/i }).first() ... Error: element(s) not found` | n/a (single shared cause with the next row) | harness | Live page snapshot confirms Settings' `tablist` now defaults to "Idioma" (Language) selected, with "Products" present but **unselected** — the test's own comment ("`/settings` already lands on the Products panel — no tab click needed") is stale since Phase 21 made Language the default/first tab (`src/widgets/SettingsTabsPanel/index.tsx:39,123`, `defaultTab = firstTab.key`). No product rows/Edit buttons are rendered because the Products tab was never clicked. | Fix (Task 3): click `page.getByRole('tab', { name: 'Products' })` before waiting on Edit buttons. |
-| e2e/36-recipes.spec.ts:43 | can add ingredients to recipe and save | Same signature as line 21 (identical missing-Products-tab-click pattern, same file, same stale assumption). | Same cause as :21 | harness | Same cause — confirmed via the same live page snapshot. | Same fix as :21 resolves this row. |
-| e2e/36-recipes.spec.ts:82 | INVENTORY_NEGATIVE shows toast and allows override with manager PIN | `Error: expect(locator).toBeVisible() failed — Locator: getByText('TestDepletionE2E') — Error: strict mode violation: resolved to 2 elements: 1) "Tab opened for TestDepletionE2E" (toast) 2) heading "TestDepletionE2E"` | n/a (single-finding) | harness | Live run confirms the tab opens correctly (both matched elements confirm the underlying feature works) — the locator is simply too broad, matching both the transient open-tab toast and the persistent tab-header heading simultaneously. | Fix (Task 3): scope to `page.getByRole('heading', { name: 'TestDepletionE2E' })` or add `.first()`. |
+| e2e/36-recipes.spec.ts:43 | can add ingredients to recipe and save | Same signature as line 21 (identical missing-Products-tab-click pattern, same file, same stale assumption) — but a **second, deeper real regression** was exposed once the tab-click harness fix landed: live console capture shows `useMutationSaveRecipe: upsert failed {"error":{"code":"42P10","message":"there is no unique or exclusion constraint matching the ON CONFLICT specification"}}` on every "Save recipe" click. | Same harness cause as :21, plus one real-regression cause (single-finding) | real-regression (reclassified from harness after the harness layer was fixed and a real bug underneath was exposed) | `src/entities/recipe/model/queries.ts:109-114` upserts with `onConflict: 'product_id'`, which needs a plain unique constraint. `supabase/migrations/20260429000002_recipes_prep_extension.sql:14-22` deliberately replaced that plain constraint with a partial unique index (`WHERE product_id IS NOT NULL`, to support prep-owned recipes with NULL `product_id`) — PostgREST's simple `onConflict` API can't target a partial index, so every upsert has failed since that migration shipped. | Products-tab-click fixed in Task 3 (same as :21). The upsert bug is filed as a todo per D-03 — no inline fix; this row is expected to remain red until the todo is resolved. |
+| e2e/36-recipes.spec.ts:82 | INVENTORY_NEGATIVE shows toast and allows override with manager PIN | `Error: expect(locator).toBeVisible() failed — Locator: getByText('TestDepletionE2E') — Error: strict mode violation: resolved to 2 elements: 1) "Tab opened for TestDepletionE2E" (toast) 2) heading "TestDepletionE2E"` — a **second layer** was exposed once that locator was fixed: `TimeoutError` waiting for `getByRole('button', { name: /TestDepletionE2E/i })` (a stale "select the tab" step). | n/a (single-finding, two-layer harness) | harness | Live run confirms the tab opens correctly and is already the active tab (its heading + "Current Order" panel already show) — there is no separate button to click to "select" it once opened; the newly-created tab is auto-selected, and this old "select the tab" step never matched anything. | Fixed (Task 3): scoped the toast/heading ambiguity to `page.getByRole('heading', { name: 'TestDepletionE2E' })`, then removed the now-provably-unnecessary "select the tab" click. Live-confirmed passing. |
 | e2e/36-recipes.spec.ts:144 | full depletion E2E: sell Alitas → verify stock ledger → void → verify reversal | Hardcoded `test.skip(...)`; inline comment: "MANUAL / INTEGRATION ONLY... Cannot be automated purely in Playwright... Covered by integration tests I1 and I2 in depletion.integration.test.ts." | n/a | valid-skip | Constraint is a structural test-infra limitation (needs DB-level assertion the E2E harness can't cleanly do inline) with a named alternate coverage path (`depletion.integration.test.ts` I1/I2) that still exists and is unrelated to any CLAUDE.md "Implemented Features" change. Still holds. | No un-skip. No code change. |
 | e2e/37-analytics-reports.spec.ts:82 | T2: RecipeVarianceReport tab renders without crash | `Error: expect(locator).toBeVisible() failed — Locator: [data-testid="loading-spinner"], table, [data-testid="empty-state"] ... Timeout: 10000ms` (stale JSON only — not reproduced live) | n/a (single-finding) | flaky | Two consecutive fresh live runs (isolated `-g "T2"` and the full 5-test spec) both pass cleanly; the component (`src/widgets/RecipeVarianceReport/RecipeVarianceReport.tsx`) unconditionally renders one of `LoadingSpinner`/`EmptyState`/`Table`, all three of which carry the exact `data-testid`s the test waits on — no code path exists that renders none of them, consistent with the failure being a one-off timing/network hiccup on the original 2026-08-03 audit run, not a reproducible defect. | No code change — not currently reproducible. Re-flag if it recurs. |
 | e2e/38-audit-logs.spec.ts:170 | bartender should be redirected away from /audit | `Error: expect(locator).toBeVisible() failed — Locator: getByText(/restricted to managers and admins/i) — Error: strict mode violation: resolved to 2 elements (both "This page is restricted to managers and admins." — duplicate-rendered toast)` | n/a (one of the two access-control findings requiring an explicit verdict) | harness | Live run: the preceding `expect(page).toHaveURL(/\/home/)` assertion (line 173) **passes** — only the *following* toast-text assertion (line 174) fails, and only because the identical toast string is rendered twice (a duplicate-toast render, not two different messages). **Written verdict: the `/audit` access-control gate holds** — bartender is genuinely redirected to `/home` before the toast assertion is even reached. | Fix (Task 3): scope to `.first()` on the toast-text locator. |
@@ -165,14 +189,20 @@ test requires no changes and should pass as written.
 - **Group 2 (`27-inventory-intelligence.spec.ts` T1/T5/T6, 3 findings; `44-focus-tab-order.spec.ts`
   A shares the same seed-availability infra class, 1 finding):** shared-remote-DB seed-data gaps —
   `infra`, routed to Phase 38, zero code changes in this plan.
-- **2 real regressions, 1 finding each** (`43-promotions.spec.ts` T1 promotion-creation DB
-  constraint violation; `44-focus-tab-order.spec.ts` B i18n namespace bug), both filed as todos
-  per D-03.
-- **8 remaining single-finding rows:** 5 `harness` (30-help-manual F1, 36-recipes ×3,
+- **3 real regressions** (`43-promotions.spec.ts` T1 promotion-creation DB constraint violation;
+  `44-focus-tab-order.spec.ts` B i18n namespace bug on inventory column headers;
+  `36-recipes.spec.ts` "can add ingredients" recipe-save `ON CONFLICT` constraint mismatch), all
+  three filed as todos per D-03 and all three left red in the ledger (no inline app-code fixes).
+- **8 remaining single-finding rows:** 5 `harness` (30-help-manual F1, 36-recipes ×2 remaining,
   38-audit-logs bartender-redirect), 2 `obsolete` (31-categories T6/T8, both justified in writing
   above), 1 `flaky` (37-analytics-reports T2, not reproducible), plus 3 `conditional` skips
   (31-categories T7, 38-audit-logs diff-sheet skip — already counted) and 1 `valid-skip`
   (36-recipes full-depletion).
+- **Multi-layer findings:** three rows (31-categories T3, T4, and 36-recipes "can add
+  ingredients"/"INVENTORY_NEGATIVE") turned out to have a second (or third) distinct cause
+  stacked underneath the first one found — each additional layer only became visible once the
+  layer above it was fixed and the test could run further. All are documented in the ledger rows
+  and, where real, filed as separate todos rather than folded into the original harness cause.
 
 ## Final spec run stats (this session, live)
 
@@ -202,5 +232,39 @@ npx playwright test e2e/44-focus-tab-order.spec.ts --reporter=list
   2 failed (A, B) / 1 passed (C)
 ```
 
-Post-Task-3 spec-run results (after harness fixes) are recorded in a dedicated section below,
-appended once Task 3 completes.
+## Post-Task-3 spec-run results (live, after all harness fixes)
+
+```
+npx playwright test e2e/27-inventory-intelligence.spec.ts --reporter=list
+  2 failed (T1, T5) / 1 skipped (T6) / 3 passed — unchanged (infra, routed to Phase 38, no fix here)
+
+npx playwright test e2e/30-help-manual.spec.ts --reporter=list
+  2 passed — fixed (defocus-click fix)
+
+npx playwright test e2e/31-categories.spec.ts --reporter=list
+  6 passed / 1 skipped (T7, conditional) — fixed (dialog-locator scoping + T3/T4 expand-order fixes
+  + T6 removed as obsolete + T8 rewritten for the Phase 21 contract)
+
+npx playwright test e2e/36-recipes.spec.ts --reporter=list
+  2 passed / 1 failed ("can add ingredients to recipe and save" — real-regression, filed as todo,
+  left red by design) / 1 skipped (full-depletion, valid-skip)
+
+npx playwright test e2e/37-analytics-reports.spec.ts --reporter=list
+  5 passed — unchanged (already green; T2's original failure was not reproducible/flaky)
+
+npx playwright test e2e/38-audit-logs.spec.ts --reporter=list
+  5 passed / 1 skipped (diff-sheet, conditional) — fixed (toast-locator .first() scoping)
+
+npx playwright test e2e/43-promotions.spec.ts --reporter=list
+  1 passed (T2) / 1 failed (T1 — real-regression, filed as todo, left red by design) — fixed
+  openCaja + DB-based verification for T2
+
+npx playwright test e2e/44-focus-tab-order.spec.ts --reporter=list
+  1 passed (C) / 2 failed (A — infra, routed to Phase 38; B — real-regression, filed as todo, left
+  red by design) — unchanged, no test-side fix warranted for either
+```
+
+**Every still-red test after Task 3 maps to a ledger row with a stated reason:** 6 map to `infra`
+(routed to Phase 38, 27-inventory ×2 + 44-focus-tab-order A — T6's skip doesn't count as red) and
+3 map to filed `real-regression` todos (43-promotions T1, 44-focus-tab-order B, 36-recipes "can
+add ingredients"). No unexplained red test remains in this batch.

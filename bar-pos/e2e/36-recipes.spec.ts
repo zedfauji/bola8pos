@@ -19,10 +19,13 @@ test.describe('Recipes & depletion', () => {
   });
 
   test('can open Recipe tab in product edit dialog', async ({ page }) => {
-    // /settings already lands on the Products panel — no tab click needed.
-    // Clicking getByRole('tab', { name: /products/i }) hits two elements (outer nav
-    // tab + inner Product Management sub-tab) and throws a strict-mode violation.
+    // 39-07, harness: Settings now defaults to the "Idioma" (Language) tab,
+    // not Products (Phase 21 i18n self-service change) — an explicit click
+    // is required. Use the outer "Products" nav tab specifically (not
+    // getByRole('tab', { name: /products/i }), which also matches the inner
+    // Product Management sub-tab and throws a strict-mode violation).
     await page.goto('/settings');
+    await page.getByRole('tab', { name: 'Products', exact: true }).click();
 
     // Wait for the products table to load (Edit buttons appear when data is ready)
     await expect(page.getByRole('button', { name: /edit/i }).first()).toBeVisible({ timeout: 10000 });
@@ -41,7 +44,9 @@ test.describe('Recipes & depletion', () => {
   });
 
   test('can add ingredients to recipe and save', async ({ page }) => {
+    // 39-07, harness: same explicit Products-tab click as the previous test.
     await page.goto('/settings');
+    await page.getByRole('tab', { name: 'Products', exact: true }).click();
 
     // Wait for product table to render before clicking Edit
     await expect(page.getByRole('button', { name: /edit/i }).first()).toBeVisible({ timeout: 10000 });
@@ -99,10 +104,18 @@ test.describe('Recipes & depletion', () => {
     await page.getByLabel(/customer name/i).fill('TestDepletionE2E');
     // "Open Tab" is the dialog footer submit (exact label from OpenTabButton)
     await page.getByRole('button', { name: 'Open Tab' }).click();
-    await expect(page.getByText('TestDepletionE2E')).toBeVisible({ timeout: 10000 });
-
-    // Select the tab
-    await page.getByRole('button', { name: /TestDepletionE2E/i }).click();
+    // 39-07, harness: bare getByText('TestDepletionE2E') is ambiguous — it
+    // matches both the transient "Tab opened for..." toast and the tab's own
+    // persistent heading. Scope to the heading, which is what "the tab now
+    // exists" actually means here.
+    await expect(page.getByRole('heading', { name: 'TestDepletionE2E' })).toBeVisible({
+      timeout: 10000,
+    });
+    // 39-07, harness: the newly-opened tab is already the active tab (its
+    // heading + "Current Order" panel are already showing above) — there is
+    // no separate button to click to "select" it, so the old
+    // `getByRole('button', { name: /TestDepletionE2E/i })` step never matched
+    // anything and always timed out.
 
     // Add a product — if no products visible, skip gracefully
     const productButtons = page.getByRole('button', { name: /select/i });
