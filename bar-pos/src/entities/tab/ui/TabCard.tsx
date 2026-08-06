@@ -45,7 +45,7 @@ export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md min-h-[44px]',
+        'cursor-pointer transition-[box-shadow] hover:shadow-md min-h-[44px]',
         isActive && 'ring-2 ring-primary',
         className
       )}
