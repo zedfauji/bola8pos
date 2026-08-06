@@ -233,3 +233,16 @@ None — no external service configuration required. `.env.local` used already e
 ---
 *Phase: 39-ai-slob-technical-debt-remediation*
 *Completed: 2026-08-05*
+
+## Self-Check: PASSED
+
+- FOUND: `.planning/phases/39-ai-slob-technical-debt-remediation/39-05-LEDGER.md`
+- FOUND: `.planning/phases/39-ai-slob-technical-debt-remediation/39-05-SUMMARY.md`
+- FOUND: `.planning/phases/39-ai-slob-technical-debt-remediation/deferred-items.md`
+- FOUND: `.planning/todos/pending/2026-08-05-void-order-close-shift-generate-report-use-relative-fetch-url-always-404.md`
+- FOUND: `.planning/todos/pending/2026-08-05-void-button-not-disabled-for-already-voided-orders.md`
+- FOUND: `.planning/todos/pending/2026-08-05-inventory-page-has-no-role-gate-bartender-can-navigate-directly.md`
+- FOUND: commit `02197e6` in `git log --oneline --all`
+- FOUND: commit `6c6b486` in `git log --oneline --all`
+- FOUND: commit `8b9a204` in `git log --oneline --all`
+- FOUND: commit `3cda4f7` in `git log --oneline --all`
