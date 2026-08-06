@@ -25,7 +25,7 @@ const db = supabase as any;
    copy (plugin doesn't resolve excluded callees across a multi-line method
    chain — 21-08 quirk). */
 
-export const recipeKeys = {
+const recipeKeys = {
   all: ['recipes'] as const,
   byProduct: (productId: string) => [...recipeKeys.all, 'product', productId] as const,
 };

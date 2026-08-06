@@ -3,7 +3,6 @@ import { persist } from 'zustand/middleware';
 import {
   OfflineActionTypeSchema,
   type OfflineAction,
-  type OfflineActionType,
   type Tab,
 } from '@shared/lib/domain';
 import i18n from '@shared/lib/i18n';
@@ -21,7 +20,7 @@ import { ok, err, type Result } from '@shared/lib/result';
 // time so the OfflineQueueProcessor can drop stale actions on replay.
 // ============================================================================
 
-export type { OfflineAction, OfflineActionType };
+export type { OfflineAction };
 
 // ============================================================================
 // STATE & ACTIONS
@@ -256,6 +255,3 @@ export const useTabStore = create<TabsStore>()(
 export const selectTabById = (id: string): Tab | undefined =>
   useTabStore.getState().tabs.find(t => t.id === id);
 
-/** Returns all tabs with status 'open'. */
-export const selectOpenTabs = (): Tab[] =>
-  useTabStore.getState().tabs.filter(t => t.status === 'open');

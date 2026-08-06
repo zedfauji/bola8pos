@@ -100,7 +100,7 @@ export type SettingsSnapshot = {
   tipDistribution: TipDistributionSettings;
 };
 
-export const settingsKeys = {
+const settingsKeys = {
   all: ['settings'] as const,
   backups: () => [...settingsKeys.all, 'backups'] as const,
   emailStatus: () => [...settingsKeys.all, 'email-status'] as const,

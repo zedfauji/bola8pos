@@ -23,7 +23,7 @@ export const paymentKeys = {
   lists: () => [...paymentKeys.all, 'list'] as const,
 };
 
-export const paymentItemKeys = {
+const paymentItemKeys = {
   byPayment: (paymentId: string) => ['payment', 'order-items', paymentId] as const,
 };
 

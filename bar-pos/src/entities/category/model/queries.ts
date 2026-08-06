@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
 import type { Category, CategoryCreate, CategoryRouting, CategoryUpdate } from '@shared/lib/domain';
 import { CategorySchema } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
@@ -13,7 +12,6 @@ import {
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 import type { Tables, TablesInsert, TablesUpdate } from '@shared/lib/supabase.types';
-import { buildCategoryTree, type CategoryNode } from './types';
 
 // ============================================================================
 // QUERY KEYS
@@ -21,7 +19,7 @@ import { buildCategoryTree, type CategoryNode } from './types';
 /* eslint-disable i18next/no-literal-string -- TanStack Query cache-key
    namespace strings below are not UI copy. */
 
-export const CATEGORY_QUERY_KEY = ['categories'] as const;
+const CATEGORY_QUERY_KEY = ['categories'] as const;
 
 // ============================================================================
 // ROW MAPPER
@@ -107,27 +105,6 @@ export function useCategories() {
     isEmpty: query.isSuccess && !!r?.ok && r.data.length === 0,
     isIdleOrLoading: query.isPending || query.isLoading,
   };
-}
-
-/**
- * Returns the same categories as {@link useCategories} but shaped as a tree.
- * Root categories have `parentId == null`; nesting is max 3 deep (DB enforced).
- */
-export function useCategoryTree(): {
-  tree: CategoryNode[];
-  isLoading: boolean;
-  resultError: ReturnType<typeof useCategories>['resultError'];
-} {
-  const { data: flat, isLoading, resultError } = useCategories();
-  // Normalize optional parentId to explicit null so it satisfies TreeNode (exactOptionalPropertyTypes).
-  const tree = useMemo(
-    () =>
-      flat != null
-        ? buildCategoryTree(flat.map(c => ({ ...c, parentId: c.parentId ?? null })))
-        : [],
-    [flat]
-  );
-  return { tree, isLoading, resultError };
 }
 
 // ============================================================================

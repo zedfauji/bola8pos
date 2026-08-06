@@ -28,7 +28,7 @@ export const promotionKeys = {
   availability: (promotionId: string) => [...promotionKeys.all, 'availability', promotionId] as const,
 };
 
-export function mapPromotionRow(row: Record<string, unknown>): Promotion {
+function mapPromotionRow(row: Record<string, unknown>): Promotion {
   return PromotionSchema.parse({
     id: row['id'],
     name: row['name'],
@@ -265,29 +265,3 @@ export function useActivePromotions() {
   });
 }
 
-/**
- * Check if a promotion is available right now via the server-side
- * is_promotion_available() function.
- * staleTime=30s — availability windows are minute-granular; short cache is fine.
- * Fails open (returns true) if the RPC errors — the order-time RPC re-validates
- * server-side, mirroring useComboAvailability's T-2-03-05 fail-open UX choice.
- */
-export function usePromotionActive(promotionId: string | null) {
-  return useQuery({
-    queryKey: promotionKeys.availability(promotionId ?? ''),
-    enabled: promotionId != null && promotionId.length > 0,
-    staleTime: 30_000,
-    queryFn: async (): Promise<boolean> => {
-      if (!promotionId) return true;
-      const { data, error } = await supabase.rpc('is_promotion_available' as any, {
-        p_promotion_id: promotionId,
-        p_ts: new Date().toISOString(),
-      });
-      if (error) {
-        logger.error('usePromotionActive: rpc failed', { error, promotionId });
-        return true;
-      }
-      return data as boolean;
-    },
-  });
-}

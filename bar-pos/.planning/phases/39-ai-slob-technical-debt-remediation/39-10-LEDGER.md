@@ -199,4 +199,201 @@ Per finding, three checks were performed (not just a single bare-identifier grep
 | 18 | `WaitlistEntryStatusSchema` | export | 3 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution (relative + @alias, multi-line-safe) in either knip mode; no immediate slice barrel forwards it (pruned in 39-08 or never present). Confirmed dead. |
 | 19 | `PhoneE164Schema` | export | 2 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution (relative + @alias, multi-line-safe) in either knip mode; no immediate slice barrel forwards it (pruned in 39-08 or never present). Confirmed dead. |
 
+---
+
+## Task 2 — `model/store.ts`, `model/queries.ts`, `model/queries-reports.ts`, `ui/*.tsx` findings (55 of 148), and the `inventoryStore`/`useInventoryStore` duplicate export
+
+### Method addendum for Task 2
+
+Same three-check method as Task 1. One additional wrinkle for this batch: several findings here are query-key factory objects or row-mapper helper functions that ARE used internally within their own file (by sibling exported hooks in the same module) but have zero external importers. For those, the disposition is still **DELETE** (the finding — "this export is unused externally" — is real), but the *action* taken is narrower than Task 1's whole-declaration removal: only the `export` keyword is dropped, the declaration itself stays (it is not dead code, just no longer part of the file's public surface). Each such row's Reason column states this explicitly ("Kept the declaration ... removed only the `export` keyword"). Rows where nothing in the file or elsewhere referenced the name at all get the full declaration removed, same as Task 1.
+
+### `src/entities/inventory/model/store.ts` — duplicate-export pair resolution
+
+`inventoryStore` and `useInventoryStore` both point at the same Zustand store instance (`export const inventoryStore = useInventoryStore;`). Checked which consumers import which name:
+
+- `useInventoryStore` — imported by `entities/inventory/model/index.ts` (barrel re-export), `entities/inventory/model/queries.ts` (internal), `entities/inventory/model/store.test.ts` (test).
+- `inventoryStore` — imported by `src/widgets/LowStockAlert/index.tsx` (`inventoryStore(s => s.lowStockAlerts)`) and `src/widgets/OrderPanel/CartPanel.tsx` (`inventoryStore.getState().decrementQuantities(...)`), both real production widgets, both reached via `@entities/inventory`'s barrel (`export { inventoryStore, ... } from './model'`).
+
+**Resolution: DEFERRED, both kept.** Both aliases have real, distinct, non-overlapping consumer sets — neither is dead. Consolidating them (e.g. renaming the two widget call sites to `useInventoryStore` and deleting the `inventoryStore` alias) would require editing `src/widgets/**` files, which are outside this plan's file scope (`src/entities/*/model/*.ts`, `src/entities/*/ui/*.tsx` per the parallel-execution scope note) and would also cross into "restructuring the module," which this plan's own text prohibits for this specific file ("Do not restructure the module, and do not touch the `queries.ts` <-> `store.ts` circular import while you are in there"). A comment recording this reasoning was added directly above the `inventoryStore` declaration so a future dependency-cleanup phase (with widgets in scope) can act on it.
+
+### Per-finding table
+
+
+### `src/entities/audit-log/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 18 | `PAGE_SIZE` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+| 31 | `sanitizeSearch` | export | 8 | **KEEP** | Barrel not involved (no re-export). Reached only via entities/audit-log/model/queries.test.ts. Production-mode-only finding -- test-reachable false positive. |
+
+### `src/entities/caja/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 41 | `cajaKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+| 386 | `cajaEntryKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+| 515 | `tipDistributionKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+
+### `src/entities/category/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 24 | `CATEGORY_QUERY_KEY` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+| 116 | `useCategoryTree` | export | 1 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/ingredient/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 105 | `useIngredient` | export | 7 | **KEEP** | Barrel not involved. Reached only via entities/ingredient/model/queries.test.ts. Production-mode-only finding -- test-reachable false positive. |
+
+### `src/entities/inventory/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 156 | `useInventoryByProduct` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 196 | `useLowStockInventory` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/inventory/model/store.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 12 | `LowStockAlertItem` | type | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+| 115 | `selectInventoryByProductId` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 119 | `selectIsLowStock` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/inventory/ui/InventoryRow.tsx`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 120 | `InventoryRowProps` | type | 0 | **KEEP** | Self-referenced as the exported InventoryRow component prop-type annotation within the same file (line 129). Production-mode-only finding (default mode resolves the internal usage) -- not deleted. |
+| 129 | `InventoryRow` | export | 11 | **KEEP** | Reached only via entities/inventory/ui/InventoryRow.stories.tsx. Production-mode-only finding -- story-reachable false positive. |
+
+### `src/entities/modifier-inventory-rule/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 28 | `modifierInventoryRuleKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+
+### `src/entities/open-unit/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 17 | `openUnitKeys` | export | 4 | **KEEP** | Reached only via entities/open-unit/model/queries.test.ts. Production-mode-only finding -- test-reachable false positive. |
+
+### `src/entities/payment/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 26 | `paymentItemKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+
+### `src/entities/prep/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 22 | `prepKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+
+### `src/entities/product/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 521 | `useMutationCreateCategory` | export | 8 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 550 | `useMutationUpdateCategory` | export | 8 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/product/model/store.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 49 | `selectProductById` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 53 | `selectActiveProducts` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 57 | `selectCategoryById` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 61 | `selectProductsByCategoryId` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 65 | `selectModifierById` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 69 | `selectModifiersByIds` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/promotion/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 31 | `mapPromotionRow` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+| 275 | `usePromotionActive` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/rappi-order/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 49 | `rappiOrdersListQueryKey` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/recipe/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 28 | `recipeKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+
+### `src/entities/resource/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 500 | `usePoolSessionsByTab` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/resource/model/store.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 115 | `selectTableById` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 119 | `selectActiveSessionForTable` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 123 | `selectAvailableTableCount` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 127 | `selectSessionsByTabId` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/settings/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 103 | `settingsKeys` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Kept the declaration (used internally in the same file); removed only the `export` keyword. |
+
+### `src/entities/staff/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 38 | `mapStaffRow` | export | 3 | **KEEP** | Reached only via entities/staff/model/queries.test.ts. Production-mode-only finding -- test-reachable false positive. |
+
+### `src/entities/tab/model/queries-reports.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 52 | `DeletionsPreRow` | type | 10 | **KEEP** | Re-exported from @shared/lib/domain (import-then-plain-export pattern, no from clause on the export itself) but reached only via 6 widget .test.tsx files that do `import type * as QueriesReports from '@entities/tab/model/queries-reports'` for mock typing. All production consumers (DeletionsPreSendPanel.tsx, ExportButtons.tsx, useExportReport.ts) import the type directly from @shared/lib/domain, bypassing this re-export. Production-mode-only finding -- test-reachable false positive. |
+| 53 | `DeletionsPostRow` | type | 10 | **KEEP** | Same re-export/test-reachable pattern as DeletionsPreRow (line 52) -- reached only via the same 6 widget .test.tsx namespace type imports; production consumers use @shared/lib/domain directly. |
+| 54 | `ModifierPopularityRow` | type | 11 | **KEEP** | Same re-export/test-reachable pattern as DeletionsPreRow (line 52). |
+| 55 | `PaymentMethodRow` | type | 10 | **KEEP** | Same re-export/test-reachable pattern as DeletionsPreRow (line 52). |
+| 71 | `computePctTotals` | export | 21 | **KEEP** | Used internally (lines 298, 461) and reached externally via entities/tab/model/queries-reports.test.ts + shared/lib/reportHelpers.test.ts + 3 widget vi.mock() factories (VoidRefundPanel, ProductSalesPanel, ProductSalesExportFilter .test.tsx). Production-mode-only finding -- test-reachable false positive. |
+| 88 | `aggregateHourlyRevenue` | export | 8 | **KEEP** | Reached via entities/tab/model/queries-reports.test.ts. Production-mode-only finding -- test-reachable false positive. |
+| 129 | `fillMissingHours` | export | 19 | **KEEP** | Reached via entities/tab/model/queries-reports.test.ts and widgets/HourlyBreakdownPanel/HourlyBreakdownPanel.test.tsx. Production-mode-only finding -- test-reachable false positive. |
+| 162 | `fillMissingCategories` | export | 8 | **KEEP** | Reached via entities/tab/model/queries-reports.test.ts. Production-mode-only finding -- test-reachable false positive. |
+| 365 | `filterVoidRefundRows` | export | 8 | **KEEP** | Reached via entities/tab/model/queries-reports.test.ts. Production-mode-only finding -- test-reachable false positive. |
+| 473 | `assertDateRangeValid` | export | 7 | **KEEP** | Reached via entities/tab/model/queries-reports.test.ts. Production-mode-only finding -- test-reachable false positive. |
+
+### `src/entities/tab/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 774 | `useMutationUpdateTabStatus` | export | 2 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration (also removed the now-dangling `handleVersionError`/`TERMINAL_ID`/`UpdateTabStatusContext` helpers this and the next deletion left unreferenced). |
+| 880 | `useMutationRecordTabPayment` | export | 1 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 1039 | `useVoidOrder` | export | 17 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/tab/model/store.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 24 | `OfflineActionType` | type | 3 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead (the re-export line, not the import — `OfflineAction`, the sibling type on the same re-export line, is kept, still live). Removed the name from both the import and the re-export. |
+| 260 | `selectOpenTabs` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+### `src/entities/waitlist/model/queries.ts`
+
+| Line | Name | Kind | `grep -rn` hit count (outside decl) | Disposition | Reason (search evidence + barrel check + action taken) |
+|---|---|---|---|---|---|
+| 103 | `useWaitlistEntry` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+| 225 | `useMutationUpdateWaitlistStatus` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
+
+<!-- gsd:write-continue -->
+
 <!-- gsd:write-continue -->

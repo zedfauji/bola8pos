@@ -9,7 +9,7 @@ import { inventoryKeys } from './queries';
 /* eslint-disable i18next/no-literal-string -- the Realtime channel name below
    is a wire-protocol identifier, not UI copy. */
 
-export type LowStockAlertItem = {
+type LowStockAlertItem = {
   productId: string;
   name: string;
   quantityOnHand: number;
@@ -108,16 +108,22 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   },
 }));
 
-/** Same store reference; use for `getState` / `subscribe` outside React. */
+/**
+ * Same store reference; use for `getState` / `subscribe` outside React.
+ *
+ * Duplicate-export pair with `useInventoryStore` (both point at the same
+ * Zustand store instance) — kept as two names deliberately, not consolidated:
+ * `inventoryStore` is the one actually imported by production widgets
+ * (`widgets/LowStockAlert/index.tsx`, `widgets/OrderPanel/CartPanel.tsx`),
+ * while `useInventoryStore` is used internally within this entities slice
+ * (`model/index.ts`, `model/queries.ts`, `model/store.test.ts`). Neither
+ * alias is dead — consolidating them would require renaming call sites in
+ * src/widgets, which is outside this plan's file scope (entities model/ui
+ * files only) and would also be a restructuring change beyond "remove the
+ * flagged declaration" (39-10 plan text: "Do not restructure the module").
+ * Deferred, not resolved.
+ */
 export const inventoryStore = useInventoryStore;
-
-/** Returns the inventory record for a given product, or undefined. */
-export const selectInventoryByProductId = (productId: string): Inventory | undefined =>
-  useInventoryStore.getState().inventory.find(i => i.productId === productId);
-
-/** Returns true if the product ID is in the low-stock alert list. */
-export const selectIsLowStock = (productId: string): boolean =>
-  useInventoryStore.getState().lowStockProductIds.includes(productId);
 
 /**
  * Subscribes to Supabase Realtime postgres_changes on the inventory table.

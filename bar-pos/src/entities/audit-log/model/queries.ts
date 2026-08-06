@@ -15,7 +15,7 @@ import { supabase } from '@shared/lib/supabase';
 
 const db = supabase as any;
 
-export const PAGE_SIZE = 50;
+const PAGE_SIZE = 50;
 
 export const auditKeys = {
   all: ['audit-logs'] as const,

@@ -110,19 +110,3 @@ export const useResourceStore = create<ResourceStore>()(
     }
   )
 );
-
-/** Returns a resource by ID, or undefined. */
-export const selectTableById = (id: string): Resource | undefined =>
-  useResourceStore.getState().tables.find(t => t.id === id);
-
-/** Returns the active (not stopped) session for a given table, or undefined. */
-export const selectActiveSessionForTable = (tableId: string): PoolSession | undefined =>
-  useResourceStore.getState().sessions.find(s => s.tableId === tableId && s.stoppedAt === null);
-
-/** Returns the count of tables whose status is 'available'. */
-export const selectAvailableTableCount = (): number =>
-  useResourceStore.getState().tables.filter(t => t.status === 'available').length;
-
-/** Returns all sessions associated with a specific tab. */
-export const selectSessionsByTabId = (tabId: string): PoolSession[] =>
-  useResourceStore.getState().sessions.filter(s => s.tabId === tabId);

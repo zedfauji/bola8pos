@@ -19,7 +19,7 @@ const db = supabase as any;
    multi-line Supabase chain args below are wire-protocol identifiers, not UI
    copy (plugin doesn't resolve excluded callees across a multi-line method
    chain — 21-08 quirk). */
-export const prepKeys = {
+const prepKeys = {
   all: ['prep_productions'] as const,
   lists: () => [...prepKeys.all, 'list'] as const,
   byIngredient: (id: string) => [...prepKeys.all, 'ingredient', id] as const,

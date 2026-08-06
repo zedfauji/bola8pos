@@ -497,44 +497,6 @@ export function useMutationStopSession() {
   });
 }
 
-export function usePoolSessionsByTab(tabId: string) {
-  const query = useQuery({
-    queryKey: ['pool-sessions', 'tab', tabId],
-    enabled: Boolean(tabId),
-    queryFn: async (): Promise<Result<PoolSession[]>> => {
-      const res = await supabaseQuery(() =>
-        supabase
-          .from('pool_sessions')
-          .select('*')
-          .eq('tab_id', tabId)
-          .order('started_at', { ascending: false })
-      );
-
-      if (!res.ok) {
-        logger.error('pool_sessions.by_tab.fetch_failed', { message: res.error.message });
-        return res;
-      }
-
-      const sessions: PoolSession[] = [];
-      for (const row of res.data) {
-        const m = mapPoolSessionRow(row);
-        if (!m.ok) return m;
-        sessions.push(m.data);
-      }
-      return ok(sessions);
-    },
-  });
-
-  const r = query.data;
-  return {
-    ...query,
-    data: r?.ok ? r.data : undefined,
-    resultError: r && !r.ok ? r.error : undefined,
-    isEmpty: query.isSuccess && !!r?.ok && r.data.length === 0,
-    isIdleOrLoading: query.isPending || query.isLoading,
-  };
-}
-
 export function useMutationLinkPoolSessionToTab() {
   const queryClient = useQueryClient();
 
