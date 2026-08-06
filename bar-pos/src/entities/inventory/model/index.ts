@@ -5,25 +5,10 @@
 // Types & Schemas
 export { InventorySchema, InventoryLogSchema } from './types';
 
-export type { Inventory, InventoryLog } from './types';
+export type { Inventory } from './types';
 
 // State Management
-export {
-  useInventoryStore,
-  inventoryStore,
-  selectInventoryByProductId,
-  selectIsLowStock,
-  useInventoryRealtimeBridge,
-} from './store';
-export type { LowStockAlertItem } from './store';
+export { useInventoryStore, inventoryStore, useInventoryRealtimeBridge } from './store';
 
 // Data Fetching
-export {
-  inventoryKeys,
-  useInventory,
-  useInventoryByProduct,
-  useLowStockInventory,
-  useInventoryAlerts,
-  useMutationAdjustInventory,
-  useInventoryLog,
-} from './queries';
+export { inventoryKeys, useInventory, useInventoryAlerts, useMutationAdjustInventory, useInventoryLog } from './queries';

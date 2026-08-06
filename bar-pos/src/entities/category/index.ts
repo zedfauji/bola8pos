@@ -7,16 +7,6 @@
  * Deep imports into model/ are NOT allowed from outside this entity.
  */
 
-export {
-  CategorySchema,
-  CategoryCreateSchema,
-  CategoryUpdateSchema,
-  buildCategoryTree,
-  CATEGORY_QUERY_KEY,
-  useCategories,
-  useCategoryTree,
-  useMutationCreateCategory,
-  useMutationUpdateCategory,
-} from './model';
+export { useCategories, useMutationCreateCategory, useMutationUpdateCategory } from './model';
 
-export type { Category, CategoryCreate, CategoryUpdate, CategoryNode } from './model';
+export type { Category } from './model';

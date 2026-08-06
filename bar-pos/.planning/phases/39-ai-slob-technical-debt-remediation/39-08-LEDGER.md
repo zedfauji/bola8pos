@@ -147,3 +147,114 @@ That comment text matches the same `from '@entities/category'` pattern as a real
 | Ratio (deep : barrel) | **0.96 : 1** |
 
 **Reading:** This is the single most decision-relevant number, and it does **not** confirm the plan's planning-time hypothesis. 39-RESEARCH.md and this plan's own `<context>` state "at planning time deep-path imports outnumbered barrel-style ones" — that assumption does not hold under direct measurement. The two styles are nearly even, with barrel-style very slightly ahead (252 vs 241, an 11-import margin, 51% vs 49%). The barrel convention has **not** eroded in practice — it is still followed almost exactly as often as it is bypassed. This is evidence for reading the 433 findings as substantially a visibility gap (knip not crediting deep-path-adjacent consumers who *could* reach the same symbol through the barrel, or barrels exporting more than any *single* current consumer needs) rather than as 433 genuinely abandoned API surfaces — which favors Option B (configure) or Option C (hybrid) over Option A (prune) on the evidence, though the near-50/50 split is close enough that it does not settle the question outright.
+
+## Decision (Task 2 checkpoint)
+
+**Selected: Option C — Hybrid.** Delete the 12 whole-dead barrels. For the 433 line-level re-export findings, prune a re-export only where the underlying declaration is *also* independently flagged dead by knip (i.e., nobody reaches the symbol at all, not even via deep-path or through the barrel) — keep re-exports for symbols that are live, even if currently reached only via deep-path import rather than through the barrel. No `knip.json` changes.
+
+## Task 2 — Applying the Decision
+
+### 12 whole-dead barrels — sanity check and deletion
+
+Every barrel was checked with a repository-wide search for both the directory-style import path (`@layer/slice` or `@layer/slice/subpath`) and the literal file path before deletion, per the plan's mandated pattern. All 12 confirmed zero functional hits (only comment/doc-string mentions or unrelated string-literal matches, e.g. the `'open-tab'` offline-queue action-type literal, which is unrelated to the `@features/open-tab` barrel import):
+
+| # | File | Search evidence | Outcome |
+|---|---|---|---|
+| 1 | `src/entities/combo/model/index.ts` | `grep -rn "entities/combo/model" src/` → 2 hits, both header/doc comments in sibling files, zero imports | DELETED |
+| 2 | `src/entities/promotion/model/index.ts` | `grep -rn "entities/promotion/model" src/` → 5 hits, all doc-comment references in test files, zero imports | DELETED |
+| 3 | `src/features/add-item-to-tab/model/index.ts` | `grep -rn "add-item-to-tab/model" src/` → 0 hits | DELETED |
+| 4 | `src/features/add-item-to-tab/ui/index.ts` | `grep -rn "add-item-to-tab/ui" src/` → 1 hit, deep-path `@features/add-item-to-tab/ui/ModifierSheet` (bypasses this barrel, doesn't import it) | DELETED |
+| 5 | `src/features/open-tab/index.ts` | `grep -rn "open-tab" src/` → all hits are the unrelated `'open-tab'` offline-queue action-type string literal, or deep-path imports into `ui/OpenTabDialog`/`ui/OpenTabButton`; zero barrel-style hits | DELETED |
+| 6 | `src/features/open-tab/ui/index.ts` | `grep -rn "features/open-tab/ui" src/` → 2 hits, both deep-path into `OpenTabDialog`/`OpenTabButton`, zero barrel-style | DELETED |
+| 7 | `src/features/print-precheque/index.ts` | `grep -rn "print-precheque" src/` → 1 hit, deep-path `@features/print-precheque/usePrintPreCheque` | DELETED |
+| 8 | `src/features/remove-item-from-tab/index.ts` | `grep -rn "remove-item-from-tab" src/` → 0 hits | DELETED |
+| 9 | `src/features/remove-tab-item/index.ts` | `grep -rn "remove-tab-item" src/` → 3 hits, 2 unrelated i18n label strings (`htmlFor`/`id="remove-tab-item-reason"`), 1 deep-path `@features/remove-tab-item/ui/RemoveTabItemDialog` | DELETED |
+| 10 | `src/features/stop-and-move-table/index.ts` | `grep -rn "stop-and-move-table" src/` → 1 hit, deep-path `@features/stop-and-move-table/ui/StopAndMoveDialog` | DELETED |
+| 11 | `src/shared/lib/index.ts` | `grep -rn "@shared/lib['\"]" src/` and `grep -rln "shared/lib'" src/` → 0 hits | DELETED |
+| 12 | `src/widgets/RappiOrderBadge/index.ts` + `src/widgets/RappiOrderBadge/RappiOrderBadge.tsx` | `grep -rn "RappiOrderBadge" src/` → only the two files' own declarations, zero external references | **DELETED TOGETHER, single commit** (T-39-12 — barrel + component pair, per 39-03's deferral) |
+
+### 433 barrel re-export findings — per-barrel outcome (hybrid rule applied)
+
+**Method:** for each flagged re-export `export { X, ... } from '<spec>'` (or `export type { ... }`), resolved `<spec>` to its actual file (handling relative paths, `@entities/@features/@widgets/@shared` tsconfig aliases, and one indirect import-then-plain-export pattern in `PaymentModal/index.tsx`), then checked whether the same symbol name is *also* independently flagged unused in the resolved underlying file's own knip findings (default+production union). Pruned only when both the barrel re-export AND the underlying declaration are dead. A worked example: `src/entities/audit-log/index.ts` re-exports `AuditLogSchema` from `./model` (itself `model/index.ts`, also one of the 64 barrels); `model/index.ts` re-exports it from `./types`; knip's production-mode report independently flags `AuditLogSchema` as unused at all three levels (`audit-log/index.ts`, `model/index.ts`, and `model/types.ts`) — confirming nobody reaches it via any path, barrel or deep. All three re-export levels get pruned in this plan; the leaf declaration in `model/types.ts` is untouched (that's a non-barrel finding, in 39-10's working set).
+
+**Total: 293 re-exports pruned, 140 kept** (139 where the underlying declaration is independently live — reached via deep-path or elsewhere — plus 1 special case, `KdsCard`, below).
+
+| File | Findings | Pruned | Kept | Pruned names | Notes |
+|---|---|---|---|---|---|
+| `src/entities/audit-log/index.ts` | 4 | 4 | 0 | AuditLogSchema, AuditLogFiltersSchema, PAGE_SIZE, sanitizeSearch | |
+| `src/entities/audit-log/model/index.ts` | 4 | 4 | 0 | AuditLogSchema, AuditLogFiltersSchema, PAGE_SIZE, sanitizeSearch | |
+| `src/entities/caja/index.ts` | 5 | 4 | 1 | cajaKeys, cajaEntryKeys, tipDistributionKeys, CajaPaymentSummary | |
+| `src/entities/caja/model/index.ts` | 4 | 3 | 1 | cajaKeys, cajaEntryKeys, tipDistributionKeys | |
+| `src/entities/category/index.ts` | 9 | 9 | 0 | CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, buildCategoryTree, CATEGORY_QUERY_KEY, useCategoryTree, CategoryCreate, CategoryUpdate, CategoryNode | |
+| `src/entities/category/model/index.ts` | 9 | 7 | 2 | CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, CATEGORY_QUERY_KEY, useCategoryTree, CategoryCreate, CategoryUpdate | |
+| `src/entities/combo/index.ts` | 6 | 6 | 0 | ComboSlotCreate, ComboSlotUpdate, ComboSlotOptionCreate, ComboAvailabilityCreate, SlotSelection, AddComboToTabInput | |
+| `src/entities/ingredient/index.ts` | 9 | 9 | 0 | useIngredient, IngredientSchema, IngredientUpdateSchema, ManualAdjustReasonSchema, UomSchema, BaseUomSchema, IngredientUpdate, Uom, BaseUom | |
+| `src/entities/inventory/index.ts` | 11 | 11 | 0 | InventorySchema, InventoryLogSchema, useInventoryStore, selectInventoryByProductId, selectIsLowStock, useInventoryByProduct, useLowStockInventory, InventoryRow, InventoryLog, LowStockAlertItem, InventoryRowProps | |
+| `src/entities/inventory/model/index.ts` | 9 | 6 | 3 | selectInventoryByProductId, selectIsLowStock, useInventoryByProduct, useLowStockInventory, InventoryLog, LowStockAlertItem | |
+| `src/entities/kds/index.ts` | 1 | 0 | 1 | — | |
+| `src/entities/modifier-inventory-rule/index.ts` | 5 | 5 | 0 | ModifierInventoryRuleSchema, ModifierInventoryRuleCreateSchema, modifierInventoryRuleKeys, ModifierInventoryRule, ModifierInventoryRuleCreate | |
+| `src/entities/open-unit/index.ts` | 6 | 6 | 0 | OpenUnitSchema, OpenUnitStatusSchema, OpenUnitCorrectionSchema, openUnitKeys, OpenUnitStatus, OpenUnitCorrection | |
+| `src/entities/payment/index.ts` | 15 | 15 | 0 | PaymentSchema, CreatePaymentSchema, UpdatePaymentSchema, mockPayments, usePaymentStore, selectPaymentByTabId, selectPaymentsByMethod, selectPaymentsByStaffId, selectPaymentsByDateRange, selectTotalRevenue, selectTotalTips, paymentItemKeys, CreatePayment, UpdatePayment, OrderItemForRefund | |
+| `src/entities/payment/model/index.ts` | 15 | 12 | 3 | CreatePaymentSchema, UpdatePaymentSchema, mockPayments, usePaymentStore, selectPaymentByTabId, selectPaymentsByMethod, selectPaymentsByStaffId, selectPaymentsByDateRange, selectTotalRevenue, selectTotalTips, paymentItemKeys, UpdatePayment | |
+| `src/entities/prep/index.ts` | 3 | 3 | 0 | prepKeys, PrepProductionSchema, PrepProductionCreateSchema | |
+| `src/entities/product/index.ts` | 18 | 18 | 0 | ProductSchema, CategorySchema, ModifierSchema, ProductCreateSchema, useProductStore, selectActiveProducts, selectProductsByCategoryId, selectProductById, selectCategoryById, selectModifierById, selectModifiersByIds, useCategories, useMutationCreateCategory, useMutationUpdateCategory, Product, Category, Modifier, ProductCreate | |
+| `src/entities/product/model/index.ts` | 18 | 10 | 8 | ProductCreateSchema, selectActiveProducts, selectProductById, selectCategoryById, selectProductsByCategoryId, selectModifierById, selectModifiersByIds, useMutationCreateCategory, useMutationUpdateCategory, ProductCreate | |
+| `src/entities/promotion/index.ts` | 6 | 6 | 0 | usePromotionActive, Promotion, PromotionCreate, PromotionUpdate, PromotionAvailabilityCreate, AppliedPromotion | |
+| `src/entities/rappi-order/index.ts` | 5 | 5 | 0 | acceptRappiOrder, rejectRappiOrder, markRappiOrderReady, markRappiOrderCompleted, setRappiOrderPreparing | |
+| `src/entities/rappi-order/model/index.ts` | 7 | 1 | 6 | rappiOrdersListQueryKey | |
+| `src/entities/rbac/index.ts` | 4 | 4 | 0 | RolePermissionSchema, RolePermissionCreateSchema, RolePermission, RolePermissionCreate | |
+| `src/entities/rbac/model/index.ts` | 4 | 4 | 0 | RolePermissionSchema, RolePermissionCreateSchema, RolePermission, RolePermissionCreate | |
+| `src/entities/recipe/index.ts` | 13 | 13 | 0 | RecipeSchema, RecipeItemSchema, RecipeWithItemsSchema, RecipeCreateSchema, RecipeItemCreateSchema, RecipeUpdateSchema, recipeKeys, Recipe, RecipeCreate, RecipeItem, RecipeItemCreate, RecipeUpdate, RecipeWithItems | |
+| `src/entities/refund/index.ts` | 7 | 5 | 2 | RefundSchema, RefundItemSchema, RefundReasonSchema, RefundCreateSchema, RefundCreate | |
+| `src/entities/resource/index.ts` | 23 | 22 | 1 | ResourceSchema, PoolSessionSchema, PoolSessionSummarySchema, ResourceTypeSchema, useResourceStore, selectTableById, selectActiveSessionForTable, selectAvailableTableCount, selectSessionsByTabId, resourceKeys, useResource, useMutationStartSession, useMutationStopSession, usePoolSessionsByTab, useMutationLinkPoolSessionToTab, usePoolTimer, Resource, PoolSession, PoolTableStatus, ResourceType, PoolSessionSummary, UsePoolTimerOptions | |
+| `src/entities/resource/model/index.ts` | 22 | 12 | 10 | PoolSessionSummarySchema, ResourceTypeSchema, selectTableById, selectActiveSessionForTable, selectAvailableTableCount, selectSessionsByTabId, usePoolSessionsByTab, Resource, PoolSession, PoolTableStatus, ResourceType, PoolSessionSummary | |
+| `src/entities/settings/index.ts` | 9 | 9 | 0 | settingsKeys, TipDistributionSettingsSchema, SettingsSnapshot, BillingSettings, EmailReceiptSettings, GeneralSettings, RappiSettings, SettingsBackupSummary, SettingsKey | |
+| `src/entities/settings/model/index.ts` | 17 | 2 | 15 | settingsKeys, SettingsKeySchema | |
+| `src/entities/staff/index.ts` | 18 | 18 | 0 | StaffSchema, StaffCreateSchema, StaffUpdateSchema, ShiftSchema, ShiftCreateSchema, ShiftUpdateSchema, staffKeys, useLoginUiStore, useMutationClockIn, useMutationClockOut, useShiftClosePreview, Staff, StaffCreate, StaffUpdate, Shift, ShiftCreate, ShiftUpdate, ShiftClosePreview | |
+| `src/entities/staff/model/index.ts` | 21 | 11 | 10 | CreateStaffSchema, mockStaff, StaffCreateSchema, StaffUpdateSchema, ShiftCreateSchema, ShiftUpdateSchema, StaffCreate, StaffUpdate, Shift, ShiftCreate, ShiftUpdate | |
+| `src/entities/tab/index.ts` | 22 | 22 | 0 | TabSchema, OrderSchema, OrderItemSchema, OrderItemCreateSchema, CartItemInputSchema, mockTab, mockTabItem, useTabStore, useMutationOpenTab, useMutationAddOrder, useMutationUpdateTabStatus, useMutationRecordTabPayment, useVoidOrder, useCartStore, Order, OrderItem, CreateTab, CreateOrder, CreateOrderItem, CartItemInput, TabStatus, OrderStatus | |
+| `src/entities/tab/model/index.ts` | 24 | 12 | 12 | selectOpenTabs, OrderItemCreateSchema, CartItemInputSchema, mockTab, mockTabItem, useMutationUpdateTabStatus, useMutationRecordTabPayment, useVoidOrder, OrderItem, CartItemInput, TabStatus, OrderStatus | |
+| `src/entities/waitlist/index.ts` | 11 | 9 | 2 | useWaitlistEntry, useMutationUpdateWaitlistStatus, WaitlistEntrySchema, WaitlistEntryCreateSchema, WaitlistNotificationSchema, WaitlistEntryStatusSchema, PhoneE164Schema, useWaitlistStore, WaitlistEntryStatus | |
+| `src/features/add-combo-to-tab/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/assign-pool-session-to-tab/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/clock-in-staff/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/clock-out-staff/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/correct-open-unit/index.ts` | 2 | 0 | 2 | — | |
+| `src/features/edit-paid-tab/index.ts` | 5 | 1 | 4 | EditPaidTabPatchOp | |
+| `src/features/edit-session-start-time/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/edit-staff-locale/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/edit-staff-role/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/export-report/index.ts` | 2 | 0 | 2 | — | |
+| `src/features/force-pin-change/index.ts` | 3 | 0 | 3 | — | |
+| `src/features/manage-products/index.ts` | 3 | 1 | 2 | CatalogCategoriesTab | |
+| `src/features/manage-recipe/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/manager-pin-gate/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/open-open-unit/index.ts` | 2 | 0 | 2 | — | |
+| `src/features/physical-count/index.ts` | 5 | 1 | 4 | PhysicalCountEntry | |
+| `src/features/process-refund/index.ts` | 4 | 1 | 3 | RefundItemInput | |
+| `src/features/produce-prep-batch/index.ts` | 2 | 0 | 2 | — | |
+| `src/features/register-caja-entry/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/reopen-tab/index.ts` | 4 | 0 | 4 | — | |
+| `src/features/split-tab/index.ts` | 8 | 0 | 8 | — | |
+| `src/features/start-pool-timer/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/stop-pool-timer/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/toggle-permission/index.ts` | 1 | 0 | 1 | — | |
+| `src/features/transfer-tab/index.ts` | 7 | 0 | 7 | — | |
+| `src/features/upload-logo/index.ts` | 4 | 2 | 2 | LOGO_MAX_BYTES, LOGO_MAX_WIDTH | |
+| `src/features/void-open-unit/index.ts` | 2 | 0 | 2 | — | |
+| `src/features/void-order/index.ts` | 1 | 0 | 1 | — | |
+| `src/widgets/KdsBoard/index.tsx` | 1 | 0 | 1 | — | `KdsCard` is a *locally declared* component in this file, not a re-export (this widget's `index.tsx` is its own implementation file, same shape as `close-tab/index.ts`/`TabDetail.tsx` in 39-03). Production-mode-only finding, reachable via `KdsCard.test.tsx` — same false-positive pattern already adjudicated in 39-03. Not pruned; out of the hybrid rule's re-export scope entirely. |
+| `src/widgets/PaymentModal/index.tsx` | 1 | 0 | 1 | — | `PaymentProcessors` re-exported indirectly (`import type {...} from './ui/PaymentForm'` then `export type { PaymentProcessors };`, no `from` clause on the export itself). Production-mode-only finding; underlying declaration in `PaymentForm.tsx` is NOT flagged dead (used internally + imported by `PaymentForm.test.tsx`) — kept per hybrid rule. |
+
+### Verification
+
+```
+npm run typecheck   # clean, zero errors
+npm run lint         # clean — only the pre-existing [boundaries] legacy-selector-syntax warning
+                       (documented out-of-scope in 39-01-LEDGER.md), zero new violations,
+                       eslint-plugin-boundaries reports no import-direction breakage
+npm run test          # 1391 passed, 15 todo (153 test files, 151 passed + 2 skipped)
+                       — exact match to the pre-existing baseline, zero regression
+```
+
+No barrel file was deleted while any consumer import of its slice path remained (every one of the 12 whole-dead barrels was individually sanity-checked above). `src/widgets/RappiOrderBadge/index.ts` and `RappiOrderBadge.tsx` were resolved together in one commit. `knip.json` was not modified.
