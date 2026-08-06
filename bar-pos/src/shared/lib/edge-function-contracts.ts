@@ -62,72 +62,6 @@ export const ReceiptDataSchema = z.object({
 
 export type ReceiptData = z.infer<typeof ReceiptDataSchema>;
 
-/**
- * Shift summary data returned after closing a shift.
- */
-export const ShiftSummarySchema = z.object({
-  totalOrders: z.number().int().nonnegative(),
-  totalRevenue: MoneySchema,
-  totalTips: MoneySchema,
-  cashTransactions: z.number().int().nonnegative(),
-  cardTransactions: z.number().int().nonnegative(),
-  openingCash: MoneySchema,
-  closingCash: MoneySchema,
-  expectedCash: MoneySchema,
-  cashVariance: MoneySchema,
-});
-
-export type ShiftSummary = z.infer<typeof ShiftSummarySchema>;
-
-/**
- * Report data schema (flexible structure for different report types).
- */
-export const ReportDataSchema = z.object({
-  reportType: z.enum(['daily', 'weekly']),
-  period: z.object({
-    start: z.string(),
-    end: z.string(),
-  }),
-  summary: z.object({
-    totalRevenue: MoneySchema,
-    totalOrders: z.number().int().nonnegative(),
-    totalTips: MoneySchema,
-    averageOrderValue: MoneySchema,
-  }),
-  breakdown: z.object({
-    byCategory: z.array(
-      z.object({
-        categoryName: z.string(),
-        revenue: MoneySchema,
-        itemsSold: z.number().int().nonnegative(),
-      })
-    ),
-    byPaymentMethod: z.array(
-      z.object({
-        method: PaymentMethodSchema,
-        count: z.number().int().nonnegative(),
-        total: MoneySchema,
-      })
-    ),
-    byStaff: z
-      .array(
-        z.object({
-          staffName: z.string(),
-          ordersProcessed: z.number().int().nonnegative(),
-          revenue: MoneySchema,
-        })
-      )
-      .optional(),
-  }),
-  poolTables: z.object({
-    totalSessions: z.number().int().nonnegative(),
-    totalRevenue: MoneySchema,
-    averageSessionDuration: z.number().nonnegative(),
-  }),
-});
-
-export type ReportData = z.infer<typeof ReportDataSchema>;
-
 // ============================================================================
 // PROCESS PAYMENT
 // ============================================================================
@@ -197,8 +131,6 @@ export const ProcessPaymentEnvelopeSchema = z.object({
   idempotent: z.boolean().optional(),
   error: ProcessPaymentErrorBodySchema.optional(),
 });
-
-export type ProcessPaymentEnvelope = z.infer<typeof ProcessPaymentEnvelopeSchema>;
 
 function mapProcessPaymentEdgeError(code: string | undefined, message: string): AppError {
   switch (code) {
@@ -411,8 +343,6 @@ export const ProcessSplitPaymentEnvelopeSchema = z.object({
   error: z.object({ code: z.string(), message: z.string() }).optional(),
 });
 
-export type ProcessSplitPaymentEnvelope = z.infer<typeof ProcessSplitPaymentEnvelopeSchema>;
-
 function mapProcessSplitPaymentEdgeError(code: string | undefined, message: string): AppError {
   switch (code) {
     case 'POOL_SESSION_ACTIVE':
@@ -520,196 +450,6 @@ export async function callProcessSplitPayment(
     }
 
     return ok(success.data);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return err({
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid request data',
-        details: error.message,
-      });
-    }
-
-    return err({
-      code: 'UNKNOWN_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-    });
-  }
-}
-
-// ============================================================================
-// CLOSE SHIFT
-// ============================================================================
-
-/**
- * Request schema for close-shift edge function.
- *
- * Closes a staff shift and generates summary report.
- */
-export const CloseShiftRequestSchema = z.object({
-  shiftId: UuidSchema,
-  closingCash: MoneySchema,
-});
-
-export type CloseShiftRequest = z.infer<typeof CloseShiftRequestSchema>;
-
-/**
- * Response schema for close-shift edge function.
- */
-export const CloseShiftResponseSchema = z.object({
-  success: z.boolean(),
-  summary: ShiftSummarySchema.optional(),
-  error: z.string().optional(),
-});
-
-export type CloseShiftResponse = z.infer<typeof CloseShiftResponseSchema>;
-
-/**
- * Calls the close-shift edge function.
- *
- * @param request - Close shift request data
- * @returns Result with shift summary or error
- *
- * @example
- * ```typescript
- * const result = await callCloseShift({
- *   shiftId: '123',
- *   closingCash: 500.00
- * })
- *
- * if (result.ok && result.data.summary) {
- *   console.log('Total revenue:', result.data.summary.totalRevenue)
- * }
- * ```
- */
-export async function callCloseShift(
-  request: CloseShiftRequest
-): Promise<Result<CloseShiftResponse, AppError>> {
-  try {
-    // Validate request
-    const validatedRequest = CloseShiftRequestSchema.parse(request);
-
-    // Call edge function
-    const response = await fetch('/functions/v1/close-shift', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validatedRequest),
-    });
-
-    if (!response.ok) {
-      return err({
-        code: 'EDGE_FUNCTION_ERROR',
-        message: 'Failed to close shift',
-        details: await response.text(),
-      });
-    }
-
-    const data: unknown = await response.json();
-    const validatedResponse = CloseShiftResponseSchema.parse(data);
-
-    if (!validatedResponse.success) {
-      return err({
-        code: 'SHIFT_CLOSE_FAILED',
-        message: validatedResponse.error || 'Failed to close shift',
-      });
-    }
-
-    return ok(validatedResponse);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return err({
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid request data',
-        details: error.message,
-      });
-    }
-
-    return err({
-      code: 'UNKNOWN_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-    });
-  }
-}
-
-// ============================================================================
-// GENERATE REPORT
-// ============================================================================
-
-/**
- * Request schema for generate-report edge function.
- *
- * Generates a daily or weekly report for the specified date range.
- */
-export const GenerateReportRequestSchema = z.object({
-  type: z.enum(['daily', 'weekly']),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
-  staffId: UuidSchema.optional(),
-});
-
-export type GenerateReportRequest = z.infer<typeof GenerateReportRequestSchema>;
-
-/**
- * Response schema for generate-report edge function.
- */
-export const GenerateReportResponseSchema = z.object({
-  success: z.boolean(),
-  data: ReportDataSchema.optional(),
-  generatedAt: TimestampSchema.optional(),
-  error: z.string().optional(),
-});
-
-export type GenerateReportResponse = z.infer<typeof GenerateReportResponseSchema>;
-
-/**
- * Calls the generate-report edge function.
- *
- * @param request - Report generation request data
- * @returns Result with report data or error
- *
- * @example
- * ```typescript
- * const result = await callGenerateReport({
- *   type: 'daily',
- *   date: '2024-01-15'
- * })
- *
- * if (result.ok && result.data.data) {
- *   console.log('Total revenue:', result.data.data.summary.totalRevenue)
- * }
- * ```
- */
-export async function callGenerateReport(
-  request: GenerateReportRequest
-): Promise<Result<GenerateReportResponse, AppError>> {
-  try {
-    // Validate request
-    const validatedRequest = GenerateReportRequestSchema.parse(request);
-
-    // Call edge function
-    const response = await fetch('/functions/v1/generate-report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validatedRequest),
-    });
-
-    if (!response.ok) {
-      return err({
-        code: 'EDGE_FUNCTION_ERROR',
-        message: 'Failed to generate report',
-        details: await response.text(),
-      });
-    }
-
-    const data: unknown = await response.json();
-    const validatedResponse = GenerateReportResponseSchema.parse(data);
-
-    if (!validatedResponse.success) {
-      return err({
-        code: 'REPORT_GENERATION_FAILED',
-        message: validatedResponse.error || 'Failed to generate report',
-      });
-    }
-
-    return ok(validatedResponse);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return err({
@@ -853,8 +593,6 @@ export const SendReceiptEmailEnvelopeSchema = z.object({
   error: SendReceiptEmailErrorBodySchema.optional(),
 });
 
-export type SendReceiptEmailEnvelope = z.infer<typeof SendReceiptEmailEnvelopeSchema>;
-
 /**
  * Calls the send-receipt-email edge function (Resend).
  */
@@ -934,8 +672,6 @@ export const RappiMenuSyncResponseSchema = z.object({
     })
     .optional(),
 });
-
-export type RappiMenuSyncResponse = z.infer<typeof RappiMenuSyncResponseSchema>;
 
 function getInvokeErrorMessage(error: unknown, fallback: string): string {
   return typeof error === 'object' &&
@@ -1305,16 +1041,6 @@ export const EDGE_FUNCTIONS = {
     responseSchema: SendReceiptEmailEnvelopeSchema,
     caller: callSendReceiptEmail,
   },
-  'close-shift': {
-    requestSchema: CloseShiftRequestSchema,
-    responseSchema: CloseShiftResponseSchema,
-    caller: callCloseShift,
-  },
-  'generate-report': {
-    requestSchema: GenerateReportRequestSchema,
-    responseSchema: GenerateReportResponseSchema,
-    caller: callGenerateReport,
-  },
   'void-order': {
     requestSchema: VoidOrderRequestSchema,
     responseSchema: VoidOrderResponseSchema,
@@ -1351,8 +1077,3 @@ export const EDGE_FUNCTIONS = {
     caller: callGetServerTime,
   },
 } as const;
-
-/**
- * Type-safe edge function names.
- */
-export type EdgeFunctionName = keyof typeof EDGE_FUNCTIONS;
