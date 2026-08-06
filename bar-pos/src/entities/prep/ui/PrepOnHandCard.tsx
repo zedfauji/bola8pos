@@ -50,8 +50,8 @@ export function PrepOnHandCard({ name, uom, qtyOnHand, reorderPoint }: PrepOnHan
             aria-valuenow={Math.round(stockPct)}
             aria-valuemin={0}
             aria-valuemax={100}
-            className={`h-full rounded-full transition-all ${isLow ? 'bg-pos-danger' : 'bg-pos-accent'}`}
-            style={{ width: `${String(stockPct)}%` }}
+            className={`h-full w-full origin-left rounded-full transition-transform duration-200 ease-out ${isLow ? 'bg-pos-danger' : 'bg-pos-accent'}`}
+            style={{ transform: `scaleX(${(stockPct / 100).toString()})` }}
           />
         </div>
       ) : null}
