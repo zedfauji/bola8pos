@@ -674,8 +674,6 @@ export const SplitPaymentLegSchema = z.object({
   rappiOrderId: z.string().max(128).nullable().optional(),
 });
 
-export type SplitPaymentLeg = z.infer<typeof SplitPaymentLegSchema>;
-
 // ============================================================================
 // INVENTORY
 // ============================================================================
@@ -1617,7 +1615,6 @@ export const domain = {
 // ============================================================================
 
 export const ComboSlotTypeSchema = z.enum(['product', 'pool_time']);
-export type ComboSlotType = z.infer<typeof ComboSlotTypeSchema>;
 
 export const ComboSlotSchema = z.object({
   id: UuidSchema,
