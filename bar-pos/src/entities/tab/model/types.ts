@@ -3,8 +3,6 @@ export {
   TabSchema,
   OrderSchema,
   OrderItemSchema,
-  OrderItemCreateSchema,
-  CartItemInputSchema,
 } from '@shared/lib/domain';
 
 export type {
@@ -14,9 +12,6 @@ export type {
   TabCreate as CreateTab,
   OrderCreate as CreateOrder,
   OrderItemCreate as CreateOrderItem,
-  CartItemInput,
-  TabStatus,
-  OrderStatus,
 } from '@shared/lib/domain';
 
 import type { Tab, OrderItem } from '@shared/lib/domain';

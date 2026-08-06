@@ -1,4 +1,4 @@
-import { useQuery, type QueryKey } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { RappiOrder } from '@shared/lib/domain';
 import { supabaseQuery, ok, type Result } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -44,8 +44,4 @@ export function useRappiOrdersList() {
       return ok(orders);
     },
   });
-}
-
-export function rappiOrdersListQueryKey(): QueryKey {
-  return rappiOrderKeys.list();
 }

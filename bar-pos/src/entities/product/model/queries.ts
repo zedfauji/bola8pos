@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type {
   Category,
-  CategoryCreate,
-  CategoryUpdate,
   Modifier,
   ModifierCreate,
   ModifierUpdate,
@@ -508,65 +506,6 @@ export function useMutationDeactivateProduct() {
       );
       if (!res.ok) {
         logger.error('products.deactivate_failed', { message: res.error.message });
-        return res;
-      }
-      return ok(null);
-    },
-    onSuccess: result => {
-      if (result.ok) invalidateCatalogQueries(queryClient);
-    },
-  });
-}
-
-export function useMutationCreateCategory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: CategoryCreate): Promise<Result<Category>> => {
-      // Legacy HH start/end columns no longer written (Phase 20, D-01) — happy-hour
-      // pricing is now managed in Settings → Promotions.
-      const insertRow: TablesInsert<'categories'> = {
-        name: input.name,
-        color: input.color,
-        sort_order: input.sortOrder,
-      };
-
-      const res = await supabaseMutation(() =>
-        supabase.from('categories').insert(insertRow).select('*').single()
-      );
-
-      if (!res.ok) {
-        logger.error('categories.create_failed', { message: res.error.message });
-        return res;
-      }
-      return mapCategoryRow(res.data as unknown as Tables<'categories'>);
-    },
-    onSuccess: result => {
-      if (result.ok) invalidateCatalogQueries(queryClient);
-    },
-  });
-}
-
-export function useMutationUpdateCategory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: CategoryUpdate): Promise<Result<null>> => {
-      const { id, ...rest } = input;
-      const row: TablesUpdate<'categories'> = {};
-      if (rest.name !== undefined) row.name = rest.name;
-      if (rest.color !== undefined) row.color = rest.color;
-      if (rest.sortOrder !== undefined) row.sort_order = rest.sortOrder;
-      // Legacy HH start/end columns no longer written (Phase 20, D-01) — happy-hour
-      // pricing is now managed in Settings → Promotions.
-
-      if (Object.keys(row).length === 0) return ok(null);
-
-      const res = await supabaseMutation(() =>
-        supabase.from('categories').update(row).eq('id', id)
-      );
-      if (!res.ok) {
-        logger.error('categories.update_failed', { message: res.error.message });
         return res;
       }
       return ok(null);

@@ -3,18 +3,6 @@
 // Never define types here — infer from Zod schemas.
 export type {
   ComboSlot,
-  ComboSlotCreate,
-  ComboSlotUpdate,
   ComboSlotOption,
-  ComboSlotOptionCreate,
   ComboAvailability,
-  ComboAvailabilityCreate,
-  SlotSelection,
-  AddComboToTabInput,
-} from '@shared/lib/domain';
-export {
-  ComboSlotSchema,
-  ComboSlotOptionSchema,
-  ComboAvailabilitySchema,
-  SlotSelectionSchema,
 } from '@shared/lib/domain';

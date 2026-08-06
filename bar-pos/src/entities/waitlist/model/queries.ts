@@ -12,7 +12,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   WaitlistEntry,
   WaitlistEntryCreate,
-  WaitlistEntryStatus,
   WaitlistNotification,
 } from '@shared/lib/domain';
 import { WaitlistEntrySchema, WaitlistNotificationSchema } from '@shared/lib/domain';
@@ -94,28 +93,6 @@ export function useWaitlistEntries() {
         throw error;
       }
       return ((data ?? []) as Record<string, unknown>[]).map(mapRow);
-    },
-    staleTime: 30 * 1000,
-  });
-}
-
-/** Returns a single waitlist entry by id. */
-export function useWaitlistEntry(id: string) {
-  return useQuery({
-    queryKey: waitlistKeys.detail(id),
-    queryFn: async (): Promise<WaitlistEntry | null> => {
-      const { data, error } = await db
-        .from('waitlist_entries')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) {
-        logger.error('useWaitlistEntry: query failed', { id, error });
-        throw error;
-      }
-      if (!data) return null;
-      return mapRow(data as Record<string, unknown>);
     },
     staleTime: 30 * 1000,
   });
@@ -221,49 +198,3 @@ export function useMutationAddWaitlistEntry() {
   });
 }
 
-/** Updates status (and optionally table_id, seated_at, notified_at). Returns Result<WaitlistEntry>. */
-export function useMutationUpdateWaitlistStatus() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: {
-      id: string;
-      status: WaitlistEntryStatus;
-      tableId: string | undefined;
-      seatedAt: string | undefined;
-      notifiedAt: string | undefined;
-    }): Promise<Result<WaitlistEntry>> => {
-      const updatePayload: Record<string, unknown> = { status: input.status };
-      if (input.tableId !== undefined) updatePayload['table_id'] = input.tableId;
-      if (input.seatedAt !== undefined) updatePayload['seated_at'] = input.seatedAt;
-      if (input.notifiedAt !== undefined) updatePayload['notified_at'] = input.notifiedAt;
-
-      const { data, error } = await db
-        .from('waitlist_entries')
-        .update(updatePayload)
-        .eq('id', input.id)
-        .select()
-        .single();
-
-      if (error) {
-        logger.error('useMutationUpdateWaitlistStatus: update failed', { error });
-        return err({
-          code: 'SUPABASE_ERROR' as const,
-          message: (error as { message?: string }).message ?? '',
-        });
-      }
-
-      const parsed = WaitlistEntrySchema.safeParse(mapRow(data as Record<string, unknown>));
-      if (!parsed.success) {
-        return err({ code: 'VALIDATION_ERROR' as const, message: i18n.t('entities:waitlist.invalidEntryReturned') });
-      }
-      return ok(parsed.data);
-    },
-    onSuccess: (result) => {
-      if (!result.ok) return;
-      void queryClient.invalidateQueries({ queryKey: waitlistKeys.lists() });
-      void queryClient.invalidateQueries({ queryKey: waitlistKeys.waitingCount() });
-      void queryClient.invalidateQueries({ queryKey: waitlistKeys.detail(result.data.id) });
-    },
-  });
-}

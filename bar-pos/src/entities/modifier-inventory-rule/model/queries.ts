@@ -25,7 +25,7 @@ const db = supabase as any;
 // Query key factory
 // ============================================================================
 
-export const modifierInventoryRuleKeys = {
+const modifierInventoryRuleKeys = {
   all: ['modifier_inventory_rules'] as const,
   byModifier: (id: string) => [...modifierInventoryRuleKeys.all, 'modifier', id] as const,
 };

@@ -38,7 +38,7 @@ const TERMINAL_ID =
 
 const db = supabase as any;
 
-export const cajaKeys = {
+const cajaKeys = {
   all: ['caja'] as const,
   current: () => [...cajaKeys.all, 'current'] as const,
   list: () => [...cajaKeys.all, 'list'] as const,
@@ -383,7 +383,7 @@ export function useCajaReport(cajaId: string | null) {
 // CAJA ENTRIES
 // ============================================================================
 
-export const cajaEntryKeys = {
+const cajaEntryKeys = {
   all: ['caja-entries'] as const,
   bySession: (sessionId: string) => [...cajaEntryKeys.all, sessionId] as const,
 };
@@ -512,7 +512,7 @@ export function useMutationCreateCajaEntry() {
 // TIP DISTRIBUTION ENTRY (immutable per-caja-close 3-way split snapshot)
 // ============================================================================
 
-export const tipDistributionKeys = {
+const tipDistributionKeys = {
   all: ['tip-distribution-entry'] as const,
   bySession: (id: string) => [...tipDistributionKeys.all, id] as const,
 };

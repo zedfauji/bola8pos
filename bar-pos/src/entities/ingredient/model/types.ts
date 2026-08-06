@@ -5,17 +5,10 @@
 export type {
   Ingredient,
   IngredientCreate,
-  IngredientUpdate,
   ManualAdjustReason,
-  Uom,
-  BaseUom,
 } from '@shared/lib/domain';
 
 export {
   IngredientSchema,
   IngredientCreateSchema,
-  IngredientUpdateSchema,
-  ManualAdjustReasonSchema,
-  UomSchema,
-  BaseUomSchema,
 } from '@shared/lib/domain';

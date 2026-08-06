@@ -8,13 +8,4 @@ export type {
   WaitlistEntry,
   WaitlistEntryCreate,
   WaitlistNotification,
-  WaitlistEntryStatus,
-} from '@shared/lib/domain';
-
-export {
-  WaitlistEntrySchema,
-  WaitlistEntryCreateSchema,
-  WaitlistNotificationSchema,
-  WaitlistEntryStatusSchema,
-  PhoneE164Schema,
 } from '@shared/lib/domain';
