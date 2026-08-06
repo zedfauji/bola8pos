@@ -258,3 +258,61 @@ npm run test          # 1391 passed, 15 todo (153 test files, 151 passed + 2 ski
 ```
 
 No barrel file was deleted while any consumer import of its slice path remained (every one of the 12 whole-dead barrels was individually sanity-checked above). `src/widgets/RappiOrderBadge/index.ts` and `RappiOrderBadge.tsx` were resolved together in one commit. `knip.json` was not modified.
+
+## Task 3 — Post-decision Knip Baseline
+
+### Method
+
+Regenerated both knip reports fresh (`npx knip --reporter json` / `--production --reporter json`), re-ran twice to confirm stability (identical counts both runs), then recomputed the distinct finding count with the same `(file, line, name)` set-union method used for the original 39-01-LEDGER.md baseline (files ∪ exports ∪ types ∪ duplicates, excluding `src/shared/ui/**`, dependency categories read separately and not folded in).
+
+### Baseline comparison (39-01's full method — comparable across the whole phase)
+
+| Category | Before this plan (Task 1 snapshot) | After this plan (Task 3) | Δ |
+|---|---|---|---|
+| Unused files | 50 | 43 | −7 (net: −13 deleted, +6 newly-surfaced, see below) |
+| Unused exports | 613 | 399 | −214 |
+| Unused types | 305 | 204 | −101 |
+| Duplicate-export pairs | 3 | 3 | 0 |
+| **Sum (distinct)** | **971** | **649** | **−322** |
+| Distinct files touched | 187 | 156 | −31 |
+
+Cross-check against 39-01-LEDGER.md: original baseline (post-39-01) was 982 → 39-03's 10-file sweep dropped it to 971 (matches this plan's "before" snapshot exactly, confirming no drift between 39-03 and this plan's Task 1). This plan's decision drops it further to **649** — a 33% reduction phase-to-date from the original 982.
+
+### Plan's own Task 3 verify metric (exports+types union only, matches the `<verify>` command)
+
+| | Before | After | Δ |
+|---|---|---|---|
+| Distinct export/type findings | 918 | **603** | **−315** |
+
+This is lower than the 293 re-exports directly pruned in Task 2 because pruning a re-export can promote a file from "N unused exports, still reachable" to "1 unused whole file" once nothing reaches it at all anymore — those promoted files move from the `exports`/`types` categories into the `files` category (not double-counted in this metric). See below.
+
+### Byproduct: 6 files newly reclassified whole-file-dead
+
+Pruning barrel re-exports whose underlying declaration was also dead made 6 further files completely unreachable (previously "partially used" — some exports genuinely dead, file still counted reachable via the barrel's own dead re-export edge; now the file itself has zero remaining reachability):
+
+| File | Was (pre-decision) | Now (post-decision) |
+|---|---|---|
+| `src/entities/recipe/model/types.ts` | 13 unused export/type findings | 1 unused-file finding |
+| `src/entities/rbac/model/types.ts` | 4 unused export/type findings | 1 unused-file finding |
+| `src/entities/modifier-inventory-rule/model/types.ts` | 4 unused export/type findings | 1 unused-file finding |
+| `src/entities/payment/model/store.ts` | 7 unused export/type findings | 1 unused-file finding |
+| `src/entities/waitlist/model/store.ts` | 1 unused export/type finding | 1 unused-file finding |
+| `src/features/manage-products/ui/CatalogCategoriesTab.tsx` | 1 unused export/type finding | 1 unused-file finding |
+
+These are genuine simplifications for the downstream plans that own them (39-10 for the 5 entities files, 39-11 for the 1 features file) — a single whole-file deletion candidate (after the same repo-wide sanity check pattern from 39-01/39-03) replaces what would otherwise have been several individual export deletions. Not deleted in this plan — out of Task 2's scope (only the 12 barrels named in this plan's frontmatter were whole-file candidates here).
+
+**Also net +4, relocated not created:** `src/entities/rbac/index.ts`/`model/index.ts` pruning exposed `RolePermissionSchema`, `RolePermissionCreateSchema`, `RolePermission`, `RolePermissionCreate` as newly-unused at their true origin, `src/shared/lib/domain.ts` (previously "used" only because `rbac/model/types.ts` re-exported them, which itself only counted as reachable because the barrel chain re-exported *it*). Same 4 dead symbols, just now attributed to the correct origin file — not new dead code, a bookkeeping relocation. Folded into 39-09's domain.ts working set below.
+
+### Working sets for plans 39-09, 39-10, 39-11
+
+Computed from these post-decision reports (fresh regeneration, not from 39-RESEARCH.md's pre-decision figures, per this plan's explicit instruction — under option C some symbols reachable only via now-pruned barrel paths are gone from the report entirely, and some are newly exposed at their true origin as shown above).
+
+| Plan | Scope | Export/type findings | Whole-file candidates |
+|---|---|---|---|
+| **39-09** | `src/shared/lib/domain.ts` + `src/shared/lib/edge-function-contracts.ts` | **196** | 0 |
+| **39-10** | Remaining non-barrel findings under `src/entities/` | **148** | **7**: `modifier-inventory-rule/model/types.ts`, `rbac/model/types.ts`, `recipe/model/types.ts`, `waitlist/model/store.ts`, `payment/model/store.ts` (all newly-surfaced by this plan's Task 2, see above), plus `tab/ui/PoolChargeItem.tsx` and `tab/ui/TabDetail.tsx` (both already adjudicated FALSE POSITIVE — reachable via test/story — in 39-03-LEDGER.md; still present here as a knip finding, but not new dead code) |
+| **39-11** | Remaining non-barrel findings under `src/shared/` (excl. `domain.ts`/`edge-function-contracts.ts`/`shared/ui/**`) + `src/features/` | **117** | **8**: `features/manage-products/ui/CatalogCategoriesTab.tsx` (newly-surfaced, see above); `shared/lib/mocks.ts`, `promotion-pricing.ts`, `rappi-webhook-payload.ts`, `supabase-test-client.ts`, `test-setup.ts`, `test-utils.tsx`, `uom.ts` (all 7 already adjudicated FALSE POSITIVE — test-only/config-wired — in 39-03-LEDGER.md Task 2) |
+
+**No `src/widgets/**` non-barrel working set exists** — post-decision, zero non-barrel findings remain under `src/widgets/` (confirmed by exhaustive check across every non-barrel, non-entities/features/shared file: only 2 residual findings exist anywhere outside the three named scopes, both in `e2e/helpers/supabase.ts`, which is Track A's territory, not Track B's — out of this plan's and 39-09/10/11's scope entirely).
+
+**Coverage check:** 196 + 148 + 117 + 2 (e2e, unassigned) = 463 = the full post-decision non-barrel export/type total. All 463 non-barrel findings are accounted for across the three working sets plus the 2 pre-existing e2e items — nothing is silently dropped.
