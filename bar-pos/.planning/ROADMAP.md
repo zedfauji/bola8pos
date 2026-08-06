@@ -992,7 +992,7 @@ Plans:
 **Goal:** Remediate Phase 10's audit Blocking tier (181: E2E triage-and-fix + knip unlisted deps) and all knip dead-code findings (High 1917 + Medium 37, Medium skipped per false-positive review). jscpd, as-any, unused deps, and Low tier are split into separate future phases.
 **Requirements**: TBD (no REQUIREMENTS.md entries map to this phase — 39-CONTEXT.md decision IDs D-01..D-09 serve as the acceptance-criteria identifiers)
 **Depends on:** Phase 10 (audit source), overlaps Phase 38 (E2E infra root causes)
-**Plans:** 8/12 plans executed
+**Plans:** 11/12 plans executed
 
 Plans:
 **Wave 1**
@@ -1014,9 +1014,9 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 39-09-PLAN.md — Registry review: per-export triage of `domain.ts` + `edge-function-contracts.ts`
-- [ ] 39-10-PLAN.md — `entities/` layer non-barrel export/type deletions
-- [ ] 39-11-PLAN.md — `shared/` + `features/` non-barrel export/type deletions (string-keyed blind spots first)
+- [x] 39-09-PLAN.md — Registry review: per-export triage of `domain.ts` + `edge-function-contracts.ts`
+- [x] 39-10-PLAN.md — `entities/` layer non-barrel export/type deletions
+- [x] 39-11-PLAN.md — `shared/` + `features/` non-barrel export/type deletions (string-keyed blind spots first)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
