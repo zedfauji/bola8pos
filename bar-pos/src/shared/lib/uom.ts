@@ -26,9 +26,6 @@ export const BASE_UOMS = ['g', 'kg', 'ml', 'L', 'unit', 'portion'] as const;
 /** All UOM values including purchase-only units (case_24). */
 export const ALL_UOMS = ['g', 'kg', 'ml', 'L', 'unit', 'case_24', 'portion'] as const;
 
-export type BaseUom = (typeof BASE_UOMS)[number];
-export type Uom = (typeof ALL_UOMS)[number];
-
 /**
  * Convert a quantity expressed in purchase units to base units.
  * @param purchaseQty - Quantity in purchase units (e.g. 2 for 2 kg)

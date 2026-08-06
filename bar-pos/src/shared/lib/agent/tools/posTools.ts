@@ -288,7 +288,7 @@ export async function openTab(
 }
 
 // Internal executor — called by confirm_action
-export async function _executeCloseTab(
+async function _executeCloseTab(
   args: Record<string, unknown>,
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
@@ -557,7 +557,7 @@ export async function startPoolSession(
 }
 
 // Internal executor for stop_pool_session
-export async function _executeStopPoolSession(
+async function _executeStopPoolSession(
   args: Record<string, unknown>,
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
@@ -669,7 +669,7 @@ export async function assignSessionToTab(
 }
 
 // Internal executor for stop_and_move_table
-export async function _executeStopAndMoveTable(
+async function _executeStopAndMoveTable(
   args: Record<string, unknown>,
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {

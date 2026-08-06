@@ -1,8 +1,8 @@
 import { useMutationUpdateSetting, type ReceiptSettings } from '@entities/settings';
 import i18n from '@shared/lib/i18n';
 
-export const LOGO_MAX_BYTES = 200 * 1024;
-export const LOGO_MAX_WIDTH = 384;
+const LOGO_MAX_BYTES = 200 * 1024;
+const LOGO_MAX_WIDTH = 384;
 
 export type LogoEncodeError =
   | { code: 'UNSUPPORTED_TYPE'; message: string }

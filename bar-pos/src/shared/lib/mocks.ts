@@ -2,36 +2,18 @@
  * MOCK DATA
  *
  * Factories merge defaults with overrides, then validate with Zod schemas from `domain.ts`.
- * For an occupied pool table with a linked session in one step, use `generateMockOccupiedPoolTable`.
- * Override `{ status: 'occupied', currentSessionId, currentSession }` on `generateMockPoolTable` if you prefer manual wiring.
  */
 
 import {
   CategorySchema,
   ProductSchema,
   TabSchema,
-  OrderSchema,
-  OrderItemSchema,
   ResourceSchema,
-  PoolSessionSchema,
   StaffSchema,
   ShiftSchema,
   InventorySchema,
-  PaymentSchema,
 } from '@shared/lib/domain';
-import type {
-  Product,
-  Category,
-  Tab,
-  Order,
-  OrderItem,
-  Resource,
-  PoolSession,
-  Staff,
-  Shift,
-  Inventory,
-  Payment,
-} from '@shared/lib/domain';
+import type { Product, Category, Tab, Resource, Staff, Shift, Inventory } from '@shared/lib/domain';
 
 // ----------------------------------------------------------------------------
 // Stable UUIDs for cross-linked Storybook / scenario data (v4 format)
@@ -205,7 +187,7 @@ export function generateMockProduct(overrides?: Partial<Product>): Product {
   });
 }
 
-export function generateMockStaff(overrides?: Partial<Staff> & { role?: StaffRole }): Staff {
+function generateMockStaff(overrides?: Partial<Staff> & { role?: StaffRole }): Staff {
   const { role: roleFromOverrides, ...rest } = overrides ?? {};
   const role = roleFromOverrides ?? 'bartender';
   const base = staffRoleDefaults[role];
@@ -219,7 +201,7 @@ export function generateMockStaff(overrides?: Partial<Staff> & { role?: StaffRol
   });
 }
 
-export function generateMockShift(overrides?: Partial<Shift>): Shift {
+function generateMockShift(overrides?: Partial<Shift>): Shift {
   return ShiftSchema.parse({
     id: crypto.randomUUID(),
     staffId: MOCK_IDS.staffBartender,
@@ -231,7 +213,7 @@ export function generateMockShift(overrides?: Partial<Shift>): Shift {
   });
 }
 
-export function generateMockTab(overrides?: Partial<Tab>): Tab {
+function generateMockTab(overrides?: Partial<Tab>): Tab {
   const staff = generateMockStaff({ id: MOCK_IDS.staffBartender, role: 'bartender' });
   const shift = generateMockShift({ id: MOCK_IDS.shiftMain, staffId: staff.id });
 
@@ -253,70 +235,10 @@ export function generateMockTab(overrides?: Partial<Tab>): Tab {
   });
 }
 
-export function generateMockOrder(overrides?: Partial<Order>): Order {
-  return OrderSchema.parse({
-    id: crypto.randomUUID(),
-    tabId: crypto.randomUUID(),
-    staffId: MOCK_IDS.staffBartender,
-    createdAt: openedMinutesAgo(20),
-    status: 'pending',
-    notes: null,
-    items: [],
-    ...overrides,
-  });
-}
-
-export function generateMockOrderItem(overrides?: Partial<OrderItem>): OrderItem {
-  const product = overrides?.product ?? generateMockProduct();
-  const productId = overrides?.productId ?? product.id;
-  const resolvedProduct = overrides?.product ?? product;
-
-  return OrderItemSchema.parse({
-    id: crypto.randomUUID(),
-    orderId: crypto.randomUUID(),
-    quantity: 1,
-    unitPrice: resolvedProduct.basePrice,
-    modifierIds: [],
-    modifierPriceDelta: 0,
-    notes: null,
-    modifiers: [],
-    ...overrides,
-    productId,
-    product: resolvedProduct,
-  });
-}
-
-export function generateMockPoolTable(overrides?: Partial<Resource>): Resource {
-  return ResourceSchema.parse({
-    id: crypto.randomUUID(),
-    number: 1,
-    label: 'Table 1',
-    ratePerHour: 12.0,
-    status: 'available',
-    currentSessionId: null,
-    ...overrides,
-  });
-}
-
-export function generateMockPoolSession(overrides?: Partial<PoolSession>): PoolSession {
-  const tableId = overrides?.tableId ?? crypto.randomUUID();
-
-  return PoolSessionSchema.parse({
-    id: crypto.randomUUID(),
-    tableId,
-    tabId: null,
-    startedAt: openedMinutesAgo(40),
-    stoppedAt: null,
-    billedMinutes: null,
-    totalCharge: null,
-    ...overrides,
-  });
-}
-
 /**
  * Pool table in `occupied` state with a matching `currentSession` (base session shape).
  */
-export function generateMockOccupiedPoolTable(overrides?: Partial<Resource>): Resource {
+function generateMockOccupiedPoolTable(overrides?: Partial<Resource>): Resource {
   const tableId = overrides?.id ?? crypto.randomUUID();
   const sessionId = overrides?.currentSessionId ?? crypto.randomUUID();
   const sessionBase = {
@@ -356,21 +278,6 @@ export function generateMockInventory(overrides?: Partial<Inventory>): Inventory
     ...overrides,
     productId,
     product: resolvedProduct,
-  });
-}
-
-export function generateMockPayment(overrides?: Partial<Payment>): Payment {
-  return PaymentSchema.parse({
-    id: crypto.randomUUID(),
-    tabId: crypto.randomUUID(),
-    amount: 42.5,
-    tipAmount: 8.5,
-    method: 'cash',
-    squarePaymentId: null,
-    squareReceiptUrl: null,
-    processedAt: new Date(),
-    processedBy: MOCK_IDS.staffBartender,
-    ...overrides,
   });
 }
 

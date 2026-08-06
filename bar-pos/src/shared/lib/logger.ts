@@ -36,7 +36,7 @@ type BannedKeys =
  *
  * TypeScript will error if you try to include banned keys.
  */
-export type SafeLogPayload = {
+type SafeLogPayload = {
   [K in string]: K extends BannedKeys ? never : unknown;
 };
 
@@ -44,7 +44,7 @@ export type SafeLogPayload = {
 // LOG LEVELS
 // ============================================================================
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
   debug: 0,
@@ -75,7 +75,7 @@ export type LogContext = {
 /**
  * Structured log entry format.
  */
-export type LogEntry = {
+type LogEntry = {
   ts: string; // ISO timestamp
   level: LogLevel;
   event: string; // namespaced: "tab.opened", "payment.failed", "pool.timer.started"

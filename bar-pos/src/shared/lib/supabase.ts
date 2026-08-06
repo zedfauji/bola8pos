@@ -77,17 +77,3 @@ export const supabase = new Proxy({} as SupabaseClientType, {
 export function getCachedAccessToken(): string | null {
   return _cachedAccessToken;
 }
-
-// Row type aliases for use across the app
-export type TabRow = Database['public']['Tables']['tabs']['Row'];
-export type OrderRow = Database['public']['Tables']['orders']['Row'];
-export type OrderItemRow = Database['public']['Tables']['order_items']['Row'];
-export type ProductRow = Database['public']['Tables']['products']['Row'];
-export type CategoryRow = Database['public']['Tables']['categories']['Row'];
-export type ModifierRow = Database['public']['Tables']['modifiers']['Row'];
-export type ResourceRow = Database['public']['Tables']['resources']['Row'];
-export type PoolSessionRow = Database['public']['Tables']['pool_sessions']['Row'];
-export type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-export type ShiftRow = Database['public']['Tables']['shifts']['Row'];
-export type PaymentRow = Database['public']['Tables']['payments']['Row'];
-export type InventoryRow = Database['public']['Tables']['inventory']['Row'];

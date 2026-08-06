@@ -21,7 +21,7 @@ import { logger } from './logger-instance';
 import type { AppError } from './result';
 
 /** Entity tables guarded by the version contract. */
-export type VersionedEntity = 'tabs' | 'pool_sessions' | 'caja_sessions';
+type VersionedEntity = 'tabs' | 'pool_sessions' | 'caja_sessions';
 
 export interface VersionErrorContext {
   queryClient: QueryClient;

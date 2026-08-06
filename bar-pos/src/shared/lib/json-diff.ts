@@ -9,7 +9,7 @@
  *   const nodes = diffJson(before, after);
  */
 
-export type DiffStatus = 'added' | 'removed' | 'unchanged' | 'modified';
+type DiffStatus = 'added' | 'removed' | 'unchanged' | 'modified';
 
 export interface DiffNode {
   key: string;
