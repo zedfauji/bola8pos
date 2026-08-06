@@ -51,7 +51,16 @@ test.describe('Advanced Pool Operations', () => {
   });
 
   test('PA1: edit start time 30 min ago — stop shows higher charge', async ({ page }) => {
-    test.skip(true, 'UI not implemented — EXPECTED FAIL: edit-start-time UI not implemented');
+    // 39-06 triage finding: the "UI not implemented" premise is stale — the
+    // Edit Start Time button/dialog exists (see 24-sprint5-pool-accuracy.spec.ts
+    // T1-T5 and 16-table-status.spec.ts T16). This specific
+    // edit-then-verify-higher-charge scenario was never actually implemented
+    // in this file, and as of this triage the whole flow is additionally
+    // blocked end-to-end by a live PGRST205 pool_tables schema-cache defect
+    // (routed to Phase 38, see 39-06-LEDGER.md Group A/B) that also blocks
+    // T1-T5/T7/T8 in the sibling spec — so a from-scratch implementation here
+    // could not be exercised or verified against real behavior right now.
+    test.skip(true, 'Not implemented — edit-start-time UI exists elsewhere but this proportional-charge scenario has no test coverage here yet, and is currently blocked by the Phase-38 pool_tables schema-cache defect');
   });
 
   test('PA2: start session with New Tab, then assign to existing tab', async ({ page }) => {
@@ -219,6 +228,8 @@ test.describe('Advanced Pool Operations', () => {
   test('PA7: session started 16 min ago — charge is proportional, not flat minimum', async ({
     page,
   }) => {
-    test.skip(true, 'UI not implemented — EXPECTED FAIL: edit-start-time UI not implemented');
+    // 39-06 triage finding: same stale premise as PA1 above — see that
+    // test's comment for the full explanation.
+    test.skip(true, 'Not implemented — edit-start-time UI exists elsewhere but this proportional-charge scenario has no test coverage here yet, and is currently blocked by the Phase-38 pool_tables schema-cache defect');
   });
 });
