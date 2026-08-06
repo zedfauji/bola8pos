@@ -259,15 +259,16 @@ test.describe('Phase 13: Permission Matrix', () => {
     // Permission Matrix heading visible
     await expect(page.getByText('Permission Matrix')).toBeVisible({ timeout: 20_000 });
 
-    // Table has 24 action rows — STAFF_ACTIONS has 24 items
+    // Table has 26 action rows — STAFF_ACTIONS grew from 24 to 26 with
+    // Phase 22's edit_paid_tab and Phase 23's reopen_tab additions.
     // Each row has an action label in the first column
     await expect(page.getByText('create_order').first()).toBeVisible();
     await expect(page.getByText('manage_staff').first()).toBeVisible();
     await expect(page.getByText('view_kds').first()).toBeVisible();
 
-    // Switch elements present (24 rows × 4 roles = 96 switches)
+    // Switch elements present (26 rows × 4 roles = 104 switches)
     const switches = page.getByRole('switch');
-    await expect(switches).toHaveCount(96);
+    await expect(switches).toHaveCount(104);
 
     expect(consoleErrors).toHaveLength(0);
   });

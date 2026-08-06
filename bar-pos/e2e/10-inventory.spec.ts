@@ -140,9 +140,15 @@ test.describe('Inventory Decrement', () => {
       .catch(() => false);
 
     if (!redirected) {
-      // Read-only: adjust button should not be visible
+      // Read-only: shared/ui's ProtectedAction (src/shared/ui/ProtectedAction.tsx)
+      // renders RBAC-denied actions disabled-with-tooltip rather than
+      // unmounted, so the Adjust button is still present in the DOM — assert
+      // it's disabled, not absent.
       const adjustBtn = page.getByRole('button', { name: /adjust/i }).first();
-      await expect(adjustBtn).toHaveCount(0);
+      const adjustBtnExists = await adjustBtn.count();
+      if (adjustBtnExists > 0) {
+        await expect(adjustBtn).toBeDisabled();
+      }
     } else {
       expect(redirected).toBe(true);
     }

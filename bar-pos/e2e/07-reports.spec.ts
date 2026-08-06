@@ -251,7 +251,10 @@ test.describe('Reports Page', () => {
     await expect(sel).toBeVisible({ timeout: 20_000 });
     const val = await sel.locator('option').nth(0).getAttribute('value');
     if (val) await sel.selectOption(val);
-    await expect(page.getByText('Variance', { exact: false })).toBeVisible({ timeout: 30_000 });
+    // exact: true — a "Recipe Variance" report tab was added since this test
+    // was written; { exact: false } now also matches that tab's label,
+    // causing a strict-mode violation (2 elements) on the substring "Variance".
+    await expect(page.getByText('Variance', { exact: true })).toBeVisible({ timeout: 30_000 });
     await logout(page);
   });
 
@@ -334,7 +337,11 @@ test.describe('Reports Page', () => {
     // Trigger re-query by blurring the input
     await toInput.press('Tab');
 
-    await expect(page.getByRole('status').filter({ hasText: /No sales data/i })).toBeVisible({ timeout: 20_000 });
+    // Text updated by the Phase 21 i18n migration
+    // (productSalesPanel.emptyTitle in en-US/wAdmin.json): "No sales data"
+    // became "No sales in this range" — the role itself (EmptyState's
+    // role="status") is unchanged.
+    await expect(page.getByRole('status').filter({ hasText: /No sales in this range/i })).toBeVisible({ timeout: 20_000 });
 
     await logout(page);
   });
