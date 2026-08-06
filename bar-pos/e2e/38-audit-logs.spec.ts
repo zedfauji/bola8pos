@@ -171,7 +171,10 @@ test.describe('Audit Log', () => {
       await loginAs(page, 'bartender');
       await page.goto('/audit');
       await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
-      await expect(page.getByText(/restricted to managers and admins/i)).toBeVisible({
+      // 39-07, harness: this toast renders twice (duplicate mount), making a
+      // bare getByText() a strict-mode violation — the redirect above already
+      // proves the gate holds; .first() is enough to confirm the toast fired.
+      await expect(page.getByText(/restricted to managers and admins/i).first()).toBeVisible({
         timeout: 8_000,
       });
     });

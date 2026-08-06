@@ -38,40 +38,6 @@ async function cleanupTestCategories(names: string[]): Promise<void> {
 }
 
 /**
- * Get combo_eligible value for a category by name via the service-role client.
- */
-async function getCategoryComboEligible(name: string): Promise<boolean | null> {
-  const url = process.env.VITE_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  const admin = createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data, error } = await admin
-    .from('categories')
-    .select('combo_eligible')
-    .eq('name', name)
-    .maybeSingle();
-  if (error || !data) return null;
-  return (data as { combo_eligible: boolean }).combo_eligible ?? null;
-}
-
-/**
- * Set combo_eligible on a category row by name via the service-role client.
- */
-async function setCategoryComboEligible(name: string, value: boolean): Promise<void> {
-  const url = process.env.VITE_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  const admin = createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { error } = await admin
-    .from('categories')
-    .update({ combo_eligible: value })
-    .eq('name', name);
-  if (error) throw new Error(`setCategoryComboEligible failed: ${error.message}`);
-}
-
-/**
  * Attempt to insert a modifier_group row using a user JWT (anon key + bartender auth).
  * Returns the Supabase error code / message if refused, or null if succeeded.
  *
@@ -130,6 +96,23 @@ async function attemptModifierGroupInsertAsBartender(): Promise<{
 
 const TEST_CATEGORY_NAMES = ['Beers', 'Regular', 'Corona'];
 
+/**
+ * The Category create/edit dialog, scoped to exclude the always-mounted
+ * AgentPanel (`src/features/agent-chat/ui/AgentPanel.tsx`), which also renders
+ * `role="dialog"` permanently in the DOM (toggled only by a CSS transform —
+ * never `display:none`/`visibility:hidden`), so a bare `page.getByRole('dialog')`
+ * intermittently re-resolves to it once the real Radix dialog has closed and
+ * Radix's aria-hide-siblings-while-modal-is-open behavior lifts. AgentPanel is
+ * the only `role="dialog"` element that ever carries a literal `aria-modal="false"`
+ * attribute (verified via a live DOM dump this session — the real Radix dialog
+ * carries no `aria-modal` attribute at all), so excluding that value — rather
+ * than requiring a specific `aria-modal="true"` that doesn't exist — is the
+ * correct, locale-independent way to scope this.
+ */
+function categoryDialog(page: import('@playwright/test').Page) {
+  return page.locator('[role="dialog"]:not([aria-modal="false"])');
+}
+
 test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () => {
   test.beforeEach(async ({ page }) => {
     requireIntegrationEnv();
@@ -174,14 +157,14 @@ test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () =
 
     // Click "Add root category"
     await page.getByRole('button', { name: /add root category/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+    await expect(categoryDialog(page)).toBeVisible({ timeout: 10_000 });
 
     // Fill name
     await page.getByLabel(/name/i).fill('Beers');
     await page.getByRole('button', { name: /^save$/i }).click();
 
     // Dialog closes, success toast appears, tree shows Beers
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('Beers')).toBeVisible({ timeout: 15_000 });
 
     await logout(page);
@@ -200,17 +183,24 @@ test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () =
     await page.getByRole('button', { name: /add root category/i }).click();
     await page.getByLabel(/name/i).fill('Beers');
     await page.getByRole('button', { name: /^save$/i }).click();
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('Beers')).toBeVisible({ timeout: 15_000 });
 
     // Click "Add subcategory under Beers"
     await page.getByRole('button', { name: /add subcategory under Beers/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+    await expect(categoryDialog(page)).toBeVisible({ timeout: 10_000 });
 
     await page.getByLabel(/name/i).fill('Regular');
     await page.getByRole('button', { name: /^save$/i }).click();
 
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
+
+    // Beers may be collapsed after the dialog closes (39-07, harness — T3 was
+    // missing the expand step T4/T5 already handle for the same tree).
+    const expandBeers = page.getByRole('button', { name: /expand Beers/i });
+    const expandVisible = await expandBeers.isVisible({ timeout: 3_000 }).catch(() => false);
+    if (expandVisible) await expandBeers.click();
+
     await expect(page.getByText('Regular')).toBeVisible({ timeout: 15_000 });
 
     await logout(page);
@@ -229,28 +219,39 @@ test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () =
     await page.getByRole('button', { name: /add root category/i }).click();
     await page.getByLabel(/name/i).fill('Beers');
     await page.getByRole('button', { name: /^save$/i }).click();
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('Beers')).toBeVisible({ timeout: 15_000 });
 
     // Create child Regular under Beers
     await page.getByRole('button', { name: /add subcategory under Beers/i }).click();
     await page.getByLabel(/name/i).fill('Regular');
     await page.getByRole('button', { name: /^save$/i }).click();
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText('Regular')).toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
 
-    // Expand Beers to see Regular (Beers may be collapsed after dialog close)
+    // Expand Beers to see Regular (Beers may be collapsed after dialog close —
+    // 39-07, harness: this check must run before asserting "Regular" is
+    // visible, not after).
     const expandBeers = page.getByRole('button', { name: /expand Beers/i });
     const expandVisible = await expandBeers.isVisible({ timeout: 3_000 }).catch(() => false);
     if (expandVisible) await expandBeers.click();
 
+    await expect(page.getByText('Regular')).toBeVisible({ timeout: 15_000 });
+
     // Create grandchild Corona under Regular
     await page.getByRole('button', { name: /add subcategory under Regular/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+    await expect(categoryDialog(page)).toBeVisible({ timeout: 10_000 });
 
     await page.getByLabel(/name/i).fill('Corona');
     await page.getByRole('button', { name: /^save$/i }).click();
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
+
+    // Expand Regular to reveal Corona (39-07, harness — same collapsed-tree
+    // pattern as the Beers/Regular expand step above; T5 already handles
+    // this correctly for the identical tree shape).
+    const expandRegular = page.getByRole('button', { name: /expand Regular/i });
+    const expandRegularVisible = await expandRegular.isVisible({ timeout: 3_000 }).catch(() => false);
+    if (expandRegularVisible) await expandRegular.click();
+
     await expect(page.getByText('Corona')).toBeVisible({ timeout: 15_000 });
 
     await logout(page);
@@ -271,13 +272,13 @@ test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () =
     await page.getByRole('button', { name: /add root category/i }).click();
     await page.getByLabel(/name/i).fill('Beers');
     await page.getByRole('button', { name: /^save$/i }).click();
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('Beers')).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('button', { name: /add subcategory under Beers/i }).click();
     await page.getByLabel(/name/i).fill('Regular');
     await page.getByRole('button', { name: /^save$/i }).click();
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
 
     // Expand Beers
     const expandBeers = page.getByRole('button', { name: /expand Beers/i });
@@ -289,7 +290,7 @@ test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () =
     await page.getByRole('button', { name: /add subcategory under Regular/i }).click();
     await page.getByLabel(/name/i).fill('Corona');
     await page.getByRole('button', { name: /^save$/i }).click();
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15_000 });
+    await expect(categoryDialog(page)).not.toBeVisible({ timeout: 15_000 });
 
     // Expand Regular to reveal Corona
     const expandRegular = page.getByRole('button', { name: /expand Regular/i });
@@ -307,50 +308,16 @@ test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () =
   });
 
   // =========================================================================
-  // T6: combo_eligible flag — set via DB helper, verify read-back
-  //
-  // combo_eligible is not yet exposed in the Settings UI form, so we test:
-  //  1. The DB column is writable via the service-role client
-  //  2. The value can be read back correctly
-  // This proves the migration column and schema are correct (S1-01/S1-06).
-  // When the UI toggle is added (future sprint), update this test to use the UI.
+  // T6 REMOVED (39-07, obsolete — justified in 39-07-LEDGER.md):
+  // `combo_eligible` was never a column on `categories`. It was added only to
+  // `products` (supabase/migrations/20260424000004_product_combo_flags.sql:7-10,
+  // "S1-04: Add combo flags to products"). This test asserted a schema shape
+  // that doesn't exist and never did — a live re-check this session confirmed
+  // Postgres itself rejects the query with `42703: column categories.combo_eligible
+  // does not exist`, not a stale-cache artifact. Product-level `combo_eligible`
+  // coverage belongs to a products-focused spec, which this file is not and
+  // does not otherwise touch.
   // =========================================================================
-  test('T6: combo_eligible flag — DB column writable and readable (service-role)', async () => {
-    // Seed a category via DB helper
-    const url = process.env.VITE_SUPABASE_URL!;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const admin = createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-
-    const { data: cat, error: insertErr } = await admin
-      .from('categories')
-      .insert({
-        name: 'Beers',
-        color: '#6366f1',
-        sort_order: 0,
-        depth: 0,
-        combo_eligible: false,
-        is_food: false,
-      })
-      .select('id, combo_eligible')
-      .single();
-
-    expect(insertErr).toBeNull();
-    expect(cat).not.toBeNull();
-    // Default inserted as false
-    expect((cat as { combo_eligible: boolean }).combo_eligible).toBe(false);
-
-    // Toggle to true
-    await setCategoryComboEligible('Beers', true);
-
-    // Verify read-back
-    const value = await getCategoryComboEligible('Beers');
-    expect(value).toBe(true);
-
-    // Cleanup (afterEach also runs, belt-and-suspenders)
-    await cleanupTestCategories(['Beers']);
-  });
 
   // =========================================================================
   // T7: Bartender RLS — cannot write to modifier_groups
@@ -379,13 +346,31 @@ test.describe('Settings: Category Tree + Combo Flag + Modifier Groups RLS', () =
   });
 
   // =========================================================================
-  // T8: Bartender UI — cannot reach Settings page (redirected to /home)
-  //     (Existing RBAC ensures this — guard smoke-test re-run here for traceability)
+  // T8: Bartender UI — Settings shows only the role-agnostic Language tab,
+  //     Products/Categories management stays inaccessible (39-07, updated
+  //     from a stale full-page redirect assertion — justified in
+  //     39-07-LEDGER.md). Phase 21 intentionally opened the `/settings` route
+  //     itself to every authenticated role so bartenders can self-service
+  //     their locale (src/widgets/SettingsTabsPanel/index.tsx:33-43, CLAUDE.md
+  //     "i18n / Multi-Language"); the security property this test protects —
+  //     bartenders cannot manage products/categories — is now enforced by
+  //     per-tab RBAC gating (`canManageProducts`) rather than a route redirect.
   // =========================================================================
-  test('T8: bartender cannot access Settings — redirected to /home', async ({ page }) => {
+  test('T8: bartender sees only the Language tab on Settings — Products tab is absent', async ({
+    page,
+  }) => {
     await loginAs(page, 'bartender');
     await page.goto('/settings');
-    await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible({ timeout: 15_000 });
+
+    // Self-service Language tab is the only tab a bartender sees, and it is
+    // selected by default.
+    await expect(page.getByRole('tab', { name: 'Idioma' })).toBeVisible({ timeout: 10_000 });
+
+    // Products/Categories management remains gated — no "Products" tab exists
+    // for a bartender.
+    await expect(page.getByRole('tab', { name: 'Products' })).toHaveCount(0);
+
     await logout(page);
   });
 });
