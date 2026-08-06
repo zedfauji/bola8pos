@@ -394,6 +394,55 @@ Same three-check method as Task 1. One additional wrinkle for this batch: severa
 | 103 | `useWaitlistEntry` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
 | 225 | `useMutationUpdateWaitlistStatus` | export | 0 | **DELETE** | Zero reaching imports found via full-repo import-graph resolution in either knip mode; no immediate slice barrel forwards it. Confirmed dead. Nothing else in the file (or elsewhere) referenced it; removed the whole declaration. |
 
-<!-- gsd:write-continue -->
+---
 
-<!-- gsd:write-continue -->
+## Task 3 — Entities-layer delta re-measurement
+
+### Method
+
+Regenerated both knip reports fresh a third time (`npx knip --reporter json`, `npx knip --production --reporter json`, after both Task 1 and Task 2's commits), recomputed the distinct `(file, line, name)` export/type union scoped to `src/entities/`, excluding `**/index.ts(x)` barrels — same method as Task 1/2's working-set derivation and the same method 39-01/39-03/39-08 used for comparability.
+
+### Before / after
+
+| | Before this plan (Task 1 baseline, = 39-08-LEDGER.md's published 39-10 working set) | After this plan (Task 3, fresh) | Δ |
+|---|---|---|---|
+| `src/entities/` non-barrel export/type findings | **148** | **27** | **-121** |
+| Whole-file-dead candidates under `src/entities/` | 7 | 7 | 0 (untouched — out of this plan's scope) |
+
+### The 27 residual findings are fully attributable
+
+25 are the KEEP dispositions already recorded per-row above (9 from Task 1, 16 from Task 2) — barrel-forwarded, still-live-via-a-different-origin, or test/story-reachable production-mode-only false positives, each with its specific evidence in the per-finding tables.
+
+The remaining 2 — `buildCategoryTree` and `CategoryNode` in `src/entities/category/model/types.ts` (lines 7-8) — are a byproduct newly surfaced by Task 2's own deletion of `useCategoryTree` in `category/model/queries.ts` (the only file in this slice that imported them). Checked before finalizing this count: `src/entities/category/model/index.ts` still re-exports both (`export { buildCategoryTree } from './types'; export type { Category, CategoryNode } from './types';`) — per this plan's own rule ("the barrel is the authority, not this plan"), a still-forwarding barrel means the declaration is not this plan's to delete, exactly the same precedent already applied to `CreatePayment`/`StaffUpdateSchema` in Task 1. Not touched; flagged here for a future barrel-decision pass (39-08's territory) to resolve, consistent with how 39-08-LEDGER.md itself documented an analogous byproduct (6 files newly reclassified whole-file-dead) for downstream plans to inherit rather than silently absorbing.
+
+25 (recorded KEEP) + 2 (barrel-protected byproduct) = **27**, matching the residual exactly. Zero unattributed/unexplained residual findings.
+
+### Whole-file candidates — explicitly not touched, carried forward
+
+The same 7 whole-file candidates 39-08-LEDGER.md surfaced remain unchanged (this plan does not delete files, per its own frontmatter prohibition):
+
+| File | Status |
+|---|---|
+| `src/entities/modifier-inventory-rule/model/types.ts` | Whole-file-dead candidate (newly surfaced by 39-08's barrel pruning) — not adjudicated by this plan |
+| `src/entities/rbac/model/types.ts` | Whole-file-dead candidate (newly surfaced by 39-08's barrel pruning) — not adjudicated by this plan |
+| `src/entities/recipe/model/types.ts` | Whole-file-dead candidate (newly surfaced by 39-08's barrel pruning) — not adjudicated by this plan |
+| `src/entities/waitlist/model/store.ts` | Whole-file-dead candidate (newly surfaced by 39-08's barrel pruning) — not adjudicated by this plan |
+| `src/entities/payment/model/store.ts` | Whole-file-dead candidate (newly surfaced by 39-08's barrel pruning); this plan explicitly kept `CreatePayment`/`CreatePaymentSchema` alive in `types.ts` specifically because this file still imports them — deleting this file is future work, not this plan's |
+| `src/entities/tab/ui/PoolChargeItem.tsx` | Already adjudicated FALSE POSITIVE (reachable via test/story) in 39-03-LEDGER.md — carried forward unchanged, not re-litigated |
+| `src/entities/tab/ui/TabDetail.tsx` | Already adjudicated FALSE POSITIVE (reachable via test/story) in 39-03-LEDGER.md — carried forward unchanged; this plan explicitly kept `OrderItem` alive in `tab/model/types.ts` specifically because this file still imports it |
+
+### Verification
+
+```
+npm run typecheck   # clean, zero errors (both after Task 2 and after this re-measurement)
+npm run test          # 1391 passed, 15 todo — one transient failure observed on an
+                       # intermediate run (fast-check property test in
+                       # src/shared/lib/groupOrderItemsForReceipt.test.ts, a file
+                       # entirely outside this plan's scope), passed in isolation and
+                       # on a full-suite re-run — pre-existing flakiness, not caused
+                       # by this plan's changes, not fixed (out of scope per the
+                       # deviation-rules scope boundary)
+```
+
+No file was deleted by this plan (verified: `git diff --stat` against the pre-plan base shows only modifications, zero deletions, across both task commits). No deletion in either task's table has a nonzero *path-aware* reaching-import count recorded against it (the raw bare-identifier `grep -rn` hit counts are non-zero for many rows precisely because the domain.ts-native symbol names are reused elsewhere via a different origin — see the Method section's worked example — every one of those was individually confirmed non-reaching via the import-graph resolution step before deletion).
+
