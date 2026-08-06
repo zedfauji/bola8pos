@@ -992,7 +992,7 @@ Plans:
 **Goal:** Remediate Phase 10's audit Blocking tier (181: E2E triage-and-fix + knip unlisted deps) and all knip dead-code findings (High 1917 + Medium 37, Medium skipped per false-positive review). jscpd, as-any, unused deps, and Low tier are split into separate future phases.
 **Requirements**: TBD (no REQUIREMENTS.md entries map to this phase — 39-CONTEXT.md decision IDs D-01..D-09 serve as the acceptance-criteria identifiers)
 **Depends on:** Phase 10 (audit source), overlaps Phase 38 (E2E infra root causes)
-**Plans:** 7/12 plans executed
+**Plans:** 8/12 plans executed
 
 Plans:
 **Wave 1**
@@ -1010,7 +1010,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 39-08-PLAN.md — FSD barrel decision: one call covering 445 findings across 64 `index.ts` files, then republish the knip baseline
+- [x] 39-08-PLAN.md — FSD barrel decision: one call covering 445 findings across 64 `index.ts` files, then republish the knip baseline
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
