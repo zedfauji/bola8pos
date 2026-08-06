@@ -52,8 +52,8 @@ export function AgentPanel() {
       role="dialog"
       aria-label={t('agentChat.assistantAria')}
       aria-modal="false"
-      className={`fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-background shadow-2xl transition-transform duration-300 md:w-[380px] ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
+      className={`fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-background shadow-2xl transition-transform ease-in-out md:w-[380px] ${
+        isOpen ? 'translate-x-0 duration-500' : 'translate-x-full duration-300'
       }`}
     >
       {/* Header */}
