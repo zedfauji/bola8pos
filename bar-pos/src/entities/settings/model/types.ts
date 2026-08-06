@@ -6,7 +6,6 @@ export {
   RappiSettingsSchema,
   ReceiptSettingsSchema,
   SettingsBackupSummarySchema,
-  SettingsKeySchema,
   TipDistributionSettingsSchema,
 } from '@shared/lib/domain';
 

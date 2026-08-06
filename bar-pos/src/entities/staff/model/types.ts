@@ -1,30 +1,19 @@
 import {
   StaffSchema,
-  StaffCreateSchema,
   StaffUpdateSchema,
   ShiftSchema,
-  ShiftCreateSchema,
-  ShiftUpdateSchema,
 } from '@shared/lib/domain';
 import type {
   Staff,
-  StaffCreate,
-  StaffUpdate,
-  Shift,
-  ShiftCreate,
-  ShiftUpdate,
 } from '@shared/lib/domain';
 
 export {
   StaffSchema,
-  StaffCreateSchema,
   StaffUpdateSchema,
   ShiftSchema,
-  ShiftCreateSchema,
-  ShiftUpdateSchema,
 };
 
-export type { Staff, StaffCreate, StaffUpdate, Shift, ShiftCreate, ShiftUpdate };
+export type { Staff };
 
 // Re-export mock data if needed, but ideally move to shared mocks
 /* eslint-disable i18next/no-literal-string -- Storybook fixture data, not UI copy. */
