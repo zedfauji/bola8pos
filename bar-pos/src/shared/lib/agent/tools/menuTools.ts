@@ -123,7 +123,7 @@ export async function updateProduct(
   return result;
 }
 
-export async function _executeDeactivateProduct(
+async function _executeDeactivateProduct(
   args: Record<string, unknown>,
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {
@@ -146,7 +146,7 @@ export async function deactivateProduct(
   return ok({ pending: true, confirm_token: token, preview });
 }
 
-export async function _executeBulkImportProducts(
+async function _executeBulkImportProducts(
   args: Record<string, unknown>,
   ctx: AgentActionContext
 ): Promise<Result<unknown>> {

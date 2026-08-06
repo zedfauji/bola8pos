@@ -16,16 +16,6 @@ const db = supabase as any;
 // Types
 // ---------------------------------------------------------------------------
 
-export type PhysicalCountEntry = {
-  /** inventory.product_id */
-  productId: string;
-  productName: string;
-  /** Stock currently recorded in the DB */
-  expectedStock: number;
-  /** Actual physical count entered by manager */
-  actualCount: number;
-};
-
 export type PhysicalCountVarianceRow = {
   productId: string;
   productName: string;

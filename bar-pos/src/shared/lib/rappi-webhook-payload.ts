@@ -14,7 +14,7 @@ const WebhookItemSchema = z.object({
 });
 
 /** Flexible top-level: common marketplace-style keys */
-export const RappiWebhookBodySchema = z.object({
+const RappiWebhookBodySchema = z.object({
   order_id: z.string().min(1).max(128),
   customer_name: z.string().default(''),
   delivery_address: z.string().default(''),

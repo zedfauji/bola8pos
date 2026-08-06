@@ -194,7 +194,7 @@ export function generateIdempotencyKey(prefix: string): string {
 }
 
 /** Minutes a tab has been open (floored), for duration rules and tests. */
-export function getTabOpenMinutes(openedAt: Date, now: Date = new Date()): number {
+function getTabOpenMinutes(openedAt: Date, now: Date = new Date()): number {
   return Math.floor((now.getTime() - openedAt.getTime()) / 60000);
 }
 

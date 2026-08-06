@@ -5,7 +5,7 @@
  * Provides wrappers for QueryClient, Zustand stores, and other providers.
  */
 
-/* eslint-disable react-refresh/only-export-components -- RTL re-exports and test-only helpers */
+/* eslint-disable react-refresh/only-export-components -- test-only helpers, not components */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, type RenderOptions } from '@testing-library/react';
@@ -74,22 +74,3 @@ export function renderWithProviders(ui: ReactElement, options?: CustomRenderOpti
     ...renderOptions,
   });
 }
-
-export {
-  act,
-  cleanup,
-  fireEvent,
-  getDefaultNormalizer,
-  getNodeText,
-  isInaccessible,
-  logDOM,
-  logRoles,
-  prettyDOM,
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-  within,
-} from '@testing-library/react';
-
-/** Prefer {@link renderWithProviders} for components that need React Query. */
-export { renderWithProviders as render };

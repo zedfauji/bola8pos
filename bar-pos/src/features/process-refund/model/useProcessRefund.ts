@@ -17,7 +17,7 @@ import { supabase } from '@shared/lib/supabase';
 
 const db = supabase as any;
 
-export interface RefundItemInput {
+interface RefundItemInput {
   order_item_id: string;
   qty: number;
   amount: number;    // positive decimal (e.g. 8.50)

@@ -21,7 +21,7 @@ import { err, ok, supabaseMutation } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
 import type { Json } from '@shared/lib/supabase.types';
 
-export type EditPaidTabPatchOp = 'update' | 'add' | 'delete';
+type EditPaidTabPatchOp = 'update' | 'add' | 'delete';
 
 /**
  * Wire shape sent to the RPC — keys match the whitelist read by
