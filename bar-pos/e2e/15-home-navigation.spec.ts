@@ -101,26 +101,38 @@ test.describe('Home Dashboard Navigation', () => {
     await logout(page);
   });
 
-  test('T11: bartender navigates to /settings directly — redirected or access dialog shown', async ({
+  test('T11: bartender navigates to /settings directly — only the Language tab is available, no admin tabs', async ({
     page,
   }) => {
     test.setTimeout(60_000);
+    // `/settings`'s route registration (router.tsx) has no dedicated role
+    // gate — unlike `/reports`/`/kds`/`/audit`, it's wrapped only in the
+    // generic (auth-only) <ProtectedRoute>. This is intentional, not a gap:
+    // SettingsTabsPanel (widgets/SettingsTabsPanel/index.tsx) always pushes
+    // the role-agnostic "Language" tab first, outside both the
+    // `canManageSettings`/`canManageProducts` gates, specifically so every
+    // authenticated role — including bartender — can self-serve their own
+    // locale (CLAUDE.md "i18n / Multi-Language": "Self-service via Settings
+    // > Language, open to every authenticated role including bartender").
+    // The actual admin-only surfaces (General/Hardware/Rappi/Email/Backup/
+    // Tip Split/Products/Pool Tables/Billing/Combos/Promotions/Ingredients)
+    // are conditionally excluded from the tab list entirely for a role
+    // without `manage_settings`/`manage_products` — verify that gate here
+    // instead of a page-level redirect or blocking dialog that was never
+    // the actual design.
     await loginAs(page, 'bartender');
     await page.goto('/settings');
 
-    const redirected = await page
-      .waitForURL(/\/home/, { timeout: 10_000 })
-      .then(() => true)
-      .catch(() => false);
+    // Locale-agnostic (the test staff's default locale is es-MX, rendering
+    // the Language tab as "Idioma", not "Language") — assert the tab COUNT
+    // instead of matching a specific translated label. Exactly one tab
+    // (the always-pushed, role-agnostic Language tab) confirms none of the
+    // 12 admin-only tabs (General/Hardware/Rappi/Email/Backup/Tip Split/
+    // Products/Pool Tables/Billing/Combos/Promotions/Ingredients) rendered.
+    const tabs = page.getByRole('tab');
+    await expect(tabs).toHaveCount(1, { timeout: 10_000 });
+    await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
 
-    if (!redirected) {
-      // May show an alertdialog blocking the page
-      const dialog = page.getByRole('alertdialog');
-      await expect(dialog).toBeVisible({ timeout: 8_000 });
-      await expect(dialog.getByText(/manager access required|admin access required/i)).toBeVisible();
-    } else {
-      expect(redirected).toBe(true);
-    }
     await logout(page);
   });
 

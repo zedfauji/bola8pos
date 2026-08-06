@@ -172,13 +172,20 @@ test.describe('Caja Entries', () => {
     const dialog = page.getByRole('dialog', { name: /register expense|expense.*income/i });
     await expect(dialog).toBeVisible({ timeout: 10_000 });
 
-    await dialog.getByLabel(/amount/i).fill('0');
+    const amountInput = dialog.getByLabel(/amount/i);
+    await amountInput.fill('0');
     await dialog.locator('#entry-concept').fill('Zero amount test');
     await dialog.getByRole('button', { name: /save entry/i }).click();
 
-    await expect(
-      dialog.getByText(/amount must be greater than 0|positive/i)
-    ).toBeVisible({ timeout: 5_000 });
+    // `#entry-amount` is a native `<input type="number" min="0.01">`
+    // (RegisterCajaEntryDialog.tsx:154-156) — the browser's own HTML5
+    // constraint validation blocks the `<form onSubmit>` for amount=0
+    // before React's handler (and its Zod "Amount must be greater than 0"
+    // message) ever runs, so that message never renders for this specific
+    // input value. Assert the actual, real defense instead: native
+    // `validity.valid === false` and the form not having submitted (dialog
+    // still open).
+    await expect(amountInput).toHaveJSProperty('validity.valid', false);
     await expect(dialog).toBeVisible();
     await logout(page);
   });
@@ -199,9 +206,15 @@ test.describe('Caja Entries', () => {
       await sessionSelector.selectOption({ index: 0 });
     }
 
-    // Look for caja entries section
+    // Look for caja entries section — CajaReportPanel's "Expenses & Income"
+    // section only renders once its report query resolves; `isVisible` is a
+    // one-shot check and the initial spinner can still be up at 15s, so use
+    // `waitFor` (polls) with a longer window before concluding it's missing.
     const entriesSection = page.getByText(/caja entries|expense.*income/i).first();
-    const sectionVisible = await entriesSection.isVisible({ timeout: 15_000 }).catch(() => false);
+    const sectionVisible = await entriesSection
+      .waitFor({ state: 'visible', timeout: 30_000 })
+      .then(() => true)
+      .catch(() => false);
     if (!sectionVisible) {
       test.skip(true, 'UI not implemented — EXPECTED FAIL: caja entries section in reports');
       return;

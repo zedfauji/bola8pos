@@ -30,7 +30,11 @@ test.describe('Updater — smoke', () => {
 
     await loginAs(page, 'admin');
     await page.goto('/home');
-    await expect(page.locator('[data-testid="home-page"], h1, main')).toBeVisible({
+    // HomePage (src/pages/home/index.tsx) has no `data-testid`, `<h1>`, or
+    // `<main>` — its shell is `<div>`/`<header>` around `HomeDashboard`.
+    // "POS Register" is one of HomeDashboard's always-present nav buttons
+    // (already the load-bearing selector across 15-home-navigation.spec.ts).
+    await expect(page.getByRole('button', { name: 'POS Register' })).toBeVisible({
       timeout: 10_000,
     });
 
