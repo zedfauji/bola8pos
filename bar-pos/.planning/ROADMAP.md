@@ -992,7 +992,7 @@ Plans:
 **Goal:** Remediate Phase 10's audit Blocking tier (181: E2E triage-and-fix + knip unlisted deps) and all knip dead-code findings (High 1917 + Medium 37, Medium skipped per false-positive review). jscpd, as-any, unused deps, and Low tier are split into separate future phases.
 **Requirements**: TBD (no REQUIREMENTS.md entries map to this phase — 39-CONTEXT.md decision IDs D-01..D-09 serve as the acceptance-criteria identifiers)
 **Depends on:** Phase 10 (audit source), overlaps Phase 38 (E2E infra root causes)
-**Plans:** 2/12 plans executed
+**Plans:** 7/12 plans executed
 
 Plans:
 **Wave 1**
@@ -1002,11 +1002,11 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 39-03-PLAN.md — Unused-file sweep: 14 supabase/functions + 19 production-only false positives annotated, 15 candidates deleted
-- [ ] 39-04-PLAN.md — E2E triage, specs 01–14 (43 findings, incl. the 11 routed to Phase 38)
-- [ ] 39-05-PLAN.md — E2E triage, specs 15–22 (32 findings, incl. the void-order stale-skip cluster)
-- [ ] 39-06-PLAN.md — E2E triage, specs 23–26 (34 findings, pool billing + payment + validation)
-- [ ] 39-07-PLAN.md — E2E triage, specs 27–44 (22 findings, categories chain + focus/tab-order)
+- [x] 39-03-PLAN.md — Unused-file sweep: 14 supabase/functions + 19 production-only false positives annotated, 15 candidates deleted
+- [x] 39-04-PLAN.md — E2E triage, specs 01–14 (43 findings, incl. the 11 routed to Phase 38)
+- [x] 39-05-PLAN.md — E2E triage, specs 15–22 (32 findings, incl. the void-order stale-skip cluster)
+- [x] 39-06-PLAN.md — E2E triage, specs 23–26 (34 findings, pool billing + payment + validation)
+- [x] 39-07-PLAN.md — E2E triage, specs 27–44 (22 findings, categories chain + focus/tab-order)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
