@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 3
+open_count: 4
 waived_count: 0
 fixed_count: 0
-total_count: 3
-last_updated: 2026-08-02T19:44:06.125Z
+total_count: 4
+last_updated: 2026-08-06T19:09:50.452Z
 ---
 
 # Broken Windows Ledger
@@ -18,6 +18,7 @@ last_updated: 2026-08-02T19:44:06.125Z
 | 1 | 26 | unrun-verify | e2e/04-pool-timer.spec.ts |  | E2E pool-timer spec not run to a pass/fail verdict for Plan 26-02 — Playwright's managed dev server returned net::ERR_CONNECTION_REFUSED on both attempts before any page loaded (dev-server/environment issue, typecheck/lint/unit-test all green). | open |  | 2026-07-29T04:16:30.587Z |  |
 | 2 | 26 | unrun-verify | e2e/04-pool-timer.spec.ts |  | Plan 26-04 verification item 6 (npx playwright test e2e/04-pool-timer.spec.ts) and item 7 (deactivate-floating-resource.integration.test.ts) not re-run to completion — severe host filesystem/process contention during execution. Also: ~15 e2e specs (incl. this one, e2e/helpers/supabase.ts) still query .from('pool_tables'), the table Plan 01 renamed to resources — likely breaks these specs at the DB level regardless of dev-server health. | open |  | 2026-07-29T06:56:28.946Z |  |
 | 3 | 28 | deviation | src/features/process-refund/process-refund-rpc.integration.test.ts |  | Flaky/pre-existing integration test failure (parent-close trigger) observed during 28-06 verify — unrelated to money-formatter changes, likely cross-worktree DB race; see phase deferred-items.md | open |  | 2026-08-02T19:44:06.125Z |  |
+| 4 | 39 | deviation | e2e/11-offline.spec.ts | 69 | Offline queue drops the 2nd of 2 orders queued against the same tab on reconnect (STALE_VERSION discard, unconfirmed root cause) — filed as .planning/todos/pending/2026-08-04-offline-queue-drops-second-order-on-reconnect.md | open |  | 2026-08-06T19:09:50.452Z |  |
 
 ````json
 [
@@ -55,6 +56,18 @@ last_updated: 2026-08-02T19:44:06.125Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-02T19:44:06.125Z",
+    "resolved_at": null
+  },
+  {
+    "id": 4,
+    "kind": "deviation",
+    "phase": "39",
+    "file": "e2e/11-offline.spec.ts",
+    "line": 69,
+    "description": "Offline queue drops the 2nd of 2 orders queued against the same tab on reconnect (STALE_VERSION discard, unconfirmed root cause) — filed as .planning/todos/pending/2026-08-04-offline-queue-drops-second-order-on-reconnect.md",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T19:09:50.452Z",
     "resolved_at": null
   }
 ]

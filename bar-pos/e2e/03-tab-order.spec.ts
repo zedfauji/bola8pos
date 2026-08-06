@@ -20,10 +20,15 @@ test.describe('Tab + Order Flow', () => {
     await page.getByRole('button', { name: 'Open Tab' }).click();
     await expect(page.getByText(/tab opened/i)).toBeVisible({ timeout: 20_000 });
     await page.getByRole('button', { name: /switch tab/i }).click();
-    await expect(page.getByRole('dialog').getByRole('button', { name: /tab for e2e customer/i })).toBeVisible({ timeout: 15_000 });
+    // Scoped by accessible name ("N open tabs") to exclude the always-mounted
+    // AgentPanel (src/features/agent-chat/ui/AgentPanel.tsx), which also
+    // renders role="dialog" even while closed off-screen — an unscoped
+    // getByRole('dialog') can match it instead of this drawer.
+    const switchTabDialog = page.getByRole('dialog', { name: /open tabs/i });
+    await expect(switchTabDialog.getByRole('button', { name: /tab for e2e customer/i })).toBeVisible({ timeout: 15_000 });
     // Close the drawer so the sidebar Logout button isn't blocked by the overlay
-    await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
-    await expect(page.getByRole('dialog')).toBeHidden({ timeout: 5_000 });
+    await switchTabDialog.getByRole('button', { name: 'Close' }).click();
+    await expect(switchTabDialog).toBeHidden({ timeout: 5_000 });
     await logout(page);
   });
 

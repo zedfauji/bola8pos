@@ -6,7 +6,11 @@ import { test } from './fixtures';
 const BAR_POS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function run(cmd: string): void {
-  execSync(cmd, { cwd: BAR_POS, stdio: 'inherit', shell: process.env.ComSpec ?? 'cmd.exe' });
+  // No explicit `shell` override: Node's execSync already picks the right
+  // default per platform (cmd.exe on Windows via ComSpec, /bin/sh on Linux/macOS).
+  // The old hardcoded `cmd.exe` fallback broke every run on Ubuntu (Phase 36
+  // migrated dev off Windows) with `spawnSync cmd.exe ENOENT`.
+  execSync(cmd, { cwd: BAR_POS, stdio: 'inherit' });
 }
 
 test.describe('CI Checks', () => {
