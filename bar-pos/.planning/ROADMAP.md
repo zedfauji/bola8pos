@@ -600,14 +600,14 @@ Plans:
 **Goal:** Ship a promotions engine — `promotions` + `applied_promotions` tables and an `evaluate_promotions` RPC supporting happy-hour time windows, item/category/pool-time targeting, and auto-apply at order time. Settings → Promotions admin UI to manage them.
 **Requirements:** TBD (POS-COMPARISON.md §20 — source doc no longer present; scope locked in 20-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 11/13 plans complete (20-12, 20-13 = gap closure for UAT gaps G-20-2..G-20-6)
+**Plans:** 12/13 plans executed
 
 Plans:
 **Wave 1**
 
 - [x] 20-01-PLAN.md — promotions + promotion_availability schema + is_promotion_available (SC-1)
 - [x] 20-02-PLAN.md — promotion Zod schemas + promotion.apply audit action + entities/promotion slice
-- [ ] 20-12-PLAN.md — gap closure: fix draft-insert CHECK violation blocking all promotion creation (G-20-2, SC-4)
+- [x] 20-12-PLAN.md — gap closure: fix draft-insert CHECK violation blocking all promotion creation (G-20-2, SC-4)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

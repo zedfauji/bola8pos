@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Cross-Pollination from billar-pos
-current_phase: 39
-current_phase_name: ai-slob-technical-debt-remediation
+current_phase: 20
+current_phase_name: promotions-engine
 status: executing
 stopped_at: Phase 10 audit complete; Phase 39 created for remediation
-last_updated: "2026-08-07T22:12:13.214Z"
-last_activity: 2026-08-04
-last_activity_desc: Phase 39 execution started
+last_updated: "2026-08-07T22:39:40.700Z"
+last_activity: 2026-08-07
+last_activity_desc: Phase 20 execution started
 progress:
   total_phases: 28
-  completed_phases: 25
+  completed_phases: 24
   total_plans: 187
-  completed_plans: 181
-  percent: 89
+  completed_plans: 184
+  percent: 86
 ---
 
 # Session State
@@ -44,14 +44,14 @@ Phases 01-12 predate v2.2 scope (this is the project's first formal milestone cl
 See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
-**Current focus:** Phase 39 — ai-slob-technical-debt-remediation
+**Current focus:** Phase 20 — promotions-engine
 
 ## Current Position
 
-Phase: 39 (ai-slob-technical-debt-remediation) — EXECUTING
-Plan: 1 of 12
+Phase: 20 (promotions-engine) — EXECUTING
+Plan: 2 of 13
 Status: Ready to execute
-Last activity: 2026-08-04 — Phase 39 execution started
+Last activity: 2026-08-07 — Phase 20 execution started
 
 ## Session Log
 
@@ -346,6 +346,9 @@ Last activity: 2026-08-04 — Phase 39 execution started
 - [Phase ?]: 27-07: correct/void open-unit dialogs gate dispatch behind ManagerPinDialog requiredAction=adjust_inventory (D-12, per 27-RESEARCH.md Pitfall 4), not CartPanel's void_order precedent.
 - [Phase ?]: 27-08 Task 3: human authorized substituting a real automated Playwright spec (e2e/49-open-units.spec.ts) for the manual checkpoint; found and fixed 5 genuine pre-existing bugs along the way (i18n locale-persistence-on-reload, broken product-creation flow, whole-Stock-tab inventory failure, and a never-worked manager-PIN negative-stock override) — all client-side fixes, zero database/RPC schema changes
 - [Phase ?]: Phase 10-03: madge same-slice cycle promoted to High per RESEARCH.md A2 (no barrel in the chain); as-any's 144 occurrences split 119 unjustified-cast/High vs 25 comment-mention/excluded via digest text analysis; jscpd's 2657 clones triage-flagged wholesale to High pending a .jscpd.json ignore-list fix (visible sample is 100% vendor/doc noise).
+- [Phase ?]: Draft promotion insert defaults target_type to pool_billing (the one FK-free target type) instead of relaxing promotions_item_target_check via a migration
+- [Phase ?]: PromotionBuilderForm.handleSave client-side target-consistency guard is UX-only, not the security boundary — DB CHECK constraints remain authoritative
+- [Phase ?]: Fixed e2e/helpers/supabase.ts resetTestState() to exclude the 4 pinned E2E login accounts from its blanket profiles.locale reset, which was silently reverting the en-US pin before every test
 
 ## Performance Metrics
 
@@ -449,10 +452,11 @@ Last activity: 2026-08-04 — Phase 39 execution started
 | Phase 27 P06 | 35min | 2 tasks | 5 files |
 | Phase 27 P07 | ~40min | 2 tasks | 12 files |
 | Phase 27 P08 | ~5h | 1 tasks | 7 files |
+| Phase 20 P12 | 55min | 3 tasks | 8 files |
 
 ## Last Session
 
-- **Stopped at:** Phase 15 context gathered
+- **Stopped at:** Completed 20-12-PLAN.md (G-20-2 closed)
 - **Timestamp:** 2026-07-12
 
 ## Current Position
@@ -470,9 +474,9 @@ Last activity: 2026-07-10 — Phase 30 planned: PageContainer backTo/backLabel e
 
 ## Session
 
-**Last session:** 2026-08-07T06:13:17.384Z
+**Last session:** 2026-08-07T22:39:40.680Z
 **Stopped at:** Completed 27-06-PLAN.md
-**Resume file:** .planning/phases/15-tabs-version-optimistic-concurrency/15-CONTEXT.md
+**Resume file:** None
 
 ## Operator Next Steps
 
