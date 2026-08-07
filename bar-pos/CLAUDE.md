@@ -59,6 +59,8 @@ A bar/restaurant POS system built as a Tauri 2 desktop app shipping to Windows/W
 
 All source code lives in `bar-pos/`. Run all commands from `bar-pos/`.
 
+**Working directory convention:** the git repo root is one level above `bar-pos/` (`.git`, `.claude/`, worktree checkouts, and other tooling scaffolding live at the repo root; project source, `.planning/`, `graphify-out/`, and this `CLAUDE.md` live under `bar-pos/`). Stay inside `bar-pos/` for all normal work — reads, edits, npm/vitest/playwright/git commands, `.planning/` updates. Only reference or operate on the repo-root level for things that are inherently repo-root scoped: managing git worktrees themselves (`git worktree add/remove/list`), or repo-root-only config that doesn't exist under `bar-pos/`. Don't `cd` out to the repo root as a habit or default paths there — it's not where the project lives.
+
 ## Commands
 
 ```bash
