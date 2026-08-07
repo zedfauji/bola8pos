@@ -603,20 +603,42 @@ Plans:
 **Plans:** 11/13 plans complete (20-12, 20-13 = gap closure for UAT gaps G-20-2..G-20-6)
 
 Plans:
+**Wave 1**
 
 - [x] 20-01-PLAN.md — promotions + promotion_availability schema + is_promotion_available (SC-1)
 - [x] 20-02-PLAN.md — promotion Zod schemas + promotion.apply audit action + entities/promotion slice
+- [ ] 20-12-PLAN.md — gap closure: fix draft-insert CHECK violation blocking all promotion creation (G-20-2, SC-4)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [x] 20-03-PLAN.md — applied_promotions + evaluate_promotions_for_item + create_order_with_items v3 (SC-2/SC-3)
 - [x] 20-04-PLAN.md — Settings → Promotions admin UI (SC-4)
+- [ ] 20-13-PLAN.md — gap closure: Playwright coverage for banner, order-time, pool billing, pool grant (G-20-3..G-20-6, SC-3)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [x] 20-05-PLAN.md — pool-time promotions: pool_grant branch + stop_pool_session RPC (D-05)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [x] 20-06-PLAN.md — HH→promotions data migration (D-07) + BLOCKING schema push + types
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [x] 20-07-PLAN.md — client pricing rewire (send basePrice) + Active Promotions banner
 - [x] 20-08-PLAN.md — pool client rewire (useMutationStopSession → stop_pool_session)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [x] 20-09-PLAN.md — D-07 parity gate + e2e/43-promotions + BLOCKING UAT
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
 - [x] 20-10-PLAN.md — drop happy_hour columns + retire HH admin editing
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
 - [x] 20-11-PLAN.md — retire client HH calc path (resolveProductPrice/isHappyHourActive)
-- [ ] 20-12-PLAN.md — gap closure: fix draft-insert CHECK violation blocking all promotion creation (G-20-2, SC-4)
-- [ ] 20-13-PLAN.md — gap closure: Playwright coverage for banner, order-time, pool billing, pool grant (G-20-3..G-20-6, SC-3)
 
 **Success Criteria:**
 
