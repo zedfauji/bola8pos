@@ -193,6 +193,50 @@ describe('ProcessPaymentRequestSchema', () => {
     const r = ProcessPaymentRequestSchema.safeParse(baseValidRequest());
     expect(r.success).toBe(true);
   });
+
+  // Phase 15 gap-closure (D-02) — expectedVersion
+  it('accepts request without expectedVersion (field is optional)', () => {
+    const r = ProcessPaymentRequestSchema.safeParse(baseValidRequest());
+    expect(r.success).toBe(true);
+  });
+
+  it('accepts expectedVersion: 0 and retains it in parsed output', () => {
+    const r = ProcessPaymentRequestSchema.safeParse({
+      ...baseValidRequest(),
+      expectedVersion: 0,
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.expectedVersion).toBe(0);
+    }
+  });
+
+  it('accepts expectedVersion: 7 and retains it in parsed output', () => {
+    const r = ProcessPaymentRequestSchema.safeParse({
+      ...baseValidRequest(),
+      expectedVersion: 7,
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.expectedVersion).toBe(7);
+    }
+  });
+
+  it('rejects negative expectedVersion', () => {
+    const r = ProcessPaymentRequestSchema.safeParse({
+      ...baseValidRequest(),
+      expectedVersion: -1,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('rejects non-integer expectedVersion', () => {
+    const r = ProcessPaymentRequestSchema.safeParse({
+      ...baseValidRequest(),
+      expectedVersion: 1.5,
+    });
+    expect(r.success).toBe(false);
+  });
 });
 
 // TODO: Move callProcessPayment invocation tests to e2e/05-payments.spec.ts
