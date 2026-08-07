@@ -47,7 +47,13 @@ test.describe('Concurrent Edits (Optimistic Concurrency)', () => {
     await loginAs(page, 'admin');
 
     const customerName = `Concurrent Edit ${String(Date.now())}`;
-    await page.goto('/pos');
+    // Prefer in-app SPA navigation over a full page reload — a reload re-triggers
+    // caja/realtime fetches that are unreliable under test load (same reasoning as
+    // helpers/auth.ts's logout()). loginAs() can land on either /home or /pos.
+    if (!page.url().includes('/pos')) {
+      await page.getByRole('button', { name: 'POS Register' }).click();
+      await expect(page).toHaveURL(/\/pos/, { timeout: 15_000 });
+    }
     await page.getByRole('button', { name: /new tab/i }).click();
     await page.getByLabel(/customer name/i).fill(customerName);
     await page.getByRole('button', { name: 'Open Tab' }).click();
