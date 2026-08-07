@@ -1,25 +1,20 @@
 ---
 phase: 12-full-rbac-page-remove-the-breadcrumbs-of-rbac-from-other-pag
 verified: 2026-04-28T00:00:00Z
+re_verified: 2026-08-06
 status: human_needed
 score: 7/7 must-haves verified
 overrides_applied: 0
 human_verification:
-  - test: "Log in as admin (PIN 0000), navigate to /rbac"
-    expected: "Page renders with 'Roles & Permissions' heading and a DataTable of staff rows"
-    why_human: "Visual rendering of page + DataTable with live Supabase data cannot be verified programmatically"
   - test: "While on /rbac as admin, click 'Edit Role' on any staff row (not self)"
-    expected: "EditRoleDialog opens with the staff member already selected in the dropdown"
-    why_human: "key-based remount pattern for preSelectedStaffId seeding requires runtime interaction to verify"
-  - test: "Log in as manager, navigate directly to /rbac via the URL bar"
-    expected: "Immediately redirected to /home (no flash of the RBAC page)"
-    why_human: "Redirect timing and absence of RBAC content flash cannot be confirmed statically"
-  - test: "Log in as admin, navigate to /home, look for the 'Roles & Permissions' tile"
-    expected: "Tile appears with a ShieldCheck icon and an 'Admin' badge; clicking it navigates to /rbac"
-    why_human: "Tile click-through and icon rendering are visual and interactive"
-  - test: "Log in as bartender, navigate directly to /rbac via the URL bar"
-    expected: "Immediately redirected to /home"
-    why_human: "Same redirect verification as T-RBAC-redirect; non-admin path"
+    expected: "EditRoleDialog opens with the staff member already selected in the dropdown (not blank)"
+    why_human: "Automated E2E (T-RBAC-page, 2026-08-06) confirms the dialog opens on click but does not assert the dropdown's pre-selected value"
+  - test: "Log in as admin, on /home, click the 'Roles & Permissions' tile"
+    expected: "Tile navigates to /rbac"
+    why_human: "Automated E2E (T14, 2026-08-06) confirms the tile is visible but does not click it to confirm navigation"
+  - test: "Log in as bartender, navigate to /home, look for the 'Roles & Permissions' tile"
+    expected: "Tile shows a lock icon; clicking it opens ManagerPinDialog rather than navigating directly to /rbac"
+    why_human: "No automated coverage exists for the bartender tile-gating interaction"
 ---
 
 # Phase 12: Full RBAC Management Page — Verification Report
@@ -27,7 +22,7 @@ human_verification:
 **Phase Goal:** Full RBAC management page — single admin-only page for role management, breadcrumbs of RBAC removed from other pages, protected by navigation rule.
 **Verified:** 2026-04-28
 **Status:** human_needed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — 2026-08-06 (live E2E run against current code; original 2026-04-28 findings still hold, no regressions found)
 
 ## Goal Achievement
 
@@ -80,7 +75,18 @@ human_verification:
 
 ### Behavioral Spot-Checks
 
-Step 7b: SKIPPED for route guards and route wiring (no runnable entry points without a dev server). E2E tests T-RBAC-page, T-RBAC-redirect, T12, and T14 provide behavioral coverage for this phase and require a running server.
+Step 7b: RUN LIVE on 2026-08-06 — this sandbox has a running dev server (`localhost:1420`), `.env.local` E2E credentials, and Chrome, so the 4 tests originally deferred as "require a running server" were executed directly:
+
+```
+npx playwright test e2e/09-rbac.spec.ts --grep "T-RBAC-page|T-RBAC-redirect|T12:|T14:"
+  ✓ T-RBAC-page: admin can access /rbac page and open per-row edit role dialog (11.6s)
+  ✓ T-RBAC-redirect: non-admin (bartender) visiting /rbac is redirected to /home (12.1s)
+  ✓ T12: non-admin (manager) visiting /rbac is redirected to /home (12.0s)
+  ✓ T14: admin sees Roles & Permissions tile on home dashboard (11.6s)
+  4 passed (1.1m)
+```
+
+All 4 passed against current `main` — no regressions from the 3.5 months of work landed since the original 2026-04-28 verification (including the i18n namespace migration and touch-target sweep, both of which touched these files incidentally).
 
 ### Requirements Coverage
 
@@ -105,45 +111,41 @@ No TODO/FIXME, no `console.log`, no hardcoded empty returns in any new or modifi
 
 ### Human Verification Required
 
-The automated checks all pass. These items require running the app with a live Supabase connection:
+Automated E2E (2026-08-06, see Behavioral Spot-Checks) now covers most of what this section originally deferred. What's left:
 
-#### 1. Admin page access and DataTable rendering
-
-**Test:** Log in as admin (PIN 0000), navigate to `/rbac`
-**Expected:** Page renders with "Roles & Permissions" heading; DataTable shows staff rows with Name, Role badge, and "Edit Role" button per row
-**Why human:** Visual rendering and live Supabase data cannot be verified statically
-
-#### 2. Per-row Edit Role dialog pre-seeding
+#### 1. Per-row Edit Role dialog pre-seeding (value, not just open/close)
 
 **Test:** On `/rbac` as admin, click "Edit Role" on a non-self staff row
 **Expected:** `EditRoleDialog` opens with that staff member already selected in the "Staff member" dropdown (not blank)
-**Why human:** The `key`-based remount + `useState(preSelectedStaffId ?? '')` seeding pattern requires runtime interaction to confirm; no unit test yet covers this (test stubs are `it.todo`)
+**Why human:** T-RBAC-page confirms the dialog opens on click; it does not assert the dropdown's selected value, so the `key`-based remount + `useState(preSelectedStaffId ?? '')` seeding still needs a visual confirm (no unit test covers this either — stubs are `it.todo`)
 
-#### 3. Manager redirect to /home
+#### 2. HomeDashboard tile click-through
 
-**Test:** Log in as manager, navigate directly to `/rbac` via URL bar
-**Expected:** Immediately redirected to `/home` with no visible flash of the RBAC page
-**Why human:** Redirect timing and absence of page flash are runtime-observable
+**Test:** Log in as admin, go to `/home`, click the "Roles & Permissions" tile
+**Expected:** Navigates to `/rbac`
+**Why human:** T14 confirms the tile is visible with the right label; it does not click it to confirm the navigation
 
-#### 4. HomeDashboard tile visibility and navigation
-
-**Test:** Log in as admin, go to `/home`, find "Roles & Permissions" tile
-**Expected:** Tile visible with ShieldCheck icon and "Admin" badge; clicking navigates to `/rbac`
-**Why human:** Icon rendering and tile click-through require browser interaction
-
-#### 5. Non-admin tile gating
+#### 3. Non-admin tile gating via ManagerPinDialog
 
 **Test:** Log in as bartender, go to `/home`
-**Expected:** "Roles & Permissions" tile is visible but shows a lock icon and "Admin" badge; clicking opens ManagerPinDialog rather than navigating directly
-**Why human:** Tile gating behavior via ManagerPinDialog is interaction-dependent
+**Expected:** "Roles & Permissions" tile is visible but shows a lock icon and "Admin" badge; clicking it opens ManagerPinDialog rather than navigating directly
+**Why human:** No E2E test exercises this interaction; interaction-dependent
+
+**Resolved by automated E2E, no longer blocking:**
+- Admin page access + DataTable rendering with live data — T-RBAC-page
+- Manager redirect to /home — T12
+- Bartender redirect to /home — T-RBAC-redirect
+- HomeDashboard tile visibility for admin — T14
+- Redirect timing: functionally confirmed (URL changes immediately in both cases); the sub-visual "no flash of RBAC content" nuance remains formally unautomated but is low-risk given the route guard renders before the protected content mounts (code-verified above) — optional spot-check, not blocking
 
 ### Gaps Summary
 
-No gaps found. All 7 observable truths are VERIFIED. All artifacts exist, are substantive, and are wired correctly. All 6 requirement IDs are satisfied. The `preSelectedStaffId` implementation correctly uses the key-based remount pattern (documented deviation from plan's `useEffect` approach, justified by `react-hooks/set-state-in-effect` lint constraint). Commit history (501c036, 3ce2029, 5c97c9a, 8051884, 5fdba18, a8b1332) corroborates all claimed changes.
+No code-level gaps found, then or now. All 7 observable truths are VERIFIED. All artifacts exist, are substantive, and are wired correctly. All 6 requirement IDs are satisfied. The `preSelectedStaffId` implementation correctly uses the key-based remount pattern (documented deviation from plan's `useEffect` approach, justified by `react-hooks/set-state-in-effect` lint constraint). Commit history (501c036, 3ce2029, 5c97c9a, 8051884, 5fdba18, a8b1332) corroborates all claimed changes.
 
-Status is `human_needed` because E2E tests T-RBAC-page, T-RBAC-redirect, T12, and T14 require a running Supabase environment and cannot be executed without `.env.local` credentials. The interactive per-row dialog seeding also requires human confirmation.
+Status stays `human_needed` — but narrower than the original pass. The 2026-08-06 re-verification ran the 4 E2E tests live (see Behavioral Spot-Checks) and all passed, resolving 4 of the original 5 human-verification items (page load, both redirects, tile visibility). What remains is genuinely interaction/visual-only: the Edit Role dialog's pre-seeded *value* (dialog-opens is now automated, dropdown-content is not), the tile's click-through navigation, and the bartender lock+PIN tile-gating flow (see Human Verification Required). No `--gaps` gap-closure plan was created for this phase — there is no code defect to write a task against.
 
 ---
 
 _Verified: 2026-04-28_
+_Re-verified: 2026-08-06 — live E2E run (4/4 passed), no regressions; see Behavioral Spot-Checks_
 _Verifier: Claude (gsd-verifier)_
