@@ -201,6 +201,9 @@ describe('PaymentForm — discount section', () => {
     const user = userEvent.setup();
     renderForm();
 
+    // discount is progressively disclosed — expand it first
+    await user.click(screen.getByRole('switch', { name: 'Discount' }));
+
     // scope defaults to 'all'; change discount value to 10
     const discountInput = screen.getByLabelText('Discount %');
     await user.clear(discountInput);
@@ -215,6 +218,8 @@ describe('PaymentForm — discount section', () => {
     const user = userEvent.setup();
     renderForm();
 
+    // discount is progressively disclosed — expand it first
+    await user.click(screen.getByRole('switch', { name: 'Discount' }));
     await user.click(screen.getByTestId('discount-type-fixed'));
 
     const discountInput = screen.getByLabelText('Discount amount');

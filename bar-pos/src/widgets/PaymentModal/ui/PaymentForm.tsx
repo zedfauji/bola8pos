@@ -26,7 +26,14 @@ import {
 } from '@shared/lib/payment-processor';
 import { openCashDrawer, printReceipt } from '@shared/lib/pos-printer';
 import type { Result } from '@shared/lib/result';
-import { MoneyDisplay, MoneyInput, POSButton, ProtectedAction, ScrollArea, Switch } from '@shared/ui';
+import {
+  MoneyDisplay,
+  MoneyInput,
+  POSButton,
+  ProtectedAction,
+  ScrollArea,
+  Switch,
+} from '@shared/ui';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 
@@ -164,6 +171,7 @@ export function PaymentForm({
   const [discountScope, setDiscountScope] = useState<DiscountScope>('all');
   const [discountType, setDiscountType] = useState<DiscountType>('percent');
   const [discountValue, setDiscountValue] = useState(0);
+  const [discountExpanded, setDiscountExpanded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
@@ -198,6 +206,7 @@ export function PaymentForm({
     setDiscountScope('all');
     setDiscountType('percent');
     setDiscountValue(0);
+    setDiscountExpanded(false);
     setIsSplitMode(false);
     setReceiptQueue([]);
     setReceiptIndex(0);
@@ -597,69 +606,92 @@ export function PaymentForm({
           )}
 
           {method !== 'rappi' && (
-            <section className="space-y-3" data-testid="discount-section">
-              <h4 className="font-medium">{t('paymentForm.discount')}</h4>
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  {/* eslint-disable-next-line i18next/no-literal-string -- fixed discount-scope enum identifiers, not UI copy */}
-                  {(['all', 'pool_only', 'consumptions_only'] as const).map(scope => (
-                    <POSButton
-                      key={scope}
-                      type="button"
-                      touchSize="large"
-                      variant={discountScope === scope ? 'default' : 'outline'}
-                      disabled={isProcessing}
-                      data-testid={`discount-scope-${scope}`}
-                      onClick={() => {
-                        setDiscountScope(scope);
-                      }}
-                      className="flex-1 text-xs"
-                    >
-                      {scope === 'all'
-                        ? t('paymentForm.discountScopeAll')
-                        : scope === 'pool_only'
-                          ? t('paymentForm.discountScopePool')
-                          : t('paymentForm.discountScopeConsumptions')}
-                    </POSButton>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  {/* eslint-disable-next-line i18next/no-literal-string -- fixed discount-type enum identifiers, not UI copy */}
-                  {(['percent', 'fixed'] as const).map(type => (
-                    <POSButton
-                      key={type}
-                      type="button"
-                      touchSize="large"
-                      variant={discountType === type ? 'default' : 'outline'}
-                      disabled={isProcessing}
-                      data-testid={`discount-type-${type}`}
-                      onClick={() => {
-                        setDiscountType(type);
-                      }}
-                      className="flex-1"
-                    >
-                      {type === 'percent'
-                        ? t('paymentForm.discountTypePercent')
-                        : t('paymentForm.discountTypeFixed')}
-                    </POSButton>
-                  ))}
-                </div>
-                <MoneyInput
-                  label={
-                    discountType === 'percent'
-                      ? t('paymentForm.discountPercentLabel')
-                      : t('paymentForm.discountAmountLabel')
-                  }
-                  value={discountValue}
-                  onChange={setDiscountValue}
-                  disabled={isProcessing}
-                  data-testid="discount-value-input"
-                />
-                {discountAmount > 0 && (
-                  <p className="text-sm text-green-400" data-testid="discount-applied-label">
-                    {t('paymentForm.discountApplied', { amount: formatMoney(discountAmount) })}
+            <section className="space-y-2 rounded-lg border p-3" data-testid="discount-section">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <Label htmlFor="discount-toggle" className="text-sm font-semibold">
+                    {t('paymentForm.discount')}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('paymentForm.discountDescription')}
                   </p>
-                )}
+                </div>
+                <Switch
+                  id="discount-toggle"
+                  checked={discountExpanded}
+                  disabled={isProcessing}
+                  onCheckedChange={setDiscountExpanded}
+                />
+              </div>
+              <div
+                className={`grid transition-[grid-template-rows] duration-200 ease-in-out ${
+                  discountExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="space-y-2 pt-2">
+                    <div className="flex gap-2">
+                      {/* eslint-disable-next-line i18next/no-literal-string -- fixed discount-scope enum identifiers, not UI copy */}
+                      {(['all', 'pool_only', 'consumptions_only'] as const).map(scope => (
+                        <POSButton
+                          key={scope}
+                          type="button"
+                          touchSize="large"
+                          variant={discountScope === scope ? 'default' : 'outline'}
+                          disabled={isProcessing}
+                          data-testid={`discount-scope-${scope}`}
+                          onClick={() => {
+                            setDiscountScope(scope);
+                          }}
+                          className="flex-1 text-xs"
+                        >
+                          {scope === 'all'
+                            ? t('paymentForm.discountScopeAll')
+                            : scope === 'pool_only'
+                              ? t('paymentForm.discountScopePool')
+                              : t('paymentForm.discountScopeConsumptions')}
+                        </POSButton>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      {/* eslint-disable-next-line i18next/no-literal-string -- fixed discount-type enum identifiers, not UI copy */}
+                      {(['percent', 'fixed'] as const).map(type => (
+                        <POSButton
+                          key={type}
+                          type="button"
+                          touchSize="large"
+                          variant={discountType === type ? 'default' : 'outline'}
+                          disabled={isProcessing}
+                          data-testid={`discount-type-${type}`}
+                          onClick={() => {
+                            setDiscountType(type);
+                          }}
+                          className="flex-1"
+                        >
+                          {type === 'percent'
+                            ? t('paymentForm.discountTypePercent')
+                            : t('paymentForm.discountTypeFixed')}
+                        </POSButton>
+                      ))}
+                    </div>
+                    <MoneyInput
+                      label={
+                        discountType === 'percent'
+                          ? t('paymentForm.discountPercentLabel')
+                          : t('paymentForm.discountAmountLabel')
+                      }
+                      value={discountValue}
+                      onChange={setDiscountValue}
+                      disabled={isProcessing}
+                      data-testid="discount-value-input"
+                    />
+                    {discountAmount > 0 && (
+                      <p className="text-sm text-green-400" data-testid="discount-applied-label">
+                        {t('paymentForm.discountApplied', { amount: formatMoney(discountAmount) })}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
           )}
@@ -771,7 +803,11 @@ export function PaymentForm({
                           variant={row.method === 'cash' ? 'default' : 'outline'}
                           disabled={isProcessing}
                           onClick={() => {
-                            dispatchSplitRows({ type: 'SET_METHOD', rowId: row.id, method: 'cash' });
+                            dispatchSplitRows({
+                              type: 'SET_METHOD',
+                              rowId: row.id,
+                              method: 'cash',
+                            });
                           }}
                         >
                           {paymentLabels.cash}
@@ -784,7 +820,11 @@ export function PaymentForm({
                           variant={row.method === 'card' ? 'default' : 'outline'}
                           disabled={isProcessing}
                           onClick={() => {
-                            dispatchSplitRows({ type: 'SET_METHOD', rowId: row.id, method: 'card' });
+                            dispatchSplitRows({
+                              type: 'SET_METHOD',
+                              rowId: row.id,
+                              method: 'card',
+                            });
                           }}
                         >
                           {paymentLabels.card}
@@ -797,7 +837,11 @@ export function PaymentForm({
                           variant={row.method === 'rappi' ? 'default' : 'outline'}
                           disabled={isProcessing}
                           onClick={() => {
-                            dispatchSplitRows({ type: 'SET_METHOD', rowId: row.id, method: 'rappi' });
+                            dispatchSplitRows({
+                              type: 'SET_METHOD',
+                              rowId: row.id,
+                              method: 'rappi',
+                            });
                           }}
                         >
                           {paymentLabels.rappi}

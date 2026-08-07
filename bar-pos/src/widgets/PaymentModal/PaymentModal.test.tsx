@@ -617,6 +617,8 @@ describe('PaymentModal', () => {
       const user = userEvent.setup();
       renderModal(tabNoPool);
       const dialog = screen.getByRole('dialog');
+      // discount is progressively disclosed — expand it first
+      await user.click(within(dialog).getByRole('switch', { name: 'Discount' }));
       const poolOnlyBtn = within(dialog).getByTestId('discount-scope-pool_only');
       await user.click(poolOnlyBtn);
       expect(poolOnlyBtn.className).toContain('bg-primary');
@@ -628,6 +630,7 @@ describe('PaymentModal', () => {
       const user = userEvent.setup();
       renderModal(tabNoPool);
       const dialog = screen.getByRole('dialog');
+      await user.click(within(dialog).getByRole('switch', { name: 'Discount' }));
       await user.click(within(dialog).getByTestId('discount-type-fixed'));
       expect(within(dialog).getByLabelText('Discount amount')).toBeInTheDocument();
     });
@@ -636,6 +639,9 @@ describe('PaymentModal', () => {
       const user = userEvent.setup();
       renderModal(tabNoPool);
       const dialog = screen.getByRole('dialog');
+
+      // discount is progressively disclosed — expand it first
+      await user.click(within(dialog).getByRole('switch', { name: 'Discount' }));
 
       // Default is percent type — label is "Discount %"
       const discountInput = within(dialog).getByLabelText('Discount %');
@@ -654,6 +660,8 @@ describe('PaymentModal', () => {
       renderModal(tabNoPool);
       const dialog = screen.getByRole('dialog');
 
+      // discount is progressively disclosed — expand it first
+      await user.click(within(dialog).getByRole('switch', { name: 'Discount' }));
       await user.click(within(dialog).getByTestId('discount-type-fixed'));
       const discountInput = within(dialog).getByLabelText('Discount amount');
       await user.clear(discountInput);
@@ -671,6 +679,8 @@ describe('PaymentModal', () => {
       renderModal(tabNoPool);
       const dialog = screen.getByRole('dialog');
 
+      // discount is progressively disclosed — expand it first
+      await user.click(within(dialog).getByRole('switch', { name: 'Discount' }));
       const discountInput = within(dialog).getByLabelText('Discount %');
       await user.clear(discountInput);
       await user.type(discountInput, '10');
