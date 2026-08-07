@@ -600,7 +600,7 @@ Plans:
 **Goal:** Ship a promotions engine — `promotions` + `applied_promotions` tables and an `evaluate_promotions` RPC supporting happy-hour time windows, item/category/pool-time targeting, and auto-apply at order time. Settings → Promotions admin UI to manage them.
 **Requirements:** TBD (POS-COMPARISON.md §20 — source doc no longer present; scope locked in 20-CONTEXT.md)
 **Depends on:** Phase 14
-**Plans:** 11/11 plans complete
+**Plans:** 11/13 plans complete (20-12, 20-13 = gap closure for UAT gaps G-20-2..G-20-6)
 
 Plans:
 
@@ -615,6 +615,8 @@ Plans:
 - [x] 20-09-PLAN.md — D-07 parity gate + e2e/43-promotions + BLOCKING UAT
 - [x] 20-10-PLAN.md — drop happy_hour columns + retire HH admin editing
 - [x] 20-11-PLAN.md — retire client HH calc path (resolveProductPrice/isHappyHourActive)
+- [ ] 20-12-PLAN.md — gap closure: fix draft-insert CHECK violation blocking all promotion creation (G-20-2, SC-4)
+- [ ] 20-13-PLAN.md — gap closure: Playwright coverage for banner, order-time, pool billing, pool grant (G-20-3..G-20-6, SC-3)
 
 **Success Criteria:**
 
