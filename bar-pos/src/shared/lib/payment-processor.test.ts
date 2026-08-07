@@ -93,6 +93,43 @@ describe('payment-processor', () => {
     });
   });
 
+  it('processCashPayment forwards expectedVersion when supplied', async () => {
+    const spy = vi.spyOn(contracts, 'callProcessPayment').mockResolvedValue(
+      ok({
+        paymentId: 'pay-id',
+        receiptData: receipt,
+        idempotent: false,
+      })
+    );
+
+    await processCashPayment(
+      'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      10,
+      1,
+      20,
+      undefined,
+      5
+    );
+    const tuple = spy.mock.calls[0];
+    if (tuple === undefined) throw new Error('expected call');
+    expect(tuple[0].expectedVersion).toBe(5);
+  });
+
+  it('processCashPayment omits expectedVersion when not supplied', async () => {
+    const spy = vi.spyOn(contracts, 'callProcessPayment').mockResolvedValue(
+      ok({
+        paymentId: 'pay-id',
+        receiptData: receipt,
+        idempotent: false,
+      })
+    );
+
+    await processCashPayment('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 10, 1, 20);
+    const tuple = spy.mock.calls[0];
+    if (tuple === undefined) throw new Error('expected call');
+    expect(tuple[0].expectedVersion).toBeUndefined();
+  });
+
   it('processCashPayment propagates callProcessPayment failure', async () => {
     vi.spyOn(contracts, 'callProcessPayment').mockResolvedValue(
       err({ code: 'VALIDATION_ERROR', message: 'Insufficient tender' })

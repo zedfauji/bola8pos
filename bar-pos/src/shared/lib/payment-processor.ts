@@ -42,7 +42,8 @@ export async function processCashPayment(
   amount: number,
   tipAmount: number,
   tenderedAmount: number,
-  discountInfo?: DiscountInfo
+  discountInfo?: DiscountInfo,
+  expectedVersion?: number
 ): Promise<Result<CashPaymentResult, AppError>> {
   const idempotencyKey = generateIdempotencyKey('payment_cash');
   const result = await callProcessPayment({
@@ -56,6 +57,7 @@ export async function processCashPayment(
     discountType: discountInfo?.type,
     discountValue: discountInfo?.value,
     discountAmount: discountInfo?.amount,
+    expectedVersion,
   });
 
   if (!result.ok) {
@@ -76,7 +78,8 @@ export async function processCardPayment(
   amount: number,
   tipAmount: number,
   referenceNumber?: string,
-  discountInfo?: DiscountInfo
+  discountInfo?: DiscountInfo,
+  expectedVersion?: number
 ): Promise<Result<CardPaymentResult, AppError>> {
   const idempotencyKey = generateIdempotencyKey('payment_card');
   const trimmed = referenceNumber?.trim();
@@ -91,6 +94,7 @@ export async function processCardPayment(
     discountType: discountInfo?.type,
     discountValue: discountInfo?.value,
     discountAmount: discountInfo?.amount,
+    expectedVersion,
   });
 
   if (!result.ok) {
@@ -151,7 +155,8 @@ export async function processRappiPayment(
   tabId: string,
   amount: number,
   rappiOrderId: string,
-  discountInfo?: DiscountInfo
+  discountInfo?: DiscountInfo,
+  expectedVersion?: number
 ): Promise<Result<RappiPaymentResult, AppError>> {
   const idempotencyKey = generateIdempotencyKey('payment_rappi');
   const result = await callProcessPayment({
@@ -165,6 +170,7 @@ export async function processRappiPayment(
     discountType: discountInfo?.type,
     discountValue: discountInfo?.value,
     discountAmount: discountInfo?.amount,
+    expectedVersion,
   });
 
   if (!result.ok) {

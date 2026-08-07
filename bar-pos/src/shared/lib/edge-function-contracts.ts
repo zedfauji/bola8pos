@@ -83,6 +83,8 @@ export const ProcessPaymentRequestSchema = z
     discountType: DiscountTypeSchema.optional(),
     discountValue: z.number().nonnegative().optional(),
     discountAmount: MoneySchema.optional(),
+    /** Phase 15 gap-closure (D-02): cached tab.version for optimistic-concurrency guard. */
+    expectedVersion: z.number().int().nonnegative().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.method === 'cash' && data.tenderedAmount == null) {

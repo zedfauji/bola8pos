@@ -390,6 +390,7 @@ describe('PaymentModal', () => {
       22,
       3.3,
       30,
+      undefined,
       undefined
     );
     expect(openCashDrawer).toHaveBeenCalled();
@@ -529,6 +530,7 @@ describe('PaymentModal', () => {
       tabRappi.id,
       22,
       'RAPPI-999',
+      undefined,
       undefined
     );
     expect(openCashDrawer).not.toHaveBeenCalled();
@@ -558,6 +560,7 @@ describe('PaymentModal', () => {
       22,
       3.3,
       'AUTH-777',
+      undefined,
       undefined
     );
   });

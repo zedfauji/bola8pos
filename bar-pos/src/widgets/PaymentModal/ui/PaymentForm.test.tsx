@@ -336,11 +336,12 @@ describe('PaymentForm — card charge override', () => {
     await waitFor(() => {
       expect(processors.processCardPayment).toHaveBeenCalled();
     });
-    // override amount=45, tipAmount=0 (because override is set), no ref, no discount
+    // override amount=45, tipAmount=0 (because override is set), no ref, no discount, no version (testTab has none)
     expect(processors.processCardPayment).toHaveBeenCalledWith(
       testTab.id,
       45,
       0,
+      undefined,
       undefined,
       undefined
     );
@@ -358,11 +359,12 @@ describe('PaymentForm — card charge override', () => {
     await waitFor(() => {
       expect(processors.processCardPayment).toHaveBeenCalled();
     });
-    // No override: chargeAmount=baseSubtotal=20, tipAmount=3 (15% of 20, taxRate=0), no ref, no discount
+    // No override: chargeAmount=baseSubtotal=20, tipAmount=3 (15% of 20, taxRate=0), no ref, no discount, no version (testTab has none)
     expect(processors.processCardPayment).toHaveBeenCalledWith(
       testTab.id,
       20,
       3,
+      undefined,
       undefined,
       undefined
     );
