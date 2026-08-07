@@ -2,6 +2,15 @@ import { expect, type Page } from '@playwright/test';
 
 const fastE2e = process.env.FAST_E2E === '1' || process.env.FAST_E2E === 'true';
 
+// The app's cold-start locale is es-MX with no English fallback (`fallbackLng: 'es-MX'`),
+// so a genuinely fresh session renders Spanish. Staff-picked locale only applies after
+// login. These helpers match both locales rather than assuming en-US.
+const WHO_ARE_YOU_RE = /who are you|quién eres/i;
+const OPENING_CASH_RE = /opening cash|fondo de caja/i;
+const DRAWER_FLOAT_RE = /drawer float|fondo de caja/i;
+const START_SHIFT_RE = /^(start shift|iniciar turno)$/i;
+const LOGOUT_RE = /^(logout|cerrar sesión)$/i;
+
 export type StaffRole = 'bartender' | 'manager' | 'admin' | 'kitchen';
 
 function envOrThrow(key: string): string {
@@ -35,7 +44,7 @@ async function enterPin(page: Page, pin: string): Promise<void> {
 /** PIN login for an explicit staff name/PIN (e.g. second bartender). */
 export async function loginAsNamed(page: Page, name: string, pin: string): Promise<void> {
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: /who are you/i })).toBeVisible({
+  await expect(page.getByRole('heading', { name: WHO_ARE_YOU_RE })).toBeVisible({
     timeout: fastE2e ? 15_000 : 60_000,
   });
   await page.getByRole('button', { name: new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i') }).click();
@@ -45,17 +54,17 @@ export async function loginAsNamed(page: Page, name: string, pin: string): Promi
   });
   await enterPin(page, pin);
 
-  const openingDialog = page.getByRole('alertdialog', { name: /opening cash/i });
+  const openingDialog = page.getByRole('alertdialog', { name: OPENING_CASH_RE });
   const opened = await openingDialog
     .waitFor({ state: 'visible', timeout: 8_000 })
     .then(() => true)
     .catch(() => false);
 
   if (opened) {
-    const drawerInput = page.getByLabel(/drawer float/i);
+    const drawerInput = page.getByLabel(DRAWER_FLOAT_RE);
     await expect(drawerInput).toBeVisible({ timeout: 10_000 });
     await drawerInput.fill('0');
-    await page.getByRole('button', { name: 'Start shift' }).click();
+    await page.getByRole('button', { name: START_SHIFT_RE }).click();
   }
 
   // LoginPage has <Navigate to="/pos"> when isAuthenticated becomes true, which can
@@ -85,7 +94,7 @@ export async function gotoAuthed(page: Page, path: string): Promise<void> {
   await page.goto(path, { timeout: 15_000, waitUntil: 'domcontentloaded' }).catch(() => undefined);
 
   const bounced = await page
-    .getByRole('heading', { name: /who are you/i })
+    .getByRole('heading', { name: WHO_ARE_YOU_RE })
     .isVisible()
     .catch(() => false);
   if (!bounced) {
@@ -93,7 +102,7 @@ export async function gotoAuthed(page: Page, path: string): Promise<void> {
   }
 
   await page.goto(path, { timeout: 15_000, waitUntil: 'domcontentloaded' }).catch(() => undefined);
-  await expect(page.getByRole('heading', { name: /who are you/i })).not.toBeVisible({
+  await expect(page.getByRole('heading', { name: WHO_ARE_YOU_RE })).not.toBeVisible({
     timeout: 5_000,
   });
 }
@@ -101,7 +110,7 @@ export async function gotoAuthed(page: Page, path: string): Promise<void> {
 export async function logout(page: Page): Promise<void> {
   // Already logged out (staff picker / PIN screen) — nothing to do.
   const alreadyOnLogin = await page
-    .getByRole('heading', { name: /who are you/i })
+    .getByRole('heading', { name: WHO_ARE_YOU_RE })
     .isVisible()
     .catch(() => false);
   if (alreadyOnLogin) {
@@ -139,7 +148,7 @@ export async function logout(page: Page): Promise<void> {
     }
   }
 
-  const logoutBtn = page.getByRole('button', { name: 'Logout' });
+  const logoutBtn = page.getByRole('button', { name: LOGOUT_RE });
   const logoutVisible = await logoutBtn
     .waitFor({ state: 'visible', timeout: 10_000 })
     .then(() => true)
