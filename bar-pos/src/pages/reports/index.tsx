@@ -55,24 +55,86 @@ export default function ReportsPage() {
       <main className="flex-1 overflow-auto">
         <PageContainer title={t('reports.title')} backTo="/home">
           <Tabs defaultValue="session">
-            <TabsList className="mb-4 flex flex-wrap">
-              <TabsTrigger value="session">{t('reports.tabs.session')}</TabsTrigger>
-              <TabsTrigger value="products">{t('reports.tabs.products')}</TabsTrigger>
-              <TabsTrigger value="hourly">{t('reports.tabs.hourly')}</TabsTrigger>
-              <TabsTrigger value="voids">{t('reports.tabs.voids')}</TabsTrigger>
-              <TabsTrigger value="deletions-pre">{t('reports.tabs.deletionsPre')}</TabsTrigger>
-              <TabsTrigger value="deletions-post">{t('reports.tabs.deletionsPost')}</TabsTrigger>
-              <TabsTrigger value="modifier-popularity">{t('reports.tabs.modifierPopularity')}</TabsTrigger>
-              <TabsTrigger value="payment-methods">{t('reports.tabs.paymentMethods')}</TabsTrigger>
-              <TabsTrigger value="categories">{t('reports.tabs.categories')}</TabsTrigger>
-              <TabsTrigger value="staff">{t('reports.tabs.staff')}</TabsTrigger>
-              <TabsTrigger value="tips">{t('reports.tabs.tips')}</TabsTrigger>
-              <TabsTrigger value="tip-split">{t('reports.tabs.tipSplit')}</TabsTrigger>
-              <TabsTrigger value="combos">{t('reports.tabs.combos')}</TabsTrigger>
-              <TabsTrigger value="variance">{t('reports.tabs.variance')}</TabsTrigger>
-              <TabsTrigger value="waitlist">{t('reports.tabs.waitlist')}</TabsTrigger>
-              <TabsTrigger value="refunds-reg">{t('reports.tabs.refundsReg')}</TabsTrigger>
-              <TabsTrigger value="overrides">{t('reports.tabs.overrides')}</TabsTrigger>
+            <TabsList className="mb-4 h-auto w-full flex-col items-stretch gap-3 bg-transparent p-0">
+              <div className="flex flex-col gap-1.5">
+                <span className="px-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t('reports.groups.sales')}
+                </span>
+                <div className="flex flex-wrap items-center gap-1 rounded-lg bg-muted p-1">
+                  <TabsTrigger value="session" className="flex-none">
+                    {t('reports.tabs.session')}
+                  </TabsTrigger>
+                  <TabsTrigger value="products" className="flex-none">
+                    {t('reports.tabs.products')}
+                  </TabsTrigger>
+                  <TabsTrigger value="hourly" className="flex-none">
+                    {t('reports.tabs.hourly')}
+                  </TabsTrigger>
+                  <TabsTrigger value="categories" className="flex-none">
+                    {t('reports.tabs.categories')}
+                  </TabsTrigger>
+                  <TabsTrigger value="payment-methods" className="flex-none">
+                    {t('reports.tabs.paymentMethods')}
+                  </TabsTrigger>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="px-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t('reports.groups.menu')}
+                </span>
+                <div className="flex flex-wrap items-center gap-1 rounded-lg bg-muted p-1">
+                  <TabsTrigger value="modifier-popularity" className="flex-none">
+                    {t('reports.tabs.modifierPopularity')}
+                  </TabsTrigger>
+                  <TabsTrigger value="combos" className="flex-none">
+                    {t('reports.tabs.combos')}
+                  </TabsTrigger>
+                  <TabsTrigger value="variance" className="flex-none">
+                    {t('reports.tabs.variance')}
+                  </TabsTrigger>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="px-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t('reports.groups.staffTips')}
+                </span>
+                <div className="flex flex-wrap items-center gap-1 rounded-lg bg-muted p-1">
+                  <TabsTrigger value="staff" className="flex-none">
+                    {t('reports.tabs.staff')}
+                  </TabsTrigger>
+                  <TabsTrigger value="tips" className="flex-none">
+                    {t('reports.tabs.tips')}
+                  </TabsTrigger>
+                  <TabsTrigger value="tip-split" className="flex-none">
+                    {t('reports.tabs.tipSplit')}
+                  </TabsTrigger>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="px-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t('reports.groups.operations')}
+                </span>
+                <div className="flex flex-wrap items-center gap-1 rounded-lg bg-muted p-1">
+                  <TabsTrigger value="voids" className="flex-none">
+                    {t('reports.tabs.voids')}
+                  </TabsTrigger>
+                  <TabsTrigger value="deletions-pre" className="flex-none">
+                    {t('reports.tabs.deletionsPre')}
+                  </TabsTrigger>
+                  <TabsTrigger value="deletions-post" className="flex-none">
+                    {t('reports.tabs.deletionsPost')}
+                  </TabsTrigger>
+                  <TabsTrigger value="refunds-reg" className="flex-none">
+                    {t('reports.tabs.refundsReg')}
+                  </TabsTrigger>
+                  <TabsTrigger value="overrides" className="flex-none">
+                    {t('reports.tabs.overrides')}
+                  </TabsTrigger>
+                  <TabsTrigger value="waitlist" className="flex-none">
+                    {t('reports.tabs.waitlist')}
+                  </TabsTrigger>
+                </div>
+              </div>
             </TabsList>
 
             <TabsContent value="session">

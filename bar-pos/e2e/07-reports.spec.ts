@@ -810,29 +810,29 @@ test.describe('Reports Page', () => {
     await loginAs(page, 'admin');
     await page.goto('/reports');
 
-    await expect(page.getByRole('tab', { name: 'Eliminaciones' })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole('tab', { name: 'Correcciones' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Modificadores' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Métodos de pago' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Deletions' })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('tab', { name: 'Corrections' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Modifiers' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Payment Methods' })).toBeVisible();
 
     // deletions-pre: the standing historical-gap Alert is always visible (not dismissible)
-    await page.getByRole('tab', { name: 'Eliminaciones' }).click();
+    await page.getByRole('tab', { name: 'Deletions' }).click();
     const deletionsPrePanel = page.getByRole('tabpanel');
     await expect(deletionsPrePanel).toBeVisible({ timeout: 20_000 });
     await expect(deletionsPrePanel.getByText(/partial history|historial parcial/i)).toBeVisible({ timeout: 15_000 });
 
     // deletions-post: table or empty state, never a crash
-    await page.getByRole('tab', { name: 'Correcciones' }).click();
+    await page.getByRole('tab', { name: 'Corrections' }).click();
     const deletionsPostPanel = page.getByRole('tabpanel');
     await expect(deletionsPostPanel).toBeVisible({ timeout: 20_000 });
 
     // modifier-popularity: chart+table or empty state
-    await page.getByRole('tab', { name: 'Modificadores' }).click();
+    await page.getByRole('tab', { name: 'Modifiers' }).click();
     const modifierPanel = page.getByRole('tabpanel');
     await expect(modifierPanel).toBeVisible({ timeout: 20_000 });
 
     // payment-methods: chart+table or empty state
-    await page.getByRole('tab', { name: 'Métodos de pago' }).click();
+    await page.getByRole('tab', { name: 'Payment Methods' }).click();
     const paymentMethodsPanel = page.getByRole('tabpanel');
     await expect(paymentMethodsPanel).toBeVisible({ timeout: 20_000 });
 
@@ -845,7 +845,7 @@ test.describe('Reports Page', () => {
 
     await loginAs(page, 'admin');
     await page.goto('/reports');
-    await page.getByRole('tab', { name: 'Métodos de pago' }).click();
+    await page.getByRole('tab', { name: 'Payment Methods' }).click();
 
     const tabPanel = page.getByRole('tabpanel');
     await expect(tabPanel).toBeVisible({ timeout: 20_000 });
@@ -882,7 +882,7 @@ test.describe('Reports Page', () => {
   // reason-required removal completes without AUTH_FORBIDDEN once past that
   // existing gate, and the removal is attributed correctly in the deletions-pre
   // report (SC-1).
-  test('Phase 24: bartender-initiated reason-required removal succeeds (no AUTH_FORBIDDEN) and appears in Eliminaciones', async ({ page }) => {
+  test('Phase 24: bartender-initiated reason-required removal succeeds (no AUTH_FORBIDDEN) and appears in Deletions', async ({ page }) => {
     test.setTimeout(120_000);
     const { tableId } = await seedRemovableItem('Phase24 Removal Test');
 
@@ -924,7 +924,7 @@ test.describe('Reports Page', () => {
     // Verify attribution in the deletions-pre report
     await loginAs(page, 'admin');
     await page.goto('/reports');
-    await page.getByRole('tab', { name: 'Eliminaciones' }).click();
+    await page.getByRole('tab', { name: 'Deletions' }).click();
     const deletionsPanel = page.getByRole('tabpanel');
     await expect(deletionsPanel).toBeVisible({ timeout: 20_000 });
     await expect(deletionsPanel.getByText(uniqueReason)).toBeVisible({ timeout: 20_000 });
