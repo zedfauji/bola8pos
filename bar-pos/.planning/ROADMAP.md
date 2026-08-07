@@ -451,7 +451,7 @@ Plans:
 **Goal:** Add `version int` column to `tabs`, `pool_sessions`, `caja_sessions`. Every mutation RPC accepts `p_expected_version` and bumps version on success; mismatch raises `STALE_VERSION` (SQLSTATE `P0V01`). Frontend mutation hooks read cached version, surface 'Updated by another terminal — please retry' toast on conflict, invalidate the entity query, and write `conflict.stale_version` to audit_logs. Offline queue replay drops stale actions with summary toast + audit row.
 **Requirements:** TBD (POS-COMPARISON.md §15) — phase scope locked in 15-CONTEXT.md (D-01..D-19)
 **Depends on:** Phase 14
-**Plans:** 9 plans (6 complete; 3 gap-closure plans added 2026-08-07)
+**Plans:** 2/3 plans executed
 
 Plans:
 
@@ -461,8 +461,8 @@ Plans:
 - [x] 15-04-PLAN.md — OfflineAction.expectedVersion + OfflineQueueProcessor STALE_VERSION/NOT_FOUND_VERSIONED drop + summary toast + offline.discarded_stale audit; OfflineActionSchema (Zod) + locked 4-literal enum in domain.ts; persist v2 migrate (legacy queues default expectedVersion=0, drop unknown types); 4 enqueue call sites updated; 8 new tests (3 offline-summary + 5 OfflineQueueProcessor); 1131/1131 tests pass (Wave 4) (D-11, D-12, D-16) ✓ 2026-04-28
 - [x] 15-05-PLAN.md — [BLOCKING] supabase db push (Wave 5)
 - [x] 15-06-PLAN.md — Tests: fast-check property test + per-RPC integration test (11 RPCs) + Playwright 39-concurrent-edits.spec.ts + verification gate (Wave 6) (D-19)
-- [ ] 15-07-PLAN.md — [GAP CLOSURE] `versionedMutation` zero-row detection in result.ts + `TERMINAL_ID` export + `handleVersionError` wiring at 4 Group-B call sites (close-tab, stop-and-move-table, transfer-tab, useMutationLinkPoolSessionToTab) (Wave 1) (D-01)
-- [ ] 15-08-PLAN.md — [GAP CLOSURE] `expectedVersion` threaded through ProcessPaymentRequestSchema + Deno BodySchema + `p_expected_version` RPC param + payment-processor/PaymentForm call sites (Wave 1) (D-02)
+- [x] 15-07-PLAN.md — [GAP CLOSURE] `versionedMutation` zero-row detection in result.ts + `TERMINAL_ID` export + `handleVersionError` wiring at 4 Group-B call sites (close-tab, stop-and-move-table, transfer-tab, useMutationLinkPoolSessionToTab) (Wave 1) (D-01)
+- [x] 15-08-PLAN.md — [GAP CLOSURE] `expectedVersion` threaded through ProcessPaymentRequestSchema + Deno BodySchema + `p_expected_version` RPC param + payment-processor/PaymentForm call sites (Wave 1) (D-02)
 - [ ] 15-09-PLAN.md — [GAP CLOSURE] `bumpTabVersion` e2e helper + author `e2e/39-concurrent-edits.spec.ts` + blocking human-verify live run (Wave 2) (D-03)
 
 **Success Criteria:**
