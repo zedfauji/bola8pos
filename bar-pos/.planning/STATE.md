@@ -26,13 +26,13 @@ Items acknowledged and deferred at v2.2 milestone close on 2026-07-17:
 | Category | Item | Status |
 |----------|------|--------|
 | uat_gap | Phase 02: 02-HUMAN-UAT.md | passed, 0 pending scenarios |
-| uat_gap | Phase 07: 07-HUMAN-UAT.md | partial, 3 pending scenarios |
+| uat_gap | Phase 07: 07-HUMAN-UAT.md | partial, 4 pending scenarios (3 original + live e2e run) — re-verified 2026-08-06 |
 | uat_gap | Phase 09: 09-HUMAN-UAT.md | partial, 4 pending scenarios |
 | uat_gap | Phase 12: 12-HUMAN-UAT.md | partial, 5 pending scenarios |
 | verification_gap | Phase 01: 01-VERIFICATION.md | human_needed |
 | verification_gap | Phase 03: 03-VERIFICATION.md | gaps_found |
 | verification_gap | Phase 06: 06-VERIFICATION.md | human_needed |
-| verification_gap | Phase 07: 07-VERIFICATION.md | gaps_found |
+| verification_gap | Phase 07: 07-VERIFICATION.md | human_needed — CR-01/CR-02 code gaps closed by plan 07-08 (2026-04-25), re-verified clean 2026-08-06; only human-run items remain (see uat_gap row) |
 | verification_gap | Phase 09: 09-VERIFICATION.md | human_needed |
 | verification_gap | Phase 12: 12-VERIFICATION.md | human_needed |
 | verification_gap | Phase 33: 33-VERIFICATION.md | human_needed — visual/keyboard-focus-ring parity spot-check on 7 payment-critical surfaces deferred by user (33-UAT.md test 1 skipped with reason); automated E2E gate already passes |
