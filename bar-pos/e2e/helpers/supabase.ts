@@ -107,16 +107,31 @@ export async function resetTestState(): Promise<void> {
     .from('ingredients')
     .select('id')
     .like('name', '%E2E%');
-  for (const row of (e2eIngredientRows ?? []) as { id: string }[]) {
-    await (admin as any).from('prep_productions').delete().eq('prep_ingredient_id', row.id);
+  const e2eIngredientIds = (e2eIngredientRows ?? []).map((row: { id: string }) => row.id);
+  for (const id of e2eIngredientIds) {
+    await (admin as any).from('prep_productions').delete().eq('prep_ingredient_id', id);
   }
+
+  // Some E2E ingredients are permanent recipe fixtures (e.g. "E2E Prep Raw Tomato",
+  // referenced by the Salsa Mexicana recipe's recipe_items row) and can never be
+  // deleted — recipe_items has no ON DELETE CASCADE on ingredient_id. A single bulk
+  // DELETE that includes even one such row fails the WHOLE statement (Postgres runs
+  // it as one transaction), silently leaving every matched "E2E"-named row undeleted
+  // run after run. Exclude ids still referenced by recipe_items before deleting.
+  const { data: referencedRows } =
+    e2eIngredientIds.length > 0
+      ? await (admin as any).from('recipe_items').select('ingredient_id').in('ingredient_id', e2eIngredientIds)
+      : { data: [] };
+  const referencedIds = new Set(
+    ((referencedRows ?? []) as { ingredient_id: string }[]).map((row) => row.ingredient_id)
+  );
+  const deletableIds = e2eIngredientIds.filter((id: string) => !referencedIds.has(id));
 
   // Clean up E2E test ingredients to prevent strict-mode violations in ingredient tests.
   // Pattern covers both "E2E Foo" (starts with) and "Test Tomato E2E" (contains).
-  await (admin as any)
-    .from('ingredients')
-    .delete()
-    .like('name', '%E2E%');
+  if (deletableIds.length > 0) {
+    await (admin as any).from('ingredients').delete().in('id', deletableIds);
+  }
 
   const { data: bud } = await admin.from('products').select('id').eq('name', 'Budweiser').maybeSingle();
   if (bud?.id) {

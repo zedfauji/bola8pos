@@ -30,7 +30,7 @@ Items acknowledged and deferred at v2.2 milestone close on 2026-07-17:
 | uat_gap | Phase 09: 09-HUMAN-UAT.md | partial, 4 pending scenarios |
 | uat_gap | Phase 12: 12-HUMAN-UAT.md | partial, 5 pending scenarios |
 | verification_gap | Phase 01: 01-VERIFICATION.md | human_needed |
-| verification_gap | Phase 03: 03-VERIFICATION.md | gaps_found |
+| verification_gap | Phase 03: 03-VERIFICATION.md | gaps_closed 2026-08-07 — CR-01 was already fixed same-day by plan 03-08 (report was just stale); re-confirmed via live E2E run, plus a real test-hygiene bug found+fixed (see 03-VERIFICATION.md closure note) |
 | verification_gap | Phase 06: 06-VERIFICATION.md | human_needed |
 | verification_gap | Phase 07: 07-VERIFICATION.md | gaps_found |
 | verification_gap | Phase 09: 09-VERIFICATION.md | human_needed |

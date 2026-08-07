@@ -13,7 +13,7 @@ Eight phases mapped from the 6-sprint S1–S6 plan (S3 split into S3a/S3b/S3c). 
 
 - [x] **Phase 1: Foundation** — Unified stock ledger, category tree, modifier groups, combo flags (completed 2026-04-23)
 - [x] **Phase 2: Combos** — Customer-visible combo support with pool-time bundles (completed 2026-04-24)
-- [ ] **Phase 3: Ingredient Foundation** — Ingredient entity + canonical stock movement RPC
+- [x] **Phase 3: Ingredient Foundation** — Ingredient entity + canonical stock movement RPC (completed 2026-04-24, gaps closed + re-verified 2026-08-07)
 - [x] **Phase 4: Recipes & Sale Depletion** — Recipes + atomic ingredient depletion on sale (completed 2026-04-24)
 - [x] **Phase 5: Kitchen Prep + Cocktails** — Chef prep batches and Michelada extension
  (completed 2026-07-03)
@@ -127,14 +127,14 @@ Plans:
 
 Plans:
 
-- [ ] 03-01-PLAN.md — SQL migrations: ingredients table + idempotency index + record_stock_movement RPC + [BLOCKING] supabase db push (Wave 1) (S3a-01, S3a-02, S3a-03)
-- [ ] 03-02-PLAN.md — Zod schemas in domain.ts (Ingredient, UOM, ManualAdjustReason) + uom.ts utility + P5 round-trip property test (Wave 1, parallel) (S3a-04, S3a-05)
-- [ ] 03-03-PLAN.md — entities/ingredient/ FSD slice: types.ts, queries.ts, index.ts (Wave 2) (S3a-06)
-- [ ] 03-04-PLAN.md — features/adjust-stock-movement/ + features/import-ingredients-csv/ (Wave 2, parallel with 03-03) (S3a-07, S3a-08)
-- [ ] 03-05-PLAN.md — features/manage-ingredients/ (IngredientForm + ManageIngredientsTab) + widgets/IngredientsTable/ + widgets/StockMovementsList/ (Wave 3) (S3a-07)
-- [ ] 03-06-PLAN.md — SettingsTabsPanel wiring: Ingredients tab after Combos (Wave 4) (S3a-07)
-- [ ] 03-07-PLAN.md — E2E 33-ingredients.spec.ts (T1–T7) + P4 ledger invariant + seed-ingredients.ts + human sign-off (Wave 5) (S3a-07, S3a-08)
-- [ ] 03-08-PLAN.md — Gap closure: product_id nullable migration + RPC fix + StockMovementSchema nullable + CSV warnings + E2E T4/T5 verification (S3a-03, S3a-07, S3a-08)
+- [x] 03-01-PLAN.md — SQL migrations: ingredients table + idempotency index + record_stock_movement RPC + [BLOCKING] supabase db push (Wave 1) (S3a-01, S3a-02, S3a-03) ✓ 2026-04-24
+- [x] 03-02-PLAN.md — Zod schemas in domain.ts (Ingredient, UOM, ManualAdjustReason) + uom.ts utility + P5 round-trip property test (Wave 1, parallel) (S3a-04, S3a-05) ✓ 2026-04-24
+- [x] 03-03-PLAN.md — entities/ingredient/ FSD slice: types.ts, queries.ts, index.ts (Wave 2) (S3a-06) ✓ 2026-04-24
+- [x] 03-04-PLAN.md — features/adjust-stock-movement/ + features/import-ingredients-csv/ (Wave 2, parallel with 03-03) (S3a-07, S3a-08) ✓ 2026-04-24
+- [x] 03-05-PLAN.md — features/manage-ingredients/ (IngredientForm + ManageIngredientsTab) + widgets/IngredientsTable/ + widgets/StockMovementsList/ (Wave 3) (S3a-07) ✓ 2026-04-24
+- [x] 03-06-PLAN.md — SettingsTabsPanel wiring: Ingredients tab after Combos (Wave 4) (S3a-07) ✓ 2026-04-24
+- [x] 03-07-PLAN.md — E2E 33-ingredients.spec.ts (T1–T7) + P4 ledger invariant + seed-ingredients.ts + human sign-off (Wave 5) (S3a-07, S3a-08) ✓ 2026-04-24
+- [x] 03-08-PLAN.md — Gap closure: product_id nullable migration + RPC fix + StockMovementSchema nullable + CSV warnings + E2E T4/T5 verification (S3a-03, S3a-07, S3a-08) ✓ 2026-04-24 (E2E confirmed live 2026-08-07, plus a real T1 test-hygiene bug found+fixed: e2e/helpers/supabase.ts bulk-delete FK failure — see 03-VERIFICATION.md)
 
 **Success Criteria**:
 
