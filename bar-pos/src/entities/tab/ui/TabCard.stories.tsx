@@ -16,6 +16,7 @@ const meta = {
   args: {
     isActive: false,
     onSelect: () => {},
+    onViewDetails: () => {},
   },
 } satisfies Meta<typeof TabCard>;
 

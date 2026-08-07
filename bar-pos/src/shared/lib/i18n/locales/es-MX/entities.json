@@ -112,7 +112,8 @@
     "ariaLabelWithTable": "Cuenta de {{customerName}}, mesa {{tableNumber}}",
     "tableNumber": "Mesa {{number}}",
     "itemCount_one": "{{count}} artículo",
-    "itemCount_other": "{{count}} artículos"
+    "itemCount_other": "{{count}} artículos",
+    "detailsAriaLabel": "Ver detalles de {{customerName}}"
   },
   "tabDetail": {
     "errorLoadingTab": "Error al cargar la cuenta",

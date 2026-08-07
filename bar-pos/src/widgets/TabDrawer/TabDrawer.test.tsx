@@ -9,6 +9,8 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { useCloseTab } from '@features/close-tab';
+import { useStaffStore } from '@entities/staff/model/store';
 import * as queries from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import type { Tab } from '@entities/tab/model/types';
@@ -17,6 +19,9 @@ import { TabDrawer } from './index';
 
 // Mock the queries module
 vi.mock('../../entities/tab/model/queries');
+
+// Mock the close-tab hook — TabDrawer wires its detail sheet's onCloseTab to this.
+vi.mock('@features/close-tab');
 
 describe('TabDrawer', () => {
   const mockShiftId = '88888888-8888-8888-8888-888888888888';
@@ -71,12 +76,17 @@ describe('TabDrawer', () => {
       mutateAsync: vi.fn(),
       isPending: false,
     } as any);
+    vi.mocked(useCloseTab).mockReturnValue({
+      closeTab: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+      isClosing: false,
+    });
     // Reset the tab store
     useTabStore.setState({
       selectedTabId: null,
       activeTabId: null,
       isTabDrawerOpen: false,
     });
+    useStaffStore.setState({ currentStaff: null });
   });
 
   /**
@@ -398,5 +408,83 @@ describe('TabDrawer', () => {
 
     // Drawer content should not be visible
     expect(screen.queryByText('Open Tabs')).not.toBeInTheDocument();
+  });
+
+  /**
+   * Test: Details affordance opens the tab detail sheet (Task 1.5, plan 15-09)
+   */
+  it('opens the tab details sheet when a card Details button is clicked', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(queries.useTabs).mockReturnValue({
+      data: mockTabs,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      isDisabled: false,
+    } as any);
+    vi.mocked(queries.useTab).mockReturnValue({
+      data: mockTabs[0],
+      isLoading: false,
+      isError: false,
+      error: null,
+      resultError: undefined,
+    } as any);
+
+    useTabStore.setState({ isTabDrawerOpen: true });
+
+    renderWithProviders(<TabDrawer />);
+
+    const detailsButton = screen.getByLabelText('View details for John Doe');
+    await user.click(detailsButton);
+    // Note: role='admin' isn't set here — this test only checks the sheet
+    // opens, not that the (RBAC-gated, disabled-without-a-role) Close Tab
+    // button is clickable. See the next test for the closeTab wiring.
+
+    expect(await screen.findByText('Tab Details')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close Tab' })).toBeInTheDocument();
+  });
+
+  /**
+   * Test: Close Tab action inside the detail sheet calls useCloseTab and
+   * closes the sheet on success (Task 1.5, plan 15-09)
+   */
+  it('calls closeTab and closes the detail sheet on a successful close', async () => {
+    const user = userEvent.setup();
+    const closeTab = vi.fn().mockResolvedValue({ ok: true, data: undefined });
+    vi.mocked(useCloseTab).mockReturnValue({ closeTab, isClosing: false });
+
+    vi.mocked(queries.useTabs).mockReturnValue({
+      data: mockTabs,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      isDisabled: false,
+    } as any);
+    vi.mocked(queries.useTab).mockReturnValue({
+      data: mockTabs[0],
+      isLoading: false,
+      isError: false,
+      error: null,
+      resultError: undefined,
+    } as any);
+    // close_tab is RBAC-gated (ProtectedAction) — needs a role that has it.
+    useStaffStore.setState({ currentStaff: { role: 'admin' } as any });
+
+    useTabStore.setState({ isTabDrawerOpen: true });
+
+    renderWithProviders(<TabDrawer />);
+
+    await user.click(screen.getByLabelText('View details for John Doe'));
+    await user.click(await screen.findByRole('button', { name: 'Close Tab' }));
+
+    await waitFor(() => {
+      expect(closeTab).toHaveBeenCalledWith(mockTabs[0]?.id);
+    });
+    await waitFor(() => {
+      expect(screen.queryByText('Tab Details')).not.toBeInTheDocument();
+    });
   });
 });

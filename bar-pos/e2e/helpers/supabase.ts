@@ -279,6 +279,45 @@ export async function getOpenTabIdByCustomerName(customerName: string): Promise<
   return (data?.id as string | undefined) ?? null;
 }
 
+/**
+ * Simulates a second POS terminal winning the race: bumps `tabs.version` for
+ * the given tab out-of-band via the service-role client, without touching
+ * any other column. The returned value is the version the app's cached copy
+ * (fetched before this call) is now stale against — driving a UI action that
+ * still carries the pre-bump version should surface a STALE_VERSION conflict.
+ *
+ * Read-then-guarded-write, mirroring the private `bumpVersionedRows` above:
+ * the `bump_version_on_update` trigger (Phase 15) rejects any `tabs` UPDATE
+ * that doesn't advance `version` by exactly 1, and PostgREST cannot express
+ * `version = version + 1` as a literal, so the current version must be read
+ * first and the UPDATE re-guarded with `.eq('version', currentVersion)`.
+ */
+export async function bumpTabVersion(tabId: string): Promise<number> {
+  const admin = getServiceClient();
+  const { data: current, error: readErr } = await admin
+    .from('tabs')
+    .select('version')
+    .eq('id', tabId)
+    .single();
+  if (readErr) throw new Error(readErr.message);
+
+  const currentVersion = (current as { version: number }).version;
+  const nextVersion = currentVersion + 1;
+
+  const { data: updated, error: updateErr } = await admin
+    .from('tabs')
+    .update({ version: nextVersion })
+    .eq('id', tabId)
+    .eq('version', currentVersion)
+    .select('id');
+  if (updateErr) throw new Error(updateErr.message);
+  if (!updated || updated.length === 0) {
+    throw new Error(`bumpTabVersion: no row matched id=${tabId} version=${currentVersion}`);
+  }
+
+  return nextVersion;
+}
+
 export async function getPoolSessionStartedAt(sessionId: string): Promise<string | null> {
   const admin = getServiceClient();
   const { data, error } = await admin.from('pool_sessions').select('started_at').eq('id', sessionId).maybeSingle();

@@ -1,8 +1,10 @@
+import { Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Tab } from '@shared/lib/domain';
 import { getTabDurationTier } from '@shared/lib/domain-helpers';
 import { cn } from '@shared/lib/utils';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
+import { POSButton } from '@shared/ui/POSButton';
 import { StatusBadge } from '@shared/ui/StatusBadge';
 import { TimerDisplay } from '@shared/ui/TimerDisplay';
 import { Card } from '@shared/ui/card';
@@ -11,6 +13,7 @@ export interface TabCardProps {
   tab: Tab;
   isActive: boolean;
   onSelect: (tabId: string) => void;
+  onViewDetails?: (tabId: string) => void;
   className?: string;
 }
 
@@ -29,7 +32,7 @@ function durationBadgeStatus(
   return 'tab_open_ok';
 }
 
-export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
+export function TabCard({ tab, isActive, onSelect, onViewDetails, className }: TabCardProps) {
   const { t } = useTranslation('entities');
   const runningTotal = calculateRunningTotal(tab.items);
   const itemCount = tab.items.length;
@@ -61,6 +64,10 @@ export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
           : t('tabCard.ariaLabel', { customerName: tab.customerName })
       }
       onKeyDown={e => {
+        // Only handle keydown originating on the card itself — the nested
+        // "Details" button below is a real <button> and would otherwise
+        // double-fire (its own click + this handler) when focused.
+        if (e.target !== e.currentTarget) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleClick();
@@ -77,7 +84,24 @@ export function TabCard({ tab, isActive, onSelect, className }: TabCardProps) {
               </p>
             )}
           </div>
-          {tab.status === 'open' && <StatusBadge status={badgeStatus} />}
+          <div className="flex items-center gap-1">
+            {tab.status === 'open' && <StatusBadge status={badgeStatus} />}
+            {onViewDetails && (
+              <POSButton
+                type="button"
+                variant="ghost"
+                touchSize="default"
+                className="h-11 w-11 shrink-0 p-0"
+                aria-label={t('tabCard.detailsAriaLabel', { customerName: tab.customerName })}
+                onClick={e => {
+                  e.stopPropagation();
+                  onViewDetails(tab.id);
+                }}
+              >
+                <Info className="size-4" />
+              </POSButton>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
           <TimerDisplay
