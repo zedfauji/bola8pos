@@ -400,7 +400,16 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
         session={session}
         openTabs={openTabs ?? []}
         onSuccess={() => {
-          navigate('/pool-tables');
+          // Stopping the timer frees the table but the tab (with the pool
+          // charge already on it) stays open — route straight to it instead
+          // of the pool grid, or it looks like the bill vanished.
+          if (session.tabId) {
+            useTabStore.getState().selectTab(session.tabId);
+            useTabStore.getState().openDrawer();
+            navigate('/pos');
+          } else {
+            navigate('/pool-tables');
+          }
         }}
       />
 
