@@ -18,7 +18,7 @@
 | **Resolved — declared directly** | — | 34 → 0 | — | `@testing-library/user-event` added to `devDependencies` (39-01) |
 | **Deleted** (confirmed dead, sanity-checked) | — | — | see chain below | Whole files, barrels, re-exports, individual declarations across 39-01/03/08/09/10/11 |
 | **Retained — false positive** | — | — | see chain below | Dynamic/string-keyed/test-only/story-only reachability knip's static graph misses |
-| **Deferred** (D-02/D-08/D-09, out of phase scope) | — | — | Medium tier (37) untouched; jscpd/as-any/madge/unused-deps untouched | Verified in Task 2 below |
+| **Deferred** (D-02/D-08/D-09, out of phase scope) | — | — | Medium tier (37) untouched; deps/as-any/madge untouched; jscpd count drifted +3.7% as an incidental side effect, not deliberate work | Verified in Task 2's Scope-Compliance Section |
 | **NEEDS HUMAN TRIAGE** (not remediated) | — | — | 1 file | `supabase/functions/create-staff/index.ts` — see "Not Remediated" |
 
 **Totals check:** 54 + 41 + 37 + 11 + 4 = **147** (all Blocking-tier E2E findings accounted for). 34 → 0 (all Blocking-tier `unlisted` findings resolved).
@@ -133,7 +133,9 @@ Plus 2 additional recovered-but-out-of-this-plan's-fix-scope todos referenced (n
 
 *39-09's own full-repo re-measurement (631) reflects only its own registry-file edits layered on the 39-08 baseline; 39-10 and 39-11 ran **concurrently** in separate worktrees during the same wave, each touching a disjoint scope (`src/entities/` vs `src/shared/`+`src/features/`), so their deltas are additive but were never jointly re-measured against a single merged tree until this consolidation plan.
 
-**Projected combined total after all three concurrent Wave-4 plans** (649 baseline − 21 registry − 121 entities − 84 shared/features): **423** distinct findings, sum of files+exports+types+dup-pairs, before this plan's Task 2 fresh re-measurement. Task 2 below runs the actual audit pipeline against the merged tree and reports the real number — this projection exists so a reviewer can sanity-check Task 2's output against the additive math rather than trusting it blind.
+**Projected combined total after all three concurrent Wave-4 plans** (649 baseline − 21 registry − 121 entities − 84 shared/features): **423** distinct findings, sum of files+exports+types+dup-pairs, before this plan's Task 2 fresh re-measurement.
+
+**Task 2's actual fresh re-measurement against the merged tree: 432** (files=43, exports=259, types=127, dup-pairs=3) — 9 above the additive projection, close enough to confirm the chain above is correct and nothing drifted unexpectedly between the concurrent Wave-4 worktrees merging. **432 is the authoritative, final number** for this phase — see the Scope-Compliance Section below for the full before/after table and verification evidence.
 
 ### `unlisted` Blocking-tier reconciliation
 
@@ -167,7 +169,7 @@ Everything else — the 4 unresolved E2E items (see above), the 2 duplicate-expo
 | Decision | Where honored |
 |---|---|
 | **D-01** (scope: Blocking 181 + knip dead-code High 1917/High-distinct 982 + Medium 37) | Every plan's `files_modified` frontmatter scoped to exactly its assigned slice; this ledger's Summary Table accounts for all 147 E2E + 34 unlisted + the full knip distinct chain. |
-| **D-02** (jscpd/as-any/madge/Low-tier deferred to future phases) | Verified untouched in Task 2 below (madge cycle still reports, jscpd/as-any counts materially unchanged). |
+| **D-02** (jscpd/as-any/madge/Low-tier deferred to future phases) | Verified in Task 2's Scope-Compliance Section: madge cycle still reports, `as any` count literally untouched (zero diff lines), jscpd clone count increased +3.7% as an incidental side effect of E2E harness fixes (not a deliberate jscpd-scoped edit) — reported honestly rather than as "unchanged." |
 | **D-03** (real bugs found during triage → todo, not inline fix) | 39-04, 39-05, 39-06, 39-07 — 11 findings, 9 new todos filed (see "Todos Filed" above). |
 | **D-04** (triage-first: real per-test error output, not digest titles) | Every Track A plan (39-02, 39-04–39-07) explicitly re-ran specs live and cited `error.message` excerpts, not `10-CHECKLIST.md` titles. |
 | **D-05** (11 pre-confirmed Phase-38 items routed without re-triage) | 39-04 Task 1. |
@@ -178,6 +180,45 @@ Everything else — the 4 unresolved E2E items (see above), the 2 duplicate-expo
 
 ---
 
-## Scope-Compliance Section
+## Scope-Compliance Section (Task 2)
 
-*(Populated by Task 2 — see below.)*
+**Method:** ran the full audit pipeline once (`npm run audit:tech-debt`) against this worktree's merged tree (all 11 Wave 1–4 plans committed). `.audit-tmp/` did not exist in this worktree before this run (fresh clone/worktree per the documented environment gap), so the WR-04 staleness caveat does not apply — every report's mtime (2026-08-06 16:46–16:47) is this run's own output, not a stale carryover. `npm run typecheck`, `npm run lint`, and `npm run test` were then re-run individually (not just read from the pipeline's own captures) to get an authoritative pass/fail signal matching this task's `<verify>` command exactly. The task's `<verify>` scope-compliance base commit (`git log --grep='docs(39)'`) resolves to `3ef7ee1` ("docs(39): commit pattern map") — since `(`/`)` are literal in git's default basic-regex `--grep`, this pattern matches only bare `docs(39):` planning commits, and its newest match happens to land exactly on the last planning-phase commit before Wave 1 execution began (verified: `27dfc83 docs(39-01): regenerate knip baseline...` is the very next commit). The literal command therefore produces the correct phase-wide diff base without adjustment — confirmed by cross-checking against the pre-Phase-39 commit `b7ef2c4` (all planning-phase commits between them are docs-only, identical diff result either way).
+
+### Final knip counts (before/after, same set-union method as the 39-01 baseline)
+
+| Metric | Baseline (39-01, Wave 0) | Final (this run) | Δ |
+|---|---:|---:|---:|
+| Distinct High-tier findings (files+exports+types+dup-pairs, excl. `src/shared/ui/**`) | **982** | **432** | **−550 (−56%)** |
+| — Unused files | 61 | 43 | −18 |
+| — Unused exports | 613 | 259 | −354 |
+| — Unused types | 305 | 127 | −178 |
+| — Duplicate-export pairs | 3 | 3 | 0 (both pairs deliberately deferred — see 39-09's write-up) |
+| Blocking-tier `unlisted` (default-mode) | 34 | **0** | −34 |
+| Knip `unresolved` (both modes) | 0 | 0 | 0 (still clean) |
+
+The final 432 is close to (9 above) the phase's own additive projection from Task 1 (423) — the small gap is expected: 39-10 and 39-11 computed their own scoped deltas independently in parallel worktrees against a shared 39-08 baseline snapshot, and this run is the first fresh re-measurement against the actual merged tree. **432 is the authoritative number**, not the projection.
+
+The phase's real, measured effect on the tiers it was chartered to remediate: **Blocking tier fully closed** (147/147 E2E findings dispositioned, 34/34 `unlisted` resolved) and **the High-tier distinct dead-code surface cut by 56%** (982 → 432), with every remaining finding individually justified as a false positive, a deliberate naming-convention deferral, or an out-of-plan-scope byproduct (see "Not Remediated" above).
+
+### Deferred-category compliance (D-02, D-08, D-09)
+
+| Category | Check | Result |
+|---|---|---|
+| **D-09** — no dependency removed | `git diff b7ef2c4..HEAD -- package.json` | Only `@testing-library/user-event` (`^14.6.1`) added to `devDependencies`. Zero removals from `dependencies` or `devDependencies`. |
+| **D-08** — no `src/shared/ui/**` or `*.stories.tsx` finding acted on | `git diff --name-only b7ef2c4..HEAD -- 'src/shared/ui' '*.stories.tsx'` | **Empty** — zero files under either path modified anywhere in the phase. |
+| **D-02** — madge cycle still exists | `.audit-tmp/madge-circular.json` (this run) | `entities/inventory/model/queries.ts` ↔ `entities/inventory/model/store.ts` — the exact same cycle 39-10 explicitly declined to touch ("do not touch the `queries.ts` <-> `store.ts` circular import"). Still reports. |
+| **D-02** — `as any` count materially unchanged | `.audit-tmp/as-any.txt` (143 lines) vs. `git diff b7ef2c4..HEAD -- src \| grep -E '^[+-].*\bas any\b'` | **Zero** added or removed lines matching `as any` anywhere in the phase's diff — stronger than "materially unchanged," this is *literally* untouched. The 143-line current count is provided for the record; no comparison baseline was separately isolated in 10-CHECKLIST.md beyond the tiered 119 (which excludes 25 comment-only mentions), and this phase's diff evidence makes the exact baseline number moot — nothing touched these lines. |
+| **D-02** — jscpd clone count materially unchanged | jscpd re-run this session: **2756** clones vs. 10-CHECKLIST.md's baseline **2657** (`+99`, `+3.7%`) | **Reported honestly, not spun as unchanged.** This is a real increase, not noise. Root cause: no plan performed jscpd-scoped work (no clone extraction/consolidation commit exists in the phase's git log — confirmed by `git log --grep` across all 39-* commits, none reference jscpd), so the increase is a side effect of Track A's E2E harness-fix work — many structurally similar fix patterns (e.g. `page.reload()` insertion, native-HTML5-validation OR-fallback checks, `.first()` disambiguation) were applied nearly verbatim across dozens of `e2e/*.spec.ts` files, and `.jscpd.json` does not exclude `e2e/**` from its scan (only `*.test.ts(x)`/`*.stories.tsx` are excluded). This is a genuine, if small, drift in a deferred category — flagged here for the future jscpd-remediation phase (D-02) rather than absorbed into a false "unchanged" claim. |
+
+**Verification commands (all pass):**
+```
+npm run typecheck   # clean, 0 errors
+npm run lint         # exit 0 (only the pre-existing [boundaries] legacy-selector warning)
+npm run test          # 151 passed / 2 skipped (153 files), 1391 passed / 15 todo (1406) — exact
+                       # match to the phase baseline. 2 failures appeared in the audit
+                       # pipeline's own full-suite run (queries.clock.test.ts, both in
+                       # useShiftClosePreview/useMutationClockOut) -- re-ran in isolation:
+                       # 6/6 pass. Matches the same pre-existing order-dependent/shared-Supabase
+                       # flakiness documented in 39-05's deferred-items.md and 39-09-LEDGER.md;
+                       # not a regression from this plan.
+```
