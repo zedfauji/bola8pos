@@ -8,6 +8,10 @@ Bar/restaurant POS system built as a Tauri 2 desktop app (Windows, WebView2). Fr
 
 Reliable, offline-tolerant order-to-payment flow for a single bar/pool-hall location — orders and pool-table billing must stay correct even under concurrent terminal edits and flaky connectivity.
 
+## Testing Policy (LOCKED, 2026-08-07)
+
+All testing, verification, and UAT must be automated Playwright E2E, headless by default. No phase may carry `human_needed` verification or a manual UAT scenario as an accepted end state — see `.planning/decisions/2026-08-07-mandatory-automated-testing-no-manual-verification.md` and `bar-pos/CLAUDE.md`'s "Testing & Verification Policy" section.
+
 ## Current State
 
 **Shipped:** v2.2 — UI Standardization (2026-07-17). Full archive: `.planning/milestones/v2.2-ROADMAP.md`, `.planning/milestones/v2.2-REQUIREMENTS.md`, `.planning/milestones/v2.2-MILESTONE-AUDIT.md`.

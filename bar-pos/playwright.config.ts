@@ -8,6 +8,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env.local') });
 
 const fastE2e = process.env.FAST_E2E === '1' || process.env.FAST_E2E === 'true';
+// Headless is the default per project policy (.planning/decisions/2026-08-07-mandatory-automated-testing-no-manual-verification.md).
+// Opt into a real browser window only for interactive debugging: HEADED=1 npm run test:e2e
+const headed = process.env.HEADED === '1' || process.env.HEADED === 'true';
+const headless = !headed;
 const slowMo = fastE2e ? 0 : 400;
 const testTimeout = fastE2e ? 45_000 : 60_000;
 const webServerTimeout = fastE2e ? 75_000 : 120_000;
