@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { toast } from 'sonner';
 import { tabKeys } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
@@ -7,11 +8,12 @@ import {
   err,
   ok,
   sessionStillRunningError,
-  supabaseMutation,
   supabaseQuery,
+  versionedMutation,
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
+import { handleVersionError, TERMINAL_ID } from '@shared/lib/version-error';
 
 type PoolSessionRunningRow = {
   resources: { number: number } | null;
@@ -20,6 +22,7 @@ type PoolSessionRunningRow = {
 export function useCloseTab() {
   const queryClient = useQueryClient();
   const clearSelection = useTabStore(s => s.clearSelection);
+  const expectedVersionRef = useRef(0);
 
   const mutation = useMutation({
     mutationFn: async (tabId: string): Promise<Result<void>> => {
@@ -48,8 +51,9 @@ export function useCloseTab() {
       if (!versionRes.ok) {
         return versionRes;
       }
+      expectedVersionRef.current = versionRes.data.version;
 
-      const upd = await supabaseMutation(() =>
+      const upd = await versionedMutation(() =>
         supabase
           .from('tabs')
           .update({
@@ -59,6 +63,7 @@ export function useCloseTab() {
           })
           .eq('id', tabId)
           .eq('version', versionRes.data.version)
+          .select('id')
       );
 
       if (!upd.ok) {
@@ -72,7 +77,18 @@ export function useCloseTab() {
   const closeTab = async (tabId: string): Promise<Result<void>> => {
     const result = await mutation.mutateAsync(tabId);
     if (!result.ok) {
-      toast.error(result.error.message);
+      const handled = handleVersionError(result.error, {
+        queryClient,
+        queryKey: tabKeys.all,
+        entity: 'tabs',
+        entityId: tabId,
+        expectedVersion: expectedVersionRef.current,
+        supabase,
+        terminalId: TERMINAL_ID,
+      });
+      if (!handled) {
+        toast.error(result.error.message);
+      }
       return result;
     }
     toast.success(i18n.t('featOrders:closeTab.success'));

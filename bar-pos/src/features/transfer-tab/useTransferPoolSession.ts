@@ -3,8 +3,16 @@ import { resourceKeys } from '@entities/resource/model/queries';
 import { tabKeys } from '@entities/tab/model/queries';
 import i18n from '@shared/lib/i18n';
 import { logger } from '@shared/lib/logger-instance';
-import { err, ok, unknownError, type AppError, type Result } from '@shared/lib/result';
+import {
+  err,
+  ok,
+  unknownError,
+  versionedMutation,
+  type AppError,
+  type Result,
+} from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
+import { handleVersionError, TERMINAL_ID } from '@shared/lib/version-error';
 
 export type TransferPoolSessionInput = {
   /** Current pool session being moved */
@@ -67,16 +75,28 @@ export function useTransferPoolSession() {
           message: versionFetchError.message,
         });
       } else {
-        const { error: stampError } = await supabase
-          .from('pool_sessions')
-          .update({ previous_table_id: currentTableId, version: versionRow.version + 1 })
-          .eq('id', sessionId)
-          .eq('version', versionRow.version);
+        const stampRes = await versionedMutation(() =>
+          supabase
+            .from('pool_sessions')
+            .update({ previous_table_id: currentTableId, version: versionRow.version + 1 })
+            .eq('id', sessionId)
+            .eq('version', versionRow.version)
+            .select('id')
+        );
 
-        if (stampError) {
+        if (!stampRes.ok) {
           // Non-fatal — the transfer already succeeded; log and continue.
           logger.warn('transfer_pool_session.stamp_previous_table_error', {
-            message: stampError.message,
+            message: stampRes.error.message,
+          });
+          handleVersionError(stampRes.error, {
+            queryClient,
+            queryKey: resourceKeys.all,
+            entity: 'pool_sessions',
+            entityId: sessionId,
+            expectedVersion: versionRow.version,
+            supabase,
+            terminalId: TERMINAL_ID,
           });
         }
       }

@@ -10,6 +10,7 @@ import {
   supabaseMutation,
   supabaseQuery,
   unknownError,
+  versionedMutation,
   type Result,
 } from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
@@ -521,20 +522,33 @@ export function useMutationLinkPoolSessionToTab() {
         return versionRes;
       }
 
-      const res = await supabaseMutation(() =>
+      const res = await versionedMutation(() =>
         supabase
           .from('pool_sessions')
           .update({ tab_id: tabId, version: versionRes.data.version + 1 })
           .eq('id', sessionId)
           .eq('version', versionRes.data.version)
           .is('stopped_at', null)
+          .select('id')
       );
       if (!res.ok) {
         logger.error('pool_sessions.link_tab_failed', { sessionId, message: res.error.message });
       }
-      return res.ok ? ok(undefined) : res;
+      return res;
     },
-    onSuccess: () => {
+    onSuccess: (result, variables) => {
+      if (!result.ok) {
+        handleVersionError(result.error, {
+          queryClient,
+          queryKey: resourceKeys.all,
+          entity: 'pool_sessions',
+          entityId: variables.sessionId,
+          expectedVersion: 0,
+          supabase,
+          terminalId: TERMINAL_ID,
+        });
+        return;
+      }
       void queryClient.invalidateQueries({ queryKey: resourceKeys.all });
       void queryClient.invalidateQueries({ queryKey: tabKeys.all });
       void queryClient.invalidateQueries({ queryKey: ['pool-sessions'] });
