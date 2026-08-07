@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { Button } from './button';
+import { POSButton } from './POSButton';
 
 export type DateRangePickerProps = {
   fromStr: string;
@@ -61,16 +61,16 @@ export function DateRangePicker({ fromStr, toStr, onChange }: DateRangePickerPro
   return (
     <div className="flex flex-wrap items-center gap-2">
       {PRESETS.map(preset => (
-        <Button
+        <POSButton
           key={preset.label}
           variant="outline"
-          size="sm"
+          touchSize="default"
           onClick={() => {
             onChange(preset.from(), preset.to());
           }}
         >
           {preset.label}
-        </Button>
+        </POSButton>
       ))}
       <label className="flex items-center gap-2 text-sm">
         <span className="text-muted-foreground">{t('dateRangePicker.from')}</span>
@@ -80,7 +80,7 @@ export function DateRangePicker({ fromStr, toStr, onChange }: DateRangePickerPro
           onChange={e => {
             onChange(e.target.value, toStr);
           }}
-          className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-11 rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </label>
       <label className="flex items-center gap-2 text-sm">
@@ -91,7 +91,7 @@ export function DateRangePicker({ fromStr, toStr, onChange }: DateRangePickerPro
           onChange={e => {
             onChange(fromStr, e.target.value);
           }}
-          className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-11 rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </label>
     </div>

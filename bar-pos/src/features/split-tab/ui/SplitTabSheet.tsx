@@ -21,7 +21,6 @@ import { MoneyInput } from '@shared/ui/MoneyInput';
 import { POSButton } from '@shared/ui/POSButton';
 import { PersonCard } from '@shared/ui/PersonCard';
 import { SubTabColumn } from '@shared/ui/SubTabColumn';
-import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import {
   Sheet,
@@ -399,7 +398,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
         aria-selected={selectedItemId === item.id}
         tabIndex={0}
         className={cn(
-          'flex items-center justify-between px-3 py-2 gap-2 hover:bg-accent/30 cursor-pointer transition-colors',
+          'flex min-h-11 items-center justify-between px-3 py-2 gap-2 hover:bg-accent/30 cursor-pointer transition-colors',
           selectedItemId === item.id && 'ring-2 ring-primary bg-primary/10'
         )}
         onClick={() => {
@@ -428,7 +427,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
         aria-selected={selectedPersonItemId === item.id}
         tabIndex={0}
         className={cn(
-          'flex items-center justify-between px-3 py-2 gap-2 hover:bg-accent/30 cursor-pointer transition-colors',
+          'flex min-h-11 items-center justify-between px-3 py-2 gap-2 hover:bg-accent/30 cursor-pointer transition-colors',
           selectedPersonItemId === item.id && 'ring-2 ring-primary bg-primary/10'
         )}
         onClick={() => {
@@ -764,15 +763,15 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                       )}
                     </div>
                   ))}
-                  <Button
+                  <POSButton
                     variant="outline"
-                    size="sm"
+                    touchSize="large"
                     onClick={addAmountRow}
                     className="w-full"
                   >
                     <Plus className="size-4 mr-2" />
                     {t('splitTab.addCheck')}
-                  </Button>
+                  </POSButton>
                 </div>
 
                 <div className="rounded-lg bg-card border p-4 space-y-2">
@@ -802,9 +801,9 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
           </Tabs>
 
           <SheetFooter className="px-6 pb-6 pt-4 border-t flex gap-3 shrink-0">
-            <Button variant="outline" className="flex-1" onClick={handleCancel}>
+            <POSButton touchSize="xl" variant="outline" className="flex-1" onClick={handleCancel}>
               {t('splitTab.keepTabOpen')}
-            </Button>
+            </POSButton>
             <POSButton
               touchSize="xl"
               focusEmphasis="high"

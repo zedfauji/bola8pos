@@ -1,7 +1,7 @@
 import { BellRing } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Button, LoadingSpinner } from '@shared/ui';
+import { LoadingSpinner, POSButton } from '@shared/ui';
 import { useNotifyWaitlist } from '../model/useNotifyWaitlist';
 
 export interface NotifyButtonProps {
@@ -19,9 +19,9 @@ export function NotifyButton({ entryId, entryName, hasPhone }: NotifyButtonProps
   }
 
   return (
-    <Button
+    <POSButton
       variant="outline"
-      size="lg"
+      touchSize="default"
       disabled={isPending}
       onClick={() => { void handleNotify(); }}
       aria-label={
@@ -38,6 +38,6 @@ export function NotifyButton({ entryId, entryName, hasPhone }: NotifyButtonProps
           {hasPhone ? t('notifyWaitlist.notifyViaWhatsapp') : t('notifyWaitlist.notifyManager')}
         </>
       )}
-    </Button>
+    </POSButton>
   );
 }

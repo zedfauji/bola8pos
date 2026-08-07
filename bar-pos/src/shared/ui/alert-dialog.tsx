@@ -88,11 +88,19 @@ const AlertDialogDescription = React.forwardRef<
 ));
 AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName;
 
+/* eslint-disable i18next/no-literal-string -- Tailwind classes, not UI copy */
+const ALERT_DIALOG_TOUCH_SIZE = 'min-h-[56px] px-6 text-base active:scale-95 transition-transform';
+/* eslint-enable i18next/no-literal-string */
+
 const AlertDialogAction = React.forwardRef<
   React.ComponentRef<typeof AlertDialogPrimitive.Action>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants(), className)} {...props} />
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={cn(buttonVariants(), ALERT_DIALOG_TOUCH_SIZE, className)}
+    {...props}
+  />
 ));
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
@@ -102,7 +110,12 @@ const AlertDialogCancel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className={cn(buttonVariants({ variant: 'outline' }), 'mt-2 sm:mt-0', className)}
+    className={cn(
+      buttonVariants({ variant: 'outline' }),
+      ALERT_DIALOG_TOUCH_SIZE,
+      'mt-2 sm:mt-0',
+      className
+    )}
     {...props}
   />
 ));

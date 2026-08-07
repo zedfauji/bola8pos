@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { inventoryStore, useInventory } from '@entities/inventory';
 import { useStaffStore } from '@entities/staff/model/store';
 import { cn } from '@shared/lib/utils';
-import { Button } from '@shared/ui/button';
+import { POSButton } from '@shared/ui/POSButton';
 
 const STORAGE_KEY = 'bola8pos:lowStockDismissed';
 
@@ -57,7 +57,7 @@ export function LowStockAlert() {
   return (
     <div
       className={cn(
-        'mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-50'
+        'mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-pos-warning/50 bg-pos-warning/10 px-3 py-2 text-sm text-amber-950 dark:border-pos-warning/40 dark:bg-pos-warning/15 dark:text-amber-50'
       )}
       role="status"
       aria-label={t('lowStockAlert.lowStockAlertAriaLabel')}
@@ -65,25 +65,26 @@ export function LowStockAlert() {
     >
       <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
       <span className="shrink-0 font-medium">{t('lowStockAlert.lowStockLabel')}</span>
-      <ul className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+      <ul className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
         {visible.map((a, i) => (
           <li key={a.productId} className="inline-flex items-center gap-0.5">
             {i > 0 ? <span className="text-muted-foreground">,</span> : null}
             <span className="whitespace-nowrap">
               {t('lowStockAlert.nameQuantity', { name: a.name, quantity: a.quantityOnHand })}
             </span>
-            <Button
+            <POSButton
               type="button"
               variant="ghost"
+              touchSize="default"
               size="icon"
-              className="size-6 text-amber-900 hover:bg-amber-500/20 dark:text-amber-50"
-              aria-label={`Dismiss alert for ${a.name}`}
+              className="text-amber-900 hover:bg-amber-500/20 dark:text-amber-50"
+              aria-label={t('lowStockAlert.dismissAlertAriaLabel', { name: a.name })}
               onClick={() => {
                 dismiss(a.productId);
               }}
             >
               <X className="size-3" />
-            </Button>
+            </POSButton>
           </li>
         ))}
       </ul>

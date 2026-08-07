@@ -172,7 +172,7 @@ export function PoolTablesSettingsTab({ currentRole }: Props) {
                     </Label>
                     <select
                       id={`table-type-${table.id}`}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       value={draft.tableType}
                       onChange={event => {
                         setDraft(table.id, {

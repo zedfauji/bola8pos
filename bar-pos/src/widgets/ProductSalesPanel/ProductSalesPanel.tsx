@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExportButtons } from '@features/export-report';
 import { useProductSalesReport, type ProductSalesRow } from '@entities/tab/model/queries-reports';
-import { Button, DataTable, EmptyState, LoadingSpinner, MoneyDisplay } from '@shared/ui';
+import { DataTable, EmptyState, LoadingSpinner, MoneyDisplay, POSButton } from '@shared/ui';
 
 type Props = {
   dateRange: { from: Date; to: Date };
@@ -78,7 +78,7 @@ export function ProductSalesPanel({ dateRange }: Props) {
   const toolbar = (
     <div className="flex flex-wrap items-center gap-2">
       <select
-        className="rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="h-11 rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         value={selectedCategory}
         onChange={e => {
           setSelectedCategory(e.target.value);
@@ -93,9 +93,10 @@ export function ProductSalesPanel({ dateRange }: Props) {
       </select>
 
       <div className="flex gap-1">
-        <Button
+        <POSButton
           type="button"
           variant="outline"
+          touchSize="default"
           onClick={() => {
             setSortBy('revenue');
           }}
@@ -106,10 +107,11 @@ export function ProductSalesPanel({ dateRange }: Props) {
           }`}
         >
           {t('productSalesPanel.sortByRevenue')}
-        </Button>
-        <Button
+        </POSButton>
+        <POSButton
           type="button"
           variant="outline"
+          touchSize="default"
           onClick={() => {
             setSortBy('units');
           }}
@@ -120,7 +122,7 @@ export function ProductSalesPanel({ dateRange }: Props) {
           }`}
         >
           {t('productSalesPanel.sortByUnits')}
-        </Button>
+        </POSButton>
       </div>
 
       {rawRows.length > 0 && <ExportButtons reportType="products" data={exportData} />}
@@ -147,7 +149,7 @@ export function ProductSalesPanel({ dateRange }: Props) {
         const idx = filtered.indexOf(row);
         if (idx < 3 && filtered.length > 0) {
           // eslint-disable-next-line i18next/no-literal-string -- Tailwind class string, not UI copy
-          return 'border-l-2 border-l-amber-400 bg-amber-500/5';
+          return 'border-l-2 border-l-pos-highlight bg-pos-highlight/5';
         }
         return undefined;
       }}

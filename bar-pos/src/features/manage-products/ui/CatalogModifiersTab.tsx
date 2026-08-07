@@ -88,6 +88,7 @@ export function CatalogModifiersTab() {
                 type="button"
                 variant="outline"
                 touchSize="default"
+                size="icon"
                 onClick={() => {
                   setEditModifier(m);
                 }}
@@ -99,6 +100,7 @@ export function CatalogModifiersTab() {
                 type="button"
                 variant="outline"
                 touchSize="default"
+                size="icon"
                 onClick={() => {
                   setDeleteId(m.id);
                 }}
@@ -110,6 +112,7 @@ export function CatalogModifiersTab() {
                 type="button"
                 variant="outline"
                 touchSize="default"
+                size="icon"
                 onClick={() => {
                   setRulesModifier(m);
                 }}

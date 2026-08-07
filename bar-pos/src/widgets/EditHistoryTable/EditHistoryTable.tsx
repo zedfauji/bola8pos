@@ -19,6 +19,7 @@ import type { AuditLog } from '@entities/audit-log';
 import { useStaffList } from '@entities/staff';
 import { DataTable } from '@shared/ui/DataTable';
 import { EmptyState } from '@shared/ui/EmptyState';
+import { POSButton } from '@shared/ui/POSButton';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 
@@ -155,8 +156,9 @@ export function EditHistoryTable() {
       />
 
       {hasNextPage && (
-        <Button
+        <POSButton
           variant="outline"
+          touchSize="default"
           disabled={isFetchingNextPage}
           onClick={() => {
             void fetchNextPage();
@@ -164,7 +166,7 @@ export function EditHistoryTable() {
         >
           {isFetchingNextPage && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />}
           {t('editHistoryTable.loadMoreEntries')}
-        </Button>
+        </POSButton>
       )}
 
       <AuditLogDetailSheet

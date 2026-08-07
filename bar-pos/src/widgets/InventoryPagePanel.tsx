@@ -40,11 +40,11 @@ function sortInventoryRows(rows: Inventory[]): Inventory[] {
 function rowHighlightClass(inv: Inventory): string | undefined {
   if (inv.quantityOnHand === 0) {
     // eslint-disable-next-line i18next/no-literal-string -- Tailwind class string, not UI copy
-    return 'border-l-4 border-destructive bg-destructive/5';
+    return 'border-l-2 border-l-destructive bg-destructive/5';
   }
   if (inv.quantityOnHand <= inv.lowStockThreshold) {
     // eslint-disable-next-line i18next/no-literal-string -- Tailwind class string, not UI copy
-    return 'border-l-4 border-amber-500 bg-amber-500/5';
+    return 'border-l-2 border-l-pos-warning bg-pos-warning/5';
   }
   return undefined;
 }
@@ -151,7 +151,7 @@ export function InventoryPagePanel() {
       </label>
       <select
         id="inv-category-filter"
-        className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-sm"
+        className="h-11 rounded-md border border-input bg-background px-3 text-sm shadow-sm"
         value={categoryFilter}
         onChange={e => {
           setCategoryFilter(e.target.value);
@@ -216,7 +216,7 @@ export function InventoryPagePanel() {
           ) : null}
 
           {!staffId ? (
-            <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100">
+            <p className="rounded-md border border-pos-warning/40 bg-pos-warning/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100">
               {t('inventoryPagePanel.signInBanner')}
             </p>
           ) : null}
@@ -356,7 +356,7 @@ export function InventoryPagePanel() {
                   </label>
                   <select
                     id="batch-product"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
                     value={batchProductId}
                     onChange={e => {
                       setBatchProductId(e.target.value);
@@ -377,7 +377,7 @@ export function InventoryPagePanel() {
                   {/* eslint-disable-next-line no-restricted-syntax -- 31-CONTEXT.md D-06: signed-delta input, MoneyInput would clamp negatives */}
                   <input
                     type="number"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
                     value={batchDelta}
                     onChange={e => {
                       setBatchDelta(e.target.value);

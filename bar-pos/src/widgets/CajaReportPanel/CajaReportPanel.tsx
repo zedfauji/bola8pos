@@ -123,7 +123,7 @@ export function CajaReportPanel() {
             onChange={e => {
               setSelectedId(e.target.value || null);
             }}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-11 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {sessions.map((s: CajaSession) => (
               <option key={s.id} value={s.id}>

@@ -5,7 +5,6 @@ import { useStaffList } from '@entities/staff';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { Tab } from '@shared/lib/domain';
 import { POSButton } from '@shared/ui/POSButton';
-import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -87,7 +86,7 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
               onChange={e => {
                 setNewStaffId(e.target.value);
               }}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">{t('transferTab.keepCurrentOption')}</option>
               {(staffList ?? []).map(s => (
@@ -100,7 +99,7 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
         </div>
 
         <DialogFooter>
-          <Button
+          <POSButton
             type="button"
             variant="outline"
             onClick={() => {
@@ -108,7 +107,7 @@ export function TransferTabDialog({ open, onOpenChange, tab }: TransferTabDialog
             }}
           >
             {t('common:actions.cancel')}
-          </Button>
+          </POSButton>
           <POSButton type="button" disabled={transferMut.isPending} onClick={handleSubmit}>
             {transferMut.isPending ? t('transferTab.transferring') : t('transferTab.transfer')}
           </POSButton>

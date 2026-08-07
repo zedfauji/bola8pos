@@ -9,7 +9,6 @@ import type { Staff } from '@shared/lib/domain';
 import { DataTable } from '@shared/ui/DataTable';
 import { POSButton } from '@shared/ui/POSButton';
 import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 
 import { PermissionMatrix } from './PermissionMatrix';
 
@@ -73,10 +72,10 @@ export function RBACDashboard() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">{t('rbacDashboard.staffRolesTitle')}</h2>
         <div className="flex flex-wrap gap-2">
-          <Button
+          <POSButton
             type="button"
             variant="secondary"
-            size="sm"
+            touchSize="default"
             onClick={() => {
               toast.message(t('rbacDashboard.addStaffToastTitle'), {
                 description: t('rbacDashboard.addStaffToastDescription'),
@@ -84,11 +83,11 @@ export function RBACDashboard() {
             }}
           >
             {t('rbacDashboard.addStaff')}
-          </Button>
-          <Button
+          </POSButton>
+          <POSButton
             type="button"
             variant="secondary"
-            size="sm"
+            touchSize="default"
             onClick={() => {
               toast.message(t('rbacDashboard.deactivateToastTitle'), {
                 description: t('rbacDashboard.deactivateToastDescription'),
@@ -96,7 +95,7 @@ export function RBACDashboard() {
             }}
           >
             {t('rbacDashboard.deactivate')}
-          </Button>
+          </POSButton>
         </div>
 
         <DataTable

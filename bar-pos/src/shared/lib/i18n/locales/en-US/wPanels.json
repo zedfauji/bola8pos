@@ -105,6 +105,7 @@
     "tip": "Tip",
     "customTip": "Custom tip",
     "discount": "Discount",
+    "discountDescription": "Apply a percentage or fixed-amount discount to this order",
     "discountScopeAll": "All Items",
     "discountScopePool": "Pool Only",
     "discountScopeConsumptions": "Consumptions",
@@ -181,7 +182,14 @@
     "filters": "Filters",
     "couldNotLoad": "Could not load pool tables",
     "retry": "Retry",
-    "tableReleased": "Table released."
+    "tableReleased": "Table released.",
+    "typeFilter": {
+      "all": "All",
+      "pool": "Pool",
+      "carom": "Carom",
+      "consumption": "Consumption",
+      "floating": "Floating"
+    }
   },
   "poolTableOccupancyPanel": {
     "noTablesConfiguredTitle": "No tables configured",
@@ -410,7 +418,8 @@
   "lowStockAlert": {
     "lowStockAlertAriaLabel": "Low stock alert",
     "lowStockLabel": "Low stock:",
-    "nameQuantity": "{{name}} ({{quantity}})"
+    "nameQuantity": "{{name}} ({{quantity}})",
+    "dismissAlertAriaLabel": "Dismiss alert for {{name}}"
   },
   "rappiOrdersPanel": {
     "clockInBeforeAccepting": "Clock in with an active shift before accepting orders.",

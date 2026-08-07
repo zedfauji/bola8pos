@@ -4,13 +4,13 @@
  * Consistent page/section headers with optional action and badge.
  */
 
-import { ChevronLeft } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { cn } from '@shared/lib/utils';
+import { POSButton } from '@shared/ui/POSButton';
 import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 
 export type SectionHeaderProps = {
   /** Section title */
@@ -53,25 +53,33 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   const { t } = useTranslation('common');
   return (
-    <div className={cn('flex items-start justify-between gap-4 border-b pb-4', className)}>
-      <div className="space-y-1">
+    <div className={cn('flex items-center justify-between gap-4 border-b pb-4', className)}>
+      <div className="flex items-center gap-4">
         {backTo && (
-          <Button variant="ghost" size="sm" asChild className="-ml-2.5 h-6 px-2 text-xs">
+          <POSButton
+            variant="outline"
+            touchSize="large"
+            focusEmphasis="high"
+            asChild
+            className="shrink-0 gap-2 border-2 px-4"
+          >
             <Link to={backTo}>
-              <ChevronLeft className="mr-1 h-3.5 w-3.5" />
+              <Home className="h-5 w-5" />
               {backLabel ?? t('sectionHeader.backHome')}
             </Link>
-          </Button>
+          </POSButton>
         )}
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-          {badge !== undefined && (
-            <Badge variant="secondary" aria-label={`Count: ${String(badge)}`}>
-              {badge}
-            </Badge>
-          )}
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+            {badge !== undefined && (
+              <Badge variant="secondary" aria-label={`Count: ${String(badge)}`}>
+                {badge}
+              </Badge>
+            )}
+          </div>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
 
       {action && <div className="flex-shrink-0">{action}</div>}

@@ -42,7 +42,7 @@ function ProductNameCell({
 }) {
   return (
     <Input
-      className="h-8 min-w-[8rem]"
+      className="h-11 min-w-[8rem]"
       value={draftName}
       onChange={e => {
         onDraftChange(e.target.value);
@@ -71,7 +71,7 @@ function ProductCategoryCell({
 }) {
   return (
     <select
-      className="border-input bg-background h-8 max-w-[10rem] rounded-md border px-2 text-sm"
+      className="border-input bg-background h-11 max-w-[10rem] rounded-md border px-2 text-sm"
       value={draftCategoryId}
       onChange={e => {
         const categoryId = e.target.value;

@@ -5,7 +5,7 @@ import { useMutationUpdateStaffRole } from '@entities/staff/model/queries';
 import type { Staff } from '@shared/lib/domain';
 import { UserRoleSchema } from '@shared/lib/domain';
 import { logger } from '@shared/lib/logger-instance';
-import { Button } from '@shared/ui/button';
+import { POSButton } from '@shared/ui/POSButton';
 import {
   Dialog,
   DialogContent,
@@ -144,25 +144,27 @@ export function EditRoleDialog({
         </div>
 
         <DialogFooter>
-          <Button
+          <POSButton
             type="button"
             variant="outline"
+            touchSize="default"
             onClick={() => {
               handleOpenChange(false);
             }}
             disabled={mutation.isPending}
           >
             {t('editStaffRole.cancel')}
-          </Button>
-          <Button
+          </POSButton>
+          <POSButton
             type="button"
+            touchSize="default"
             onClick={() => {
               void handleSubmit();
             }}
             disabled={!canSubmit}
           >
             {mutation.isPending ? t('editStaffRole.saving') : t('editStaffRole.save')}
-          </Button>
+          </POSButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

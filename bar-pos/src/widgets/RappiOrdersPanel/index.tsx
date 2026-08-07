@@ -7,7 +7,7 @@ import { useStaffStore } from '@entities/staff/model/store';
 import { tabKeys } from '@entities/tab/model/queries';
 import type { RappiOrder } from '@shared/lib/domain';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
-import { Button } from '@shared/ui/button';
+import { POSButton } from '@shared/ui/POSButton';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -132,11 +132,11 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
         <div className="flex flex-wrap gap-2">
           {order.status === 'pending_acceptance' && (
             <>
-              <Button size="sm" onClick={() => void handleAccept()} disabled={busy}>
+              <POSButton touchSize="default" onClick={() => void handleAccept()} disabled={busy}>
                 {t('rappiOrdersPanel.accept')}
-              </Button>
-              <Button
-                size="sm"
+              </POSButton>
+              <POSButton
+                touchSize="default"
                 variant="destructive"
                 onClick={() => {
                   setRejectOpen(true);
@@ -144,30 +144,30 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
                 disabled={busy}
               >
                 {t('rappiOrdersPanel.reject')}
-              </Button>
+              </POSButton>
             </>
           )}
           {(order.status === 'accepted' || order.status === 'preparing') && (
             <>
               {order.status === 'accepted' && (
-                <Button
-                  size="sm"
+                <POSButton
+                  touchSize="default"
                   variant="secondary"
                   onClick={() => void handlePreparing()}
                   disabled={busy}
                 >
                   {t('rappiOrdersPanel.preparing')}
-                </Button>
+                </POSButton>
               )}
-              <Button size="sm" onClick={() => void handleReady()} disabled={busy}>
+              <POSButton touchSize="default" onClick={() => void handleReady()} disabled={busy}>
                 {t('rappiOrdersPanel.readyForPickup')}
-              </Button>
+              </POSButton>
             </>
           )}
           {order.status === 'ready_for_pickup' && (
-            <Button size="sm" onClick={() => void handleComplete()} disabled={busy}>
+            <POSButton touchSize="default" onClick={() => void handleComplete()} disabled={busy}>
               {t('rappiOrdersPanel.complete')}
-            </Button>
+            </POSButton>
           )}
         </div>
       </div>
@@ -189,17 +189,17 @@ function OrderCard({ order, onAccepted }: { order: RappiOrder; onAccepted: () =>
             />
           </div>
           <DialogFooter>
-            <Button
+            <POSButton
               variant="outline"
               onClick={() => {
                 setRejectOpen(false);
               }}
             >
               {t('rappiOrdersPanel.cancel')}
-            </Button>
-            <Button variant="destructive" disabled={busy} onClick={() => void handleReject()}>
+            </POSButton>
+            <POSButton variant="destructive" disabled={busy} onClick={() => void handleReject()}>
               {t('rappiOrdersPanel.rejectOrder')}
-            </Button>
+            </POSButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -235,9 +235,9 @@ export function RappiOrdersPanel() {
     return (
       <div className="p-6">
         <p className="text-destructive mb-2">{t('rappiOrdersPanel.couldNotLoadOrders')}</p>
-        <Button variant="outline" onClick={() => void refetch()}>
+        <POSButton variant="outline" onClick={() => void refetch()}>
           {t('rappiOrdersPanel.retry')}
-        </Button>
+        </POSButton>
       </div>
     );
   }

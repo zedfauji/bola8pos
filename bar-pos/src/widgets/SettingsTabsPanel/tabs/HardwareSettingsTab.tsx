@@ -127,7 +127,7 @@ export function HardwareSettingsTab({ currentRole }: Props) {
                 onChange={e => {
                   patchReceipt({ paperWidthChars: Number(e.target.value) as 32 | 40 | 48 });
                 }}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {PAPER_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>

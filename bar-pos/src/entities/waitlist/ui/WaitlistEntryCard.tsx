@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { WaitlistEntry, WaitlistNotification } from '@entities/waitlist/model/types';
 import { Badge } from '@shared/ui';
-import { Button } from '@shared/ui';
+import { POSButton } from '@shared/ui';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -202,44 +202,46 @@ export function WaitlistEntryCard({
 
       {/* Action buttons — only for active entries */}
       {isActive && (
-        <div className="flex items-center gap-2 pt-1">
+        <div className="flex items-center gap-3 pt-1">
           {/* Notify slot — only for waiting entries */}
           {entry.status === 'waiting' && notifySlot}
 
           {/* Seat button */}
-          <Button
+          <POSButton
             variant="outline"
-            size="sm"
+            touchSize="default"
             disabled={isSeating}
             onClick={() => { onSeat(entry.id); }}
             aria-label={t('waitlistEntryCard.seatPartyAriaLabel')}
           >
             <CheckSquare className="h-4 w-4 mr-1" aria-hidden="true" />
             {t('waitlistEntryCard.seatParty')}
-          </Button>
+          </POSButton>
 
           {/* No-show button — icon only */}
-          <Button
+          <POSButton
             variant="ghost"
+            touchSize="default"
             size="icon"
             onClick={() => { onNoShow(entry.id); }}
             aria-label={t('waitlistEntryCard.markNoShowAriaLabel')}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="ml-auto text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <UserX className="h-4 w-4" aria-hidden="true" />
-          </Button>
+          </POSButton>
 
           {/* Cancel button — only for waiting entries */}
           {entry.status === 'waiting' && (
-            <Button
+            <POSButton
               variant="ghost"
+              touchSize="default"
               size="icon"
               onClick={() => { onCancel(entry.id); }}
               aria-label={t('waitlistEntryCard.cancelEntryAriaLabel')}
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <X className="h-4 w-4" aria-hidden="true" />
-            </Button>
+            </POSButton>
           )}
         </div>
       )}

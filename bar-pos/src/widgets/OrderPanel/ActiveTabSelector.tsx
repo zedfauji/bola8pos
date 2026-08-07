@@ -12,7 +12,6 @@ import type { Order } from '@entities/tab/model/types';
 import { POSButton } from '@shared/ui/POSButton';
 import { ProtectedAction } from '@shared/ui/ProtectedAction';
 import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 import { SubChecksSection } from './SubChecksSection';
 
 export interface ActiveTabSelectorProps {
@@ -71,11 +70,11 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button
+            <div className="flex gap-3">
+              <POSButton
                 type="button"
                 variant="outline"
-                size="sm"
+                touchSize="large"
                 className="flex-1"
                 onClick={handleSwitchTab}
               >
@@ -86,24 +85,25 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                     {openTabCount}
                   </Badge>
                 )}
-              </Button>
+              </POSButton>
               {can('transfer_tab') && (
-                <Button
+                <POSButton
                   type="button"
                   variant="outline"
-                  size="sm"
+                  touchSize="large"
+                  size="icon"
                   onClick={() => {
                     setTransferOpen(true);
                   }}
                   aria-label={t('activeTabSelector.transferTabAriaLabel')}
                 >
                   <ArrowLeftRight className="size-4" />
-                </Button>
+                </POSButton>
               )}
-              <Button
+              <POSButton
                 type="button"
                 variant="outline"
-                size="sm"
+                touchSize="large"
                 onClick={() => {
                   setOpenTabDialogOpen(true);
                 }}
@@ -111,13 +111,13 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
               >
                 <Plus className="mr-1 size-4" />
                 {t('activeTabSelector.newTabButton')}
-              </Button>
+              </POSButton>
             </div>
             {currentTab && currentTab.status === 'open' && (
               <POSButton
                 data-testid="split-bill-button"
                 variant="outline"
-                size="sm"
+                touchSize="large"
                 className="w-full"
                 onClick={() => {
                   setSplitSheetOpen(true);
@@ -149,10 +149,10 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                         action="void_order"
                         currentRole={currentStaff?.role}
                       >
-                        <Button
+                        <POSButton
                           type="button"
                           variant="destructive"
-                          size="sm"
+                          touchSize="large"
                           className="w-full justify-between"
                           onClick={() => {
                             setOrderToVoid(order);
@@ -164,7 +164,7 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                               minute: '2-digit',
                             }),
                           })}
-                        </Button>
+                        </POSButton>
                       </ProtectedAction>
                     ))}
                 </div>
@@ -173,18 +173,18 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
           </div>
         ) : (
           <div
-            className="space-y-3 rounded-lg border-2 border-dashed border-primary/40 p-4 ring-2 ring-primary/20 animate-pulse"
+            className="space-y-3 rounded-lg border bg-muted/30 p-4"
             role="status"
             aria-live="polite"
           >
             <p className="text-center text-sm text-muted-foreground">
               {t('activeTabSelector.selectOrCreateTab')}
             </p>
-            <div className="flex gap-2">
-              <Button
+            <div className="flex gap-3">
+              <POSButton
                 type="button"
                 variant="outline"
-                size="sm"
+                touchSize="large"
                 className="flex-1"
                 onClick={handleSwitchTab}
                 disabled={openTabCount === 0}
@@ -196,17 +196,17 @@ export function ActiveTabSelector({ onSwitchTab }: ActiveTabSelectorProps) {
                     {openTabCount}
                   </Badge>
                 )}
-              </Button>
-              <Button
+              </POSButton>
+              <POSButton
                 type="button"
-                size="sm"
+                touchSize="large"
                 onClick={() => {
                   setOpenTabDialogOpen(true);
                 }}
               >
                 <Plus className="mr-1 size-4" />
                 {t('activeTabSelector.newTabButton')}
-              </Button>
+              </POSButton>
             </div>
           </div>
         )}

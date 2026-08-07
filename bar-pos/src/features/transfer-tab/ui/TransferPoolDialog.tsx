@@ -5,7 +5,6 @@ import { useResources } from '@entities/resource';
 import { useStaffStore } from '@entities/staff/model/store';
 import type { PoolSession, Resource } from '@shared/lib/domain';
 import { POSButton } from '@shared/ui/POSButton';
-import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/ui/dialog';
 import { Label } from '@shared/ui/label';
 import { useTransferPoolSession } from '../useTransferPoolSession';
@@ -75,7 +74,7 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
               onChange={e => {
                 setTargetTableId(e.target.value);
               }}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">{t('transferTab.selectTableOption')}</option>
               {availableTables.map((tbl: Resource) => (
@@ -91,7 +90,7 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
         </div>
 
         <DialogFooter>
-          <Button
+          <POSButton
             type="button"
             variant="outline"
             onClick={() => {
@@ -99,7 +98,7 @@ export function TransferPoolDialog({ open, onOpenChange, session }: TransferPool
             }}
           >
             {t('common:actions.cancel')}
-          </Button>
+          </POSButton>
           <POSButton
             type="button"
             disabled={transferMut.isPending || !targetTableId}

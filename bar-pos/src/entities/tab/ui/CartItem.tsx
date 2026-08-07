@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import type { CartItem as CartItemType } from '@shared/lib/domain';
 import { formatMoney } from '@shared/lib/format';
 import { MoneyDisplay } from '@shared/ui/MoneyDisplay';
+import { POSButton } from '@shared/ui/POSButton';
 import { QuantityControl } from '@shared/ui/QuantityControl';
 import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 
 export interface CartItemProps {
@@ -22,16 +22,17 @@ export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartI
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-start justify-between gap-2">
           <h4 className="truncate text-sm font-medium">{item.product.name}</h4>
-          <Button
+          <POSButton
             type="button"
             variant="ghost"
+            touchSize="default"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="shrink-0"
             onClick={onRemove}
             aria-label={t('cartItem.remove', { name: item.product.name })}
           >
             <X className="h-4 w-4" />
-          </Button>
+          </POSButton>
         </div>
 
         {item.selectedModifiers.length > 0 && (

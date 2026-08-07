@@ -20,7 +20,7 @@ import type {
   WaitlistMetricsRow,
 } from '@shared/lib/domain';
 import { canAccess } from '@shared/lib/rbac';
-import { Button } from '@shared/ui/button';
+import { POSButton } from '@shared/ui/POSButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -250,14 +250,14 @@ export function ExportButtons(props: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={isExporting}>
+        <POSButton variant="outline" touchSize="default" disabled={isExporting}>
           {isExporting ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (
             <Download className="mr-2 size-4" />
           )}
           {t('exportReport.exportButton')}
-        </Button>
+        </POSButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel inset={undefined}>{t('exportReport.downloadAs')}</DropdownMenuLabel>

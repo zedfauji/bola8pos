@@ -79,7 +79,7 @@ export function KdsCard({ item, onBump, isBumping }: KdsCardProps) {
 
       {item.kdsStatus !== 'done' && (
         <POSButton
-          touchSize="large"
+          touchSize="xl"
           variant={item.kdsStatus === 'pending' ? 'secondary' : 'default'}
           disabled={isBumping}
           onClick={handleClick}
@@ -129,7 +129,7 @@ function ComboKdsCard({
       </div>
 
       <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger className="flex items-center gap-1 text-sm opacity-70 hover:opacity-100">
+        <CollapsibleTrigger className="-ml-3 flex min-h-11 items-center gap-1 rounded-md px-3 text-sm opacity-70 transition-opacity hover:opacity-100 active:opacity-100">
           <ChevronDown
             size={16}
             className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
@@ -156,7 +156,7 @@ function ComboKdsCard({
 
       {item.kdsStatus !== 'done' && (
         <POSButton
-          touchSize="large"
+          touchSize="xl"
           variant={item.kdsStatus === 'pending' ? 'secondary' : 'default'}
           disabled={isBumping}
           onClick={() => {
@@ -198,7 +198,7 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
         <p className="text-destructive mb-2">
           {t('kdsBoard.couldNotLoadQueue', { station: stationLabel })}
         </p>
-        <POSButton touchSize="default" variant="outline" onClick={() => void refetch()}>
+        <POSButton touchSize="large" variant="outline" onClick={() => void refetch()}>
           {t('kdsBoard.retry')}
         </POSButton>
       </div>

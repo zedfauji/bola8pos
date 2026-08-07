@@ -98,6 +98,7 @@ export function CatalogCategoriesTab() {
                 type="button"
                 variant="outline"
                 touchSize="default"
+                size="icon"
                 disabled={index === 0 || updateMutation.isPending}
                 aria-label={t('manageProducts.categoriesTab.moveUpAria')}
                 onClick={() => {
@@ -111,6 +112,7 @@ export function CatalogCategoriesTab() {
                 type="button"
                 variant="outline"
                 touchSize="default"
+                size="icon"
                 disabled={index >= sorted.length - 1 || updateMutation.isPending}
                 aria-label={t('manageProducts.categoriesTab.moveDownAria')}
                 onClick={() => {
@@ -124,6 +126,7 @@ export function CatalogCategoriesTab() {
                 type="button"
                 variant="outline"
                 touchSize="default"
+                size="icon"
                 onClick={() => {
                   setEditCategory(c);
                 }}

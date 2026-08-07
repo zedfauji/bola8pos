@@ -13,7 +13,7 @@ import type { AuditLogFilters } from '@entities/audit-log';
 import { useStaffList } from '@entities/staff';
 import { AuditActionSchema } from '@shared/lib/audit-actions';
 import { FormField } from '@shared/ui/FormField';
-import { Button } from '@shared/ui/button';
+import { POSButton } from '@shared/ui/POSButton';
 import { Input } from '@shared/ui/input';
 import {
   Select,
@@ -55,7 +55,7 @@ function toDateInputValue(date: Date | undefined): string {
 }
 
 const DATE_INPUT_CLASS =
-  'rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+  'h-11 rounded-md border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
 function omit<T extends object, K extends keyof T>(obj: T, key: K): Omit<T, K> {
   const entries = Object.entries(obj).filter(([k]) => k !== key);
@@ -176,13 +176,14 @@ export function AuditLogFilterBar({ staged, onStagedChange, onApply }: AuditLogF
         </span>
       </div>
 
-      <Button
+      <POSButton
+        touchSize="default"
         onClick={() => {
           onApply(staged);
         }}
       >
         {t('auditLogFilterBar.applyFilters')}
-      </Button>
+      </POSButton>
     </div>
   );
 }

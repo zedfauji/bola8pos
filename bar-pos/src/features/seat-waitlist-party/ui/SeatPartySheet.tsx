@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '@shared/lib/supabase';
 import { cn } from '@shared/lib/utils';
 import {
-  Button,
   LoadingSpinner,
+  POSButton,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -159,9 +159,9 @@ export function SeatPartySheet({
                 <p className="text-sm text-muted-foreground">
                   {t('seatWaitlistParty.noTablesAvailable')}
                 </p>
-                <Button
+                <POSButton
                   type="button"
-                  size="lg"
+                  touchSize="large"
                   disabled={isSeatingNewTable}
                   onClick={() => { void handleSeatAtNewTable(); }}
                 >
@@ -173,18 +173,19 @@ export function SeatPartySheet({
                       {t('seatWaitlistParty.seatAtNewTable')}
                     </>
                   )}
-                </Button>
+                </POSButton>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {availableTables.map((table) => (
-                  <Button
+                  <POSButton
                     key={table.id}
                     type="button"
                     variant="outline"
+                    touchSize="large"
                     aria-pressed={selectedTableId === table.id}
                     className={cn(
-                      'rounded-lg border p-4 text-left transition-colors',
+                      'h-auto rounded-lg border p-4 text-left transition-colors',
                       selectedTableId === table.id
                         ? 'border-pos-accent bg-pos-accent/10'
                         : 'hover:bg-accent',
@@ -194,7 +195,7 @@ export function SeatPartySheet({
                     <span className="text-base font-semibold">
                       {t('seatWaitlistParty.tableLabel', { number: table.number, label: table.label })}
                     </span>
-                  </Button>
+                  </POSButton>
                 ))}
               </div>
             )}
@@ -208,16 +209,17 @@ export function SeatPartySheet({
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {occupiedTables.map((table) => (
-                  <Button
+                  <POSButton
                     key={table.id}
                     type="button"
                     variant="outline"
+                    touchSize="large"
                     disabled
                     aria-label={t('seatWaitlistParty.occupiedTableAria', {
                       number: table.number,
                       label: table.label,
                     })}
-                    className="rounded-lg border p-4 text-left opacity-50 cursor-not-allowed"
+                    className="h-auto rounded-lg border p-4 text-left opacity-50 cursor-not-allowed"
                   >
                     <span className="text-base font-semibold">
                       {t('seatWaitlistParty.tableLabel', { number: table.number, label: table.label })}
@@ -225,7 +227,7 @@ export function SeatPartySheet({
                     <span className="block text-sm text-muted-foreground">
                       {t('seatWaitlistParty.occupied')}
                     </span>
-                  </Button>
+                  </POSButton>
                 ))}
               </div>
             </div>
@@ -233,11 +235,11 @@ export function SeatPartySheet({
         </div>
 
         <SheetFooter className="px-6 pb-6 flex gap-3">
-          <Button size="lg" variant="outline" className="flex-1" onClick={handleClose}>
+          <POSButton touchSize="large" variant="outline" className="flex-1" onClick={handleClose}>
             {t('seatWaitlistParty.close')}
-          </Button>
-          <Button
-            size="lg"
+          </POSButton>
+          <POSButton
+            touchSize="large"
             className="flex-1"
             disabled={!selectedTableId || isPending}
             onClick={() => { void handleSeat(); }}
@@ -250,7 +252,7 @@ export function SeatPartySheet({
                 {t('seatWaitlistParty.seatParty')}
               </>
             )}
-          </Button>
+          </POSButton>
         </SheetFooter>
       </SheetContent>
     </Sheet>

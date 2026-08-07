@@ -12,7 +12,7 @@ export interface CategoryTabsProps {
 
 const pillClass = (active: boolean) =>
   cn(
-    'flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-colors',
+    'flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 py-3 text-sm font-medium transition-colors',
     active ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
   );
 
