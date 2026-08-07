@@ -28,6 +28,7 @@ import {
   tauriError,
   unknownError,
   parseSupabaseError,
+  versionedMutation,
   type Result,
   type AppError,
 } from './result';
@@ -528,5 +529,71 @@ describe('parseSupabaseError()', () => {
     const error = parseSupabaseError(pgError);
 
     expect(error.code).toBe('SUPABASE_ERROR');
+  });
+});
+
+describe('versionedMutation()', () => {
+  it('returns ok(undefined) when the update matches at least one row', async () => {
+    const result = await versionedMutation(() =>
+      Promise.resolve({ data: [{ id: 'x' }], error: null })
+    );
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('returns STALE_VERSION when the update matches zero rows (empty array)', async () => {
+    const result = await versionedMutation(() => Promise.resolve({ data: [], error: null }));
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe('STALE_VERSION');
+    }
+  });
+
+  it('returns STALE_VERSION when the update returns null data with no error', () => {
+    return versionedMutation(() => Promise.resolve({ data: null, error: null })).then(result => {
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe('STALE_VERSION');
+      }
+    });
+  });
+
+  it('delegates a P0V01 Supabase error to parseSupabaseError (not the row-count branch)', async () => {
+    const pgError: PostgrestError = {
+      code: 'P0V01',
+      message: 'stale version',
+      details: '',
+      hint: '',
+      name: 'PostgrestError',
+      toJSON: () => ({ name: 'PostgrestError', message: '', details: '', hint: '', code: '' }),
+    };
+    const result = await versionedMutation(() =>
+      Promise.resolve({ data: null, error: pgError })
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe('STALE_VERSION');
+    }
+  });
+
+  it('passes through non-version Supabase errors unchanged', async () => {
+    const pgError: PostgrestError = {
+      code: '23505',
+      message: 'duplicate key value',
+      details: '',
+      hint: '',
+      name: 'PostgrestError',
+      toJSON: () => ({ name: 'PostgrestError', message: '', details: '', hint: '', code: '' }),
+    };
+    const result = await versionedMutation(() =>
+      Promise.resolve({ data: null, error: pgError })
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe('DUPLICATE_ENTRY');
+    }
   });
 });
