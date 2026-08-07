@@ -160,17 +160,21 @@ export default tseslint.config({
   plugins: { tailwindcss },
   settings: {
     tailwindcss: {
-      // Must be an absolute path — eslint-plugin-tailwindcss@3.18.3 resolves
-      // the `tailwindcss` package via `require.resolve(..., { paths: [dirname(config)] })`,
-      // and Node's require.resolve `paths` option does not reliably resolve a
-      // relative dirname ('.') against process.cwd() in all cases.
-      config: path.resolve(import.meta.dirname, 'tailwind.config.ts'),
-      callees: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv'],
-      whitelist: ['^(animate|fade|slide|zoom)-(in|out)(-from-\\w+)?$'],
+      // eslint-plugin-tailwindcss@4 requires cssConfigPath to point at the
+      // Tailwind v4 CSS entry point (must be a .css file), not the old v3
+      // JS/TS config — tailwind.config.ts is no longer read by Tailwind
+      // itself post-v4-upgrade (all theme values live in globals.css's
+      // @theme block). Must be an absolute path for the same require.resolve
+      // reliability reason the old `config` path was absolute.
+      cssConfigPath: path.resolve(import.meta.dirname, 'src/app/globals.css'),
+      functions: ['cn', 'clsx', 'classnames', 'ctl', 'cva', 'tv'],
     },
   },
   rules: {
-    'tailwindcss/no-custom-classname': 'error',
+    'tailwindcss/no-custom-classname': [
+      'error',
+      { whitelist: ['^(animate|fade|slide|zoom)-(in|out)(-from-\\w+)?$'] },
+    ],
     'tailwindcss/enforces-shorthand': 'error',
     // tailwindcss/no-arbitrary-value intentionally NOT enabled — D-15.
     // It flags any bracketed value (h-[...], w-[...], min-h-[...], etc.), not
