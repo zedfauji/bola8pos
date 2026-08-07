@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## UAT / Verification: automate it, never ask the user to click through
+
+**Never ask the user to manually click through the app and report back what happened.** This includes `/gsd-verify-work` UAT checkpoints, "please verify X", or any other request for the user to be the test harness. The user has explicitly and repeatedly stated this is unacceptable.
+
+Instead, when a feature needs to be verified in the running app:
+- Drive it yourself with the Playwright MCP tools (`mcp__playwright__browser_navigate`, `browser_click`, `browser_snapshot`, `browser_network_requests`/`browser_network_request`, `browser_console_messages`, etc.) against the dev server (`npm run dev`, port 1420).
+- Read the actual network responses / console errors to find root causes — don't guess and don't narrate a hypothetical click-through.
+- If something can be verified with `npx playwright test` against an existing or new spec file, do that instead of ad-hoc browser driving.
+- Only report back to the user once you have concrete, reproduced evidence (pass, or a specific failure with request/response/error detail).
+- If a check is genuinely impossible to automate (e.g. requires physical hardware), say so explicitly and explain why — don't default to "please check for me."
+
 ## Codebase Knowledge Graph (query before you grep)
 
 A knowledge graph of this codebase already exists at `graphify-out/graph.json` (built via the `graphify` skill — 5309 nodes, 13496 edges, 394 communities). **Before using Glob/Grep/Read to explore unfamiliar code** ("where is X defined", "what calls Y", "how does Z connect to W", "what depends on this table/RPC"), check the graph first:
