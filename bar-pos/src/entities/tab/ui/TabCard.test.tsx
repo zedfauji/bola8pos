@@ -97,4 +97,27 @@ describe('TabCard', () => {
     render(<TabCard {...baseProps} tab={tab} />);
     expect(screen.getByLabelText('Status: 4h+')).toBeInTheDocument();
   });
+
+  it('does not render a Details button when onViewDetails is omitted', () => {
+    vi.setSystemTime(new Date('2026-04-16T22:00:00Z'));
+    render(<TabCard {...baseProps} tab={tabShort} />);
+    expect(
+      screen.queryByLabelText(`View details for ${mockTab.customerName}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('calls onViewDetails with the tab id, without triggering onSelect', () => {
+    vi.setSystemTime(new Date('2026-04-16T22:00:00Z'));
+    const onSelect = vi.fn();
+    const onViewDetails = vi.fn();
+    render(
+      <TabCard {...baseProps} tab={tabShort} onSelect={onSelect} onViewDetails={onViewDetails} />
+    );
+
+    const detailsButton = screen.getByLabelText(`View details for ${mockTab.customerName}`);
+    fireEvent.click(detailsButton);
+
+    expect(onViewDetails).toHaveBeenCalledWith(mockTab.id);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });

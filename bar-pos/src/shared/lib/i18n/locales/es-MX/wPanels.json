@@ -239,7 +239,9 @@
     "noActiveShiftDescription": "Tu sesión no tiene un turno vinculado. Cierra sesión y vuelve a iniciar sesión con el fondo de caja inicial para comenzar un turno.",
     "errorLoadingTabs": "Error al cargar las cuentas",
     "noOpenTabs": "No hay cuentas abiertas",
-    "openNewTabToStart": "Abre una nueva cuenta para comenzar"
+    "openNewTabToStart": "Abre una nueva cuenta para comenzar",
+    "tabDetailsTitle": "Detalles de la cuenta",
+    "tabDetailsDescription": "Consulta los artículos, totales y acciones de cierre/transferencia de esta cuenta."
   },
   "cajaDashboard": {
     "cajaOpenedSuccess": "Caja abierta correctamente.",

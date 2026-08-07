@@ -239,7 +239,9 @@
     "noActiveShiftDescription": "Your session has no shift linked. Sign out and sign in again with opening cash to start a shift.",
     "errorLoadingTabs": "Error loading tabs",
     "noOpenTabs": "No open tabs",
-    "openNewTabToStart": "Open a new tab to get started"
+    "openNewTabToStart": "Open a new tab to get started",
+    "tabDetailsTitle": "Tab Details",
+    "tabDetailsDescription": "View this tab's items, totals, and close/transfer actions."
   },
   "cajaDashboard": {
     "cajaOpenedSuccess": "Caja opened successfully.",

@@ -6,11 +6,14 @@
  */
 
 import { Receipt } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useCloseTab } from '@features/close-tab';
 import { OpenTabButton } from '@features/open-tab/ui/OpenTabButton';
 import { useTabs } from '@entities/tab/model/queries';
 import { useTabStore } from '@entities/tab/model/store';
 import { TabCard } from '@entities/tab/ui/TabCard';
+import { TabDetail } from '@entities/tab/ui/TabDetail';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@shared/ui';
 import { EmptyState } from '@shared/ui';
 import { TabListSkeleton } from '@shared/ui/LoadingSkeletons';
@@ -21,6 +24,8 @@ export function TabDrawer() {
   const { data: tabs, isLoading, isError, error, resultError, isDisabled } = useTabs();
   const hasError = isError || Boolean(resultError);
   const errorMessage = resultError?.message ?? error?.message ?? t('tabDrawer.unknownError');
+  const { closeTab } = useCloseTab();
+  const [detailTabId, setDetailTabId] = useState<string | null>(null);
 
   const tabCount = tabs?.length ?? 0;
 
@@ -83,6 +88,7 @@ export function TabDrawer() {
                   selectTab(tabId);
                   closeDrawer();
                 }}
+                onViewDetails={setDetailTabId}
               />
             ))}
           </div>
@@ -92,6 +98,42 @@ export function TabDrawer() {
           <OpenTabButton />
         </div>
       </SheetContent>
+
+      <Sheet
+        open={detailTabId !== null}
+        onOpenChange={open => {
+          if (!open) setDetailTabId(null);
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="flex w-[380px] max-w-[100vw] flex-col overflow-y-auto sm:max-w-[380px]"
+        >
+          <SheetHeader>
+            <SheetTitle>{t('tabDrawer.tabDetailsTitle')}</SheetTitle>
+            <SheetDescription className="sr-only">
+              {t('tabDrawer.tabDetailsDescription')}
+            </SheetDescription>
+          </SheetHeader>
+          {detailTabId && (
+            <TabDetail
+              tabId={detailTabId}
+              onAddItems={() => {
+                selectTab(detailTabId);
+                closeDrawer();
+                setDetailTabId(null);
+              }}
+              onCloseTab={() => {
+                void closeTab(detailTabId).then(result => {
+                  if (result.ok) {
+                    setDetailTabId(null);
+                  }
+                });
+              }}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
     </Sheet>
   );
 }

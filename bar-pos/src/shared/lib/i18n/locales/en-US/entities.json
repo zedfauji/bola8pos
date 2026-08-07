@@ -112,7 +112,8 @@
     "ariaLabelWithTable": "Tab for {{customerName}}, table {{tableNumber}}",
     "tableNumber": "Table {{number}}",
     "itemCount_one": "{{count}} item",
-    "itemCount_other": "{{count}} items"
+    "itemCount_other": "{{count}} items",
+    "detailsAriaLabel": "View details for {{customerName}}"
   },
   "tabDetail": {
     "errorLoadingTab": "Error loading tab",
