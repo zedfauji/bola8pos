@@ -74,7 +74,7 @@ async function ensureStaffAccount(
 
   const { data: existing, error: findErr } = await db
     .from('profiles')
-    .select('id, is_active, deleted_at, must_change_pin, pin, role, email')
+    .select('id, is_active, deleted_at, must_change_pin, pin, role, email, locale')
     .eq('name', name)
     .maybeSingle();
 
@@ -104,6 +104,7 @@ async function ensureStaffAccount(
       existing.is_active !== true ||
       existing.deleted_at !== null ||
       existing.must_change_pin !== false ||
+      existing.locale !== 'en-US' ||
       !existing.email;
 
     if (needsRepair) {
@@ -115,6 +116,11 @@ async function ensureStaffAccount(
           is_active: true,
           deleted_at: null,
           must_change_pin: false,
+          // App default is es-MX (D-02), but E2E specs assert on English UI text
+          // (e2e/helpers/auth.ts and most e2e/*.spec.ts selectors) — post-login,
+          // i18n.changeLanguage(staff.locale) fires, so these test-only accounts
+          // pin to en-US regardless of the app-wide default.
+          locale: 'en-US',
           email: existing.email ?? email,
         })
         .eq('id', id);
@@ -149,6 +155,8 @@ async function ensureStaffAccount(
     email,
     is_active: true,
     must_change_pin: false,
+    // See the repair-path comment above: E2E specs assert on English UI text.
+    locale: 'en-US',
   });
   if (insertErr) {
     console.error(`Failed to insert profile "${name}":`, insertErr);
