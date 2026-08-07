@@ -174,3 +174,38 @@ explicitly-labeled "Placeholder for Supabase generated types" documentation file
 header comment) that is not imported for its `Database.public.Tables` shape by any real query
 code (verified via `grep -rln "supabase-contracts"` — the only 3 importers use unrelated exports).
 Left untouched; does not affect typecheck or runtime.
+
+## Plan 20-12, Task 3
+
+**Pre-existing `npm run test` failure (out of scope, not caused by this task):
+`src/widgets/PINLoginForm/PINLoginForm.test.tsx` — 5 of 6 cases fail.**
+
+`npm run test` (full unit suite) shows 6 failed / 1408 passed / 15 todo. 5 of the 6 failures
+are all in `PINLoginForm.test.tsx` (`forced_pin_change phase` × 4 cases + `does not log in when
+clock-in fails`). Every failure is a `TestingLibraryElementError: Unable to find an element with
+the text: ...` where the queried text is English (`Set a new PIN`, `New PIN`, `Enter the cash
+drawer float for this shift...`, `Start shift`) but the rendered DOM shows Spanish (`Atrás`,
+`Iniciar turno`, etc.) — i.e. the test environment's i18next instance is rendering es-MX despite
+`src/shared/lib/test-setup.ts` pinning `i18n.changeLanguage('en-US')` at module load.
+
+**Confirmed pre-existing, not caused by this plan's changes:**
+- None of Plan 20-12's changed files (`entities/promotion/model/queries.ts`,
+  `features/manage-promotions/ui/PromotionBuilderForm.{tsx,test.tsx}`, the two `featMgmt.json`
+  locale files, `e2e/43-promotions.spec.ts`, `e2e/helpers/supabase.ts`) touch
+  `PINLoginForm.tsx`/`.test.tsx`, `staff/model/store.ts`, `test-setup.ts`, or the i18n config.
+- Reproduces identically running `npx vitest run src/widgets/PINLoginForm/PINLoginForm.test.tsx`
+  in complete file isolation (5/6 fail, same error text) — rules out cross-file test-pollution
+  from this session's other vitest invocations.
+- Consistent with this phase's own documented history of i18next locale-timing races (see the
+  `store.ts` TDZ/hydration comment and multiple `i18nReady.then(...)` races already fixed
+  elsewhere in Phase 21/23) — this looks like the same category of pre-existing flake/defect in
+  a file untouched by any Phase 20 plan.
+
+**6th failing test not investigated in detail** (same file, believed same root cause).
+
+**Why not fixed here:** SCOPE BOUNDARY — `PINLoginForm.test.tsx` is not in Plan 20-12's
+`files_modified` and the failure is unrelated to the promotions CHECK-constraint bug this plan
+closes. The 1 new test added by this plan's Task 3 (`useMutationCreatePromotion` draft-default
+regression guard) passes cleanly and causes no additional failures beyond this pre-existing one.
+Flagged here for a future cleanup plan to investigate the i18next test-environment locale race
+in `PINLoginForm.test.tsx`.

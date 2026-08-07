@@ -16,7 +16,7 @@ vi.mock('@shared/lib/logger-instance', () => ({
 
 import { supabase } from '@shared/lib/supabase';
 
-import { promotionKeys, usePromotions } from './queries';
+import { promotionKeys, useMutationCreatePromotion, usePromotions } from './queries';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -80,5 +80,33 @@ describe('usePromotions', () => {
     expect(promotions?.[0]?.discountType).toBe('percentage');
     expect(promotions?.[0]?.targetCategoryId).toBe('223e4567-e89b-12d3-a456-426614174001');
     expect(promotions?.[0]?.isActive).toBe(true);
+  });
+});
+
+describe('useMutationCreatePromotion', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('draft insert targets pool_billing (no required FK) and carries no target_product_id/target_category_id', async () => {
+    const singleMock = vi.fn().mockResolvedValue({ data: { id: 'new-promo-id' }, error: null });
+    const selectMock = vi.fn().mockReturnValue({ single: singleMock });
+    const insertMock = vi.fn().mockReturnValue({ select: selectMock });
+    (supabase.from as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      insert: insertMock,
+    } as unknown as ReturnType<typeof supabase.from>);
+
+    const { result } = renderHook(() => useMutationCreatePromotion(), { wrapper: createWrapper() });
+    result.current.mutate();
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(insertMock).toHaveBeenCalledTimes(1);
+    const insertPayload = insertMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(insertPayload['target_type']).toBe('pool_billing');
+    expect(insertPayload).not.toHaveProperty('target_product_id');
+    expect(insertPayload).not.toHaveProperty('target_category_id');
   });
 });

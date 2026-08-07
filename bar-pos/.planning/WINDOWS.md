@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 5
+open_count: 6
 waived_count: 0
 fixed_count: 0
-total_count: 5
-last_updated: 2026-08-07T07:10:42.764Z
+total_count: 6
+last_updated: 2026-08-07T22:35:53.291Z
 ---
 
 # Broken Windows Ledger
@@ -20,6 +20,7 @@ last_updated: 2026-08-07T07:10:42.764Z
 | 3 | 28 | deviation | src/features/process-refund/process-refund-rpc.integration.test.ts |  | Flaky/pre-existing integration test failure (parent-close trigger) observed during 28-06 verify — unrelated to money-formatter changes, likely cross-worktree DB race; see phase deferred-items.md | open |  | 2026-08-02T19:44:06.125Z |  |
 | 4 | 39 | deviation | e2e/11-offline.spec.ts | 69 | Offline queue drops the 2nd of 2 orders queued against the same tab on reconnect (STALE_VERSION discard, unconfirmed root cause) — filed as .planning/todos/pending/2026-08-04-offline-queue-drops-second-order-on-reconnect.md | open |  | 2026-08-06T19:09:50.452Z |  |
 | 5 | 15 | deviation | src/widgets/PINLoginForm/PINLoginForm.test.tsx |  | Pre-existing flaky forced_pin_change / clock-in waitFor timeouts, unrelated to 15-07 (result.ts diff purely additive); see deferred-items.md | open |  | 2026-08-07T07:10:42.764Z |  |
+| 6 | 20 | deviation | src/widgets/PINLoginForm/PINLoginForm.test.tsx |  | Pre-existing (not caused by Plan 20-12): 5/6 tests fail — i18next test env renders es-MX instead of en-US, unrelated to promotions CHECK-constraint fix; documented in deferred-items.md | open |  | 2026-08-07T22:35:53.291Z |  |
 
 ````json
 [
@@ -81,6 +82,18 @@ last_updated: 2026-08-07T07:10:42.764Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-07T07:10:42.764Z",
+    "resolved_at": null
+  },
+  {
+    "id": 6,
+    "kind": "deviation",
+    "phase": "20",
+    "file": "src/widgets/PINLoginForm/PINLoginForm.test.tsx",
+    "line": null,
+    "description": "Pre-existing (not caused by Plan 20-12): 5/6 tests fail — i18next test env renders es-MX instead of en-US, unrelated to promotions CHECK-constraint fix; documented in deferred-items.md",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-07T22:35:53.291Z",
     "resolved_at": null
   }
 ]
