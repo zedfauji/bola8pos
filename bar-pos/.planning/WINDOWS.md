@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 4
+open_count: 5
 waived_count: 0
 fixed_count: 0
-total_count: 4
-last_updated: 2026-08-06T19:09:50.452Z
+total_count: 5
+last_updated: 2026-08-07T07:10:42.764Z
 ---
 
 # Broken Windows Ledger
@@ -19,6 +19,7 @@ last_updated: 2026-08-06T19:09:50.452Z
 | 2 | 26 | unrun-verify | e2e/04-pool-timer.spec.ts |  | Plan 26-04 verification item 6 (npx playwright test e2e/04-pool-timer.spec.ts) and item 7 (deactivate-floating-resource.integration.test.ts) not re-run to completion — severe host filesystem/process contention during execution. Also: ~15 e2e specs (incl. this one, e2e/helpers/supabase.ts) still query .from('pool_tables'), the table Plan 01 renamed to resources — likely breaks these specs at the DB level regardless of dev-server health. | open |  | 2026-07-29T06:56:28.946Z |  |
 | 3 | 28 | deviation | src/features/process-refund/process-refund-rpc.integration.test.ts |  | Flaky/pre-existing integration test failure (parent-close trigger) observed during 28-06 verify — unrelated to money-formatter changes, likely cross-worktree DB race; see phase deferred-items.md | open |  | 2026-08-02T19:44:06.125Z |  |
 | 4 | 39 | deviation | e2e/11-offline.spec.ts | 69 | Offline queue drops the 2nd of 2 orders queued against the same tab on reconnect (STALE_VERSION discard, unconfirmed root cause) — filed as .planning/todos/pending/2026-08-04-offline-queue-drops-second-order-on-reconnect.md | open |  | 2026-08-06T19:09:50.452Z |  |
+| 5 | 15 | deviation | src/widgets/PINLoginForm/PINLoginForm.test.tsx |  | Pre-existing flaky forced_pin_change / clock-in waitFor timeouts, unrelated to 15-07 (result.ts diff purely additive); see deferred-items.md | open |  | 2026-08-07T07:10:42.764Z |  |
 
 ````json
 [
@@ -68,6 +69,18 @@ last_updated: 2026-08-06T19:09:50.452Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-06T19:09:50.452Z",
+    "resolved_at": null
+  },
+  {
+    "id": 5,
+    "kind": "deviation",
+    "phase": "15",
+    "file": "src/widgets/PINLoginForm/PINLoginForm.test.tsx",
+    "line": null,
+    "description": "Pre-existing flaky forced_pin_change / clock-in waitFor timeouts, unrelated to 15-07 (result.ts diff purely additive); see deferred-items.md",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-07T07:10:42.764Z",
     "resolved_at": null
   }
 ]
