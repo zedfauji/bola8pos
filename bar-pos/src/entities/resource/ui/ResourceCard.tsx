@@ -86,7 +86,7 @@ export function ResourceCard({
     <Card
       data-testid="pool-table-card"
       className={cn(
-        'flex flex-col overflow-hidden',
+        'flex flex-col overflow-hidden transition-shadow duration-200 ease-out',
         isOccupied && 'ring-2 ring-inset ring-primary'
       )}
       onClick={isOccupied && onViewStatus ? handleCardClick : undefined}
