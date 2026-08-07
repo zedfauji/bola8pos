@@ -12,6 +12,8 @@ const BodySchema = z
     tenderedAmount: z.number().nonnegative().multipleOf(0.01).nullable().optional(),
     referenceNumber: z.string().max(64).nullable().optional(),
     rappiOrderId: z.string().max(128).nullable().optional(),
+    // Phase 15 gap-closure (D-02): cached tab.version for optimistic-concurrency guard.
+    expectedVersion: z.number().int().nonnegative().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.method === 'cash' && data.tenderedAmount == null) {
@@ -154,6 +156,7 @@ Deno.serve(async (req: Request) => {
     p_tendered_amount: body.tenderedAmount ?? null,
     p_reference_number: body.referenceNumber?.trim() ? body.referenceNumber.trim() : null,
     p_rappi_order_id: body.rappiOrderId?.trim() ? body.rappiOrderId.trim() : null,
+    ...(body.expectedVersion !== undefined ? { p_expected_version: body.expectedVersion } : {}),
   });
 
   if (rpcError) {
