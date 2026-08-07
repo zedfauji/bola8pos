@@ -177,7 +177,7 @@ function ComboBuilderSheetInner({
 
         <div className="max-h-[calc(80vh-240px)] overflow-y-auto space-y-4 py-4">
           {overrideActive && (
-            <Alert className="border-yellow-500 bg-yellow-950/20 mb-4">
+            <Alert className="border-pos-warning bg-pos-warning/10 mb-4">
               <AlertDescription>{t('addCombo.overrideNotice')}</AlertDescription>
             </Alert>
           )}

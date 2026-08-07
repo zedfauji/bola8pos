@@ -158,7 +158,7 @@ export function TabDetail({
     <div className={cn('space-y-6', className)}>
       {tab.hasActivePoolSession && (
         <div
-          className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100"
+          className="rounded-lg border border-pos-warning/50 bg-pos-warning/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100"
           role="status"
         >
           {tab.activePoolTableNumber != null
@@ -172,7 +172,9 @@ export function TabDetail({
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h2 className="text-2xl font-bold">{tab.customerName}</h2>
+              <h2 className="font-heading text-2xl font-semibold tracking-tight">
+                {tab.customerName}
+              </h2>
               {tab.tableNumber !== null && (
                 <p className="text-muted-foreground">
                   {t('tabDetail.tableNumber', { number: tab.tableNumber })}

@@ -33,10 +33,10 @@ import { PromotionBuilderForm } from './PromotionBuilderForm';
 
 /* eslint-disable i18next/no-literal-string -- Tailwind class strings, not UI copy */
 const targetTypeBadgeClasses: Record<PromotionTargetType, string> = {
-  item: 'bg-blue-500/20 text-blue-300',
-  category: 'bg-purple-500/20 text-purple-300',
-  pool_billing: 'bg-cyan-500/20 text-cyan-300',
-  pool_grant: 'bg-amber-500/20 text-amber-300',
+  item: 'bg-primary/20 text-primary',
+  category: 'bg-muted text-muted-foreground',
+  pool_billing: 'bg-secondary text-secondary-foreground',
+  pool_grant: 'bg-accent text-accent-foreground',
 };
 /* eslint-enable i18next/no-literal-string */
 

@@ -271,15 +271,15 @@ describe('PaymentModal', () => {
     expect(within(dialog).getByText(/item type/)).toBeInTheDocument();
     expect(within(dialog).getByText(/Beer/)).toBeInTheDocument();
     expect(within(dialog).getByText(/Whiskey/)).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$13.00 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$9.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$13.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$9.00 dollars')).toBeInTheDocument();
     expect(within(dialog).getByText('Items subtotal')).toBeInTheDocument();
     const itemsSubtotalRow = within(dialog)
       .getByText('Items subtotal')
       .closest('div') as HTMLElement;
-    expect(within(itemsSubtotalRow).getByLabelText('MX$22.00 dollars')).toBeInTheDocument();
+    expect(within(itemsSubtotalRow).getByLabelText('$22.00 dollars')).toBeInTheDocument();
     expect(within(dialog).getByText('Total')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$25.30 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$25.30 dollars')).toBeInTheDocument();
     expect(within(dialog).queryByText('Pool charges')).not.toBeInTheDocument();
   });
 
@@ -288,7 +288,7 @@ describe('PaymentModal', () => {
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText('Pool charges')).toBeInTheDocument();
     expect(within(dialog).getByText('Table 3 · 90 min')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$15.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$15.00 dollars')).toBeInTheDocument();
   });
 
   it('applies preset tip percentages and custom tip on tabNoPool', async () => {
@@ -303,33 +303,33 @@ describe('PaymentModal', () => {
 
     expect(pct15.className).toContain('bg-primary');
     expect(pct10.className).toContain('border-border');
-    expect(within(dialog).getByLabelText('MX$3.30 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$25.30 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$3.30 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$25.30 dollars')).toBeInTheDocument();
 
     await user.click(pct10);
-    expect(within(dialog).getByLabelText('MX$2.20 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$24.20 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$2.20 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$24.20 dollars')).toBeInTheDocument();
 
     await user.click(pct18);
-    expect(within(dialog).getByLabelText('MX$3.96 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$25.96 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$3.96 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$25.96 dollars')).toBeInTheDocument();
 
     await user.click(pct20);
-    expect(within(dialog).getByLabelText('MX$4.40 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$26.40 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$4.40 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$26.40 dollars')).toBeInTheDocument();
 
     await user.click(pct15);
-    expect(within(dialog).getByLabelText('MX$3.30 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$25.30 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$3.30 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$25.30 dollars')).toBeInTheDocument();
 
     const customInput = within(dialog).getByLabelText('Custom tip');
     await user.clear(customInput);
     await user.type(customInput, '5.00');
-    expect(within(dialog).getByLabelText('MX$5.00 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$27.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$5.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$27.00 dollars')).toBeInTheDocument();
 
     await user.click(pct10);
-    expect(within(dialog).getByLabelText('MX$24.20 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$24.20 dollars')).toBeInTheDocument();
   });
 
   it('toggles payment method between cash and card', async () => {
@@ -496,7 +496,7 @@ describe('PaymentModal', () => {
     await user.type(tendered, '40.00');
 
     expect(within(dialog).getByText('Change due')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$14.70 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$14.70 dollars')).toBeInTheDocument();
   });
 
   it('completes Rappi payment without cash drawer', async () => {

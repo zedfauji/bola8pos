@@ -44,7 +44,7 @@ export function VarianceReport({ rows }: Props) {
               data-variance={row.variance}
               className={cn(
                 row.variance < 0 && 'bg-destructive/10 text-destructive',
-                row.variance > 0 && 'bg-emerald-500/10 text-emerald-400'
+                row.variance > 0 && 'bg-pos-highlight/10 text-pos-highlight'
               )}
             >
               <TableCell className="font-medium">{row.productName}</TableCell>

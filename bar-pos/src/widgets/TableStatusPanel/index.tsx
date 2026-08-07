@@ -249,6 +249,7 @@ export function TableStatusPanel({ tableId }: { tableId: string }) {
                           touchSize="default"
                           className="text-muted-foreground hover:text-destructive ml-1 size-11 touch-manipulation rounded p-1 transition-colors"
                           title={t('tableStatusPanel.removeItem')}
+                          aria-label={t('tableStatusPanel.removeItem')}
                           onClick={() => {
                             setSelectedItemForRemoval(item);
                             setShowPinForRemoval(true);

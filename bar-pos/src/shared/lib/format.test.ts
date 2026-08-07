@@ -1,13 +1,19 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { formatMoney, formatMoneyIn, formatPercent, parseMoneyInput } from './format';
 import i18n from './i18n/index';
 
 describe('formatMoney', () => {
-  afterEach(async () => {
-    await i18n.changeLanguage('es-MX'); // reset for other tests/consumers
+  beforeEach(async () => {
+    // This file's assertions assume es-MX formatting; test-setup.ts defaults
+    // the suite to en-US, so opt in explicitly rather than depend on order.
+    await i18n.changeLanguage('es-MX');
   });
 
-  it('formats a positive amount with the es-MX symbol (default locale)', () => {
+  afterEach(async () => {
+    await i18n.changeLanguage('en-US'); // reset to the test-suite default (see test-setup.ts)
+  });
+
+  it('formats a positive amount with the es-MX symbol', () => {
     expect(formatMoney(12.5)).toBe('MX$12.50');
   });
 

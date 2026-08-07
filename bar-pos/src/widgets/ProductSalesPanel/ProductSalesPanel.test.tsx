@@ -79,7 +79,7 @@ describe('ProductSalesPanel', () => {
     expect(rows).toHaveLength(3);
   });
 
-  it('applies amber/top-3 highlight class to first row (Corona)', () => {
+  it('applies pos-highlight top-3 class to first row (Corona)', () => {
     mockUseProductSalesReport.mockReturnValue({
       data: { ok: true, data: threeProducts },
       isLoading: false,
@@ -87,12 +87,12 @@ describe('ProductSalesPanel', () => {
 
     renderWithProviders(<ProductSalesPanel dateRange={dateRange} />);
 
-    // ProductSalesPanel applies 'border-l-amber-400' to top-3 rows
+    // ProductSalesPanel applies 'border-l-pos-highlight' to top-3 rows
     const tbody = document.querySelector('tbody');
     expect(tbody).not.toBeNull();
     const rows = within(tbody as HTMLElement).getAllByRole('row');
-    // The first row (highest revenue) should have the amber class
-    expect(rows[0]!.className).toMatch(/border-l-amber-400/);
+    // The first row (highest revenue) should have the highlight class
+    expect(rows[0]!.className).toMatch(/border-l-pos-highlight/);
   });
 
   it('shows all unique categories in the filter select', () => {

@@ -100,8 +100,8 @@ describe('SettingsTabsPanel', () => {
 
     render(<SettingsTabsPanel />);
 
-    // i18n defaults to es-MX (D-02) — the tab label resolves to the es-MX catalog value.
-    const languageTab = screen.getByRole('tab', { name: 'Idioma' });
+    // test-setup.ts pins the suite to en-US — the tab label resolves to the en-US catalog value.
+    const languageTab = screen.getByRole('tab', { name: 'Language' });
     expect(languageTab).toBeInTheDocument();
     expect(languageTab).toHaveAttribute('data-state', 'active');
     expect(screen.queryByText('You do not have permission to view settings.')).not.toBeInTheDocument();

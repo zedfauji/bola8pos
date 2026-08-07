@@ -88,7 +88,8 @@
     "startSession": "Start Session",
     "stopSession": "Stop Session",
     "release": "Release",
-    "unavailable": "Unavailable"
+    "unavailable": "Unavailable",
+    "viewStatus": "View status for {{label}}"
   },
   "poolTableIllustration": {
     "ratePerHour": "{{amount}}/hr",

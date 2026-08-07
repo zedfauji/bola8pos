@@ -51,7 +51,7 @@ export function IngredientAutocomplete({
       ingredient.reorderPoint != null &&
       ingredient.quantityOnHand <= ingredient.reorderPoint
     ) {
-      return cn('text-yellow-500');
+      return cn('text-pos-warning');
     }
     return cn('text-pos-accent');
   }

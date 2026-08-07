@@ -164,10 +164,10 @@ describe('VoidOrderDialog', () => {
     const lineItems = dialog.querySelectorAll('ul li');
     expect(lineItems[0]?.textContent?.replace(/\s+/g, ' ')).toMatch(/2\s*x\s*item1/);
     expect(lineItems[1]?.textContent?.replace(/\s+/g, ' ')).toMatch(/1\s*x\s*item2/);
-    expect(within(dialog).getByLabelText('MX$26.00 dollars')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$9.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$26.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$9.00 dollars')).toBeInTheDocument();
     expect(within(dialog).getByText('Total voided')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText('MX$35.00 dollars')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('$35.00 dollars')).toBeInTheDocument();
   });
 
   it('disables Void order when reason is empty', async () => {

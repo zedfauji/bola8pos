@@ -104,7 +104,7 @@ export function ModifierPopularityReport({ dateRange }: Props) {
                 key={row.modifierId}
                 className={
                   row.modifierId === topId
-                    ? 'border-l-2 border-l-emerald-500 bg-emerald-500/5'
+                    ? 'border-l-2 border-l-pos-highlight bg-pos-highlight/5'
                     : undefined
                 }
               >

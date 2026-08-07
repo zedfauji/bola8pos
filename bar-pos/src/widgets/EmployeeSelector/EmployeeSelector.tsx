@@ -30,7 +30,9 @@ export function EmployeeSelector() {
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-center">{t('employeeSelector.whoAreYou')}</h2>
+      <h2 className="font-heading text-2xl font-semibold tracking-tight text-center">
+        {t('employeeSelector.whoAreYou')}
+      </h2>
       <div className="flex flex-col gap-2">
         {(staff ?? []).map((member: Staff) => (
           <Button

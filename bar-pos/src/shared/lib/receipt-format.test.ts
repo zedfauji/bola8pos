@@ -50,7 +50,7 @@ describe('buildThermalReceiptText', () => {
       }),
       'es-MX'
     );
-    expect(text).toContain('Card (BBVA Terminal)');
+    expect(text).toContain('Tarjeta (Terminal BBVA)');
   });
 
   it('labels Rappi payment', () => {
@@ -69,8 +69,8 @@ describe('buildThermalReceiptText', () => {
 
   it('shows tendered and change for cash when tenderedAmount set', () => {
     const text = buildThermalReceiptText(baseReceipt(), 'es-MX');
-    expect(text).toContain('Tendered');
-    expect(text).toContain('Change');
+    expect(text).toContain('Entregado');
+    expect(text).toContain('Cambio');
     expect(text).toContain('$200.00');
     expect(text).toContain('$96.50');
   });
@@ -96,7 +96,7 @@ describe('buildThermalReceiptText', () => {
       }),
       'es-MX'
     );
-    expect(text).toContain('Date');
+    expect(text).toContain('Fecha');
   });
 
   it('truncates long item name with tilde on left column', () => {
@@ -124,17 +124,17 @@ describe('buildThermalReceiptText', () => {
   // Locale-awareness (21-05, D-06)
   // ---------------------------------------------------------------------
 
-  it('es-MX output is byte-identical to the pre-migration (English) labels', () => {
+  it('es-MX output uses real Spanish labels (Impeccable critique i18n fix)', () => {
     const text = buildThermalReceiptText(baseReceipt(), 'es-MX');
-    expect(text).toContain('Date');
-    expect(text).toContain('Cashier');
-    expect(text).toContain('Customer');
+    expect(text).toContain('Fecha');
+    expect(text).toContain('Cajero');
+    expect(text).toContain('Cliente');
     expect(text).toContain('Subtotal');
-    expect(text).toContain('Tip');
+    expect(text).toContain('Propina');
     expect(text).toContain('Total');
-    expect(text).toContain('Payment');
-    expect(text).toContain('Tendered');
-    expect(text).toContain('Change');
+    expect(text).toContain('Pago');
+    expect(text).toContain('Entregado');
+    expect(text).toContain('Cambio');
   });
 
   it('en-US output uses the same English labels as es-MX (thermal receipt was already English)', () => {
@@ -250,9 +250,9 @@ function basePreCheque(overrides: Partial<PreChequeData> = {}): PreChequeData {
 }
 
 describe('buildPreChequeText', () => {
-  it('header contains PRE-CHEQUE', () => {
+  it('header contains PRE-CUENTA', () => {
     const text = buildPreChequeText(basePreCheque(), 'es-MX');
-    expect(text).toContain('PRE-CHEQUE');
+    expect(text).toContain('PRE-CUENTA');
   });
 
   it('footer contains PENDIENTE DE PAGO', () => {
@@ -317,7 +317,7 @@ describe('buildPreChequeText', () => {
 
   it('handles empty items array without crashing and still renders header/footer', () => {
     const text = buildPreChequeText(basePreCheque({ items: [], subtotal: 0 }), 'es-MX');
-    expect(text).toContain('PRE-CHEQUE');
+    expect(text).toContain('PRE-CUENTA');
     expect(text).toContain('PENDIENTE DE PAGO');
   });
 

@@ -622,6 +622,13 @@
     "closeAssistantAria": "Close assistant",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "toolLabels": {
+      "close_tab": "Close tab",
+      "stop_pool_session": "Stop pool session",
+      "stop_and_move_table": "Stop & move table",
+      "deactivate_product": "Deactivate product",
+      "bulk_import_products": "Import products"
+    },
     "dropFileHere": "Drop the file here",
     "messagePlaceholder": "Type a message...",
     "stopVoiceRecordingAria": "Stop voice recording",

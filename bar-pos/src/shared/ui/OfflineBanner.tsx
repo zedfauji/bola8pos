@@ -59,8 +59,8 @@ export function OfflineBanner() {
       aria-live="polite"
       className={cn(
         'fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center py-1 px-3',
-        'text-xs font-medium text-white transition-opacity duration-200',
-        isOffline ? 'bg-orange-500' : 'bg-green-600',
+        'text-xs font-medium transition-opacity duration-200',
+        isOffline ? 'bg-pos-warning text-black' : 'bg-pos-accent text-white',
         isDone ? 'opacity-0' : 'opacity-100'
       )}
     >

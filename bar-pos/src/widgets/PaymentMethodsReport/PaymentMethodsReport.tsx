@@ -104,7 +104,7 @@ export function PaymentMethodsReport({ dateRange }: Props) {
                   key={`${row.cajaSessionId ?? 'rollup'}-${row.method}-${String(i)}`}
                   className={
                     isLeadingRollup
-                      ? `border-l-2 border-l-emerald-500 bg-emerald-500/5 font-semibold${isRollupStart ? ' border-t-2' : ''}`
+                      ? `border-l-2 border-l-pos-highlight bg-pos-highlight/5 font-semibold${isRollupStart ? ' border-t-2' : ''}`
                       : row.isRollup
                         ? `font-semibold${isRollupStart ? ' border-t-2' : ''}`
                         : undefined

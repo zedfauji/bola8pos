@@ -127,7 +127,7 @@ describe('CategoryRevenuePanel', () => {
     expect(rows).toHaveLength(sampleRows.length);
   });
 
-  it('top row (idx=0) gets emerald highlight class', () => {
+  it('top row (idx=0) gets pos-highlight class', () => {
     mockUseCategoryRevenueReport.mockReturnValue({
       data: { ok: true, data: sampleRows },
       isLoading: false,
@@ -137,8 +137,8 @@ describe('CategoryRevenuePanel', () => {
 
     const tbody = document.querySelector('tbody') as HTMLElement;
     const rows = within(tbody).getAllByRole('row');
-    expect(rows[0]?.className).toMatch(/emerald/);
-    expect(rows[1]?.className).not.toMatch(/emerald/);
+    expect(rows[0]?.className).toMatch(/pos-highlight/);
+    expect(rows[1]?.className).not.toMatch(/pos-highlight/);
   });
 
   it('renders category name and pctTotal correctly', () => {

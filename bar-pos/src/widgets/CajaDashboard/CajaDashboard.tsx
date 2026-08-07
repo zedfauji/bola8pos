@@ -250,13 +250,13 @@ export function CajaDashboard() {
               label={t('cajaDashboard.pendingOpenTabs')}
               amount={pendingTotal}
               isLoading={isPendingLoading}
-              highlight="border-amber-500/40"
+              highlight="border-pos-warning/40"
             />
             <SummaryCard
               label={t('cajaDashboard.net')}
               amount={net}
               isLoading={isSummaryLoading}
-              highlight="border-emerald-500/40"
+              highlight="border-pos-highlight/40"
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">

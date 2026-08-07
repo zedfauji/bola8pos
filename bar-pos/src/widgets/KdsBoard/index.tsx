@@ -22,10 +22,10 @@ function formatAge(createdAt: Date, t: TFunction<'wPanels'>): string {
 /* eslint-disable i18next/no-literal-string -- Tailwind class strings, not UI copy */
 function statusColorFor(status: KdsOrderItem['kdsStatus']): string {
   return status === 'pending'
-    ? 'border-yellow-500 bg-yellow-950 text-yellow-100'
+    ? 'border-pos-warning bg-pos-warning/10 text-foreground'
     : status === 'in_progress'
-      ? 'border-blue-500 bg-blue-950 text-blue-100'
-      : 'border-green-500 bg-green-950 text-green-100';
+      ? 'border-primary bg-primary/10 text-foreground'
+      : 'border-pos-accent bg-pos-accent/10 text-foreground';
 }
 /* eslint-enable i18next/no-literal-string */
 
@@ -259,10 +259,10 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
   return (
     <div data-testid="kds-board" className="grid gap-6 p-6 md:grid-cols-2">
       <section>
-        <h2 className="mb-3 text-lg font-semibold">
+        <h2 className="mb-3 font-heading text-lg font-semibold">
           {t('kdsBoard.pending')}
           {pending.length > 0 && (
-            <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs text-black">
+            <span className="ml-2 rounded-full bg-pos-warning px-2 py-0.5 text-xs text-black">
               {pending.length}
             </span>
           )}
@@ -276,10 +276,10 @@ export function KdsBoard({ routing }: { routing: 'KITCHEN' | 'BAR' }) {
         </div>
       </section>
       <section>
-        <h2 className="mb-3 text-lg font-semibold">
+        <h2 className="mb-3 font-heading text-lg font-semibold">
           {t('kdsBoard.inProgress')}
           {inProgress.length > 0 && (
-            <span className="ml-2 rounded-full bg-blue-500 px-2 py-0.5 text-xs text-white">
+            <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
               {inProgress.length}
             </span>
           )}

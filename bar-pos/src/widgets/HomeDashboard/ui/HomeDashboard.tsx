@@ -146,7 +146,7 @@ export function HomeDashboard() {
       {/* Staff context */}
       {currentStaff && (
         <div className="flex items-center gap-3">
-          <span className="text-xl font-semibold">
+          <span className="font-heading text-xl font-semibold">
             {t('homeDashboard.welcome', { name: currentStaff.name })}
           </span>
           <Badge variant="secondary" className="capitalize">

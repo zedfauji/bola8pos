@@ -90,7 +90,7 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
           {peakHour && (
             <span>
               {t('hourlyBreakdownPanel.peakLabel')}{' '}
-              <span className="font-semibold text-emerald-500">
+              <span className="font-semibold text-pos-highlight">
                 {t('hourlyBreakdownPanel.hourRevenueValue', {
                   hour: formatHour(peakHour.hour),
                   revenue: formatMoney(peakHour.revenue),
@@ -101,7 +101,7 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
           {slowestHour && (
             <span>
               {t('hourlyBreakdownPanel.slowestLabel')}{' '}
-              <span className="font-semibold text-amber-400">
+              <span className="font-semibold text-pos-warning">
                 {t('hourlyBreakdownPanel.hourRevenueValue', {
                   hour: formatHour(slowestHour.hour),
                   revenue: formatMoney(slowestHour.revenue),
@@ -154,9 +154,9 @@ export function HourlyBreakdownPanel({ dateRange }: Props) {
                   key={row.hour}
                   className={
                     isPeak
-                      ? 'border-l-2 border-l-emerald-500 bg-emerald-500/5 text-emerald-400'
+                      ? 'border-l-2 border-l-pos-highlight bg-pos-highlight/5 text-pos-highlight'
                       : isSlowest
-                        ? 'border-l-2 border-l-amber-400 bg-amber-500/5 text-amber-400'
+                        ? 'border-l-2 border-l-pos-warning bg-pos-warning/5 text-pos-warning'
                         : undefined
                   }
                 >

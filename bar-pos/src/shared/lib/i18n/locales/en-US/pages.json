@@ -55,6 +55,12 @@
   },
   "reports": {
     "title": "Reports",
+    "groups": {
+      "sales": "Sales",
+      "menu": "Menu & Promos",
+      "staffTips": "Staff & Tips",
+      "operations": "Operations"
+    },
     "tabs": {
       "session": "Session View",
       "products": "Product Sales",

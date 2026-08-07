@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
+import i18n from 'i18next';
 import { afterEach, vi } from 'vitest';
 
 // Initialize the real i18next singleton for every unit test (same side-effect
@@ -7,7 +8,15 @@ import { afterEach, vi } from 'vitest';
 // etc.) call useTranslation('common') — without this, t() has no i18next
 // instance to attach to and every test using those primitives renders raw
 // key strings (e.g. "loading.generic") instead of resolved catalog values.
-import '@shared/lib/i18n';
+import { i18nReady } from '@shared/lib/i18n';
+
+// Force en-US regardless of the app's es-MX production default: tests assert
+// component behavior via rendered copy (getByText/getByLabelText), and
+// pinning to one locale keeps those assertions stable across either
+// catalog's future wording changes instead of coupling to translation content.
+// Must await init settling first — see the race note in shared/lib/i18n/index.ts.
+await i18nReady;
+await i18n.changeLanguage('en-US');
 
 // Cleanup after each test
 afterEach(() => {

@@ -1,140 +1,140 @@
 {
   "actions": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "saving": "Saving…",
-    "confirm": "Confirm",
-    "close": "Close",
-    "tryAgain": "Try Again"
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "saving": "Guardando…",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "tryAgain": "Reintentar"
   },
   "loading": {
-    "generic": "Loading...",
-    "simple": "Loading",
-    "products": "Loading products...",
-    "poolTables": "Loading pool tables...",
-    "tabs": "Loading tabs...",
-    "tabDetails": "Loading tab details...",
-    "downloading": "Downloading {{percent}}%"
+    "generic": "Cargando...",
+    "simple": "Cargando",
+    "products": "Cargando productos...",
+    "poolTables": "Cargando mesas de billar...",
+    "tabs": "Cargando cuentas...",
+    "tabDetails": "Cargando detalle de la cuenta...",
+    "downloading": "Descargando {{percent}}%"
   },
   "chefHatBadge": {
     "label": "Prep"
   },
   "clockDriftBanner": {
-    "message": "Clock out of sync — check your PC date/time settings"
+    "message": "Reloj desincronizado — revisa la fecha/hora de la PC"
   },
   "comboBadge": {
     "label": "Combo"
   },
   "comboSlotCard": {
-    "selectRange": "Select {{min}}–{{max}}",
-    "poolTimeIncluded": "1 hour pool time included",
-    "quantity": "Quantity"
+    "selectRange": "Selecciona {{min}}–{{max}}",
+    "poolTimeIncluded": "Incluye 1 hora de mesa de billar",
+    "quantity": "Cantidad"
   },
   "dataTable": {
-    "noDataTitle": "No data",
-    "noDataDescription": "No records found.",
-    "noResultsTitle": "No results",
-    "noResultsDescription": "No records match your search."
+    "noDataTitle": "Sin datos",
+    "noDataDescription": "No se encontraron registros.",
+    "noResultsTitle": "Sin resultados",
+    "noResultsDescription": "Ningún registro coincide con tu búsqueda."
   },
   "dateRangePicker": {
-    "from": "From:",
-    "to": "To:"
+    "from": "Desde:",
+    "to": "Hasta:"
   },
   "errorBoundary": {
-    "title": "Something went wrong"
+    "title": "Algo salió mal"
   },
   "ingredientAutocomplete": {
-    "selectedAria": "Selected: {{name}}",
-    "selectAria": "Select ingredient",
-    "selectPlaceholder": "Select ingredient…",
-    "notFound": "No ingredient found.",
-    "clearAria": "Clear ingredient selection"
+    "selectedAria": "Seleccionado: {{name}}",
+    "selectAria": "Seleccionar ingrediente",
+    "selectPlaceholder": "Seleccionar ingrediente…",
+    "notFound": "No se encontró ningún ingrediente.",
+    "clearAria": "Quitar ingrediente seleccionado"
   },
   "jsonDiffViewer": {
-    "noPayload": "No payload recorded for this entry.",
-    "truncated": "Payload truncated at 64 KB. Full snapshot not available.",
-    "before": "Before",
-    "after": "After",
-    "collapse": "Collapse",
-    "expand": "Expand",
-    "collapseAll": "Collapse all",
-    "expandAll": "Expand all",
-    "noChanges": "No changes detected."
+    "noPayload": "No hay datos registrados para este evento.",
+    "truncated": "Datos truncados a 64 KB. No hay captura completa disponible.",
+    "before": "Antes",
+    "after": "Después",
+    "collapse": "Contraer",
+    "expand": "Expandir",
+    "collapseAll": "Contraer todo",
+    "expandAll": "Expandir todo",
+    "noChanges": "No se detectaron cambios."
   },
   "moneyDisplay": {
-    "negativePrefix": "Negative "
+    "negativePrefix": "Negativo "
   },
   "moneyInput": {
-    "amountAria": "Money amount"
+    "amountAria": "Monto en dinero"
   },
   "offlineBanner": {
-    "offline": "Offline — running on cached data",
-    "done": "All actions synced"
+    "offline": "Sin conexión — usando datos locales",
+    "done": "Todas las acciones sincronizadas"
   },
   "pinKeypad": {
-    "display": "PIN display",
-    "keypad": "Numeric keypad",
-    "key0": "Key 0",
-    "backspace": "Backspace"
+    "display": "Pantalla de PIN",
+    "keypad": "Teclado numérico",
+    "key0": "Tecla 0",
+    "backspace": "Borrar"
   },
   "personCard": {
-    "namePlaceholder": "Person name"
+    "namePlaceholder": "Nombre de la persona"
   },
   "quantityControl": {
-    "group": "Quantity control",
-    "decrease": "Decrease quantity",
-    "increase": "Increase quantity"
+    "group": "Control de cantidad",
+    "decrease": "Disminuir cantidad",
+    "increase": "Aumentar cantidad"
   },
   "routingBadge": {
-    "kitchen": "Kitchen",
-    "bar": "Bar"
+    "kitchen": "Cocina",
+    "bar": "Barra"
   },
   "searchInput": {
-    "search": "Search",
-    "clear": "Clear search"
+    "search": "Buscar",
+    "clear": "Limpiar búsqueda"
   },
   "sectionHeader": {
-    "backHome": "Home"
+    "backHome": "Inicio"
   },
   "splitLayout": {
-    "products": "Products",
-    "currentTab": "Current Tab"
+    "products": "Productos",
+    "currentTab": "Cuenta actual"
   },
   "statusBadge": {
-    "open": "Open",
-    "closed": "Closed",
-    "paid": "Paid",
-    "voided": "Voided",
-    "available": "Available",
-    "occupied": "Occupied",
-    "reserved": "Reserved",
-    "maintenance": "Maintenance",
-    "pending": "Pending",
-    "served": "Served",
+    "open": "Abierta",
+    "closed": "Cerrada",
+    "paid": "Pagada",
+    "voided": "Anulada",
+    "available": "Disponible",
+    "occupied": "Ocupada",
+    "reserved": "Reservada",
+    "maintenance": "Mantenimiento",
+    "pending": "Pendiente",
+    "served": "Servido",
     "tabOpenWarn": "2h+",
     "tabOpenCritical": "4h+",
-    "inStock": "In stock",
-    "lowStock": "Low stock",
-    "outOfStock": "Out of stock"
+    "inStock": "En existencia",
+    "lowStock": "Existencia baja",
+    "outOfStock": "Agotado"
   },
   "subTabColumn": {
-    "dropHint": "Tap an item to assign here"
+    "dropHint": "Toca un artículo para asignarlo aquí"
   },
   "updateAvailableDialog": {
-    "titleAvailable": "Update Available",
-    "titleDownloading": "Downloading Update",
-    "titleRestartReady": "Ready to Restart",
-    "titleError": "Update Failed",
-    "descAvailableVersion": "Version {{version}} is ready to install.",
-    "descAvailableGeneric": "A new version is ready.",
-    "descDownloading": "Please wait — do not close the app.",
-    "descRestartReady": "Update installed. Restart now to apply changes.",
-    "descError": "Could not download the update. Try again later.",
-    "whatsNew": "What's new",
-    "remindLater": "Remind Later",
-    "installNow": "Install Now",
-    "installing": "Installing...",
-    "later": "Later",
-    "restartNow": "Restart Now"
+    "titleAvailable": "Actualización disponible",
+    "titleDownloading": "Descargando actualización",
+    "titleRestartReady": "Listo para reiniciar",
+    "titleError": "Error al actualizar",
+    "descAvailableVersion": "La versión {{version}} está lista para instalar.",
+    "descAvailableGeneric": "Hay una nueva versión disponible.",
+    "descDownloading": "Espera — no cierres la aplicación.",
+    "descRestartReady": "Actualización instalada. Reinicia ahora para aplicar los cambios.",
+    "descError": "No se pudo descargar la actualización. Intenta más tarde.",
+    "whatsNew": "Novedades",
+    "remindLater": "Recordar después",
+    "installNow": "Instalar ahora",
+    "installing": "Instalando...",
+    "later": "Más tarde",
+    "restartNow": "Reiniciar ahora"
   }
 }

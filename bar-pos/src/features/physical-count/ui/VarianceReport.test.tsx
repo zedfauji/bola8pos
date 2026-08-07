@@ -5,7 +5,7 @@
  * - Shows product name, expected stock, actual count, variance columns
  * - Negative variance row is highlighted red (bg-destructive/10)
  * - Zero variance row has no colour highlight class
- * - Positive variance row is highlighted green (bg-emerald-500/10)
+ * - Positive variance row is highlighted green (bg-pos-highlight/10)
  * - Empty-state message shown when rows is []
  */
 
@@ -117,7 +117,7 @@ describe('VarianceReport', () => {
     render(<VarianceReport rows={[makeRow({ variance: -1, productName: 'Short Beer' })]} />);
 
     const row = getRowByProductName('Short Beer');
-    expect(row.className).not.toContain('bg-emerald');
+    expect(row.className).not.toContain('bg-pos-highlight');
   });
 
   // -------------------------------------------------------------------------
@@ -129,21 +129,21 @@ describe('VarianceReport', () => {
 
     const row = getRowByProductName('Exact Beer');
     expect(row.className).not.toContain('bg-destructive');
-    expect(row.className).not.toContain('bg-emerald');
+    expect(row.className).not.toContain('bg-pos-highlight');
     expect(row.className).not.toContain('text-destructive');
-    expect(row.className).not.toContain('text-emerald');
+    expect(row.className).not.toContain('text-pos-highlight');
   });
 
   // -------------------------------------------------------------------------
   // Positive variance → green highlight
   // -------------------------------------------------------------------------
 
-  it('positive variance row has bg-emerald-500/10 class', () => {
+  it('positive variance row has bg-pos-highlight/10 class', () => {
     render(<VarianceReport rows={[makeRow({ variance: 5, productName: 'Surplus Rum' })]} />);
 
     const row = getRowByProductName('Surplus Rum');
-    expect(row.className).toContain('bg-emerald-500/10');
-    expect(row.className).toContain('text-emerald-400');
+    expect(row.className).toContain('bg-pos-highlight/10');
+    expect(row.className).toContain('text-pos-highlight');
   });
 
   it('positive variance row does NOT have red highlight classes', () => {
@@ -190,8 +190,8 @@ describe('VarianceReport', () => {
 
     expect(shortRow.className).toContain('bg-destructive/10');
     expect(matchRow.className).not.toContain('bg-destructive');
-    expect(matchRow.className).not.toContain('bg-emerald');
-    expect(extraRow.className).toContain('bg-emerald-500/10');
+    expect(matchRow.className).not.toContain('bg-pos-highlight');
+    expect(extraRow.className).toContain('bg-pos-highlight/10');
   });
 
   // -------------------------------------------------------------------------

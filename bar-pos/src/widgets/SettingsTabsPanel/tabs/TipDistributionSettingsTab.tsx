@@ -140,7 +140,7 @@ export function TipDistributionSettingsTab({ currentRole }: Props) {
         </div>
 
         {sumIsOff && (
-          <p className="text-sm text-amber-500">
+          <p className="text-sm text-pos-warning">
             {t('tipDistributionSettingsTab.percentagesOff', { sum })}
           </p>
         )}

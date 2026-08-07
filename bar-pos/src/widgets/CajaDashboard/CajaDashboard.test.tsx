@@ -196,11 +196,11 @@ describe('CajaDashboard', () => {
 
     // MoneyDisplay renders with aria-label="$X.XX dollars"
     // cash=500, card=300, rappi=100, pending=150, net=900
-    expect(screen.getByRole('generic', { name: 'MX$500.00 dollars' })).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$300.00 dollars' })).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$100.00 dollars' })).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$150.00 dollars' })).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$900.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$500.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$300.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$100.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$150.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$900.00 dollars' })).toBeInTheDocument();
   });
 
   it('renders Print Summary button', () => {
@@ -254,12 +254,12 @@ describe('CajaDashboard', () => {
 
     const [printArg] = printSpy.mock.calls[0] as [string];
     // The printed string must contain each method total and net total, formatted
-    // through the shared formatMoney() (es-MX default locale => "MX$" prefix)
-    expect(printArg).toContain('MX$500.00'); // cash
-    expect(printArg).toContain('MX$300.00'); // card
-    expect(printArg).toContain('MX$100.00'); // rappi
-    expect(printArg).toContain('MX$900.00'); // net = 500+300+100
-    expect(printArg).toContain('MX$150.00'); // open tabs pending
+    // through the shared formatMoney() (en-US test-suite locale => "$" prefix)
+    expect(printArg).toContain('$500.00'); // cash
+    expect(printArg).toContain('$300.00'); // card
+    expect(printArg).toContain('$100.00'); // rappi
+    expect(printArg).toContain('$900.00'); // net = 500+300+100
+    expect(printArg).toContain('$150.00'); // open tabs pending
   });
 
   it('shows net revenue of $170.00 when cash=$100, card=$50, rappi=$20', () => {
@@ -276,10 +276,10 @@ describe('CajaDashboard', () => {
     renderDashboard();
 
     // Net = 100 + 50 + 20 = 170
-    expect(screen.getByRole('generic', { name: 'MX$170.00 dollars' })).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$100.00 dollars' })).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$50.00 dollars' })).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$20.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$170.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$100.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$50.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$20.00 dollars' })).toBeInTheDocument();
   });
 
   it('shows loading spinners when useCajaPaymentSummary is in loading state', () => {
@@ -307,7 +307,7 @@ describe('CajaDashboard', () => {
 
     // Pending (open tabs) card is visible with value from the mock ($150.00)
     expect(screen.getByText(/Pending/i)).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$150.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$150.00 dollars' })).toBeInTheDocument();
   });
 
   it('pending card shows $0.00 without layout shift when no tabs are open', () => {
@@ -319,7 +319,7 @@ describe('CajaDashboard', () => {
     renderDashboard();
 
     expect(screen.getByText(/Pending/i)).toBeInTheDocument();
-    expect(screen.getByRole('generic', { name: 'MX$0.00 dollars' })).toBeInTheDocument();
+    expect(screen.getByRole('generic', { name: '$0.00 dollars' })).toBeInTheDocument();
   });
 
   // ---------------------------------------------------------------------------

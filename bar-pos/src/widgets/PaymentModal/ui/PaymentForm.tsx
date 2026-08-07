@@ -686,7 +686,7 @@ export function PaymentForm({
                       data-testid="discount-value-input"
                     />
                     {discountAmount > 0 && (
-                      <p className="text-sm text-green-400" data-testid="discount-applied-label">
+                      <p className="text-sm text-pos-accent" data-testid="discount-applied-label">
                         {t('paymentForm.discountApplied', { amount: formatMoney(discountAmount) })}
                       </p>
                     )}
@@ -710,7 +710,7 @@ export function PaymentForm({
             {discountAmount > 0 && (
               <>
                 <div
-                  className="flex items-center justify-between text-sm text-green-400"
+                  className="flex items-center justify-between text-sm text-pos-accent"
                   data-testid="discount-row"
                 >
                   <span>

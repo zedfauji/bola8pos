@@ -55,7 +55,7 @@ export default function POSPage() {
     >
       <div className="flex min-w-0 flex-1 items-center justify-center p-4 md:p-6">
         <div className="flex size-full max-w-[1600px] overflow-hidden rounded-xl border border-border shadow-lg">
-          <main className="relative flex-1 overflow-y-auto p-4">
+          <main className="relative min-w-0 flex-1 overflow-y-auto p-4">
             <POSButton
               type="button"
               variant="ghost"
@@ -83,7 +83,7 @@ export default function POSPage() {
             <aside
               id="order-panel"
               data-testid="pos-order-panel"
-              className="flex w-[400px] min-w-0 flex-col border-l bg-background"
+              className="flex w-[400px] shrink-0 flex-col border-l bg-background"
             >
               <ActiveTabSelector />
               <CartPanel />

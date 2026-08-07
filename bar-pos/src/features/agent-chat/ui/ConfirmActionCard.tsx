@@ -10,13 +10,13 @@ interface Props {
   isLoading: boolean;
 }
 
-const TOOL_LABELS: Record<string, string> = {
-  close_tab: 'Cerrar cuenta',
-  stop_pool_session: 'Detener sesión de billar',
-  stop_and_move_table: 'Detener y mover mesa',
-  deactivate_product: 'Desactivar producto',
-  bulk_import_products: 'Importar productos',
-};
+const TOOL_LABEL_KEYS = new Set([
+  'close_tab',
+  'stop_pool_session',
+  'stop_and_move_table',
+  'deactivate_product',
+  'bulk_import_products',
+]);
 
 function PreviewRow({ label, value }: { label: string; value: string }) {
   return (
@@ -39,13 +39,15 @@ function renderPreview(preview: unknown): React.ReactNode {
 
 export function ConfirmActionCard({ pending, onConfirm, onCancel, isLoading }: Props) {
   const { t } = useTranslation('featMgmt');
-  const label = TOOL_LABELS[pending.toolName] ?? pending.toolName;
+  const label = TOOL_LABEL_KEYS.has(pending.toolName)
+    ? t(`agentChat.toolLabels.${pending.toolName}`)
+    : pending.toolName;
 
   return (
-    <div className="mx-3 mb-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
+    <div className="mx-3 mb-2 rounded-xl border border-pos-warning/40 bg-pos-warning/10 p-3">
       <div className="mb-2 flex items-center gap-2">
-        <AlertTriangle className="size-4 shrink-0 text-amber-400" />
-        <span className="text-sm font-semibold text-amber-300">{label}</span>
+        <AlertTriangle className="size-4 shrink-0 text-pos-warning" />
+        <span className="text-sm font-semibold text-pos-warning">{label}</span>
       </div>
 
       <div className="mb-3 divide-y divide-border/40 rounded-lg bg-background/60 px-3 py-1">

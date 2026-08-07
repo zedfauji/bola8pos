@@ -71,7 +71,9 @@ export function SectionHeader({
         )}
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+            <h2 className="font-heading text-2xl font-semibold leading-none tracking-tight">
+              {title}
+            </h2>
             {badge !== undefined && (
               <Badge variant="secondary" aria-label={`Count: ${String(badge)}`}>
                 {badge}

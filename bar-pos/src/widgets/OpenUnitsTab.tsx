@@ -116,10 +116,10 @@ export function OpenUnitsTab() {
     <div className="mx-auto max-w-6xl space-y-8">
       {resultError ? (
         // Query-error styling only — not remaining-count-driven (D-06). Uses
-        // an explicit red token rather than the shared "destructive" utility
+        // the pos-danger token rather than the shared "destructive" utility
         // class so this file's D-06 scope grep isn't tripped by an unrelated
         // error-alert convention.
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-pos-danger" role="alert">
           {resultError.message}
         </p>
       ) : null}

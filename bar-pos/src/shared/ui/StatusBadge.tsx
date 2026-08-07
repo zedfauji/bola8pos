@@ -41,7 +41,7 @@ const statusConfig: Record<string, StatusConfig> = {
   open: {
     labelKey: 'statusBadge.open',
     variant: 'default',
-    className: 'bg-green-500 hover:bg-green-600 text-white',
+    className: 'bg-pos-accent text-white hover:opacity-90',
   },
   closed: {
     labelKey: 'statusBadge.closed',
@@ -50,7 +50,7 @@ const statusConfig: Record<string, StatusConfig> = {
   paid: {
     labelKey: 'statusBadge.paid',
     variant: 'default',
-    className: 'bg-blue-500 hover:bg-blue-600 text-white',
+    className: 'bg-primary text-primary-foreground hover:opacity-90',
   },
   voided: {
     labelKey: 'statusBadge.voided',
@@ -61,17 +61,17 @@ const statusConfig: Record<string, StatusConfig> = {
   available: {
     labelKey: 'statusBadge.available',
     variant: 'default',
-    className: 'bg-green-500 hover:bg-green-600 text-white',
+    className: 'bg-pos-accent text-white hover:opacity-90',
   },
   occupied: {
     labelKey: 'statusBadge.occupied',
     variant: 'default',
-    className: 'bg-red-600 hover:bg-red-700 text-white',
+    className: 'bg-pos-danger text-white hover:opacity-90',
   },
   reserved: {
     labelKey: 'statusBadge.reserved',
     variant: 'default',
-    className: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+    className: 'bg-pos-warning text-black hover:opacity-90',
   },
   maintenance: {
     labelKey: 'statusBadge.maintenance',
@@ -83,7 +83,7 @@ const statusConfig: Record<string, StatusConfig> = {
   pending: {
     labelKey: 'statusBadge.pending',
     variant: 'default',
-    className: 'bg-green-500 hover:bg-green-600 text-white',
+    className: 'bg-pos-accent text-white hover:opacity-90',
   },
   served: {
     labelKey: 'statusBadge.served',
@@ -94,17 +94,17 @@ const statusConfig: Record<string, StatusConfig> = {
   tab_open_ok: {
     labelKey: 'statusBadge.open',
     variant: 'default',
-    className: 'bg-green-600 hover:bg-green-700 text-white dark:bg-green-700',
+    className: 'bg-pos-accent text-white hover:opacity-90',
   },
   tab_open_warn: {
     labelKey: 'statusBadge.tabOpenWarn',
     variant: 'default',
-    className: 'bg-yellow-500 hover:bg-yellow-600 text-black dark:text-black',
+    className: 'bg-pos-warning text-black hover:opacity-90',
   },
   tab_open_critical: {
     labelKey: 'statusBadge.tabOpenCritical',
     variant: 'destructive',
-    className: 'bg-red-600 hover:bg-red-700 text-white',
+    className: 'bg-pos-danger text-white hover:opacity-90',
   },
 
   // Inventory (quantity vs threshold)
@@ -116,12 +116,12 @@ const statusConfig: Record<string, StatusConfig> = {
   inv_low_stock: {
     labelKey: 'statusBadge.lowStock',
     variant: 'destructive',
-    className: 'bg-red-600 hover:bg-red-700 text-white',
+    className: 'bg-pos-danger text-white hover:opacity-90',
   },
   inv_out_of_stock: {
     labelKey: 'statusBadge.outOfStock',
     variant: 'destructive',
-    className: 'bg-red-700 hover:bg-red-800 text-white',
+    className: 'bg-destructive text-white hover:opacity-90',
   },
 };
 

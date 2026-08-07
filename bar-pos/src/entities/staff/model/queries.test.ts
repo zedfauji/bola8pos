@@ -96,14 +96,12 @@ describe('mapStaffRow locale', () => {
 });
 
 describe('getCurrentLocale', () => {
-  it('returns es-MX by default and en-US after changeLanguage', async () => {
+  it('reflects the current i18n language after changeLanguage', async () => {
+    await i18n.changeLanguage('es-MX');
     expect(getCurrentLocale()).toBe('es-MX');
 
     await i18n.changeLanguage('en-US');
     expect(getCurrentLocale()).toBe('en-US');
-
-    // Restore default so later tests in this file are unaffected.
-    await i18n.changeLanguage('es-MX');
   });
 });
 

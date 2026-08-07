@@ -109,17 +109,17 @@ export function HappyHourBanner({ activePromotions }: HappyHourBannerProps) {
   return (
     <div
       // eslint-disable-next-line tailwindcss/no-custom-classname -- happy-hour-banner is a hand-written CSS hook (globals.css) for the @starting-style entrance transition, not a Tailwind utility
-      className="happy-hour-banner mb-3 flex items-center gap-2 rounded-lg border border-amber-700 bg-amber-950 px-3 py-2 text-sm text-amber-200"
+      className="happy-hour-banner mb-3 flex items-center gap-2 rounded-lg border border-pos-warning/60 bg-amber-950 px-3 py-2 text-sm text-amber-200"
       role="status"
       aria-label={t('happyHourBanner.promotionsActiveAriaLabel')}
       data-testid="active-promotions-banner"
     >
-      <Zap className="size-4 shrink-0 text-amber-400" aria-hidden />
+      <Zap className="size-4 shrink-0 text-pos-warning" aria-hidden />
       <span className="flex-1 font-medium">
         {t('happyHourBanner.promotionsActive', { names })}
       </span>
       {countdown !== null && (
-        <span className="text-xs text-amber-400">
+        <span className="text-xs text-pos-warning">
           {t('happyHourBanner.endsIn', { countdown })}
         </span>
       )}

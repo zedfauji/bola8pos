@@ -103,7 +103,7 @@ export function ComboMixReport({ dateRange }: Props) {
                 key={`${row.date}-${row.comboProductId}`}
                 className={
                   row.comboProductId === topId
-                    ? 'border-l-2 border-l-emerald-500 bg-emerald-500/5'
+                    ? 'border-l-2 border-l-pos-highlight bg-pos-highlight/5'
                     : undefined
                 }
               >

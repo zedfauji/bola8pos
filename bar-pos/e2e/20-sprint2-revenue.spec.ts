@@ -86,6 +86,8 @@ test.describe('Sprint 2 — Discount UI (PaymentModal)', () => {
     await openPaymentModalWithItem(page, 'Discount D2');
 
     const modal = page.getByRole('dialog', { name: /process payment/i });
+    // Discount is progressively disclosed — expand it first
+    await modal.getByRole('switch', { name: 'Discount' }).click();
     const poolOnlyBtn = modal.getByTestId('discount-scope-pool_only');
     await expect(poolOnlyBtn).toBeVisible({ timeout: 10_000 });
     await poolOnlyBtn.click();
@@ -106,6 +108,8 @@ test.describe('Sprint 2 — Discount UI (PaymentModal)', () => {
     await openPaymentModalWithItem(page, 'Discount D3');
 
     const modal = page.getByRole('dialog', { name: /process payment/i });
+    // Discount is progressively disclosed — expand it first
+    await modal.getByRole('switch', { name: 'Discount' }).click();
     await modal.getByTestId('discount-type-fixed').click();
 
     const discountInput = modal.getByLabel('Discount amount');
@@ -125,6 +129,8 @@ test.describe('Sprint 2 — Discount UI (PaymentModal)', () => {
     await openPaymentModalWithItem(page, 'Discount D4');
 
     const modal = page.getByRole('dialog', { name: /process payment/i });
+    // Discount is progressively disclosed — expand it first
+    await modal.getByRole('switch', { name: 'Discount' }).click();
 
     // Default type is percent — fill discount value
     const discountInput = modal.getByLabel('Discount %');

@@ -151,7 +151,7 @@ describe('HourlyBreakdownPanel', () => {
     expect(screen.queryByText(/Slowest/i)).not.toBeInTheDocument();
   });
 
-  it('single non-zero hour: Peak callout visible; table row gets only peak (emerald) highlight, not slowest (amber)', () => {
+  it('single non-zero hour: Peak callout visible; table row gets only peak (pos-highlight) highlight, not slowest (pos-warning)', () => {
     // Only hour 10 has revenue.
     // findPeakHour and findSlowestHour both return the same row.
     // The callout area shows both Peak and Slowest labels.
@@ -171,12 +171,12 @@ describe('HourlyBreakdownPanel', () => {
     // Peak callout must appear
     expect(screen.getByText(/Peak:/i)).toBeInTheDocument();
 
-    // The table row for hour 10 must have the peak (emerald) class, NOT the amber (slowest) class.
+    // The table row for hour 10 must have the peak (pos-highlight) class, NOT the slowest (pos-warning) class.
     const tbody = document.querySelector('tbody') as HTMLElement;
     const allRows = within(tbody).getAllByRole('row');
     const row10 = allRows.find(r => r.textContent?.includes('10:00 AM'));
     expect(row10).toBeDefined();
-    expect(row10!.className).toMatch(/emerald/);
-    expect(row10!.className).not.toMatch(/amber/);
+    expect(row10!.className).toMatch(/pos-highlight/);
+    expect(row10!.className).not.toMatch(/pos-warning/);
   });
 });

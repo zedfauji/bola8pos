@@ -74,6 +74,6 @@ describe('ComboMixReport', () => {
     // ROW_A has netRevenue=500, ROW_B has 300 — ROW_A is top
     const rows = container.querySelectorAll('tbody tr');
     const topRow = Array.from(rows).find(r => r.textContent?.includes('Cubeta Regular'));
-    expect(topRow?.className).toContain('border-l-emerald-500');
+    expect(topRow?.className).toContain('border-l-pos-highlight');
   });
 });

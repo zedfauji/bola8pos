@@ -76,9 +76,19 @@ export function ResourceCard({
     firstHourMode
   );
 
+  const isClickable = isOccupied && Boolean(onViewStatus);
+
   const handleCardClick = () => {
-    if (isOccupied && onViewStatus) {
+    if (isClickable && onViewStatus) {
       onViewStatus();
+    }
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!isClickable) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick();
     }
   };
 
@@ -87,17 +97,22 @@ export function ResourceCard({
       data-testid="pool-table-card"
       className={cn(
         'flex flex-col overflow-hidden transition-shadow duration-200 ease-out',
-        isOccupied && 'ring-2 ring-inset ring-primary'
+        isOccupied && 'ring-2 ring-inset ring-primary',
+        isClickable && 'focus-visible:ring-3 focus-visible:ring-ring/50 outline-none'
       )}
-      onClick={isOccupied && onViewStatus ? handleCardClick : undefined}
-      style={isOccupied && onViewStatus ? { cursor: 'pointer' } : undefined}
+      onClick={isClickable ? handleCardClick : undefined}
+      onKeyDown={isClickable ? handleCardKeyDown : undefined}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      aria-label={isClickable ? t('poolTableCard.viewStatus', { label: table.label }) : undefined}
+      style={isClickable ? { cursor: 'pointer' } : undefined}
     >
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground">
             {t('poolTableCard.tableNumber', { number: table.number })}
           </p>
-          <CardTitle className="truncate text-lg font-bold">{table.label}</CardTitle>
+          <CardTitle className="truncate text-lg">{table.label}</CardTitle>
           <Badge
             data-testid="table-type-badge"
             variant={TABLE_TYPE_VARIANT[table.tableType]}

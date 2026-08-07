@@ -16,7 +16,7 @@ describe('ProductCard', () => {
 
     render(<ProductCard product={product} category={category} onSelect={vi.fn()} />);
 
-    expect(screen.getByLabelText('MX$5.50 dollars')).toBeInTheDocument();
+    expect(screen.getByLabelText('$5.50 dollars')).toBeInTheDocument();
   });
 
   it('does not render a happy hour badge', () => {

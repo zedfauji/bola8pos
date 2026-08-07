@@ -146,10 +146,11 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
   const assignedPersonItemIdSet = new Set(personColumns.flatMap(c => c.itemIds));
   const unassignedPersonItems = orderItems.filter(i => !assignedPersonItemIdSet.has(i.id));
 
-  // Amount mode totals
-  const enteredTotal = amountRows.reduce((s, r) => s + r.amount, 0);
-  const remaining = tabTotal - enteredTotal;
-  const remainingExact = Math.abs(remaining) <= 0.01;
+  // Amount mode totals — integer cents to avoid float drift across repeated row add/remove edits
+  const enteredTotalCents = amountRows.reduce((s, r) => s + toCents(r.amount), 0);
+  const remainingCents = tabTotalCents - enteredTotalCents;
+  const remaining = remainingCents / 100;
+  const remainingExact = remainingCents === 0;
 
   // ── isValid per mode ──
   const isValid: boolean =
@@ -318,7 +319,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
     const nextNum = itemColumns.length + 1;
     setItemColumns(prev => [
       ...prev,
-      { id: `${uid}-col-${String(nextNum)}-${String(Date.now())}`, label: `Check ${String(nextNum)}`, itemIds: [] },
+      { id: `${uid}-col-${String(nextNum)}-${String(Date.now())}`, label: t('splitTab.checkN', { n: nextNum }), itemIds: [] },
     ]);
   }
 
@@ -362,7 +363,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
       ...prev,
       {
         id: `${uid}-p-${String(nextNum)}-${String(Date.now())}`,
-        name: `Person ${String(nextNum)}`,
+        name: t('splitTab.personN', { n: nextNum }),
         itemIds: [],
       },
     ]);
@@ -373,7 +374,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
     const nextNum = amountRows.length + 1;
     setAmountRows(prev => [
       ...prev,
-      { id: `${uid}-a-${String(nextNum)}-${String(Date.now())}`, label: `Check ${String(nextNum)}`, amount: 0 },
+      { id: `${uid}-a-${String(nextNum)}-${String(Date.now())}`, label: t('splitTab.checkN', { n: nextNum }), amount: 0 },
     ]);
   }
 
@@ -498,7 +499,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                       onClick={() => {
                         setN(num);
                       }}
-                      aria-label={`Split ${String(num)} ways`}
+                      aria-label={t('splitTab.splitNWaysAria', { n: num })}
                       aria-pressed={n === num}
                     >
                       {num}
@@ -720,7 +721,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
             {/* ── By Amount mode ── */}
             <TabsContent value="amount" className="flex-1 overflow-y-auto">
               <div className="px-6 py-4 flex flex-col gap-4">
-                <div className="rounded-md border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
+                <div className="rounded-md border border-pos-warning/30 bg-pos-warning/5 px-4 py-3">
                   <p className="text-sm text-muted-foreground">
                     {t('splitTab.amountModeWarning')}
                   </p>
@@ -730,7 +731,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   {amountRows.map((row, i) => (
                     <div key={row.id} className="flex items-center gap-3">
                       <Input
-                        placeholder={`Check ${String(i + 1)} label`}
+                        placeholder={t('splitTab.checkLabelPlaceholder', { n: i + 1 })}
                         value={row.label}
                         onChange={e => {
                           updateAmountLabel(row.id, e.target.value);
@@ -756,7 +757,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                           onClick={() => {
                             removeAmountRow(row.id);
                           }}
-                          aria-label={`Remove check ${String(i + 1)}`}
+                          aria-label={t('splitTab.removeCheckAria', { n: i + 1 })}
                         >
                           <X className="size-4 text-muted-foreground hover:text-destructive" />
                         </POSButton>
@@ -778,7 +779,7 @@ export function SplitTabSheet({ open, onClose, tab, orderItems }: SplitTabSheetP
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">{t('splitTab.enteredTotal')}</span>
                     <MoneyDisplay
-                      amount={enteredTotal}
+                      amount={enteredTotalCents / 100}
                       size="sm"
                       className={remainingExact ? '' : 'text-pos-danger'}
                     />

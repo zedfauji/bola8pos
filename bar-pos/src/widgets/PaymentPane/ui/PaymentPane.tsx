@@ -232,12 +232,12 @@ export function PaymentPane() {
             {/* Active pool session warning — payment blocked */}
             {selectedTab.hasActivePoolSession ? (
               <div className="flex flex-1 items-center justify-center p-8">
-                <div className="max-w-sm rounded-lg border border-amber-500/40 bg-amber-500/10 p-6 text-center">
+                <div className="max-w-sm rounded-lg border border-pos-warning/40 bg-pos-warning/10 p-6 text-center">
                   <AlertTriangle
-                    className="mx-auto mb-3 size-8 text-amber-500"
+                    className="mx-auto mb-3 size-8 text-pos-warning"
                     aria-hidden="true"
                   />
-                  <h3 className="mb-1 font-semibold text-amber-600 dark:text-amber-400">
+                  <h3 className="mb-1 font-semibold text-pos-warning">
                     {t('paymentPane.timerStillRunningTitle')}
                   </h3>
                   <p className="text-sm text-muted-foreground">

@@ -65,14 +65,6 @@ export interface RefundSheetProps {
 // REASON LABELS
 // ============================================================================
 
-const REASON_LABELS: Record<RefundReason, string> = {
-  wrong_order: "Wrong order",
-  quality_issue: "Quality issue",
-  customer_complaint: "Customer complaint",
-  billing_error: "Billing error",
-  other: "Other",
-};
-
 const REFUND_REASONS: RefundReason[] = [
   "wrong_order",
   "quality_issue",
@@ -298,7 +290,7 @@ export function RefundSheet({ open, paymentId, onOpenChange }: RefundSheetProps)
                 <SelectContent>
                   {REFUND_REASONS.map(r => (
                     <SelectItem key={r} value={r}>
-                      {REASON_LABELS[r]}
+                      {t(`processRefund.reasonLabels.${r}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>

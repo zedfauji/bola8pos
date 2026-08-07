@@ -47,7 +47,7 @@ describe('RecipeVarianceReport', () => {
     const { container } = renderWithProviders(<RecipeVarianceReport dateRange={dateRange} />);
     const rows = container.querySelectorAll('tbody tr');
     const dataRow = Array.from(rows).find(r => r.textContent?.includes('Cerveza'));
-    expect(dataRow?.className).toContain('border-l-amber-400');
+    expect(dataRow?.className).toContain('border-l-pos-warning');
   });
 
   it('row with |variancePct| <= 10 does NOT have amber highlight class', () => {
@@ -55,7 +55,7 @@ describe('RecipeVarianceReport', () => {
     const { container } = renderWithProviders(<RecipeVarianceReport dateRange={dateRange} />);
     const rows = container.querySelectorAll('tbody tr');
     const dataRow = Array.from(rows).find(r => r.textContent?.includes('Hielo'));
-    expect(dataRow?.className ?? '').not.toContain('border-l-amber-400');
+    expect(dataRow?.className ?? '').not.toContain('border-l-pos-warning');
   });
 
   it('renders LoadingSpinner while isLoading', () => {

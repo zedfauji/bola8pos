@@ -214,11 +214,14 @@ test.describe('Payments', () => {
     await payButton(page).click();
     const modal = page.getByRole('dialog', { name: /process payment/i });
 
-    const discountInput = modal.getByLabel(/discount/i);
-    if (!(await discountInput.isVisible({ timeout: 5_000 }).catch(() => false))) {
+    const discountToggle = modal.getByRole('switch', { name: 'Discount' });
+    if (!(await discountToggle.isVisible({ timeout: 5_000 }).catch(() => false))) {
       test.skip(true, 'tip/discount UI not implemented');
       return;
     }
+    // Discount is progressively disclosed — expand it first
+    await discountToggle.click();
+    const discountInput = modal.getByLabel(/discount %|discount amount/i);
     await discountInput.fill('10');
     await expect(modal.getByTestId('discount-applied-label')).toBeVisible({ timeout: 5_000 });
     await expect(modal.getByTestId('discount-row')).toBeVisible();

@@ -69,8 +69,8 @@ export function TimerDisplay({
       className={cn(
         isTabOpen ? 'tabular-nums' : 'font-mono tabular-nums',
         sizeClasses[size],
-        warning && 'text-yellow-600 dark:text-yellow-400',
-        critical && 'text-red-600 dark:text-red-400',
+        warning && 'text-pos-warning',
+        critical && 'text-destructive',
         className
       )}
       dateTime={`PT${String(secondsForIso)}S`}

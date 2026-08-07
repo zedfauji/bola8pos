@@ -47,7 +47,7 @@ export default defineConfig({
       slowMo,
     },
   },
-  projects: [{ name: 'chromium', use: { channel: 'chrome', headless: false } }],
+  projects: [{ name: 'chromium', use: { channel: 'chrome', headless: true } }],
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:1420',

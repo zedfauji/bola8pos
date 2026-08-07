@@ -1,18 +1,18 @@
 {
   "receipt": {
-    "date": "Date",
-    "cashier": "Cashier",
-    "customer": "Customer",
+    "date": "Fecha",
+    "cashier": "Cajero",
+    "customer": "Cliente",
     "subtotal": "Subtotal",
-    "tip": "Tip",
+    "tip": "Propina",
     "total": "Total",
-    "payment": "Payment",
-    "tendered": "Tendered",
-    "change": "Change",
+    "payment": "Pago",
+    "tendered": "Entregado",
+    "change": "Cambio",
     "ref": "Ref",
     "method": {
-      "cash": "Cash",
-      "card": "Card (BBVA Terminal)",
+      "cash": "Efectivo",
+      "card": "Tarjeta (Terminal BBVA)",
       "rappi": "Rappi"
     },
     "category": {
@@ -21,7 +21,7 @@
   },
   "precheque": {
     "title": "CUENTA PREVIA",
-    "subtitle": "PRE-CHEQUE",
+    "subtitle": "PRE-CUENTA",
     "date": "Fecha",
     "cashier": "Cajero",
     "customer": "Cliente",
@@ -35,109 +35,109 @@
   "pdf": {
     "appTitle": "Bar & Pool Parlor POS",
     "caja": {
-      "title": "Daily Caja Report",
-      "summary": "Summary",
-      "metric": "Metric",
-      "value": "Value",
-      "totalRevenue": "Total Revenue",
-      "cashSales": "Cash Sales",
-      "cardSales": "Card Sales",
-      "rappiSales": "Rappi Sales",
-      "orderCount": "Order Count",
-      "tabCount": "Tab Count",
-      "cashReconciliation": "Cash Reconciliation",
-      "item": "Item",
-      "amount": "Amount",
-      "openingCash": "Opening Cash",
-      "expectedCash": "Expected Cash",
-      "closingCash": "Closing Cash",
-      "variance": "Variance",
-      "topProducts": "Top Products",
-      "product": "Product",
-      "qty": "Qty",
-      "revenue": "Revenue",
-      "staffPerformance": "Staff Performance",
-      "staff": "Staff",
-      "orders": "Orders",
-      "salesTotal": "Sales Total",
+      "title": "Reporte diario de caja",
+      "summary": "Resumen",
+      "metric": "Métrica",
+      "value": "Valor",
+      "totalRevenue": "Ingresos totales",
+      "cashSales": "Ventas en efectivo",
+      "cardSales": "Ventas con tarjeta",
+      "rappiSales": "Ventas Rappi",
+      "orderCount": "Número de pedidos",
+      "tabCount": "Número de cuentas",
+      "cashReconciliation": "Conciliación de efectivo",
+      "item": "Concepto",
+      "amount": "Monto",
+      "openingCash": "Efectivo de apertura",
+      "expectedCash": "Efectivo esperado",
+      "closingCash": "Efectivo de cierre",
+      "variance": "Varianza",
+      "topProducts": "Productos principales",
+      "product": "Producto",
+      "qty": "Cant.",
+      "revenue": "Ingresos",
+      "staffPerformance": "Desempeño del personal",
+      "staff": "Personal",
+      "orders": "Pedidos",
+      "salesTotal": "Total de ventas",
       "categoryOther": "Otros"
     },
     "productSales": {
-      "title": "Product Sales Report",
-      "product": "Product",
-      "category": "Category",
-      "units": "Units",
-      "revenue": "Revenue"
+      "title": "Reporte de ventas de productos",
+      "product": "Producto",
+      "category": "Categoría",
+      "units": "Unidades",
+      "revenue": "Ingresos"
     },
     "hourlySales": {
-      "title": "Hourly Sales Report",
-      "hour": "Hour",
-      "dayOfWeek": "Day of Week",
-      "orders": "Orders",
-      "revenue": "Revenue",
-      "busiest": "Busiest",
-      "busiestMarker": "Yes"
+      "title": "Reporte de ventas por hora",
+      "hour": "Hora",
+      "dayOfWeek": "Día de la semana",
+      "orders": "Pedidos",
+      "revenue": "Ingresos",
+      "busiest": "Más concurrida",
+      "busiestMarker": "Sí"
     },
     "voidRefund": {
-      "title": "Voids & Refunds Report",
-      "timestamp": "Timestamp",
-      "staff": "Staff",
-      "amount": "Amount",
-      "reason": "Reason"
+      "title": "Reporte de anulaciones y reembolsos",
+      "timestamp": "Fecha y hora",
+      "staff": "Personal",
+      "amount": "Monto",
+      "reason": "Motivo"
     },
     "categoryRevenue": {
-      "title": "Revenue by Category",
-      "category": "Category",
-      "units": "Units",
-      "orders": "Orders",
-      "revenue": "Revenue",
-      "pctTotal": "% of Total"
+      "title": "Ingresos por categoría",
+      "category": "Categoría",
+      "units": "Unidades",
+      "orders": "Pedidos",
+      "revenue": "Ingresos",
+      "pctTotal": "% del total"
     },
     "staffMetrics": {
-      "title": "Staff Performance Report",
-      "staffMember": "Staff Member",
-      "revenue": "Revenue",
-      "transactions": "Transactions",
-      "avgCheck": "Avg Check",
-      "voids": "Voids"
+      "title": "Reporte de desempeño del personal",
+      "staffMember": "Miembro del personal",
+      "revenue": "Ingresos",
+      "transactions": "Transacciones",
+      "avgCheck": "Cuenta promedio",
+      "voids": "Anulaciones"
     },
     "staffTips": {
-      "title": "Tip Distribution Report",
-      "staffMember": "Staff Member",
-      "totalTips": "Total Tips"
+      "title": "Reporte de reparto de propinas",
+      "staffMember": "Miembro del personal",
+      "totalTips": "Propinas totales"
     },
     "comboMix": {
-      "title": "Combo Mix Report",
-      "date": "Date",
+      "title": "Reporte de mezcla de combos",
+      "date": "Fecha",
       "combo": "Combo",
-      "units": "Units",
-      "revenue": "Revenue",
-      "avgPrice": "Avg Price",
-      "overrides": "Overrides"
+      "units": "Unidades",
+      "revenue": "Ingresos",
+      "avgPrice": "Precio promedio",
+      "overrides": "Autorizaciones"
     },
     "recipeVariance": {
-      "title": "Recipe Variance Report",
-      "date": "Date",
-      "ingredient": "Ingredient",
-      "theoretical": "Theoretical",
+      "title": "Reporte de varianza de recetas",
+      "date": "Fecha",
+      "ingredient": "Ingrediente",
+      "theoretical": "Teórico",
       "delta": "Delta",
-      "variancePct": "Variance %"
+      "variancePct": "% de varianza"
     },
     "waitlistMetrics": {
-      "title": "Waitlist Analytics Report",
-      "date": "Date",
-      "partiesSeated": "Parties Seated",
-      "avgQuoted": "Avg Quoted (min)",
-      "avgActual": "Avg Actual (min)",
-      "noShowRate": "No-Show %"
+      "title": "Reporte analítico de lista de espera",
+      "date": "Fecha",
+      "partiesSeated": "Grupos sentados",
+      "avgQuoted": "Espera cotizada prom. (min)",
+      "avgActual": "Espera real prom. (min)",
+      "noShowRate": "% de no presentados"
     },
     "refundsRegister": {
-      "title": "Refunds Register",
-      "date": "Date",
-      "operator": "Operator",
-      "amount": "Amount",
-      "reason": "Reason",
-      "restock": "Restock"
+      "title": "Registro de reembolsos",
+      "date": "Fecha",
+      "operator": "Operador",
+      "amount": "Monto",
+      "reason": "Motivo",
+      "restock": "Reposición"
     }
   }
 }

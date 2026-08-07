@@ -55,7 +55,7 @@ export function RecipeVarianceReport({ dateRange }: Props) {
                 key={`${row.date}-${row.ingredientId}`}
                 className={
                   Math.abs(row.variancePct) > 10
-                    ? 'border-l-4 border-l-amber-400 bg-amber-50/5'
+                    ? 'border-l-2 border-l-pos-warning bg-pos-warning/5'
                     : undefined
                 }
               >

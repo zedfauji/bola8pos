@@ -27,7 +27,7 @@ describe('buildStartTicketText', () => {
     expect(result).toContain('Bola 8');
     expect(result).toContain('START TICKET');
     expect(result).toContain('Main Table');
-    expect(result).toContain('MX$15.00/h');
+    expect(result).toContain('$15.00/h');
     // Snapshot the full result
     expect(result).toMatchSnapshot();
   });

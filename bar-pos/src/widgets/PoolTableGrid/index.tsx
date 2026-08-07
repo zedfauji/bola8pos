@@ -22,12 +22,16 @@ import { EmptyState, POSButton, PoolTableGridSkeleton, ProtectedAction } from '@
 
 type TypeFilter = 'all' | ResourceType;
 
-const TYPE_FILTER_LABELS: { value: TypeFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'pool', label: 'Pool' },
-  { value: 'carom', label: 'Carom' },
-  { value: 'consumption', label: 'Consumption' },
-];
+// eslint-disable-next-line i18next/no-literal-string -- object keys (filter enum values) + translation-key strings, not UI copy
+const TYPE_FILTER_LABEL_KEY: Record<TypeFilter, string> = {
+  all: 'poolTableGrid.typeFilter.all',
+  pool: 'poolTableGrid.typeFilter.pool',
+  carom: 'poolTableGrid.typeFilter.carom',
+  consumption: 'poolTableGrid.typeFilter.consumption',
+  floating: 'poolTableGrid.typeFilter.floating',
+};
+
+const TYPE_FILTER_VALUES: TypeFilter[] = ['all', 'pool', 'carom', 'consumption'];
 
 export function PoolTableGrid() {
   const { t } = useTranslation('wPanels');
@@ -140,7 +144,7 @@ export function PoolTableGrid() {
         </POSButton>
         {!filtersCollapsed && (
           <div data-testid="pool-filters" className="flex flex-wrap gap-2">
-            {TYPE_FILTER_LABELS.map(({ value, label }) => (
+            {TYPE_FILTER_VALUES.map(value => (
               <POSButton
                 key={value}
                 type="button"
@@ -150,7 +154,7 @@ export function PoolTableGrid() {
                   setTypeFilter(value);
                 }}
               >
-                {label}
+                {t(TYPE_FILTER_LABEL_KEY[value])}
               </POSButton>
             ))}
           </div>

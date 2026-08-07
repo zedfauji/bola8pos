@@ -188,7 +188,9 @@ export function PINLoginForm() {
         <div className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-2xl mx-auto mb-2">
           {selectedStaff.name.charAt(0).toUpperCase()}
         </div>
-        <h2 className="text-xl font-bold">{selectedStaff.name}</h2>
+        <h2 className="font-heading text-xl font-semibold tracking-tight">
+          {selectedStaff.name}
+        </h2>
         <p className="text-sm text-muted-foreground capitalize">{selectedStaff.role}</p>
       </div>
 
@@ -207,7 +209,9 @@ export function PINLoginForm() {
       {phase === 'forced_pin_change' && (
         <div className="flex flex-col gap-4">
           <div className="text-center">
-            <h3 className="text-xl font-semibold">{t('pinLoginForm.setNewPinTitle')}</h3>
+            <h3 className="font-heading text-xl font-semibold">
+              {t('pinLoginForm.setNewPinTitle')}
+            </h3>
             <p className="text-sm text-muted-foreground">
               {t('pinLoginForm.setNewPinDescription')}
             </p>

@@ -305,10 +305,7 @@ export function ResourceIllustration({
 
       {/* Occupied overlay — timer + charge, centered */}
       {status === 'occupied' && timer !== undefined && (
-        <div
-          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
-          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
-        >
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center [text-shadow:0_1px_2px_var(--color-overlay-shadow)]">
           <span className="font-mono text-2xl tracking-wide text-white">
             {formatSeconds(timer.totalSeconds)}
           </span>
@@ -319,7 +316,7 @@ export function ResourceIllustration({
       {/* Available overlay — rate label, bottom-right */}
       {status === 'available' && ratePerHour !== undefined && (
         <div className="pointer-events-none absolute bottom-2 right-3">
-          <span className="font-mono text-[11px] text-white/70">
+          <span className="font-mono text-xs text-white/70">
             {t('poolTableIllustration.ratePerHour', { amount: formatMoney(ratePerHour) })}
           </span>
         </div>

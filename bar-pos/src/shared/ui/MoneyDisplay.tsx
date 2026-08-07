@@ -54,7 +54,7 @@ export function MoneyDisplay({
       className={cn(
         'font-mono tabular-nums',
         sizeClasses[size],
-        isNegative && 'text-red-600 dark:text-red-400',
+        isNegative && 'text-destructive',
         className
       )}
       aria-label={`${isNegative ? t('moneyDisplay.negativePrefix') : ''}${formatted} dollars`}

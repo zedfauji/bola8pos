@@ -1,22 +1,22 @@
 {
   "table": {
-    "name": "Name",
-    "role": "Role",
+    "name": "Nombre",
+    "role": "Rol",
     "locale": "Idioma",
-    "clockIn": "Clock in",
-    "duration": "Shift duration"
+    "clockIn": "Entrada",
+    "duration": "Duración del turno"
   },
   "actions": {
-    "clockIn": "Clock In",
-    "clockOut": "Clock Out",
-    "forcePinChange": "Force PIN Change"
+    "clockIn": "Marcar entrada",
+    "clockOut": "Marcar salida",
+    "forcePinChange": "Forzar cambio de PIN"
   },
   "section": {
-    "title": "Staff",
-    "description": "Active team members and open shifts."
+    "title": "Personal",
+    "description": "Miembros activos del equipo y turnos abiertos."
   },
   "search": {
-    "placeholder": "Search staff…"
+    "placeholder": "Buscar personal…"
   },
   "locale": {
     "editTrigger": "Cambiar idioma",

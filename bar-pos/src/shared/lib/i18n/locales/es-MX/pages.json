@@ -1,93 +1,93 @@
 {
   "common": {
-    "logoAlt": "Bar logo"
+    "logoAlt": "Logo del bar"
   },
   "audit": {
-    "title": "Audit Log"
+    "title": "Registro de auditoría"
   },
   "editHistory": {
     "title": "Historial de ediciones"
   },
   "home": {},
   "inventory": {
-    "title": "Inventory",
-    "physicalCount": "Physical Count",
-    "lowStockToast": "Low stock: {{productName}} — {{currentStock}} remaining (threshold: {{threshold}})"
+    "title": "Inventario",
+    "physicalCount": "Conteo físico",
+    "lowStockToast": "Existencia baja: {{productName}} — quedan {{currentStock}} (umbral: {{threshold}})"
   },
   "kdsBar": {
-    "title": "Bar Display"
+    "title": "Pantalla de barra"
   },
   "kds": {
-    "title": "Kitchen Display"
+    "title": "Pantalla de cocina"
   },
   "kitchenPrep": {
-    "title": "Kitchen Prep"
+    "title": "Prep de cocina"
   },
   "payments": {
-    "title": "Payments",
+    "title": "Pagos",
     "tabs": {
-      "payments": "Payments",
-      "refunds": "Refunds"
+      "payments": "Pagos",
+      "refunds": "Reembolsos"
     }
   },
   "poolTableStatus": {
-    "title": "Table Status",
-    "backLabel": "Pool Tables"
+    "title": "Estado de mesa",
+    "backLabel": "Mesas de billar"
   },
   "poolTables": {
-    "title": "Pool Tables"
+    "title": "Mesas de billar"
   },
   "pos": {
     "title": "POS",
-    "showOrderPanel": "Show order panel",
-    "hideOrderPanel": "Hide order panel",
-    "barcodeNotFound": "No product found for barcode {{code}}",
-    "addedToCart": "Added {{name}}",
-    "closeTabAndPay": "Close Tab / Pay",
-    "closeTabAndPayAriaLabel": "Close tab and process payment for {{customerName}}",
-    "customerFallback": "customer"
+    "showOrderPanel": "Mostrar panel de pedido",
+    "hideOrderPanel": "Ocultar panel de pedido",
+    "barcodeNotFound": "No se encontró ningún producto para el código {{code}}",
+    "addedToCart": "{{name}} agregado",
+    "closeTabAndPay": "Cerrar cuenta / Pagar",
+    "closeTabAndPayAriaLabel": "Cerrar cuenta y procesar pago para {{customerName}}",
+    "customerFallback": "cliente"
   },
   "rappi": {
-    "title": "Rappi delivery"
+    "title": "Entregas Rappi"
   },
   "rbac": {
-    "title": "Roles & Permissions"
+    "title": "Roles y permisos"
   },
   "reports": {
-    "title": "Reports",
+    "title": "Reportes",
     "groups": {
-      "sales": "Sales",
-      "menu": "Menu & Promos",
-      "staffTips": "Staff & Tips",
-      "operations": "Operations"
+      "sales": "Ventas",
+      "menu": "Menú y promociones",
+      "staffTips": "Personal y propinas",
+      "operations": "Operaciones"
     },
     "tabs": {
-      "session": "Session View",
-      "products": "Product Sales",
-      "hourly": "Hourly Breakdown",
-      "voids": "Voids & Refunds",
-      "deletionsPre": "Deletions",
-      "deletionsPost": "Corrections",
-      "categories": "Revenue by Category",
-      "staff": "Staff Performance",
-      "tips": "Tip Distribution",
-      "tipSplit": "Tip Split",
-      "combos": "Combo Mix",
-      "modifierPopularity": "Modifiers",
-      "paymentMethods": "Payment Methods",
-      "variance": "Recipe Variance",
-      "waitlist": "Waitlist",
-      "refundsReg": "Refunds Register",
-      "overrides": "Overrides"
+      "session": "Vista de sesión",
+      "products": "Ventas de productos",
+      "hourly": "Desglose por hora",
+      "voids": "Anulaciones y reembolsos",
+      "deletionsPre": "Eliminaciones",
+      "deletionsPost": "Correcciones",
+      "categories": "Ingresos por categoría",
+      "staff": "Desempeño del personal",
+      "tips": "Reparto de propinas",
+      "tipSplit": "Reparto de propinas",
+      "combos": "Mezcla de combos",
+      "modifierPopularity": "Modificadores",
+      "paymentMethods": "Métodos de pago",
+      "variance": "Varianza de recetas",
+      "waitlist": "Lista de espera",
+      "refundsReg": "Registro de reembolsos",
+      "overrides": "Autorizaciones"
     }
   },
   "settings": {
-    "title": "Settings"
+    "title": "Configuración"
   },
   "staff": {
-    "title": "Staff"
+    "title": "Personal"
   },
   "waitlist": {
-    "title": "Waitlist"
+    "title": "Lista de espera"
   }
 }

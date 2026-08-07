@@ -6,16 +6,23 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { act } from 'react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import i18n from '@shared/lib/i18n/index';
 import { MoneyDisplay } from './MoneyDisplay';
 
 describe('MoneyDisplay', () => {
-  afterEach(async () => {
-    await i18n.changeLanguage('es-MX'); // reset for other tests/consumers
+  beforeEach(async () => {
+    // test-setup.ts defaults the suite to en-US; opt in to es-MX explicitly
+    // for the tests in this file that assert es-MX-specific formatting.
+    await act(() => i18n.changeLanguage('es-MX'));
   });
 
-  it('renders the es-MX symbol under the default locale', () => {
+  afterEach(async () => {
+    await act(() => i18n.changeLanguage('en-US')); // reset to the test-suite default
+  });
+
+  it('renders the es-MX symbol', () => {
     render(<MoneyDisplay amount={12.5} />);
     expect(screen.getByText('MX$12.50')).toBeInTheDocument();
   });

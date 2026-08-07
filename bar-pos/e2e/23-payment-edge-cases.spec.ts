@@ -211,12 +211,17 @@ test.describe('Payment Edge Cases', () => {
       return;
     }
 
-    const discountInput = page.getByLabel(/discount/i);
-    const discountVisible = await discountInput.isVisible({ timeout: 5_000 }).catch(() => false);
-    if (!discountVisible) {
+    const discountToggle = page.getByRole('switch', { name: 'Discount' });
+    const discountToggleVisible = await discountToggle
+      .isVisible({ timeout: 5_000 })
+      .catch(() => false);
+    if (!discountToggleVisible) {
       test.skip(true, 'tip/discount UI not implemented');
       return;
     }
+    // Discount is progressively disclosed — expand it first
+    await discountToggle.click();
+    const discountInput = page.getByLabel(/discount %|discount amount/i);
 
     const originalTotal = await page.getByText(/\$\d+\.\d{2}/).first().textContent();
     await discountInput.fill('10');

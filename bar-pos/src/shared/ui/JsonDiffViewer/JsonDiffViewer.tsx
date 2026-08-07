@@ -2,7 +2,7 @@
  * JsonDiffViewer — Side-by-side JSON diff viewer.
  *
  * Renders DiffNode[] from json-diff.ts as a collapsible tree.
- * Colors: added = emerald-500/10 bg + text-emerald-400
+ * Colors: added = pos-accent/10 bg + text-pos-accent
  *         removed = destructive/10 bg + text-destructive
  *         unchanged = transparent bg + text-muted-foreground
  *
@@ -43,7 +43,7 @@ function DiffLine({ node, depth }: DiffLineProps) {
 
   const bgClass = cn(
     node.status === 'added'
-      ? 'bg-emerald-500/10'
+      ? 'bg-pos-accent/10'
       : node.status === 'removed'
         ? 'bg-destructive/10'
         : 'bg-transparent'
@@ -51,7 +51,7 @@ function DiffLine({ node, depth }: DiffLineProps) {
 
   const textClass = cn(
     node.status === 'added'
-      ? 'text-emerald-400'
+      ? 'text-pos-accent'
       : node.status === 'removed'
         ? 'text-destructive'
         : 'text-muted-foreground'
@@ -61,7 +61,7 @@ function DiffLine({ node, depth }: DiffLineProps) {
 
   const gutterClass = cn(
     node.status === 'added'
-      ? 'text-emerald-400'
+      ? 'text-pos-accent'
       : node.status === 'removed'
         ? 'text-destructive'
         : 'text-muted-foreground'

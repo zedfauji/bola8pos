@@ -240,8 +240,8 @@ function SlotEditor({ slot, onDeleteSlot }: SlotEditorProps) {
   /* eslint-disable i18next/no-literal-string -- Tailwind class strings, not UI copy */
   const slotTypeBadge =
     slot.slotType === 'product'
-      ? 'bg-blue-500/20 text-blue-300'
-      : 'bg-purple-500/20 text-purple-300';
+      ? 'bg-primary/20 text-primary'
+      : 'bg-muted text-muted-foreground';
   /* eslint-enable i18next/no-literal-string */
 
   return (

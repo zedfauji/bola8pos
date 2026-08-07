@@ -53,7 +53,7 @@ export function CategoryRevenuePanel({ dateRange }: Props) {
               <TableRow
                 key={row.categoryId}
                 className={
-                  idx === 0 ? 'border-l-2 border-l-emerald-500 bg-emerald-500/5' : undefined
+                  idx === 0 ? 'border-l-2 border-l-pos-highlight bg-pos-highlight/5' : undefined
                 }
               >
                 <TableCell className="font-medium">{row.categoryName}</TableCell>

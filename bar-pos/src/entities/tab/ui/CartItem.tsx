@@ -50,7 +50,7 @@ export function CartItem({ item, onQuantitySet, onRemove, onNotesChange }: CartI
           <QuantityControl value={item.quantity} min={1} max={99} onChange={onQuantitySet} />
           <div className="flex shrink-0 items-center gap-1">
             {item.unitPrice !== item.product.basePrice && (
-              <Zap className="h-3.5 w-3.5 text-amber-400" aria-label={t('cartItem.happyHourPrice')} />
+              <Zap className="h-3.5 w-3.5 text-pos-warning" aria-label={t('cartItem.happyHourPrice')} />
             )}
             <MoneyDisplay amount={item.lineTotal} size="lg" />
           </div>
