@@ -83,7 +83,10 @@ export function usePromotion(id: string | null) {
 /**
  * Create a draft promotion row and return its id. Defaults `is_active: false`
  * (draft is safe-to-leave-incomplete, per 20-UI-SPEC.md §1 — mirrors combo's
- * `is_combo: true` draft pattern).
+ * `is_combo: true` draft pattern) and `target_type: 'pool_billing'` — the one
+ * target type carrying no required foreign key, so a freshly created,
+ * still-incomplete draft never violates `promotions_item_target_check` /
+ * `promotions_category_target_check`.
  */
 export function useMutationCreatePromotion() {
   const queryClient = useQueryClient();
@@ -99,7 +102,7 @@ export function useMutationCreatePromotion() {
           name: i18n.t('entities:promotion.newPromotionDefaultName'),
           discount_type: 'percentage',
           discount_value: 0,
-          target_type: 'item',
+          target_type: 'pool_billing',
           priority: 0,
           is_active: false,
         })

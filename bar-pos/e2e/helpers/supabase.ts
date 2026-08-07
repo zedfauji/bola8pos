@@ -144,7 +144,26 @@ export async function resetTestState(): Promise<void> {
   // profile back to the documented default here so every spec starts from
   // a deterministic locale baseline, not whatever a prior run's failure
   // left behind.
-  await admin.from('profiles').update({ locale: 'es-MX' }).neq('locale', 'es-MX');
+  //
+  // EXCEPT the 4 fixed E2E login accounts (setup-dev-users.ts pins these to
+  // en-US, per 331e1b6) — nearly every other spec's selectors assert on
+  // English UI text post-login. Blindly resetting every row here silently
+  // reverted that pin on each test's beforeEach, since this reset predates
+  // the en-US pin by three weeks (75dcdb4 vs 331e1b6) and was never updated
+  // to account for it.
+  const pinnedNames = [
+    process.env['E2E_ADMIN_NAME'],
+    process.env['E2E_MANAGER_NAME'],
+    process.env['E2E_BARTENDER_NAME'],
+    process.env['E2E_KITCHEN_NAME'],
+  ].filter((n): n is string => !!n);
+  const { data: pinnedRows } = await admin.from('profiles').select('id').in('name', pinnedNames);
+  const pinnedIds = (pinnedRows ?? []).map(r => (r as { id: string }).id);
+  let localeResetQuery = admin.from('profiles').update({ locale: 'es-MX' }).neq('locale', 'es-MX');
+  if (pinnedIds.length > 0) {
+    localeResetQuery = localeResetQuery.not('id', 'in', `(${pinnedIds.join(',')})`);
+  }
+  await localeResetQuery;
 }
 
 /**

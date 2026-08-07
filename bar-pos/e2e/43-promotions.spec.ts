@@ -57,9 +57,13 @@ test.describe('Promotions', () => {
     await expect(dialog).toBeVisible({ timeout: 15_000 });
 
     await dialog.getByLabel('Promotion name').fill(promoName);
-    // Discount type defaults to "Percentage off" and target type defaults to
-    // "Item" — both already correct for this test, no Select interaction needed.
+    // Discount type defaults to "Percentage off" — already correct for this
+    // test, no Select interaction needed. A fresh draft opens on the
+    // pool-billing target (the one target type with no required FK); switch
+    // it to Item before the Product picker mounts.
     await dialog.getByLabel('Discount value').fill('15');
+    await dialog.getByLabel('Applies to').click();
+    await page.getByRole('option', { name: 'Item' }).click();
     await dialog.getByLabel('Product').selectOption({ label: 'Budweiser' });
     await dialog.getByLabel('Priority').fill('5');
     // New drafts default to inactive (is_active: false) — turn Active on.
