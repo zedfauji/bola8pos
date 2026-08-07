@@ -238,7 +238,7 @@ Plans:
 **Goal:** Walk-in queue with FIFO ordering, party size, and per-party WhatsApp notification on table-available events (fallback to Realtime pane + Tauri notification).
 **Requirements:** S5-01..S5-11
 **Depends on:** Phase 1
-**Plans:** 11 plans (7 executed + 1 gap closure + 3 scope addition planned 2026-08-07)
+**Plans:** 8/10 plans executed
 
 **Scope addition (2026-08-07):** plans 07-09..07-11 add automatic tab creation and pool-timer start to the existing-table waitlist seat action, via two new atomic Postgres RPCs, plus the `pg_net` extension fix for the currently-broken `notify-waitlist` trigger. Driven entirely by 07-CONTEXT.md decisions D-01..D-08 — no new REQUIREMENTS.md IDs. Requirements S5-01..S5-11 remain covered by 07-01..07-08.
 
@@ -247,7 +247,7 @@ Plans:
 
 - [x] 07-01-PLAN.md — DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
 - [x] 07-08-PLAN.md — Gap closure CR-01+CR-02: register /waitlist route in router.tsx, mount WaitlistRealtimeListener, fix pool_tables name→label+number column bug in 3 files (Wave 7) (S5-08, S5-11) ✓ 2026-04-25
-- [ ] 07-09-PLAN.md — Atomic `start_pool_session` + `seat_waitlist_party_and_start_session` RPCs + `pg_net` extension, pushed live (Wave 1) (D-01, D-02, D-04, D-06, D-08)
+- [x] 07-09-PLAN.md — Atomic `start_pool_session` + `seat_waitlist_party_and_start_session` RPCs + `pg_net` extension, pushed live (Wave 1) (D-01, D-02, D-04, D-06, D-08)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
