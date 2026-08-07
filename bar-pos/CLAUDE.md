@@ -42,6 +42,17 @@ This project uses GSD for phase planning — `.planning/STATE.md`, `ROADMAP.md`,
 
 Do not enable GSD's MemPalace integration (`gsd-mempalace-*`) on top of this — it would run a third overlapping memory system alongside claude-mem and GSD's own `.planning/STATE.md`. claude-mem covers cross-session recall; `.planning/` covers phase/roadmap state. That's sufficient.
 
+## Testing & Verification Policy — NON-NEGOTIABLE
+
+**Every test, verification, and UAT scenario in this project MUST be automated Playwright E2E, run headless by default.** This overrides GSD's default behavior and applies to every phase, plan, and skill invocation from this point forward.
+
+- **No `<human-check>` sub-blocks, no `checkpoint:human-verify` tasks, no `*-UAT.md` scenario marked for manual/human execution.** If a planner (`gsd-planner`, `gsd-ui-phase`, etc.) is about to emit one, it must instead write the equivalent as a Playwright assertion — visual-regression screenshot diff, computed-style/DOM assertion, `getByRole`/ARIA check, network-request assertion — and put it in `e2e/`. There is no case in this project where "have a human click it" is an acceptable substitute for "assert it in Playwright."
+- **Verification status of `human_needed` is not a valid terminal state for a phase in this project.** A phase is not `complete` until its verification is `passed` via automated E2E, or has an explicit, reasoned override per `verification-overrides.md` (and "requires visual/human judgment" is not a valid override reason here — write the visual-regression assertion instead).
+- **Headless is the default run mode.** Only deviate (headed/`--headed`) when explicitly asked for a specific debugging session — never as the standing mode for a suite. Note: `playwright.config.ts` currently sets `headless: false` with `channel: 'chrome'` for local dev convenience (see "Ubuntu dev notes" below) — CI and any automated verification run must force `headless: true` regardless of that local default.
+- **`checkpoint:human-action`** (an auth step or credential only a human can perform) and **`checkpoint:decision`** (a choice the executor needs from the user) are a different category — those aren't post-hoc verification of finished work, so this policy doesn't touch them. Only human *verification/testing* of already-built work is banned.
+- This policy is retroactive in intent: existing phases carrying `human_needed`/`gaps_found`/pending manual UAT scenarios (see `.planning/STATE.md` Deferred Items and `.planning/audits/2026-08-07-cross-phase-todos-and-gaps.md`) are backlog to close via Playwright, not accepted end states — do not treat their current `human_needed` status as precedent for new phases.
+- Full rationale and scope: `.planning/decisions/2026-08-07-mandatory-automated-testing-no-manual-verification.md`.
+
 ## Project Overview
 
 A bar/restaurant POS system built as a Tauri 2 desktop app shipping to Windows/WebView2 end users. Ubuntu is an officially supported development OS, running the same native shell through webkit2gtk instead of WebView2. Frontend is React 19 + TypeScript + Vite. Backend is Supabase (PostgreSQL + Auth + Realtime + RLS).
