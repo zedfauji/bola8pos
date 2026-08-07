@@ -568,3 +568,34 @@ export async function supabaseMutation<T>(
     return err(unknownError(e));
   }
 }
+
+/**
+ * Wraps a version-guarded Supabase UPDATE (`.eq('version', expected)`) into a
+ * Result<void>, treating a zero-row match as a stale-version conflict.
+ *
+ * PostgREST returns HTTP 204 with no body for an UPDATE that matches zero
+ * rows — callers MUST append a `.select(...)` projection to the update
+ * chain, or the zero-row (stale version) case degrades to the current silent
+ * no-op behavior instead of surfacing `STALE_VERSION`.
+ *
+ * @param mutationFn - Function returning a Supabase mutation promise whose
+ *   update chain ends with `.select(...)` so `data` reflects matched rows.
+ * @returns `ok(undefined)` when at least one row matched, `err(staleVersionError())`
+ *   when zero rows matched (null or empty array), or the parsed Supabase
+ *   error unchanged for any other failure.
+ */
+export async function versionedMutation(
+  mutationFn: () => PromiseLike<{ data: unknown[] | null; error: PostgrestError | null }>
+): Promise<Result<void>> {
+  const result = await supabaseMutation<unknown[]>(mutationFn);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  if (result.data === null || result.data.length === 0) {
+    return err(staleVersionError());
+  }
+
+  return ok(undefined);
+}
