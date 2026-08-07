@@ -201,7 +201,7 @@ export function ProductGrid({ className }: ProductGridProps) {
       )}
 
       {!hasError && isLoading && (
-        <div className="mt-4 grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
+        <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
           {Array.from({ length: 15 }).map((_, i) => (
             <CardSkeleton key={i} height="160px" />
           ))}
@@ -210,7 +210,7 @@ export function ProductGrid({ className }: ProductGridProps) {
 
       {!hasError && !isLoading && filteredProducts.length > 0 && (
         <ScrollAreaRoot className="mt-4" style={{ maxHeight: 'calc(100vh - 200px)' }}>
-          <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
             {filteredProducts.map(product => {
               const category = categories?.find(c => c.id === product.categoryId);
               if (!category) return null;

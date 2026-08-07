@@ -160,7 +160,7 @@ export function PoolTableGrid() {
       {isIdleOrLoading && (
         <PoolTableGridSkeleton
           count={9}
-          className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+          className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4"
         />
       )}
 
@@ -174,7 +174,7 @@ export function PoolTableGrid() {
       )}
 
       {!isIdleOrLoading && !isError && tables && (
-        <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
           {filteredTables.map(table => {
             const session = table.currentSession ?? null;
             return (

@@ -105,3 +105,20 @@
     @apply font-sans;
   }
 }
+
+/*
+ * Happy-hour banner entrance: fade + settle on mount instead of popping in.
+ * Raw CSS (not a Tailwind utility) because this project is on Tailwind v3
+ * (package.json pins ^3.4.19), which has no `starting:` variant — that's a
+ * v4-only feature. @starting-style itself is native CSS (Chrome 117+/
+ * Safari 17.4+), so it works here independent of the Tailwind version.
+ */
+.happy-hour-banner {
+  transition:
+    opacity 250ms ease-out,
+    transform 250ms ease-out;
+}
+@starting-style {
+  .happy-hour-banner {
+    opacity: 0;
+    transform: translateY(-4px);

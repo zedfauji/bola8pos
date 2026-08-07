@@ -53,7 +53,7 @@ export function ProductCard({ product, category, onSelect, className }: ProductC
         />
         <span className="text-xs text-muted-foreground">{category.name}</span>
       </div>
-      <h3 className="text-lg font-semibold">{product.name}</h3>
+      <h3 className="w-full truncate text-lg font-semibold">{product.name}</h3>
       <MoneyDisplay amount={displayPrice} size="lg" />
     </POSButton>
   );
