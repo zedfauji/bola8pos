@@ -238,18 +238,39 @@ Plans:
 **Goal:** Walk-in queue with FIFO ordering, party size, and per-party WhatsApp notification on table-available events (fallback to Realtime pane + Tauri notification).
 **Requirements:** S5-01..S5-11
 **Depends on:** Phase 1
-**Plans:** 8 plans (7 executed + 1 gap closure)
+**Plans:** 8/10 plans executed
+
+**Scope addition (2026-08-07):** plans 07-09..07-11 add automatic tab creation and pool-timer start to the existing-table waitlist seat action, via two new atomic Postgres RPCs, plus the `pg_net` extension fix for the currently-broken `notify-waitlist` trigger. Driven entirely by 07-CONTEXT.md decisions D-01..D-08 — no new REQUIREMENTS.md IDs. Requirements S5-01..S5-11 remain covered by 07-01..07-08.
 
 Plans:
+**Wave 1**
 
 - [x] 07-01-PLAN.md — DB migrations (waitlist_entries + waitlist_notifications + pg_net trigger) (Wave 1) (S5-01, S5-02, S5-03)
+- [x] 07-08-PLAN.md — Gap closure CR-01+CR-02: register /waitlist route in router.tsx, mount WaitlistRealtimeListener, fix pool_tables name→label+number column bug in 3 files (Wave 7) (S5-08, S5-11) ✓ 2026-04-25
+- [x] 07-09-PLAN.md — Atomic `start_pool_session` + `seat_waitlist_party_and_start_session` RPCs + `pg_net` extension, pushed live (Wave 1) (D-01, D-02, D-04, D-06, D-08)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [x] 07-02-PLAN.md — [BLOCKING] supabase db push + shared utilities (phone.ts, waitlist-math.ts, tauri-notify.ts) + Zod schemas + AppErrorCodes + RBAC (Wave 2) (S5-04, S5-06, S5-07)
+- [ ] 07-10-PLAN.md — Swap `useMutationStartSession` internals onto the shared RPC behind an unchanged interface (Wave 2) (D-02, D-03) — has a blocking one-way decision checkpoint
+- [ ] 07-11-PLAN.md — `useSeatPartyAndStart` + SeatPartySheet rewire; auto tab + timer on the existing-table seat path (Wave 2) (D-01, D-02, D-05, D-06, D-07)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [x] 07-03-PLAN.md — Edge function send-waitlist-notification (Deno + WasenderAPI + rate-limit guard) (Wave 3) (S5-05)
 - [x] 07-04-PLAN.md — entities/waitlist/ FSD slice (types, queries, WaitlistEntryCard + Storybook) + WaitlistRealtimeListener (Wave 3) (S5-08)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [x] 07-05-PLAN.md — Features: add-waitlist-entry, notify-waitlist, seat-waitlist-party, mark-no-show/cancelled (Wave 4) (S5-09, S5-10, S5-11)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [x] 07-06-PLAN.md — Widgets + WaitlistPage + Route + Router + HomeDashboard tile with live count badge (Wave 5)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [x] 07-07-PLAN.md — Unit tests (phone, waitlist-math), schema tests, E2E 24-waitlist.spec.ts (Wave 6)
-- [x] 07-08-PLAN.md — Gap closure CR-01+CR-02: register /waitlist route in router.tsx, mount WaitlistRealtimeListener, fix pool_tables name→label+number column bug in 3 files (Wave 7) (S5-08, S5-11) ✓ 2026-04-25
 
 **Success Criteria**:
 
