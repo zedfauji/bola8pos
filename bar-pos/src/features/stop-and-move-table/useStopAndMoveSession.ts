@@ -1,8 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { resourceKeys } from '@entities/resource/model/queries';
 import { useResourceStore } from '@entities/resource/model/store';
-import { ok, supabaseMutation, supabaseQuery, type Result } from '@shared/lib/result';
+import { tabKeys } from '@entities/tab/model/queries';
+import {
+  ok,
+  supabaseMutation,
+  supabaseQuery,
+  versionedMutation,
+  type Result,
+} from '@shared/lib/result';
 import { supabase } from '@shared/lib/supabase';
+import { handleVersionError, TERMINAL_ID } from '@shared/lib/version-error';
 
 export interface StopAndMoveInput {
   sessionId: string;
@@ -16,6 +25,7 @@ export interface StopAndMoveInput {
 
 export function useStopAndMoveSession() {
   const qc = useQueryClient();
+  const expectedTabVersionRef = useRef(0);
 
   return useMutation({
     mutationFn: async (input: StopAndMoveInput): Promise<Result<void>> => {
@@ -50,8 +60,9 @@ export function useStopAndMoveSession() {
         supabase.from('tabs').select('version').eq('id', input.tabId).single()
       );
       if (!tabVersionRes.ok) return tabVersionRes;
+      expectedTabVersionRef.current = tabVersionRes.data.version;
 
-      const tabRes = await supabaseMutation(() =>
+      const tabRes = await versionedMutation(() =>
         supabase
           .from('tabs')
           .update({
@@ -60,6 +71,7 @@ export function useStopAndMoveSession() {
           })
           .eq('id', input.tabId)
           .eq('version', tabVersionRes.data.version)
+          .select('id')
       );
 
       if (!tabRes.ok) return tabRes;
@@ -73,6 +85,15 @@ export function useStopAndMoveSession() {
 
     onSuccess: (result, input) => {
       if (!result.ok) {
+        handleVersionError(result.error, {
+          queryClient: qc,
+          queryKey: tabKeys.all,
+          entity: 'tabs',
+          entityId: input.tabId,
+          expectedVersion: expectedTabVersionRef.current,
+          supabase,
+          terminalId: TERMINAL_ID,
+        });
         useResourceStore.getState().updateTableStatus(input.tableId, 'occupied');
         return;
       }
