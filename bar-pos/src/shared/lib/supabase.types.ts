@@ -778,6 +778,77 @@ export type Database = {
         }
         Relationships: []
       }
+      open_units: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closed_reason: string | null
+          created_at: string
+          id: string
+          opened_at: string
+          opened_by: string | null
+          product_id: string
+          remaining_count: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closed_reason?: string | null
+          created_at?: string
+          id?: string
+          opened_at?: string
+          opened_by?: string | null
+          product_id: string
+          remaining_count: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closed_reason?: string | null
+          created_at?: string
+          id?: string
+          opened_at?: string
+          opened_by?: string | null
+          product_id?: string
+          remaining_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "open_units_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "open_units_opened_by_fkey"
+            columns: ["opened_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "open_units_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_combo_usage"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "open_units_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           combo_slot_id: string | null
@@ -1366,8 +1437,10 @@ export type Database = {
           is_active: boolean
           is_combo: boolean
           name: string
+          parent_product_id: string | null
           sku: string | null
           stock_threshold: number | null
+          units_per_package: number | null
           updated_at: string
         }
         Insert: {
@@ -1383,8 +1456,10 @@ export type Database = {
           is_active?: boolean
           is_combo?: boolean
           name: string
+          parent_product_id?: string | null
           sku?: string | null
           stock_threshold?: number | null
+          units_per_package?: number | null
           updated_at?: string
         }
         Update: {
@@ -1400,8 +1475,10 @@ export type Database = {
           is_active?: boolean
           is_combo?: boolean
           name?: string
+          parent_product_id?: string | null
           sku?: string | null
           stock_threshold?: number | null
+          units_per_package?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -1410,6 +1487,20 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_parent_product_id_fkey"
+            columns: ["parent_product_id"]
+            isOneToOne: false
+            referencedRelation: "product_combo_usage"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "products_parent_product_id_fkey"
+            columns: ["parent_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -2552,6 +2643,24 @@ export type Database = {
         }
         Returns: Json
       }
+      consume_open_unit: {
+        Args: {
+          p_allow_negative?: boolean
+          p_direction: number
+          p_order_item_id: string
+          p_product_id: string
+          p_qty: number
+        }
+        Returns: undefined
+      }
+      correct_open_unit: {
+        Args: {
+          p_open_unit_id: string
+          p_reason: string
+          p_remaining_count: number
+        }
+        Returns: undefined
+      }
       create_order_with_items: {
         Args: {
           p_expected_version?: number
@@ -2650,6 +2759,7 @@ export type Database = {
           similarity: number
         }[]
       }
+      open_open_unit: { Args: { p_product_id: string }; Returns: string }
       process_payment_atomic: {
         Args: {
           p_amount: number
@@ -2766,6 +2876,16 @@ export type Database = {
         Args: { p_expected_version: number; p_reason: string; p_tab_id: string }
         Returns: Json
       }
+      seat_waitlist_party_and_start_session: {
+        Args: {
+          p_caja_session_id: string
+          p_entry_id: string
+          p_shift_id: string
+          p_staff_id: string
+          p_table_id: string
+        }
+        Returns: Json
+      }
       set_own_locale: {
         Args: { p_locale: string; p_terminal_id?: string }
         Returns: Json
@@ -2784,6 +2904,10 @@ export type Database = {
       }
       split_tab_evenly: {
         Args: { p_n: number; p_parent_tab_id: string }
+        Returns: Json
+      }
+      start_pool_session: {
+        Args: { p_tab_id: string; p_table_id: string }
         Returns: Json
       }
       stop_pool_session: {
@@ -2810,6 +2934,10 @@ export type Database = {
           p_transferred_by: string
         }
         Returns: Json
+      }
+      void_open_unit: {
+        Args: { p_open_unit_id: string; p_reason: string }
+        Returns: undefined
       }
     }
     Enums: {
