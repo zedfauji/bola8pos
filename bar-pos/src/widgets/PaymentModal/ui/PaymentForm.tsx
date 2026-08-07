@@ -334,7 +334,8 @@ export function PaymentForm({
         afterDiscount,
         tipAmount,
         tenderedAmount,
-        discountInfoArg
+        discountInfoArg,
+        tab.version
       );
       if (!r.ok) return { ok: false, error: { message: r.error.message } };
       return { ok: true, data: { receiptData: r.data.receiptData } };
@@ -349,7 +350,8 @@ export function PaymentForm({
         chargeAmount,
         chargeTip,
         ref.length > 0 ? ref : undefined,
-        discountInfoArg
+        discountInfoArg,
+        tab.version
       );
       if (!r.ok) return { ok: false, error: { message: r.error.message } };
       return { ok: true, data: { receiptData: r.data.receiptData } };
@@ -362,7 +364,8 @@ export function PaymentForm({
       tab.id,
       afterDiscount,
       tab.rappiOrderId,
-      discountInfoArg
+      discountInfoArg,
+      tab.version
     );
     if (!r.ok) return { ok: false, error: { message: r.error.message } };
     return { ok: true, data: { receiptData: r.data.receiptData } };
