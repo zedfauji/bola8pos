@@ -8,6 +8,7 @@
  */
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { toast } from 'sonner';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as categoryEntity from '@entities/category';
@@ -180,5 +181,29 @@ describe('PromotionBuilderForm', () => {
       expect(screen.getByLabelText('Product')).toBeInTheDocument();
       expect(screen.queryByRole('tree')).not.toBeInTheDocument();
     });
+  });
+
+  it('saving an item-target promotion with no product selected shows an error toast and never calls the update mutation', async () => {
+    const user = userEvent.setup();
+    const { mutate } = vi.mocked(promotionEntity.useMutationUpdatePromotion)();
+    const poolBillingDraft: Promotion = {
+      ...basePromotion,
+      targetType: 'pool_billing',
+      targetProductId: null,
+    };
+    renderForm(poolBillingDraft);
+
+    await selectOption(user, 'Applies to', 'Item');
+    await user.clear(screen.getByLabelText('Promotion name'));
+    await user.type(screen.getByLabelText('Promotion name'), 'Happy Hour Beers');
+    await user.clear(screen.getByLabelText('Discount value'));
+    await user.type(screen.getByLabelText('Discount value'), '15');
+
+    await user.click(screen.getByRole('button', { name: 'Save promotion' }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Select a product for an item-target promotion.');
+    });
+    expect(mutate).not.toHaveBeenCalled();
   });
 });
