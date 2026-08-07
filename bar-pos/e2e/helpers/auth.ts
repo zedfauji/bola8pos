@@ -7,9 +7,12 @@ const fastE2e = process.env.FAST_E2E === '1' || process.env.FAST_E2E === 'true';
 // login. These helpers match both locales rather than assuming en-US.
 const WHO_ARE_YOU_RE = /who are you|quién eres/i;
 const OPENING_CASH_RE = /opening cash|fondo de caja/i;
-const DRAWER_FLOAT_RE = /drawer float|fondo de caja/i;
+const DRAWER_FLOAT_RE = /^(drawer float|fondo de caja)$/i;
 const START_SHIFT_RE = /^(start shift|iniciar turno)$/i;
 const LOGOUT_RE = /^(logout|cerrar sesión)$/i;
+/** Digits 1-9 use aria-label="Key N" in both locales; PINKeypad's "0" key is the
+ * one translated string (`pinKeypad.key0`: "Key 0" en-US, "Tecla 0" es-MX). */
+const KEY_0_RE = /^(key 0|tecla 0)$/i;
 
 export type StaffRole = 'bartender' | 'manager' | 'admin' | 'kitchen';
 
@@ -36,7 +39,7 @@ function staffForRole(role: StaffRole): { name: string; pin: string } {
 
 async function enterPin(page: Page, pin: string): Promise<void> {
   for (const ch of pin) {
-    const label = ch === '0' ? 'Key 0' : `Key ${ch}`;
+    const label = ch === '0' ? KEY_0_RE : `Key ${ch}`;
     await page.getByRole('button', { name: label }).click();
   }
 }
