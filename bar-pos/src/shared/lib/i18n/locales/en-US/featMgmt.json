@@ -335,6 +335,8 @@
       "invalidDiscountValue": "Invalid discount value.",
       "percentageExceeds100": "Percentage discount cannot exceed 100.",
       "invalidPriority": "Invalid priority.",
+      "productRequired": "Select a product for an item-target promotion.",
+      "categoryRequired": "Select a category for a category-target promotion.",
       "promotionSaved": "Promotion saved",
       "failedToSave": "Failed to save promotion",
       "selectOrCreatePrompt": "Select or create a promotion to edit.",

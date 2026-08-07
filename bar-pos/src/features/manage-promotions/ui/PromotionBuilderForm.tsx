@@ -136,6 +136,14 @@ export function PromotionBuilderForm({ promotionId, onSaved }: Props) {
       toast.error(t('managePromotions.builder.invalidPriority'));
       return;
     }
+    if (targetType === 'item' && targetProductId.length === 0) {
+      toast.error(t('managePromotions.builder.productRequired'));
+      return;
+    }
+    if (targetType === 'category' && targetCategoryId === null) {
+      toast.error(t('managePromotions.builder.categoryRequired'));
+      return;
+    }
 
     updateMutation.mutate(
       {

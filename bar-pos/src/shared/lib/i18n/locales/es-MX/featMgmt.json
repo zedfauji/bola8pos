@@ -335,6 +335,8 @@
       "invalidDiscountValue": "Valor de descuento inválido.",
       "percentageExceeds100": "El descuento porcentual no puede exceder 100.",
       "invalidPriority": "Prioridad inválida.",
+      "productRequired": "Selecciona un producto para una promoción de tipo artículo.",
+      "categoryRequired": "Selecciona una categoría para una promoción de tipo categoría.",
       "promotionSaved": "Promoción guardada",
       "failedToSave": "No se pudo guardar la promoción",
       "selectOrCreatePrompt": "Selecciona o crea una promoción para editar.",
